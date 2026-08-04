@@ -1,0 +1,11 @@
+# PlatformIO
+firmware/.pio/
+firmware/.vscode/
+
+# macOS
+.DS_Store
+
+# KiCad backups / autosave
+hardware/kicad/*-backups/
+hardware/kicad/_autosave-*
+hardware/kicad/*.lck
