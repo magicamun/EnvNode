@@ -8,4 +8,4 @@ firmware/.vscode/
 # KiCad backups / autosave
 hardware/kicad/*-backups/
 hardware/kicad/_autosave-*
-hardware/kicad/*.lck
+hardware/kicad/WeatherStation/*.lck
