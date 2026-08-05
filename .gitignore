@@ -9,3 +9,13 @@ firmware/.vscode/
 hardware/kicad/*-backups/
 hardware/kicad/_autosave-*
 hardware/kicad/WeatherStation/*.lck
+
+.pio/
+
+.vscode/ipch/
+
+*.bak
+
+*.tmp
+
+__pycache__/
