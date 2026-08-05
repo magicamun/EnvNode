@@ -1,0 +1,428 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "4cc529e4-f126-4541-9f71-d2fae66595d2")
+	(paper "A4")
+	(lib_symbols)
+	(sheet
+		(at 120.015 31.75)
+		(size 54.61 40.64)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "26d48029-573f-45c2-b80c-40583ae613fe")
+		(property "Sheetname" "Power"
+			(at 120.015 31.0384 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Power.kicad_sch"
+			(at 120.015 72.9746 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 100.33 104.775)
+		(size 33.02 18.415)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "3a752605-b631-41f6-b7b5-ce95fc1597bc")
+		(property "Sheetname" "Pressure"
+			(at 100.33 104.0634 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Pressure.kicad_sch"
+			(at 100.33 123.7746 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 119.38 80.645)
+		(size 37.465 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "46e766bd-1fa7-4f5b-8075-05e0ca3b3ad4")
+		(property "Sheetname" "Analog"
+			(at 119.38 79.9334 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Analog.kicad_sch"
+			(at 119.38 99.0096 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 34.925 34.29)
+		(size 72.39 45.72)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "6ea134f5-bcf8-4ef1-88cd-39da3b67e348")
+		(property "Sheetname" "MCU"
+			(at 34.925 33.5784 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "MCU.kicad_sch"
+			(at 34.925 80.5946 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 96.52 134.62)
+		(size 32.385 20.32)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "859cb470-39b9-4b49-9253-c716fff64edb")
+		(property "Sheetname" "Rain"
+			(at 96.52 133.9084 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Rain.kicad_sch"
+			(at 96.52 155.5246 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 33.655 99.695)
+		(size 53.34 25.4)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "a73ec864-aa1a-44cb-92ae-5af8edd08575")
+		(property "Sheetname" "I2C"
+			(at 33.655 98.9834 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "I2C.kicad_sch"
+			(at 33.655 125.6796 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 142.875 107.95)
+		(size 40.64 22.225)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "aa95149e-555d-46ed-9c61-85de5c05d5a1")
+		(property "Sheetname" "Solar"
+			(at 142.875 107.2384 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Solar.kicad_sch"
+			(at 142.875 130.7596 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "9")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 33.655 136.525)
+		(size 48.26 21.59)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c46f52ce-b721-49d7-a44e-473329d429d7")
+		(property "Sheetname" "Connectors"
+			(at 33.655 135.8134 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Connectors.kicad_sch"
+			(at 33.655 158.6996 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 218.44 113.03)
+		(size 54.61 29.845)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c8fe4d9d-ceca-4c22-8749-6363a8ab43c9")
+		(property "Sheetname" "Optional"
+			(at 218.44 112.3184 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Optional.kicad_sch"
+			(at 218.44 143.4596 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "WeatherStation"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(page "10")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
