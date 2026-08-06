@@ -11,6 +11,7 @@ public:
     virtual void begin() = 0;
     virtual void loop() = 0;
     virtual bool connected() const = 0;
+    virtual bool inSetupAccessPointMode() const = 0;
     virtual String ipAddress() const = 0;
 };
 

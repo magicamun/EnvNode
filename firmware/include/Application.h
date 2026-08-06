@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IConfigurationService.h"
+#include "IWebService.h"
 #include "IWiFiService.h"
 #include "Logger.h"
 
@@ -8,7 +9,7 @@ namespace WeatherStation {
 
 class Application {
 public:
-    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService);
+    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService);
 
     void setup();
     void loop();
@@ -17,6 +18,7 @@ private:
     ILogger& logger_;
     IConfigurationService& configurationService_;
     IWiFiService& wifiService_;
+    IWebService& webService_;
 };
 
 } // namespace WeatherStation

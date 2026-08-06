@@ -15,6 +15,7 @@ public:
     void begin() override;
     void loop() override;
     bool connected() const override;
+    bool inSetupAccessPointMode() const override;
     String ipAddress() const override;
 
 private:

@@ -47,6 +47,10 @@ bool WiFiService::connected() const {
     return state_ == State::Connected && WiFi.status() == WL_CONNECTED;
 }
 
+bool WiFiService::inSetupAccessPointMode() const {
+    return state_ == State::SetupAccessPoint;
+}
+
 String WiFiService::ipAddress() const {
     if (connected()) {
         return WiFi.localIP().toString();
@@ -56,8 +60,17 @@ String WiFiService::ipAddress() const {
 
 void WiFiService::startConnection() {
     const Configuration& configuration = configurationService_.getConfiguration();
+
+
+    logger_.println("WiFi connection parameters:");
+    logger_.printf("  SSID: '%s'\n", configuration.wifiSSID.c_str());
+    logger_.printf("  SSID length: %u\n", configuration.wifiSSID.length());
+    logger_.printf("  Password length: %u\n", configuration.wifiPassword.length());
+    logger_.printf("  Hostname: '%s'\n", configuration.deviceName.c_str());
+
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(configuration.deviceName.c_str());
+
     WiFi.begin(configuration.wifiSSID.c_str(), configuration.wifiPassword.c_str());
     connectionStartTimeMs_ = millis();
     state_ = State::Connecting;

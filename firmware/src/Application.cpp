@@ -5,10 +5,11 @@ namespace WeatherStation {
 
 constexpr auto CurrentFirmwareVersion = "0.1.0";
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService)
     : logger_(logger)
     , configurationService_(configurationService)
-    , wifiService_(wifiService) {
+    , wifiService_(wifiService)
+    , webService_(webService) {
 }
 
 void Application::setup() {
@@ -17,6 +18,7 @@ void Application::setup() {
 
     configurationService_.loadConfiguration();
     wifiService_.begin();
+    webService_.begin();
 
     const Configuration& configuration = configurationService_.getConfiguration();
 
@@ -30,6 +32,7 @@ void Application::setup() {
 
 void Application::loop() {
     wifiService_.loop();
+    webService_.loop();
 }
 
 } // namespace WeatherStation
