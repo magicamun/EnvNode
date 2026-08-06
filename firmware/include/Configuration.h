@@ -10,6 +10,8 @@ struct Configuration {
     String wifiPassword;
     String mqttServer;
     uint16_t mqttPort;
+    String mqttUsername;
+    String mqttPassword;
 };
 
 } // namespace WeatherStation

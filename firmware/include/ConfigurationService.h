@@ -16,6 +16,8 @@ public:
     bool setWifiPassword(const String& password) override;
     bool setMqttServer(const String& server) override;
     bool setMqttPort(uint16_t port) override;
+    bool setMqttUsername(const String& username) override;
+    bool setMqttPassword(const String& password) override;
 
 private:
     void initializeDefaults();
@@ -29,6 +31,8 @@ private:
     bool validateWifiPassword(const String& password) const;
     bool validateMqttServer(const String& server) const;
     bool validateMqttPort(uint16_t port) const;
+    bool validateMqttUsername(const String& username) const;
+    bool validateMqttPassword(const String& password) const;
 
     Configuration configuration_;
     Preferences preferences_;

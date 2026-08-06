@@ -65,7 +65,7 @@ void WiFiService::startConnection() {
     logger_.println("WiFi connection parameters:");
     logger_.printf("  SSID: '%s'\n", configuration.wifiSSID.c_str());
     logger_.printf("  SSID length: %u\n", configuration.wifiSSID.length());
-    logger_.printf("  Password length: %u\n", configuration.wifiPassword.length());
+    logger_.printf("  Password length: %u, Password<%s>\n", configuration.wifiPassword.length());
     logger_.printf("  Hostname: '%s'\n", configuration.deviceName.c_str());
 
     WiFi.mode(WIFI_STA);
@@ -101,6 +101,8 @@ void WiFiService::logStateTransition(State nextState) {
             break;
         case State::Connected:
             logger_.println("WiFi connected");
+            logger_.printf("IP: %s\n",
+               WiFi.localIP().toString().c_str());
             break;
         case State::Reconnecting:
             logger_.println("WiFi reconnecting");

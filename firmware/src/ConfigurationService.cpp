@@ -11,11 +11,15 @@ constexpr const char* KeyWifiSSID = "wifiSSID";
 constexpr const char* KeyWifiPassword = "wifiPassword";
 constexpr const char* KeyMqttServer = "mqttServer";
 constexpr const char* KeyMqttPort = "mqttPort";
+constexpr const char* KeyMqttUsername = "mqttUsername";
+constexpr const char* KeyMqttPassword = "mqttPassword";
 constexpr uint16_t DefaultMqttPort = 1883;
 constexpr size_t MaxDeviceNameLength = 32;
 constexpr size_t MaxWifiSSIDLength = 32;
 constexpr size_t MaxWifiPasswordLength = 64;
 constexpr size_t MaxMqttServerLength = 64;
+constexpr size_t MaxMqttUsernameLength = 32;
+constexpr size_t MaxMqttPasswordLength = 64;
 }
 
 void ConfigurationService::ensurePreferencesStarted() {
@@ -31,6 +35,8 @@ void ConfigurationService::initializeDefaults() {
     configuration_.wifiPassword = String();
     configuration_.mqttServer = String();
     configuration_.mqttPort = DefaultMqttPort;
+    configuration_.mqttUsername = String();
+    configuration_.mqttPassword = String();
 }
 
 void ConfigurationService::loadFromPreferences() {
@@ -51,6 +57,12 @@ void ConfigurationService::loadFromPreferences() {
     if (preferences_.isKey(KeyMqttPort)) {
         configuration_.mqttPort = static_cast<uint16_t>(preferences_.getUInt(KeyMqttPort, configuration_.mqttPort));
     }
+    if (preferences_.isKey(KeyMqttUsername)) {
+        configuration_.mqttUsername = preferences_.getString(KeyMqttUsername, configuration_.mqttUsername);
+    }
+    if (preferences_.isKey(KeyMqttPassword)) {
+        configuration_.mqttPassword = preferences_.getString(KeyMqttPassword, configuration_.mqttPassword);
+    }
 }
 
 void ConfigurationService::validateConfiguration() {
@@ -68,6 +80,12 @@ void ConfigurationService::validateConfiguration() {
     }
     if (!validateMqttPort(configuration_.mqttPort)) {
         configuration_.mqttPort = DefaultMqttPort;
+    }
+    if (!validateMqttUsername(configuration_.mqttUsername)) {
+        configuration_.mqttUsername = String();
+    }
+    if (!validateMqttPassword(configuration_.mqttPassword)) {
+        configuration_.mqttPassword = String();
     }
 }
 
@@ -104,11 +122,25 @@ bool ConfigurationService::validateWifiPassword(const String& password) const {
 }
 
 bool ConfigurationService::validateMqttServer(const String& server) const {
-    return server.length() <= MaxMqttServerLength;
+    if (server.isEmpty()) return true;
+    if (server.length() > MaxMqttServerLength) return false;
+    // reject whitespace-only strings
+    for (size_t i = 0; i < server.length(); ++i) {
+        if (!isspace(server[i])) return true;
+    }
+    return false;
 }
 
 bool ConfigurationService::validateMqttPort(uint16_t port) const {
-    return port != 0;
+    return port >= 1 && port <= 65535;
+}
+
+bool ConfigurationService::validateMqttUsername(const String& username) const {
+    return username.length() <= MaxMqttUsernameLength;
+}
+
+bool ConfigurationService::validateMqttPassword(const String& password) const {
+    return password.length() <= MaxMqttPasswordLength;
 }
 
 bool ConfigurationService::setDeviceName(const String& deviceName) {
@@ -163,6 +195,28 @@ bool ConfigurationService::setMqttPort(uint16_t port) {
         return false;
     }
     configuration_.mqttPort = port;
+    return true;
+}
+
+bool ConfigurationService::setMqttUsername(const String& username) {
+    if (!validateMqttUsername(username)) {
+        return false;
+    }
+    if (!persistString(KeyMqttUsername, username)) {
+        return false;
+    }
+    configuration_.mqttUsername = username;
+    return true;
+}
+
+bool ConfigurationService::setMqttPassword(const String& password) {
+    if (!validateMqttPassword(password)) {
+        return false;
+    }
+    if (!persistString(KeyMqttPassword, password)) {
+        return false;
+    }
+    configuration_.mqttPassword = password;
     return true;
 }
 

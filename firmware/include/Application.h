@@ -3,13 +3,14 @@
 #include "IConfigurationService.h"
 #include "IWebService.h"
 #include "IWiFiService.h"
+#include "IMqttService.h"
 #include "Logger.h"
 
 namespace WeatherStation {
 
 class Application {
 public:
-    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService);
+    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService);
 
     void setup();
     void loop();
@@ -19,6 +20,7 @@ private:
     IConfigurationService& configurationService_;
     IWiFiService& wifiService_;
     IWebService& webService_;
+    IMqttService& mqttService_;
 };
 
 } // namespace WeatherStation
