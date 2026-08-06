@@ -1,11 +1,11 @@
 #include "Application.h"
-#include "DefaultConfigurationService.h"
+#include "ConfigurationService.h"
 #include "SerialLogger.h"
 
 using namespace WeatherStation;
 
 static SerialLogger serialLogger;
-static DefaultConfigurationService configurationService;
+static ConfigurationService configurationService;
 static Application app(serialLogger, configurationService);
 
 void setup() {

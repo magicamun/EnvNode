@@ -17,7 +17,7 @@ void Application::setup() {
     configurationService_.loadConfiguration();
     const Configuration& configuration = configurationService_.getConfiguration();
 
-    logger_.println(configuration.deviceName);
+    logger_.println(configuration.deviceName.c_str());
     logger_.printf("Firmware version: %s\n", CurrentFirmwareVersion);
     logger_.printf("Chip model: %s\n", ESP.getChipModel());
     logger_.printf("CPU frequency: %u MHz\n", ESP.getCpuFreqMHz());

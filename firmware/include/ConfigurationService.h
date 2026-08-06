@@ -1,15 +1,38 @@
 #pragma once
 
+#include <Preferences.h>
 #include "Configuration.h"
+#include "IConfigurationService.h"
 
 namespace WeatherStation {
 
-class IConfigurationService {
+class ConfigurationService : public IConfigurationService {
 public:
-    virtual ~IConfigurationService() = default;
+    void loadConfiguration() override;
+    const Configuration& getConfiguration() const override;
 
-    virtual void loadConfiguration() = 0;
-    virtual const Configuration& getConfiguration() const = 0;
+    bool setDeviceName(const String& deviceName) override;
+    bool setWifiSSID(const String& ssid) override;
+    bool setWifiPassword(const String& password) override;
+    bool setMqttServer(const String& server) override;
+    bool setMqttPort(uint16_t port) override;
+
+private:
+    void initializeDefaults();
+    void loadFromPreferences();
+    void validateConfiguration();
+    void ensurePreferencesStarted();
+    bool persistString(const char* key, const String& value);
+    bool persistUInt(const char* key, uint32_t value);
+    bool validateDeviceName(const String& deviceName) const;
+    bool validateWifiSSID(const String& ssid) const;
+    bool validateWifiPassword(const String& password) const;
+    bool validateMqttServer(const String& server) const;
+    bool validateMqttPort(uint16_t port) const;
+
+    Configuration configuration_;
+    Preferences preferences_;
+    bool preferencesInitialized_ = false;
 };
 
 } // namespace WeatherStation

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ConfigurationService.h"
+#include "IConfigurationService.h"
 #include "Logger.h"
 
 namespace WeatherStation {
