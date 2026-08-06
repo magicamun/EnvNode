@@ -18,6 +18,7 @@ public:
     bool setMqttPort(uint16_t port) override;
     bool setMqttUsername(const String& username) override;
     bool setMqttPassword(const String& password) override;
+    bool resetToDefaults() override;
 
 private:
     void initializeDefaults();

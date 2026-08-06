@@ -18,6 +18,7 @@ public:
     virtual bool setMqttPort(uint16_t port) = 0;
     virtual bool setMqttUsername(const String& username) = 0;
     virtual bool setMqttPassword(const String& password) = 0;
+    virtual bool resetToDefaults() = 0;
 };
 
 } // namespace WeatherStation

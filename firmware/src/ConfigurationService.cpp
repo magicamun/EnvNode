@@ -101,6 +101,12 @@ const Configuration& ConfigurationService::getConfiguration() const {
 
 bool ConfigurationService::persistString(const char* key, const String& value) {
     ensurePreferencesStarted();
+    if (value.isEmpty()) {
+        if (!preferences_.isKey(key)) {
+            return true;
+        }
+        return preferences_.remove(key);
+    }
     return preferences_.putString(key, value) > 0;
 }
 
@@ -217,6 +223,15 @@ bool ConfigurationService::setMqttPassword(const String& password) {
         return false;
     }
     configuration_.mqttPassword = password;
+    return true;
+}
+
+bool ConfigurationService::resetToDefaults() {
+    ensurePreferencesStarted();
+    if (!preferences_.clear()) {
+        return false;
+    }
+    initializeDefaults();
     return true;
 }
 

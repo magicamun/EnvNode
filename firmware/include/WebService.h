@@ -19,6 +19,7 @@ public:
 private:
     void handleRoot();
     void handleSave();
+    void handleReset();
     void handleNotFound();
     void scheduleRestart();
     String configurationPage() const;

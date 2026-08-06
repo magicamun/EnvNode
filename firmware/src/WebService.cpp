@@ -13,6 +13,7 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleRoot(); });
     server_.on("/save", HTTP_POST, [this]() { handleSave(); });
+    server_.on("/reset", HTTP_POST, [this]() { handleReset(); });
     server_.onNotFound([this]() { handleNotFound(); });
     server_.begin();
     logger_.println("Web service started");
@@ -61,34 +62,40 @@ void WebService::handleSave() {
     String errorMessage;
 
     if (!configurationService_.setDeviceName(deviceName)) {
+        logger_.println("Config failed: deviceName");
         ok = false;
         errorMessage = "Invalid device name.";
     }
 
     if (ok && !configurationService_.setWifiSSID(wifiSSID)) {
+        logger_.println("Config failed: SSID");
         ok = false;
         errorMessage = "Invalid WiFi SSID.";
     }
 
     if (ok && changeWifiPassword == "1") {
         if (!configurationService_.setWifiPassword(wifiPassword)) {
+            logger_.println("Config failed: WiFi password");
             ok = false;
             errorMessage = "Invalid WiFi password.";
         }
     }
 
     if (ok && !configurationService_.setMqttServer(mqttServer)) {
+        logger_.println("Config failed: MQTT server");
         ok = false;
         errorMessage = "Invalid MQTT server.";
     }
 
     if (ok && mqttPort != 0 && !configurationService_.setMqttPort(mqttPort)) {
+        logger_.println("Config failed: MQTT port");
         ok = false;
         errorMessage = "Invalid MQTT port.";
     }
 
     // Persist username even if empty (explicitly clear)
     if (ok && !configurationService_.setMqttUsername(mqttUsername)) {
+        logger_.println("Config failed: MQTT username");
         ok = false;
         errorMessage = "Invalid MQTT username.";
     }
@@ -96,6 +103,7 @@ void WebService::handleSave() {
     // Only update stored password when user explicitly requested it
     if (ok && changeMqttPassword == "1") {
         if (!configurationService_.setMqttPassword(mqttPassword)) {
+            logger_.println("Config failed: MQTT password");
             ok = false;
             errorMessage = "Invalid MQTT password.";
         }
@@ -109,6 +117,23 @@ void WebService::handleSave() {
 
     logger_.println("Configuration saved");
     server_.send(200, "text/html", responsePage("Success", "Configuration saved. Restarting device..."));
+    scheduleRestart();
+}
+
+void WebService::handleReset() {
+    if (!isProvisioningEnabled()) {
+        server_.send(404, "text/plain", "Not Found");
+        return;
+    }
+
+    if (!configurationService_.resetToDefaults()) {
+        logger_.println("Configuration reset failed");
+        server_.send(500, "text/html", responsePage("Error", "Reset to defaults failed."));
+        return;
+    }
+
+    logger_.println("Configuration reset to defaults");
+    server_.send(200, "text/html", responsePage("Success", "Configuration reset to defaults. Restarting device..."));
     scheduleRestart();
 }
 
@@ -146,7 +171,13 @@ String WebService::configurationPage() const {
     html += "<label>MQTT username:<br><input type='text' name='mqttUsername' value='" + configuration.mqttUsername + "'></label><br><br>";
     html += "<label>MQTT password:<br><input type='password' name='mqttPassword' autocomplete='new-password'></label><br><br>";
     html += "<button type='submit'>Save</button>";
-    html += "</form></body></html>";
+    html += "</form>";
+    html += "<hr>";
+    html += "<h2>Reset to defaults</h2>";
+    html += "<form method='post' action='/reset' onsubmit='return confirm(\"Reset all configuration and restart the device?\");'>";
+    html += "<button type='submit'>Reset to defaults</button>";
+    html += "</form>";
+    html += "</body></html>";
     return html;
 }
 
