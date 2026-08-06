@@ -1,18 +1,20 @@
 #pragma once
 
+#include "ConfigurationService.h"
 #include "Logger.h"
 
 namespace WeatherStation {
 
 class Application {
 public:
-    explicit Application(ILogger& logger);
+    Application(ILogger& logger, IConfigurationService& configurationService);
 
     void setup();
     void loop();
 
 private:
     ILogger& logger_;
+    IConfigurationService& configurationService_;
 };
 
 } // namespace WeatherStation
