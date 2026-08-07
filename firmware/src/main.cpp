@@ -12,6 +12,7 @@
 #include "SimulatedHumiditySensor.h"
 #include "SimulatedPressureSensor.h"
 #include "LocaleFormatter.h"
+#include "RuntimeManager.h"
 
 using namespace WeatherStation;
 
@@ -24,11 +25,12 @@ static ArduinoMonotonicClock monotonicClock;
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static SensorManager sensorManager(timeService, monotonicClock, measurementPublisher);
 static LocaleFormatter localeFormatter(configurationService);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager);
+static RuntimeManager runtimeManager(serialLogger);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, runtimeManager);
 static SimulatedTemperatureSensor simulatedTemperatureSensor(1, monotonicClock);
 static SimulatedHumiditySensor simulatedHumiditySensor(2, monotonicClock);
 static SimulatedPressureSensor simulatedPressureSensor(3, monotonicClock);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager);
+static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager);
 
 void setup() {
     const SensorRegistrationResult temperatureRegistrationResult = sensorManager.registerSensor(

@@ -6,13 +6,14 @@
 #include "IMqttService.h"
 #include "ITimeService.h"
 #include "SensorManager.h"
+#include "RuntimeManager.h"
 #include "Logger.h"
 
 namespace WeatherStation {
 
 class Application {
 public:
-    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager);
+    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager);
 
     void setup();
     void loop();
@@ -25,6 +26,7 @@ private:
     IMqttService& mqttService_;
     ITimeService& timeService_;
     SensorManager& sensorManager_;
+    RuntimeManager& runtimeManager_;
     bool timeSyncLogged_ = false;
 };
 

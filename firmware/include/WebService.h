@@ -9,6 +9,8 @@
 #include "ITimeService.h"
 #include "SensorManager.h"
 #include "LocaleFormatter.h"
+#include "RuntimeManager.h"
+#include "ConfigurationRuntimeEffect.h"
 #include "Logger.h"
 
 namespace WeatherStation {
@@ -22,7 +24,8 @@ public:
         IMqttService& mqttService,
         ITimeService& timeService,
         LocaleFormatter& localeFormatter,
-        SensorManager& sensorManager);
+        SensorManager& sensorManager,
+        RuntimeManager& runtimeManager);
 
     void begin() override;
     void loop() override;
@@ -49,10 +52,18 @@ private:
 
     void sendPage(const char* title, const char* activeRoute, const String& content, int status = 200);
     void sendResult(const char* title, const char* activeRoute, const char* message, bool success);
+    void sendConfigurationResult(
+        const ConfigurationSaveResult& result,
+        const char* successTitle,
+        const char* failureTitle,
+        const char* activeRoute,
+        const char* failureMessage);
     String renderPage(const char* title, const char* activeRoute, const String& content) const;
     String navigationHtml(const char* activeRoute) const;
     String currentLocalDateTime() const;
-    void scheduleRestart();
+    String pendingRuntimeActionHtml() const;
+    const char* pendingActionMessage() const;
+    void performExplicitRestart();
     bool administrationAvailable() const;
 
     ILogger& logger_;
@@ -62,8 +73,8 @@ private:
     ITimeService& timeService_;
     LocaleFormatter& localeFormatter_;
     SensorManager& sensorManager_;
+    RuntimeManager& runtimeManager_;
     WebServer server_{80};
-    unsigned long restartAtMs_ = 0;
 };
 
 } // namespace WeatherStation

@@ -146,10 +146,10 @@ String effectiveConnectionMode(bool setupAccessPoint) {
 
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
-    SensorManager& sensorManager)
+    SensorManager& sensorManager, RuntimeManager& runtimeManager)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
-      sensorManager_(sensorManager) {}
+      sensorManager_(sensorManager), runtimeManager_(runtimeManager) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -177,7 +177,6 @@ void WebService::begin() {
 
 void WebService::loop() {
     server_.handleClient();
-    if (restartAtMs_ != 0 && static_cast<int32_t>(millis() - restartAtMs_) >= 0) ESP.restart();
 }
 
 bool WebService::administrationAvailable() const { return wifiService_.inSetupAccessPointMode() || wifiService_.connected(); }
@@ -204,6 +203,52 @@ void WebService::sendResult(const char* title, const char* route, const char* me
     content += route;
     content += "'>Back</a>";
     sendPage(title, route, content, success ? 200 : 400);
+}
+
+void WebService::sendConfigurationResult(
+    const ConfigurationSaveResult& result,
+    const char* successTitle,
+    const char* failureTitle,
+    const char* route,
+    const char* failureMessage) {
+    if (!result.success) {
+        sendResult(failureTitle, route, failureMessage, false);
+        return;
+    }
+    if (result.requiredAction != RuntimeAction::None) {
+        runtimeManager_.request(result.requiredAction);
+    }
+    sendResult(successTitle, route, pendingActionMessage(), true);
+}
+
+const char* WebService::pendingActionMessage() const {
+    switch (runtimeManager_.pendingAction()) {
+        case RuntimeAction::None: return "Configuration saved. Changes are active.";
+        case RuntimeAction::RestartMqtt: return "Configuration saved. MQTT restart required.";
+        case RuntimeAction::RestartTime: return "Configuration saved. Time service restart required.";
+        case RuntimeAction::RestartWiFi: return "Configuration saved. WiFi restart required.";
+        case RuntimeAction::RestartSensorManager: return "Configuration saved. Sensor Manager restart required.";
+        case RuntimeAction::RestartDevice: return "Configuration saved. Device restart required.";
+        default: return "Configuration saved. Runtime action required.";
+    }
+}
+
+String WebService::pendingRuntimeActionHtml() const {
+    const RuntimeAction action = runtimeManager_.pendingAction();
+    if (action == RuntimeAction::None) return String();
+    String html;
+    html.reserve(180);
+    html = "<div class='notice'><strong>Restart required</strong><p>Pending runtime action: ";
+    switch (action) {
+        case RuntimeAction::RestartMqtt: html += "MQTT restart"; break;
+        case RuntimeAction::RestartTime: html += "Time service restart"; break;
+        case RuntimeAction::RestartWiFi: html += "WiFi restart"; break;
+        case RuntimeAction::RestartSensorManager: html += "Sensor Manager restart"; break;
+        case RuntimeAction::RestartDevice: html += "Device restart"; break;
+        case RuntimeAction::None: break;
+    }
+    html += ".</p></div>";
+    return html;
 }
 
 String WebService::navigationHtml(const char* active) const {
@@ -240,7 +285,7 @@ String WebService::renderPage(const char* title, const char* active, const Strin
     html += escapeHtml(title);
     html += "</h1>";
     if (wifiService_.inSetupAccessPointMode()) html += "<p class='muted'>Setup access point mode</p>";
-    html += "</div></div>" + content + "</main></div></body></html>";
+    html += "</div></div>" + pendingRuntimeActionHtml() + content + "</main></div></body></html>";
     return html;
 }
 
@@ -288,7 +333,7 @@ void WebService::handleNetwork() {
     const bool isStatic = n.addressMode == NetworkAddressMode::Static;
     String c;
     c.reserve(2200);
-    c = "<div class='notice'><strong>Restart required for network changes.</strong><p>Saved settings become active after an explicit restart.</p></div><section class='card'><h2>Network configuration</h2><form method='post' action='/network/save' autocomplete='off'>";
+    c = "<section class='card'><h2>Network configuration</h2><form method='post' action='/network/save' autocomplete='off'>";
     c += "<label>Hostname<input name='hostname' required value='" + escapeHtml(n.hostname) + "'></label><label>WiFi SSID<input name='wifiSSID' required value='" + escapeHtml(n.wifiSSID) + "'></label>";
     c += "<label class='choice'><input type='checkbox' name='changeWifiPassword' value='1'>Change WiFi password</label><label>New WiFi password<input type='password' name='wifiPassword' autocomplete='new-password'></label>";
     c += "<label>Address mode<select name='addressMode' id='addressMode' onchange='toggleStatic()'><option value='dhcp'" + String(!isStatic?" selected":"") + ">DHCP</option><option value='static'" + String(isStatic?" selected":"") + ">Static IPv4</option></select></label>";
@@ -367,29 +412,29 @@ void WebService::handleNetworkSave() {
     n.hostname=server_.arg("hostname"); n.wifiSSID=server_.arg("wifiSSID"); n.addressMode=server_.arg("addressMode")=="static"?NetworkAddressMode::Static:NetworkAddressMode::Dhcp;
     n.ipv4Address=server_.arg("ipv4Address"); n.subnetMask=server_.arg("subnetMask"); n.gateway=server_.arg("gateway"); n.dns1=server_.arg("dns1"); n.dns2=server_.arg("dns2");
     const bool updatePassword=server_.arg("changeWifiPassword")=="1"; if(updatePassword)n.wifiPassword=server_.arg("wifiPassword");
-    if(!configurationService_.setNetworkConfiguration(n,updatePassword)){sendResult("Network save failed","/network","Invalid network settings. Static mode requires a valid address, contiguous subnet mask, same-subnet gateway, and primary DNS.",false);return;}
-    sendResult("Network settings saved","/network","Restart required for network changes. Use the Firmware page when ready.",true);
+    const ConfigurationSaveResult result=configurationSaveResult(configurationService_.setNetworkConfiguration(n,updatePassword),ConfigurationArea::Network);
+    sendConfigurationResult(result,"Network settings saved","Network save failed","/network","Invalid network settings. Static mode requires a valid address, contiguous subnet mask, same-subnet gateway, and primary DNS.");
 }
 
 void WebService::handleMqttSave() {
     const String portText=server_.arg("port"); const long port=portText.toInt();
     bool ok=port>=1&&port<=65535&&configurationService_.setMqttServer(server_.arg("server"))&&configurationService_.setMqttPort(static_cast<uint16_t>(port))&&configurationService_.setMqttUsername(server_.arg("username"));
     if(ok&&server_.arg("changePassword")=="1")ok=configurationService_.setMqttPassword(server_.arg("password"));
-    sendResult(ok?"MQTT settings saved":"MQTT save failed","/mqtt",ok?"Configuration saved. The service will use it on its next connection attempt.":"Invalid MQTT configuration.",ok);
+    sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Mqtt),"MQTT settings saved","MQTT save failed","/mqtt","Invalid MQTT configuration.");
 }
 
-void WebService::handleTimeSave() { Locale locale; bool ok=parseLocaleKey(server_.arg("locale").c_str(),locale); if(ok)ok=configurationService_.setLocale(locale)&&configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendResult(ok?"Locale and time saved":"Locale and time save failed","/time",ok?"Configuration saved. Locale applies to subsequent page rendering.":"Invalid locale or time configuration.",ok); }
+void WebService::handleTimeSave() { const Configuration& current=configurationService_.getConfiguration(); Locale locale; bool ok=parseLocaleKey(server_.arg("locale").c_str(),locale); const bool localeChanged=ok&&locale!=current.locale.locale; const bool timeChanged=server_.arg("timezone")!=current.time.timezone||server_.arg("ntpServer1")!=current.time.ntpServer1||server_.arg("ntpServer2")!=current.time.ntpServer2; if(ok)ok=configurationService_.setLocale(locale)&&configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Locale,localeChanged,ConfigurationArea::Time,timeChanged),"Locale and time saved","Locale and time save failed","/time","Invalid locale or time configuration."); }
 
 void WebService::handleUnitsSave() {
     PresentationUnit t,p,s,r; bool ok=parseUnit(server_.arg("temperature"),MeasurementType::Temperature,t)&&parseUnit(server_.arg("pressure"),MeasurementType::AtmosphericPressure,p)&&parseUnit(server_.arg("solarTemperature"),MeasurementType::SolarCellTemperature,s)&&parseUnit(server_.arg("rainLevel"),MeasurementType::RainDetectorLevel,r);
     if(ok)ok=configurationService_.setPresentationUnit(MeasurementType::Temperature,t)&&configurationService_.setPresentationUnit(MeasurementType::AtmosphericPressure,p)&&configurationService_.setPresentationUnit(MeasurementType::SolarCellTemperature,s)&&configurationService_.setPresentationUnit(MeasurementType::RainDetectorLevel,r);
-    sendResult(ok?"Presentation units saved":"Unit save failed","/units",ok?"Future measurements use the selected presentation units immediately.":"Invalid or unsupported presentation unit.",ok);
+    sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::PresentationUnits),"Presentation units saved","Unit save failed","/units","Invalid or unsupported presentation unit.");
 }
 
-void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendResult(ok?"Device settings saved":"Device save failed","/device",ok?"Device name saved.":"Invalid device name.",ok); }
-void WebService::handleRestart() { sendResult("Restarting","/firmware","The device is restarting now.",true); scheduleRestart(); }
-void WebService::handleFactoryReset() { if(!configurationService_.resetToDefaults()){sendResult("Factory reset failed","/firmware","Stored configuration could not be cleared.",false);return;} sendResult("Factory reset complete","/firmware","Configuration erased. Restarting into provisioning mode.",true);scheduleRestart(); }
+void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),"Device settings saved","Device save failed","/device","Invalid device name."); }
+void WebService::handleRestart() { runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Restarting","/firmware","The device is restarting now.",true); performExplicitRestart(); }
+void WebService::handleFactoryReset() { if(!configurationService_.resetToDefaults()){sendResult("Factory reset failed","/firmware","Stored configuration could not be cleared.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Factory reset complete","/firmware","Configuration erased. Restarting into provisioning mode.",true);performExplicitRestart(); }
 void WebService::handleNotFound() { server_.send(404,"text/plain","Not Found"); }
-void WebService::scheduleRestart() { if(restartAtMs_==0){restartAtMs_=millis()+1000;logger_.println("Restart scheduled by Web administration");} }
+void WebService::performExplicitRestart() { server_.client().flush(); runtimeManager_.performPendingRestart(); }
 
 } // namespace WeatherStation
