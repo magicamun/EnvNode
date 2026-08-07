@@ -10,6 +10,7 @@ class ConfigurationService : public IConfigurationService {
 public:
     void loadConfiguration() override;
     const Configuration& getConfiguration() const override;
+    Locale getLocale() const override;
 
     bool setDeviceName(const String& deviceName) override;
     bool setNetworkConfiguration(const NetworkConfiguration& network, bool updatePassword) override;
@@ -22,6 +23,7 @@ public:
     bool setTimezone(const String& timezone) override;
     bool setNtpServer1(const String& server) override;
     bool setNtpServer2(const String& server) override;
+    bool setLocale(Locale locale) override;
     bool setPresentationUnit(MeasurementType type, PresentationUnit unit) override;
     bool resetToDefaults() override;
 

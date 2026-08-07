@@ -11,6 +11,7 @@
 #include "SimulatedTemperatureSensor.h"
 #include "SimulatedHumiditySensor.h"
 #include "SimulatedPressureSensor.h"
+#include "LocaleFormatter.h"
 
 using namespace WeatherStation;
 
@@ -22,7 +23,8 @@ static MqttService mqttService(serialLogger, configurationService, wifiService);
 static ArduinoMonotonicClock monotonicClock;
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static SensorManager sensorManager(timeService, monotonicClock, measurementPublisher);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, sensorManager);
+static LocaleFormatter localeFormatter(configurationService);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager);
 static SimulatedTemperatureSensor simulatedTemperatureSensor(1, monotonicClock);
 static SimulatedHumiditySensor simulatedHumiditySensor(2, monotonicClock);
 static SimulatedPressureSensor simulatedPressureSensor(3, monotonicClock);

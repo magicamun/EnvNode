@@ -16,6 +16,7 @@ public:
     void loop() override;
     bool synchronized() const override;
     time_t now() const override;
+    bool localCivilTime(tm& localTime) const override;
     String iso8601Utc() const override;
     String iso8601Local() const override;
     String iso8601Local(time_t timestamp) const override;

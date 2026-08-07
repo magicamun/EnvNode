@@ -65,6 +65,29 @@ String timezoneSelect(const String& current) {
     return html;
 }
 
+String localeSelect(Locale current) {
+    const Locale supported[] = {
+        Locale::GermanGermany,
+        Locale::EnglishUnitedKingdom,
+        Locale::EnglishUnitedStates,
+    };
+    String html;
+    html.reserve(220);
+    html = "<select name='locale'>";
+    for (const Locale locale : supported) {
+        const char* key = localeKey(locale);
+        html += "<option value='";
+        html += key;
+        html += "'";
+        if (locale == current) html += " selected";
+        html += ">";
+        html += key;
+        html += "</option>";
+    }
+    html += "</select>";
+    return html;
+}
+
 String unitSelect(const char* name, MeasurementType type, PresentationUnit current) {
     const MeasurementTypeMetadata& metadata = measurementTypeMetadata(type);
     String html;
@@ -104,9 +127,11 @@ String measurementTypes(const SensorRuntimeInfo& info) {
 } // namespace
 
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
-    IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager)
+    IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
+    SensorManager& sensorManager)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
-      mqttService_(mqttService), timeService_(timeService), sensorManager_(sensorManager) {}
+      mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
+      sensorManager_(sensorManager) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -164,7 +189,7 @@ void WebService::sendResult(const char* title, const char* route, const char* me
 }
 
 String WebService::navigationHtml(const char* active) const {
-    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
+    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
     String html;
     html.reserve(560);
     html = "<nav class='nav'>";
@@ -201,16 +226,23 @@ String WebService::renderPage(const char* title, const char* active, const Strin
     return html;
 }
 
+String WebService::currentLocalDateTime() const {
+    tm localTime;
+    return timeService_.localCivilTime(localTime)
+        ? localeFormatter_.formatDateTime(localTime)
+        : String("—");
+}
+
 void WebService::handleStatus() {
     const Configuration& cfg = configurationService_.getConfiguration();
     String c;
     c.reserve(1800);
-    c = "<div class='grid'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareVersion + "</span><span>Uptime</span><span>" + String(millis()/1000UL) + " seconds</span><span>Free heap</span><span>" + String(ESP.getFreeHeap()) + " bytes</span><span>Flash</span><span>" + String(ESP.getFlashChipSize()/1024UL) + " KB</span></div></section>";
-    c += "<section class='card'><h2>Network</h2><div class='kv'><span>Status</span><span>" + (wifiService_.connected()?badge("Connected","good"):wifiService_.inSetupAccessPointMode()?badge("Setup AP","warn"):badge("Disconnected","bad")) + "</span><span>Hostname</span><span>" + escapeHtml(wifiService_.hostname()) + "</span><span>IP address</span><span>" + escapeHtml(wifiService_.ipAddress()) + "</span><span>RSSI</span><span>" + (wifiService_.connected()?String(wifiService_.rssi())+" dBm":"—") + "</span></div></section>";
+    c = "<div class='grid'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareVersion + "</span><span>Uptime</span><span>" + localeFormatter_.formatNumber(millis()/1000UL, 0) + " seconds</span><span>Free heap</span><span>" + localeFormatter_.formatNumber(ESP.getFreeHeap(), 0) + " bytes</span><span>Flash</span><span>" + localeFormatter_.formatNumber(ESP.getFlashChipSize()/1024UL, 0) + " KB</span></div></section>";
+    c += "<section class='card'><h2>Network</h2><div class='kv'><span>Status</span><span>" + (wifiService_.connected()?badge("Connected","good"):wifiService_.inSetupAccessPointMode()?badge("Setup AP","warn"):badge("Disconnected","bad")) + "</span><span>Hostname</span><span>" + escapeHtml(wifiService_.hostname()) + "</span><span>IP address</span><span>" + escapeHtml(wifiService_.ipAddress()) + "</span><span>RSSI</span><span>" + (wifiService_.connected()?localeFormatter_.formatNumber(wifiService_.rssi(),0)+" dBm":"—") + "</span></div></section>";
     const bool configured = !cfg.mqtt.server.isEmpty();
     c += "<section class='card'><h2>MQTT</h2><div class='kv'><span>Configuration</span><span>" + badge(configured?"Configured":"Not configured",configured?"good":"warn") + "</span><span>Runtime</span><span>" + badge(mqttService_.connected()?"Connected":"Disconnected",mqttService_.connected()?"good":"bad") + "</span></div></section>";
-    c += "<section class='card'><h2>Time</h2><div class='kv'><span>Status</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(timeService_.iso8601Local()):"—") + "</span></div></section>";
-    c += "<section class='card'><h2>Sensors</h2><div class='kv'><span>Registered</span><span>" + String(sensorManager_.sensorCount()) + "</span></div><p><a href='/sensors'>View sensor runtime state</a></p></section></div>";
+    c += "<section class='card'><h2>Time</h2><div class='kv'><span>Status</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + "</span></div></section>";
+    c += "<section class='card'><h2>Sensors</h2><div class='kv'><span>Registered</span><span>" + localeFormatter_.formatNumber(sensorManager_.sensorCount(), 0) + "</span></div><p><a href='/sensors'>View sensor runtime state</a></p></section></div>";
     sendPage("Status", "/status", c);
 }
 
@@ -239,11 +271,12 @@ void WebService::handleMqtt() {
 
 void WebService::handleTime() {
     const TimeConfiguration& t = configurationService_.getConfiguration().time;
+    const Locale currentLocale = configurationService_.getLocale();
     String c;
     c.reserve(1300);
-    c = "<section class='card'><h2>Runtime status</h2><div class='kv'><span>Synchronization</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(timeService_.iso8601Local()):"—") + "</span></div></section><section class='card'><h2>Time configuration</h2><form method='post' action='/time/save'>";
-    c += "<label>Timezone" + timezoneSelect(t.timezone) + "</label><label>NTP server 1<input name='ntpServer1' value='" + escapeHtml(t.ntpServer1) + "'></label><label>NTP server 2<input name='ntpServer2' value='" + escapeHtml(t.ntpServer2) + "'></label><div class='actions'><button>Save time settings</button></div></form></section>";
-    sendPage("Time", "/time", c);
+    c = "<section class='card'><h2>Runtime status</h2><div class='kv'><span>Synchronization</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + "</span></div></section><form method='post' action='/time/save'><section class='card'><h2>Locale</h2><label>Locale" + localeSelect(currentLocale) + "</label></section><section class='card'><h2>Time</h2>";
+    c += "<label>Timezone" + timezoneSelect(t.timezone) + "</label><label>NTP server 1<input name='ntpServer1' value='" + escapeHtml(t.ntpServer1) + "'></label><label>NTP server 2<input name='ntpServer2' value='" + escapeHtml(t.ntpServer2) + "'></label><div class='actions'><button>Save locale and time</button></div></section></form>";
+    sendPage("Locale & Time", "/time", c);
 }
 
 void WebService::handleUnits() {
@@ -266,7 +299,7 @@ void WebService::handleSensors() {
     String c;
     c.reserve(650 + sensorManager_.sensorCount() * 300);
     c = "<div class='notice'><strong>Read-only milestone</strong><p>Sensor implementation selection, hardware detection, enablement, and persistent Slot configuration require the future SensorFactory and Sensor Slot backend.</p></div><section class='card'><h2>Registered runtime sensors</h2><div class='scroll'><table><thead><tr><th>Slot / ID</th><th>Enabled</th><th>Implementation</th><th>Detected</th><th>Provenance</th><th>State</th><th>Schedule</th><th>Measurements</th><th>Configure</th></tr></thead><tbody>";
-    for (size_t index=0; index<sensorManager_.sensorCount(); ++index) { SensorRuntimeInfo i; if (!sensorManager_.runtimeInfo(index,i)) continue; c += "<tr><td>"+String(i.id)+"</td><td>"+(i.schedule.enabled?"Yes":"No")+"</td><td>Not exposed</td><td>Not exposed</td><td>"+(i.provenance==SensorProvenance::Simulated?"Simulated":"Physical")+"</td><td>"+String(sensorStateName(i.state))+"</td><td>"+(i.schedule.acquisitionMode==AcquisitionMode::Periodic?String(i.schedule.sampleIntervalMs)+" ms":"Event only")+"</td><td>"+measurementTypes(i)+"</td><td>Future</td></tr>"; }
+    for (size_t index=0; index<sensorManager_.sensorCount(); ++index) { SensorRuntimeInfo i; if (!sensorManager_.runtimeInfo(index,i)) continue; c += "<tr><td>"+localeFormatter_.formatNumber(i.id,0)+"</td><td>"+(i.schedule.enabled?"Yes":"No")+"</td><td>Not exposed</td><td>Not exposed</td><td>"+(i.provenance==SensorProvenance::Simulated?"Simulated":"Physical")+"</td><td>"+String(sensorStateName(i.state))+"</td><td>"+(i.schedule.acquisitionMode==AcquisitionMode::Periodic?localeFormatter_.formatNumber(i.schedule.sampleIntervalMs,0)+" ms":"Event only")+"</td><td>"+measurementTypes(i)+"</td><td>Future</td></tr>"; }
     c += "</tbody></table></div></section>";
     sendPage("Sensors", "/sensors", c);
 }
@@ -274,8 +307,8 @@ void WebService::handleSensors() {
 void WebService::handleDiagnostics() {
     String c;
     c.reserve(750 + sensorManager_.sensorCount() * 450);
-    c = "<div class='grid'><section class='card'><h2>System</h2><div class='kv'><span>Uptime</span><span>"+String(millis()/1000UL)+" s</span><span>Free heap</span><span>"+String(ESP.getFreeHeap())+" bytes</span><span>Flash</span><span>"+String(ESP.getFlashChipSize())+" bytes</span></div></section><section class='card'><h2>Services</h2><div class='kv'><span>WiFi</span><span>"+(wifiService_.connected()?"Connected":"Disconnected")+"</span><span>MQTT</span><span>"+(mqttService_.connected()?"Connected":"Disconnected")+"</span><span>Time</span><span>"+(timeService_.synchronized()?"Synchronized":"Pending")+"</span></div></section></div>";
-    for(size_t index=0;index<sensorManager_.sensorCount();++index){SensorRuntimeInfo i; if(!sensorManager_.runtimeInfo(index,i))continue;SensorRuntimeStatus s;sensorManager_.runtimeStatus(i.id,s);c+="<section class='card'><h2>Sensor "+String(i.id)+"</h2><div class='kv'><span>State</span><span>"+sensorStateName(i.state)+"</span><span>Accepted</span><span>"+String(s.acceptedMeasurementCount)+"</span><span>Rejected</span><span>"+String(s.rejectedMeasurementCount)+"</span><span>Pre-sync discarded</span><span>"+String(s.preSyncDiscardCount)+"</span><span>Last sample emissions</span><span>"+String(s.lastSampleEmissionCount)+"</span></div></section>";}
+    c = "<div class='grid'><section class='card'><h2>System</h2><div class='kv'><span>Uptime</span><span>"+localeFormatter_.formatNumber(millis()/1000UL,0)+" s</span><span>Free heap</span><span>"+localeFormatter_.formatNumber(ESP.getFreeHeap(),0)+" bytes</span><span>Flash</span><span>"+localeFormatter_.formatNumber(ESP.getFlashChipSize(),0)+" bytes</span></div></section><section class='card'><h2>Services</h2><div class='kv'><span>WiFi</span><span>"+(wifiService_.connected()?"Connected":"Disconnected")+"</span><span>MQTT</span><span>"+(mqttService_.connected()?"Connected":"Disconnected")+"</span><span>Time</span><span>"+(timeService_.synchronized()?"Synchronized":"Pending")+"</span></div></section></div>";
+    for(size_t index=0;index<sensorManager_.sensorCount();++index){SensorRuntimeInfo i; if(!sensorManager_.runtimeInfo(index,i))continue;SensorRuntimeStatus s;sensorManager_.runtimeStatus(i.id,s);c+="<section class='card'><h2>Sensor "+localeFormatter_.formatNumber(i.id,0)+"</h2><div class='kv'><span>State</span><span>"+sensorStateName(i.state)+"</span><span>Accepted</span><span>"+localeFormatter_.formatNumber(s.acceptedMeasurementCount,0)+"</span><span>Rejected</span><span>"+localeFormatter_.formatNumber(s.rejectedMeasurementCount,0)+"</span><span>Pre-sync discarded</span><span>"+localeFormatter_.formatNumber(s.preSyncDiscardCount,0)+"</span><span>Last sample emissions</span><span>"+localeFormatter_.formatNumber(s.lastSampleEmissionCount,0)+"</span></div></section>";}
     sendPage("Diagnostics", "/diagnostics", c);
 }
 
@@ -308,7 +341,7 @@ void WebService::handleMqttSave() {
     sendResult(ok?"MQTT settings saved":"MQTT save failed","/mqtt",ok?"Configuration saved. The service will use it on its next connection attempt.":"Invalid MQTT configuration.",ok);
 }
 
-void WebService::handleTimeSave() { bool ok=configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendResult(ok?"Time settings saved":"Time save failed","/time",ok?"Configuration saved. Current SNTP behavior is unchanged.":"Invalid time configuration.",ok); }
+void WebService::handleTimeSave() { Locale locale; bool ok=parseLocaleKey(server_.arg("locale").c_str(),locale); if(ok)ok=configurationService_.setLocale(locale)&&configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendResult(ok?"Locale and time saved":"Locale and time save failed","/time",ok?"Configuration saved. Locale applies to subsequent page rendering.":"Invalid locale or time configuration.",ok); }
 
 void WebService::handleUnitsSave() {
     PresentationUnit t,p,s,r; bool ok=parseUnit(server_.arg("temperature"),MeasurementType::Temperature,t)&&parseUnit(server_.arg("pressure"),MeasurementType::AtmosphericPressure,p)&&parseUnit(server_.arg("solarTemperature"),MeasurementType::SolarCellTemperature,s)&&parseUnit(server_.arg("rainLevel"),MeasurementType::RainDetectorLevel,r);

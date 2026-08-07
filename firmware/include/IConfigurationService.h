@@ -10,6 +10,7 @@ public:
 
     virtual void loadConfiguration() = 0;
     virtual const Configuration& getConfiguration() const = 0;
+    virtual Locale getLocale() const = 0;
 
     virtual bool setDeviceName(const String& deviceName) = 0;
     virtual bool setNetworkConfiguration(
@@ -24,6 +25,7 @@ public:
     virtual bool setTimezone(const String& timezone) = 0;
     virtual bool setNtpServer1(const String& server) = 0;
     virtual bool setNtpServer2(const String& server) = 0;
+    virtual bool setLocale(Locale locale) = 0;
     virtual bool setPresentationUnit(MeasurementType type, PresentationUnit unit) = 0;
     virtual bool resetToDefaults() = 0;
 };

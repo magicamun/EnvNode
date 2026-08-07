@@ -52,6 +52,11 @@ time_t TimeService::now() const {
     return time(nullptr);
 }
 
+bool TimeService::localCivilTime(tm& localTime) const {
+    const time_t timestamp = now();
+    return localtime_r(&timestamp, &localTime) != nullptr;
+}
+
 String TimeService::iso8601Utc() const {
     return formatIso8601(now(), false);
 }

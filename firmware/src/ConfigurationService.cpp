@@ -24,6 +24,7 @@ constexpr const char* KeyMqttPassword = "mqttPassword";
 constexpr const char* KeyTimezone = "timezone";
 constexpr const char* KeyNtpServer1 = "ntpServer1";
 constexpr const char* KeyNtpServer2 = "ntpServer2";
+constexpr const char* KeyLocale = "locale";
 constexpr const char* KeyTemperatureUnit = "unitTemp";
 constexpr const char* KeyPressureUnit = "unitPressure";
 constexpr const char* KeySolarCellTemperatureUnit = "unitSolarTemp";
@@ -68,6 +69,7 @@ void ConfigurationService::initializeDefaults() {
     configuration_.time.timezone = String(DefaultTimezone);
     configuration_.time.ntpServer1 = String(DefaultNtpServer1);
     configuration_.time.ntpServer2 = String(DefaultNtpServer2);
+    configuration_.locale.locale = Locale::GermanGermany;
     configuration_.presentation.temperature =
         measurementTypeMetadata(MeasurementType::Temperature).defaultPresentationUnit;
     configuration_.presentation.atmosphericPressure =
@@ -120,6 +122,11 @@ void ConfigurationService::loadFromPreferences() {
     if (preferences_.isKey(KeyNtpServer2)) {
         configuration_.time.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.time.ntpServer2);
     }
+    const uint32_t storedLocale = preferences_.getUInt(
+        KeyLocale, static_cast<uint32_t>(Locale::GermanGermany));
+    configuration_.locale.locale = storedLocale <= static_cast<uint32_t>(Locale::EnglishUnitedStates)
+        ? static_cast<Locale>(storedLocale)
+        : Locale::GermanGermany;
     configuration_.presentation.temperature =
         loadPresentationUnit(KeyTemperatureUnit, MeasurementType::Temperature);
     configuration_.presentation.atmosphericPressure =
@@ -185,6 +192,10 @@ void ConfigurationService::loadConfiguration() {
 
 const Configuration& ConfigurationService::getConfiguration() const {
     return configuration_;
+}
+
+Locale ConfigurationService::getLocale() const {
+    return configuration_.locale.locale;
 }
 
 bool ConfigurationService::persistString(const char* key, const String& value) {
@@ -424,6 +435,19 @@ bool ConfigurationService::setNtpServer2(const String& server) {
         return false;
     }
     configuration_.time.ntpServer2 = server;
+    return true;
+}
+
+bool ConfigurationService::setLocale(Locale locale) {
+    if (locale != Locale::GermanGermany
+        && locale != Locale::EnglishUnitedKingdom
+        && locale != Locale::EnglishUnitedStates) {
+        return false;
+    }
+    if (!persistUInt(KeyLocale, static_cast<uint32_t>(locale))) {
+        return false;
+    }
+    configuration_.locale.locale = locale;
     return true;
 }
 

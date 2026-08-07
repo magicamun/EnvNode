@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "MeasurementType.h"
+#include "WeatherLocale.h"
 
 namespace WeatherStation {
 
@@ -39,6 +40,10 @@ struct TimeConfiguration {
     String ntpServer2;
 };
 
+struct LocaleConfiguration {
+    Locale locale = Locale::GermanGermany;
+};
+
 struct PresentationConfiguration {
     PresentationUnit temperature = PresentationUnit::DegreeCelsius;
     PresentationUnit atmosphericPressure = PresentationUnit::Pascal;
@@ -61,6 +66,7 @@ struct Configuration {
     NetworkConfiguration network;
     MqttConfiguration mqtt;
     TimeConfiguration time;
+    LocaleConfiguration locale;
     PresentationConfiguration presentation;
 
     PresentationUnit presentationUnitFor(MeasurementType type) const {
