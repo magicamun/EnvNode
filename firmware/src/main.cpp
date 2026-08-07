@@ -9,6 +9,8 @@
 #include "MeasurementPublisher.h"
 #include "SensorManager.h"
 #include "SimulatedTemperatureSensor.h"
+#include "SimulatedHumiditySensor.h"
+#include "SimulatedPressureSensor.h"
 
 using namespace WeatherStation;
 
@@ -22,19 +24,37 @@ static ArduinoMonotonicClock monotonicClock;
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static SensorManager sensorManager(timeService, monotonicClock, measurementPublisher);
 static SimulatedTemperatureSensor simulatedTemperatureSensor(1, monotonicClock);
+static SimulatedHumiditySensor simulatedHumiditySensor(2, monotonicClock);
+static SimulatedPressureSensor simulatedPressureSensor(3, monotonicClock);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager);
 
 void setup() {
-    const SensorRegistrationResult registrationResult = sensorManager.registerSensor(
+    const SensorRegistrationResult temperatureRegistrationResult = sensorManager.registerSensor(
         simulatedTemperatureSensor,
         SensorSchedule::periodic(5000));
+    const SensorRegistrationResult humidityRegistrationResult = sensorManager.registerSensor(
+        simulatedHumiditySensor,
+        SensorSchedule::periodic(5000));
+    const SensorRegistrationResult pressureRegistrationResult = sensorManager.registerSensor(
+        simulatedPressureSensor,
+        SensorSchedule::periodic(10000));
 
     app.setup();
 
-    if (registrationResult != SensorRegistrationResult::Registered) {
+    if (temperatureRegistrationResult != SensorRegistrationResult::Registered) {
         serialLogger.printf(
             "Simulated temperature sensor registration failed: result=%d\n",
-            static_cast<int>(registrationResult));
+            static_cast<int>(temperatureRegistrationResult));
+    }
+    if (humidityRegistrationResult != SensorRegistrationResult::Registered) {
+        serialLogger.printf(
+            "Simulated humidity sensor registration failed: result=%d\n",
+            static_cast<int>(humidityRegistrationResult));
+    }
+    if (pressureRegistrationResult != SensorRegistrationResult::Registered) {
+        serialLogger.printf(
+            "Simulated pressure sensor registration failed: result=%d\n",
+            static_cast<int>(pressureRegistrationResult));
     }
 }
 
