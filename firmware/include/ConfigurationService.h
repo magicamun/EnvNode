@@ -18,6 +18,9 @@ public:
     bool setMqttPort(uint16_t port) override;
     bool setMqttUsername(const String& username) override;
     bool setMqttPassword(const String& password) override;
+    bool setTimezone(const String& timezone) override;
+    bool setNtpServer1(const String& server) override;
+    bool setNtpServer2(const String& server) override;
     bool resetToDefaults() override;
 
 private:
@@ -34,6 +37,8 @@ private:
     bool validateMqttPort(uint16_t port) const;
     bool validateMqttUsername(const String& username) const;
     bool validateMqttPassword(const String& password) const;
+    bool validateTimezone(const String& timezone) const;
+    bool validateNtpServer(const String& server) const;
 
     Configuration configuration_;
     Preferences preferences_;

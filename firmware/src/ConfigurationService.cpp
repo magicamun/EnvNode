@@ -13,13 +13,21 @@ constexpr const char* KeyMqttServer = "mqttServer";
 constexpr const char* KeyMqttPort = "mqttPort";
 constexpr const char* KeyMqttUsername = "mqttUsername";
 constexpr const char* KeyMqttPassword = "mqttPassword";
+constexpr const char* KeyTimezone = "timezone";
+constexpr const char* KeyNtpServer1 = "ntpServer1";
+constexpr const char* KeyNtpServer2 = "ntpServer2";
 constexpr uint16_t DefaultMqttPort = 1883;
+constexpr const char* DefaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
+constexpr const char* DefaultNtpServer1 = "pool.ntp.org";
+constexpr const char* DefaultNtpServer2 = "time.cloudflare.com";
 constexpr size_t MaxDeviceNameLength = 32;
 constexpr size_t MaxWifiSSIDLength = 32;
 constexpr size_t MaxWifiPasswordLength = 64;
 constexpr size_t MaxMqttServerLength = 64;
 constexpr size_t MaxMqttUsernameLength = 32;
 constexpr size_t MaxMqttPasswordLength = 64;
+constexpr size_t MaxTimezoneLength = 128;
+constexpr size_t MaxNtpServerLength = 64;
 }
 
 void ConfigurationService::ensurePreferencesStarted() {
@@ -37,6 +45,9 @@ void ConfigurationService::initializeDefaults() {
     configuration_.mqttPort = DefaultMqttPort;
     configuration_.mqttUsername = String();
     configuration_.mqttPassword = String();
+    configuration_.timezone = String(DefaultTimezone);
+    configuration_.ntpServer1 = String(DefaultNtpServer1);
+    configuration_.ntpServer2 = String(DefaultNtpServer2);
 }
 
 void ConfigurationService::loadFromPreferences() {
@@ -63,6 +74,15 @@ void ConfigurationService::loadFromPreferences() {
     if (preferences_.isKey(KeyMqttPassword)) {
         configuration_.mqttPassword = preferences_.getString(KeyMqttPassword, configuration_.mqttPassword);
     }
+    if (preferences_.isKey(KeyTimezone)) {
+        configuration_.timezone = preferences_.getString(KeyTimezone, configuration_.timezone);
+    }
+    if (preferences_.isKey(KeyNtpServer1)) {
+        configuration_.ntpServer1 = preferences_.getString(KeyNtpServer1, configuration_.ntpServer1);
+    }
+    if (preferences_.isKey(KeyNtpServer2)) {
+        configuration_.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.ntpServer2);
+    }
 }
 
 void ConfigurationService::validateConfiguration() {
@@ -86,6 +106,15 @@ void ConfigurationService::validateConfiguration() {
     }
     if (!validateMqttPassword(configuration_.mqttPassword)) {
         configuration_.mqttPassword = String();
+    }
+    if (!validateTimezone(configuration_.timezone)) {
+        configuration_.timezone = String(DefaultTimezone);
+    }
+    if (!validateNtpServer(configuration_.ntpServer1)) {
+        configuration_.ntpServer1 = String(DefaultNtpServer1);
+    }
+    if (!validateNtpServer(configuration_.ntpServer2)) {
+        configuration_.ntpServer2 = String(DefaultNtpServer2);
     }
 }
 
@@ -147,6 +176,14 @@ bool ConfigurationService::validateMqttUsername(const String& username) const {
 
 bool ConfigurationService::validateMqttPassword(const String& password) const {
     return password.length() <= MaxMqttPasswordLength;
+}
+
+bool ConfigurationService::validateTimezone(const String& timezone) const {
+    return timezone.length() <= MaxTimezoneLength;
+}
+
+bool ConfigurationService::validateNtpServer(const String& server) const {
+    return server.length() <= MaxNtpServerLength;
 }
 
 bool ConfigurationService::setDeviceName(const String& deviceName) {
@@ -223,6 +260,39 @@ bool ConfigurationService::setMqttPassword(const String& password) {
         return false;
     }
     configuration_.mqttPassword = password;
+    return true;
+}
+
+bool ConfigurationService::setTimezone(const String& timezone) {
+    if (!validateTimezone(timezone)) {
+        return false;
+    }
+    if (!persistString(KeyTimezone, timezone)) {
+        return false;
+    }
+    configuration_.timezone = timezone;
+    return true;
+}
+
+bool ConfigurationService::setNtpServer1(const String& server) {
+    if (!validateNtpServer(server)) {
+        return false;
+    }
+    if (!persistString(KeyNtpServer1, server)) {
+        return false;
+    }
+    configuration_.ntpServer1 = server;
+    return true;
+}
+
+bool ConfigurationService::setNtpServer2(const String& server) {
+    if (!validateNtpServer(server)) {
+        return false;
+    }
+    if (!persistString(KeyNtpServer2, server)) {
+        return false;
+    }
+    configuration_.ntpServer2 = server;
     return true;
 }
 

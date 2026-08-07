@@ -4,6 +4,51 @@
 
 namespace WeatherStation {
 
+namespace {
+struct TimezoneOption {
+    const char* label;
+    const char* value;
+};
+
+constexpr TimezoneOption TimezoneOptions[] = {
+    {"Europe/Berlin", "CET-1CEST,M3.5.0/2,M10.5.0/3"},
+    {"Europe/London", "GMT0BST,M3.5.0/1,M10.5.0"},
+    {"UTC", "UTC0"},
+    {"America/New_York", "EST5EDT,M3.2.0/2,M11.1.0/2"},
+    {"America/Chicago", "CST6CDT,M3.2.0/2,M11.1.0/2"},
+    {"America/Denver", "MST7MDT,M3.2.0/2,M11.1.0/2"},
+    {"America/Los_Angeles", "PST8PDT,M3.2.0/2,M11.1.0/2"},
+};
+
+String timezoneSelectHtml(const String& currentTimezone) {
+    String html;
+    bool customSelected = true;
+    html += "<select name='timezone'>";
+
+    for (const auto& option : TimezoneOptions) {
+        const String value(option.value);
+        const bool selected = (!currentTimezone.isEmpty() && currentTimezone == value);
+        if (selected) {
+            customSelected = false;
+        }
+        html += "<option value='" + value + "'";
+        if (selected) {
+            html += " selected";
+        }
+        html += ">";
+        html += option.label;
+        html += "</option>";
+    }
+
+    if (customSelected && !currentTimezone.isEmpty()) {
+        html += "<option value='" + currentTimezone + "' selected>Custom: " + currentTimezone + "</option>";
+    }
+
+    html += "</select>";
+    return html;
+}
+}
+
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService)
     : logger_(logger)
     , configurationService_(configurationService)
@@ -57,6 +102,9 @@ void WebService::handleSave() {
     const String mqttUsername = server_.arg("mqttUsername");
     const String mqttPassword = server_.arg("mqttPassword");
     const String changeMqttPassword = server_.arg("changeMqttPassword");
+    const String timezone = server_.arg("timezone");
+    const String ntpServer1 = server_.arg("ntpServer1");
+    const String ntpServer2 = server_.arg("ntpServer2");
 
     bool ok = true;
     String errorMessage;
@@ -107,6 +155,24 @@ void WebService::handleSave() {
             ok = false;
             errorMessage = "Invalid MQTT password.";
         }
+    }
+
+    if (ok && !configurationService_.setTimezone(timezone)) {
+        logger_.println("Config failed: timezone");
+        ok = false;
+        errorMessage = "Invalid timezone.";
+    }
+
+    if (ok && !configurationService_.setNtpServer1(ntpServer1)) {
+        logger_.println("Config failed: NTP server 1");
+        ok = false;
+        errorMessage = "Invalid NTP server 1.";
+    }
+
+    if (ok && !configurationService_.setNtpServer2(ntpServer2)) {
+        logger_.println("Config failed: NTP server 2");
+        ok = false;
+        errorMessage = "Invalid NTP server 2.";
     }
 
     if (!ok) {
@@ -166,10 +232,14 @@ String WebService::configurationPage() const {
     html += "<span style='font-size:small;color:#555;'> Leave unchecked to preserve the current WiFi password.</span><br>";
     html += "<label>WiFi password:<br><input type='password' name='wifiPassword' autocomplete='new-password'></label><br><br>";
     html += "<label>MQTT server:<br><input type='text' name='mqttServer' value='" + configuration.mqttServer + "'></label><br><br>";
+    html += "<label>MQTT port:<br><input type='number' name='mqttPort' value='" + String(configuration.mqttPort) + "'></label><br><br>";
     html += "<label><input type='checkbox' name='changeMqttPassword' value='1'> Change MQTT password</label>";
     html += "<span style='font-size:small;color:#555;'> Leave unchecked to preserve the current MQTT password.</span><br>";
     html += "<label>MQTT username:<br><input type='text' name='mqttUsername' value='" + configuration.mqttUsername + "'></label><br><br>";
     html += "<label>MQTT password:<br><input type='password' name='mqttPassword' autocomplete='new-password'></label><br><br>";
+    html += "<label>Timezone:<br>" + timezoneSelectHtml(configuration.timezone) + "</label><br><br>";
+    html += "<label>NTP server 1:<br><input type='text' name='ntpServer1' value='" + configuration.ntpServer1 + "'></label><br><br>";
+    html += "<label>NTP server 2:<br><input type='text' name='ntpServer2' value='" + configuration.ntpServer2 + "'></label><br><br>";
     html += "<button type='submit'>Save</button>";
     html += "</form>";
     html += "<hr>";

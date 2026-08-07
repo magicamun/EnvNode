@@ -18,6 +18,9 @@ public:
     virtual bool setMqttPort(uint16_t port) = 0;
     virtual bool setMqttUsername(const String& username) = 0;
     virtual bool setMqttPassword(const String& password) = 0;
+    virtual bool setTimezone(const String& timezone) = 0;
+    virtual bool setNtpServer1(const String& server) = 0;
+    virtual bool setNtpServer2(const String& server) = 0;
     virtual bool resetToDefaults() = 0;
 };
 

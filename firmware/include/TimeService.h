@@ -1,0 +1,37 @@
+#pragma once
+
+#include <Arduino.h>
+#include "ITimeService.h"
+#include "IConfigurationService.h"
+#include "IWiFiService.h"
+#include "Logger.h"
+
+namespace WeatherStation {
+
+class TimeService : public ITimeService {
+public:
+    TimeService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService);
+
+    void begin() override;
+    void loop() override;
+    bool synchronized() const override;
+    time_t now() const override;
+    String iso8601Utc() const override;
+    String iso8601Local() const override;
+    uint32_t epoch() const override;
+
+private:
+    void startSynchronization();
+    bool isTimeValid() const;
+    String formatIso8601(time_t timestamp, bool local) const;
+
+    ILogger& logger_;
+    IConfigurationService& configurationService_;
+    IWiFiService& wifiService_;
+    bool syncAttemptInProgress_ = false;
+    bool synchronized_ = false;
+    unsigned long lastSyncAttemptMs_ = 0;
+    static constexpr unsigned long SyncRetryIntervalMs = 10000;
+};
+
+} // namespace WeatherStation
