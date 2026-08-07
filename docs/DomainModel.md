@@ -52,15 +52,21 @@ Conceptually:
       │
       └──────── Actuators
 
-The Device is the root of the domain.
+The Device is the aggregate root of the WeatherStation domain.
 
 Everything belongs to exactly one Device.
+
+Measurements are the primary domain objects produced by the Device.
+
+The WeatherStation exists to acquire reliable Measurements from the physical world.
+
+All other domain concepts ultimately support that goal.
 
 ---
 
 # Device
 
-The Device represents one physical WeatherStation installation.
+A Device represents one physical WeatherStation installation.
 
 The Device owns:
 
@@ -69,9 +75,7 @@ The Device owns:
 - Actuators
 - Diagnostics
 
-The Device coordinates the system.
-
-The Device does not perform weather interpretation.
+The Device coordinates the complete WeatherStation.
 
 Typical properties include:
 
@@ -80,13 +84,21 @@ Typical properties include:
 - firmware version
 - operating state
 
-The Device represents the weather station as a whole.
+The Device intentionally does not own Measurements directly.
+
+Measurements are owned by the Sensors that produce them.
+
+The Device does not interpret weather data.
+
+Its responsibility is limited to acquiring, coordinating and exposing reliable Measurements.
 
 ---
 
 # Configuration
 
-Configuration contains all persistent installation-specific settings.
+Configuration contains all installation-specific parameters that influence Device behaviour.
+
+Configuration represents long-lived operational settings rather than runtime state.
 
 Typical examples include:
 
@@ -95,46 +107,70 @@ Typical examples include:
 - hardware options
 - simulation mode
 - installation parameters
+- network configuration
+- time configuration
 
 Configuration determines how the Device behaves.
 
-Configuration is **not** weather data.
+Configuration is never considered Measurement data.
 
-Examples of valid configuration:
+Examples of valid Configuration include:
 
 - rain gauge calibration
 - solar sensor calibration factor
 - rain detector threshold
 - heater limits
+- MQTT server
+- WiFi credentials
+- timezone
 
-Examples of invalid configuration:
+Examples of invalid Configuration include:
 
 - rainfall today
 - sunshine duration
-- ETo
+- evapotranspiration
 - pressure trend
 
-Those values are derived information and belong outside the Device.
+Those values are derived information and therefore remain outside the Device domain.
 
 ---
 
 # Sensor
 
-A Sensor represents a source of physical measurements.
+A Sensor represents one physical or simulated measurement source.
 
-A Sensor may be:
+A Sensor is not identical to a Measurement type.
 
-- physical
-- simulated
+One Sensor may produce one or more different Measurements.
 
-Examples include:
+Examples:
+
+BMP390
+
+- pressure
+- temperature
+
+SHT4x
 
 - temperature
 - humidity
-- pressure
-- solar radiation
-- rain detector
-- rain gauge
+
+Solar Sensor
+
+- irradiance
+- cell temperature
+- raw analog value
+
+Rain Detector
+
+- detector value
+- detector state
+
+Rain Gauge
+
+- tip event
+
+A Sensor therefore represents the measurement-producing component, not the individual physical quantity.
 
 Each Sensor has:
 
@@ -142,11 +178,11 @@ Each Sensor has:
 - type
 - operational state
 - configuration
-- one or more Measurements
+- one or more supported Measurement types
 
-The Sensor is responsible for obtaining reliable physical values.
+The Sensor is responsible for obtaining reliable physical values from its measurement source.
 
-A Sensor may perform calculations that are necessary to obtain meaningful physical measurements.
+A Sensor may perform calculations that are technically required to derive a meaningful physical Measurement.
 
 Examples include:
 
@@ -155,49 +191,148 @@ Examples include:
 - temperature compensation
 - signal filtering
 - debounce
+- conversion from raw hardware values into engineering units
+
+These operations belong to measurement acquisition.
 
 A Sensor must never perform weather interpretation.
+
+Examples of allowed Sensor behaviour:
+
+    raw ADC value
+        |
+        v
+    calibrated irradiance Measurement
+
+and:
+
+    rain gauge switch transition
+        |
+        v
+    debounced rain gauge tip event
+
+Examples of behaviour that does not belong to a Sensor:
+
+- rainfall today
+- sunshine duration
+- pressure trend
+- evapotranspiration
+- weather classification
+
+A physical Sensor and a simulated Sensor must expose the same functional behaviour to the rest of the domain.
 
 ---
 
 # Measurement
 
-A Measurement represents one observed physical value or event.
+A Measurement represents one observed physical value or one physical event.
 
-Measurements are independent of concrete sensor implementations.
+Measurements are the primary output of Sensors.
 
-Examples:
+A Measurement is independent from the concrete hardware implementation that produced it.
+
+Examples include:
 
 - temperature
 - humidity
 - pressure
 - irradiance
+- solar cell temperature
 - rain detector value
 - rain detector state
 - rain gauge tip event
 
 A Measurement conceptually contains:
 
-- identifier
-- source
+- Measurement type
+- source Sensor
 - timestamp
-- value
-- unit
+- value or event
+- unit where applicable
 - validity
 - quality
 - simulated flag
 
 Not every Measurement requires every property.
 
-A rain gauge tip, for example, is an event.
+A temperature Measurement contains a numeric value and unit.
 
-Temperature is a continuous value.
+A rain gauge tip Measurement represents an event and therefore does not require a continuous numeric value.
+
+The purpose of Measurement is to describe physical reality in a normalized domain representation.
+
+Consumers of Measurements must not need to understand:
+
+- GPIO pins
+- I2C addresses
+- ADC channels
+- register layouts
+- hardware-specific scaling
+- whether the source is simulated or physical
+
+Measurements may represent either a continuous physical quantity or a discrete physical event.
+
+Examples of continuous Measurements include:
+
+- temperature
+- humidity
+- pressure
+- irradiance
+
+Examples of event Measurements include:
+
+- rain gauge tip
+- sensor failure
+- sensor recovery
+
+Both are Measurements.
+
+Consumers should not require different processing pipelines simply because one Measurement represents a value while another represents an event.
 
 ---
 
-# Measurement Types
+# Measurement Type
 
-Two different categories of Measurements exist.
+Measurement Type identifies what a Measurement represents.
+
+Examples include:
+
+- temperature
+- relative humidity
+- atmospheric pressure
+- solar irradiance
+- solar cell temperature
+- rain detector raw value
+- rain detector state
+- rain gauge tip
+
+Measurement Type is independent from Sensor identity.
+
+This distinction is important because different Sensors may produce the same Measurement Type.
+
+Example:
+
+    SHT4x
+        |
+        +----> temperature
+
+    BMP390
+        |
+        +----> temperature
+
+Both Measurements represent temperature.
+
+They remain distinguishable through their source Sensor.
+
+Measurement Type therefore answers:
+
+> What was measured?
+
+Sensor identity answers:
+
+> Where did the Measurement come from?
+
+---
 
 ## State Measurement
 
@@ -243,19 +378,42 @@ Event
 
 # Measurement Ownership
 
-Measurements belong to Sensors.
+Measurements belong to the Sensor that produced them.
 
-A Sensor may produce multiple Measurements.
+A Sensor may produce one or more different Measurement Types.
 
-Example:
+Examples:
+
+BMP390
+
+- pressure
+- temperature
+
+SHT4x
+
+- temperature
+- humidity
 
 Solar Sensor
 
 - irradiance
 - cell temperature
-- raw ADC value
+- raw analog value
+
+Rain Detector
+
+- detector value
+- detector state
 
 The Device never owns Measurements directly.
+
+Instead, the Device owns Sensors, and Sensors produce Measurements.
+
+Measurements are intentionally transient domain objects.
+
+The primary purpose of the Device is to acquire Measurements rather than permanently storing them.
+
+Long-term storage, aggregation and historical analysis belong outside the WeatherStation domain.
 
 ---
 
@@ -290,9 +448,9 @@ They do not interpret weather.
 
 # Diagnostics
 
-Diagnostics describe the health of the Device and its components.
+Diagnostics describe the operational health of the Device and its components.
 
-Diagnostics are not Measurements.
+Diagnostics are domain objects independent from Measurements.
 
 Typical examples include:
 
@@ -302,6 +460,28 @@ Typical examples include:
 - low memory
 - configuration valid
 - calibration required
+
+Diagnostics communicate operational state.
+
+Measurements communicate physical reality.
+
+These responsibilities are intentionally separated.
+
+Example:
+
+Temperature sensor failure
+
+↓
+
+Diagnostic
+
+NOT
+
+Temperature = 0°C
+
+Likewise:
+
+A valid temperature Measurement does not imply that every subsystem is healthy.
 
 Diagnostics allow failures to be communicated without interrupting unrelated functionality.
 
@@ -328,16 +508,20 @@ One failed Sensor must never stop unrelated Sensors.
 
 # Measurement Validity
 
-A Measurement is more than a numeric value.
+A Measurement represents more than a numeric value.
 
 Every Measurement has a validity.
 
-Examples of invalid Measurements:
+Validity answers the question:
+
+> Can this Measurement be used?
+
+Examples of invalid Measurements include:
 
 - sensor not initialized
 - communication timeout
-- impossible value
-- conversion failed
+- impossible physical value
+- conversion failure
 
 Invalid data must never silently appear as plausible values.
 
@@ -350,6 +534,22 @@ Good example:
 Temperature = unavailable
 
 Reason = sensor failure
+
+Validity is independent from Measurement quality.
+
+A Measurement may be valid while having reduced quality.
+
+Examples include:
+
+- estimated values
+- reduced sensor accuracy
+- degraded operating conditions
+
+Quality answers the question:
+
+> How trustworthy is this Measurement?
+
+This distinction allows consumers to make informed decisions without treating every imperfect Measurement as unusable.
 
 ---
 
@@ -398,10 +598,16 @@ It produces the same Measurements.
 
 Consumers must not distinguish between:
 
-- real Sensor
+- physical Sensor
 - simulated Sensor
 
 Simulation therefore belongs inside the Sensor abstraction.
+
+The purpose of simulation is to validate the complete WeatherStation domain model before physical hardware is available.
+
+Replacing a simulated Sensor with a physical Sensor must not require architectural changes outside the Sensor implementation.
+
+Simulation validates the complete application behaviour rather than providing a separate execution path.
 
 ---
 
@@ -422,23 +628,44 @@ produce
 
 Measurements
 
-Actuators
+Measurements
 
-modify
+describe
 
-Hardware
+physical reality
 
 Diagnostics
 
 describe
 
-Device state
+operational state
+
+Actuators
+
+modify
+
+hardware state
+
+Configuration
+
+controls
+
+Device behaviour
+
+The relationships intentionally separate:
+
+- physical reality
+- operational health
+- configuration
+- hardware control
+
+Each concept owns one clearly defined domain responsibility.
 
 ---
 
 # Domain Boundary
 
-The domain ends with:
+The WeatherStation domain ends with:
 
 - Measurements
 - Configuration
@@ -449,11 +676,18 @@ The domain intentionally excludes:
 
 - transport
 - communication
-- persistence
+- persistence implementation
 - automation
 - visualization
+- message serialization
+- MQTT topic structures
+- HTTP interfaces
 
-Those belong to the Technical Architecture.
+These belong to the Technical Architecture.
+
+The domain describes *what* the WeatherStation is.
+
+The Technical Architecture describes *how* the WeatherStation is implemented.
 
 ---
 
@@ -465,11 +699,11 @@ Sensors produce Measurements.
 
 Measurements describe physical reality.
 
+Measurements intentionally contain no interpretation.
+
 Interpretation belongs outside the Device.
 
-Examples:
-
-Domain:
+Examples belonging to the domain:
 
 - temperature
 - humidity
@@ -478,12 +712,16 @@ Domain:
 - rain tip
 - rain detected
 
-Outside the domain:
+Examples outside the domain:
 
 - rainfall today
 - sunshine duration
 - pressure trend
 - evapotranspiration
 - irrigation requirement
+
+The Device measures.
+
+External systems understand.
 
 This distinction is fundamental to the WeatherStation architecture.

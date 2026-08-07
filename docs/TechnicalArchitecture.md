@@ -4,22 +4,42 @@
 
 This document defines the technical architecture of WeatherStation.
 
-It describes how the domain model is implemented on the embedded platform and how the different technical layers interact.
+It describes how the WeatherStation domain model is realized on the embedded platform and how the different technical layers interact.
 
 The domain model itself is defined separately in `DomainModel.md`.
 
 This document intentionally focuses on technical responsibilities such as:
 
 - runtime
-- hardware access
+- hardware abstraction
 - connectivity
 - communication
 - persistence
+- time synchronization
+- configuration
 - web access
 - firmware updates
 - diagnostics
 
-The goal is to keep the technical architecture modular and independent from the concrete sensor hardware wherever possible.
+The goal is to keep the technical architecture modular, maintainable and largely independent from individual sensor implementations.
+
+Hardware may evolve over time without requiring architectural changes to higher software layers.
+
+The WeatherStation firmware intentionally limits itself to acquiring and publishing measurements.
+
+Interpretation of weather data belongs to external systems such as Home Assistant or other automation platforms.
+
+Examples include:
+
+- daily rainfall
+- sunshine duration
+- evapotranspiration
+- historical statistics
+- weather interpretation
+
+The fundamental architectural principle therefore remains:
+
+> Measure, don't interpret.
 
 ---
 
@@ -39,7 +59,8 @@ Conceptually:
     |--------------------------------------------------|
     | Device orchestration                             |
     | Sensor coordination                              |
-    | Configuration use                                |
+    | Measurement coordination                         |
+    | Configuration usage                              |
     | Diagnostics                                      |
     | Local hardware control                           |
     +-------------------------+------------------------+
@@ -57,10 +78,11 @@ Conceptually:
     +--------------------------------------------------+
     |       Connectivity and Infrastructure Layer      |
     |--------------------------------------------------|
+    | Configuration                                    |
     | WiFi                                             |
     | Time / NTP                                       |
-    | Persistent storage                               |
     | Logging                                          |
+    | Persistent Storage                               |
     +-------------------------+------------------------+
                               |
                               v
@@ -75,11 +97,21 @@ Conceptually:
     | ESP32 hardware                                   |
     +--------------------------------------------------+
 
-Dependencies should point downward.
+Dependencies always point downward.
 
 Higher layers may depend on lower layers.
 
-Lower layers must not depend on application-specific logic.
+Lower layers must never depend on application-specific logic.
+
+Each layer owns one clearly defined technical responsibility.
+
+Communication protocols use infrastructure.
+
+Application logic uses services.
+
+Services use hardware abstractions.
+
+Hardware remains unaware of application behaviour.
 
 ---
 
@@ -87,40 +119,71 @@ Lower layers must not depend on application-specific logic.
 
 The Application Layer coordinates the WeatherStation as a whole.
 
-It connects the domain model to technical services.
+It connects the domain model to the technical infrastructure services.
 
 Typical responsibilities include:
 
 - initializing the device
 - loading configuration
-- initializing sensors
-- coordinating measurements
+- initializing infrastructure services
+- coordinating sensors
 - coordinating actuators
+- coordinating Measurements
 - exposing diagnostics
-- forwarding measurements to communication components
+- coordinating communication services
 - managing lifecycle state
 
-The Application Layer must not contain hardware-driver logic.
+The Application Layer intentionally contains very little implementation logic.
 
-It must also not contain transport-specific implementation details.
+Its primary responsibility is orchestration.
 
-For example, application logic should not directly call ESP32 WiFi APIs or manipulate MQTT packets.
+Concrete implementations remain inside dedicated services.
 
-Those responsibilities belong to dedicated lower-level components.
+Examples include:
+
+- ConfigurationService
+- WiFiService
+- TimeService
+- MqttService
+- WebService
+
+Future examples include:
+
+- SensorManager
+- MeasurementPublisher
+
+The Application Layer must not contain:
+
+- hardware driver logic
+- MQTT protocol implementation
+- HTTP implementation
+- NTP implementation
+- persistent storage implementation
+- ESP32-specific API calls
+
+Application logic therefore remains largely independent from hardware details and communication protocols.
+
+This separation keeps the firmware modular while allowing infrastructure components to evolve independently.
 
 ---
 
 # Communication Layer
 
-The Communication Layer exposes WeatherStation data and functionality to external systems.
+The Communication Layer exposes WeatherStation functionality to external systems.
 
-Communication protocols are independent from the transport used underneath them.
+Communication protocols remain independent from the transport mechanisms underneath them.
 
 The initial communication mechanisms are:
 
 - MQTT
 - HTTP
 - OTA
+
+Communication components never own configuration or measurements.
+
+Instead, they consume domain objects and infrastructure services.
+
+The Communication Layer therefore remains responsible for representation and transport rather than business logic.
 
 ---
 
@@ -133,6 +196,9 @@ MQTT operates on top of network connectivity provided by the Connectivity Layer.
 Conceptually:
 
     Measurement
+        |
+        v
+    Measurement Publisher
         |
         v
     MQTT representation
@@ -152,18 +218,35 @@ MQTT is responsible for:
 - publishing device state
 - publishing diagnostics
 - publishing availability
-- receiving configuration-related commands where explicitly supported
+- receiving explicitly supported configuration commands
 
 MQTT is not responsible for:
 
 - acquiring measurements
 - interpreting weather data
 - maintaining WiFi connectivity
+- synchronizing system time
+- storing persistent configuration
 - storing long-term data
 
-MQTT must continue attempting reconnection if the broker becomes unavailable.
+The MQTT client owns broker connectivity only.
 
-Loss of MQTT must not stop sensor acquisition or local hardware control.
+Translation of domain Measurements into MQTT payloads belongs to a dedicated MeasurementPublisher component.
+
+This separation intentionally decouples measurement semantics from transport implementation.
+
+Loss of MQTT connectivity must never stop:
+
+- sensor acquisition
+- local hardware control
+- web administration
+- diagnostics
+
+MQTT shall continue reconnecting in the background while WiFi connectivity is available.
+
+MQTT connectivity may become available before valid system time exists.
+
+However, publication of timestamped Measurements should only begin after TimeService reports successful synchronization.
 
 ---
 
@@ -173,9 +256,11 @@ HTTP provides local device administration and diagnostics.
 
 The web interface is primarily intended for:
 
-- initial configuration
+- initial device provisioning
+- device configuration
 - WiFi configuration
 - MQTT configuration
+- time and NTP configuration
 - device status
 - diagnostics
 - calibration parameters
@@ -183,15 +268,92 @@ The web interface is primarily intended for:
 - factory reset
 - firmware update
 
-The web interface is not intended to become a weather dashboard.
+The web interface is intentionally **not** a weather dashboard.
 
-Historical visualization and weather interpretation belong to external systems.
+Historical visualization, charting and weather interpretation belong to external systems.
 
-HTTP operates on top of the existing network connectivity.
+HTTP operates on top of the existing WiFi connectivity.
 
-The Web Interface must not own configuration data itself.
+The Web Interface does not own configuration.
 
-It reads and modifies configuration through the configuration subsystem.
+Instead it retrieves and modifies configuration exclusively through ConfigurationService.
+
+This ensures that ConfigurationService remains the single owner of persistent configuration.
+
+---
+
+## Configuration Changes
+
+Configuration changes are submitted through HTTP POST requests.
+
+The expected lifecycle is:
+
+    Browser
+       |
+       v
+    Web Interface
+       |
+       v
+    ConfigurationService
+       |
+       +--> Validate
+       |
+       +--> Persist
+       |
+       +--> Update Runtime Configuration
+       |
+       v
+    Restart if required
+
+Validation always occurs before persistence.
+
+Runtime configuration is updated only after successful persistence.
+
+---
+
+## Password Handling
+
+Passwords are treated as sensitive configuration.
+
+Therefore:
+
+- passwords are never rendered back into the Web Interface
+- passwords are never written to normal log output
+- browser autofill must not silently overwrite stored credentials
+- password changes require explicit user interaction
+
+These rules apply equally to:
+
+- WiFi credentials
+- MQTT credentials
+
+---
+
+## Factory Reset
+
+The Web Interface provides an explicit reset-to-defaults function.
+
+Reset clears the complete WeatherStation configuration namespace in persistent storage.
+
+Conceptually:
+
+    Reset Request
+         |
+         v
+    Clear Preferences Namespace
+         |
+         v
+    Restart
+         |
+         v
+    Default Configuration
+         |
+         v
+    Setup Access Point
+
+The complete namespace is removed rather than individual keys.
+
+This automatically includes future configuration parameters without requiring changes to the reset implementation.
 
 ---
 
@@ -202,27 +364,48 @@ Firmware updates are part of the Communication Layer because they require an ext
 Two update mechanisms are planned:
 
 - OTA update from the development environment
-- firmware upload through the local web interface
+- firmware upload through the local Web Interface
 
-OTA must not own application configuration.
+OTA must never own persistent configuration.
 
-Firmware updates should preserve persistent configuration unless an explicit migration requires otherwise.
+Firmware updates should preserve configuration unless an explicit migration requires otherwise.
 
-USB flashing remains the recovery mechanism if OTA fails.
+USB flashing remains the recovery mechanism.
+
+OTA is intentionally implemented as an independent infrastructure service.
+
+It shall not introduce dependencies into Application logic.
 
 ---
 
 # Connectivity and Infrastructure Layer
 
-The Connectivity and Infrastructure Layer provides reusable technical services required by the Communication and Application Layers.
+The Connectivity and Infrastructure Layer provides reusable technical services required by both the Application Layer and the Communication Layer.
 
-Initial components include:
+Infrastructure services currently include:
 
+- Configuration
 - WiFi
-- persistent storage
-- time synchronization
-- logging
-- system diagnostics
+- Time synchronization
+- Logging
+- Persistent Storage
+
+Current implementations include:
+
+- ConfigurationService
+- WiFiService
+- TimeService
+
+Future infrastructure services may include:
+
+- OTAService
+- BoardService
+
+Each infrastructure service owns exactly one technical responsibility.
+
+Infrastructure services intentionally avoid application-specific behaviour.
+
+This allows application logic to evolve independently from platform implementation details.
 
 ---
 
@@ -253,32 +436,37 @@ WiFi is responsible for:
 
 - connecting to the configured network
 - monitoring connection state
-- reconnecting after connection loss
+- reconnecting after temporary connection loss
 - exposing network diagnostics
-- providing fallback setup access when required
+- providing initial provisioning through a setup access point
+- providing the configured hostname
 
-WiFi must not contain MQTT-specific or HTTP-specific logic.
+WiFi is not responsible for:
+
+- MQTT
+- HTTP
+- persistent configuration
+- time synchronization
+- application logic
+
+Configuration is obtained from ConfigurationService.
+
+WiFiService never owns configuration itself.
 
 ---
 
 # WiFi Provisioning
 
-The setup access point is a provisioning and startup-recovery mechanism.
+The setup access point is a provisioning and startup recovery mechanism.
 
-It is not a general fallback mode for temporary network outages.
+It is intentionally **not** a fallback mode for temporary infrastructure failures.
 
-If no valid WiFi configuration exists, the device shall start a local setup access point.
-
-If valid WiFi configuration exists, the device attempts to connect to the configured network during startup.
-
-If the configured network cannot be reached within a defined startup timeout, the device may start the setup access point to allow recovery from an invalid or unavailable configuration.
-
-Conceptually:
+Startup behaviour is:
 
     Boot
       |
       v
-    Load WiFi configuration
+    Load Configuration
       |
       +---- missing / invalid ------> Setup Access Point
       |
@@ -291,81 +479,116 @@ Conceptually:
               |
               +---- startup timeout -> Setup Access Point
 
-Once the device has successfully entered normal operation, temporary WiFi outages must not activate the setup access point.
+Once the device has successfully entered normal operation, temporary WiFi outages must never activate the setup access point.
 
-During normal operation:
+Normal runtime behaviour is therefore:
 
-    WiFi connection lost
-            |
-            v
+    WiFi lost
+        |
+        v
     Continue local operation
-            |
-            v
-    Retry WiFi connection indefinitely
+        |
+        v
+    Retry WiFi connection
+        |
+        +---- success ------> Connected
+        |
+        +---- failure ------> Retry indefinitely
 
-The device remains in its normal configured mode while reconnecting.
+There is intentionally no transition from:
 
-Likewise, MQTT availability has no influence on WiFi provisioning.
+    Reconnecting
 
-An unavailable MQTT broker must only cause MQTT reconnect attempts.
+to
 
-It must never activate the setup access point.
+    Setup Access Point
 
-This distinction prevents temporary infrastructure outages from unexpectedly changing the network behaviour of the device.
+Likewise, MQTT availability has no influence on provisioning behaviour.
+
+An unavailable MQTT broker causes only MQTT reconnect attempts.
+
+The setup access point therefore remains exclusively a provisioning and startup recovery mechanism.
+
+---
 
 # Persistent Storage
 
-Persistent storage is used for configuration.
+Persistent storage is used exclusively for device configuration and long-lived device settings.
 
-The initial implementation uses ESP32 non-volatile storage.
+The initial implementation uses the ESP32 Preferences API backed by the ESP32 Non-Volatile Storage (NVS).
 
-Persistent data includes:
+Persistent configuration currently includes:
 
 - device identity
 - WiFi configuration
 - MQTT configuration
+- time configuration
 - calibration values
 - sensor settings
 - actuator settings
 - simulation settings
 
-Persistent storage is not intended for:
+Persistent storage is intentionally **not** used for:
 
 - historical weather measurements
-- long-term logging
+- event history
 - daily rainfall
 - sunshine duration
+- long-term logging
 - time-series data
 
-These belong outside the embedded device.
+Historical data belongs outside the embedded device.
+
+The WeatherStation firmware is designed to measure and publish data, not to archive it.
 
 ---
 
 # Configuration Ownership
 
-Configuration has exactly one authoritative in-memory representation.
+Configuration has exactly one authoritative runtime representation.
 
-All technical components obtain configuration from the configuration subsystem.
+ConfigurationService owns this representation.
+
+All technical components obtain configuration through ConfigurationService.
 
 Conceptually:
 
     Persistent Storage
            |
            v
+    ConfigurationService
+           |
+           v
       Configuration
            |
-       +---+---+--------+--------+
-       |       |        |        |
-       v       v        v        v
-     WiFi     MQTT    Sensors   Web
+       +---+---+--------+--------+---------+
+       |       |        |        |         |
+       v       v        v        v         v
+     WiFi    MQTT     Time    Sensors    Web
 
-The Web Interface modifies Configuration.
+No other subsystem owns persistent configuration.
 
-The Configuration subsystem persists Configuration.
+Configuration changes are always performed through strongly typed ConfigurationService methods.
 
-Individual services must not maintain independent copies of persistent settings unless required internally for runtime operation.
+Examples include:
 
-This avoids multiple competing sources of truth.
+    setDeviceName(...)
+    setWifiSSID(...)
+    setWifiPassword(...)
+    setMqttServer(...)
+    setMqttPort(...)
+    setMqttUsername(...)
+    setMqttPassword(...)
+    setTimezone(...)
+
+A generic key/value configuration interface is intentionally avoided.
+
+This provides:
+
+- compile-time safety
+- explicit validation
+- self-documenting interfaces
+- controlled configuration evolution
 
 ---
 
@@ -376,57 +599,153 @@ The expected configuration lifecycle is:
     Boot
       |
       v
-    Load persistent configuration
+    Initialize Defaults
       |
       v
-    Validate configuration
+    Load Persistent Values
       |
       v
-    Create runtime configuration
+    Validate Configuration
       |
       v
-    Start services
+    Create Runtime Configuration
       |
       v
-    Configuration changed through Web/API
-      |
-      v
-    Validate
-      |
-      v
-    Persist
-      |
-      v
-    Apply dynamically or restart if required
+    Start Infrastructure Services
 
-A configuration change must never be persisted without validation.
+Missing configuration values are considered normal.
+
+Defaults remain active whenever no persisted value exists.
+
+Configuration changes follow the sequence:
+
+    Configuration Request
+           |
+           v
+       Validate
+           |
+           v
+       Persist
+           |
+           v
+    Update Runtime Configuration
+
+Runtime configuration is updated only after successful persistence.
+
+This prevents divergence between runtime configuration and persistent storage.
+
+---
+
+## Reset to Defaults
+
+Factory reset clears the complete WeatherStation Preferences namespace.
+
+Conceptually:
+
+    Reset
+       |
+       v
+    Clear Namespace
+       |
+       v
+    Restart
+       |
+       v
+    Default Configuration
+
+The implementation intentionally removes the complete namespace rather than individual keys.
+
+Future configuration fields therefore become part of the reset process automatically.
 
 ---
 
 # Time
 
-Time synchronization is provided by NTP.
+Time synchronization is provided by TimeService.
 
-Time is infrastructure.
+The current implementation uses SNTP (Network Time Protocol).
 
-It may be used for:
+Time is considered infrastructure.
 
-- timestamps
-- diagnostics
-- log entries
-- event timestamps
+Application logic should never directly configure or manipulate the system clock.
 
-The device should continue operating if NTP is temporarily unavailable.
+Possible future synchronization sources include:
 
-Sensor acquisition must not depend on successful NTP synchronization unless absolute time is technically required.
+- RTC
+- GPS
+- DCF77
 
-Internal timing for hardware behaviour should use monotonic timers rather than wall-clock time.
+without changing higher application layers.
+
+---
+
+## Internal Time Representation
+
+The authoritative runtime representation is Unix Epoch (`time_t`).
+
+Using epoch time provides:
+
+- unambiguous timestamps
+- simple comparisons
+- compact storage
+- independence from local timezones
+
+Internal timing for hardware behaviour continues to use monotonic timers rather than wall-clock time.
 
 This avoids problems caused by:
 
+- daylight-saving transitions
 - NTP corrections
-- daylight-saving changes
-- clock jumps
+- manual clock changes
+- leap adjustments
+
+---
+
+## Published Time Representation
+
+Human-facing and externally published timestamps use local ISO-8601 representation including the UTC offset.
+
+Example:
+
+    2026-08-07T05:34:50+02:00
+
+UTC representation remains available when required.
+
+Example:
+
+    2026-08-07T03:34:50Z
+
+Local timestamps without timezone information must not be published.
+
+The configured timezone automatically handles daylight-saving transitions.
+
+---
+
+## Time Synchronization
+
+Time synchronization starts after WiFi connectivity becomes available.
+
+Conceptually:
+
+    WiFi Connected
+          |
+          v
+    Start SNTP
+          |
+          v
+    Synchronization
+          |
+          +---- success ------> Synchronized
+          |
+          +---- timeout ------> Retry Later
+
+Synchronization is non-blocking.
+
+The firmware continues operating while synchronization is pending.
+
+MQTT connectivity may already exist before synchronization has completed.
+
+Measurement publication, however, should begin only after valid synchronized time is available.
 
 ---
 
@@ -434,30 +753,40 @@ This avoids problems caused by:
 
 Logging is an infrastructure service.
 
+The current implementation provides centralized logging through Logger abstractions.
+
 Logging should provide useful information about:
 
 - startup
 - configuration
-- network state
-- MQTT state
+- WiFi
+- MQTT
+- time synchronization
 - sensor initialization
 - sensor failures
-- actuator state
 - OTA
 - unexpected conditions
 
-Logging should support different severity levels.
+Future implementations may support configurable log levels.
 
-Typical levels are:
+Typical levels include:
 
 - ERROR
 - WARN
 - INFO
 - DEBUG
 
-Production behaviour should not depend on logging output.
+Logging must never become a substitute for diagnostics.
 
-Logging must not become a substitute for explicit diagnostics.
+Production behaviour must never depend on log output.
+
+Sensitive information must never appear in normal logs.
+
+Examples include:
+
+- WiFi passwords
+- MQTT passwords
+- authentication tokens
 
 ---
 
@@ -465,113 +794,127 @@ Logging must not become a substitute for explicit diagnostics.
 
 Diagnostics span multiple technical layers.
 
-Each subsystem is responsible for reporting its own operational state.
+Each subsystem reports its own operational state.
 
 Examples:
 
-WiFi:
+WiFi
 
 - connected
 - disconnected
+- reconnecting
 - RSSI
 - IP address
 
-MQTT:
+MQTT
 
 - connected
 - disconnected
 - reconnecting
 
-Sensors:
+Time
+
+- synchronized
+- synchronizing
+
+Sensors
 
 - ready
 - degraded
 - failed
 - simulated
 
-System:
+System
 
 - uptime
-- free memory
-- restart reason
 - firmware version
+- restart reason
+- free heap
+- flash size
 
-Diagnostics are collected by the application and exposed through available communication interfaces.
+Diagnostics are collected by the Application Layer and exposed through available communication interfaces.
+
+Diagnostics must remain read-only.
+
+They shall never become the authoritative source for application configuration.
 
 ---
 
 # Hardware Layer
 
-The Hardware Layer provides direct access to the physical ESP32 and connected components.
+The Hardware Layer provides direct access to the physical ESP32 platform and attached peripherals.
 
-Examples include:
+Typical hardware interfaces include:
 
 - GPIO
 - I2C
-- OneWire
+- SPI
 - ADC
+- OneWire
 - PWM
-- interrupts
-- timers
+- Interrupts
+- Hardware Timers
 
 Concrete sensor drivers belong close to this layer.
 
-Application code must not directly access hardware primitives.
+The Application Layer must never directly access hardware primitives.
 
 For example:
 
 Bad:
 
     Application
-        |
-        v
+         |
+         v
     digitalRead(GPIO27)
 
 Preferred:
 
     Application
-        |
-        v
+         |
+         v
     RainGauge
-        |
-        v
+         |
+         v
     GPIO / Interrupt
 
-This keeps hardware-specific behaviour isolated.
+Hardware-specific implementation details remain encapsulated inside dedicated drivers.
+
+This allows higher software layers to evolve independently from hardware implementation.
 
 ---
 
 # Hardware Abstraction
 
-Concrete hardware implementations should expose interfaces that represent their function rather than their electrical implementation.
+Concrete hardware implementations expose interfaces representing their functional behaviour rather than their electrical implementation.
 
 Examples:
 
     TemperatureSensor
 
-rather than:
+instead of
 
     I2CDeviceAtAddress0x44
 
-and:
+and
 
     RainGauge
 
-rather than:
+instead of
 
     GPIO27InterruptHandler
 
-Electrical implementation details remain inside drivers.
+Electrical implementation details remain inside hardware drivers.
 
-This supports hardware replacement without changing application logic.
+This allows hardware replacement without changing application logic.
 
 ---
 
 # Sensor Drivers
 
-A sensor driver bridges physical hardware and the domain model.
+A Sensor Driver bridges physical hardware and the WeatherStation domain model.
 
-Its responsibility is to convert hardware interaction into Measurements.
+Its responsibility is to convert hardware interaction into domain Measurements.
 
 Conceptually:
 
@@ -581,21 +924,103 @@ Conceptually:
     Hardware Driver
           |
           v
-       Sensor
+        Sensor
           |
           v
      Measurement
 
-Examples of driver responsibilities include:
+Typical driver responsibilities include:
 
+- hardware initialization
 - I2C communication
-- reading registers
+- SPI communication
 - ADC conversion
-- hardware-specific filtering
-- calibration
+- hardware calibration
+- conversion into engineering units
 - hardware error detection
 
-Drivers must not contain MQTT or Web Interface logic.
+Sensor drivers must not:
+
+- publish MQTT
+- implement HTTP
+- manage WiFi
+- manage configuration persistence
+
+Sensor drivers are responsible only for hardware interaction.
+
+---
+
+# Sensor Manager
+
+SensorManager is the orchestration component responsible for all sensor instances.
+
+It is planned as the central coordination point for both physical and simulated sensors.
+
+Responsibilities include:
+
+- sensor registration
+- sensor initialization
+- measurement scheduling
+- event handling
+- availability monitoring
+- collecting Measurements
+- forwarding Measurements for publication
+
+Conceptually:
+
+    SensorManager
+          |
+          +------ Sensor A
+          |
+          +------ Sensor B
+          |
+          +------ Sensor C
+          |
+          +------ Simulated Sensor
+
+SensorManager owns sensor orchestration.
+
+Individual sensors remain independent from each other.
+
+SensorManager itself performs no weather interpretation.
+
+---
+
+# Measurement Pipeline
+
+All Measurements follow exactly one processing pipeline.
+
+Conceptually:
+
+    Physical Sensor --------+
+                            |
+                            v
+                       Measurement
+                            ^
+                            |
+    Simulated Sensor -------+
+                            |
+                            v
+                      SensorManager
+                            |
+                            v
+                  MeasurementPublisher
+                            |
+                            v
+                      MqttService
+                            |
+                            v
+                      MQTT Broker
+
+Simulation intentionally shares the identical processing path used by physical hardware.
+
+Simulation therefore validates the complete application architecture rather than a separate development path.
+
+Sensor implementations must never publish MQTT directly.
+
+MeasurementPublisher owns translation from domain objects into MQTT payloads.
+
+MqttService owns broker connectivity and transport only.
 
 ---
 
@@ -603,7 +1028,7 @@ Drivers must not contain MQTT or Web Interface logic.
 
 WeatherStation uses a long-running embedded runtime.
 
-The top-level execution model remains intentionally simple.
+The top-level execution model intentionally remains simple.
 
 Conceptually:
 
@@ -617,14 +1042,14 @@ Conceptually:
        v
     Application.run()
 
-The exact implementation may later use:
+The internal implementation may later evolve towards:
 
 - cooperative scheduling
+- asynchronous callbacks
 - timers
 - FreeRTOS tasks
-- asynchronous callbacks
 
-The application architecture must not depend on one specific scheduling mechanism.
+Higher application layers remain independent from the chosen scheduling mechanism.
 
 ---
 
@@ -635,40 +1060,45 @@ The intended startup sequence is:
     Power On
        |
        v
-    Initialize basic logging
+    Initialize Logging
        |
        v
-    Load persistent configuration
+    Load Configuration
        |
        v
-    Validate configuration
+    Validate Configuration
        |
        v
-    Initialize infrastructure
+    Initialize Infrastructure
        |
        +--> WiFi
        +--> Time
-       +--> Diagnostics
        |
        v
-    Initialize communication
+    Initialize Communication
        |
        +--> HTTP
        +--> MQTT
-       +--> OTA
        |
        v
-    Initialize sensors
+    Initialize Sensors
        |
        v
-    Initialize actuators
-       |
-       v
-    Enter normal operation
+    Enter Normal Operation
 
-Not every subsystem must block startup until fully available.
+Infrastructure components initialize asynchronously where appropriate.
 
-For example, MQTT connection may be established asynchronously while sensor acquisition already starts.
+For example:
+
+- WiFi connection
+- MQTT connection
+- NTP synchronization
+
+must not unnecessarily delay application startup.
+
+Sensor acquisition may begin before MQTT connectivity becomes available.
+
+Measurement publication should wait until valid synchronized system time exists.
 
 ---
 
@@ -683,9 +1113,10 @@ Conceptually:
            v
       Measurements
            |
-           +-----------------> MQTT
+           v
+    MeasurementPublisher
            |
-           +-----------------> Web diagnostics
+           +-----------------> MQTT
 
     WiFi maintenance
            |
@@ -697,6 +1128,11 @@ Conceptually:
            v
       reconnect if required
 
+    Time maintenance
+           |
+           v
+      synchronize if required
+
     Hardware control
            |
            v
@@ -705,62 +1141,67 @@ Conceptually:
     Diagnostics
            |
            v
-      monitor component state
+      monitor subsystem state
 
-These activities should remain loosely coupled.
+Each activity remains loosely coupled.
 
-Failure of one activity must not block unrelated activities.
+Failure of one subsystem must not unnecessarily stop unrelated activities.
 
 ---
 
 # Event-Driven and Periodic Behaviour
 
-WeatherStation supports both periodic and event-driven data.
+WeatherStation supports both periodic and event-driven Measurements.
 
-Periodic examples:
+Examples of periodic measurements include:
 
 - temperature
 - humidity
 - pressure
 - solar irradiance
 
-Event-driven examples:
+Examples of event-driven measurements include:
 
 - rain gauge tip
 - sensor failure
 - sensor recovery
+- digital input changes
 
-The architecture must support both without forcing event data into artificial polling intervals.
+The architecture supports both without forcing event-driven data into artificial polling intervals.
+
+SensorManager coordinates both mechanisms.
 
 ---
 
 # Local Control
 
-Local hardware control must remain functional without network connectivity.
+Local hardware functionality must remain operational without external connectivity.
 
 Example:
 
     Rain Detector
-         |
-         v
+          |
+          v
     Heater Controller
-         |
-         v
-    Heater
+          |
+          v
+        Heater
 
-This path must not require:
+This path must never require:
 
 - MQTT
 - Home Assistant
-- Internet access
+- Internet connectivity
 
-Local hardware functionality has priority over remote integration.
+Local hardware functionality always has priority over remote integration.
 
 ---
 
 # Failure Isolation
 
-Technical components must fail independently where possible.
+Technical components should fail independently wherever possible.
+
+Recoverable failures in one subsystem must not unnecessarily propagate to unrelated components.
 
 Examples:
 
@@ -769,21 +1210,25 @@ MQTT broker unavailable:
     WiFi remains connected
     Sensors continue measuring
     Web Interface remains available
-    MQTT reconnects in background
+    MQTT reconnects in the background
 
 One sensor unavailable:
 
     Remaining sensors continue measuring
-    Diagnostics report failure
+    Diagnostics report the failure
 
-NTP unavailable:
+Time synchronization unavailable:
 
-    Measurement continues
+    Sensor acquisition continues
+    WiFi remains connected
+    MQTT remains connected
     Time synchronization retries later
+
+Measurements requiring absolute timestamps are published only after valid system time becomes available.
 
 Web Interface failure:
 
-    MQTT and measurement continue
+    MQTT and sensor acquisition continue
 
 WiFi temporarily unavailable:
 
@@ -792,16 +1237,12 @@ WiFi temporarily unavailable:
     WiFi reconnects in the background
     Setup Access Point is not activated
 
-MQTT broker unavailable:
+Configuration error:
 
-    WiFi remains in normal configured mode
-    Sensors continue measuring
-    Web Interface remains available if WiFi is connected
-    MQTT reconnects in the background
-    Setup Access Point is not activated
+    Device enters Setup Access Point during startup only.
 
+The firmware intentionally avoids a single global failure state for recoverable subsystem failures.
 
-The application must avoid a single global failure state for recoverable subsystem failures.
 ---
 
 # Watchdog and Blocking Behaviour
@@ -811,27 +1252,33 @@ Long blocking operations should be avoided.
 Network reconnect attempts must not block:
 
 - sensor acquisition
-- hardware control
+- local hardware control
 - diagnostics
 
-Hardware access should use bounded timeouts.
+Hardware access should always use bounded execution times.
 
-The runtime must remain responsive enough to satisfy the ESP32 watchdog.
+The runtime should remain responsive enough to satisfy the ESP32 watchdog.
 
-The architecture therefore prefers:
+The preferred implementation style therefore consists of:
 
 - asynchronous behaviour
-- short processing steps
-- state machines
+- explicit state machines
 - timers
+- short processing steps
 
-over long blocking waits.
+rather than:
+
+- long blocking waits
+- polling loops with delays
+- recursive retry logic
 
 ---
 
 # Simulation Mode
 
-Simulation uses the same application paths as physical hardware.
+Simulation is considered a first-class development mechanism.
+
+Simulation exists to validate the complete application architecture before physical hardware becomes available.
 
 Conceptually:
 
@@ -843,16 +1290,33 @@ Conceptually:
                         |
     Simulated Sensor ---+
 
-All higher technical layers operate identically regardless of measurement source.
+Both produce identical domain objects.
 
-This includes:
+After Measurement creation the complete processing pipeline is identical:
 
-- MQTT
-- HTTP
+    Measurement
+         |
+         v
+    SensorManager
+         |
+         v
+    MeasurementPublisher
+         |
+         v
+      MQTT
+
+Simulation therefore validates:
+
+- scheduling
+- publishing
 - diagnostics
 - logging
+- communication
+- application behaviour
 
-Simulation must not require a separate communication architecture.
+Simulation must never require a dedicated communication or MQTT implementation.
+
+Replacing a simulated sensor with a physical driver must not require architectural changes.
 
 ---
 
@@ -863,55 +1327,74 @@ Dependencies always point toward lower-level abstractions.
 Preferred:
 
     Application
-        |
-        v
-    Sensor Interface
-        |
-        v
-    Hardware Driver
+         |
+         v
+    Infrastructure Services
+         |
+         v
+    Hardware Drivers
 
-and:
+Domain orchestration follows:
 
     Application
-        |
-        v
-    Communication Interface
-        |
-        v
-    MQTT Implementation
-        |
-        v
-    WiFi
+         |
+         v
+    SensorManager
+         |
+         v
+      Sensors
+         |
+         v
+    Measurements
+         |
+         v
+    MeasurementPublisher
+         |
+         v
+     MqttService
 
-Avoid reverse dependencies.
+Reverse dependencies are intentionally avoided.
 
-For example, the WiFi component must never call SensorManager.
+Examples:
+
+WiFiService must never call SensorManager.
+
+Sensor drivers must never publish MQTT.
+
+ConfigurationService must never depend on communication protocols.
+
+This keeps technical responsibilities isolated.
 
 ---
 
 # Dependency Injection
 
-Where practical, dependencies should be supplied explicitly rather than accessed through hidden global state.
+Where practical, dependencies should be supplied explicitly through constructors.
+
+The current implementation uses constructor-based dependency injection.
 
 Conceptually:
 
     Application(
-        configuration,
-        sensors,
-        communication,
-        diagnostics
+        configurationService,
+        wifiService,
+        timeService,
+        mqttService,
+        webService
     )
 
-This improves:
+The composition root resides in `main.cpp`.
 
-- testing
+Concrete implementations are created once and injected into dependent components.
+
+This approach improves:
+
+- testability
 - simulation
-- modularity
 - replaceability
+- modularity
 
-The exact C++ implementation may remain lightweight.
-
-The goal is architectural clarity, not implementation complexity.
+Global mutable state should remain the exception rather than the rule.
 
 ---
 
@@ -919,30 +1402,32 @@ The goal is architectural clarity, not implementation complexity.
 
 Global mutable state should be minimized.
 
-Some embedded framework objects may require global or static lifetime.
+Some ESP32 framework objects require static lifetime.
 
-Where this is unavoidable, access should remain encapsulated.
+Where this is unavoidable they should remain encapsulated inside dedicated services.
 
-Application data should not be passed implicitly through unrelated global variables.
+Application data should never be exchanged through unrelated global variables.
+
+The runtime Configuration has exactly one authoritative owner.
 
 ---
 
 # Memory Management
 
-WeatherStation runs on a memory-constrained embedded system.
+WeatherStation runs on a memory-constrained embedded platform.
 
-The implementation should prefer predictable memory usage.
+The implementation should therefore prefer deterministic memory usage.
 
 Guidelines include:
 
 - avoid unnecessary dynamic allocation
 - avoid uncontrolled object creation
 - reuse buffers where practical
-- avoid large temporary JSON documents
+- avoid unnecessarily large temporary JSON documents
 - monitor free heap
 - treat memory exhaustion as a diagnostic condition
 
-Architecture must remain understandable and safe without introducing unnecessary abstraction overhead.
+Readability and maintainability remain more important than premature micro-optimizations.
 
 ---
 
@@ -952,21 +1437,22 @@ WeatherStation is intended for trusted local networks.
 
 Nevertheless:
 
-- WiFi credentials must not be exposed unnecessarily
-- MQTT credentials must not appear in normal logs
-- passwords must not be returned by diagnostic APIs
-- firmware update endpoints should not expose secrets
-- configuration handling must validate incoming data
+- WiFi credentials are treated as sensitive information
+- MQTT credentials are treated as sensitive information
+- passwords never appear in normal log output
+- passwords are never returned by diagnostic interfaces
+- configuration input is always validated
+- firmware update mechanisms must not expose secrets
 
-Security may evolve as the project matures, but credentials are always treated as sensitive configuration.
+Security should evolve together with the project without unnecessarily increasing implementation complexity.
 
 ---
 
 # Firmware Versioning
 
-Firmware has an explicit semantic version.
+Firmware follows semantic versioning.
 
-The intended format is:
+Format:
 
     MAJOR.MINOR.PATCH
 
@@ -981,29 +1467,29 @@ The firmware version is exposed through:
 - Web Interface
 - MQTT status
 
+There shall be exactly one authoritative firmware version definition.
+
+Duplicated manually maintained version strings should be avoided.
+
 Release versions should correspond to Git tags.
 
 Example:
 
     v0.1.0
 
-There must be one authoritative firmware version definition.
-
-Duplicated manually maintained version strings should be avoided.
-
 ---
 
 # Repository Boundary
 
-The WeatherStation repository contains the complete device design.
+The WeatherStation repository contains the complete product.
 
 It includes:
 
 - firmware
 - hardware
 - documentation
-- images and diagrams
-- build and development configuration
+- images
+- development configuration
 
 Conceptually:
 
@@ -1023,20 +1509,60 @@ Conceptually:
     +-- README.md
     +-- AGENTS.md
 
-Firmware and hardware are part of one product and therefore belong to the same repository.
+Firmware and hardware are developed together and therefore belong to a single repository.
 
 ---
 
-# Technical Design Rule
+# Current Implementation Status
 
-The central rule of the technical architecture is:
+Implemented
 
-> Protocols use connectivity.
->
-> Application logic uses services.
->
-> Services use hardware abstractions.
->
-> Hardware does not know the application.
+- Application lifecycle
+- constructor-based dependency injection
+- serial logging
+- ConfigurationService
+- persistent configuration (ESP32 Preferences)
+- configuration validation
+- factory reset
+- WiFi station mode
+- WiFi reconnect
+- setup access point
+- browser-based provisioning
+- MQTT connectivity
+- authenticated MQTT client
+- DNS hostname support
+- TimeService
+- SNTP synchronization
+- configurable timezone
+- configurable NTP servers
+- UTC and local ISO-8601 timestamps
 
-This dependency direction must remain intact as the project evolves.
+Planned
+
+- Measurement domain implementation
+- SensorManager
+- MeasurementPublisher
+- simulated sensors
+- MQTT measurement contract
+- OTA service
+- physical sensor drivers
+
+---
+
+# Technical Design Rules
+
+The central rules of the technical architecture are:
+
+- Measure, don't interpret.
+- One technical responsibility per service.
+- Infrastructure services own infrastructure.
+- Domain managers orchestrate domain objects.
+- Hardware drivers own hardware interaction.
+- Configuration has exactly one authoritative owner.
+- Sensors never publish MQTT directly.
+- Simulation and physical hardware share the same processing pipeline.
+- Connectivity failures must not stop local operation.
+- Published Measurements require valid synchronized system time.
+- Secrets must never appear in normal log output.
+
+These rules define the architectural direction of the project and should remain stable as the implementation evolves.

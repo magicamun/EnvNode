@@ -1,93 +1,216 @@
 # WeatherStation
 
-## Vision
+WeatherStation is an open-source ESP32-based weather station designed for reliable environmental measurements and seamless integration into modern home automation systems.
 
-WeatherStation is an open-source weather sensor platform designed for home automation.
+The project intentionally separates **measurement** from **interpretation**.
 
-The goal is to build a transparent, modular and fully open weather sensor platform that can serve as a reliable data source for Home Assistant and other automation systems.
+The firmware is responsible for acquiring reliable physical Measurements and publishing them to external systems.
 
-Instead, WeatherStation focuses on accurate sensor measurements, transparent processing and a clean separation of responsibilities.
+Higher-level concepts such as weather interpretation, historical aggregation, evapotranspiration (ETo), irrigation logic and visualization intentionally remain outside the firmware.
 
-The ESP32 acts as a measurement node.
+WeatherStation is developed as a complete open-source product including:
 
-It acquires physical sensor data, performs only the hardware-related processing required to obtain reliable measurements and publishes the results via MQTT.
+- firmware
+- hardware (KiCad)
+- documentation
+- development tooling
 
-Higher-level calculations such as daily statistics, sunshine duration, rain aggregation, evapotranspiration (ETo) or weather interpretation intentionally remain outside the firmware.
+The goal is not to build another weather dashboard.
 
-This architecture keeps the firmware small, deterministic and maintainable while allowing external software to evolve independently.
+The goal is to build a reliable measurement platform.
 
-## Why another weather station?
+---
+
+# Vision
+
+WeatherStation provides an open, transparent and extensible weather sensor platform for Home Assistant and other home automation systems.
+
+The ESP32 acts as a dedicated measurement node.
+
+It acquires physical sensor data, performs only the hardware-related processing required to obtain reliable Measurements and publishes them via MQTT.
+
+The firmware intentionally remains deterministic, maintainable and independent from weather-specific interpretation.
+
+This allows higher software layers to evolve independently while keeping the embedded firmware simple and robust.
+
+---
+
+# Why another weather station?
 
 The project originated from practical experience with an existing DIY weather station.
 
-While the hardware proved to be reliable, several software aspects became increasingly problematic over time:
+Although the hardware proved to be reliable, several software aspects became increasingly problematic:
 
-- closed source firmware
+- closed-source firmware
 - undocumented algorithms
-- incorrect calculation of sunshine duration
-- rain aggregation inside the firmware
-- difficult extensibility
-- no clear separation between measurement and interpretation
+- incorrect sunshine duration calculation
+- embedded rain aggregation
+- limited extensibility
+- unclear separation between measurement and interpretation
 
-Rather than replacing individual algorithms, the decision was made to redesign the entire firmware architecture around a simple principle:
+Rather than replacing individual algorithms, the firmware was redesigned from first principles around a small number of architectural rules.
 
-## Core Philosophy
+---
 
-Measure first.
+# Core Philosophy
 
-Interpret later.
+The WeatherStation project follows one simple principle:
 
-The firmware prefers publishing raw measurements over derived values.
+> Measure first.
+>
+> Interpret later.
 
-## Project Goals
+The firmware exists to acquire reliable Measurements.
 
-- Fully open source firmware
-- Open hardware (KiCad)
-- MQTT based communication
-- Web based configuration
+Interpretation belongs to external systems.
+
+---
+
+# Project Goals
+
+- fully open-source firmware
+- open hardware (KiCad)
+- MQTT-based integration
+- browser-based configuration
 - OTA firmware updates
-- Modular software architecture
-- High quality raw sensor data
-- Long-term maintainability
-- Easy extensibility
-- Well documented hardware and software
-- Vendor independant hardware
+- modular architecture
+- high-quality Measurements
+- deterministic firmware behaviour
+- long-term maintainability
+- simulation support
+- comprehensive documentation
+- hardware independence
 
-## Design Principles
+---
 
-The project follows a number of architectural principles.
+# Design Principles
 
-### Observable behaviour
-
-Whenever possible, internal decisions shall be visible through logging, diagnostics or MQTT.
-
-The firmware should never behave like a black box.
+The project follows a small number of architectural principles.
 
 ### Measure, don't interpret
 
-The firmware shall primarily measure physical quantities.
+The firmware measures physical reality.
 
-Derived values belong to higher software layers.
+Interpretation belongs outside the Device.
 
-### Separation of concerns
+---
 
-Sensor drivers, communication, configuration and business logic are independent modules.
+### One technical responsibility per service
 
-### Keep the firmware deterministic
+Each infrastructure service owns exactly one technical responsibility.
 
-No complex weather models are executed on the ESP32.
+Examples include:
 
-### Configuration instead of source code modifications
+- Configuration
+- WiFi
+- Time
+- MQTT
 
-Whenever possible, behaviour shall be configurable.
+---
+
+### Sensors produce Measurements
+
+Sensors do not publish MQTT.
+
+Sensors do not interpret weather.
+
+Sensors produce Measurements.
+
+---
+
+### Configuration has one authoritative owner
+
+Configuration exists exactly once inside the runtime.
+
+Every subsystem uses the same Configuration.
+
+---
+
+### Simulation is part of the architecture
+
+Simulated and physical Sensors follow the same processing pipeline.
+
+Replacing a simulated Sensor with a physical implementation must not require architectural changes.
+
+---
+
+### Observable behaviour
+
+Whenever practical, internal decisions should be visible through:
+
+- diagnostics
+- logging
+- MQTT status
+
+The firmware should never behave like a black box.
+
+---
+
+### Deterministic firmware
+
+The firmware intentionally avoids executing complex weather models.
+
+Embedded software should remain predictable and responsive.
+
+---
 
 ### Hardware independence
 
-The software shall depend on abstract interfaces rather than concrete sensor implementations.
+Application logic depends on abstract Sensor behaviour rather than concrete hardware implementations.
 
-Replacing a sensor should require only a new driver, not changes to the application logic.
+Replacing a Sensor should require only a new driver.
 
-## Non Goals
+---
+
+# Current Status
+
+Implemented
+
+- ESP32 PlatformIO project
+- persistent configuration
+- browser-based provisioning
+- WiFi connectivity
+- automatic WiFi reconnect
+- setup access point
+- configurable hostname
+- SNTP time synchronization
+- configurable timezone
+- MQTT connectivity
+- authenticated MQTT client
+- factory reset
+- technical architecture
+- domain model
+
+Currently under development
+
+- Measurement implementation
+- SensorManager
+- simulated Sensors
+- MeasurementPublisher
+
+Planned
+
+- physical Sensor drivers
+- OTA firmware updates
+- calibration support
+- extended diagnostics
+
+---
+
+# Documentation
+
+Project documentation is intentionally separated by responsibility.
+
+| Document | Purpose |
+|----------|---------|
+| README.md | Project overview |
+| DomainModel.md | Functional domain concepts |
+| TechnicalArchitecture.md | Technical architecture |
+| ADRs | Architectural decisions |
+
+---
+
+# Non Goals
 
 WeatherStation intentionally does not:
 
@@ -100,8 +223,12 @@ WeatherStation intentionally does not:
 
 These responsibilities belong to higher software layers.
 
-> **Status**
->
-> This project is currently under active development.
->
-> The architecture is considered stable, while hardware and firmware are evolving incrementally.
+---
+
+# Project Status
+
+The architecture is considered stable.
+
+Infrastructure services are implemented.
+
+The current development focus is the Measurement domain and Sensor framework.
