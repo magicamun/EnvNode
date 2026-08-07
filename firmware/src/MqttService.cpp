@@ -31,7 +31,7 @@ void MqttService::loop() {
 
     // Ensure MQTT server configured
     const Configuration& cfg = configurationService_.getConfiguration();
-    if (cfg.mqttServer.isEmpty()) {
+    if (cfg.mqtt.server.isEmpty()) {
         // nothing to do until configured
         return;
     }
@@ -67,24 +67,24 @@ void MqttService::attemptConnect() {
     if (now - lastAttemptMs_ < ReconnectIntervalMs) return;
 
     const Configuration& cfg = configurationService_.getConfiguration();
-    String clientId = String("WeatherStation-") + (cfg.deviceName.isEmpty() ? "Device" : cfg.deviceName);
+    String clientId = String("WeatherStation-") + (cfg.device.name.isEmpty() ? "Device" : cfg.device.name);
     clientId.replace(' ', '-');
 
-    client.setServer(cfg.mqttServer.c_str(), cfg.mqttPort);
+    client.setServer(cfg.mqtt.server.c_str(), cfg.mqtt.port);
     logStateTransition(State::Connecting);
     logger_.printf("Connecting to MQTT broker %s:%u user=%s client_id=%s password_length=%u\n",
-                    cfg.mqttServer.c_str(), cfg.mqttPort,
-                    cfg.mqttUsername.c_str(), clientId.c_str(),
-                    static_cast<unsigned int>(cfg.mqttPassword.length()));
+                    cfg.mqtt.server.c_str(), cfg.mqtt.port,
+                    cfg.mqtt.username.c_str(), clientId.c_str(),
+                    static_cast<unsigned int>(cfg.mqtt.password.length()));
     // PubSubClient::connect is synchronous; keep it bounded and infrequent
-    if (client.connect(clientId.c_str(), cfg.mqttUsername.c_str(), cfg.mqttPassword.c_str())) {
+    if (client.connect(clientId.c_str(), cfg.mqtt.username.c_str(), cfg.mqtt.password.c_str())) {
         logStateTransition(State::Connected);
     } else {
         int mqttState = client.state();
         logger_.printf("MQTT connect failed: state=%d broker=%s port=%u user=%s client_id=%s password_length=%u\n",
-                        mqttState, cfg.mqttServer.c_str(), cfg.mqttPort,
-                        cfg.mqttUsername.c_str(), clientId.c_str(),
-                        static_cast<unsigned int>(cfg.mqttPassword.length()));
+                        mqttState, cfg.mqtt.server.c_str(), cfg.mqtt.port,
+                        cfg.mqtt.username.c_str(), clientId.c_str(),
+                        static_cast<unsigned int>(cfg.mqtt.password.length()));
         logStateTransition(State::Reconnecting);
         lastAttemptMs_ = now;
     }

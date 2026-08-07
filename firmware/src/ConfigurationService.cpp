@@ -1,6 +1,7 @@
 #include "ConfigurationService.h"
 #include <Arduino.h>
 #include <Preferences.h>
+#include <IPAddress.h>
 
 namespace WeatherStation {
 
@@ -9,6 +10,13 @@ constexpr const char* PreferencesNamespace = "weather";
 constexpr const char* KeyDeviceName = "deviceName";
 constexpr const char* KeyWifiSSID = "wifiSSID";
 constexpr const char* KeyWifiPassword = "wifiPassword";
+constexpr const char* KeyHostname = "hostname";
+constexpr const char* KeyAddressMode = "addressMode";
+constexpr const char* KeyIpv4Address = "ipv4Address";
+constexpr const char* KeySubnetMask = "subnetMask";
+constexpr const char* KeyGateway = "gateway";
+constexpr const char* KeyDns1 = "dns1";
+constexpr const char* KeyDns2 = "dns2";
 constexpr const char* KeyMqttServer = "mqttServer";
 constexpr const char* KeyMqttPort = "mqttPort";
 constexpr const char* KeyMqttUsername = "mqttUsername";
@@ -32,6 +40,7 @@ constexpr size_t MaxMqttUsernameLength = 32;
 constexpr size_t MaxMqttPasswordLength = 64;
 constexpr size_t MaxTimezoneLength = 128;
 constexpr size_t MaxNtpServerLength = 64;
+constexpr size_t MaxHostnameLength = 63;
 }
 
 void ConfigurationService::ensurePreferencesStarted() {
@@ -42,23 +51,30 @@ void ConfigurationService::ensurePreferencesStarted() {
 }
 
 void ConfigurationService::initializeDefaults() {
-    configuration_.deviceName = "WeatherStation";
-    configuration_.wifiSSID = String();
-    configuration_.wifiPassword = String();
-    configuration_.mqttServer = String();
-    configuration_.mqttPort = DefaultMqttPort;
-    configuration_.mqttUsername = String();
-    configuration_.mqttPassword = String();
-    configuration_.timezone = String(DefaultTimezone);
-    configuration_.ntpServer1 = String(DefaultNtpServer1);
-    configuration_.ntpServer2 = String(DefaultNtpServer2);
-    configuration_.temperaturePresentationUnit =
+    configuration_.device.name = "WeatherStation";
+    configuration_.network.hostname = "WeatherStation";
+    configuration_.network.wifiSSID = String();
+    configuration_.network.wifiPassword = String();
+    configuration_.network.addressMode = NetworkAddressMode::Dhcp;
+    configuration_.network.ipv4Address = String();
+    configuration_.network.subnetMask = String();
+    configuration_.network.gateway = String();
+    configuration_.network.dns1 = String();
+    configuration_.network.dns2 = String();
+    configuration_.mqtt.server = String();
+    configuration_.mqtt.port = DefaultMqttPort;
+    configuration_.mqtt.username = String();
+    configuration_.mqtt.password = String();
+    configuration_.time.timezone = String(DefaultTimezone);
+    configuration_.time.ntpServer1 = String(DefaultNtpServer1);
+    configuration_.time.ntpServer2 = String(DefaultNtpServer2);
+    configuration_.presentation.temperature =
         measurementTypeMetadata(MeasurementType::Temperature).defaultPresentationUnit;
-    configuration_.atmosphericPressurePresentationUnit =
+    configuration_.presentation.atmosphericPressure =
         measurementTypeMetadata(MeasurementType::AtmosphericPressure).defaultPresentationUnit;
-    configuration_.solarCellTemperaturePresentationUnit =
+    configuration_.presentation.solarCellTemperature =
         measurementTypeMetadata(MeasurementType::SolarCellTemperature).defaultPresentationUnit;
-    configuration_.rainDetectorLevelPresentationUnit =
+    configuration_.presentation.rainDetectorLevel =
         measurementTypeMetadata(MeasurementType::RainDetectorLevel).defaultPresentationUnit;
 }
 
@@ -66,42 +82,51 @@ void ConfigurationService::loadFromPreferences() {
     ensurePreferencesStarted();
 
     if (preferences_.isKey(KeyDeviceName)) {
-        configuration_.deviceName = preferences_.getString(KeyDeviceName, configuration_.deviceName);
+        configuration_.device.name = preferences_.getString(KeyDeviceName, configuration_.device.name);
     }
     if (preferences_.isKey(KeyWifiSSID)) {
-        configuration_.wifiSSID = preferences_.getString(KeyWifiSSID, configuration_.wifiSSID);
+        configuration_.network.wifiSSID = preferences_.getString(KeyWifiSSID, configuration_.network.wifiSSID);
     }
     if (preferences_.isKey(KeyWifiPassword)) {
-        configuration_.wifiPassword = preferences_.getString(KeyWifiPassword, configuration_.wifiPassword);
+        configuration_.network.wifiPassword = preferences_.getString(KeyWifiPassword, configuration_.network.wifiPassword);
     }
+    configuration_.network.hostname = preferences_.getString(KeyHostname, configuration_.device.name);
+    const uint32_t addressMode = preferences_.getUInt(KeyAddressMode, 0);
+    configuration_.network.addressMode = addressMode == 1
+        ? NetworkAddressMode::Static : NetworkAddressMode::Dhcp;
+    configuration_.network.ipv4Address = preferences_.getString(KeyIpv4Address, "");
+    configuration_.network.subnetMask = preferences_.getString(KeySubnetMask, "");
+    configuration_.network.gateway = preferences_.getString(KeyGateway, "");
+    configuration_.network.dns1 = preferences_.getString(KeyDns1, "");
+    configuration_.network.dns2 = preferences_.getString(KeyDns2, "");
     if (preferences_.isKey(KeyMqttServer)) {
-        configuration_.mqttServer = preferences_.getString(KeyMqttServer, configuration_.mqttServer);
+        configuration_.mqtt.server = preferences_.getString(KeyMqttServer, configuration_.mqtt.server);
     }
     if (preferences_.isKey(KeyMqttPort)) {
-        configuration_.mqttPort = static_cast<uint16_t>(preferences_.getUInt(KeyMqttPort, configuration_.mqttPort));
+        configuration_.mqtt.port = static_cast<uint16_t>(preferences_.getUInt(KeyMqttPort, configuration_.mqtt.port));
     }
     if (preferences_.isKey(KeyMqttUsername)) {
-        configuration_.mqttUsername = preferences_.getString(KeyMqttUsername, configuration_.mqttUsername);
+        configuration_.mqtt.username = preferences_.getString(KeyMqttUsername, configuration_.mqtt.username);
     }
     if (preferences_.isKey(KeyMqttPassword)) {
-        configuration_.mqttPassword = preferences_.getString(KeyMqttPassword, configuration_.mqttPassword);
+        configuration_.mqtt.password = preferences_.getString(KeyMqttPassword, configuration_.mqtt.password);
     }
     if (preferences_.isKey(KeyTimezone)) {
-        configuration_.timezone = preferences_.getString(KeyTimezone, configuration_.timezone);
+        configuration_.time.timezone = preferences_.getString(KeyTimezone, configuration_.time.timezone);
     }
     if (preferences_.isKey(KeyNtpServer1)) {
-        configuration_.ntpServer1 = preferences_.getString(KeyNtpServer1, configuration_.ntpServer1);
+        configuration_.time.ntpServer1 = preferences_.getString(KeyNtpServer1, configuration_.time.ntpServer1);
     }
     if (preferences_.isKey(KeyNtpServer2)) {
-        configuration_.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.ntpServer2);
+        configuration_.time.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.time.ntpServer2);
     }
-    configuration_.temperaturePresentationUnit =
+    configuration_.presentation.temperature =
         loadPresentationUnit(KeyTemperatureUnit, MeasurementType::Temperature);
-    configuration_.atmosphericPressurePresentationUnit =
+    configuration_.presentation.atmosphericPressure =
         loadPresentationUnit(KeyPressureUnit, MeasurementType::AtmosphericPressure);
-    configuration_.solarCellTemperaturePresentationUnit =
+    configuration_.presentation.solarCellTemperature =
         loadPresentationUnit(KeySolarCellTemperatureUnit, MeasurementType::SolarCellTemperature);
-    configuration_.rainDetectorLevelPresentationUnit =
+    configuration_.presentation.rainDetectorLevel =
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
 }
 
@@ -120,35 +145,35 @@ PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, Mea
 }
 
 void ConfigurationService::validateConfiguration() {
-    if (!validateDeviceName(configuration_.deviceName)) {
-        configuration_.deviceName = "WeatherStation";
+    if (!validateDeviceName(configuration_.device.name)) {
+        configuration_.device.name = "WeatherStation";
     }
-    if (!validateWifiSSID(configuration_.wifiSSID)) {
-        configuration_.wifiSSID = String();
+    if (!validateNetworkConfiguration(configuration_.network)) {
+        configuration_.network.addressMode = NetworkAddressMode::Dhcp;
+        if (!validateHostname(configuration_.network.hostname)) configuration_.network.hostname = "WeatherStation";
+        if (!validateWifiSSID(configuration_.network.wifiSSID)) configuration_.network.wifiSSID = String();
+        if (!validateWifiPassword(configuration_.network.wifiPassword)) configuration_.network.wifiPassword = String();
     }
-    if (!validateWifiPassword(configuration_.wifiPassword)) {
-        configuration_.wifiPassword = String();
+    if (!validateMqttServer(configuration_.mqtt.server)) {
+        configuration_.mqtt.server = String();
     }
-    if (!validateMqttServer(configuration_.mqttServer)) {
-        configuration_.mqttServer = String();
+    if (!validateMqttPort(configuration_.mqtt.port)) {
+        configuration_.mqtt.port = DefaultMqttPort;
     }
-    if (!validateMqttPort(configuration_.mqttPort)) {
-        configuration_.mqttPort = DefaultMqttPort;
+    if (!validateMqttUsername(configuration_.mqtt.username)) {
+        configuration_.mqtt.username = String();
     }
-    if (!validateMqttUsername(configuration_.mqttUsername)) {
-        configuration_.mqttUsername = String();
+    if (!validateMqttPassword(configuration_.mqtt.password)) {
+        configuration_.mqtt.password = String();
     }
-    if (!validateMqttPassword(configuration_.mqttPassword)) {
-        configuration_.mqttPassword = String();
+    if (!validateTimezone(configuration_.time.timezone)) {
+        configuration_.time.timezone = String(DefaultTimezone);
     }
-    if (!validateTimezone(configuration_.timezone)) {
-        configuration_.timezone = String(DefaultTimezone);
+    if (!validateNtpServer(configuration_.time.ntpServer1)) {
+        configuration_.time.ntpServer1 = String(DefaultNtpServer1);
     }
-    if (!validateNtpServer(configuration_.ntpServer1)) {
-        configuration_.ntpServer1 = String(DefaultNtpServer1);
-    }
-    if (!validateNtpServer(configuration_.ntpServer2)) {
-        configuration_.ntpServer2 = String(DefaultNtpServer2);
+    if (!validateNtpServer(configuration_.time.ntpServer2)) {
+        configuration_.time.ntpServer2 = String(DefaultNtpServer2);
     }
 }
 
@@ -220,6 +245,56 @@ bool ConfigurationService::validateNtpServer(const String& server) const {
     return server.length() <= MaxNtpServerLength;
 }
 
+bool ConfigurationService::validateHostname(const String& hostname) const {
+    if (hostname.isEmpty() || hostname.length() > MaxHostnameLength) return false;
+    if (hostname[0] == '-' || hostname[hostname.length() - 1] == '-') return false;
+    for (size_t index = 0; index < hostname.length(); ++index) {
+        const char character = hostname[index];
+        if (!isalnum(character) && character != '-') return false;
+    }
+    return true;
+}
+
+bool ConfigurationService::validateIPv4(const String& value, bool allowEmpty) const {
+    if (allowEmpty && value.isEmpty()) return true;
+    IPAddress address;
+    return address.fromString(value) && static_cast<uint32_t>(address) != 0;
+}
+
+bool ConfigurationService::validateNetworkConfiguration(const NetworkConfiguration& network) const {
+    if (!validateHostname(network.hostname)
+        || !validateWifiSSID(network.wifiSSID)
+        || !validateWifiPassword(network.wifiPassword)) {
+        return false;
+    }
+    if (network.addressMode == NetworkAddressMode::Dhcp) return true;
+    if (network.addressMode != NetworkAddressMode::Static
+        || !validateIPv4(network.ipv4Address)
+        || !validateIPv4(network.subnetMask)
+        || !validateIPv4(network.gateway)
+        || !validateIPv4(network.dns1)
+        || !validateIPv4(network.dns2, true)) {
+        return false;
+    }
+
+    IPAddress address, mask, gateway;
+    address.fromString(network.ipv4Address);
+    mask.fromString(network.subnetMask);
+    gateway.fromString(network.gateway);
+    bool zeroSeen = false;
+    for (uint8_t byteIndex = 0; byteIndex < 4; ++byteIndex) {
+        for (int bit = 7; bit >= 0; --bit) {
+            const bool set = (mask[byteIndex] & (1U << bit)) != 0;
+            if (!set) zeroSeen = true;
+            else if (zeroSeen) return false;
+        }
+        if ((address[byteIndex] & mask[byteIndex]) != (gateway[byteIndex] & mask[byteIndex])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ConfigurationService::setDeviceName(const String& deviceName) {
     if (!validateDeviceName(deviceName)) {
         return false;
@@ -227,7 +302,29 @@ bool ConfigurationService::setDeviceName(const String& deviceName) {
     if (!persistString(KeyDeviceName, deviceName)) {
         return false;
     }
-    configuration_.deviceName = deviceName;
+    configuration_.device.name = deviceName;
+    return true;
+}
+
+bool ConfigurationService::setNetworkConfiguration(
+    const NetworkConfiguration& requestedNetwork,
+    bool updatePassword) {
+    NetworkConfiguration network = requestedNetwork;
+    if (!updatePassword) network.wifiPassword = configuration_.network.wifiPassword;
+    if (!validateNetworkConfiguration(network)) return false;
+
+    if (!persistString(KeyHostname, network.hostname)
+        || !persistString(KeyWifiSSID, network.wifiSSID)
+        || (updatePassword && !persistString(KeyWifiPassword, network.wifiPassword))
+        || !persistUInt(KeyAddressMode, static_cast<uint32_t>(network.addressMode))
+        || !persistString(KeyIpv4Address, network.ipv4Address)
+        || !persistString(KeySubnetMask, network.subnetMask)
+        || !persistString(KeyGateway, network.gateway)
+        || !persistString(KeyDns1, network.dns1)
+        || !persistString(KeyDns2, network.dns2)) {
+        return false;
+    }
+    configuration_.network = network;
     return true;
 }
 
@@ -238,7 +335,7 @@ bool ConfigurationService::setWifiSSID(const String& ssid) {
     if (!persistString(KeyWifiSSID, ssid)) {
         return false;
     }
-    configuration_.wifiSSID = ssid;
+    configuration_.network.wifiSSID = ssid;
     return true;
 }
 
@@ -249,7 +346,7 @@ bool ConfigurationService::setWifiPassword(const String& password) {
     if (!persistString(KeyWifiPassword, password)) {
         return false;
     }
-    configuration_.wifiPassword = password;
+    configuration_.network.wifiPassword = password;
     return true;
 }
 
@@ -260,7 +357,7 @@ bool ConfigurationService::setMqttServer(const String& server) {
     if (!persistString(KeyMqttServer, server)) {
         return false;
     }
-    configuration_.mqttServer = server;
+    configuration_.mqtt.server = server;
     return true;
 }
 
@@ -271,7 +368,7 @@ bool ConfigurationService::setMqttPort(uint16_t port) {
     if (!persistUInt(KeyMqttPort, port)) {
         return false;
     }
-    configuration_.mqttPort = port;
+    configuration_.mqtt.port = port;
     return true;
 }
 
@@ -282,7 +379,7 @@ bool ConfigurationService::setMqttUsername(const String& username) {
     if (!persistString(KeyMqttUsername, username)) {
         return false;
     }
-    configuration_.mqttUsername = username;
+    configuration_.mqtt.username = username;
     return true;
 }
 
@@ -293,7 +390,7 @@ bool ConfigurationService::setMqttPassword(const String& password) {
     if (!persistString(KeyMqttPassword, password)) {
         return false;
     }
-    configuration_.mqttPassword = password;
+    configuration_.mqtt.password = password;
     return true;
 }
 
@@ -304,7 +401,7 @@ bool ConfigurationService::setTimezone(const String& timezone) {
     if (!persistString(KeyTimezone, timezone)) {
         return false;
     }
-    configuration_.timezone = timezone;
+    configuration_.time.timezone = timezone;
     return true;
 }
 
@@ -315,7 +412,7 @@ bool ConfigurationService::setNtpServer1(const String& server) {
     if (!persistString(KeyNtpServer1, server)) {
         return false;
     }
-    configuration_.ntpServer1 = server;
+    configuration_.time.ntpServer1 = server;
     return true;
 }
 
@@ -326,7 +423,7 @@ bool ConfigurationService::setNtpServer2(const String& server) {
     if (!persistString(KeyNtpServer2, server)) {
         return false;
     }
-    configuration_.ntpServer2 = server;
+    configuration_.time.ntpServer2 = server;
     return true;
 }
 
@@ -340,19 +437,19 @@ bool ConfigurationService::setPresentationUnit(MeasurementType type, Presentatio
     switch (type) {
         case MeasurementType::Temperature:
             key = KeyTemperatureUnit;
-            configuredUnit = &configuration_.temperaturePresentationUnit;
+            configuredUnit = &configuration_.presentation.temperature;
             break;
         case MeasurementType::AtmosphericPressure:
             key = KeyPressureUnit;
-            configuredUnit = &configuration_.atmosphericPressurePresentationUnit;
+            configuredUnit = &configuration_.presentation.atmosphericPressure;
             break;
         case MeasurementType::SolarCellTemperature:
             key = KeySolarCellTemperatureUnit;
-            configuredUnit = &configuration_.solarCellTemperaturePresentationUnit;
+            configuredUnit = &configuration_.presentation.solarCellTemperature;
             break;
         case MeasurementType::RainDetectorLevel:
             key = KeyRainDetectorLevelUnit;
-            configuredUnit = &configuration_.rainDetectorLevelPresentationUnit;
+            configuredUnit = &configuration_.presentation.rainDetectorLevel;
             break;
         default:
             return false;

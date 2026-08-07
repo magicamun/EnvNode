@@ -5,30 +5,66 @@
 
 namespace WeatherStation {
 
-struct Configuration {
-    String deviceName;
+enum class NetworkAddressMode : uint8_t {
+    Dhcp = 0,
+    Static = 1,
+};
+
+struct DeviceConfiguration {
+    String name;
+};
+
+struct NetworkConfiguration {
+    String hostname;
     String wifiSSID;
     String wifiPassword;
-    String mqttServer;
-    uint16_t mqttPort;
-    String mqttUsername;
-    String mqttPassword;
+    NetworkAddressMode addressMode = NetworkAddressMode::Dhcp;
+    String ipv4Address;
+    String subnetMask;
+    String gateway;
+    String dns1;
+    String dns2;
+};
+
+struct MqttConfiguration {
+    String server;
+    uint16_t port = 1883;
+    String username;
+    String password;
+};
+
+struct TimeConfiguration {
     String timezone;
     String ntpServer1;
     String ntpServer2;
-    PresentationUnit temperaturePresentationUnit = PresentationUnit::DegreeCelsius;
-    PresentationUnit atmosphericPressurePresentationUnit = PresentationUnit::Pascal;
-    PresentationUnit solarCellTemperaturePresentationUnit = PresentationUnit::DegreeCelsius;
-    PresentationUnit rainDetectorLevelPresentationUnit = PresentationUnit::Ratio;
+};
 
-    PresentationUnit presentationUnitFor(MeasurementType type) const {
+struct PresentationConfiguration {
+    PresentationUnit temperature = PresentationUnit::DegreeCelsius;
+    PresentationUnit atmosphericPressure = PresentationUnit::Pascal;
+    PresentationUnit solarCellTemperature = PresentationUnit::DegreeCelsius;
+    PresentationUnit rainDetectorLevel = PresentationUnit::Ratio;
+
+    PresentationUnit unitFor(MeasurementType type) const {
         switch (type) {
-            case MeasurementType::Temperature: return temperaturePresentationUnit;
-            case MeasurementType::AtmosphericPressure: return atmosphericPressurePresentationUnit;
-            case MeasurementType::SolarCellTemperature: return solarCellTemperaturePresentationUnit;
-            case MeasurementType::RainDetectorLevel: return rainDetectorLevelPresentationUnit;
+            case MeasurementType::Temperature: return temperature;
+            case MeasurementType::AtmosphericPressure: return atmosphericPressure;
+            case MeasurementType::SolarCellTemperature: return solarCellTemperature;
+            case MeasurementType::RainDetectorLevel: return rainDetectorLevel;
             default: return measurementTypeMetadata(type).defaultPresentationUnit;
         }
+    }
+};
+
+struct Configuration {
+    DeviceConfiguration device;
+    NetworkConfiguration network;
+    MqttConfiguration mqtt;
+    TimeConfiguration time;
+    PresentationConfiguration presentation;
+
+    PresentationUnit presentationUnitFor(MeasurementType type) const {
+        return presentation.unitFor(type);
     }
 };
 

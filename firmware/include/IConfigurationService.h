@@ -12,6 +12,9 @@ public:
     virtual const Configuration& getConfiguration() const = 0;
 
     virtual bool setDeviceName(const String& deviceName) = 0;
+    virtual bool setNetworkConfiguration(
+        const NetworkConfiguration& network,
+        bool updatePassword) = 0;
     virtual bool setWifiSSID(const String& ssid) = 0;
     virtual bool setWifiPassword(const String& password) = 0;
     virtual bool setMqttServer(const String& server) = 0;

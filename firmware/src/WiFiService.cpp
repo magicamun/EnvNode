@@ -55,7 +55,18 @@ String WiFiService::ipAddress() const {
     if (connected()) {
         return WiFi.localIP().toString();
     }
+    if (inSetupAccessPointMode()) {
+        return WiFi.softAPIP().toString();
+    }
     return String();
+}
+
+String WiFiService::hostname() const {
+    return configurationService_.getConfiguration().network.hostname;
+}
+
+int32_t WiFiService::rssi() const {
+    return connected() ? WiFi.RSSI() : 0;
 }
 
 void WiFiService::startConnection() {
@@ -63,22 +74,28 @@ void WiFiService::startConnection() {
 
 
     logger_.println("WiFi connection parameters:");
-    logger_.printf("  SSID: '%s'\n", configuration.wifiSSID.c_str());
-    logger_.printf("  SSID length: %u\n", configuration.wifiSSID.length());
-    logger_.printf("  Password length: %u\n", configuration.wifiPassword.length());
-    logger_.printf("  Hostname: '%s'\n", configuration.deviceName.c_str());
+    const NetworkConfiguration& network = configuration.network;
+    logger_.printf("  SSID: '%s'\n", network.wifiSSID.c_str());
+    logger_.printf("  SSID length: %u\n", network.wifiSSID.length());
+    logger_.printf("  Password length: %u\n", network.wifiPassword.length());
+    logger_.printf("  Hostname: '%s'\n", network.hostname.c_str());
 
     WiFi.mode(WIFI_STA);
-    WiFi.setHostname(configuration.deviceName.c_str());
+    WiFi.setHostname(network.hostname.c_str());
+    if (!applyAddressConfiguration(network)) {
+        logger_.println("Static network configuration could not be applied");
+        startSetupAccessPoint();
+        return;
+    }
 
-    WiFi.begin(configuration.wifiSSID.c_str(), configuration.wifiPassword.c_str());
+    WiFi.begin(network.wifiSSID.c_str(), network.wifiPassword.c_str());
     connectionStartTimeMs_ = millis();
     state_ = State::Connecting;
 }
 
 void WiFiService::startSetupAccessPoint() {
     const Configuration& configuration = configurationService_.getConfiguration();
-    const String apSsid = configuration.deviceName + "-Setup";
+    const String apSsid = configuration.network.hostname + "-Setup";
     WiFi.mode(WIFI_AP);
     WiFi.softAP(apSsid.c_str());
     logger_.printf("Setup access point started: %s\n", apSsid.c_str());
@@ -87,7 +104,20 @@ void WiFiService::startSetupAccessPoint() {
 
 bool WiFiService::configurationIsValid() const {
     const Configuration& config = configurationService_.getConfiguration();
-    return !config.wifiSSID.isEmpty();
+    return !config.network.wifiSSID.isEmpty();
+}
+
+bool WiFiService::applyAddressConfiguration(const NetworkConfiguration& network) {
+    if (network.addressMode == NetworkAddressMode::Dhcp) return true;
+    IPAddress address, gateway, subnet, dns1, dns2;
+    if (!address.fromString(network.ipv4Address)
+        || !gateway.fromString(network.gateway)
+        || !subnet.fromString(network.subnetMask)
+        || !dns1.fromString(network.dns1)) {
+        return false;
+    }
+    if (!network.dns2.isEmpty() && !dns2.fromString(network.dns2)) return false;
+    return WiFi.config(address, gateway, subnet, dns1, dns2);
 }
 
 void WiFiService::logStateTransition(State nextState) {
@@ -136,8 +166,8 @@ void WiFiService::updateReconnectingState() {
 
     if (millis() - lastReconnectAttemptMs_ >= ReconnectIntervalMs) {
         const Configuration& configuration = configurationService_.getConfiguration();
-        if (!configuration.wifiSSID.isEmpty()) {
-            WiFi.begin(configuration.wifiSSID.c_str(), configuration.wifiPassword.c_str());
+        if (!configuration.network.wifiSSID.isEmpty()) {
+            WiFi.begin(configuration.network.wifiSSID.c_str(), configuration.network.wifiPassword.c_str());
         }
         lastReconnectAttemptMs_ = millis();
     }

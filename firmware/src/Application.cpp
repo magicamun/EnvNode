@@ -1,9 +1,8 @@
 #include "Application.h"
+#include "FirmwareVersion.h"
 #include <Arduino.h>
 
 namespace WeatherStation {
-
-constexpr auto CurrentFirmwareVersion = "0.1.0";
 
 Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager)
     : logger_(logger)
@@ -29,8 +28,8 @@ void Application::setup() {
 
     const Configuration& configuration = configurationService_.getConfiguration();
 
-    logger_.println(configuration.deviceName.c_str());
-    logger_.printf("Firmware version: %s\n", CurrentFirmwareVersion);
+    logger_.println(configuration.device.name.c_str());
+    logger_.printf("Firmware version: %s\n", FirmwareVersion);
     logger_.printf("Chip model: %s\n", ESP.getChipModel());
     logger_.printf("CPU frequency: %u MHz\n", ESP.getCpuFreqMHz());
     logger_.printf("Flash size: %u KB\n", ESP.getFlashChipSize() / 1024);

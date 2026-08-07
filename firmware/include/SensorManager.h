@@ -34,6 +34,21 @@ struct SensorRuntimeStatus {
     uint32_t preSyncDiscardCount = 0;
 };
 
+struct SensorRuntimeInfo {
+    SensorId id = InvalidSensorId;
+    SensorProvenance provenance = SensorProvenance::Physical;
+    SensorState state = SensorState::Unknown;
+    SensorSchedule schedule;
+    bool supportsTemperature = false;
+    bool supportsRelativeHumidity = false;
+    bool supportsAtmosphericPressure = false;
+    bool supportsSolarIrradiance = false;
+    bool supportsSolarCellTemperature = false;
+    bool supportsRainDetectorLevel = false;
+    bool supportsRainDetectorWet = false;
+    bool supportsRainGaugeTip = false;
+};
+
 class SensorManager : public IMeasurementSink {
 public:
     SensorManager(ITimeService& timeService, IMonotonicClock& monotonicClock, IMeasurementSink& downstream);
@@ -44,6 +59,7 @@ public:
 
     size_t sensorCount() const;
     bool runtimeStatus(SensorId id, SensorRuntimeStatus& status) const;
+    bool runtimeInfo(size_t index, SensorRuntimeInfo& info) const;
 
     void emit(const Measurement& measurementContent) override;
 

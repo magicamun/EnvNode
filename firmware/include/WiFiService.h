@@ -17,6 +17,8 @@ public:
     bool connected() const override;
     bool inSetupAccessPointMode() const override;
     String ipAddress() const override;
+    String hostname() const override;
+    int32_t rssi() const override;
 
 private:
     enum class State {
@@ -28,6 +30,7 @@ private:
     };
 
     void startConnection();
+    bool applyAddressConfiguration(const NetworkConfiguration& network);
     void startSetupAccessPoint();
     bool configurationIsValid() const;
     void logStateTransition(State nextState);

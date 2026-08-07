@@ -12,6 +12,7 @@ public:
     const Configuration& getConfiguration() const override;
 
     bool setDeviceName(const String& deviceName) override;
+    bool setNetworkConfiguration(const NetworkConfiguration& network, bool updatePassword) override;
     bool setWifiSSID(const String& ssid) override;
     bool setWifiPassword(const String& password) override;
     bool setMqttServer(const String& server) override;
@@ -41,6 +42,9 @@ private:
     bool validateMqttPassword(const String& password) const;
     bool validateTimezone(const String& timezone) const;
     bool validateNtpServer(const String& server) const;
+    bool validateHostname(const String& hostname) const;
+    bool validateNetworkConfiguration(const NetworkConfiguration& network) const;
+    bool validateIPv4(const String& value, bool allowEmpty = false) const;
 
     Configuration configuration_;
     Preferences preferences_;

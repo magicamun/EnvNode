@@ -125,6 +125,24 @@ bool SensorManager::runtimeStatus(SensorId id, SensorRuntimeStatus& status) cons
     return true;
 }
 
+bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
+    if (index >= sensorCount_) return false;
+    const SensorEntry& entry = entries_[index];
+    info.id = entry.registeredId;
+    info.provenance = entry.sensor->provenance();
+    info.state = entry.sensor->state();
+    info.schedule = entry.schedule;
+    info.supportsTemperature = entry.sensor->supports(MeasurementType::Temperature);
+    info.supportsRelativeHumidity = entry.sensor->supports(MeasurementType::RelativeHumidity);
+    info.supportsAtmosphericPressure = entry.sensor->supports(MeasurementType::AtmosphericPressure);
+    info.supportsSolarIrradiance = entry.sensor->supports(MeasurementType::SolarIrradiance);
+    info.supportsSolarCellTemperature = entry.sensor->supports(MeasurementType::SolarCellTemperature);
+    info.supportsRainDetectorLevel = entry.sensor->supports(MeasurementType::RainDetectorLevel);
+    info.supportsRainDetectorWet = entry.sensor->supports(MeasurementType::RainDetectorWet);
+    info.supportsRainGaugeTip = entry.sensor->supports(MeasurementType::RainGaugeTip);
+    return true;
+}
+
 void SensorManager::emit(const Measurement& measurementContent) {
     if (activeEntry_ == nullptr) {
         return;
