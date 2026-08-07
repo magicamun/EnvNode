@@ -1011,6 +1011,21 @@ Availability is derived from Sensor State:
 
 Availability is not maintained as independent state.
 
+Sensor registration uses a fixed-capacity table and does not allocate Sensors dynamically. Each registered Sensor has an explicit enabled flag and acquisition mode:
+
+- EventOnly Sensors receive cooperative `service(output)` calls but no periodic `sample(output)` calls.
+- Periodic Sensors receive both cooperative service calls and scheduled sample calls.
+
+A periodic Sensor may also produce events from `service(output)`; a separate hybrid mode is unnecessary. The periodic interval belongs to SensorManager configuration, while the next-due deadline is runtime-only state.
+
+SensorManager calls `service(output)` once per manager loop for every enabled Sensor, including Unknown, Initializing and Failed Sensors so lifecycle progression and recovery remain possible. It calls `sample(output)` only for due Periodic Sensors in Ready or Degraded state.
+
+Periodic scheduling uses monotonic milliseconds and wrap-safe deadline comparisons. Deadlines normally advance by adding the interval to preserve phase. When one or more intervals were missed, SensorManager skips the backlog and schedules from the current monotonic time; it never produces catch-up bursts. Completed, NoData and HardwareFailure all advance the regular schedule without immediate retry.
+
+When a periodic deadline becomes due, SensorManager latches one pending sample even if the Sensor is unavailable. The pending sample remains latched until the Sensor becomes Ready or Degraded, then executes exactly once before the next regular deadline is established.
+
+Hardware-near averaging, filtering, debounce, oversampling and compensation remain Sensor responsibilities. SensorManager performs no generic smoothing and owns no publishing interval or MQTT policy.
+
 ---
 
 ## Sensor Contract
@@ -1143,6 +1158,8 @@ SensorManager is the acceptance boundary for the publication pipeline.
 It assigns the Sensor source, synchronized Unix Epoch timestamp and provenance before forwarding a completed Measurement.
 
 These assignments are unconditional: source comes from `sensor.id()` and provenance comes from `sensor.provenance()`. A positive epoch is only structurally valid; SensorManager must verify `ITimeService::synchronized()` before assigning and forwarding it.
+
+All Measurements emitted during one `service(output)` or `sample(output)` call receive one shared acceptance timestamp. Before synchronization, emitted content is discarded at the acceptance boundary and is neither forwarded nor buffered for replay.
 
 Sensor acquisition and local operation may continue before TimeService is synchronized.
 

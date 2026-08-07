@@ -462,6 +462,8 @@ Measurements are intentionally transient domain objects.
 
 Sensors supply the physical content, validity and quality of Measurements.
 
+Periodic acquisition scheduling is orchestration state owned by SensorManager. Hardware-near filtering, smoothing, debounce, oversampling and compensation remain Sensor acquisition responsibilities and use Sensor-specific configuration.
+
 When SensorManager accepts Measurement content, it always copies the Sensor identity from `sensor.id()`, always assigns provenance from `sensor.provenance()`, validates structural Measurement Type and value-kind compatibility, and assigns a synchronized Unix Epoch timestamp.
 
 SensorManager does not own hardware-specific range validation, conversion or physical plausibility rules.

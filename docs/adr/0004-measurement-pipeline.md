@@ -69,6 +69,10 @@ Sensors provide physical content, validity and quality.
 
 SensorManager completes Measurements without modifying their physical meaning.
 
+For each Sensor operation, SensorManager establishes a synchronous acceptance context containing the active Sensor and one shared timestamp. It always assigns source from `sensor.id()` and provenance from `sensor.provenance()`.
+
+If system time is not synchronized, emitted content is discarded without forwarding or historical buffering.
+
 It validates only structural consistency, such as:
 
 - MeasurementType ↔ value representation
