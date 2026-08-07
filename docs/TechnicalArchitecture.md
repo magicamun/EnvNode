@@ -665,6 +665,8 @@ Time synchronization is provided by TimeService.
 
 The current implementation uses SNTP (Network Time Protocol).
 
+TimeService configures SNTP through the thread-safe ESP-IDF SNTP APIs. The configured POSIX timezone is applied separately to the system time library.
+
 Time is considered infrastructure.
 
 Application logic should never directly configure or manipulate the system clock.
@@ -742,6 +744,8 @@ Conceptually:
 Synchronization is non-blocking.
 
 The firmware continues operating while synchronization is pending.
+
+SNTP is initialized once after WiFi becomes available. Subsequent request retries are handled by the SNTP subsystem without periodically reinitializing it.
 
 MQTT connectivity may already exist before synchronization has completed.
 

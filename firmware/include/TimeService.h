@@ -28,10 +28,8 @@ private:
     ILogger& logger_;
     IConfigurationService& configurationService_;
     IWiFiService& wifiService_;
-    bool syncAttemptInProgress_ = false;
+    bool syncStarted_ = false;
     bool synchronized_ = false;
-    unsigned long lastSyncAttemptMs_ = 0;
-    static constexpr unsigned long SyncRetryIntervalMs = 10000;
 };
 
 } // namespace WeatherStation

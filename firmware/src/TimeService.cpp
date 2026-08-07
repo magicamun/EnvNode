@@ -1,6 +1,6 @@
 #include "TimeService.h"
 #include <time.h>
-#include <lwip/apps/sntp.h>
+#include <esp_sntp.h>
 #include <Arduino.h>
 
 namespace WeatherStation {
@@ -18,9 +18,8 @@ TimeService::TimeService(ILogger& logger, IConfigurationService& configurationSe
 }
 
 void TimeService::begin() {
-    syncAttemptInProgress_ = false;
+    syncStarted_ = false;
     synchronized_ = false;
-    lastSyncAttemptMs_ = 0;
 }
 
 void TimeService::loop() {
@@ -28,12 +27,12 @@ void TimeService::loop() {
         return;
     }
 
-    if (synchronized_) {
+    if (!syncStarted_) {
+        startSynchronization();
         return;
     }
 
-    if (!syncAttemptInProgress_) {
-        startSynchronization();
+    if (synchronized_) {
         return;
     }
 
@@ -42,12 +41,6 @@ void TimeService::loop() {
         logger_.println("Time synchronized successfully");
         logger_.printf("UTC timestamp: %s\n", iso8601Utc().c_str());
         logger_.printf("Local timestamp: %s\n", iso8601Local().c_str());
-        return;
-    }
-
-    unsigned long now = millis();
-    if (now - lastSyncAttemptMs_ >= SyncRetryIntervalMs) {
-        startSynchronization();
     }
 }
 
@@ -73,17 +66,25 @@ uint32_t TimeService::epoch() const {
 
 void TimeService::startSynchronization() {
     const Configuration& cfg = configurationService_.getConfiguration();
-    const String timezone = cfg.timezone.isEmpty() ? String(DefaultTimezone) : cfg.timezone;
-    const String ntpServer1 = cfg.ntpServer1.isEmpty() ? String(DefaultNtpServer1) : cfg.ntpServer1;
-    const String ntpServer2 = cfg.ntpServer2.isEmpty() ? String(DefaultNtpServer2) : cfg.ntpServer2;
+    const char* timezone = cfg.timezone.isEmpty() ? DefaultTimezone : cfg.timezone.c_str();
+    const char* ntpServer1 = cfg.ntpServer1.isEmpty() ? DefaultNtpServer1 : cfg.ntpServer1.c_str();
+    const char* ntpServer2 = cfg.ntpServer2.isEmpty() ? DefaultNtpServer2 : cfg.ntpServer2.c_str();
 
     logger_.println("Time synchronization started");
-    logger_.printf("NTP server used: %s, %s\n", ntpServer1.c_str(), ntpServer2.c_str());
+    logger_.printf("NTP server used: %s, %s\n", ntpServer1, ntpServer2);
 
-    configTzTime(timezone.c_str(), ntpServer1.c_str(), ntpServer2.c_str());
+    if (esp_sntp_enabled()) {
+        esp_sntp_stop();
+    }
+    esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
+    esp_sntp_setservername(0, ntpServer1);
+    esp_sntp_setservername(1, ntpServer2);
+    esp_sntp_setservername(2, nullptr);
+    esp_sntp_init();
+
+    setenv("TZ", timezone, 1);
     tzset();
-    syncAttemptInProgress_ = true;
-    lastSyncAttemptMs_ = millis();
+    syncStarted_ = true;
 }
 
 bool TimeService::isTimeValid() const {
