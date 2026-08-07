@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_netif.h>
 #include "FirmwareVersion.h"
 #include "UnitConverter.h"
 
@@ -124,6 +125,23 @@ String measurementTypes(const SensorRuntimeInfo& info) {
     return result;
 }
 
+String availableValue(const String& value) {
+    return value.isEmpty() || value == "0.0.0.0" ? String("—") : escapeHtml(value);
+}
+
+String effectiveConnectionMode(bool setupAccessPoint) {
+    if (setupAccessPoint) return String("—");
+    esp_netif_t* stationInterface = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    esp_netif_dhcp_status_t dhcpStatus = ESP_NETIF_DHCP_INIT;
+    if (stationInterface == nullptr
+        || esp_netif_dhcpc_get_status(stationInterface, &dhcpStatus) != ESP_OK) {
+        return String("—");
+    }
+    return dhcpStatus == ESP_NETIF_DHCP_STARTED ? String("DHCP")
+        : dhcpStatus == ESP_NETIF_DHCP_STOPPED ? String("Static IP")
+        : String("—");
+}
+
 } // namespace
 
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
@@ -235,10 +253,29 @@ String WebService::currentLocalDateTime() const {
 
 void WebService::handleStatus() {
     const Configuration& cfg = configurationService_.getConfiguration();
+    const bool connected = wifiService_.connected();
+    const bool setupAccessPoint = wifiService_.inSetupAccessPointMode();
+    const char* activeHostname = setupAccessPoint ? WiFi.softAPgetHostname() : WiFi.getHostname();
+    const String hostname(activeHostname == nullptr ? "" : activeHostname);
+    const String ssid = connected ? WiFi.SSID() : setupAccessPoint ? WiFi.softAPSSID() : String();
+    const String ipv4Address = connected ? WiFi.localIP().toString()
+        : setupAccessPoint ? WiFi.softAPIP().toString() : String();
+    const String subnetMask = connected ? WiFi.subnetMask().toString()
+        : setupAccessPoint ? WiFi.softAPSubnetMask().toString() : String();
+    const String gateway = connected ? WiFi.gatewayIP().toString()
+        : setupAccessPoint ? WiFi.softAPIP().toString() : String();
+    const String dns1 = connected ? WiFi.dnsIP(0).toString() : String();
+    const String dns2 = connected ? WiFi.dnsIP(1).toString() : String();
+    const String macAddress = setupAccessPoint ? WiFi.softAPmacAddress() : WiFi.macAddress();
     String c;
-    c.reserve(1800);
+    c.reserve(2300);
     c = "<div class='grid'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareVersion + "</span><span>Uptime</span><span>" + localeFormatter_.formatNumber(millis()/1000UL, 0) + " seconds</span><span>Free heap</span><span>" + localeFormatter_.formatNumber(ESP.getFreeHeap(), 0) + " bytes</span><span>Flash</span><span>" + localeFormatter_.formatNumber(ESP.getFlashChipSize()/1024UL, 0) + " KB</span></div></section>";
-    c += "<section class='card'><h2>Network</h2><div class='kv'><span>Status</span><span>" + (wifiService_.connected()?badge("Connected","good"):wifiService_.inSetupAccessPointMode()?badge("Setup AP","warn"):badge("Disconnected","bad")) + "</span><span>Hostname</span><span>" + escapeHtml(wifiService_.hostname()) + "</span><span>IP address</span><span>" + escapeHtml(wifiService_.ipAddress()) + "</span><span>RSSI</span><span>" + (wifiService_.connected()?localeFormatter_.formatNumber(wifiService_.rssi(),0)+" dBm":"—") + "</span></div></section>";
+    c += "<section class='card'><h2>Network</h2><div class='kv'><span>Status</span><span>" + (connected?badge("Connected","good"):setupAccessPoint?badge("Setup AP","warn"):badge("Disconnected","bad")) + "</span>";
+    c += "<span>Connection mode</span><span>" + effectiveConnectionMode(setupAccessPoint) + "</span><span>Hostname</span><span>" + availableValue(hostname) + "</span><span>SSID</span><span>" + availableValue(ssid) + "</span>";
+    c += "<span>IPv4 address</span><span>" + availableValue(ipv4Address) + "</span><span>Subnet mask</span><span>" + availableValue(subnetMask) + "</span><span>Default gateway</span><span>" + availableValue(gateway) + "</span>";
+    c += "<span>DNS server 1</span><span>" + availableValue(dns1) + "</span>";
+    if (!dns2.isEmpty() && dns2 != "0.0.0.0") c += "<span>DNS server 2</span><span>" + escapeHtml(dns2) + "</span>";
+    c += "<span>MAC address</span><span>" + availableValue(macAddress) + "</span><span>RSSI</span><span>" + (connected?localeFormatter_.formatNumber(wifiService_.rssi(),0)+" dBm":"—") + "</span></div></section>";
     const bool configured = !cfg.mqtt.server.isEmpty();
     c += "<section class='card'><h2>MQTT</h2><div class='kv'><span>Configuration</span><span>" + badge(configured?"Configured":"Not configured",configured?"good":"warn") + "</span><span>Runtime</span><span>" + badge(mqttService_.connected()?"Connected":"Disconnected",mqttService_.connected()?"good":"bad") + "</span></div></section>";
     c += "<section class='card'><h2>Time</h2><div class='kv'><span>Status</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + "</span></div></section>";
