@@ -410,24 +410,284 @@ This automatically includes future configuration parameters without requiring ch
 
 ---
 
-## OTA
+# OTA Firmware Updates
 
-Firmware updates are part of the Communication Layer because they require an external communication path.
+Firmware updates are implemented as a staged lifecycle.
 
-Two update mechanisms are planned:
+OTA is treated as a communication capability, but firmware activation remains a runtime lifecycle decision owned by RuntimeManager.
 
-- OTA update from the development environment
-- firmware upload through the local Web Interface
+The OTA architecture intentionally separates:
 
-OTA must never own persistent configuration.
+- firmware transfer
+- firmware validation
+- firmware activation
+- device restart
 
-Firmware updates should preserve configuration unless an explicit migration requires otherwise.
+The OTA process therefore follows:
+
+    Browser
+       |
+       v
+    WebService
+       |
+       v
+    OTAService
+       |
+       v
+    Firmware staging
+       |
+       v
+    RuntimeManager
+       |
+       v
+    Explicit restart
+       |
+       v
+    New firmware activation
+
+
+## OTAService
+
+OTAService owns firmware update handling.
+
+Responsibilities include:
+
+- receiving firmware upload data
+- writing firmware data to the OTA partition
+- tracking upload progress
+- validating update completion
+- reporting OTA state
+- requesting device restart after successful staging
+
+OTAService does not own:
+
+- device restart execution
+- configuration
+- MQTT
+- sensor acquisition
+- firmware lifecycle decisions
+
+OTAService must never directly call:
+
+    ESP.restart()
+
+The single device restart boundary remains inside RuntimeManager.
+
+---
+
+## OTA Lifecycle
+
+A firmware update follows these states:
+
+    Idle
+
+      |
+      v
+
+    Uploading
+
+      |
+      v
+
+    Verifying
+
+      |
+      v
+
+    Firmware Staged
+
+      |
+      v
+
+    Restart Required
+
+      |
+      v
+
+    Running New Firmware
+
+
+A successful upload does not immediately restart the device.
+
+After successful staging:
+
+    OTAService
+        |
+        v
+    RuntimeManager.request(RestartDevice)
+
+
+The restart remains pending until explicitly activated.
+
+This prevents:
+
+- unexpected device restarts
+- interrupted configuration workflows
+- loss of diagnostic information
+- hidden lifecycle side effects
+
+---
+
+## Explicit Activation
+
+Firmware activation requires an explicit restart action.
+
+The restart flow is:
+
+    User Request
+          |
+          v
+    RuntimeManager
+          |
+          v
+    performPendingRestart()
+          |
+          v
+    ESP.restart()
+
+
+There is exactly one executable restart boundary in the firmware.
+
+All components requiring a device restart request the action through RuntimeManager.
+
+No communication service, configuration service or Web handler may directly restart the device.
+
+---
+
+## Failed Updates
+
+The currently running firmware remains active if:
+
+- upload is interrupted
+- the firmware image is invalid
+- flash writing fails
+- OTA finalization fails
+
+Failed updates do not trigger a restart.
+
+The device continues normal operation using the previously installed firmware.
+
+---
+
+## Web Interface Integration
+
+The Firmware page provides:
+
+- current firmware version
+- OTA state
+- upload functionality
+- restart-required status
+
+The Web Interface acts only as an adapter between the user interface and OTAService.
+
+It does not contain firmware update logic.
+
+After a successful upload the user receives:
+
+    Firmware uploaded successfully.
+
+    Firmware is staged.
+
+    Device restart is required to activate the update.
+
+The user may then explicitly activate the update.
+
+---
+
+## Runtime Integration
+
+OTA integrates with the existing runtime lifecycle model.
+
+The relationship is:
+
+    Configuration Changes
+              |
+              v
+        RuntimeManager
+
+    OTA Update
+              |
+              v
+        RuntimeManager
+
+    Factory Reset
+              |
+              v
+        RuntimeManager
+
+
+RuntimeManager remains the single owner of lifecycle actions.
+
+OTA therefore does not introduce a separate restart mechanism.
+
+---
+
+## Memory and Reliability
+
+Firmware upload data is processed incrementally.
+
+The complete firmware image is never loaded into RAM.
+
+This ensures:
+
+- bounded memory usage
+- predictable runtime behaviour
+- continued operation on memory-constrained hardware
+
+OTA upload is isolated from sensor acquisition and measurement processing as far as technically possible.
+
+A failed OTA operation must not compromise the running application.
+
+---
+
+## Development Workflow
+
+The development workflow is:
+
+Build firmware:
+
+    PlatformIO Build
+
+Generated firmware:
+
+    .pio/build/<environment>/firmware.bin
+
+
+The generated binary can be uploaded through the WeatherStation Web Interface.
+
+The OTA process then performs:
+
+    firmware.bin
+          |
+          v
+    Upload
+          |
+          v
+    Stage
+          |
+          v
+    Restart Required
+          |
+          v
+    Activate
+
+
+OTA updates are therefore independent from USB flashing.
 
 USB flashing remains the recovery mechanism.
 
-OTA is intentionally implemented as an independent infrastructure service.
+---
 
-It shall not introduce dependencies into Application logic.
+## Design Rules
+
+The OTA implementation follows these rules:
+
+- OTA transfers firmware; it does not own lifecycle decisions.
+- Successful uploads do not automatically restart the device.
+- RuntimeManager owns restart decisions.
+- There is exactly one executable ESP.restart() boundary.
+- Failed updates leave the running firmware untouched.
+- OTA must not introduce dependencies into Sensors, Measurements or MQTT.
 
 ---
 
