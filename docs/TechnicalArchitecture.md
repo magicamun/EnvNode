@@ -1715,13 +1715,15 @@ Implemented
 - configurable timezone
 - configurable NTP servers
 - UTC and local ISO-8601 timestamps
+- Measurement domain implementation
+- SensorManager
+- deterministic SimulatedTemperatureSensor
+- temporary diagnostic Measurement sink
 
 Planned
 
-- Measurement domain implementation
-- SensorManager
 - MeasurementPublisher
-- simulated sensors
+- additional simulated sensors
 - MQTT measurement contract
 - OTA service
 - physical sensor drivers

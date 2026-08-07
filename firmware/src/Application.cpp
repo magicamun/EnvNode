@@ -5,13 +5,14 @@ namespace WeatherStation {
 
 constexpr auto CurrentFirmwareVersion = "0.1.0";
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
     , webService_(webService)
     , mqttService_(mqttService)
     , timeService_(timeService)
+    , sensorManager_(sensorManager)
     , timeSyncLogged_(false) {
 }
 
@@ -22,6 +23,7 @@ void Application::setup() {
     configurationService_.loadConfiguration();
     wifiService_.begin();
     timeService_.begin();
+    sensorManager_.begin();
     webService_.begin();
     mqttService_.begin();
 
@@ -44,6 +46,7 @@ void Application::loop() {
         timeSyncLogged_ = true;
     }
 
+    sensorManager_.loop();
     webService_.loop();
     mqttService_.loop();
 }
