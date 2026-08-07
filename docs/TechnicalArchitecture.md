@@ -195,16 +195,18 @@ MQTT operates on top of network connectivity provided by the Connectivity Layer.
 
 Conceptually:
 
-    Measurement
+    Canonical Measurement
         |
         v
-    Measurement Publisher
+    MeasurementPublisher
         |
+        | presentation conversion
+        | serialization
         v
     MQTT representation
         |
         v
-    MQTT client
+    MqttService
         |
         v
     WiFi
@@ -214,7 +216,7 @@ Conceptually:
 
 MQTT is responsible for:
 
-- publishing measurements
+- publishing Measurements
 - publishing device state
 - publishing diagnostics
 - publishing availability
@@ -222,22 +224,69 @@ MQTT is responsible for:
 
 MQTT is not responsible for:
 
-- acquiring measurements
+- acquiring Measurements
 - interpreting weather data
+- converting hardware representations
+- converting physical units
 - maintaining WiFi connectivity
 - synchronizing system time
 - storing persistent configuration
 - storing long-term data
 
-The MQTT client owns broker connectivity only.
+MqttService owns broker connectivity and transport only.
 
-Translation of domain Measurements into MQTT payloads belongs to a dedicated MeasurementPublisher component.
+Translation of domain Measurements into MQTT topics and payloads belongs to MeasurementPublisher.
 
-The initial MeasurementPublisher publishes every accepted Measurement without buffering, suppression or aggregation. Topics use `weatherstation/<deviceName>/measurement/<measurementType>` with deterministic topic-safe device-name normalization and stable lowercase Measurement Type names.
+The initial MeasurementPublisher publishes every accepted Measurement without buffering, suppression or aggregation.
 
-Payloads use JSON with the Measurement timestamp formatted from its assigned epoch as local ISO-8601 including the UTC offset. Initial payloads omit unit metadata and are not retained. Invalid Measurements omit the value, while value-free events use an explicit event marker without an artificial numeric value.
+Topics use:
 
-This separation intentionally decouples measurement semantics from transport implementation.
+    weatherstation/<deviceName>/measurement/<measurementType>
+
+with deterministic topic-safe device-name normalization and stable lowercase MeasurementType names.
+
+Payloads use JSON with the Measurement timestamp formatted from its assigned epoch as local ISO-8601 including the UTC offset.
+
+MeasurementPublisher is responsible for making the externally presented unit of every numeric Measurement unambiguous.
+
+According to ADR-0005, canonical domain values may be converted into the configured Presentation Unit before serialization.
+
+Examples include:
+
+    canonical Temperature in °C
+            |
+            v
+    configured Presentation Unit
+            |
+            +----> °C
+            +----> °F
+
+and:
+
+    canonical AtmosphericPressure in Pa
+            |
+            v
+    configured Presentation Unit
+            |
+            +----> Pa
+            +----> hPa
+            +----> kPa
+            +----> inHg
+
+Unit conversion changes representation only.
+
+It never changes the physical meaning, timestamp, validity, quality, source or provenance of a Measurement.
+
+Boolean Measurements and value-free event Measurements do not acquire artificial units.
+
+Invalid Measurements never fabricate a value.
+
+This separation intentionally decouples:
+
+- measurement acquisition
+- canonical domain representation
+- presentation
+- transport
 
 Loss of MQTT connectivity must never stop:
 
@@ -521,7 +570,7 @@ Persistent storage is used exclusively for device configuration and long-lived d
 
 The initial implementation uses the ESP32 Preferences API backed by the ESP32 Non-Volatile Storage (NVS).
 
-Persistent configuration currently includes:
+Persistent configuration includes or is expected to include:
 
 - device identity
 - WiFi configuration
@@ -531,10 +580,25 @@ Persistent configuration currently includes:
 - sensor settings
 - actuator settings
 - simulation settings
+- Presentation Unit configuration
+
+Presentation Unit configuration is stored globally per MeasurementType.
+
+Examples include:
+
+    Temperature -> Celsius
+
+    AtmosphericPressure -> hectopascal
+
+Presentation configuration contains typed unit selections rather than arbitrary unit strings.
+
+It affects external representation only.
+
+It does not modify canonical Measurement values or Sensor behaviour.
 
 Persistent storage is intentionally **not** used for:
 
-- historical weather measurements
+- historical weather Measurements
 - event history
 - daily rainfall
 - sunshine duration
@@ -546,7 +610,6 @@ Historical data belongs outside the embedded device.
 The WeatherStation firmware is designed to measure and publish data, not to archive it.
 
 ---
-
 # Configuration Ownership
 
 Configuration has exactly one authoritative runtime representation.
@@ -565,10 +628,10 @@ Conceptually:
            v
       Configuration
            |
-       +---+---+--------+--------+---------+
-       |       |        |        |         |
-       v       v        v        v         v
-     WiFi    MQTT     Time    Sensors    Web
+       +---+---+--------+--------+-----------+----------------------+
+       |       |        |        |           |                      |
+       v       v        v        v           v                      v
+     WiFi    MQTT     Time    Sensors       Web          MeasurementPublisher
 
 No other subsystem owns persistent configuration.
 
@@ -584,6 +647,9 @@ Examples include:
     setMqttUsername(...)
     setMqttPassword(...)
     setTimezone(...)
+    setPresentationUnit(...)
+
+The exact typed API for Presentation Units is defined by the implementation, but arbitrary free-form unit strings are not used.
 
 A generic key/value configuration interface is intentionally avoided.
 
@@ -593,6 +659,14 @@ This provides:
 - explicit validation
 - self-documenting interfaces
 - controlled configuration evolution
+
+Presentation Unit configuration is global per MeasurementType.
+
+MeasurementPublisher consumes this configuration but never owns or persists it.
+
+Changing a Presentation Unit affects future external representation only.
+
+It does not require Sensor reinitialization and does not modify canonical Measurements.
 
 ---
 
@@ -924,18 +998,24 @@ This allows hardware replacement without changing application logic.
 
 A Sensor Driver bridges physical hardware and the WeatherStation domain model.
 
-Its responsibility is to convert hardware interaction into domain Measurements.
+Its responsibility is to convert hardware interaction into canonical domain Measurements.
 
 Conceptually:
 
     Physical Sensor
           |
+          | hardware representation
           v
     Hardware Driver
           |
+          | conversion
+          | calibration
+          | filtering
+          | compensation
           v
         Sensor
           |
+          | canonical Measurement content
           v
      Measurement
 
@@ -946,12 +1026,39 @@ Typical driver responsibilities include:
 - SPI communication
 - ADC conversion
 - hardware calibration
-- conversion into engineering units
+- hardware-near filtering
+- compensation
+- conversion into canonical engineering units
 - hardware error detection
+- physical plausibility validation
+
+Different Sensors producing the same MeasurementType may use completely different native hardware representations.
+
+For example:
+
+    SHT4x
+        |
+        | native temperature representation
+        v
+    Temperature in canonical °C
+
+and:
+
+    BMP390
+        |
+        | native temperature representation
+        v
+    Temperature in canonical °C
+
+Higher layers therefore never need to know the native unit or encoding of the hardware.
 
 Raw ADC values are generally exposed as Diagnostics.
 
-Primary Measurements use the canonical representation defined by their Measurement Type.
+Primary Measurements use the canonical representation defined by their MeasurementType.
+
+Sensor drivers never apply Presentation Unit configuration.
+
+A Sensor always emits canonical Measurements regardless of whether the user later chooses Celsius, Fahrenheit, Pascal, hectopascal or another supported external representation.
 
 Sensor drivers must not:
 
@@ -959,8 +1066,9 @@ Sensor drivers must not:
 - implement HTTP
 - manage WiFi
 - manage configuration persistence
+- apply Presentation Unit preferences
 
-Sensor drivers are responsible only for hardware interaction.
+Sensor drivers own hardware acquisition and normalization into the canonical domain representation.
 
 ---
 
@@ -1130,6 +1238,7 @@ Conceptually:
                             |
     Simulated Sensor -------+
                             |
+                            | canonical value
                             v
                       SensorManager
                             |
@@ -1138,11 +1247,15 @@ Conceptually:
                             | assign timestamp
                             | assign provenance
                             v
-                 Completed Measurement
+                 Completed canonical Measurement
                             |
                             v
                   MeasurementPublisher
                             |
+                            | select Presentation Unit
+                            | convert representation
+                            | attach unit metadata
+                            | serialize
                             v
                       MqttService
                             |
@@ -1155,39 +1268,153 @@ Simulation therefore validates the complete application architecture rather than
 
 Sensor implementations must never publish MQTT directly.
 
-Sensors provide physical content, validity and quality.
+Sensors provide:
+
+- canonical physical content
+- validity
+- quality
 
 SensorManager is the acceptance boundary for the publication pipeline.
 
-It assigns the Sensor source, synchronized Unix Epoch timestamp and provenance before forwarding a completed Measurement.
+It assigns:
 
-These assignments are unconditional: source comes from `sensor.id()` and provenance comes from `sensor.provenance()`. A positive epoch is only structurally valid; SensorManager must verify `ITimeService::synchronized()` before assigning and forwarding it.
+- Sensor source
+- synchronized Unix Epoch timestamp
+- provenance
 
-All Measurements emitted during one `service(output)` or `sample(output)` call receive one shared acceptance timestamp. Before synchronization, emitted content is discarded at the acceptance boundary and is neither forwarded nor buffered for replay.
+before forwarding a completed canonical Measurement.
+
+These assignments are unconditional:
+
+- source comes from `sensor.id()`
+- provenance comes from `sensor.provenance()`
+
+A positive epoch is only structurally valid.
+
+SensorManager must verify `ITimeService::synchronized()` before assigning and forwarding it.
+
+All Measurements emitted during one `service(output)` or `sample(output)` call receive one shared acceptance timestamp.
+
+Before synchronization, emitted content is discarded at the acceptance boundary and is neither forwarded nor buffered for replay.
 
 Sensor acquisition and local operation may continue before TimeService is synchronized.
 
 Measurements must never enter the publication pipeline with fake epoch values.
-
-Pre-synchronization Measurements may be dropped rather than queued indefinitely.
 
 One coherent acquisition may produce multiple Measurements.
 
 Examples include:
 
     SHT4x
-        +----> Temperature
-        +----> RelativeHumidity
+        +----> Temperature in canonical °C
+        +----> RelativeHumidity in canonical %
 
 and:
 
     BMP390
-        +----> AtmosphericPressure
-        +----> Temperature
+        +----> AtmosphericPressure in canonical Pa
+        +----> Temperature in canonical °C
 
-MeasurementPublisher owns translation from domain objects into MQTT payloads.
+MeasurementPublisher is the presentation boundary.
+
+It may convert a canonical numeric Measurement into the globally configured Presentation Unit for its MeasurementType.
+
+Examples:
+
+    Temperature
+        canonical: °C
+        presentation: °C or °F
+
+    AtmosphericPressure
+        canonical: Pa
+        presentation: Pa, hPa, kPa or inHg
+
+MeasurementPublisher never mutates the canonical Measurement.
+
+Presentation conversion changes representation only and never physical meaning.
 
 MqttService owns broker connectivity and transport only.
+
+---
+
+# Measurement Publisher
+
+MeasurementPublisher is the boundary between canonical domain Measurements and external representation.
+
+It implements the downstream Measurement sink used by SensorManager.
+
+Its responsibilities include:
+
+- receiving completed canonical Measurements
+- selecting the configured Presentation Unit for the MeasurementType
+- converting numeric values from canonical representation into Presentation representation
+- attaching unambiguous unit metadata
+- formatting the assigned Measurement timestamp for external use
+- serializing Measurements
+- generating stable MQTT topics
+- forwarding topic and payload to MqttService
+
+Conceptually:
+
+    Completed canonical Measurement
+                |
+                v
+        Presentation Configuration
+                |
+                v
+           UnitConverter
+                |
+                v
+        Presentation Value
+                |
+                v
+           Serializer
+                |
+                v
+          MqttService
+
+MeasurementPublisher reads Presentation Unit preferences through the configuration subsystem.
+
+It never persists configuration itself.
+
+The conversion rules are defined centrally rather than being duplicated across Sensors or individual MQTT mappings.
+
+Each MeasurementType defines:
+
+- one canonical representation
+- its supported Presentation Units
+- its default Presentation Unit
+
+The canonical representation is used as the fallback whenever no alternative Presentation Unit is configured or a stored presentation setting is invalid.
+
+MeasurementPublisher must not perform:
+
+- Sensor acquisition
+- calibration
+- hardware compensation
+- smoothing
+- physical plausibility validation
+- historical aggregation
+- weather interpretation
+- broker connection management
+
+Unit conversion is purely representational.
+
+The underlying canonical Measurement remains unchanged.
+
+Boolean Measurements and value-free events bypass numeric unit conversion.
+
+Invalid Measurements do not receive fabricated values.
+
+The initial publishing policy is intentionally simple:
+
+- every accepted Measurement is published
+- no historical buffering
+- no aggregation
+- no change suppression
+- no minimum publishing interval
+
+Future publishing policies may evolve independently from Sensor acquisition scheduling.
 
 ---
 
@@ -1278,12 +1505,18 @@ Conceptually:
     Sensor Acquisition
            |
            v
-      Measurements
+    Canonical Measurements
+           |
+           v
+      SensorManager
            |
            v
     MeasurementPublisher
            |
-           +-----------------> MQTT
+           | Presentation conversion
+           | Serialization
+           v
+          MQTT
 
     WiFi maintenance
            |
@@ -1313,6 +1546,10 @@ Conceptually:
 Each activity remains loosely coupled.
 
 Failure of one subsystem must not unnecessarily stop unrelated activities.
+
+Presentation preferences affect only MeasurementPublisher output.
+
+They never change Sensor acquisition cadence or canonical Measurement values.
 
 ---
 
@@ -1720,17 +1957,23 @@ Implemented
 - configurable NTP servers
 - UTC and local ISO-8601 timestamps
 - Measurement domain implementation
+- canonical MeasurementType metadata
 - SensorManager
+- monotonic Sensor scheduling
 - deterministic SimulatedTemperatureSensor
 - MeasurementPublisher
 - MQTT Measurement publishing
+- end-to-end simulated Sensor-to-MQTT pipeline
 
 Planned
 
-- additional simulated sensors
-- configurable presentation units
+- Presentation Unit configuration
+- UnitConverter
+- MQTT unit metadata
+- Web Interface for Presentation Unit configuration
+- additional simulated Sensors
 - OTA service
-- physical sensor drivers
+- physical Sensor drivers
 
 ---
 
@@ -1744,10 +1987,18 @@ The central rules of the technical architecture are:
 - Domain managers orchestrate domain objects.
 - Hardware drivers own hardware interaction.
 - Configuration has exactly one authoritative owner.
+- Sensors convert hardware-specific values into canonical Measurements.
+- Canonical Measurement representation is stable inside the domain.
+- Presentation Units are applied only at external representation boundaries.
+- Sensors never apply user-selected Presentation Units.
+- SensorManager never performs unit conversion.
+- MeasurementPublisher owns presentation conversion and serialization.
+- MqttService owns transport only.
 - Sensors never publish MQTT directly.
 - Simulation and physical hardware share the same processing pipeline.
 - Connectivity failures must not stop local operation.
 - Published Measurements require valid synchronized system time.
+- Published numeric Measurements must expose their Presentation Unit unambiguously.
 - Secrets must never appear in normal log output.
 
 These rules define the architectural direction of the project and should remain stable as the implementation evolves.
