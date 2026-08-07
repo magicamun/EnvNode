@@ -16,6 +16,10 @@ constexpr const char* KeyMqttPassword = "mqttPassword";
 constexpr const char* KeyTimezone = "timezone";
 constexpr const char* KeyNtpServer1 = "ntpServer1";
 constexpr const char* KeyNtpServer2 = "ntpServer2";
+constexpr const char* KeyTemperatureUnit = "unitTemp";
+constexpr const char* KeyPressureUnit = "unitPressure";
+constexpr const char* KeySolarCellTemperatureUnit = "unitSolarTemp";
+constexpr const char* KeyRainDetectorLevelUnit = "unitRainLevel";
 constexpr uint16_t DefaultMqttPort = 1883;
 constexpr const char* DefaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
 constexpr const char* DefaultNtpServer1 = "pool.ntp.org";
@@ -48,6 +52,14 @@ void ConfigurationService::initializeDefaults() {
     configuration_.timezone = String(DefaultTimezone);
     configuration_.ntpServer1 = String(DefaultNtpServer1);
     configuration_.ntpServer2 = String(DefaultNtpServer2);
+    configuration_.temperaturePresentationUnit =
+        measurementTypeMetadata(MeasurementType::Temperature).defaultPresentationUnit;
+    configuration_.atmosphericPressurePresentationUnit =
+        measurementTypeMetadata(MeasurementType::AtmosphericPressure).defaultPresentationUnit;
+    configuration_.solarCellTemperaturePresentationUnit =
+        measurementTypeMetadata(MeasurementType::SolarCellTemperature).defaultPresentationUnit;
+    configuration_.rainDetectorLevelPresentationUnit =
+        measurementTypeMetadata(MeasurementType::RainDetectorLevel).defaultPresentationUnit;
 }
 
 void ConfigurationService::loadFromPreferences() {
@@ -83,6 +95,28 @@ void ConfigurationService::loadFromPreferences() {
     if (preferences_.isKey(KeyNtpServer2)) {
         configuration_.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.ntpServer2);
     }
+    configuration_.temperaturePresentationUnit =
+        loadPresentationUnit(KeyTemperatureUnit, MeasurementType::Temperature);
+    configuration_.atmosphericPressurePresentationUnit =
+        loadPresentationUnit(KeyPressureUnit, MeasurementType::AtmosphericPressure);
+    configuration_.solarCellTemperaturePresentationUnit =
+        loadPresentationUnit(KeySolarCellTemperatureUnit, MeasurementType::SolarCellTemperature);
+    configuration_.rainDetectorLevelPresentationUnit =
+        loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
+}
+
+PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, MeasurementType type) {
+    const PresentationUnit fallback = measurementTypeMetadata(type).defaultPresentationUnit;
+    if (!preferences_.isKey(key)) {
+        return fallback;
+    }
+
+    const uint32_t encoded = preferences_.getUInt(key, static_cast<uint32_t>(fallback));
+    if (encoded > static_cast<uint32_t>(PresentationUnit::Ratio)) {
+        return fallback;
+    }
+    const PresentationUnit unit = static_cast<PresentationUnit>(encoded);
+    return supportsPresentationUnit(type, unit) ? unit : fallback;
 }
 
 void ConfigurationService::validateConfiguration() {
@@ -293,6 +327,41 @@ bool ConfigurationService::setNtpServer2(const String& server) {
         return false;
     }
     configuration_.ntpServer2 = server;
+    return true;
+}
+
+bool ConfigurationService::setPresentationUnit(MeasurementType type, PresentationUnit unit) {
+    if (!supportsPresentationUnit(type, unit)) {
+        return false;
+    }
+
+    const char* key = nullptr;
+    PresentationUnit* configuredUnit = nullptr;
+    switch (type) {
+        case MeasurementType::Temperature:
+            key = KeyTemperatureUnit;
+            configuredUnit = &configuration_.temperaturePresentationUnit;
+            break;
+        case MeasurementType::AtmosphericPressure:
+            key = KeyPressureUnit;
+            configuredUnit = &configuration_.atmosphericPressurePresentationUnit;
+            break;
+        case MeasurementType::SolarCellTemperature:
+            key = KeySolarCellTemperatureUnit;
+            configuredUnit = &configuration_.solarCellTemperaturePresentationUnit;
+            break;
+        case MeasurementType::RainDetectorLevel:
+            key = KeyRainDetectorLevelUnit;
+            configuredUnit = &configuration_.rainDetectorLevelPresentationUnit;
+            break;
+        default:
+            return false;
+    }
+
+    if (!persistUInt(key, static_cast<uint32_t>(unit))) {
+        return false;
+    }
+    *configuredUnit = unit;
     return true;
 }
 

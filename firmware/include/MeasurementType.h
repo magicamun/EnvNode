@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MeasurementValue.h"
+#include "PresentationUnit.h"
 
 namespace WeatherStation {
 
@@ -18,10 +19,14 @@ enum class MeasurementType {
 
 struct MeasurementTypeMetadata {
     ValueKind expectedValueKind;
-    const char* canonicalUnit;
+    PresentationUnit canonicalUnit;
+    const PresentationUnit* supportedPresentationUnits;
+    uint8_t supportedPresentationUnitCount;
+    PresentationUnit defaultPresentationUnit;
 };
 
 bool isSupportedMeasurementType(MeasurementType type);
 const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type);
+bool supportsPresentationUnit(MeasurementType type, PresentationUnit unit);
 
 } // namespace WeatherStation

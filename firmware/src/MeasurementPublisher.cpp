@@ -1,4 +1,5 @@
 #include "MeasurementPublisher.h"
+#include "UnitConverter.h"
 
 namespace WeatherStation {
 namespace {
@@ -38,7 +39,29 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
     const String deviceName = topicSafeDeviceName(configuration.deviceName);
     const String topic = String("weatherstation/") + deviceName + "/measurement/" + typeTopic;
     const String timestamp = timeService_.iso8601Local(measurement.timestamp);
-    const String payload = serializePayload(measurement, timestamp);
+    const MeasurementTypeMetadata& metadata = measurementTypeMetadata(measurement.type);
+    PresentationUnit presentationUnit = configuration.presentationUnitFor(measurement.type);
+    if (!supportsPresentationUnit(measurement.type, presentationUnit)) {
+        presentationUnit = metadata.defaultPresentationUnit;
+    }
+
+    float presentationValue = 0.0F;
+    bool hasPresentationValue = false;
+    if (measurement.valid && measurement.value.kind() == ValueKind::FloatingPoint) {
+        float canonicalValue = 0.0F;
+        if (measurement.value.tryGetFloatingPoint(canonicalValue)) {
+            hasPresentationValue = UnitConverter::convert(
+                measurement.type, canonicalValue, presentationUnit, presentationValue);
+            if (!hasPresentationValue && presentationUnit != metadata.defaultPresentationUnit) {
+                presentationUnit = metadata.defaultPresentationUnit;
+                hasPresentationValue = UnitConverter::convert(
+                    measurement.type, canonicalValue, presentationUnit, presentationValue);
+            }
+        }
+    }
+
+    const String payload = serializePayload(
+        measurement, timestamp, presentationUnit, presentationValue, hasPresentationValue);
 
     mqttService_.publish(topic.c_str(), payload.c_str(), RetainMeasurements);
 }
@@ -98,7 +121,10 @@ String MeasurementPublisher::topicSafeDeviceName(const String& deviceName) {
 
 String MeasurementPublisher::serializePayload(
     const Measurement& measurement,
-    const String& timestamp) {
+    const String& timestamp,
+    PresentationUnit presentationUnit,
+    float presentationValue,
+    bool hasPresentationValue) {
     String payload;
     payload.reserve(192);
     payload = "{\"timestamp\":\"";
@@ -108,10 +134,9 @@ String MeasurementPublisher::serializePayload(
     if (measurement.valid) {
         switch (measurement.value.kind()) {
             case ValueKind::FloatingPoint: {
-                float value = 0.0F;
-                if (measurement.value.tryGetFloatingPoint(value)) {
+                if (hasPresentationValue) {
                     payload += ",\"value\":";
-                    payload += String(value, 3);
+                    payload += String(presentationValue, 3);
                 }
                 break;
             }
@@ -135,6 +160,14 @@ String MeasurementPublisher::serializePayload(
                 payload += ",\"event\":true";
                 break;
         }
+    }
+
+    const char* unitSymbol = UnitConverter::symbol(presentationUnit);
+    if (measurementTypeMetadata(measurement.type).expectedValueKind == ValueKind::FloatingPoint
+        && unitSymbol != nullptr) {
+        payload += ",\"unit\":\"";
+        payload += unitSymbol;
+        payload += '"';
     }
 
     payload += ",\"valid\":";

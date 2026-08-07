@@ -1,4 +1,5 @@
 #include "WebService.h"
+#include "UnitConverter.h"
 #include <Arduino.h>
 #include <WiFi.h>
 
@@ -46,6 +47,38 @@ String timezoneSelectHtml(const String& currentTimezone) {
 
     html += "</select>";
     return html;
+}
+
+String presentationUnitSelectHtml(
+    const char* fieldName,
+    MeasurementType type,
+    PresentationUnit currentUnit) {
+    const MeasurementTypeMetadata& metadata = measurementTypeMetadata(type);
+    String html = "<select name='" + String(fieldName) + "'>";
+    for (uint8_t index = 0; index < metadata.supportedPresentationUnitCount; ++index) {
+        const PresentationUnit unit = metadata.supportedPresentationUnits[index];
+        html += "<option value='";
+        html += UnitConverter::stableKey(unit);
+        html += "'";
+        if (unit == currentUnit) {
+            html += " selected";
+        }
+        html += ">";
+        html += UnitConverter::displayName(unit);
+        html += " (";
+        html += UnitConverter::symbol(unit);
+        html += ")</option>";
+    }
+    html += "</select>";
+    return html;
+}
+
+bool parsePresentationUnitArgument(
+    const String& argument,
+    MeasurementType type,
+    PresentationUnit& unit) {
+    return UnitConverter::parseStableKey(argument.c_str(), unit)
+        && supportsPresentationUnit(type, unit);
 }
 }
 
@@ -105,11 +138,30 @@ void WebService::handleSave() {
     const String timezone = server_.arg("timezone");
     const String ntpServer1 = server_.arg("ntpServer1");
     const String ntpServer2 = server_.arg("ntpServer2");
+    PresentationUnit temperatureUnit = PresentationUnit::None;
+    PresentationUnit pressureUnit = PresentationUnit::None;
+    PresentationUnit solarCellTemperatureUnit = PresentationUnit::None;
+    PresentationUnit rainDetectorLevelUnit = PresentationUnit::None;
 
     bool ok = true;
     String errorMessage;
 
-    if (!configurationService_.setDeviceName(deviceName)) {
+    if (!parsePresentationUnitArgument(
+            server_.arg("temperatureUnit"), MeasurementType::Temperature, temperatureUnit)
+        || !parsePresentationUnitArgument(
+            server_.arg("pressureUnit"), MeasurementType::AtmosphericPressure, pressureUnit)
+        || !parsePresentationUnitArgument(
+            server_.arg("solarCellTemperatureUnit"), MeasurementType::SolarCellTemperature,
+            solarCellTemperatureUnit)
+        || !parsePresentationUnitArgument(
+            server_.arg("rainDetectorLevelUnit"), MeasurementType::RainDetectorLevel,
+            rainDetectorLevelUnit)) {
+        logger_.println("Config failed: unsupported presentation unit");
+        ok = false;
+        errorMessage = "Invalid or unsupported presentation unit.";
+    }
+
+    if (ok && !configurationService_.setDeviceName(deviceName)) {
         logger_.println("Config failed: deviceName");
         ok = false;
         errorMessage = "Invalid device name.";
@@ -173,6 +225,31 @@ void WebService::handleSave() {
         logger_.println("Config failed: NTP server 2");
         ok = false;
         errorMessage = "Invalid NTP server 2.";
+    }
+
+    if (ok && !configurationService_.setPresentationUnit(
+            MeasurementType::Temperature, temperatureUnit)) {
+        logger_.println("Config failed: Temperature presentation unit");
+        ok = false;
+        errorMessage = "Could not save Temperature presentation unit.";
+    }
+    if (ok && !configurationService_.setPresentationUnit(
+            MeasurementType::AtmosphericPressure, pressureUnit)) {
+        logger_.println("Config failed: Atmospheric Pressure presentation unit");
+        ok = false;
+        errorMessage = "Could not save Atmospheric Pressure presentation unit.";
+    }
+    if (ok && !configurationService_.setPresentationUnit(
+            MeasurementType::SolarCellTemperature, solarCellTemperatureUnit)) {
+        logger_.println("Config failed: Solar Cell Temperature presentation unit");
+        ok = false;
+        errorMessage = "Could not save Solar Cell Temperature presentation unit.";
+    }
+    if (ok && !configurationService_.setPresentationUnit(
+            MeasurementType::RainDetectorLevel, rainDetectorLevelUnit)) {
+        logger_.println("Config failed: Rain Detector Level presentation unit");
+        ok = false;
+        errorMessage = "Could not save Rain Detector Level presentation unit.";
     }
 
     if (!ok) {
@@ -240,6 +317,27 @@ String WebService::configurationPage() const {
     html += "<label>Timezone:<br>" + timezoneSelectHtml(configuration.timezone) + "</label><br><br>";
     html += "<label>NTP server 1:<br><input type='text' name='ntpServer1' value='" + configuration.ntpServer1 + "'></label><br><br>";
     html += "<label>NTP server 2:<br><input type='text' name='ntpServer2' value='" + configuration.ntpServer2 + "'></label><br><br>";
+    html += "<h2>Presentation Units</h2>";
+    html += "<label>Temperature:<br>";
+    html += presentationUnitSelectHtml(
+        "temperatureUnit", MeasurementType::Temperature,
+        configuration.temperaturePresentationUnit);
+    html += "</label><br><br>";
+    html += "<label>Atmospheric Pressure:<br>";
+    html += presentationUnitSelectHtml(
+        "pressureUnit", MeasurementType::AtmosphericPressure,
+        configuration.atmosphericPressurePresentationUnit);
+    html += "</label><br><br>";
+    html += "<label>Solar Cell Temperature:<br>";
+    html += presentationUnitSelectHtml(
+        "solarCellTemperatureUnit", MeasurementType::SolarCellTemperature,
+        configuration.solarCellTemperaturePresentationUnit);
+    html += "</label><br><br>";
+    html += "<label>Rain Detector Level:<br>";
+    html += presentationUnitSelectHtml(
+        "rainDetectorLevelUnit", MeasurementType::RainDetectorLevel,
+        configuration.rainDetectorLevelPresentationUnit);
+    html += "</label><br><br>";
     html += "<button type='submit'>Save</button>";
     html += "</form>";
     html += "<hr>";

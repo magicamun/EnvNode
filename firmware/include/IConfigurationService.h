@@ -21,6 +21,7 @@ public:
     virtual bool setTimezone(const String& timezone) = 0;
     virtual bool setNtpServer1(const String& server) = 0;
     virtual bool setNtpServer2(const String& server) = 0;
+    virtual bool setPresentationUnit(MeasurementType type, PresentationUnit unit) = 0;
     virtual bool resetToDefaults() = 0;
 };
 

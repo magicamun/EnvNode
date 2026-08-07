@@ -6,6 +6,7 @@
 #include "IMeasurementSink.h"
 #include "IMqttService.h"
 #include "ITimeService.h"
+#include "PresentationUnit.h"
 
 namespace WeatherStation {
 
@@ -22,7 +23,12 @@ private:
     static const char* measurementTypeTopic(MeasurementType type);
     static const char* qualityName(MeasurementQuality quality);
     static String topicSafeDeviceName(const String& deviceName);
-    static String serializePayload(const Measurement& measurement, const String& timestamp);
+    static String serializePayload(
+        const Measurement& measurement,
+        const String& timestamp,
+        PresentationUnit presentationUnit,
+        float presentationValue,
+        bool hasPresentationValue);
 
     IConfigurationService& configurationService_;
     ITimeService& timeService_;

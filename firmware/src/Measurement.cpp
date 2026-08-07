@@ -3,15 +3,53 @@
 namespace WeatherStation {
 namespace {
 
-const MeasurementTypeMetadata UnknownMetadata = {ValueKind::None, nullptr};
-const MeasurementTypeMetadata TemperatureMetadata = {ValueKind::FloatingPoint, "\xC2\xB0" "C"};
-const MeasurementTypeMetadata RelativeHumidityMetadata = {ValueKind::FloatingPoint, "%"};
-const MeasurementTypeMetadata AtmosphericPressureMetadata = {ValueKind::FloatingPoint, "Pa"};
-const MeasurementTypeMetadata SolarIrradianceMetadata = {ValueKind::FloatingPoint, "W/m\xC2\xB2"};
-const MeasurementTypeMetadata SolarCellTemperatureMetadata = {ValueKind::FloatingPoint, "\xC2\xB0" "C"};
-const MeasurementTypeMetadata RainDetectorLevelMetadata = {ValueKind::FloatingPoint, "ratio"};
-const MeasurementTypeMetadata RainDetectorWetMetadata = {ValueKind::Boolean, nullptr};
-const MeasurementTypeMetadata RainGaugeTipMetadata = {ValueKind::None, nullptr};
+const PresentationUnit NoUnit[] = {PresentationUnit::None};
+const PresentationUnit TemperatureUnits[] = {
+    PresentationUnit::DegreeCelsius,
+    PresentationUnit::DegreeFahrenheit,
+};
+const PresentationUnit HumidityUnits[] = {PresentationUnit::Percent};
+const PresentationUnit PressureUnits[] = {
+    PresentationUnit::Pascal,
+    PresentationUnit::Hectopascal,
+    PresentationUnit::Kilopascal,
+    PresentationUnit::InchMercury,
+};
+const PresentationUnit IrradianceUnits[] = {PresentationUnit::WattPerSquareMetre};
+const PresentationUnit RainLevelUnits[] = {
+    PresentationUnit::Ratio,
+    PresentationUnit::Percent,
+};
+
+template <size_t Size>
+constexpr uint8_t unitCount(const PresentationUnit (&)[Size]) {
+    return static_cast<uint8_t>(Size);
+}
+
+const MeasurementTypeMetadata UnknownMetadata = {
+    ValueKind::None, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
+const MeasurementTypeMetadata TemperatureMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::DegreeCelsius,
+    TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius};
+const MeasurementTypeMetadata RelativeHumidityMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::Percent,
+    HumidityUnits, unitCount(HumidityUnits), PresentationUnit::Percent};
+const MeasurementTypeMetadata AtmosphericPressureMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::Pascal,
+    PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal};
+const MeasurementTypeMetadata SolarIrradianceMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::WattPerSquareMetre,
+    IrradianceUnits, unitCount(IrradianceUnits), PresentationUnit::WattPerSquareMetre};
+const MeasurementTypeMetadata SolarCellTemperatureMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::DegreeCelsius,
+    TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius};
+const MeasurementTypeMetadata RainDetectorLevelMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::Ratio,
+    RainLevelUnits, unitCount(RainLevelUnits), PresentationUnit::Ratio};
+const MeasurementTypeMetadata RainDetectorWetMetadata = {
+    ValueKind::Boolean, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
+const MeasurementTypeMetadata RainGaugeTipMetadata = {
+    ValueKind::None, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
 
 bool hasStructurallyValidPayload(const Measurement& measurement) {
     if (!isSupportedMeasurementType(measurement.type)) {
@@ -68,6 +106,20 @@ const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type) {
         default:
             return UnknownMetadata;
     }
+}
+
+bool supportsPresentationUnit(MeasurementType type, PresentationUnit unit) {
+    if (!isSupportedMeasurementType(type)) {
+        return false;
+    }
+
+    const MeasurementTypeMetadata& metadata = measurementTypeMetadata(type);
+    for (uint8_t index = 0; index < metadata.supportedPresentationUnitCount; ++index) {
+        if (metadata.supportedPresentationUnits[index] == unit) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool isMeasurementContentStructurallyValid(const Measurement& measurement) {

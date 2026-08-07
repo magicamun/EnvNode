@@ -21,6 +21,7 @@ public:
     bool setTimezone(const String& timezone) override;
     bool setNtpServer1(const String& server) override;
     bool setNtpServer2(const String& server) override;
+    bool setPresentationUnit(MeasurementType type, PresentationUnit unit) override;
     bool resetToDefaults() override;
 
 private:
@@ -30,6 +31,7 @@ private:
     void ensurePreferencesStarted();
     bool persistString(const char* key, const String& value);
     bool persistUInt(const char* key, uint32_t value);
+    PresentationUnit loadPresentationUnit(const char* key, MeasurementType type);
     bool validateDeviceName(const String& deviceName) const;
     bool validateWifiSSID(const String& ssid) const;
     bool validateWifiPassword(const String& password) const;
