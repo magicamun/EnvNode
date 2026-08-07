@@ -60,6 +60,10 @@ String TimeService::iso8601Local() const {
     return formatIso8601(now(), true);
 }
 
+String TimeService::iso8601Local(time_t timestamp) const {
+    return formatIso8601(timestamp, true);
+}
+
 uint32_t TimeService::epoch() const {
     return static_cast<uint32_t>(now());
 }

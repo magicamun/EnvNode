@@ -18,6 +18,7 @@ public:
     time_t now() const override;
     String iso8601Utc() const override;
     String iso8601Local() const override;
+    String iso8601Local(time_t timestamp) const override;
     uint32_t epoch() const override;
 
 private:

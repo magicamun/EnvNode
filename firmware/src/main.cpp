@@ -6,7 +6,7 @@
 #include "MqttService.h"
 #include "TimeService.h"
 #include "ArduinoMonotonicClock.h"
-#include "DiagnosticMeasurementSink.h"
+#include "MeasurementPublisher.h"
 #include "SensorManager.h"
 #include "SimulatedTemperatureSensor.h"
 
@@ -19,8 +19,8 @@ static TimeService timeService(serialLogger, configurationService, wifiService);
 static MqttService mqttService(serialLogger, configurationService, wifiService);
 static WebService webService(serialLogger, configurationService, wifiService);
 static ArduinoMonotonicClock monotonicClock;
-static DiagnosticMeasurementSink measurementSink(serialLogger);
-static SensorManager sensorManager(timeService, monotonicClock, measurementSink);
+static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
+static SensorManager sensorManager(timeService, monotonicClock, measurementPublisher);
 static SimulatedTemperatureSensor simulatedTemperatureSensor(1, monotonicClock);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager);
 

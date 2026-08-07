@@ -233,6 +233,10 @@ The MQTT client owns broker connectivity only.
 
 Translation of domain Measurements into MQTT payloads belongs to a dedicated MeasurementPublisher component.
 
+The initial MeasurementPublisher publishes every accepted Measurement without buffering, suppression or aggregation. Topics use `weatherstation/<deviceName>/measurement/<measurementType>` with deterministic topic-safe device-name normalization and stable lowercase Measurement Type names.
+
+Payloads use JSON with the Measurement timestamp formatted from its assigned epoch as local ISO-8601 including the UTC offset. Initial payloads omit unit metadata and are not retained. Invalid Measurements omit the value, while value-free events use an explicit event marker without an artificial numeric value.
+
 This separation intentionally decouples measurement semantics from transport implementation.
 
 Loss of MQTT connectivity must never stop:
@@ -1718,13 +1722,13 @@ Implemented
 - Measurement domain implementation
 - SensorManager
 - deterministic SimulatedTemperatureSensor
-- temporary diagnostic Measurement sink
+- MeasurementPublisher
+- MQTT Measurement publishing
 
 Planned
 
-- MeasurementPublisher
 - additional simulated sensors
-- MQTT measurement contract
+- configurable presentation units
 - OTA service
 - physical sensor drivers
 

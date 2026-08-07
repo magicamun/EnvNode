@@ -115,4 +115,12 @@ bool MqttService::connected() const {
     return client.connected();
 }
 
+bool MqttService::publish(const char* topic, const char* payload, bool retained) {
+    if (!client.connected()) {
+        return false;
+    }
+
+    return client.publish(topic, payload, retained);
+}
+
 } // namespace WeatherStation

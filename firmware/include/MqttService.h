@@ -15,6 +15,7 @@ public:
     void begin() override;
     void loop() override;
     bool connected() const override;
+    bool publish(const char* topic, const char* payload, bool retained) override;
 
 private:
     enum class State {

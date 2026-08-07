@@ -14,6 +14,7 @@ public:
     virtual time_t now() const = 0;
     virtual String iso8601Utc() const = 0;
     virtual String iso8601Local() const = 0;
+    virtual String iso8601Local(time_t timestamp) const = 0;
     virtual uint32_t epoch() const = 0;
 };
 
