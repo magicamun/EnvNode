@@ -8,7 +8,10 @@ enum class SensorState {
     Ready,
     Degraded,
     Failed,
-    Simulated,
 };
+
+inline bool isSensorAvailable(SensorState state) {
+    return state == SensorState::Ready || state == SensorState::Degraded;
+}
 
 } // namespace WeatherStation

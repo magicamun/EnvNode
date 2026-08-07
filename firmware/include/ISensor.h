@@ -1,6 +1,10 @@
 #pragma once
 
-#include "Measurement.h"
+#include "IMeasurementSink.h"
+#include "MeasurementType.h"
+#include "SensorId.h"
+#include "SensorOperationResult.h"
+#include "SensorProvenance.h"
 #include "SensorState.h"
 
 namespace WeatherStation {
@@ -9,12 +13,14 @@ class ISensor {
 public:
     virtual ~ISensor() = default;
 
-    virtual void begin() = 0;
-    virtual void loop() = 0;
     virtual SensorId id() const = 0;
+    virtual SensorProvenance provenance() const = 0;
     virtual SensorState state() const = 0;
-    virtual bool available() const = 0;
-    virtual bool read(Measurement& outMeasurement) = 0;
+    virtual bool supports(MeasurementType type) const = 0;
+
+    virtual void begin() = 0;
+    virtual SensorOperationResult service(IMeasurementSink& output) = 0;
+    virtual SensorOperationResult sample(IMeasurementSink& output) = 0;
 };
 
 } // namespace WeatherStation

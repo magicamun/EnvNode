@@ -159,12 +159,11 @@ Solar Sensor
 
 - irradiance
 - cell temperature
-- raw analog value
 
 Rain Detector
 
-- detector value
-- detector state
+- normalized detector level
+- wet/dry state
 
 Rain Gauge
 
@@ -177,8 +176,19 @@ Each Sensor has:
 - identity
 - type
 - operational state
+- provenance
 - configuration
 - one or more supported Measurement types
+
+Sensor identity is represented by a `SensorId`.
+
+A `SensorId` is an unsigned 16-bit value.
+
+The value `0` is reserved for invalid or unassigned identity.
+
+Every nonzero SensorId is unique within one Device and identifies one logical measurement source.
+
+All Measurement types produced by the same Sensor use the same SensorId.
 
 The Sensor is responsible for obtaining reliable physical values from its measurement source.
 
@@ -221,6 +231,15 @@ Examples of behaviour that does not belong to a Sensor:
 
 A physical Sensor and a simulated Sensor must expose the same functional behaviour to the rest of the domain.
 
+Sensor provenance is independent from operational state.
+
+Possible provenance values are:
+
+- Physical
+- Simulated
+
+A simulated Sensor may therefore be Ready, Degraded or Failed in the same way as a physical Sensor.
+
 ---
 
 # Measurement
@@ -238,26 +257,38 @@ Examples include:
 - pressure
 - irradiance
 - solar cell temperature
-- rain detector value
-- rain detector state
+- normalized rain detector level
+- rain detector wet/dry state
 - rain gauge tip event
 
 A Measurement conceptually contains:
 
-- Measurement type
-- source Sensor
-- timestamp
-- value or event
-- unit where applicable
+- MeasurementType
+- source SensorId
+- Unix Epoch timestamp
+- MeasurementValue or explicit no-value event
 - validity
-- quality
-- simulated flag
+- MeasurementQuality
+- SensorProvenance
 
-Not every Measurement requires every property.
+Every accepted Measurement contains this metadata, but its value kind depends on the Measurement Type.
 
-A temperature Measurement contains a numeric value and unit.
+A temperature Measurement contains a numeric value in the canonical unit defined by its Measurement type.
 
-A rain gauge tip Measurement represents an event and therefore does not require a continuous numeric value.
+A rain gauge tip Measurement represents an event and therefore has no value.
+
+Event Measurements must never use artificial numeric values.
+
+Measurement values use a small tagged representation with the following possible kinds:
+
+- None
+- FloatingPoint
+- Boolean
+- UnsignedInteger
+
+The None kind represents a value-free event or an invalid state Measurement without a usable value.
+
+The value representation must remain compatible with the firmware C++ standard and use deterministic memory.
 
 The purpose of Measurement is to describe physical reality in a normalized domain representation.
 
@@ -282,8 +313,6 @@ Examples of continuous Measurements include:
 Examples of event Measurements include:
 
 - rain gauge tip
-- sensor failure
-- sensor recovery
 
 Both are Measurements.
 
@@ -297,14 +326,37 @@ Measurement Type identifies what a Measurement represents.
 
 Examples include:
 
+- unknown
 - temperature
 - relative humidity
 - atmospheric pressure
 - solar irradiance
 - solar cell temperature
-- rain detector raw value
-- rain detector state
+- normalized rain detector level
+- rain detector wet/dry state
 - rain gauge tip
+
+The initial Measurement Types and their canonical representations are:
+
+| Measurement Type | Value Kind | Canonical Representation |
+|------------------|------------|--------------------------|
+| Unknown | None | invalid or unassigned type |
+| Temperature | FloatingPoint | degrees Celsius |
+| RelativeHumidity | FloatingPoint | percent, 0 to 100 |
+| AtmosphericPressure | FloatingPoint | Pascal |
+| SolarIrradiance | FloatingPoint | watt per square metre |
+| SolarCellTemperature | FloatingPoint | degrees Celsius |
+| RainDetectorLevel | FloatingPoint | normalized ratio, 0.0 to 1.0 |
+| RainDetectorWet | Boolean | wet/dry state, no unit |
+| RainGaugeTip | None | event, no unit |
+
+Units are metadata of Measurement Type.
+
+Measurements do not carry arbitrary unit values.
+
+Alternative presentation units are the responsibility of external consumers.
+
+Raw ADC values are generally Diagnostics rather than primary Measurement Types.
 
 Measurement Type is independent from Sensor identity.
 
@@ -351,7 +403,7 @@ Conceptually:
 Measurement
 
 - value
-- unit
+- canonical unit defined by Measurement Type
 - timestamp
 
 ---
@@ -363,8 +415,6 @@ Represents something that happened.
 Examples:
 
 - rain gauge tip
-- sensor failure
-- sensor recovery
 
 Conceptually:
 
@@ -398,18 +448,25 @@ Solar Sensor
 
 - irradiance
 - cell temperature
-- raw analog value
 
 Rain Detector
 
-- detector value
-- detector state
+- normalized detector level
+- wet/dry state
 
 The Device never owns Measurements directly.
 
 Instead, the Device owns Sensors, and Sensors produce Measurements.
 
 Measurements are intentionally transient domain objects.
+
+Sensors supply the physical content, validity and quality of Measurements.
+
+When SensorManager accepts Measurement content, it always copies the Sensor identity from `sensor.id()`, always assigns provenance from `sensor.provenance()`, validates structural Measurement Type and value-kind compatibility, and assigns a synchronized Unix Epoch timestamp.
+
+SensorManager does not own hardware-specific range validation, conversion or physical plausibility rules.
+
+Those remain Sensor responsibilities.
 
 The primary purpose of the Device is to acquire Measurements rather than permanently storing them.
 
@@ -454,8 +511,10 @@ Diagnostics are domain objects independent from Measurements.
 
 Typical examples include:
 
-- sensor available
+- sensor state
 - sensor failed
+- sensor recovered
+- hardware communication failed
 - restart reason
 - low memory
 - configuration valid
@@ -485,6 +544,8 @@ A valid temperature Measurement does not imply that every subsystem is healthy.
 
 Diagnostics allow failures to be communicated without interrupting unrelated functionality.
 
+Sensor failure, sensor recovery and hardware communication failure are Diagnostics, not Measurement Types.
+
 ---
 
 # Sensor State
@@ -498,9 +559,11 @@ Possible states include:
 - Ready
 - Degraded
 - Failed
-- Simulated
 
-Sensor availability must always be explicit.
+Availability is derived from Sensor State rather than stored independently.
+
+- Ready and Degraded Sensors are available.
+- Unknown, Initializing and Failed Sensors are unavailable.
 
 One failed Sensor must never stop unrelated Sensors.
 
@@ -525,6 +588,8 @@ Examples of invalid Measurements include:
 
 Invalid data must never silently appear as plausible values.
 
+An invalid state Measurement has no usable value.
+
 Bad example:
 
 Temperature = 0.0 °C
@@ -534,6 +599,10 @@ Good example:
 Temperature = unavailable
 
 Reason = sensor failure
+
+The unavailable physical value may be represented by an invalid Measurement when required to clear previously published state.
+
+The failure reason remains a Diagnostic.
 
 Validity is independent from Measurement quality.
 
@@ -591,6 +660,8 @@ Rain forecast
 # Simulation
 
 Simulation is a property of Sensors.
+
+Simulation is represented as Sensor provenance rather than Sensor State.
 
 A simulated Sensor behaves exactly like a physical Sensor.
 

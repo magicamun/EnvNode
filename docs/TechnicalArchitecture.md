@@ -823,10 +823,12 @@ Time
 
 Sensors
 
+- initializing
 - ready
 - degraded
 - failed
-- simulated
+
+Sensor provenance is reported separately as physical or simulated.
 
 System
 
@@ -943,6 +945,10 @@ Typical driver responsibilities include:
 - conversion into engineering units
 - hardware error detection
 
+Raw ADC values are generally exposed as Diagnostics.
+
+Primary Measurements use the canonical representation defined by their Measurement Type.
+
 Sensor drivers must not:
 
 - publish MQTT
@@ -964,10 +970,14 @@ Responsibilities include:
 
 - sensor registration
 - sensor initialization
-- measurement scheduling
+- periodic measurement scheduling
 - event handling
-- availability monitoring
+- lifecycle and state monitoring
 - collecting Measurements
+- structural Measurement validation
+- assigning source SensorId
+- assigning synchronized Unix Epoch timestamps
+- assigning Sensor provenance
 - forwarding Measurements for publication
 
 Conceptually:
@@ -988,6 +998,103 @@ Individual sensors remain independent from each other.
 
 SensorManager itself performs no weather interpretation.
 
+Sensor identity belongs to each Sensor.
+
+SensorManager copies `sensor.id()` into accepted Measurements rather than inventing Sensor identity.
+
+The value `0` is reserved for invalid or unassigned SensorId values. Every nonzero SensorId is unique within one Device and identifies one logical measurement source.
+
+Availability is derived from Sensor State:
+
+- Ready and Degraded Sensors are available.
+- Unknown, Initializing and Failed Sensors are unavailable.
+
+Availability is not maintained as independent state.
+
+---
+
+## Sensor Contract
+
+Physical and simulated Sensors expose the same conceptual contract.
+
+Identity and metadata include:
+
+- `id()`
+- `provenance()`
+- `state()`
+- `supports(MeasurementType)`
+
+Lifecycle initialization is performed through `begin()`.
+
+Cooperative recurring work is performed through `service(output)`.
+
+The service operation is responsible for:
+
+- lifecycle progression
+- event-driven output
+- draining pending interrupt or event state in normal runtime context
+
+Periodic acquisition is requested by SensorManager through `sample(output)`.
+
+One sample operation may emit zero, one or multiple Measurements.
+
+Sensors never:
+
+- depend on TimeService
+- call `time(nullptr)`
+- format timestamps
+- decide whether Measurements are ready for publication
+
+---
+
+## Sensor Output
+
+Sensors emit Measurement content through a narrow output abstraction.
+
+The output call is synchronous. Its receiver consumes or copies the Measurement during the call and must not retain the passed reference after the call returns.
+
+This avoids a dynamic collection requirement while supporting:
+
+- multiple Measurements from one acquisition
+- event-driven Measurements
+- identical output paths for physical and simulated Sensors
+
+Sensor output operations have three conceptual outcomes:
+
+- Completed
+- NoData
+- HardwareFailure
+
+Completed means the operation completed without a hardware or acquisition failure. For `sample(output)`, at least one Measurement should normally have been emitted. Successfully emitted output remains valid.
+
+NoData means the operation completed normally, emitted zero Measurements and encountered no hardware failure. It is typical for `service(output)` when no event is pending and may also occur when an asynchronous Sensor is not yet ready to deliver a sample.
+
+HardwareFailure means a hardware transaction, acquisition or required conversion failed. Zero or more Measurements may already have been emitted successfully.
+
+Successfully emitted Measurements are never rolled back. Partial output from a multi-output Sensor is explicitly allowed; one `sample(output)` call is not a transaction.
+
+On HardwareFailure:
+
+- the Sensor changes to Degraded or Failed as appropriate
+- Diagnostics report the failure reason
+- the Sensor never fabricates a physical value
+
+When required to clear previously published state, a Sensor may emit an invalid Measurement for a supported Measurement Type with no usable value.
+
+The failure reason remains a Diagnostic.
+
+SensorManager validates structural compatibility between Measurement Type and value kind.
+
+Examples include:
+
+- Temperature requires FloatingPoint
+- RainDetectorWet requires Boolean
+- RainGaugeTip requires None
+
+SensorManager does not validate hardware-specific ranges or physical plausibility.
+
+Hardware conversion, range validation and physical plausibility remain Sensor responsibilities.
+
 ---
 
 # Measurement Pipeline
@@ -999,13 +1106,20 @@ Conceptually:
     Physical Sensor --------+
                             |
                             v
-                       Measurement
+                  Measurement content
                             ^
                             |
     Simulated Sensor -------+
                             |
                             v
                       SensorManager
+                            |
+                            | validate structure
+                            | assign source SensorId
+                            | assign timestamp
+                            | assign provenance
+                            v
+                 Completed Measurement
                             |
                             v
                   MeasurementPublisher
@@ -1021,6 +1135,34 @@ Simulation intentionally shares the identical processing path used by physical h
 Simulation therefore validates the complete application architecture rather than a separate development path.
 
 Sensor implementations must never publish MQTT directly.
+
+Sensors provide physical content, validity and quality.
+
+SensorManager is the acceptance boundary for the publication pipeline.
+
+It assigns the Sensor source, synchronized Unix Epoch timestamp and provenance before forwarding a completed Measurement.
+
+These assignments are unconditional: source comes from `sensor.id()` and provenance comes from `sensor.provenance()`. A positive epoch is only structurally valid; SensorManager must verify `ITimeService::synchronized()` before assigning and forwarding it.
+
+Sensor acquisition and local operation may continue before TimeService is synchronized.
+
+Measurements must never enter the publication pipeline with fake epoch values.
+
+Pre-synchronization Measurements may be dropped rather than queued indefinitely.
+
+One coherent acquisition may produce multiple Measurements.
+
+Examples include:
+
+    SHT4x
+        +----> Temperature
+        +----> RelativeHumidity
+
+and:
+
+    BMP390
+        +----> AtmosphericPressure
+        +----> Temperature
 
 MeasurementPublisher owns translation from domain objects into MQTT payloads.
 
@@ -1167,13 +1309,25 @@ Examples of periodic measurements include:
 Examples of event-driven measurements include:
 
 - rain gauge tip
-- sensor failure
-- sensor recovery
 - digital input changes
+
+Sensor failure and recovery are Diagnostics rather than Measurements.
 
 The architecture supports both without forcing event-driven data into artificial polling intervals.
 
 SensorManager coordinates both mechanisms.
+
+SensorManager owns periodic scheduling and calls `sample(output)` when a Sensor is due.
+
+Event-driven Sensors emit through `service(output)` independently from the periodic schedule.
+
+Interrupt handlers record only minimal pending state or event counts.
+
+Measurement construction and publication never occur inside an interrupt handler.
+
+The Sensor drains pending events during normal runtime execution.
+
+Each rain gauge tip remains individually representable as a value-free event Measurement.
 
 ---
 
@@ -1296,7 +1450,11 @@ Conceptually:
 
 Both produce identical domain objects.
 
-After Measurement creation the complete processing pipeline is identical:
+Simulation is Sensor provenance rather than Sensor health state.
+
+A simulated Sensor can be Ready, Degraded or Failed.
+
+After Sensor output the complete processing pipeline is identical:
 
     Measurement
          |

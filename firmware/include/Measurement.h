@@ -1,24 +1,25 @@
 #pragma once
 
-#include <variant>
 #include <ctime>
+#include "MeasurementValue.h"
 #include "MeasurementType.h"
 #include "MeasurementQuality.h"
+#include "SensorId.h"
+#include "SensorProvenance.h"
 
 namespace WeatherStation {
 
-using MeasurementValue = std::variant<float, bool, uint32_t>;
-
-using SensorId = uint16_t;
-
 struct Measurement {
     MeasurementType type = MeasurementType::Unknown;
-    SensorId source = 0;
+    SensorId source = InvalidSensorId;
     std::time_t timestamp = 0;
     MeasurementValue value;
     bool valid = false;
     MeasurementQuality quality = MeasurementQuality::Good;
-    bool simulated = false;
+    SensorProvenance provenance = SensorProvenance::Physical;
 };
+
+bool isMeasurementContentStructurallyValid(const Measurement& measurement);
+bool isMeasurementStructurallyValid(const Measurement& measurement);
 
 } // namespace WeatherStation
