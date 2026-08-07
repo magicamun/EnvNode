@@ -146,10 +146,10 @@ String effectiveConnectionMode(bool setupAccessPoint) {
 
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
-    SensorManager& sensorManager, RuntimeManager& runtimeManager)
+    SensorManager& sensorManager, RuntimeManager& runtimeManager, OTAService& otaService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
-      sensorManager_(sensorManager), runtimeManager_(runtimeManager) {}
+      sensorManager_(sensorManager), runtimeManager_(runtimeManager), otaService_(otaService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -162,6 +162,9 @@ void WebService::begin() {
     server_.on("/device", HTTP_GET, [this]() { handleDevice(); });
     server_.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server_.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
+    server_.on("/firmware/upload", HTTP_POST,
+        [this]() { handleFirmwareUpload(); },
+        [this]() { handleFirmwareUploadData(); });
     server_.on("/style.css", HTTP_GET, [this]() { handleStyle(); });
     server_.on("/network/save", HTTP_POST, [this]() { handleNetworkSave(); });
     server_.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
@@ -248,6 +251,37 @@ String WebService::pendingRuntimeActionHtml() const {
         case RuntimeAction::None: break;
     }
     html += ".</p></div>";
+    return html;
+}
+
+String WebService::otaStatusHtml() const {
+    String html;
+    html.reserve(520);
+    html = "<div class='kv'><span>OTA state</span><span>";
+    html += otaStateName(otaService_.state());
+    html += "</span><span>Upload status</span><span>";
+    if (otaService_.totalBytesKnown()) {
+        html += localeFormatter_.formatNumber(otaService_.bytesReceived(), 0);
+        html += " / ";
+        html += localeFormatter_.formatNumber(otaService_.totalBytes(), 0);
+        html += " bytes (";
+        html += localeFormatter_.formatNumber(otaService_.progressPercent(), 0);
+        html += "%)";
+    } else if (otaService_.bytesReceived() > 0) {
+        html += localeFormatter_.formatNumber(otaService_.bytesReceived(), 0);
+        html += " bytes received";
+    } else {
+        html += "—";
+    }
+    html += "</span><span>Restart required</span><span>";
+    html += otaService_.restartRequired() ? "Yes" : "No";
+    html += "</span>";
+    if (otaService_.state() == OTAState::Failed && !otaService_.lastError().isEmpty()) {
+        html += "<span>Last error</span><span>";
+        html += escapeHtml(otaService_.lastError());
+        html += "</span>";
+    }
+    html += "</div>";
     return html;
 }
 
@@ -396,9 +430,78 @@ void WebService::handleDiagnostics() {
 
 void WebService::handleFirmware() {
     String c;
-    c.reserve(1100);
-    c = "<section class='card'><h2>Firmware</h2><div class='kv'><span>Version</span><span>"+String(FirmwareVersion)+"</span></div><p class='help'>Firmware upload and OTA will be added in a later milestone.</p></section><section class='card'><h2>Restart</h2><form method='post' action='/restart' onsubmit='return confirm(\"Restart the device now?\")'><button>Restart device</button></form></section><section class='card'><h2>Factory reset</h2><p>This permanently removes all stored configuration and restarts into provisioning mode.</p><form method='post' action='/factory-reset' onsubmit='return confirm(\"Erase ALL configuration and restart?\")'><button class='danger'>Factory reset</button></form></section>";
+    c.reserve(2000);
+    c = "<section class='card'><h2>Firmware</h2><div class='kv'><span>Running firmware</span><span>"+String(FirmwareVersion)+"</span><span>Staged firmware</span><span>"+(otaService_.firmwareStaged()?"Ready for activation":"—")+"</span></div>";
+    if (otaService_.firmwareStaged()) c += "<p class='help'>Staged firmware version metadata is not yet available.</p>";
+    c += "</section><section class='card'><h2>Firmware update status</h2>" + otaStatusHtml() + "</section>";
+    if (!otaService_.firmwareStaged() && !otaService_.busy()) {
+        c += "<section class='card'><h2>Upload firmware</h2><p class='help'>Build with <code>pio run</code>, then upload <code>.pio/build/&lt;environment&gt;/firmware.bin</code>.</p><form method='post' action='/firmware/upload' enctype='multipart/form-data' onsubmit='document.getElementById(\"firmwareSize\").value=document.getElementById(\"firmwareFile\").files[0].size'><input type='hidden' id='firmwareSize' name='firmwareSize' value='0'><label>Firmware binary<input id='firmwareFile' type='file' name='firmware' accept='.bin,application/octet-stream' required></label><div class='actions'><button>Upload firmware</button></div></form></section>";
+    }
+    c += "<section class='card'><h2>Restart</h2><form method='post' action='/restart' onsubmit='return confirm(\"Restart the device now?\")'><button>Restart Now</button></form></section><section class='card'><h2>Factory reset</h2><p>This permanently removes all stored configuration and restarts into provisioning mode.</p><form method='post' action='/factory-reset' onsubmit='return confirm(\"Erase ALL configuration and restart?\")'><button class='danger'>Factory reset</button></form></section>";
     sendPage("Firmware", "/firmware", c);
+}
+
+void WebService::handleFirmwareUploadData() {
+    HTTPUpload& upload = server_.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+        firmwareUploadRequestAccepted_ = false;
+        firmwareUploadRequestError_ = String();
+        if (otaService_.busy()) {
+            firmwareUploadRequestError_ = "Another firmware upload is already active.";
+            return;
+        }
+        if (otaService_.firmwareStaged()) {
+            firmwareUploadRequestError_ = "Firmware is already staged and awaiting restart.";
+            return;
+        }
+        if (upload.name != "firmware" || upload.filename.isEmpty()
+            || !upload.filename.endsWith(".bin")) {
+            firmwareUploadRequestError_ = "Select a valid PlatformIO firmware.bin file.";
+            otaService_.rejectUpload(firmwareUploadRequestError_.c_str());
+            return;
+        }
+        const size_t expectedSize = static_cast<size_t>(server_.arg("firmwareSize").toInt());
+        firmwareUploadRequestAccepted_ = otaService_.beginUpload(expectedSize);
+        if (!firmwareUploadRequestAccepted_) {
+            firmwareUploadRequestError_ = otaService_.lastError().isEmpty()
+                ? String("Firmware upload could not be started.") : otaService_.lastError();
+        }
+        return;
+    }
+    if (!firmwareUploadRequestAccepted_) return;
+    if (upload.status == UPLOAD_FILE_WRITE) {
+        if (!otaService_.writeChunk(upload.buf, upload.currentSize)) {
+            firmwareUploadRequestAccepted_ = false;
+            firmwareUploadRequestError_ = otaService_.lastError();
+        }
+    } else if (upload.status == UPLOAD_FILE_END) {
+        if (!otaService_.finishUpload()) {
+            firmwareUploadRequestAccepted_ = false;
+            firmwareUploadRequestError_ = otaService_.lastError();
+        }
+    } else if (upload.status == UPLOAD_FILE_ABORTED) {
+        otaService_.abortUpload("Firmware upload was aborted before completion.");
+        firmwareUploadRequestAccepted_ = false;
+        firmwareUploadRequestError_ = otaService_.lastError();
+    }
+}
+
+void WebService::handleFirmwareUpload() {
+    if (firmwareUploadRequestAccepted_ && otaService_.firmwareStaged()) {
+        String content;
+        content.reserve(520);
+        content = "<div class='notice success'><strong>Firmware uploaded successfully.</strong><p>Firmware is staged.</p><p>Device restart is required to activate the new firmware.</p></div><form method='post' action='/restart' onsubmit='return confirm(\"Restart the device now?\")'><button>Restart Now</button></form><a class='button' href='/firmware'>Restart Later</a>";
+        sendPage("Firmware staged", "/firmware", content);
+        return;
+    }
+    const String reason = !firmwareUploadRequestError_.isEmpty()
+        ? firmwareUploadRequestError_ : otaService_.lastError();
+    String content;
+    content.reserve(480 + reason.length());
+    content = "<div class='notice error'><strong>Firmware update failed.</strong><p>";
+    content += escapeHtml(reason.isEmpty() ? String("Invalid firmware upload request.") : reason);
+    content += "</p><p>The currently running firmware remains active.</p></div><a class='button' href='/firmware'>Back</a>";
+    sendPage("Firmware update failed", "/firmware", content, 400);
 }
 
 void WebService::handleStyle() {
@@ -432,8 +535,8 @@ void WebService::handleUnitsSave() {
 }
 
 void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),"Device settings saved","Device save failed","/device","Invalid device name."); }
-void WebService::handleRestart() { runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Restarting","/firmware","The device is restarting now.",true); performExplicitRestart(); }
-void WebService::handleFactoryReset() { if(!configurationService_.resetToDefaults()){sendResult("Factory reset failed","/firmware","Stored configuration could not be cleared.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Factory reset complete","/firmware","Configuration erased. Restarting into provisioning mode.",true);performExplicitRestart(); }
+void WebService::handleRestart() { if(otaService_.busy()){sendResult("Restart unavailable","/firmware","A firmware upload is currently active.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Restarting","/firmware","The device is restarting now.",true); performExplicitRestart(); }
+void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult("Factory reset unavailable","/firmware","A firmware upload is currently active.",false);return;} if(!configurationService_.resetToDefaults()){sendResult("Factory reset failed","/firmware","Stored configuration could not be cleared.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Factory reset complete","/firmware","Configuration erased. Restarting into provisioning mode.",true);performExplicitRestart(); }
 void WebService::handleNotFound() { server_.send(404,"text/plain","Not Found"); }
 void WebService::performExplicitRestart() { server_.client().flush(); runtimeManager_.performPendingRestart(); }
 

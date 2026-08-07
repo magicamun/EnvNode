@@ -11,6 +11,7 @@
 #include "LocaleFormatter.h"
 #include "RuntimeManager.h"
 #include "ConfigurationRuntimeEffect.h"
+#include "OTAService.h"
 #include "Logger.h"
 
 namespace WeatherStation {
@@ -25,7 +26,8 @@ public:
         ITimeService& timeService,
         LocaleFormatter& localeFormatter,
         SensorManager& sensorManager,
-        RuntimeManager& runtimeManager);
+        RuntimeManager& runtimeManager,
+        OTAService& otaService);
 
     void begin() override;
     void loop() override;
@@ -40,6 +42,8 @@ private:
     void handleDevice();
     void handleDiagnostics();
     void handleFirmware();
+    void handleFirmwareUpload();
+    void handleFirmwareUploadData();
     void handleStyle();
     void handleNetworkSave();
     void handleMqttSave();
@@ -62,6 +66,7 @@ private:
     String navigationHtml(const char* activeRoute) const;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;
+    String otaStatusHtml() const;
     const char* pendingActionMessage() const;
     void performExplicitRestart();
     bool administrationAvailable() const;
@@ -74,7 +79,10 @@ private:
     LocaleFormatter& localeFormatter_;
     SensorManager& sensorManager_;
     RuntimeManager& runtimeManager_;
+    OTAService& otaService_;
     WebServer server_{80};
+    bool firmwareUploadRequestAccepted_ = false;
+    String firmwareUploadRequestError_;
 };
 
 } // namespace WeatherStation

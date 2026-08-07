@@ -13,6 +13,7 @@
 #include "SimulatedPressureSensor.h"
 #include "LocaleFormatter.h"
 #include "RuntimeManager.h"
+#include "OTAService.h"
 
 using namespace WeatherStation;
 
@@ -26,7 +27,8 @@ static MeasurementPublisher measurementPublisher(configurationService, timeServi
 static SensorManager sensorManager(timeService, monotonicClock, measurementPublisher);
 static LocaleFormatter localeFormatter(configurationService);
 static RuntimeManager runtimeManager(serialLogger);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, runtimeManager);
+static OTAService otaService(serialLogger, runtimeManager);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, runtimeManager, otaService);
 static SimulatedTemperatureSensor simulatedTemperatureSensor(1, monotonicClock);
 static SimulatedHumiditySensor simulatedHumiditySensor(2, monotonicClock);
 static SimulatedPressureSensor simulatedPressureSensor(3, monotonicClock);
