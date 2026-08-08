@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "FirmwareVersion.h"
+#include "FirmwareBuildInfo.h"
 #include <Arduino.h>
 
 namespace WeatherStation {
@@ -31,7 +31,12 @@ void Application::setup(bool configurationAlreadyLoaded) {
     const Configuration& configuration = configurationService_.getConfiguration();
 
     logger_.println(configuration.device.name.c_str());
-    logger_.printf("Firmware version: %s\n", FirmwareVersion);
+    logger_.printf("Firmware version: %s\n", FirmwareBuildInfo::SemanticVersion);
+    logger_.printf("Build: %s\n", FirmwareBuildInfo::BuildNumber);
+    logger_.printf("Git commit: %s\n", FirmwareBuildInfo::GitCommit);
+    logger_.printf("Git branch: %s\n", FirmwareBuildInfo::GitBranch);
+    logger_.printf("Git working tree: %s\n", FirmwareBuildInfo::SourceState);
+    logger_.printf("Built: %s\n", FirmwareBuildInfo::BuildTimestampUtc);
     logger_.printf("Chip model: %s\n", ESP.getChipModel());
     logger_.printf("CPU frequency: %u MHz\n", ESP.getCpuFreqMHz());
     logger_.printf("Flash size: %u KB\n", ESP.getFlashChipSize() / 1024);

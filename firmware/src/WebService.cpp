@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "FirmwareVersion.h"
+#include "FirmwareBuildInfo.h"
 #include "UnitConverter.h"
 #include "SensorImplementationRegistry.h"
 #include "SensorSlotConfiguration.h"
@@ -478,7 +479,7 @@ String WebService::renderPage(const char* title, const char* active, const Strin
     html += " · WeatherStation</title><link rel='stylesheet' href='/style.css'></head><body><div class='shell'><aside class='side'><div class='brand'>";
     html += escapeHtml(cfg.device.name);
     html += "</div><div class='version'>WeatherStation · v";
-    html += FirmwareVersion;
+    html += FirmwareBuildInfo::SemanticVersion;
     html += "</div>";
     html += navigationHtml(active);
     html += "</aside><main class='main'><div class='top'><div><h1>";
@@ -514,7 +515,7 @@ void WebService::handleStatus() {
     const String macAddress = setupAccessPoint ? WiFi.softAPmacAddress() : WiFi.macAddress();
     String c;
     c.reserve(2300);
-    c = "<div class='grid'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareVersion + "</span><span>Uptime</span><span>" + localeFormatter_.formatNumber(millis()/1000UL, 0) + " seconds</span><span>Free heap</span><span>" + localeFormatter_.formatNumber(ESP.getFreeHeap(), 0) + " bytes</span><span>Flash</span><span>" + localeFormatter_.formatNumber(ESP.getFlashChipSize()/1024UL, 0) + " KB</span></div></section>";
+    c = "<div class='grid'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareBuildInfo::SemanticVersion + "</span><span>Build</span><span>" + FirmwareBuildInfo::CompactIdentity + "</span><span>Uptime</span><span>" + localeFormatter_.formatNumber(millis()/1000UL, 0) + " seconds</span><span>Free heap</span><span>" + localeFormatter_.formatNumber(ESP.getFreeHeap(), 0) + " bytes</span><span>Flash</span><span>" + localeFormatter_.formatNumber(ESP.getFlashChipSize()/1024UL, 0) + " KB</span></div></section>";
     c += "<section class='card'><h2>Network</h2><div class='kv'><span>Status</span><span>" + (connected?badge("Connected","good"):setupAccessPoint?badge("Setup AP","warn"):badge("Disconnected","bad")) + "</span>";
     c += "<span>Connection mode</span><span>" + effectiveConnectionMode(setupAccessPoint) + "</span><span>Hostname</span><span>" + availableValue(hostname) + "</span><span>SSID</span><span>" + availableValue(ssid) + "</span>";
     c += "<span>IPv4 address</span><span>" + availableValue(ipv4Address) + "</span><span>Subnet mask</span><span>" + availableValue(subnetMask) + "</span><span>Default gateway</span><span>" + availableValue(gateway) + "</span>";
@@ -733,7 +734,9 @@ void WebService::handleDiagnostics() {
 void WebService::handleFirmware() {
     String c;
     c.reserve(2000);
-    c = "<section class='card'><h2>Firmware</h2><div class='kv'><span>Running firmware</span><span>"+String(FirmwareVersion)+"</span><span>Staged firmware</span><span>"+(otaService_.firmwareStaged()?"Ready for activation":"—")+"</span></div>";
+    const char* sourceStyle = FirmwareBuildInfo::SourceDirty ? "warn"
+        : String(FirmwareBuildInfo::SourceState) == "clean" ? "good" : "warn";
+    c = "<section class='card'><h2>Running firmware</h2><div class='kv'><span>Firmware Version</span><span>" + String(FirmwareBuildInfo::SemanticVersion) + "</span><span>Build Identity</span><span>" + FirmwareBuildInfo::CompactIdentity + "</span><span>Build Number</span><span>" + FirmwareBuildInfo::BuildNumber + "</span><span>Git Commit</span><span>" + FirmwareBuildInfo::GitCommit + "</span><span>Git Branch</span><span>" + escapeHtml(FirmwareBuildInfo::GitBranch) + "</span><span>Build Timestamp</span><span>" + FirmwareBuildInfo::BuildTimestampUtc + "</span><span>Source State</span><span>" + badge(FirmwareBuildInfo::SourceDirty ? "Dirty" : String(FirmwareBuildInfo::SourceState) == "clean" ? "Clean" : "Unknown", sourceStyle) + "</span><span>Staged firmware</span><span>"+(otaService_.firmwareStaged()?"Ready for activation":"—")+"</span></div>";
     if (otaService_.firmwareStaged()) c += "<p class='help'>Staged firmware version metadata is not yet available.</p>";
     c += "</section><section class='card'><h2>Firmware update status</h2>" + otaStatusHtml() + "</section>";
     if (!otaService_.firmwareStaged() && !otaService_.busy()) {

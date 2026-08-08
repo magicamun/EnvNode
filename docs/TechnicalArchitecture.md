@@ -2208,7 +2208,7 @@ Security should evolve together with the project without unnecessarily increasin
 
 ---
 
-# Firmware Versioning
+# Firmware Versioning and Build Identity
 
 Firmware follows semantic versioning.
 
@@ -2231,11 +2231,38 @@ There shall be exactly one authoritative firmware version definition.
 
 Duplicated manually maintained version strings should be avoided.
 
+The semantic Product Version is intentionally updated only for product releases and version
+milestones. Git commit count is not a semantic version component.
+
+Every PlatformIO build also generates a compile-time Build Identity from Git:
+
+    <semantic-version>+<commit-count>.g<short-sha>[.dirty]
+
+For example:
+
+    0.1.0+317.g7f8c2d1
+    0.1.0+318.g1234567.dirty
+
+The PlatformIO pre-build hook writes `FirmwareBuildInfo.h` only beneath the environment's
+`.pio/build` directory. Building therefore does not modify tracked source or maintain a
+persistent build counter. The generated metadata includes commit count, short SHA, branch,
+firmware-scoped working-tree state and a UTC ISO-8601 build timestamp. Git-unavailable builds
+use explicit `unknown` metadata and continue successfully.
+
+Commit count is deterministic for one Git history, but it can change after rebasing or other
+history rewriting and may be incomplete in shallow clones. Commit SHA remains the stronger
+exact-source identifier. The build timestamp is diagnostic metadata and is not firmware
+identity.
+
 Release versions should correspond to Git tags.
 
 Example:
 
     v0.1.0
+
+For a release such as `v0.2.0`, the semantic authority is intentionally changed to `0.2.0`
+and the tag is created by the release workflow. Automatic release tagging is outside the
+firmware build.
 
 ---
 
