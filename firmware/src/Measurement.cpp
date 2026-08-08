@@ -27,33 +27,43 @@ constexpr uint8_t unitCount(const PresentationUnit (&)[Size]) {
     return static_cast<uint8_t>(Size);
 }
 
-const MeasurementTypeMetadata UnknownMetadata = {
-    ValueKind::None, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
-const MeasurementTypeMetadata TemperatureMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::DegreeCelsius,
-    TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius};
-const MeasurementTypeMetadata RelativeHumidityMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::Percent,
-    HumidityUnits, unitCount(HumidityUnits), PresentationUnit::Percent};
-const MeasurementTypeMetadata AtmosphericPressureMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::Pascal,
-    PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal};
-const MeasurementTypeMetadata SolarIrradianceMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::WattPerSquareMetre,
-    IrradianceUnits, unitCount(IrradianceUnits), PresentationUnit::WattPerSquareMetre};
-const MeasurementTypeMetadata SolarCellTemperatureMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::DegreeCelsius,
-    TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius};
-const MeasurementTypeMetadata RainDetectorLevelMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::Ratio,
-    RainLevelUnits, unitCount(RainLevelUnits), PresentationUnit::Ratio};
-const MeasurementTypeMetadata RainDetectorWetMetadata = {
-    ValueKind::Boolean, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
-const MeasurementTypeMetadata RainGaugeTipMetadata = {
-    ValueKind::None, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
-const MeasurementTypeMetadata RainfallIncrementMetadata = {
-    ValueKind::FloatingPoint, PresentationUnit::Millimeter,
-    RainfallIncrementUnits, unitCount(RainfallIncrementUnits), PresentationUnit::Millimeter};
+const MeasurementTypeMetadata MeasurementMetadata[] = {
+    {MeasurementType::Unknown, "Unknown", ValueKind::None, PresentationUnit::None, 0,
+        MeasurementSemantics::Unknown, NoUnit, unitCount(NoUnit), PresentationUnit::None},
+    {MeasurementType::Temperature, "Temperature", ValueKind::FloatingPoint,
+        PresentationUnit::DegreeCelsius, 1, MeasurementSemantics::State,
+        TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius},
+    {MeasurementType::RelativeHumidity, "Relative Humidity", ValueKind::FloatingPoint,
+        PresentationUnit::Percent, 1, MeasurementSemantics::State,
+        HumidityUnits, unitCount(HumidityUnits), PresentationUnit::Percent},
+    {MeasurementType::AtmosphericPressure, "Atmospheric Pressure", ValueKind::FloatingPoint,
+        PresentationUnit::Pascal, 1, MeasurementSemantics::State,
+        PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal},
+    {MeasurementType::SolarIrradiance, "Solar Irradiance", ValueKind::FloatingPoint,
+        PresentationUnit::WattPerSquareMetre, 1, MeasurementSemantics::State,
+        IrradianceUnits, unitCount(IrradianceUnits), PresentationUnit::WattPerSquareMetre},
+    {MeasurementType::SolarCellTemperature, "Solar Cell Temperature", ValueKind::FloatingPoint,
+        PresentationUnit::DegreeCelsius, 1, MeasurementSemantics::State,
+        TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius},
+    {MeasurementType::RainDetectorLevel, "Rain Detector Level", ValueKind::FloatingPoint,
+        PresentationUnit::Ratio, 2, MeasurementSemantics::State,
+        RainLevelUnits, unitCount(RainLevelUnits), PresentationUnit::Ratio},
+    {MeasurementType::RainDetectorWet, "Rain Detector Wet", ValueKind::Boolean,
+        PresentationUnit::None, 0, MeasurementSemantics::State,
+        NoUnit, unitCount(NoUnit), PresentationUnit::None},
+    {MeasurementType::RainGaugeTip, "Rain Gauge Tip", ValueKind::None,
+        PresentationUnit::None, 0, MeasurementSemantics::Event,
+        NoUnit, unitCount(NoUnit), PresentationUnit::None},
+    {MeasurementType::RainfallIncrement, "Rainfall Increment", ValueKind::FloatingPoint,
+        PresentationUnit::Millimeter, 3, MeasurementSemantics::Event,
+        RainfallIncrementUnits, unitCount(RainfallIncrementUnits), PresentationUnit::Millimeter},
+};
+
+constexpr size_t MeasurementMetadataCount =
+    sizeof(MeasurementMetadata) / sizeof(MeasurementMetadata[0]);
+static_assert(MeasurementMetadataCount
+        == static_cast<size_t>(MeasurementType::RainfallIncrement) + 1,
+    "Measurement metadata must cover every MeasurementType");
 
 bool hasStructurallyValidPayload(const Measurement& measurement) {
     if (!isSupportedMeasurementType(measurement.type)) {
@@ -72,47 +82,15 @@ bool hasStructurallyValidPayload(const Measurement& measurement) {
 } // namespace
 
 bool isSupportedMeasurementType(MeasurementType type) {
-    switch (type) {
-        case MeasurementType::Temperature:
-        case MeasurementType::RelativeHumidity:
-        case MeasurementType::AtmosphericPressure:
-        case MeasurementType::SolarIrradiance:
-        case MeasurementType::SolarCellTemperature:
-        case MeasurementType::RainDetectorLevel:
-        case MeasurementType::RainDetectorWet:
-        case MeasurementType::RainGaugeTip:
-        case MeasurementType::RainfallIncrement:
-            return true;
-        case MeasurementType::Unknown:
-        default:
-            return false;
-    }
+    return measurementTypeMetadata(type).type != MeasurementType::Unknown;
 }
 
 const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type) {
-    switch (type) {
-        case MeasurementType::Temperature:
-            return TemperatureMetadata;
-        case MeasurementType::RelativeHumidity:
-            return RelativeHumidityMetadata;
-        case MeasurementType::AtmosphericPressure:
-            return AtmosphericPressureMetadata;
-        case MeasurementType::SolarIrradiance:
-            return SolarIrradianceMetadata;
-        case MeasurementType::SolarCellTemperature:
-            return SolarCellTemperatureMetadata;
-        case MeasurementType::RainDetectorLevel:
-            return RainDetectorLevelMetadata;
-        case MeasurementType::RainDetectorWet:
-            return RainDetectorWetMetadata;
-        case MeasurementType::RainGaugeTip:
-            return RainGaugeTipMetadata;
-        case MeasurementType::RainfallIncrement:
-            return RainfallIncrementMetadata;
-        case MeasurementType::Unknown:
-        default:
-            return UnknownMetadata;
+    const size_t index = static_cast<size_t>(type);
+    if (index >= MeasurementMetadataCount || MeasurementMetadata[index].type != type) {
+        return MeasurementMetadata[0];
     }
+    return MeasurementMetadata[index];
 }
 
 bool supportsPresentationUnit(MeasurementType type, PresentationUnit unit) {

@@ -5,7 +5,7 @@
 
 namespace WeatherStation {
 
-enum class MeasurementType {
+enum class MeasurementType : uint8_t {
     Unknown,
     Temperature,
     RelativeHumidity,
@@ -18,9 +18,19 @@ enum class MeasurementType {
     RainfallIncrement,
 };
 
+enum class MeasurementSemantics : uint8_t {
+    Unknown,
+    State,
+    Event,
+};
+
 struct MeasurementTypeMetadata {
+    MeasurementType type;
+    const char* displayName;
     ValueKind expectedValueKind;
     PresentationUnit canonicalUnit;
+    uint8_t recommendedDisplayPrecision;
+    MeasurementSemantics semantics;
     const PresentationUnit* supportedPresentationUnits;
     uint8_t supportedPresentationUnitCount;
     PresentationUnit defaultPresentationUnit;

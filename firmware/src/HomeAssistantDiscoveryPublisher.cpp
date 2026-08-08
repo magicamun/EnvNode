@@ -71,21 +71,6 @@ const char* entityPlatform(MeasurementType type) {
     return "sensor";
 }
 
-const char* entityLabel(MeasurementType type) {
-    switch (type) {
-        case MeasurementType::Temperature: return "Temperature";
-        case MeasurementType::RelativeHumidity: return "Humidity";
-        case MeasurementType::AtmosphericPressure: return "Pressure";
-        case MeasurementType::SolarIrradiance: return "Solar Irradiance";
-        case MeasurementType::SolarCellTemperature: return "Solar Cell Temperature";
-        case MeasurementType::RainDetectorLevel: return "Rain Detector Level";
-        case MeasurementType::RainDetectorWet: return "Rain Detected";
-        case MeasurementType::RainGaugeTip: return "Bucket Tip";
-        case MeasurementType::RainfallIncrement: return "Rainfall Increment";
-        default: return "Measurement";
-    }
-}
-
 const char* deviceClass(MeasurementType type) {
     switch (type) {
         case MeasurementType::Temperature:
@@ -99,9 +84,8 @@ const char* deviceClass(MeasurementType type) {
 }
 
 bool hasMeasurementStateClass(MeasurementType type) {
-    return type != MeasurementType::RainDetectorWet
-        && type != MeasurementType::RainGaugeTip
-        && type != MeasurementType::RainfallIncrement;
+    return measurementTypeMetadata(type).semantics == MeasurementSemantics::State
+        && measurementTypeMetadata(type).expectedValueKind == ValueKind::FloatingPoint;
 }
 
 } // namespace
@@ -215,7 +199,8 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
             payload += ",\"en\":true,\"unique_id\":";
             appendJsonString(payload, uniqueId.c_str());
             payload += ",\"name\":";
-            const String entityName = String(hasRuntime ? runtime.name : "Sensor") + " " + entityLabel(type);
+            const String entityName = String(hasRuntime ? runtime.name : "Sensor") + " "
+                + measurementTypeMetadata(type).displayName;
             appendJsonString(payload, entityName.c_str());
             payload += ",\"state_topic\":";
             const String stateTopic = stateRoot + "/sensor/" + String(slotIndex + 1) + "/" + typeTopic;

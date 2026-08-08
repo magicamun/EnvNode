@@ -117,15 +117,18 @@ bool parseUnit(const String& value, MeasurementType type, PresentationUnit& unit
 String measurementTypes(const SensorRuntimeInfo& info) {
     String result;
     result.reserve(180);
-    if (info.supportsTemperature) result += "Temperature, ";
-    if (info.supportsRelativeHumidity) result += "Relative Humidity, ";
-    if (info.supportsAtmosphericPressure) result += "Atmospheric Pressure, ";
-    if (info.supportsSolarIrradiance) result += "Solar Irradiance, ";
-    if (info.supportsSolarCellTemperature) result += "Solar Cell Temperature, ";
-    if (info.supportsRainDetectorLevel) result += "Rain Detector Level, ";
-    if (info.supportsRainDetectorWet) result += "Rain Detector Wet, ";
-    if (info.supportsRainGaugeTip) result += "Rain Gauge Tip, ";
-    if (info.supportsRainfallIncrement) result += "Rainfall Increment, ";
+    const auto appendType = [&result](bool supported, MeasurementType type) {
+        if (supported) result += String(measurementTypeMetadata(type).displayName) + ", ";
+    };
+    appendType(info.supportsTemperature, MeasurementType::Temperature);
+    appendType(info.supportsRelativeHumidity, MeasurementType::RelativeHumidity);
+    appendType(info.supportsAtmosphericPressure, MeasurementType::AtmosphericPressure);
+    appendType(info.supportsSolarIrradiance, MeasurementType::SolarIrradiance);
+    appendType(info.supportsSolarCellTemperature, MeasurementType::SolarCellTemperature);
+    appendType(info.supportsRainDetectorLevel, MeasurementType::RainDetectorLevel);
+    appendType(info.supportsRainDetectorWet, MeasurementType::RainDetectorWet);
+    appendType(info.supportsRainGaugeTip, MeasurementType::RainGaugeTip);
+    appendType(info.supportsRainfallIncrement, MeasurementType::RainfallIncrement);
     if (result.endsWith(", ")) result.remove(result.length() - 2);
     return result;
 }
@@ -156,14 +159,7 @@ String implementationMeasurements(const SensorImplementationMetadata* metadata) 
     if (metadata == nullptr || metadata->measurementTypeCount == 0) return "None";
     String result;
     for (size_t index = 0; index < metadata->measurementTypeCount; ++index) {
-        switch (metadata->measurementTypes[index]) {
-            case MeasurementType::Temperature: result += "Temperature"; break;
-            case MeasurementType::RelativeHumidity: result += "Relative Humidity"; break;
-            case MeasurementType::AtmosphericPressure: result += "Atmospheric Pressure"; break;
-            case MeasurementType::RainGaugeTip: result += "Rain Gauge Tip"; break;
-            case MeasurementType::RainfallIncrement: result += "Rainfall Increment"; break;
-            default: result += "Other"; break;
-        }
+        result += measurementTypeMetadata(metadata->measurementTypes[index]).displayName;
         if (index + 1 < metadata->measurementTypeCount) result += ", ";
     }
     return result;
