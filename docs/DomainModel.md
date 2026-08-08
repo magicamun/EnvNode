@@ -109,8 +109,9 @@ Typical examples include:
 - installation parameters
 - network configuration
 - time configuration
+- presentation-unit configuration
 
-Configuration determines how the Device behaves.
+Configuration determines how the Device behaves and how Measurements are presented externally.
 
 Configuration is never considered Measurement data.
 
@@ -123,6 +124,20 @@ Examples of valid Configuration include:
 - MQTT server
 - WiFi credentials
 - timezone
+- Temperature presentation unit
+- AtmosphericPressure presentation unit
+
+Presentation-unit configuration is global per MeasurementType within one Device.
+
+It affects only external representation.
+
+It never changes:
+
+- Sensor acquisition
+- canonical Measurement values
+- Measurement validity
+- calibration
+- physical meaning
 
 Examples of invalid Configuration include:
 
@@ -147,22 +162,22 @@ Examples:
 
 BMP390
 
-- pressure
+- atmospheric pressure
 - temperature
 
 SHT4x
 
 - temperature
-- humidity
+- relative humidity
 
 Solar Sensor
 
-- irradiance
-- cell temperature
+- solar irradiance
+- solar cell temperature
 
 Rain Detector
 
-- normalized detector level
+- detector level
 - wet/dry state
 
 Rain Gauge
@@ -180,16 +195,6 @@ Each Sensor has:
 - configuration
 - one or more supported Measurement types
 
-Sensor identity is represented by a `SensorId`.
-
-A `SensorId` is an unsigned 16-bit value.
-
-The value `0` is reserved for invalid or unassigned identity.
-
-Every nonzero SensorId is unique within one Device and identifies one logical measurement source.
-
-All Measurement types produced by the same Sensor use the same SensorId.
-
 The Sensor is responsible for obtaining reliable physical values from its measurement source.
 
 A Sensor may perform calculations that are technically required to derive a meaningful physical Measurement.
@@ -201,9 +206,36 @@ Examples include:
 - temperature compensation
 - signal filtering
 - debounce
-- conversion from raw hardware values into engineering units
+- hardware oversampling
+- conversion from raw hardware representation into engineering units
 
 These operations belong to measurement acquisition.
+
+Every Sensor must convert its hardware-specific representation into the canonical representation defined by the corresponding MeasurementType before emitting Measurement content.
+
+Different Sensors producing the same MeasurementType may use completely different hardware representations.
+
+For example:
+
+    SHT4x
+        |
+        | hardware-native temperature
+        v
+    canonical Temperature in °C
+
+and:
+
+    BMP390
+        |
+        | hardware-native temperature
+        v
+    canonical Temperature in °C
+
+Higher domain layers therefore never need to understand the native representation of individual Sensors.
+
+A Sensor must never apply user-selected Presentation Units.
+
+Presentation conversion belongs outside Sensor acquisition.
 
 A Sensor must never perform weather interpretation.
 
@@ -212,14 +244,14 @@ Examples of allowed Sensor behaviour:
     raw ADC value
         |
         v
-    calibrated irradiance Measurement
+    calibrated and normalized RainDetectorLevel
 
 and:
 
     rain gauge switch transition
         |
         v
-    debounced rain gauge tip event
+    debounced RainGaugeTip event
 
 Examples of behaviour that does not belong to a Sensor:
 
@@ -230,15 +262,6 @@ Examples of behaviour that does not belong to a Sensor:
 - weather classification
 
 A physical Sensor and a simulated Sensor must expose the same functional behaviour to the rest of the domain.
-
-Sensor provenance is independent from operational state.
-
-Possible provenance values are:
-
-- Physical
-- Simulated
-
-A simulated Sensor may therefore be Ready, Degraded or Failed in the same way as a physical Sensor.
 
 ---
 
@@ -253,52 +276,70 @@ A Measurement is independent from the concrete hardware implementation that prod
 Examples include:
 
 - temperature
-- humidity
-- pressure
-- irradiance
+- relative humidity
+- atmospheric pressure
+- solar irradiance
 - solar cell temperature
-- normalized rain detector level
+- rain detector level
 - rain detector wet/dry state
 - rain gauge tip event
 
 A Measurement conceptually contains:
 
-- MeasurementType
-- source SensorId
-- Unix Epoch timestamp
-- MeasurementValue or explicit no-value event
+- Measurement type
+- source Sensor
+- timestamp
+- value or event
 - validity
-- MeasurementQuality
-- SensorProvenance
+- quality
+- provenance
 
-Every accepted Measurement contains this metadata, but its value kind depends on the Measurement Type.
+Not every Measurement requires every property.
 
-A temperature Measurement contains a numeric value in the canonical unit defined by its Measurement type.
+A temperature Measurement contains a numeric value.
 
-A rain gauge tip Measurement represents an event and therefore has no value.
+A rain gauge tip Measurement represents an event and therefore contains no artificial numeric value.
 
-Event Measurements must never use artificial numeric values.
+Every valid numeric Measurement uses the canonical representation defined by its MeasurementType.
 
-Measurement values use a small tagged representation with the following possible kinds:
+The canonical representation is part of the MeasurementType semantics.
 
-- None
-- FloatingPoint
-- Boolean
-- UnsignedInteger
+It is not selected independently by each Sensor and is not stored as an arbitrary unit field in every Measurement.
 
-The None kind represents a value-free event or an invalid state Measurement without a usable value.
+Examples:
 
-The value representation must remain compatible with the firmware C++ standard and use deterministic memory.
+    Temperature
+        canonical representation: °C
+
+    RelativeHumidity
+        canonical representation: %
+
+    AtmosphericPressure
+        canonical representation: Pa
+
+    SolarIrradiance
+        canonical representation: W/m²
+
+Presentation preferences do not change the Measurement itself.
+
+For example, a canonical Temperature Measurement may later be presented externally as:
+
+- degrees Celsius
+- degrees Fahrenheit
+
+without modifying the underlying Measurement.
 
 The purpose of Measurement is to describe physical reality in a normalized domain representation.
 
-Consumers of Measurements must not need to understand:
+Consumers of canonical Measurements must not need to understand:
 
 - GPIO pins
 - I2C addresses
 - ADC channels
 - register layouts
 - hardware-specific scaling
+- native Sensor units
+- user-selected Presentation Units
 - whether the source is simulated or physical
 
 Measurements may represent either a continuous physical quantity or a discrete physical event.
@@ -306,9 +347,9 @@ Measurements may represent either a continuous physical quantity or a discrete p
 Examples of continuous Measurements include:
 
 - temperature
-- humidity
-- pressure
-- irradiance
+- relative humidity
+- atmospheric pressure
+- solar irradiance
 
 Examples of event Measurements include:
 
@@ -316,73 +357,89 @@ Examples of event Measurements include:
 
 Both are Measurements.
 
-Consumers should not require different processing pipelines simply because one Measurement represents a value while another represents an event.
+Operational events such as Sensor failure or Sensor recovery are Diagnostics, not Measurements.
 
 ---
 
 # Measurement Type
 
-Measurement Type identifies what a Measurement represents.
+MeasurementType identifies what a Measurement represents.
 
 Examples include:
 
-- unknown
-- temperature
-- relative humidity
-- atmospheric pressure
-- solar irradiance
-- solar cell temperature
-- normalized rain detector level
-- rain detector wet/dry state
-- rain gauge tip
+- Temperature
+- RelativeHumidity
+- AtmosphericPressure
+- SolarIrradiance
+- SolarCellTemperature
+- RainDetectorLevel
+- RainDetectorWet
+- RainGaugeTip
 
-The initial Measurement Types and their canonical representations are:
+MeasurementType is independent from Sensor identity.
 
-| Measurement Type | Value Kind | Canonical Representation |
-|------------------|------------|--------------------------|
-| Unknown | None | invalid or unassigned type |
-| Temperature | FloatingPoint | degrees Celsius |
-| RelativeHumidity | FloatingPoint | percent, 0 to 100 |
-| AtmosphericPressure | FloatingPoint | Pascal |
-| SolarIrradiance | FloatingPoint | watt per square metre |
-| SolarCellTemperature | FloatingPoint | degrees Celsius |
-| RainDetectorLevel | FloatingPoint | normalized ratio, 0.0 to 1.0 |
-| RainDetectorWet | Boolean | wet/dry state, no unit |
-| RainGaugeTip | None | event, no unit |
-
-Units are metadata of Measurement Type.
-
-Measurements do not carry arbitrary unit values.
-
-Alternative presentation units are the responsibility of external consumers.
-
-Raw ADC values are generally Diagnostics rather than primary Measurement Types.
-
-Measurement Type is independent from Sensor identity.
-
-This distinction is important because different Sensors may produce the same Measurement Type.
+This distinction is important because different Sensors may produce the same MeasurementType.
 
 Example:
 
     SHT4x
         |
-        +----> temperature
+        +----> Temperature
 
     BMP390
         |
-        +----> temperature
+        +----> Temperature
 
-Both Measurements represent temperature.
+Both Measurements represent Temperature.
 
 They remain distinguishable through their source Sensor.
 
-Measurement Type therefore answers:
+MeasurementType therefore answers:
 
 > What was measured?
 
 Sensor identity answers:
 
 > Where did the Measurement come from?
+
+Each MeasurementType defines exactly one canonical representation.
+
+The current canonical representations are:
+
+| MeasurementType | Canonical Representation |
+|---|---|
+| Temperature | degrees Celsius |
+| RelativeHumidity | percent, 0 to 100 |
+| AtmosphericPressure | Pascal |
+| SolarIrradiance | watt per square metre |
+| SolarCellTemperature | degrees Celsius |
+| RainDetectorLevel | normalized ratio, 0.0 to 1.0 |
+| RainDetectorWet | Boolean, no unit |
+| RainGaugeTip | event, no value and no unit |
+
+Canonical representation is part of the domain contract.
+
+All Sensors producing the same MeasurementType must emit the same canonical representation.
+
+Presentation Units are separate from MeasurementType's canonical representation.
+
+A MeasurementType may support one or more Presentation Units for external representation.
+
+Examples:
+
+Temperature
+
+- degrees Celsius
+- degrees Fahrenheit
+
+AtmosphericPressure
+
+- Pascal
+- hectopascal
+- kilopascal
+- inches of mercury
+
+Presentation-unit selection does not alter MeasurementType semantics or the canonical Measurement value.
 
 ---
 
@@ -740,7 +797,7 @@ Each concept owns one clearly defined domain responsibility.
 
 The WeatherStation domain ends with:
 
-- Measurements
+- canonical Measurements
 - Configuration
 - Diagnostics
 - Actuator state
@@ -756,11 +813,13 @@ The domain intentionally excludes:
 - MQTT topic structures
 - HTTP interfaces
 
-These belong to the Technical Architecture.
+Presentation Unit selection belongs to Device Configuration because it expresses an installation-wide preference.
 
-The domain describes *what* the WeatherStation is.
+Presentation conversion itself occurs at the external representation boundary and does not change the canonical domain Measurement.
 
-The Technical Architecture describes *how* the WeatherStation is implemented.
+The domain describes what the WeatherStation measures and how those Measurements are represented canonically.
+
+The Technical Architecture describes how canonical Measurements are converted, serialized and transported externally.
 
 ---
 
@@ -772,17 +831,23 @@ Sensors produce Measurements.
 
 Measurements describe physical reality.
 
-Measurements intentionally contain no interpretation.
+Measurements intentionally contain no weather interpretation.
+
+Sensors convert hardware-specific representations into canonical Measurements.
+
+Canonical Measurements remain stable inside the domain.
+
+Presentation preferences may change external representation but never physical meaning.
 
 Interpretation belongs outside the Device.
 
 Examples belonging to the domain:
 
 - temperature
-- humidity
-- pressure
-- irradiance
-- rain tip
+- relative humidity
+- atmospheric pressure
+- solar irradiance
+- rain gauge tip
 - rain detected
 
 Examples outside the domain:
@@ -798,3 +863,4 @@ The Device measures.
 External systems understand.
 
 This distinction is fundamental to the WeatherStation architecture.
+
