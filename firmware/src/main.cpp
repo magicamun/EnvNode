@@ -53,7 +53,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, measurementSnapshotCache, runtimeManager, otaService);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager, homeAssistantDiscoveryPublisher);
 
 void setup() {

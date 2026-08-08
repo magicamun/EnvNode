@@ -14,6 +14,7 @@
 #include "ConfigurationRuntimeEffect.h"
 #include "OTAService.h"
 #include "Logger.h"
+#include "IDiscoveryPublisher.h"
 
 namespace WeatherStation {
 
@@ -28,6 +29,7 @@ public:
         LocaleFormatter& localeFormatter,
         SensorManager& sensorManager,
         MeasurementSnapshotCache& measurementSnapshotCache,
+        IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
         OTAService& otaService);
 
@@ -53,6 +55,7 @@ private:
     void handleStyle();
     void handleNetworkSave();
     void handleMqttSave();
+    void handleDiscoveryRepublish();
     void handleTimeSave();
     void handleUnitsSave();
     void handleDeviceSave();
@@ -85,6 +88,7 @@ private:
     LocaleFormatter& localeFormatter_;
     SensorManager& sensorManager_;
     MeasurementSnapshotCache& measurementSnapshotCache_;
+    IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;
     WebServer server_{80};

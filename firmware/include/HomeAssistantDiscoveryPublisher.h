@@ -19,6 +19,7 @@ public:
         SensorManager& sensorManager);
 
     void loop() override;
+    DiscoveryRepublishResult republish() override;
     size_t lastPayloadSize() const;
     size_t lastEntityCount() const;
 
@@ -28,7 +29,7 @@ private:
     String stableDeviceId() const;
     String discoveryTopic() const;
     uint32_t discoverySignature(uint16_t* componentMasks) const;
-    bool publishDiscovery(const uint16_t* componentMasks);
+    bool publishDiscovery(const uint16_t* componentMasks, bool logPublication = true);
     bool publishPayload(const String& payload);
     String buildPayload(
         const uint16_t* componentMasks,

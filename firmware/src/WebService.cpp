@@ -305,11 +305,11 @@ String measurementTimeDisplay(
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
     SensorManager& sensorManager, MeasurementSnapshotCache& measurementSnapshotCache,
-    RuntimeManager& runtimeManager, OTAService& otaService)
+    IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), measurementSnapshotCache_(measurementSnapshotCache),
-      runtimeManager_(runtimeManager), otaService_(otaService) {}
+      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -330,6 +330,8 @@ void WebService::begin() {
     server_.on("/style.css", HTTP_GET, [this]() { handleStyle(); });
     server_.on("/network/save", HTTP_POST, [this]() { handleNetworkSave(); });
     server_.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
+    server_.on("/mqtt/discovery/republish", HTTP_POST,
+        [this]() { handleDiscoveryRepublish(); });
     server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
     server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
@@ -543,9 +545,10 @@ void WebService::handleNetwork() {
 void WebService::handleMqtt() {
     const MqttConfiguration& m = configurationService_.getConfiguration().mqtt;
     String c;
-    c.reserve(900);
+    c.reserve(1300);
     c = "<section class='card'><h2>Runtime status</h2>" + (m.server.isEmpty()?badge("Not configured","warn"):mqttService_.connected()?badge("Connected","good"):badge("Disconnected","bad")) + "</section><section class='card'><h2>Broker configuration</h2><form method='post' action='/mqtt/save' autocomplete='off'>";
     c += "<label>Broker hostname or IP<input name='server' value='" + escapeHtml(m.server) + "'></label><label>Port<input type='number' min='1' max='65535' name='port' required value='" + String(m.port) + "'></label><label>Username<input name='username' value='" + escapeHtml(m.username) + "'></label><label class='choice'><input type='checkbox' name='changePassword' value='1'>Change MQTT password</label><label>New password<input type='password' name='password' autocomplete='new-password'></label><div class='actions'><button>Save MQTT settings</button></div></form></section>";
+    c += "<section class='card'><h2>Home Assistant Discovery</h2><p class='help'>Republish the current retained Device Discovery configuration.</p><form method='post' action='/mqtt/discovery/republish'><button type='submit'>Republish Home Assistant Discovery</button></form></section>";
     sendPage("MQTT", "/mqtt", c);
 }
 
@@ -823,6 +826,24 @@ void WebService::handleMqttSave() {
     bool ok=port>=1&&port<=65535&&configurationService_.setMqttServer(server_.arg("server"))&&configurationService_.setMqttPort(static_cast<uint16_t>(port))&&configurationService_.setMqttUsername(server_.arg("username"));
     if(ok&&server_.arg("changePassword")=="1")ok=configurationService_.setMqttPassword(server_.arg("password"));
     sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Mqtt),"MQTT settings saved","MQTT save failed","/mqtt","Invalid MQTT configuration.");
+}
+
+void WebService::handleDiscoveryRepublish() {
+    switch (discoveryPublisher_.republish()) {
+        case DiscoveryRepublishResult::Published:
+            sendResult("Home Assistant Discovery published", "/mqtt",
+                "Home Assistant Discovery published.", true);
+            return;
+        case DiscoveryRepublishResult::MqttUnavailable:
+            sendResult("Home Assistant Discovery unavailable", "/mqtt",
+                "MQTT is unavailable. Discovery was not published; retry when MQTT is connected.", false);
+            return;
+        case DiscoveryRepublishResult::PublishFailed:
+        default:
+            sendResult("Home Assistant Discovery failed", "/mqtt",
+                "MQTT publication failed. Discovery was not updated.", false);
+            return;
+    }
 }
 
 void WebService::handleTimeSave() { const Configuration& current=configurationService_.getConfiguration(); Locale locale; bool ok=parseLocaleKey(server_.arg("locale").c_str(),locale); const bool localeChanged=ok&&locale!=current.locale.locale; const bool timeChanged=server_.arg("timezone")!=current.time.timezone||server_.arg("ntpServer1")!=current.time.ntpServer1||server_.arg("ntpServer2")!=current.time.ntpServer2; if(ok)ok=configurationService_.setLocale(locale)&&configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Locale,localeChanged,ConfigurationArea::Time,timeChanged),"Locale and time saved","Locale and time save failed","/time","Invalid locale or time configuration."); }

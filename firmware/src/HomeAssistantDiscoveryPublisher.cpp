@@ -239,7 +239,9 @@ bool HomeAssistantDiscoveryPublisher::publishPayload(const String& payload) {
     return mqttService_.publish(discoveryTopic().c_str(), payload.c_str(), true);
 }
 
-bool HomeAssistantDiscoveryPublisher::publishDiscovery(const uint16_t* componentMasks) {
+bool HomeAssistantDiscoveryPublisher::publishDiscovery(
+    const uint16_t* componentMasks,
+    bool logPublication) {
     uint16_t removals[MaxSensorCount];
     bool hasRemovals = false;
     for (size_t index = 0; index < MaxSensorCount; ++index) {
@@ -259,9 +261,30 @@ bool HomeAssistantDiscoveryPublisher::publishDiscovery(const uint16_t* component
     }
     lastPayloadSize_ = payload.length();
     lastEntityCount_ = entityCount;
-    logger_.printf("Home Assistant discovery published: %u entities\n",
-        static_cast<unsigned int>(entityCount));
+    if (logPublication) {
+        logger_.printf("Home Assistant discovery published: %u entities\n",
+            static_cast<unsigned int>(entityCount));
+    }
     return true;
+}
+
+DiscoveryRepublishResult HomeAssistantDiscoveryPublisher::republish() {
+    if (!mqttService_.connected()) return DiscoveryRepublishResult::MqttUnavailable;
+
+    uint16_t componentMasks[MaxSensorCount];
+    const uint32_t signature = discoverySignature(componentMasks);
+    if (!clearedAfterBoot_) {
+        if (!publishPayload(String())) return DiscoveryRepublishResult::PublishFailed;
+        clearedAfterBoot_ = true;
+    }
+    if (!publishDiscovery(componentMasks, false)) {
+        return DiscoveryRepublishResult::PublishFailed;
+    }
+    publishedSignature_ = signature;
+    wasConnected_ = true;
+    logger_.printf("Home Assistant Discovery manually republished: %u entities\n",
+        static_cast<unsigned int>(lastEntityCount_));
+    return DiscoveryRepublishResult::Published;
 }
 
 void HomeAssistantDiscoveryPublisher::loop() {
