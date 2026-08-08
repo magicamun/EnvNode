@@ -1,12 +1,18 @@
 #include "SensorImplementationRegistry.h"
 
+#include <cstring>
+
 namespace WeatherStation {
 namespace {
 
-constexpr size_t ImplementationCount = 4;
+constexpr size_t ImplementationCount = 5;
 
 const SensorImplementationMetadata* implementations() {
     static const SensorImplementationMetadata registeredImplementations[ImplementationCount] = {
+        {SensorImplementation::None, "none", "None",
+            SensorProvenance::Simulated, {MeasurementType::Unknown, MeasurementType::Unknown}, 0,
+            HardwareInterfaceKind::Simulation, "No runtime sensor", SensorSchedule::eventOnly(false),
+            "No implementation-specific configuration"},
         {SensorImplementation::SimulatedTemperature, "simulated_temperature", "Simulated Temperature",
             SensorProvenance::Simulated, {MeasurementType::Temperature, MeasurementType::Unknown}, 1,
             HardwareInterfaceKind::Simulation, "Firmware simulation", SensorSchedule::periodic(5000),
@@ -42,6 +48,18 @@ const SensorImplementationMetadata* SensorImplementationRegistry::find(
     const SensorImplementationMetadata* registeredImplementations = implementations();
     for (size_t index = 0; index < count(); ++index) {
         if (registeredImplementations[index].implementation == implementation) {
+            return &registeredImplementations[index];
+        }
+    }
+    return nullptr;
+}
+
+const SensorImplementationMetadata* SensorImplementationRegistry::findByStableId(
+    const char* stableId) {
+    if (stableId == nullptr) return nullptr;
+    const SensorImplementationMetadata* registeredImplementations = implementations();
+    for (size_t index = 0; index < count(); ++index) {
+        if (strcmp(registeredImplementations[index].stableId, stableId) == 0) {
             return &registeredImplementations[index];
         }
     }

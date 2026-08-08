@@ -12,6 +12,7 @@ RuntimeAction runtimeActionFor(ConfigurationArea area) {
         case ConfigurationArea::Device:
             // The device name contributes to the MQTT client identity on connect.
             return RuntimeAction::RestartMqtt;
+        case ConfigurationArea::Sensors: return RuntimeAction::RestartSensorManager;
         default: return RuntimeAction::None;
     }
 }

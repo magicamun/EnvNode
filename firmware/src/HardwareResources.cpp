@@ -4,7 +4,11 @@ namespace WeatherStation {
 namespace {
 
 const BoardGpioCapability CurrentBoardGpios[] = {
+    {GpioResource(25), true, false},
+    {GpioResource(26), true, false},
     {GpioResource(27), true, false},
+    {GpioResource(32), true, false},
+    {GpioResource(33), true, false},
 };
 
 } // namespace
@@ -41,6 +45,14 @@ const BoardGpioCapability* BoardCapabilities::gpio(GpioResource resource) const 
     return nullptr;
 }
 
+size_t BoardCapabilities::gpioCount() const {
+    return gpioCount_;
+}
+
+const BoardGpioCapability* BoardCapabilities::gpioAt(size_t index) const {
+    return index < gpioCount_ ? &gpios_[index] : nullptr;
+}
+
 HardwareResourceValidationResult BoardCapabilities::validate(
     HardwareInterfaceKind interfaceKind,
     const HardwareResourceAssignment& assignment) const {
@@ -73,6 +85,14 @@ const char* hardwareInterfaceKindName(HardwareInterfaceKind kind) {
         case HardwareInterfaceKind::Custom: return "Custom";
         default: return "Custom";
     }
+}
+
+bool exclusiveHardwareResourceConflict(
+    const HardwareResourceAssignment& first,
+    const HardwareResourceAssignment& second) {
+    return first.kind == HardwareResourceKind::GPIO
+        && second.kind == HardwareResourceKind::GPIO
+        && first.gpio.number == second.gpio.number;
 }
 
 } // namespace WeatherStation

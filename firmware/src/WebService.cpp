@@ -5,6 +5,8 @@
 #include <esp_netif.h>
 #include "FirmwareVersion.h"
 #include "UnitConverter.h"
+#include "SensorImplementationRegistry.h"
+#include "SensorSlotConfiguration.h"
 
 namespace WeatherStation {
 namespace {
@@ -132,6 +134,36 @@ String hardwareAssignment(const SensorRuntimeInfo& info) {
     return "None";
 }
 
+String configuredHardwareAssignment(const SensorSlotConfiguration& slot) {
+    if (slot.hardware.kind == HardwareResourceKind::GPIO) {
+        return "GPIO" + String(slot.hardware.gpio.number);
+    }
+    return "None";
+}
+
+bool sameHardwareAssignment(
+    const HardwareResourceAssignment& first,
+    const HardwareResourceAssignment& second) {
+    if (first.kind != second.kind) return false;
+    return first.kind != HardwareResourceKind::GPIO
+        || first.gpio.number == second.gpio.number;
+}
+
+String implementationMeasurements(const SensorImplementationMetadata* metadata) {
+    if (metadata == nullptr || metadata->measurementTypeCount == 0) return "None";
+    String result;
+    for (size_t index = 0; index < metadata->measurementTypeCount; ++index) {
+        switch (metadata->measurementTypes[index]) {
+            case MeasurementType::Temperature: result += "Temperature"; break;
+            case MeasurementType::RelativeHumidity: result += "Relative Humidity"; break;
+            case MeasurementType::AtmosphericPressure: result += "Atmospheric Pressure"; break;
+            default: result += "Other"; break;
+        }
+        if (index + 1 < metadata->measurementTypeCount) result += ", ";
+    }
+    return result;
+}
+
 String availableValue(const String& value) {
     return value.isEmpty() || value == "0.0.0.0" ? String("—") : escapeHtml(value);
 }
@@ -162,6 +194,7 @@ void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
+    server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
     server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
     server_.on("/time", HTTP_GET, [this]() { handleTime(); });
@@ -178,6 +211,8 @@ void WebService::begin() {
     server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
     server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
+    server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
+    server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
     server_.on("/restart", HTTP_POST, [this]() { handleRestart(); });
     server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
     server_.onNotFound([this]() { handleNotFound(); });
@@ -420,11 +455,91 @@ void WebService::handleDevice() {
 
 void WebService::handleSensors() {
     String c;
-    c.reserve(650 + sensorManager_.sensorCount() * 300);
-    c = "<div class='notice'><strong>Read-only milestone</strong><p>Slots now use typed implementation and hardware configuration. Editing and persistence require the future SensorFactory and Sensor Slot backend.</p></div><section class='card'><h2>Registered runtime sensors</h2><div class='scroll'><table><thead><tr><th>Slot / ID</th><th>Name</th><th>Type</th><th>Interface</th><th>Connection</th><th>Enabled</th><th>Provenance</th><th>State</th><th>Schedule</th><th>Measurements</th><th>Configuration</th></tr></thead><tbody>";
-    for (size_t index=0; index<sensorManager_.sensorCount(); ++index) { SensorRuntimeInfo i; if (!sensorManager_.runtimeInfo(index,i)) continue; c += "<tr><td>"+localeFormatter_.formatNumber(i.id,0)+"</td><td>"+escapeHtml(i.name)+"</td><td>"+escapeHtml(i.type)+"</td><td>"+escapeHtml(i.interfaceName)+"<br><span class='muted'>"+escapeHtml(i.protocolDescription)+"</span></td><td>"+hardwareAssignment(i)+"</td><td>"+(i.schedule.enabled?"Yes":"No")+"</td><td>"+(i.provenance==SensorProvenance::Simulated?"Simulated":"Physical")+"</td><td>"+String(sensorStateName(i.state))+"</td><td>"+(i.schedule.acquisitionMode==AcquisitionMode::Periodic?localeFormatter_.formatNumber(i.schedule.sampleIntervalMs,0)+" ms":"Event only")+"</td><td>"+measurementTypes(i)+"</td><td>"+escapeHtml(i.configurationSummary)+"</td></tr>"; }
+    c.reserve(1200 + MaxSensorSlotCount * 400);
+    if (runtimeManager_.pendingAction() == RuntimeAction::RestartSensorManager) {
+        c = "<div class='notice'><strong>Sensor restart required</strong><p>Saved sensor configuration differs from the active runtime composition.</p><form method='post' action='/sensors/apply'><button>Apply Sensor Changes</button></form></div>";
+    }
+    c += "<section class='card'><h2>Sensor Slots</h2><p class='help'>Saving and runtime activation are separate actions. Enabled with None is valid and creates no runtime Sensor.</p><div class='scroll'><table><thead><tr><th>Slot</th><th>Name</th><th>Configured</th><th>Connection</th><th>Schedule</th><th>Runtime</th><th>State</th><th></th></tr></thead><tbody>";
+    const Configuration& configuration = configurationService_.getConfiguration();
+    for (size_t slotIndex = 0; slotIndex < MaxSensorSlotCount; ++slotIndex) {
+        const SensorSlotConfiguration& slot = configuration.sensorSlots[slotIndex];
+        const SensorImplementationMetadata* metadata = SensorImplementationRegistry::find(slot.implementation);
+        SensorRuntimeInfo runtime;
+        bool hasRuntime = false;
+        for (size_t runtimeIndex = 0; runtimeIndex < sensorManager_.sensorCount(); ++runtimeIndex) {
+            SensorRuntimeInfo candidate;
+            if (sensorManager_.runtimeInfo(runtimeIndex, candidate) && candidate.id == slot.slotId) {
+                runtime = candidate;
+                hasRuntime = true;
+                break;
+            }
+        }
+        c += "<tr><td>" + String(slot.slotId) + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
+        c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
+        c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
+        c += "</td><td>" + configuredHardwareAssignment(slot) + "</td><td>";
+        c += slot.schedule.acquisitionMode == AcquisitionMode::Periodic
+            ? String(slot.schedule.sampleIntervalMs) + " ms" : "Event only";
+        c += "</td><td>";
+        c += hasRuntime ? escapeHtml(runtime.type) + " / " + hardwareAssignment(runtime) : "No runtime Sensor";
+        const bool expectsRuntime = slot.enabled && slot.implementation != SensorImplementation::None;
+        const bool runtimeMatches = expectsRuntime == hasRuntime
+            && (!hasRuntime || (runtime.implementation == slot.implementation
+                && String(runtime.name) == slot.name
+                && runtime.schedule.acquisitionMode == slot.schedule.acquisitionMode
+                && runtime.schedule.sampleIntervalMs == slot.schedule.sampleIntervalMs
+                && sameHardwareAssignment(runtime.hardware, slot.hardware)));
+        if (!runtimeMatches) c += "<br>" + badge("Sensor restart required", "warn");
+        c += "</td><td>" + String(hasRuntime ? sensorStateName(runtime.state) : "—") + "</td>";
+        c += "<td><a class='button' href='/sensors/edit?slot=" + String(slot.slotId) + "'>Configure</a></td></tr>";
+    }
     c += "</tbody></table></div></section>";
     sendPage("Sensors", "/sensors", c);
+}
+
+void WebService::handleSensorEdit() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    if (requestedSlot < 1 || requestedSlot > static_cast<long>(MaxSensorSlotCount)) {
+        sendResult("Invalid Sensor Slot", "/sensors", "The requested Slot does not exist.", false);
+        return;
+    }
+    const SensorSlotConfiguration& slot =
+        configurationService_.getConfiguration().sensorSlots[requestedSlot - 1];
+    const SensorImplementationMetadata* selected = SensorImplementationRegistry::find(slot.implementation);
+    String options;
+    for (size_t index = 0; index < SensorImplementationRegistry::count(); ++index) {
+        const SensorImplementationMetadata* metadata = SensorImplementationRegistry::at(index);
+        if (metadata == nullptr) continue;
+        options += "<option value='" + String(metadata->stableId) + "' data-interface='";
+        options += hardwareInterfaceKindName(metadata->interfaceKind);
+        options += "' data-interval='" + String(metadata->defaultSchedule.sampleIntervalMs) + "'";
+        if (metadata->implementation == slot.implementation) options += " selected";
+        options += ">" + escapeHtml(metadata->displayType) + "</option>";
+    }
+    String gpioOptions;
+    const BoardCapabilities& board = BoardCapabilities::current();
+    for (size_t index = 0; index < board.gpioCount(); ++index) {
+        const BoardGpioCapability* gpio = board.gpioAt(index);
+        if (gpio == nullptr || !gpio->available || gpio->reserved) continue;
+        gpioOptions += "<option value='" + String(gpio->resource.number) + "'";
+        if (slot.hardware.kind == HardwareResourceKind::GPIO
+            && slot.hardware.gpio.number == gpio->resource.number) gpioOptions += " selected";
+        gpioOptions += ">GPIO" + String(gpio->resource.number) + "</option>";
+    }
+    String c;
+    c.reserve(2600);
+    c = "<section class='card'><h2>Configure Slot " + String(slot.slotId) + "</h2><form method='post' action='/sensors/save'><input type='hidden' name='slot' value='" + String(slot.slotId) + "'>";
+    c += "<label class='choice'><input type='checkbox' name='enabled' value='1'" + String(slot.enabled ? " checked" : "") + ">Enabled</label>";
+    c += "<label>Name<input name='name' maxlength='" + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
+    c += "<label>Implementation<select id='sensorImplementation' name='implementation'>" + options + "</select></label>";
+    c += "<div id='gpioConfiguration'><label>GPIO<select name='gpio'>" + gpioOptions + "</select></label><p class='help'>AM2302 uses GPIO with a custom single-wire protocol, not Dallas OneWire.</p></div>";
+    c += "<label>Sample interval (ms)<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='" + String(slot.schedule.sampleIntervalMs) + "'></label>";
+    c += "<div class='actions'><button>Save Slot</button><a class='button' href='/sensors'>Cancel</a></div></form></section>";
+    if (selected != nullptr) {
+        c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>" + escapeHtml(selected->displayType) + "</span><span>Interface</span><span>" + hardwareInterfaceKindName(selected->interfaceKind) + " / " + escapeHtml(selected->protocolDescription) + "</span><span>Provenance</span><span>" + String(selected->provenance == SensorProvenance::Simulated ? "Simulated" : "Physical") + "</span><span>Measurements</span><span>" + implementationMeasurements(selected) + "</span></div></section>";
+    }
+    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
+    sendPage("Configure Sensor Slot", "/sensors", c);
 }
 
 void WebService::handleDiagnostics() {
@@ -542,6 +657,70 @@ void WebService::handleUnitsSave() {
 }
 
 void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),"Device settings saved","Device save failed","/device","Invalid device name."); }
+void WebService::handleSensorSave() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    const SensorImplementationMetadata* metadata =
+        SensorImplementationRegistry::findByStableId(server_.arg("implementation").c_str());
+    bool ok = requestedSlot >= 1
+        && requestedSlot <= static_cast<long>(MaxSensorSlotCount)
+        && metadata != nullptr;
+    SensorSlotConfiguration slot;
+    if (ok) {
+        slot = configurationService_.getConfiguration().sensorSlots[requestedSlot - 1];
+        slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
+        slot.name = server_.arg("name");
+        slot.implementation = metadata->implementation;
+        slot.schedule = metadata->defaultSchedule;
+        slot.schedule.enabled = slot.enabled;
+        slot.hardware = HardwareResourceAssignment::none();
+        if (metadata->defaultSchedule.acquisitionMode == AcquisitionMode::Periodic) {
+            const long long interval = strtoll(server_.arg("interval").c_str(), nullptr, 10);
+            if (interval <= 0 || interval > 0x7FFFFFFFLL) ok = false;
+            else slot.schedule.sampleIntervalMs = static_cast<uint32_t>(interval);
+        } else {
+            slot.schedule.sampleIntervalMs = 0;
+        }
+        if (slot.implementation == SensorImplementation::AM2302) {
+            const long gpio = server_.arg("gpio").toInt();
+            if (gpio < 0 || gpio > 255) ok = false;
+            else {
+                const GpioResource resource(static_cast<uint8_t>(gpio));
+                slot.hardware = HardwareResourceAssignment::gpioResource(resource);
+                slot.implementationConfiguration.am2302 = AM2302Configuration(resource);
+            }
+        }
+    }
+    if (ok) ok = configurationService_.setSensorSlotConfiguration(slot);
+    sendConfigurationResult(
+        configurationSaveResult(ok, ConfigurationArea::Sensors),
+        "Sensor Slot saved",
+        "Sensor Slot save failed",
+        "/sensors",
+        "Invalid Slot configuration, schedule, hardware resource, or exclusive GPIO conflict.");
+}
+void WebService::handleSensorApply() {
+    if (runtimeManager_.pendingAction() != RuntimeAction::RestartSensorManager) {
+        sendResult(
+            "Sensor changes not applied",
+            "/sensors",
+            "No Sensor Manager restart is pending, or a stronger runtime action takes priority.",
+            false);
+        return;
+    }
+    if (!runtimeManager_.applyPendingSensorChanges()) {
+        sendResult(
+            "Sensor changes not applied",
+            "/sensors",
+            "The Sensor runtime rebuild failed. The pending action remains active; see Diagnostics and logs.",
+            false);
+        return;
+    }
+    sendResult(
+        "Sensor changes applied",
+        "/sensors",
+        "The complete Sensor runtime composition was rebuilt successfully.",
+        true);
+}
 void WebService::handleRestart() { if(otaService_.busy()){sendResult("Restart unavailable","/firmware","A firmware upload is currently active.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Restarting","/firmware","The device is restarting now.",true); performExplicitRestart(); }
 void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult("Factory reset unavailable","/firmware","A firmware upload is currently active.",false);return;} if(!configurationService_.resetToDefaults()){sendResult("Factory reset failed","/firmware","Stored configuration could not be cleared.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Factory reset complete","/firmware","Configuration erased. Restarting into provisioning mode.",true);performExplicitRestart(); }
 void WebService::handleNotFound() { server_.send(404,"text/plain","Not Found"); }

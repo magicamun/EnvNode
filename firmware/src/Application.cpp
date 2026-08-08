@@ -16,11 +16,11 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , timeSyncLogged_(false) {
 }
 
-void Application::setup() {
+void Application::setup(bool configurationAlreadyLoaded) {
     logger_.begin(115200);
     delay(500);
 
-    configurationService_.loadConfiguration();
+    if (!configurationAlreadyLoaded) configurationService_.loadConfiguration();
     wifiService_.begin();
     timeService_.begin();
     sensorManager_.begin();

@@ -65,6 +65,8 @@ public:
     static const BoardCapabilities& current();
 
     const BoardGpioCapability* gpio(GpioResource resource) const;
+    size_t gpioCount() const;
+    const BoardGpioCapability* gpioAt(size_t index) const;
     HardwareResourceValidationResult validate(
         HardwareInterfaceKind interfaceKind,
         const HardwareResourceAssignment& assignment) const;
@@ -75,6 +77,10 @@ private:
     const BoardGpioCapability* gpios_;
     size_t gpioCount_;
 };
+
+bool exclusiveHardwareResourceConflict(
+    const HardwareResourceAssignment& first,
+    const HardwareResourceAssignment& second);
 
 const char* hardwareInterfaceKindName(HardwareInterfaceKind kind);
 

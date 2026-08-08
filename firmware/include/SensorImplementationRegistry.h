@@ -9,12 +9,12 @@
 
 namespace WeatherStation {
 
-enum class SensorImplementation {
-    Unknown,
-    SimulatedTemperature,
-    SimulatedHumidity,
-    SimulatedPressure,
-    AM2302,
+enum class SensorImplementation : uint8_t {
+    None = 0,
+    SimulatedTemperature = 1,
+    SimulatedHumidity = 2,
+    SimulatedPressure = 3,
+    AM2302 = 4,
 };
 
 constexpr size_t MaxImplementationMeasurementTypeCount = 2;
@@ -37,6 +37,7 @@ public:
     static size_t count();
     static const SensorImplementationMetadata* at(size_t index);
     static const SensorImplementationMetadata* find(SensorImplementation implementation);
+    static const SensorImplementationMetadata* findByStableId(const char* stableId);
 };
 
 } // namespace WeatherStation

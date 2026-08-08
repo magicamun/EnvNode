@@ -35,6 +35,9 @@ public:
 private:
     void handleStatus();
     void handleSensors();
+    void handleSensorEdit();
+    void handleSensorSave();
+    void handleSensorApply();
     void handleNetwork();
     void handleMqtt();
     void handleTime();

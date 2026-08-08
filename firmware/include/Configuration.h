@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "MeasurementType.h"
 #include "WeatherLocale.h"
+#include "SensorSlotConfiguration.h"
 
 namespace WeatherStation {
 
@@ -68,6 +69,7 @@ struct Configuration {
     TimeConfiguration time;
     LocaleConfiguration locale;
     PresentationConfiguration presentation;
+    SensorSlotConfiguration sensorSlots[MaxSensorSlotCount];
 
     PresentationUnit presentationUnitFor(MeasurementType type) const {
         return presentation.unitFor(type);

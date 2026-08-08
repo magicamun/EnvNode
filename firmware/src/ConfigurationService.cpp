@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <Preferences.h>
 #include <IPAddress.h>
+#include "SensorImplementationRegistry.h"
+#include "HardwareResources.h"
 
 namespace WeatherStation {
 
@@ -42,6 +44,10 @@ constexpr size_t MaxMqttPasswordLength = 64;
 constexpr size_t MaxTimezoneLength = 128;
 constexpr size_t MaxNtpServerLength = 64;
 constexpr size_t MaxHostnameLength = 63;
+
+String sensorKey(SensorId slotId, const char* field) {
+    return "s" + String(slotId) + "_" + field;
+}
 }
 
 void ConfigurationService::ensurePreferencesStarted() {
@@ -78,6 +84,46 @@ void ConfigurationService::initializeDefaults() {
         measurementTypeMetadata(MeasurementType::SolarCellTemperature).defaultPresentationUnit;
     configuration_.presentation.rainDetectorLevel =
         measurementTypeMetadata(MeasurementType::RainDetectorLevel).defaultPresentationUnit;
+    initializeSensorDefaults();
+}
+
+void ConfigurationService::initializeSensorDefaults() {
+    for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        SensorSlotConfiguration& slot = configuration_.sensorSlots[index];
+        slot.slotId = static_cast<SensorId>(index + 1);
+        slot.enabled = false;
+        slot.name = "Slot " + String(index + 1);
+        slot.implementation = SensorImplementation::None;
+        slot.schedule = SensorSchedule::eventOnly(false);
+        slot.hardware = HardwareResourceAssignment::none();
+        slot.implementationConfiguration.am2302 = AM2302Configuration();
+    }
+
+    SensorSlotConfiguration& temperature = configuration_.sensorSlots[0];
+    temperature.enabled = true;
+    temperature.name = "Simulated Temperature";
+    temperature.implementation = SensorImplementation::SimulatedTemperature;
+    temperature.schedule = SensorSchedule::periodic(5000);
+
+    SensorSlotConfiguration& humidity = configuration_.sensorSlots[1];
+    humidity.enabled = true;
+    humidity.name = "Simulated Humidity";
+    humidity.implementation = SensorImplementation::SimulatedHumidity;
+    humidity.schedule = SensorSchedule::periodic(5000);
+
+    SensorSlotConfiguration& pressure = configuration_.sensorSlots[2];
+    pressure.enabled = true;
+    pressure.name = "Simulated Barometer";
+    pressure.implementation = SensorImplementation::SimulatedPressure;
+    pressure.schedule = SensorSchedule::periodic(10000);
+
+    SensorSlotConfiguration& am2302 = configuration_.sensorSlots[3];
+    am2302.enabled = true;
+    am2302.name = "Outside";
+    am2302.implementation = SensorImplementation::AM2302;
+    am2302.schedule = SensorSchedule::periodic(5000);
+    am2302.hardware = HardwareResourceAssignment::gpioResource(GpioResource(27));
+    am2302.implementationConfiguration.am2302 = AM2302Configuration(GpioResource(27));
 }
 
 void ConfigurationService::loadFromPreferences() {
@@ -135,6 +181,48 @@ void ConfigurationService::loadFromPreferences() {
         loadPresentationUnit(KeySolarCellTemperatureUnit, MeasurementType::SolarCellTemperature);
     configuration_.presentation.rainDetectorLevel =
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
+    loadSensorSlots();
+}
+
+void ConfigurationService::loadSensorSlots() {
+    SensorSlotConfiguration loaded[MaxSensorSlotCount];
+    for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        loaded[index] = configuration_.sensorSlots[index];
+        const SensorId expectedId = static_cast<SensorId>(index + 1);
+        const String implementationKey = sensorKey(expectedId, "impl");
+        if (!preferences_.isKey(implementationKey.c_str())) continue;
+
+        loaded[index].slotId = static_cast<SensorId>(preferences_.getUInt(
+            sensorKey(expectedId, "id").c_str(), expectedId));
+        loaded[index].enabled = preferences_.getUInt(
+            sensorKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
+        loaded[index].name = preferences_.getString(
+            sensorKey(expectedId, "name").c_str(), loaded[index].name);
+        const String stableImplementation = preferences_.getString(
+            implementationKey.c_str(), "none");
+        const SensorImplementationMetadata* metadata =
+            SensorImplementationRegistry::findByStableId(stableImplementation.c_str());
+        loaded[index].implementation = metadata == nullptr
+            ? static_cast<SensorImplementation>(255) : metadata->implementation;
+        const uint32_t mode = preferences_.getUInt(sensorKey(expectedId, "mode").c_str(), 0);
+        loaded[index].schedule.acquisitionMode = mode == 1
+            ? AcquisitionMode::Periodic : AcquisitionMode::EventOnly;
+        loaded[index].schedule.sampleIntervalMs = preferences_.getUInt(
+            sensorKey(expectedId, "int").c_str(), 0);
+        loaded[index].schedule.enabled = loaded[index].enabled;
+        const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
+            sensorKey(expectedId, "gpio").c_str(), 0));
+        loaded[index].hardware = loaded[index].implementation == SensorImplementation::AM2302
+            ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
+            : HardwareResourceAssignment::none();
+        loaded[index].implementationConfiguration.am2302 = AM2302Configuration(GpioResource(gpio));
+    }
+
+    if (validateSensorSlots(loaded)) {
+        for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+            configuration_.sensorSlots[index] = loaded[index];
+        }
+    }
 }
 
 PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, MeasurementType type) {
@@ -483,6 +571,79 @@ bool ConfigurationService::setPresentationUnit(MeasurementType type, Presentatio
         return false;
     }
     *configuredUnit = unit;
+    return true;
+}
+
+bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slot) const {
+    if (!isValidSensorId(slot.slotId) || slot.slotId > MaxSensorSlotCount
+        || slot.name.isEmpty() || slot.name.length() > MaxSensorSlotNameLength) {
+        return false;
+    }
+    const SensorImplementationMetadata* metadata =
+        SensorImplementationRegistry::find(slot.implementation);
+    if (metadata == nullptr) return false;
+    if (slot.schedule.acquisitionMode != metadata->defaultSchedule.acquisitionMode) return false;
+    if (slot.schedule.enabled != slot.enabled) return false;
+    if (slot.schedule.acquisitionMode == AcquisitionMode::Periodic) {
+        if (slot.schedule.sampleIntervalMs == 0
+            || slot.schedule.sampleIntervalMs > 0x7FFFFFFFUL) return false;
+    } else if (slot.schedule.acquisitionMode == AcquisitionMode::EventOnly) {
+        if (slot.schedule.sampleIntervalMs != 0) return false;
+    } else {
+        return false;
+    }
+    if (slot.implementation == SensorImplementation::None) {
+        return slot.hardware.kind == HardwareResourceKind::None;
+    }
+    if (metadata->interfaceKind == HardwareInterfaceKind::Simulation) {
+        return slot.hardware.kind == HardwareResourceKind::None;
+    }
+    if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware)
+        != HardwareResourceValidationResult::Valid) return false;
+    return slot.implementation != SensorImplementation::AM2302
+        || (slot.hardware.kind == HardwareResourceKind::GPIO
+            && slot.implementationConfiguration.am2302.gpio.number == slot.hardware.gpio.number);
+}
+
+bool ConfigurationService::validateSensorSlots(const SensorSlotConfiguration* slots) const {
+    for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        if (slots[index].slotId != index + 1 || !validateSensorSlot(slots[index])) return false;
+        if (!slots[index].enabled || slots[index].implementation == SensorImplementation::None) continue;
+        for (size_t other = index + 1; other < MaxSensorSlotCount; ++other) {
+            if (slots[other].enabled
+                && slots[other].implementation != SensorImplementation::None
+                && exclusiveHardwareResourceConflict(slots[index].hardware, slots[other].hardware)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot) {
+    const SensorImplementationMetadata* metadata = SensorImplementationRegistry::find(slot.implementation);
+    if (metadata == nullptr) return false;
+    const SensorId id = slot.slotId;
+    return persistUInt(sensorKey(id, "id").c_str(), id)
+        && persistUInt(sensorKey(id, "en").c_str(), slot.enabled ? 1 : 0)
+        && persistString(sensorKey(id, "name").c_str(), slot.name)
+        && persistString(sensorKey(id, "impl").c_str(), metadata->stableId)
+        && persistUInt(sensorKey(id, "mode").c_str(),
+            slot.schedule.acquisitionMode == AcquisitionMode::Periodic ? 1 : 0)
+        && persistUInt(sensorKey(id, "int").c_str(), slot.schedule.sampleIntervalMs)
+        && persistUInt(sensorKey(id, "gpio").c_str(),
+            slot.hardware.kind == HardwareResourceKind::GPIO ? slot.hardware.gpio.number : 0);
+}
+
+bool ConfigurationService::setSensorSlotConfiguration(const SensorSlotConfiguration& slot) {
+    if (!isValidSensorId(slot.slotId) || slot.slotId > MaxSensorSlotCount) return false;
+    SensorSlotConfiguration candidate[MaxSensorSlotCount];
+    for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        candidate[index] = configuration_.sensorSlots[index];
+    }
+    candidate[slot.slotId - 1] = slot;
+    if (!validateSensorSlots(candidate) || !persistSensorSlot(slot)) return false;
+    configuration_.sensorSlots[slot.slotId - 1] = slot;
     return true;
 }
 

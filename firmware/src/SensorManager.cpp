@@ -1,5 +1,7 @@
 #include "SensorManager.h"
 
+#include <cstring>
+
 namespace WeatherStation {
 namespace {
 
@@ -49,7 +51,8 @@ SensorRegistrationResult SensorManager::registerSensor(
     SensorEntry& entry = entries_[sensorCount_++];
     entry.sensor = &sensor;
     entry.registeredId = sensor.id();
-    entry.name = metadata.name == nullptr ? "" : metadata.name;
+    strncpy(entry.name, metadata.name == nullptr ? "" : metadata.name, MaxSensorSlotNameLength);
+    entry.name[MaxSensorSlotNameLength] = '\0';
     entry.implementation = metadata.implementation;
     entry.interfaceName = metadata.interfaceName == nullptr ? "" : metadata.interfaceName;
     entry.protocolDescription = metadata.protocolDescription == nullptr ? "" : metadata.protocolDescription;
@@ -76,6 +79,18 @@ void SensorManager::begin() {
         if (entry.schedule.enabled) {
             entry.sensor->begin();
         }
+    }
+}
+
+void SensorManager::clear() {
+    activeEntry_ = nullptr;
+    started_ = false;
+    sensorCount_ = 0;
+    operationTimestamp_ = 0;
+    operationTimeSynchronized_ = false;
+    operationEmissionCount_ = 0;
+    for (size_t index = 0; index < MaxSensorCount; ++index) {
+        entries_[index] = SensorEntry{};
     }
 }
 

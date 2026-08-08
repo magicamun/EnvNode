@@ -152,12 +152,30 @@ Future examples include:
 - SensorManager
 - MeasurementPublisher
 
-Compiled Sensor capabilities are described by `SensorImplementationRegistry`. Static
-`SensorSlotConfiguration` objects currently define the desired runtime composition,
-including stable Slot identity, implementation, schedule and typed hardware assignment.
-`BoardCapabilities` performs the initial resource existence and compatibility checks.
-Concrete construction remains in one temporary composition-root boundary; a future
-SensorFactory can replace that boundary without changing SensorManager.
+Compiled Sensor capabilities are described by `SensorImplementationRegistry`. Persistent
+`SensorSlotConfiguration` objects define the desired runtime composition, including stable
+Slot identity, enablement, name, implementation, schedule and typed hardware assignment.
+`ConfigurationService` owns their defaults, validation and NVS persistence.
+
+At boot, `SensorFactory` constructs enabled, non-None runtime Sensors from the validated
+Slot configuration using statically bounded placement storage. Disabled and None Slots
+remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
+GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
+
+The initial board capability set exposes GPIO25, GPIO26, GPIO27, GPIO32 and GPIO33 as
+general-purpose bidirectional Sensor resources. Flash, UART, bootstrapping, input-only and
+board-reserved I2C pins are intentionally excluded from Sensor administration.
+
+Sensor administration is available through the Web Sensors page. A successful edit stores
+the desired Slot configuration and requests `RestartSensorManager`; it does not activate the
+change automatically. The explicit **Apply Sensor Changes** action asks RuntimeManager to
+rebuild the complete composition while WiFi, MQTT, time and Web services remain active.
+
+SensorRuntime stages the desired composition in a second statically bounded SensorFactory.
+After successful construction it clears SensorManager, registers and begins the new Sensors,
+then destroys the previous instances. If registration fails, the still-alive previous
+composition is restored. RuntimeManager clears `RestartSensorManager` only after a successful
+rebuild and never downgrades a stronger pending action. The Device is not rebooted.
 
 The Application Layer must not contain:
 
@@ -858,6 +876,11 @@ Examples include:
     AtmosphericPressure -> hectopascal
 
 Presentation configuration contains typed unit selections rather than arbitrary unit strings.
+
+Sensor Slot persistence uses stable implementation identifiers and raw typed resource values,
+never user-facing implementation labels. Factory reset clears the same authoritative
+ConfigurationService namespace and therefore restores the development Slot defaults:
+three simulated Sensors and the AM2302 on GPIO27.
 
 It affects external representation only.
 

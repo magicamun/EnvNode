@@ -9,6 +9,7 @@
 #include "ITimeService.h"
 #include "SensorSchedule.h"
 #include "SensorImplementationRegistry.h"
+#include "SensorSlotConfiguration.h"
 
 namespace WeatherStation {
 
@@ -39,7 +40,7 @@ struct SensorRuntimeInfo {
     SensorId id = InvalidSensorId;
     const char* name = "";
     const char* type = "";
-    SensorImplementation implementation = SensorImplementation::Unknown;
+    SensorImplementation implementation = SensorImplementation::None;
     const char* interfaceName = "";
     const char* protocolDescription = "";
     const char* configurationSummary = "";
@@ -60,7 +61,7 @@ struct SensorRuntimeInfo {
 struct SensorRegistrationMetadata {
     SensorRegistrationMetadata(
         const char* sensorName = "",
-        SensorImplementation sensorImplementation = SensorImplementation::Unknown,
+        SensorImplementation sensorImplementation = SensorImplementation::None,
         const char* sensorInterfaceName = "",
         const char* sensorProtocolDescription = "",
         const char* sensorConfigurationSummary = "",
@@ -91,6 +92,7 @@ public:
         const SensorSchedule& schedule,
         const SensorRegistrationMetadata& metadata);
     void begin();
+    void clear();
     void loop();
 
     size_t sensorCount() const;
@@ -103,8 +105,8 @@ private:
     struct SensorEntry {
         ISensor* sensor = nullptr;
         SensorId registeredId = InvalidSensorId;
-        const char* name = "";
-        SensorImplementation implementation = SensorImplementation::Unknown;
+        char name[MaxSensorSlotNameLength + 1] = {};
+        SensorImplementation implementation = SensorImplementation::None;
         const char* interfaceName = "";
         const char* protocolDescription = "";
         const char* configurationSummary = "";

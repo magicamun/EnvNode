@@ -15,7 +15,7 @@ class Application {
 public:
     Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager);
 
-    void setup();
+    void setup(bool configurationAlreadyLoaded = false);
     void loop();
 
 private:

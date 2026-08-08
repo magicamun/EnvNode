@@ -11,6 +11,7 @@ enum class ConfigurationArea {
     Locale,
     PresentationUnits,
     Device,
+    Sensors,
 };
 
 struct ConfigurationSaveResult {

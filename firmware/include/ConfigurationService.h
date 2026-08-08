@@ -25,6 +25,7 @@ public:
     bool setNtpServer2(const String& server) override;
     bool setLocale(Locale locale) override;
     bool setPresentationUnit(MeasurementType type, PresentationUnit unit) override;
+    bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) override;
     bool resetToDefaults() override;
 
 private:
@@ -47,6 +48,11 @@ private:
     bool validateHostname(const String& hostname) const;
     bool validateNetworkConfiguration(const NetworkConfiguration& network) const;
     bool validateIPv4(const String& value, bool allowEmpty = false) const;
+    void initializeSensorDefaults();
+    void loadSensorSlots();
+    bool persistSensorSlot(const SensorSlotConfiguration& slot);
+    bool validateSensorSlot(const SensorSlotConfiguration& slot) const;
+    bool validateSensorSlots(const SensorSlotConfiguration* slots) const;
 
     Configuration configuration_;
     Preferences preferences_;

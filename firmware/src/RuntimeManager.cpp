@@ -16,8 +16,9 @@ const char* runtimeActionName(RuntimeAction action) {
     }
 }
 
-RuntimeManager::RuntimeManager(ILogger& logger)
-    : logger_(logger) {
+RuntimeManager::RuntimeManager(ILogger& logger, ISensorRuntime* sensorRuntime)
+    : logger_(logger)
+    , sensorRuntime_(sensorRuntime) {
 }
 
 void RuntimeManager::request(RuntimeAction action) {
@@ -53,6 +54,24 @@ void RuntimeManager::service() {
 
 void RuntimeManager::clearPending() {
     pendingAction_ = RuntimeAction::None;
+}
+
+bool RuntimeManager::applyPendingSensorChanges() {
+    if (pendingAction_ != RuntimeAction::RestartSensorManager || sensorRuntime_ == nullptr) {
+        return false;
+    }
+    logger_.println("Sensor runtime rebuild started");
+    size_t activeSensorCount = 0;
+    const char* failureReason = nullptr;
+    if (!sensorRuntime_->rebuild(activeSensorCount, failureReason)) {
+        logger_.printf("Sensor runtime rebuild failed: %s\n",
+            failureReason == nullptr ? "unknown failure" : failureReason);
+        return false;
+    }
+    pendingAction_ = RuntimeAction::None;
+    logger_.printf("Sensor runtime rebuild successful: %u sensors active\n",
+        static_cast<unsigned int>(activeSensorCount));
+    return true;
 }
 
 void RuntimeManager::performPendingRestart() {

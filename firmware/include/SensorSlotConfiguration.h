@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Arduino.h>
+
 #include "HardwareResources.h"
 #include "SensorId.h"
 #include "SensorImplementationRegistry.h"
@@ -29,11 +31,14 @@ struct SensorImplementationConfiguration {
 struct SensorSlotConfiguration {
     SensorId slotId = InvalidSensorId;
     bool enabled = false;
-    const char* name = "";
-    SensorImplementation implementation = SensorImplementation::Unknown;
+    String name;
+    SensorImplementation implementation = SensorImplementation::None;
     SensorSchedule schedule;
     HardwareResourceAssignment hardware;
     SensorImplementationConfiguration implementationConfiguration;
 };
+
+constexpr size_t MaxSensorSlotCount = 16;
+constexpr size_t MaxSensorSlotNameLength = 32;
 
 } // namespace WeatherStation
