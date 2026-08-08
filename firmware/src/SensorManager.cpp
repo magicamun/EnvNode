@@ -50,6 +50,11 @@ SensorRegistrationResult SensorManager::registerSensor(
     entry.sensor = &sensor;
     entry.registeredId = sensor.id();
     entry.name = metadata.name == nullptr ? "" : metadata.name;
+    entry.implementation = metadata.implementation;
+    entry.interfaceName = metadata.interfaceName == nullptr ? "" : metadata.interfaceName;
+    entry.protocolDescription = metadata.protocolDescription == nullptr ? "" : metadata.protocolDescription;
+    entry.configurationSummary = metadata.configurationSummary == nullptr ? "" : metadata.configurationSummary;
+    entry.hardware = metadata.hardware;
     entry.schedule = schedule;
     return SensorRegistrationResult::Registered;
 }
@@ -138,7 +143,14 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     const SensorEntry& entry = entries_[index];
     info.id = entry.registeredId;
     info.name = entry.name;
-    info.type = entry.sensor->type();
+    const SensorImplementationMetadata* implementation =
+        SensorImplementationRegistry::find(entry.implementation);
+    info.type = implementation == nullptr ? entry.sensor->type() : implementation->displayType;
+    info.implementation = entry.implementation;
+    info.interfaceName = entry.interfaceName;
+    info.protocolDescription = entry.protocolDescription;
+    info.configurationSummary = entry.configurationSummary;
+    info.hardware = entry.hardware;
     info.provenance = entry.sensor->provenance();
     info.state = entry.sensor->state();
     info.schedule = entry.schedule;

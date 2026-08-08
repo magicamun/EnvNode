@@ -8,6 +8,7 @@
 #include "ISensor.h"
 #include "ITimeService.h"
 #include "SensorSchedule.h"
+#include "SensorImplementationRegistry.h"
 
 namespace WeatherStation {
 
@@ -38,6 +39,11 @@ struct SensorRuntimeInfo {
     SensorId id = InvalidSensorId;
     const char* name = "";
     const char* type = "";
+    SensorImplementation implementation = SensorImplementation::Unknown;
+    const char* interfaceName = "";
+    const char* protocolDescription = "";
+    const char* configurationSummary = "";
+    HardwareResourceAssignment hardware;
     SensorProvenance provenance = SensorProvenance::Physical;
     SensorState state = SensorState::Unknown;
     SensorSchedule schedule;
@@ -52,11 +58,27 @@ struct SensorRuntimeInfo {
 };
 
 struct SensorRegistrationMetadata {
-    explicit SensorRegistrationMetadata(const char* sensorName = "")
-        : name(sensorName) {
+    SensorRegistrationMetadata(
+        const char* sensorName = "",
+        SensorImplementation sensorImplementation = SensorImplementation::Unknown,
+        const char* sensorInterfaceName = "",
+        const char* sensorProtocolDescription = "",
+        const char* sensorConfigurationSummary = "",
+        HardwareResourceAssignment sensorHardware = HardwareResourceAssignment())
+        : name(sensorName)
+        , implementation(sensorImplementation)
+        , interfaceName(sensorInterfaceName)
+        , protocolDescription(sensorProtocolDescription)
+        , configurationSummary(sensorConfigurationSummary)
+        , hardware(sensorHardware) {
     }
 
     const char* name;
+    SensorImplementation implementation;
+    const char* interfaceName;
+    const char* protocolDescription;
+    const char* configurationSummary;
+    HardwareResourceAssignment hardware;
 };
 
 class SensorManager : public IMeasurementSink {
@@ -82,6 +104,11 @@ private:
         ISensor* sensor = nullptr;
         SensorId registeredId = InvalidSensorId;
         const char* name = "";
+        SensorImplementation implementation = SensorImplementation::Unknown;
+        const char* interfaceName = "";
+        const char* protocolDescription = "";
+        const char* configurationSummary = "";
+        HardwareResourceAssignment hardware;
         SensorSchedule schedule;
         uint32_t nextDueMs = 0;
         bool samplePending = false;

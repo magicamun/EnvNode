@@ -125,6 +125,13 @@ String measurementTypes(const SensorRuntimeInfo& info) {
     return result;
 }
 
+String hardwareAssignment(const SensorRuntimeInfo& info) {
+    if (info.hardware.kind == HardwareResourceKind::GPIO) {
+        return "GPIO" + String(info.hardware.gpio.number);
+    }
+    return "None";
+}
+
 String availableValue(const String& value) {
     return value.isEmpty() || value == "0.0.0.0" ? String("—") : escapeHtml(value);
 }
@@ -414,8 +421,8 @@ void WebService::handleDevice() {
 void WebService::handleSensors() {
     String c;
     c.reserve(650 + sensorManager_.sensorCount() * 300);
-    c = "<div class='notice'><strong>Read-only milestone</strong><p>Sensor implementation selection, enablement, and persistent Slot configuration require the future SensorFactory and Sensor Slot backend.</p></div><section class='card'><h2>Registered runtime sensors</h2><div class='scroll'><table><thead><tr><th>Slot / ID</th><th>Name</th><th>Type</th><th>Enabled</th><th>Provenance</th><th>State</th><th>Schedule</th><th>Measurements</th></tr></thead><tbody>";
-    for (size_t index=0; index<sensorManager_.sensorCount(); ++index) { SensorRuntimeInfo i; if (!sensorManager_.runtimeInfo(index,i)) continue; c += "<tr><td>"+localeFormatter_.formatNumber(i.id,0)+"</td><td>"+escapeHtml(i.name)+"</td><td>"+escapeHtml(i.type)+"</td><td>"+(i.schedule.enabled?"Yes":"No")+"</td><td>"+(i.provenance==SensorProvenance::Simulated?"Simulated":"Physical")+"</td><td>"+String(sensorStateName(i.state))+"</td><td>"+(i.schedule.acquisitionMode==AcquisitionMode::Periodic?localeFormatter_.formatNumber(i.schedule.sampleIntervalMs,0)+" ms":"Event only")+"</td><td>"+measurementTypes(i)+"</td></tr>"; }
+    c = "<div class='notice'><strong>Read-only milestone</strong><p>Slots now use typed implementation and hardware configuration. Editing and persistence require the future SensorFactory and Sensor Slot backend.</p></div><section class='card'><h2>Registered runtime sensors</h2><div class='scroll'><table><thead><tr><th>Slot / ID</th><th>Name</th><th>Type</th><th>Interface</th><th>Connection</th><th>Enabled</th><th>Provenance</th><th>State</th><th>Schedule</th><th>Measurements</th><th>Configuration</th></tr></thead><tbody>";
+    for (size_t index=0; index<sensorManager_.sensorCount(); ++index) { SensorRuntimeInfo i; if (!sensorManager_.runtimeInfo(index,i)) continue; c += "<tr><td>"+localeFormatter_.formatNumber(i.id,0)+"</td><td>"+escapeHtml(i.name)+"</td><td>"+escapeHtml(i.type)+"</td><td>"+escapeHtml(i.interfaceName)+"<br><span class='muted'>"+escapeHtml(i.protocolDescription)+"</span></td><td>"+hardwareAssignment(i)+"</td><td>"+(i.schedule.enabled?"Yes":"No")+"</td><td>"+(i.provenance==SensorProvenance::Simulated?"Simulated":"Physical")+"</td><td>"+String(sensorStateName(i.state))+"</td><td>"+(i.schedule.acquisitionMode==AcquisitionMode::Periodic?localeFormatter_.formatNumber(i.schedule.sampleIntervalMs,0)+" ms":"Event only")+"</td><td>"+measurementTypes(i)+"</td><td>"+escapeHtml(i.configurationSummary)+"</td></tr>"; }
     c += "</tbody></table></div></section>";
     sendPage("Sensors", "/sensors", c);
 }
