@@ -1706,6 +1706,8 @@ The initial publishing policy is intentionally simple:
 
 Future publishing policies may evolve independently from Sensor acquisition scheduling.
 
+Measurement publication currently follows best-effort delivery. Measurements are not buffered for replay during MQTT outages. Event Measurements such as rain gauge tips therefore share the same delivery semantics as periodic Measurements.
+
 ---
 
 # Runtime Model
