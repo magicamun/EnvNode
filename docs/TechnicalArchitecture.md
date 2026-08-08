@@ -152,6 +152,13 @@ Future examples include:
 - SensorManager
 - MeasurementPublisher
 
+Compiled Sensor capabilities are described by `SensorImplementationRegistry`. Static
+`SensorSlotConfiguration` objects currently define the desired runtime composition,
+including stable Slot identity, implementation, schedule and typed hardware assignment.
+`BoardCapabilities` performs the initial resource existence and compatibility checks.
+Concrete construction remains in one temporary composition-root boundary; a future
+SensorFactory can replace that boundary without changing SensorManager.
+
 The Application Layer must not contain:
 
 - hardware driver logic
