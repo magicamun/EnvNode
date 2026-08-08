@@ -11,6 +11,7 @@
 #include "SimulatedTemperatureSensor.h"
 #include "SimulatedHumiditySensor.h"
 #include "SimulatedPressureSensor.h"
+#include "AM2302Sensor.h"
 #include "LocaleFormatter.h"
 #include "RuntimeManager.h"
 #include "OTAService.h"
@@ -32,6 +33,7 @@ static WebService webService(serialLogger, configurationService, wifiService, mq
 static SimulatedTemperatureSensor simulatedTemperatureSensor(1, monotonicClock);
 static SimulatedHumiditySensor simulatedHumiditySensor(2, monotonicClock);
 static SimulatedPressureSensor simulatedPressureSensor(3, monotonicClock);
+static AM2302Sensor am2302Sensor(4, 27, monotonicClock, serialLogger);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager);
 
 void setup() {
@@ -44,6 +46,9 @@ void setup() {
     const SensorRegistrationResult pressureRegistrationResult = sensorManager.registerSensor(
         simulatedPressureSensor,
         SensorSchedule::periodic(10000));
+    const SensorRegistrationResult am2302RegistrationResult = sensorManager.registerSensor(
+        am2302Sensor,
+        SensorSchedule::periodic(5000));
 
     app.setup();
 
@@ -61,6 +66,11 @@ void setup() {
         serialLogger.printf(
             "Simulated pressure sensor registration failed: result=%d\n",
             static_cast<int>(pressureRegistrationResult));
+    }
+    if (am2302RegistrationResult != SensorRegistrationResult::Registered) {
+        serialLogger.printf(
+            "AM2302 sensor registration failed: result=%d\n",
+            static_cast<int>(am2302RegistrationResult));
     }
 }
 
