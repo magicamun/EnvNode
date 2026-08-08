@@ -20,6 +20,7 @@
 #include "SensorSlotConfiguration.h"
 #include "SensorFactory.h"
 #include "SensorRuntime.h"
+#include "HomeAssistantDiscoveryPublisher.h"
 
 using namespace WeatherStation;
 
@@ -40,9 +41,14 @@ static SensorRuntime sensorRuntime(
     sensorManager);
 static LocaleFormatter localeFormatter(configurationService);
 static RuntimeManager runtimeManager(serialLogger, &sensorRuntime);
+static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
+    serialLogger,
+    configurationService,
+    mqttService,
+    sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
 static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, runtimeManager, otaService);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager);
+static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager, homeAssistantDiscoveryPublisher);
 
 void setup() {
     configurationService.loadConfiguration();

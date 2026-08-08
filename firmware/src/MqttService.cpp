@@ -18,6 +18,9 @@ void MqttService::begin() {
     if (state_ != State::Uninitialized) return;
     state_ = State::WaitingForWiFi;
     client.setKeepAlive(60);
+    if (!client.setBufferSize(16384)) {
+        logger_.println("MQTT packet buffer allocation failed");
+    }
 }
 
 void MqttService::loop() {

@@ -20,9 +20,7 @@ public:
     void emit(const Measurement& measurement) override;
 
 private:
-    static const char* measurementTypeTopic(MeasurementType type);
     static const char* qualityName(MeasurementQuality quality);
-    static String topicSafeDeviceName(const String& deviceName);
     static String serializePayload(
         const Measurement& measurement,
         const String& timestamp,

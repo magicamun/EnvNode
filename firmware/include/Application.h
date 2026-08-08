@@ -8,12 +8,13 @@
 #include "SensorManager.h"
 #include "RuntimeManager.h"
 #include "Logger.h"
+#include "IDiscoveryPublisher.h"
 
 namespace WeatherStation {
 
 class Application {
 public:
-    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager);
+    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher);
 
     void setup(bool configurationAlreadyLoaded = false);
     void loop();
@@ -27,6 +28,7 @@ private:
     ITimeService& timeService_;
     SensorManager& sensorManager_;
     RuntimeManager& runtimeManager_;
+    IDiscoveryPublisher& discoveryPublisher_;
     bool timeSyncLogged_ = false;
 };
 

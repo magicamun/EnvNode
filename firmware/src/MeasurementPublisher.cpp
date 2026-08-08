@@ -1,18 +1,11 @@
 #include "MeasurementPublisher.h"
 #include "UnitConverter.h"
+#include "MqttTopic.h"
 
 namespace WeatherStation {
 namespace {
 
 const bool RetainMeasurements = false;
-
-bool isTopicSafeCharacter(char character) {
-    return (character >= 'a' && character <= 'z')
-        || (character >= 'A' && character <= 'Z')
-        || (character >= '0' && character <= '9')
-        || character == '_'
-        || character == '-';
-}
 
 } // namespace
 
@@ -30,13 +23,13 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
         return;
     }
 
-    const char* typeTopic = measurementTypeTopic(measurement.type);
+    const char* typeTopic = mqttMeasurementTypeTopic(measurement.type);
     if (typeTopic == nullptr) {
         return;
     }
 
     const Configuration& configuration = configurationService_.getConfiguration();
-    const String deviceName = topicSafeDeviceName(configuration.device.name);
+    const String deviceName = mqttTopicSafeDeviceName(configuration.device.name);
     const String topic = String("weatherstation/") + deviceName + "/sensor/"
         + String(static_cast<unsigned int>(measurement.source)) + "/" + typeTopic;
     const String timestamp = timeService_.iso8601Local(measurement.timestamp);
@@ -67,32 +60,6 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
     mqttService_.publish(topic.c_str(), payload.c_str(), RetainMeasurements);
 }
 
-const char* MeasurementPublisher::measurementTypeTopic(MeasurementType type) {
-    switch (type) {
-        case MeasurementType::Temperature:
-            return "temperature";
-        case MeasurementType::RelativeHumidity:
-            return "relative_humidity";
-        case MeasurementType::AtmosphericPressure:
-            return "atmospheric_pressure";
-        case MeasurementType::SolarIrradiance:
-            return "solar_irradiance";
-        case MeasurementType::SolarCellTemperature:
-            return "solar_cell_temperature";
-        case MeasurementType::RainDetectorLevel:
-            return "rain_detector_level";
-        case MeasurementType::RainDetectorWet:
-            return "rain_detector_wet";
-        case MeasurementType::RainGaugeTip:
-            return "rain_gauge_tip";
-        case MeasurementType::RainfallIncrement:
-            return "rainfall_increment";
-        case MeasurementType::Unknown:
-        default:
-            return nullptr;
-    }
-}
-
 const char* MeasurementPublisher::qualityName(MeasurementQuality quality) {
     switch (quality) {
         case MeasurementQuality::Good:
@@ -104,22 +71,6 @@ const char* MeasurementPublisher::qualityName(MeasurementQuality quality) {
         default:
             return "degraded";
     }
-}
-
-String MeasurementPublisher::topicSafeDeviceName(const String& deviceName) {
-    if (deviceName.isEmpty()) {
-        return "device";
-    }
-
-    String normalized;
-    normalized.reserve(deviceName.length());
-
-    for (size_t index = 0; index < deviceName.length(); ++index) {
-        const char character = deviceName.charAt(index);
-        normalized += isTopicSafeCharacter(character) ? character : '_';
-    }
-
-    return normalized;
 }
 
 String MeasurementPublisher::serializePayload(

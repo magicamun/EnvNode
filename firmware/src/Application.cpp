@@ -4,7 +4,7 @@
 
 namespace WeatherStation {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -13,6 +13,7 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , timeService_(timeService)
     , sensorManager_(sensorManager)
     , runtimeManager_(runtimeManager)
+    , discoveryPublisher_(discoveryPublisher)
     , timeSyncLogged_(false) {
 }
 
@@ -49,6 +50,7 @@ void Application::loop() {
     sensorManager_.loop();
     webService_.loop();
     mqttService_.loop();
+    discoveryPublisher_.loop();
     runtimeManager_.service();
 }
 

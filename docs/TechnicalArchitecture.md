@@ -326,6 +326,32 @@ MQTT connectivity may become available before valid system time exists.
 
 However, publication of timestamped Measurements should only begin after TimeService reports successful synchronization.
 
+### Home Assistant MQTT Discovery
+
+`HomeAssistantDiscoveryPublisher` is a representation-only component separate from Sensors,
+MeasurementPublisher and MqttService. It publishes one retained MQTT Device Discovery document
+to:
+
+    homeassistant/device/<stable-device-id>/config
+
+The stable Device identifier is derived from the ESP32 eFuse MAC and is independent from the
+editable Device name. Entity unique IDs combine that Device identifier, SensorId and
+MeasurementType, preserving identity across Sensor renames and implementation replacement.
+
+Discovery inspects active SensorManager metadata and points entities directly at the existing
+ADR-0010 state topics. Numeric payloads use `value_json.value`. Units are derived from the same
+Presentation configuration and UnitConverter symbols used by MeasurementPublisher. Discovery
+is republished only after MQTT connection, active composition changes, Device-name changes or
+Presentation Unit changes. The retained discovery policy is independent from Measurements,
+which remain non-retained.
+
+RainGaugeTip is adapted to an MQTT Event entity through a constant event JSON value template;
+the physical Measurement payload remains unchanged and non-retained. RainfallIncrement is
+exposed conservatively as a generic millimetre sensor without cumulative precipitation device
+or state classes because each message represents one increment rather than a total. No rainfall
+aggregation is performed. Per-Sensor availability and Home Assistant birth subscriptions are
+deferred because no corresponding authoritative runtime model is currently present.
+
 ---
 
 ## HTTP / Web Interface
