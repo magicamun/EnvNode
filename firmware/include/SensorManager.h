@@ -34,6 +34,10 @@ struct SensorRuntimeStatus {
     uint32_t acceptedMeasurementCount = 0;
     uint32_t rejectedMeasurementCount = 0;
     uint32_t preSyncDiscardCount = 0;
+    bool hasMeasurementActivity = false;
+    uint32_t lastMeasurementMonotonicMs = 0;
+    bool hasLastMeasurement = false;
+    time_t lastMeasurementEpoch = 0;
 };
 
 struct SensorRuntimeInfo {
@@ -142,6 +146,7 @@ private:
 
     SensorEntry* activeEntry_ = nullptr;
     time_t operationTimestamp_ = 0;
+    uint32_t operationMonotonicMs_ = 0;
     bool operationTimeSynchronized_ = false;
     uint32_t operationEmissionCount_ = 0;
 };

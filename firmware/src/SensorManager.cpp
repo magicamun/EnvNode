@@ -87,6 +87,7 @@ void SensorManager::clear() {
     started_ = false;
     sensorCount_ = 0;
     operationTimestamp_ = 0;
+    operationMonotonicMs_ = 0;
     operationTimeSynchronized_ = false;
     operationEmissionCount_ = 0;
     for (size_t index = 0; index < MaxSensorCount; ++index) {
@@ -194,6 +195,9 @@ void SensorManager::emit(const Measurement& measurementContent) {
         return;
     }
 
+    activeEntry_->status.hasMeasurementActivity = true;
+    activeEntry_->status.lastMeasurementMonotonicMs = operationMonotonicMs_;
+
     if (!operationTimeSynchronized_) {
         ++activeEntry_->status.preSyncDiscardCount;
         return;
@@ -209,6 +213,8 @@ void SensorManager::emit(const Measurement& measurementContent) {
         return;
     }
 
+    activeEntry_->status.hasLastMeasurement = true;
+    activeEntry_->status.lastMeasurementEpoch = completedMeasurement.timestamp;
     downstream_.emit(completedMeasurement);
     ++activeEntry_->status.acceptedMeasurementCount;
 }
@@ -232,6 +238,7 @@ bool SensorManager::deadlineReached(uint32_t nowMs, uint32_t deadlineMs) {
 void SensorManager::runOperation(SensorEntry& entry, OperationKind kind) {
     activeEntry_ = &entry;
     operationEmissionCount_ = 0;
+    operationMonotonicMs_ = monotonicClock_.nowMs();
     operationTimeSynchronized_ = timeService_.synchronized();
     operationTimestamp_ = operationTimeSynchronized_ ? timeService_.now() : 0;
 
@@ -241,6 +248,7 @@ void SensorManager::runOperation(SensorEntry& entry, OperationKind kind) {
 
     activeEntry_ = nullptr;
     operationTimestamp_ = 0;
+    operationMonotonicMs_ = 0;
     operationTimeSynchronized_ = false;
 
     observeResult(entry, kind, result);

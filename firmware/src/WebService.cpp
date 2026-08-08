@@ -14,7 +14,7 @@ namespace WeatherStation {
 namespace {
 
 const char SharedStyle[] PROGMEM = R"CSS(
-:root{--bg:#f3f6f8;--panel:#fff;--ink:#17212b;--muted:#637282;--line:#dbe3e8;--brand:#176b87;--brand2:#0f536a;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#123644;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#b8d0da;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#dbeaf0;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#1d5367;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help{color:var(--muted)}.help{font-size:13px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px;min-width:0;max-width:100%}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#e8edf0;max-width:100%;white-space:normal;overflow-wrap:anywhere}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #bfcbd2;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:normal}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.scroll{overflow-x:auto;max-width:100%;min-width:0}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}}
+:root{--bg:#f3f6f8;--panel:#fff;--ink:#17212b;--muted:#637282;--line:#dbe3e8;--brand:#176b87;--brand2:#0f536a;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#123644;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#b8d0da;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#dbeaf0;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#1d5367;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help{color:var(--muted)}.help{font-size:13px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px;min-width:0;max-width:100%}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#e8edf0;max-width:100%;white-space:normal;overflow-wrap:anywhere}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #bfcbd2;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:normal}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.sensor-technical,.sensor-last-measurement,.sensor-actions,.sensor-actions .button{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.scroll{overflow-x:auto;max-width:100%;min-width:0}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}}
 )CSS";
 
 struct TimezoneOption { const char* label; const char* value; };
@@ -53,6 +53,29 @@ const char* sensorStateName(SensorState state) {
         case SensorState::Failed: return "Failed";
         default: return "Unknown";
     }
+}
+
+String lastMeasurementDisplay(
+    const SensorRuntimeStatus& status,
+    LocaleFormatter& localeFormatter) {
+    if (!status.hasMeasurementActivity) return "—";
+
+    String result;
+    if (status.hasLastMeasurement) {
+        tm localTime;
+        const time_t timestamp = status.lastMeasurementEpoch;
+        result = localtime_r(&timestamp, &localTime) != nullptr
+            ? localeFormatter.formatDateTime(localTime)
+            : String("—");
+    } else {
+        result = "Pre-sync activity";
+    }
+
+    const uint32_t ageSeconds = (millis() - status.lastMeasurementMonotonicMs) / 1000UL;
+    result += "<br><span class='help'>";
+    result += localeFormatter.formatNumber(ageSeconds, 0);
+    result += " s ago</span>";
+    return result;
 }
 
 String timezoneSelect(const String& current) {
@@ -460,7 +483,7 @@ void WebService::handleSensors() {
     if (runtimeManager_.pendingAction() == RuntimeAction::RestartSensorManager) {
         c = "<div class='notice'><strong>Sensor restart required</strong><p>Saved sensor configuration differs from the active runtime composition.</p><form method='post' action='/sensors/apply'><button>Apply Sensor Changes</button></form></div>";
     }
-    c += "<section class='card'><h2>Sensor Slots</h2><p class='help'>Saving and runtime activation are separate actions. Enabled with None is valid and creates no runtime Sensor.</p><div class='scroll'><table><thead><tr><th>Slot</th><th>Name</th><th>Configured</th><th>Connection</th><th>Schedule</th><th>Runtime</th><th>State</th><th></th></tr></thead><tbody>";
+    c += "<section class='card'><h2>Sensor Slots</h2><p class='help'>Saving and runtime activation are separate actions. Enabled with None is valid and creates no runtime Sensor.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th class='sensor-technical'>Connection</th><th class='sensor-technical'>Schedule</th><th>Runtime</th><th class='sensor-technical'>State</th><th class='sensor-last-measurement'>Last Measurement</th><th class='sensor-actions'></th></tr></thead><tbody>";
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t slotIndex = 0; slotIndex < MaxSensorSlotCount; ++slotIndex) {
         const SensorSlotConfiguration& slot = configuration.sensorSlots[slotIndex];
@@ -475,10 +498,10 @@ void WebService::handleSensors() {
                 break;
             }
         }
-        c += "<tr><td>" + String(slot.slotId) + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
+        c += "<tr><td class='sensor-technical'>" + String(slot.slotId) + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
         c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
         c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
-        c += "</td><td>" + configuredHardwareAssignment(slot) + "</td><td>";
+        c += "</td><td class='sensor-technical'>" + configuredHardwareAssignment(slot) + "</td><td class='sensor-technical'>";
         c += slot.schedule.acquisitionMode == AcquisitionMode::Periodic
             ? String(slot.schedule.sampleIntervalMs) + " ms" : "Event only";
         c += "</td><td>";
@@ -491,8 +514,13 @@ void WebService::handleSensors() {
                 && runtime.schedule.sampleIntervalMs == slot.schedule.sampleIntervalMs
                 && sameHardwareAssignment(runtime.hardware, slot.hardware)));
         if (!runtimeMatches) c += "<br>" + badge("Sensor restart required", "warn");
-        c += "</td><td>" + String(hasRuntime ? sensorStateName(runtime.state) : "—") + "</td>";
-        c += "<td><a class='button' href='/sensors/edit?slot=" + String(slot.slotId) + "'>Configure</a></td></tr>";
+        c += "</td><td class='sensor-technical'>" + String(hasRuntime ? sensorStateName(runtime.state) : "—") + "</td><td class='sensor-last-measurement'>";
+        SensorRuntimeStatus runtimeStatus;
+        c += hasRuntime && sensorManager_.runtimeStatus(runtime.id, runtimeStatus)
+            ? lastMeasurementDisplay(runtimeStatus, localeFormatter_)
+            : String("—");
+        c += "</td>";
+        c += "<td class='sensor-actions'><a class='button' href='/sensors/edit?slot=" + String(slot.slotId) + "'>Configure</a></td></tr>";
     }
     c += "</tbody></table></div></section>";
     sendPage("Sensors", "/sensors", c);
