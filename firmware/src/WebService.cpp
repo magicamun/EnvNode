@@ -178,6 +178,24 @@ bool sameHardwareAssignment(
         || first.gpio.number == second.gpio.number;
 }
 
+bool gpioAssignedToOtherEnabledSlot(
+    const Configuration& configuration,
+    SensorId editedSlotId,
+    GpioResource gpio) {
+    const HardwareResourceAssignment candidate =
+        HardwareResourceAssignment::gpioResource(gpio);
+    for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        const SensorSlotConfiguration& other = configuration.sensorSlots[index];
+        if (other.slotId == editedSlotId
+            || !other.enabled
+            || other.implementation == SensorImplementation::None) {
+            continue;
+        }
+        if (exclusiveHardwareResourceConflict(other.hardware, candidate)) return true;
+    }
+    return false;
+}
+
 String implementationMeasurements(const SensorImplementationMetadata* metadata) {
     if (metadata == nullptr || metadata->measurementTypeCount == 0) return "None";
     String result;
@@ -205,19 +223,99 @@ String effectiveConnectionMode(bool setupAccessPoint) {
         : String("—");
 }
 
+bool runtimeSupportsMeasurement(const SensorRuntimeInfo& info, MeasurementType type) {
+    switch (type) {
+        case MeasurementType::Temperature: return info.supportsTemperature;
+        case MeasurementType::RelativeHumidity: return info.supportsRelativeHumidity;
+        case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
+        case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
+        case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
+        case MeasurementType::RainDetectorLevel: return info.supportsRainDetectorLevel;
+        case MeasurementType::RainDetectorWet: return info.supportsRainDetectorWet;
+        case MeasurementType::RainGaugeTip: return info.supportsRainGaugeTip;
+        case MeasurementType::RainfallIncrement: return info.supportsRainfallIncrement;
+        default: return false;
+    }
+}
+
+const char* measurementQualityName(MeasurementQuality quality) {
+    switch (quality) {
+        case MeasurementQuality::Good: return "Good";
+        case MeasurementQuality::Estimated: return "Estimated";
+        case MeasurementQuality::Degraded: return "Degraded";
+        default: return "—";
+    }
+}
+
+String presentedMeasurementValue(
+    const Measurement& measurement,
+    const Configuration& configuration,
+    LocaleFormatter& localeFormatter) {
+    if (!measurement.valid) return "Invalid";
+    const MeasurementTypeMetadata& metadata = measurementTypeMetadata(measurement.type);
+    switch (measurement.value.kind()) {
+        case ValueKind::FloatingPoint: {
+            float canonicalValue = 0.0F;
+            if (!measurement.value.tryGetFloatingPoint(canonicalValue)) return "Invalid";
+            PresentationUnit unit = configuration.presentationUnitFor(measurement.type);
+            if (!supportsPresentationUnit(measurement.type, unit)) unit = metadata.defaultPresentationUnit;
+            float presentedValue = 0.0F;
+            if (!UnitConverter::convert(measurement.type, canonicalValue, unit, presentedValue)) {
+                return "Invalid";
+            }
+            String result = localeFormatter.formatNumber(
+                presentedValue, metadata.recommendedDisplayPrecision);
+            const char* symbol = UnitConverter::symbol(unit);
+            if (symbol != nullptr && symbol[0] != '\0') result += " " + String(symbol);
+            return result;
+        }
+        case ValueKind::Boolean: {
+            bool value = false;
+            return measurement.value.tryGetBoolean(value)
+                ? String(value ? "True" : "False") : String("Invalid");
+        }
+        case ValueKind::UnsignedInteger: {
+            uint32_t value = 0;
+            return measurement.value.tryGetUnsignedInteger(value)
+                ? localeFormatter.formatNumber(value, 0) : String("Invalid");
+        }
+        case ValueKind::None:
+            return metadata.semantics == MeasurementSemantics::Event ? String("Event") : String("—");
+        default:
+            return "Invalid";
+    }
+}
+
+String measurementTimeDisplay(
+    const MeasurementSnapshot& snapshot,
+    LocaleFormatter& localeFormatter) {
+    tm localTime;
+    const time_t timestamp = snapshot.measurement.timestamp;
+    if (localtime_r(&timestamp, &localTime) == nullptr) return "—";
+    String result = localeFormatter.formatDateTime(localTime);
+    result += "<br><span class='help'>";
+    result += localeFormatter.formatNumber(
+        (millis() - snapshot.acceptedMonotonicMs) / 1000UL, 0);
+    result += " s ago</span>";
+    return result;
+}
+
 } // namespace
 
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
-    SensorManager& sensorManager, RuntimeManager& runtimeManager, OTAService& otaService)
+    SensorManager& sensorManager, MeasurementSnapshotCache& measurementSnapshotCache,
+    RuntimeManager& runtimeManager, OTAService& otaService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
-      sensorManager_(sensorManager), runtimeManager_(runtimeManager), otaService_(otaService) {}
+      sensorManager_(sensorManager), measurementSnapshotCache_(measurementSnapshotCache),
+      runtimeManager_(runtimeManager), otaService_(otaService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
+    server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
     server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
@@ -352,7 +450,7 @@ String WebService::otaStatusHtml() const {
 }
 
 String WebService::navigationHtml(const char* active) const {
-    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
+    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
     String html;
     html.reserve(560);
     html = "<nav class='nav'>";
@@ -526,6 +624,46 @@ void WebService::handleSensors() {
     sendPage("Sensors", "/sensors", c);
 }
 
+void WebService::handleMeasurements() {
+    String content;
+    content.reserve(600 + sensorManager_.sensorCount() * 1200);
+    content = "<p class='help'>Current runtime snapshots only. Measurements are not stored as history.</p>";
+    const Configuration& configuration = configurationService_.getConfiguration();
+    for (size_t sensorIndex = 0; sensorIndex < sensorManager_.sensorCount(); ++sensorIndex) {
+        SensorRuntimeInfo runtime;
+        if (!sensorManager_.runtimeInfo(sensorIndex, runtime)) continue;
+        content += "<section class='card'><h2>Slot ";
+        content += localeFormatter_.formatNumber(runtime.id, 0);
+        content += " · ";
+        content += escapeHtml(runtime.name);
+        content += "</h2><p class='help'>";
+        content += escapeHtml(runtime.type);
+        content += "</p><div class='scroll'><table><thead><tr><th>Measurement</th><th>Current Value</th><th>Quality</th><th class='sensor-last-measurement'>Last Accepted</th></tr></thead><tbody>";
+        for (uint8_t typeValue = 1; typeValue <= SupportedMeasurementTypeCount; ++typeValue) {
+            const MeasurementType type = static_cast<MeasurementType>(typeValue);
+            if (!runtimeSupportsMeasurement(runtime, type)) continue;
+            MeasurementSnapshot snapshot;
+            const bool hasSnapshot = measurementSnapshotCache_.snapshot(runtime.id, type, snapshot);
+            content += "<tr><td>";
+            content += measurementTypeMetadata(type).displayName;
+            content += "</td><td class='sensor-technical'>";
+            content += hasSnapshot
+                ? presentedMeasurementValue(snapshot.measurement, configuration, localeFormatter_)
+                : String("—");
+            content += "</td><td class='sensor-technical'>";
+            content += hasSnapshot ? measurementQualityName(snapshot.measurement.quality) : "—";
+            content += "</td><td class='sensor-last-measurement'>";
+            content += hasSnapshot ? measurementTimeDisplay(snapshot, localeFormatter_) : String("—");
+            content += "</td></tr>";
+        }
+        content += "</tbody></table></div></section>";
+    }
+    if (sensorManager_.sensorCount() == 0) {
+        content += "<section class='card'><p>No active runtime Sensors.</p></section>";
+    }
+    sendPage("Measurements", "/measurements", content);
+}
+
 void WebService::handleSensorEdit() {
     const long requestedSlot = server_.arg("slot").toInt();
     if (requestedSlot < 1 || requestedSlot > static_cast<long>(MaxSensorSlotCount)) {
@@ -548,9 +686,17 @@ void WebService::handleSensorEdit() {
     }
     String gpioOptions;
     const BoardCapabilities& board = BoardCapabilities::current();
+    const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
-        if (gpio == nullptr || !gpio->available || gpio->reserved) continue;
+        if (gpio == nullptr) continue;
+        const HardwareResourceAssignment candidate =
+            HardwareResourceAssignment::gpioResource(gpio->resource);
+        if (board.validate(HardwareInterfaceKind::GPIO, candidate)
+                != HardwareResourceValidationResult::Valid
+            || gpioAssignedToOtherEnabledSlot(configuration, slot.slotId, gpio->resource)) {
+            continue;
+        }
         gpioOptions += "<option value='" + String(gpio->resource.number) + "'";
         if (slot.hardware.kind == HardwareResourceKind::GPIO
             && slot.hardware.gpio.number == gpio->resource.number) gpioOptions += " selected";

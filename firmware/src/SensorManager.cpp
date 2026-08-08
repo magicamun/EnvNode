@@ -12,10 +12,12 @@ const uint32_t MaximumScheduleIntervalMs = 0x7FFFFFFFUL;
 SensorManager::SensorManager(
     ITimeService& timeService,
     IMonotonicClock& monotonicClock,
-    IMeasurementSink& downstream)
+    IMeasurementSink& downstream,
+    IMeasurementObserver& measurementObserver)
     : timeService_(timeService)
     , monotonicClock_(monotonicClock)
-    , downstream_(downstream) {
+    , downstream_(downstream)
+    , measurementObserver_(measurementObserver) {
 }
 
 SensorRegistrationResult SensorManager::registerSensor(
@@ -83,6 +85,7 @@ void SensorManager::begin() {
 }
 
 void SensorManager::clear() {
+    measurementObserver_.clear();
     activeEntry_ = nullptr;
     started_ = false;
     sensorCount_ = 0;
@@ -215,6 +218,7 @@ void SensorManager::emit(const Measurement& measurementContent) {
 
     activeEntry_->status.hasLastMeasurement = true;
     activeEntry_->status.lastMeasurementEpoch = completedMeasurement.timestamp;
+    measurementObserver_.observe(completedMeasurement, operationMonotonicMs_);
     downstream_.emit(completedMeasurement);
     ++activeEntry_->status.acceptedMeasurementCount;
 }

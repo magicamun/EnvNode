@@ -62,7 +62,7 @@ const MeasurementTypeMetadata MeasurementMetadata[] = {
 constexpr size_t MeasurementMetadataCount =
     sizeof(MeasurementMetadata) / sizeof(MeasurementMetadata[0]);
 static_assert(MeasurementMetadataCount
-        == static_cast<size_t>(MeasurementType::RainfallIncrement) + 1,
+        == static_cast<size_t>(SupportedMeasurementTypeCount) + 1,
     "Measurement metadata must cover every MeasurementType");
 
 bool hasStructurallyValidPayload(const Measurement& measurement) {

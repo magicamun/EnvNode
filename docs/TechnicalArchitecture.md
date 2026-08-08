@@ -264,6 +264,18 @@ Translation of domain Measurements into MQTT topics and payloads belongs to Meas
 
 The initial MeasurementPublisher publishes every accepted Measurement without buffering, suppression or aggregation.
 
+### Measurement Snapshot Diagnostics
+
+`MeasurementSnapshotCache` is a passive observer at SensorManager's accepted-Measurement
+boundary. It retains only the latest completed canonical Measurement and monotonic acceptance
+time for each active SensorId and MeasurementType. Web diagnostics receive read-only access
+to these snapshots and apply Presentation Unit conversion only while rendering.
+
+The cache does not publish MQTT, own Sensor runtime, aggregate values, persist data or
+influence Measurement acceptance and delivery. It is cleared with the active Sensor runtime
+composition. MeasurementPublisher remains the authoritative Measurement publisher and the
+only downstream publishing sink.
+
 Topics use:
 
     weatherstation/<deviceName>/sensor/<sensorId>/<measurementType>
@@ -1573,14 +1585,15 @@ Conceptually:
                             | assign provenance
                             v
                  Completed canonical Measurement
-                            |
-                            v
-                  MeasurementPublisher
-                            |
-                            | select Presentation Unit
-                            | convert representation
-                            | attach unit metadata
-                            | serialize
+                            |--------------------------+
+                            |                          |
+                            v                          v
+                  MeasurementPublisher      MeasurementSnapshotCache
+                            |                          |
+                            | select Presentation Unit| latest snapshot only
+                            | convert representation  | read-only diagnostics
+                            | attach unit metadata    |
+                            | serialize               |
                             v
                       MqttService
                             |

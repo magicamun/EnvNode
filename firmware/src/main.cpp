@@ -21,6 +21,7 @@
 #include "SensorFactory.h"
 #include "SensorRuntime.h"
 #include "HomeAssistantDiscoveryPublisher.h"
+#include "MeasurementSnapshotCache.h"
 
 using namespace WeatherStation;
 
@@ -31,7 +32,12 @@ static TimeService timeService(serialLogger, configurationService, wifiService);
 static MqttService mqttService(serialLogger, configurationService, wifiService);
 static ArduinoMonotonicClock monotonicClock;
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
-static SensorManager sensorManager(timeService, monotonicClock, measurementPublisher);
+static MeasurementSnapshotCache measurementSnapshotCache;
+static SensorManager sensorManager(
+    timeService,
+    monotonicClock,
+    measurementPublisher,
+    measurementSnapshotCache);
 static SensorFactory firstSensorFactory(monotonicClock, serialLogger);
 static SensorFactory secondSensorFactory(monotonicClock, serialLogger);
 static SensorRuntime sensorRuntime(
@@ -47,7 +53,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, runtimeManager, otaService);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, measurementSnapshotCache, runtimeManager, otaService);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager, homeAssistantDiscoveryPublisher);
 
 void setup() {

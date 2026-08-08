@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "IMeasurementSink.h"
+#include "IMeasurementObserver.h"
 #include "IMonotonicClock.h"
 #include "ISensor.h"
 #include "ITimeService.h"
@@ -89,7 +90,11 @@ struct SensorRegistrationMetadata {
 
 class SensorManager : public IMeasurementSink {
 public:
-    SensorManager(ITimeService& timeService, IMonotonicClock& monotonicClock, IMeasurementSink& downstream);
+    SensorManager(
+        ITimeService& timeService,
+        IMonotonicClock& monotonicClock,
+        IMeasurementSink& downstream,
+        IMeasurementObserver& measurementObserver);
 
     SensorRegistrationResult registerSensor(ISensor& sensor, const SensorSchedule& schedule);
     SensorRegistrationResult registerSensor(
@@ -140,6 +145,7 @@ private:
     ITimeService& timeService_;
     IMonotonicClock& monotonicClock_;
     IMeasurementSink& downstream_;
+    IMeasurementObserver& measurementObserver_;
     SensorEntry entries_[MaxSensorCount];
     size_t sensorCount_ = 0;
     bool started_ = false;

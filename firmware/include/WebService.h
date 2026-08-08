@@ -8,6 +8,7 @@
 #include "IMqttService.h"
 #include "ITimeService.h"
 #include "SensorManager.h"
+#include "MeasurementSnapshotCache.h"
 #include "LocaleFormatter.h"
 #include "RuntimeManager.h"
 #include "ConfigurationRuntimeEffect.h"
@@ -26,6 +27,7 @@ public:
         ITimeService& timeService,
         LocaleFormatter& localeFormatter,
         SensorManager& sensorManager,
+        MeasurementSnapshotCache& measurementSnapshotCache,
         RuntimeManager& runtimeManager,
         OTAService& otaService);
 
@@ -35,6 +37,7 @@ public:
 private:
     void handleStatus();
     void handleSensors();
+    void handleMeasurements();
     void handleSensorEdit();
     void handleSensorSave();
     void handleSensorApply();
@@ -81,6 +84,7 @@ private:
     ITimeService& timeService_;
     LocaleFormatter& localeFormatter_;
     SensorManager& sensorManager_;
+    MeasurementSnapshotCache& measurementSnapshotCache_;
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;
     WebServer server_{80};

@@ -18,6 +18,9 @@ enum class MeasurementType : uint8_t {
     RainfallIncrement,
 };
 
+constexpr uint8_t SupportedMeasurementTypeCount =
+    static_cast<uint8_t>(MeasurementType::RainfallIncrement);
+
 enum class MeasurementSemantics : uint8_t {
     Unknown,
     State,
