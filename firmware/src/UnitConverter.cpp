@@ -37,6 +37,7 @@ bool UnitConverter::convert(
         case PresentationUnit::Pascal:
         case PresentationUnit::WattPerSquareMetre:
         case PresentationUnit::Ratio:
+        case PresentationUnit::Millimeter:
             presentationValue = canonicalValue;
             return true;
         case PresentationUnit::None:
@@ -56,6 +57,7 @@ const char* UnitConverter::symbol(PresentationUnit unit) {
         case PresentationUnit::Percent: return "%";
         case PresentationUnit::WattPerSquareMetre: return "W/m\xC2\xB2";
         case PresentationUnit::Ratio: return "ratio";
+        case PresentationUnit::Millimeter: return "mm";
         case PresentationUnit::None:
         default: return nullptr;
     }
@@ -72,6 +74,7 @@ const char* UnitConverter::displayName(PresentationUnit unit) {
         case PresentationUnit::Percent: return "Percent";
         case PresentationUnit::WattPerSquareMetre: return "Watt per square metre";
         case PresentationUnit::Ratio: return "Ratio";
+        case PresentationUnit::Millimeter: return "Millimetre";
         case PresentationUnit::None: return "None";
         default: return "Unknown";
     }
@@ -89,6 +92,7 @@ const char* UnitConverter::stableKey(PresentationUnit unit) {
         case PresentationUnit::Percent: return "percent";
         case PresentationUnit::WattPerSquareMetre: return "watt_per_square_metre";
         case PresentationUnit::Ratio: return "ratio";
+        case PresentationUnit::Millimeter: return "millimeter";
         default: return nullptr;
     }
 }
@@ -98,7 +102,7 @@ bool UnitConverter::parseStableKey(const char* key, PresentationUnit& unit) {
         return false;
     }
     for (uint8_t value = static_cast<uint8_t>(PresentationUnit::None);
-         value <= static_cast<uint8_t>(PresentationUnit::Ratio);
+         value <= static_cast<uint8_t>(PresentationUnit::Millimeter);
          ++value) {
         const PresentationUnit candidate = static_cast<PresentationUnit>(value);
         const char* candidateKey = stableKey(candidate);

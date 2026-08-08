@@ -21,11 +21,27 @@ struct AM2302Configuration {
     GpioResource gpio;
 };
 
+struct RainGaugeConfiguration {
+    RainGaugeConfiguration(
+        GpioResource inputGpio = GpioResource(),
+        float rainfallMillimetersPerTip = 0.2794F,
+        uint32_t softwareDebounceMs = 50)
+        : gpio(inputGpio)
+        , millimetersPerTip(rainfallMillimetersPerTip)
+        , debounceMs(softwareDebounceMs) {
+    }
+
+    GpioResource gpio;
+    float millimetersPerTip;
+    uint32_t debounceMs;
+};
+
 struct SensorImplementationConfiguration {
     SimulatedTemperatureConfiguration simulatedTemperature;
     SimulatedHumidityConfiguration simulatedHumidity;
     SimulatedPressureConfiguration simulatedPressure;
     AM2302Configuration am2302;
+    RainGaugeConfiguration rainGauge;
 };
 
 struct SensorSlotConfiguration {

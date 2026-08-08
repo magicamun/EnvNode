@@ -15,6 +15,7 @@ enum class MeasurementType {
     RainDetectorLevel,
     RainDetectorWet,
     RainGaugeTip,
+    RainfallIncrement,
 };
 
 struct MeasurementTypeMetadata {

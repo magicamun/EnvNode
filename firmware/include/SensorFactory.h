@@ -10,6 +10,7 @@
 #include "SimulatedPressureSensor.h"
 #include "SimulatedTemperatureSensor.h"
 #include "SensorSlotConfiguration.h"
+#include "RainGaugeSensor.h"
 
 namespace WeatherStation {
 
@@ -38,7 +39,8 @@ private:
         SimulatedTemperatureSensor,
         SimulatedHumiditySensor,
         SimulatedPressureSensor,
-        AM2302Sensor>::type;
+        AM2302Sensor,
+        RainGaugeSensor>::type;
 
     void destroy(size_t storageIndex);
 

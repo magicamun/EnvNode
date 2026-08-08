@@ -85,6 +85,8 @@ const char* MeasurementPublisher::measurementTypeTopic(MeasurementType type) {
             return "rain_detector_wet";
         case MeasurementType::RainGaugeTip:
             return "rain_gauge_tip";
+        case MeasurementType::RainfallIncrement:
+            return "rainfall_increment";
         case MeasurementType::Unknown:
         default:
             return nullptr;

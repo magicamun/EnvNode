@@ -1428,6 +1428,14 @@ When a periodic deadline becomes due, SensorManager latches one pending sample e
 
 Hardware-near averaging, filtering, debounce, oversampling and compensation remain Sensor responsibilities. SensorManager performs no generic smoothing and owns no publishing interval or MQTT policy.
 
+RainGaugeSensor is an EventOnly GPIO Sensor. A falling-edge interrupt performs only
+software-debounced pending-tip accounting. Cooperative `service(output)` drains pending
+tips and emits exactly one value-free RainGaugeTip plus one calibrated RainfallIncrement
+in millimetres for each accepted physical tip. Both Measurements pass through one
+SensorManager operation and therefore receive the same assigned timestamp. The Sensor
+does not aggregate rainfall, retain history or provide delivery guarantees. Its interrupt
+is detached when factory-owned placement storage is destroyed during runtime rebuild.
+
 ---
 
 ## Sensor Contract
@@ -1507,6 +1515,7 @@ Examples include:
 - Temperature requires FloatingPoint
 - RainDetectorWet requires Boolean
 - RainGaugeTip requires None
+- RainfallIncrement requires FloatingPoint in canonical millimetres
 
 SensorManager does not validate hardware-specific ranges or physical plausibility.
 

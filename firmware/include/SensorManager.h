@@ -56,6 +56,7 @@ struct SensorRuntimeInfo {
     bool supportsRainDetectorLevel = false;
     bool supportsRainDetectorWet = false;
     bool supportsRainGaugeTip = false;
+    bool supportsRainfallIncrement = false;
 };
 
 struct SensorRegistrationMetadata {

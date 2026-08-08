@@ -35,6 +35,7 @@ private:
     void ensurePreferencesStarted();
     bool persistString(const char* key, const String& value);
     bool persistUInt(const char* key, uint32_t value);
+    bool persistFloat(const char* key, float value);
     PresentationUnit loadPresentationUnit(const char* key, MeasurementType type);
     bool validateDeviceName(const String& deviceName) const;
     bool validateWifiSSID(const String& ssid) const;

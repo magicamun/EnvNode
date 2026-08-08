@@ -115,8 +115,8 @@ bool SensorRuntime::rebuild(size_t& activeSensorCount, const char*& failureReaso
         return false;
     }
 
-    sensorManager_.begin();
     activeFactory_->destroyAll();
+    sensorManager_.begin();
     SensorFactory* previousFactory = activeFactory_;
     activeFactory_ = inactiveFactory_;
     inactiveFactory_ = previousFactory;

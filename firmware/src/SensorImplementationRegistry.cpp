@@ -5,7 +5,7 @@
 namespace WeatherStation {
 namespace {
 
-constexpr size_t ImplementationCount = 5;
+constexpr size_t ImplementationCount = 6;
 
 const SensorImplementationMetadata* implementations() {
     static const SensorImplementationMetadata registeredImplementations[ImplementationCount] = {
@@ -29,6 +29,10 @@ const SensorImplementationMetadata* implementations() {
             SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity}, 2,
             HardwareInterfaceKind::GPIO, "Custom single-wire protocol", SensorSchedule::periodic(5000),
             "AM2302Configuration: GPIO resource"},
+        {SensorImplementation::RainGauge, "rain_gauge", "Rain Gauge",
+            SensorProvenance::Physical, {MeasurementType::RainGaugeTip, MeasurementType::RainfallIncrement}, 2,
+            HardwareInterfaceKind::GPIO, "Digital interrupt", SensorSchedule::eventOnly(true),
+            "RainGaugeConfiguration: GPIO, millimetres per tip, debounce"},
     };
     return registeredImplementations;
 }

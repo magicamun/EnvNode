@@ -15,6 +15,7 @@ enum class PresentationUnit : uint8_t {
     Percent = 7,
     WattPerSquareMetre = 8,
     Ratio = 9,
+    Millimeter = 10,
 };
 
 } // namespace WeatherStation

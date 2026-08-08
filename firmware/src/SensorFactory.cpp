@@ -45,9 +45,12 @@ ISensor* SensorFactory::create(
         result = SensorFactoryResult::InvalidResource;
         return nullptr;
     }
-    if (slot.implementation == SensorImplementation::AM2302
+    if ((slot.implementation == SensorImplementation::AM2302
+            || slot.implementation == SensorImplementation::RainGauge)
         && (slot.hardware.kind != HardwareResourceKind::GPIO
-            || slot.implementationConfiguration.am2302.gpio.number != slot.hardware.gpio.number)) {
+            || (slot.implementation == SensorImplementation::AM2302
+                ? slot.implementationConfiguration.am2302.gpio.number
+                : slot.implementationConfiguration.rainGauge.gpio.number) != slot.hardware.gpio.number)) {
         result = SensorFactoryResult::InvalidResource;
         return nullptr;
     }
@@ -69,6 +72,12 @@ ISensor* SensorFactory::create(
                 slot.slotId,
                 slot.implementationConfiguration.am2302.gpio.number,
                 monotonicClock_,
+                logger_);
+            break;
+        case SensorImplementation::RainGauge:
+            sensor = new (target) RainGaugeSensor(
+                slot.slotId,
+                slot.implementationConfiguration.rainGauge,
                 logger_);
             break;
         case SensorImplementation::None:
@@ -95,6 +104,9 @@ void SensorFactory::destroy(size_t storageIndex) {
             break;
         case SensorImplementation::AM2302:
             static_cast<AM2302Sensor*>(target)->~AM2302Sensor();
+            break;
+        case SensorImplementation::RainGauge:
+            static_cast<RainGaugeSensor*>(target)->~RainGaugeSensor();
             break;
         case SensorImplementation::None:
         default:

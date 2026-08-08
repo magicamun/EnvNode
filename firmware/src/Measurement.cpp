@@ -20,6 +20,7 @@ const PresentationUnit RainLevelUnits[] = {
     PresentationUnit::Ratio,
     PresentationUnit::Percent,
 };
+const PresentationUnit RainfallIncrementUnits[] = {PresentationUnit::Millimeter};
 
 template <size_t Size>
 constexpr uint8_t unitCount(const PresentationUnit (&)[Size]) {
@@ -50,6 +51,9 @@ const MeasurementTypeMetadata RainDetectorWetMetadata = {
     ValueKind::Boolean, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
 const MeasurementTypeMetadata RainGaugeTipMetadata = {
     ValueKind::None, PresentationUnit::None, NoUnit, unitCount(NoUnit), PresentationUnit::None};
+const MeasurementTypeMetadata RainfallIncrementMetadata = {
+    ValueKind::FloatingPoint, PresentationUnit::Millimeter,
+    RainfallIncrementUnits, unitCount(RainfallIncrementUnits), PresentationUnit::Millimeter};
 
 bool hasStructurallyValidPayload(const Measurement& measurement) {
     if (!isSupportedMeasurementType(measurement.type)) {
@@ -77,6 +81,7 @@ bool isSupportedMeasurementType(MeasurementType type) {
         case MeasurementType::RainDetectorLevel:
         case MeasurementType::RainDetectorWet:
         case MeasurementType::RainGaugeTip:
+        case MeasurementType::RainfallIncrement:
             return true;
         case MeasurementType::Unknown:
         default:
@@ -102,6 +107,8 @@ const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type) {
             return RainDetectorWetMetadata;
         case MeasurementType::RainGaugeTip:
             return RainGaugeTipMetadata;
+        case MeasurementType::RainfallIncrement:
+            return RainfallIncrementMetadata;
         case MeasurementType::Unknown:
         default:
             return UnknownMetadata;

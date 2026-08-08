@@ -4,6 +4,7 @@
 #include <IPAddress.h>
 #include "SensorImplementationRegistry.h"
 #include "HardwareResources.h"
+#include <cmath>
 
 namespace WeatherStation {
 
@@ -97,6 +98,7 @@ void ConfigurationService::initializeSensorDefaults() {
         slot.schedule = SensorSchedule::eventOnly(false);
         slot.hardware = HardwareResourceAssignment::none();
         slot.implementationConfiguration.am2302 = AM2302Configuration();
+        slot.implementationConfiguration.rainGauge = RainGaugeConfiguration();
     }
 
     SensorSlotConfiguration& temperature = configuration_.sensorSlots[0];
@@ -212,10 +214,15 @@ void ConfigurationService::loadSensorSlots() {
         loaded[index].schedule.enabled = loaded[index].enabled;
         const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
             sensorKey(expectedId, "gpio").c_str(), 0));
-        loaded[index].hardware = loaded[index].implementation == SensorImplementation::AM2302
+        loaded[index].hardware = (loaded[index].implementation == SensorImplementation::AM2302
+                || loaded[index].implementation == SensorImplementation::RainGauge)
             ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
             : HardwareResourceAssignment::none();
         loaded[index].implementationConfiguration.am2302 = AM2302Configuration(GpioResource(gpio));
+        loaded[index].implementationConfiguration.rainGauge = RainGaugeConfiguration(
+            GpioResource(gpio),
+            preferences_.getFloat(sensorKey(expectedId, "rgmm").c_str(), 0.2794F),
+            preferences_.getUInt(sensorKey(expectedId, "rgdeb").c_str(), 50));
     }
 
     if (validateSensorSlots(loaded)) {
@@ -300,6 +307,11 @@ bool ConfigurationService::persistString(const char* key, const String& value) {
 bool ConfigurationService::persistUInt(const char* key, uint32_t value) {
     ensurePreferencesStarted();
     return preferences_.putUInt(key, value);
+}
+
+bool ConfigurationService::persistFloat(const char* key, float value) {
+    ensurePreferencesStarted();
+    return preferences_.putFloat(key, value) > 0;
 }
 
 bool ConfigurationService::validateDeviceName(const String& deviceName) const {
@@ -600,9 +612,20 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
     }
     if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware)
         != HardwareResourceValidationResult::Valid) return false;
-    return slot.implementation != SensorImplementation::AM2302
-        || (slot.hardware.kind == HardwareResourceKind::GPIO
-            && slot.implementationConfiguration.am2302.gpio.number == slot.hardware.gpio.number);
+    if (slot.implementation == SensorImplementation::AM2302) {
+        return slot.hardware.kind == HardwareResourceKind::GPIO
+            && slot.implementationConfiguration.am2302.gpio.number == slot.hardware.gpio.number;
+    }
+    if (slot.implementation == SensorImplementation::RainGauge) {
+        return slot.hardware.kind == HardwareResourceKind::GPIO
+            && slot.implementationConfiguration.rainGauge.gpio.number == slot.hardware.gpio.number
+            && std::isfinite(slot.implementationConfiguration.rainGauge.millimetersPerTip)
+            && slot.implementationConfiguration.rainGauge.millimetersPerTip > 0.0F
+            && slot.implementationConfiguration.rainGauge.millimetersPerTip <= 100.0F
+            && slot.implementationConfiguration.rainGauge.debounceMs >= 1
+            && slot.implementationConfiguration.rainGauge.debounceMs <= 5000;
+    }
+    return true;
 }
 
 bool ConfigurationService::validateSensorSlots(const SensorSlotConfiguration* slots) const {
@@ -632,7 +655,11 @@ bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot
             slot.schedule.acquisitionMode == AcquisitionMode::Periodic ? 1 : 0)
         && persistUInt(sensorKey(id, "int").c_str(), slot.schedule.sampleIntervalMs)
         && persistUInt(sensorKey(id, "gpio").c_str(),
-            slot.hardware.kind == HardwareResourceKind::GPIO ? slot.hardware.gpio.number : 0);
+            slot.hardware.kind == HardwareResourceKind::GPIO ? slot.hardware.gpio.number : 0)
+        && persistFloat(sensorKey(id, "rgmm").c_str(),
+            slot.implementationConfiguration.rainGauge.millimetersPerTip)
+        && persistUInt(sensorKey(id, "rgdeb").c_str(),
+            slot.implementationConfiguration.rainGauge.debounceMs);
 }
 
 bool ConfigurationService::setSensorSlotConfiguration(const SensorSlotConfiguration& slot) {
