@@ -23,6 +23,10 @@ SensorId SimulatedHumiditySensor::id() const {
     return id_;
 }
 
+const char* SimulatedHumiditySensor::type() const {
+    return "Simulated Humidity";
+}
+
 SensorProvenance SimulatedHumiditySensor::provenance() const {
     return SensorProvenance::Simulated;
 }

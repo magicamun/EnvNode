@@ -32,6 +32,10 @@ SensorId SimulatedPressureSensor::id() const {
     return id_;
 }
 
+const char* SimulatedPressureSensor::type() const {
+    return "Simulated Pressure";
+}
+
 SensorProvenance SimulatedPressureSensor::provenance() const {
     return SensorProvenance::Simulated;
 }

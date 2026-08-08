@@ -39,16 +39,20 @@ static Application app(serialLogger, configurationService, wifiService, webServi
 void setup() {
     const SensorRegistrationResult temperatureRegistrationResult = sensorManager.registerSensor(
         simulatedTemperatureSensor,
-        SensorSchedule::periodic(5000));
+        SensorSchedule::periodic(5000),
+        SensorRegistrationMetadata("Simulated Temperature"));
     const SensorRegistrationResult humidityRegistrationResult = sensorManager.registerSensor(
         simulatedHumiditySensor,
-        SensorSchedule::periodic(5000));
+        SensorSchedule::periodic(5000),
+        SensorRegistrationMetadata("Simulated Humidity"));
     const SensorRegistrationResult pressureRegistrationResult = sensorManager.registerSensor(
         simulatedPressureSensor,
-        SensorSchedule::periodic(10000));
+        SensorSchedule::periodic(10000),
+        SensorRegistrationMetadata("Simulated Barometer"));
     const SensorRegistrationResult am2302RegistrationResult = sensorManager.registerSensor(
         am2302Sensor,
-        SensorSchedule::periodic(5000));
+        SensorSchedule::periodic(5000),
+        SensorRegistrationMetadata("Outside"));
 
     app.setup();
 

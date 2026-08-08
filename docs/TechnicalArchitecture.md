@@ -241,9 +241,9 @@ The initial MeasurementPublisher publishes every accepted Measurement without bu
 
 Topics use:
 
-    weatherstation/<deviceName>/measurement/<measurementType>
+    weatherstation/<deviceName>/sensor/<sensorId>/<measurementType>
 
-with deterministic topic-safe device-name normalization and stable lowercase MeasurementType names.
+with deterministic topic-safe device-name normalization, decimal SensorId serialization and stable lowercase MeasurementType names. Sensor names and implementation types are metadata and never form part of the external address.
 
 Payloads use JSON with the Measurement timestamp formatted from its assigned epoch as local ISO-8601 including the UTC offset.
 

@@ -23,6 +23,10 @@ SensorId SimulatedTemperatureSensor::id() const {
     return id_;
 }
 
+const char* SimulatedTemperatureSensor::type() const {
+    return "Simulated Temperature";
+}
+
 SensorProvenance SimulatedTemperatureSensor::provenance() const {
     return SensorProvenance::Simulated;
 }

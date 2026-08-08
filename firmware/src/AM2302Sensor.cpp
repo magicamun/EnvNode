@@ -29,6 +29,10 @@ SensorId AM2302Sensor::id() const {
     return id_;
 }
 
+const char* AM2302Sensor::type() const {
+    return "AM2302 / DHT22";
+}
+
 SensorProvenance AM2302Sensor::provenance() const {
     return SensorProvenance::Physical;
 }

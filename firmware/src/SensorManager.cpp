@@ -19,6 +19,13 @@ SensorManager::SensorManager(
 SensorRegistrationResult SensorManager::registerSensor(
     ISensor& sensor,
     const SensorSchedule& schedule) {
+    return registerSensor(sensor, schedule, SensorRegistrationMetadata{});
+}
+
+SensorRegistrationResult SensorManager::registerSensor(
+    ISensor& sensor,
+    const SensorSchedule& schedule,
+    const SensorRegistrationMetadata& metadata) {
     if (started_) {
         return SensorRegistrationResult::ManagerAlreadyStarted;
     }
@@ -42,6 +49,7 @@ SensorRegistrationResult SensorManager::registerSensor(
     SensorEntry& entry = entries_[sensorCount_++];
     entry.sensor = &sensor;
     entry.registeredId = sensor.id();
+    entry.name = metadata.name == nullptr ? "" : metadata.name;
     entry.schedule = schedule;
     return SensorRegistrationResult::Registered;
 }
@@ -129,6 +137,8 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     if (index >= sensorCount_) return false;
     const SensorEntry& entry = entries_[index];
     info.id = entry.registeredId;
+    info.name = entry.name;
+    info.type = entry.sensor->type();
     info.provenance = entry.sensor->provenance();
     info.state = entry.sensor->state();
     info.schedule = entry.schedule;

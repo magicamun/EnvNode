@@ -12,6 +12,7 @@ public:
     SimulatedPressureSensor(SensorId id, IMonotonicClock& monotonicClock);
 
     SensorId id() const override;
+    const char* type() const override;
     SensorProvenance provenance() const override;
     SensorState state() const override;
     bool supports(MeasurementType type) const override;

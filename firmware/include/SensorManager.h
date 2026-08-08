@@ -36,6 +36,8 @@ struct SensorRuntimeStatus {
 
 struct SensorRuntimeInfo {
     SensorId id = InvalidSensorId;
+    const char* name = "";
+    const char* type = "";
     SensorProvenance provenance = SensorProvenance::Physical;
     SensorState state = SensorState::Unknown;
     SensorSchedule schedule;
@@ -49,11 +51,23 @@ struct SensorRuntimeInfo {
     bool supportsRainGaugeTip = false;
 };
 
+struct SensorRegistrationMetadata {
+    explicit SensorRegistrationMetadata(const char* sensorName = "")
+        : name(sensorName) {
+    }
+
+    const char* name;
+};
+
 class SensorManager : public IMeasurementSink {
 public:
     SensorManager(ITimeService& timeService, IMonotonicClock& monotonicClock, IMeasurementSink& downstream);
 
     SensorRegistrationResult registerSensor(ISensor& sensor, const SensorSchedule& schedule);
+    SensorRegistrationResult registerSensor(
+        ISensor& sensor,
+        const SensorSchedule& schedule,
+        const SensorRegistrationMetadata& metadata);
     void begin();
     void loop();
 
@@ -67,6 +81,7 @@ private:
     struct SensorEntry {
         ISensor* sensor = nullptr;
         SensorId registeredId = InvalidSensorId;
+        const char* name = "";
         SensorSchedule schedule;
         uint32_t nextDueMs = 0;
         bool samplePending = false;
