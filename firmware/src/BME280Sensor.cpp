@@ -14,9 +14,11 @@ constexpr float MaximumPressurePascal = 110000.0F;
 
 } // namespace
 
-BME280Sensor::BME280Sensor(SensorId id, uint8_t i2cAddress, ILogger& logger)
+BME280Sensor::BME280Sensor(SensorId id, I2CResource resource,
+    I2CBusManager& i2cBusManager, ILogger& logger)
     : id_(id)
-    , i2cAddress_(i2cAddress)
+    , resource_(resource)
+    , i2cBusManager_(i2cBusManager)
     , logger_(logger) {
 }
 
@@ -33,10 +35,13 @@ bool BME280Sensor::supports(MeasurementType type) const {
 
 void BME280Sensor::begin() {
     state_ = SensorState::Initializing;
-    logger_.printf("BME280 sensor %u initializing on I2C address 0x%02X\n", id_, i2cAddress_);
-    if (!bme280_.begin(i2cAddress_)) {
+    logger_.printf("BME280 sensor %u initializing on %s address 0x%02X\n",
+        id_, i2cBusName(resource_.bus), resource_.address);
+    TwoWire* wire = i2cBusManager_.wire(resource_.bus);
+    if (wire == nullptr || !bme280_.begin(resource_.address, wire)) {
         state_ = SensorState::Failed;
-        logger_.printf("BME280 sensor %u initialization failed on I2C address 0x%02X\n", id_, i2cAddress_);
+        logger_.printf("BME280 sensor %u initialization failed on %s address 0x%02X\n",
+            id_, i2cBusName(resource_.bus), resource_.address);
         return;
     }
     state_ = SensorState::Ready;

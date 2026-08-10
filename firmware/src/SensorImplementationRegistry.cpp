@@ -36,7 +36,7 @@ const SensorImplementationMetadata* implementations() {
         {SensorImplementation::BME280, "bme280", "BME280",
             SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::AtmosphericPressure}, 3,
             HardwareInterfaceKind::I2C, "I2C", SensorSchedule::periodic(5000),
-            "BME280Configuration: I2C0 address"},
+            "BME280Configuration: I2C bus and address"},
     };
     return registeredImplementations;
 }

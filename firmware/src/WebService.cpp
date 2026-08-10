@@ -162,7 +162,8 @@ String hardwareAssignment(const SensorRuntimeInfo& info) {
         return "GPIO" + String(info.hardware.gpio.number);
     }
     if (info.hardware.kind == HardwareResourceKind::I2C) {
-        return "I2C0 / 0x" + String(info.hardware.i2c.address, HEX);
+        return String(i2cBusName(info.hardware.i2c.bus)) + " / 0x"
+            + String(info.hardware.i2c.address, HEX);
     }
     return "None";
 }
@@ -172,7 +173,8 @@ String configuredHardwareAssignment(const SensorSlotConfiguration& slot) {
         return "GPIO" + String(slot.hardware.gpio.number);
     }
     if (slot.hardware.kind == HardwareResourceKind::I2C) {
-        return "I2C0 / 0x" + String(slot.hardware.i2c.address, HEX);
+        return String(i2cBusName(slot.hardware.i2c.bus)) + " / 0x"
+            + String(slot.hardware.i2c.address, HEX);
     }
     return "None";
 }
@@ -700,6 +702,7 @@ void WebService::handleSensorEdit() {
         options += ">" + escapeHtml(metadata->displayType) + "</option>";
     }
     String gpioOptions;
+    String i2cBusOptions;
     const BoardCapabilities& board = BoardCapabilities::current();
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t index = 0; index < board.gpioCount(); ++index) {
@@ -717,6 +720,14 @@ void WebService::handleSensorEdit() {
             && slot.hardware.gpio.number == gpio->resource.number) gpioOptions += " selected";
         gpioOptions += ">GPIO" + String(gpio->resource.number) + "</option>";
     }
+    for (size_t index = 0; index < board.i2cBusCount(); ++index) {
+        const BoardI2CBusCapability* bus = board.i2cBusAt(index);
+        if (bus == nullptr) continue;
+        i2cBusOptions += "<option value='" + String(static_cast<unsigned>(bus->bus)) + "'";
+        if (slot.hardware.kind == HardwareResourceKind::I2C
+            && slot.hardware.i2c.bus == bus->bus) i2cBusOptions += " selected";
+        i2cBusOptions += ">" + String(i2cBusName(bus->bus)) + "</option>";
+    }
     String c;
     c.reserve(2600);
     c = "<section class='card'><h2>Configure Slot " + String(slot.slotId) + "</h2><form method='post' action='/sensors/save'><input type='hidden' name='slot' value='" + String(slot.slotId) + "'>";
@@ -724,7 +735,7 @@ void WebService::handleSensorEdit() {
     c += "<label>Name<input name='name' maxlength='" + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += "<label>Implementation<select id='sensorImplementation' name='implementation'>" + options + "</select></label>";
     c += "<div id='gpioConfiguration'><label>GPIO<select name='gpio'>" + gpioOptions + "</select></label><p class='help'>AM2302 uses a custom single-wire protocol. Rain Gauge uses a digital interrupt.</p></div>";
-    c += "<div id='i2cConfiguration'><label>I²C address<select name='i2cAddress'><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label><p class='help'>Bus: I2C0</p></div>";
+    c += "<div id='i2cConfiguration'><label>Bus<select name='i2cBus'>" + i2cBusOptions + "</select></label><label>I²C address<select name='i2cAddress'><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label></div>";
     c += "<div id='rainGaugeConfiguration'><label>Millimetres per tip<input type='number' name='millimetersPerTip' min='0.0001' max='100' step='0.0001' value='" + String(slot.implementationConfiguration.rainGauge.millimetersPerTip, 4) + "'></label><label>Debounce time (ms)<input type='number' name='debounceMs' min='1' max='5000' value='" + String(slot.implementationConfiguration.rainGauge.debounceMs) + "'></label></div>";
     c += "<label>Sample interval (ms)<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='" + String(slot.schedule.sampleIntervalMs) + "'></label>";
     c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/sensors'>Cancel</a></div></form></section>";
@@ -921,10 +932,14 @@ void WebService::handleSensorSave() {
         }
         if (slot.implementation == SensorImplementation::BME280) {
             const long address = server_.arg("i2cAddress").toInt();
-            if (address != 0x76 && address != 0x77) {
+            const long busValue = server_.arg("i2cBus").toInt();
+            const I2CBus bus = static_cast<I2CBus>(busValue);
+            if ((address != 0x76 && address != 0x77)
+                || busValue < 0 || busValue > 255
+                || BoardCapabilities::current().i2cBus(bus) == nullptr) {
                 ok = false;
             } else {
-                const I2CResource resource(I2CBus::I2C0, static_cast<uint8_t>(address));
+                const I2CResource resource(bus, static_cast<uint8_t>(address));
                 slot.hardware = HardwareResourceAssignment::i2cResource(resource);
                 slot.implementationConfiguration.bme280 = BME280Configuration(resource);
             }

@@ -12,6 +12,7 @@
 #include "SimulatedTemperatureSensor.h"
 #include "SensorSlotConfiguration.h"
 #include "RainGaugeSensor.h"
+#include "I2CBusManager.h"
 
 namespace WeatherStation {
 
@@ -26,7 +27,7 @@ enum class SensorFactoryResult {
 
 class SensorFactory {
 public:
-    SensorFactory(IMonotonicClock& monotonicClock, ILogger& logger);
+    SensorFactory(IMonotonicClock& monotonicClock, I2CBusManager& i2cBusManager, ILogger& logger);
     ~SensorFactory();
 
     ISensor* create(
@@ -47,6 +48,7 @@ private:
     void destroy(size_t storageIndex);
 
     IMonotonicClock& monotonicClock_;
+    I2CBusManager& i2cBusManager_;
     ILogger& logger_;
     SensorStorage storage_[MaxSensorSlotCount];
     SensorImplementation constructed_[MaxSensorSlotCount];

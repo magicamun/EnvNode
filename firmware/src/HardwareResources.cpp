@@ -4,11 +4,16 @@ namespace WeatherStation {
 namespace {
 
 const BoardGpioCapability CurrentBoardGpios[] = {
-    {GpioResource(25), true, false},
-    {GpioResource(26), true, false},
+    {GpioResource(25), true, true},
+    {GpioResource(26), true, true},
     {GpioResource(27), true, false},
     {GpioResource(32), true, false},
     {GpioResource(33), true, false},
+};
+
+const BoardI2CBusCapability CurrentBoardI2CBuses[] = {
+    {I2CBus::I2C0, GpioResource(21), GpioResource(22)},
+    {I2CBus::I2C1, GpioResource(25), GpioResource(26)},
 };
 
 } // namespace
@@ -31,15 +36,20 @@ HardwareResourceAssignment HardwareResourceAssignment::i2cResource(I2CResource r
     return assignment;
 }
 
-BoardCapabilities::BoardCapabilities(const BoardGpioCapability* gpios, size_t gpioCount)
+BoardCapabilities::BoardCapabilities(const BoardGpioCapability* gpios, size_t gpioCount,
+    const BoardI2CBusCapability* i2cBuses, size_t i2cBusCount)
     : gpios_(gpios)
-    , gpioCount_(gpioCount) {
+    , gpioCount_(gpioCount)
+    , i2cBuses_(i2cBuses)
+    , i2cBusCount_(i2cBusCount) {
 }
 
 const BoardCapabilities& BoardCapabilities::current() {
     static const BoardCapabilities capabilities(
         CurrentBoardGpios,
-        sizeof(CurrentBoardGpios) / sizeof(CurrentBoardGpios[0]));
+        sizeof(CurrentBoardGpios) / sizeof(CurrentBoardGpios[0]),
+        CurrentBoardI2CBuses,
+        sizeof(CurrentBoardI2CBuses) / sizeof(CurrentBoardI2CBuses[0]));
     return capabilities;
 }
 
@@ -60,6 +70,19 @@ const BoardGpioCapability* BoardCapabilities::gpioAt(size_t index) const {
     return index < gpioCount_ ? &gpios_[index] : nullptr;
 }
 
+const BoardI2CBusCapability* BoardCapabilities::i2cBus(I2CBus bus) const {
+    for (size_t index = 0; index < i2cBusCount_; ++index) {
+        if (i2cBuses_[index].bus == bus) return &i2cBuses_[index];
+    }
+    return nullptr;
+}
+
+size_t BoardCapabilities::i2cBusCount() const { return i2cBusCount_; }
+
+const BoardI2CBusCapability* BoardCapabilities::i2cBusAt(size_t index) const {
+    return index < i2cBusCount_ ? &i2cBuses_[index] : nullptr;
+}
+
 HardwareResourceValidationResult BoardCapabilities::validate(
     HardwareInterfaceKind interfaceKind,
     const HardwareResourceAssignment& assignment) const {
@@ -72,7 +95,7 @@ HardwareResourceValidationResult BoardCapabilities::validate(
         if (assignment.kind != HardwareResourceKind::I2C) {
             return HardwareResourceValidationResult::ResourceKindMismatch;
         }
-        return assignment.i2c.bus == I2CBus::I2C0
+        return i2cBus(assignment.i2c.bus) != nullptr
                 && assignment.i2c.address >= 0x08
                 && assignment.i2c.address <= 0x77
             ? HardwareResourceValidationResult::Valid
@@ -89,6 +112,14 @@ HardwareResourceValidationResult BoardCapabilities::validate(
     if (capability->reserved) return HardwareResourceValidationResult::ResourceReserved;
     if (!capability->available) return HardwareResourceValidationResult::ResourceUnavailable;
     return HardwareResourceValidationResult::Valid;
+}
+
+const char* i2cBusName(I2CBus bus) {
+    switch (bus) {
+        case I2CBus::I2C0: return "I2C0";
+        case I2CBus::I2C1: return "I2C1";
+        default: return "unknown I2C bus";
+    }
 }
 
 const char* hardwareInterfaceKindName(HardwareInterfaceKind kind) {

@@ -4,12 +4,14 @@
 
 #include "ISensor.h"
 #include "Logger.h"
+#include "HardwareResources.h"
+#include "I2CBusManager.h"
 
 namespace WeatherStation {
 
 class BME280Sensor : public ISensor {
 public:
-    BME280Sensor(SensorId id, uint8_t i2cAddress, ILogger& logger);
+    BME280Sensor(SensorId id, I2CResource resource, I2CBusManager& i2cBusManager, ILogger& logger);
 
     SensorId id() const override;
     const char* type() const override;
@@ -28,7 +30,8 @@ private:
     static void emit(IMeasurementSink& output, MeasurementType type, float value, bool valid);
 
     SensorId id_;
-    uint8_t i2cAddress_;
+    I2CResource resource_;
+    I2CBusManager& i2cBusManager_;
     ILogger& logger_;
     Adafruit_BME280 bme280_;
     SensorState state_ = SensorState::Unknown;

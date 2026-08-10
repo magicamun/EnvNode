@@ -22,10 +22,12 @@
 #include "SensorRuntime.h"
 #include "HomeAssistantDiscoveryPublisher.h"
 #include "MeasurementSnapshotCache.h"
+#include "I2CBusManager.h"
 
 using namespace WeatherStation;
 
 static SerialLogger serialLogger;
+static I2CBusManager i2cBusManager(serialLogger);
 static ConfigurationService configurationService;
 static WiFiService wifiService(serialLogger, configurationService);
 static TimeService timeService(serialLogger, configurationService, wifiService);
@@ -38,8 +40,8 @@ static SensorManager sensorManager(
     monotonicClock,
     measurementPublisher,
     measurementSnapshotCache);
-static SensorFactory firstSensorFactory(monotonicClock, serialLogger);
-static SensorFactory secondSensorFactory(monotonicClock, serialLogger);
+static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, serialLogger);
+static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, serialLogger);
 static SensorRuntime sensorRuntime(
     configurationService,
     firstSensorFactory,
@@ -57,6 +59,7 @@ static WebService webService(serialLogger, configurationService, wifiService, mq
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager, homeAssistantDiscoveryPublisher);
 
 void setup() {
+    i2cBusManager.begin();
     configurationService.loadConfiguration();
     size_t activeSensorCount = 0;
     const char* sensorFailureReason = nullptr;

@@ -6,8 +6,10 @@
 
 namespace WeatherStation {
 
-SensorFactory::SensorFactory(IMonotonicClock& monotonicClock, ILogger& logger)
+SensorFactory::SensorFactory(IMonotonicClock& monotonicClock,
+    I2CBusManager& i2cBusManager, ILogger& logger)
     : monotonicClock_(monotonicClock)
+    , i2cBusManager_(i2cBusManager)
     , logger_(logger) {
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         constructed_[index] = SensorImplementation::None;
@@ -90,7 +92,8 @@ ISensor* SensorFactory::create(
         case SensorImplementation::BME280:
             sensor = new (target) BME280Sensor(
                 slot.slotId,
-                slot.implementationConfiguration.bme280.i2c.address,
+                slot.implementationConfiguration.bme280.i2c,
+                i2cBusManager_,
                 logger_);
             break;
         case SensorImplementation::None:
