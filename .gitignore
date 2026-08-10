@@ -9,6 +9,8 @@ firmware/.vscode/
 hardware/kicad/*-backups/
 hardware/kicad/_autosave-*
 hardware/kicad/WeatherStation/*.lck
+hardware/kicad/WeatherStation/_autosave-MCU.kicad_sch
+hardware/kicad/WeatherStation/_autosave-WeatherStation.kicad_pcb
 
 .pio/
 
@@ -19,3 +21,4 @@ hardware/kicad/WeatherStation/*.lck
 *.tmp
 
 __pycache__/
+
