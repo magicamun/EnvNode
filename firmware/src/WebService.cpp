@@ -710,7 +710,9 @@ void WebService::handleSensorEdit() {
         if (gpio == nullptr) continue;
         const HardwareResourceAssignment candidate =
             HardwareResourceAssignment::gpioResource(gpio->resource);
-        if (board.validate(HardwareInterfaceKind::GPIO, candidate)
+        if (selected == nullptr
+            || board.validate(selected->interfaceKind, candidate,
+                selected->requiredGpioCapabilities)
                 != HardwareResourceValidationResult::Valid
             || gpioAssignedToOtherEnabledSlot(configuration, slot.slotId, gpio->resource)) {
             continue;
@@ -718,7 +720,7 @@ void WebService::handleSensorEdit() {
         gpioOptions += "<option value='" + String(gpio->resource.number) + "'";
         if (slot.hardware.kind == HardwareResourceKind::GPIO
             && slot.hardware.gpio.number == gpio->resource.number) gpioOptions += " selected";
-        gpioOptions += ">GPIO" + String(gpio->resource.number) + "</option>";
+        gpioOptions += ">" + String(gpio->displayName) + "</option>";
     }
     for (size_t index = 0; index < board.i2cBusCount(); ++index) {
         const BoardI2CBusCapability* bus = board.i2cBusAt(index);

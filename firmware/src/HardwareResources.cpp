@@ -4,11 +4,21 @@ namespace WeatherStation {
 namespace {
 
 const BoardGpioCapability CurrentBoardGpios[] = {
-    {GpioResource(25), true, true},
-    {GpioResource(26), true, true},
-    {GpioResource(27), true, false},
-    {GpioResource(32), true, false},
-    {GpioResource(33), true, false},
+    {GpioResource(4), "GPIO4", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(13), "GPIO13", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(14), "GPIO14", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(15), "GPIO15", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(16), "GPIO16", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(17), "GPIO17", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(18), "GPIO18", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(19), "GPIO19", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(23), "GPIO23", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(32), "GPIO32", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
+    {GpioResource(33), "GPIO33", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
+    {GpioResource(34), "GPIO34", GpioCapability::AnalogInput},
+    {GpioResource(35), "GPIO35", GpioCapability::AnalogInput},
+    {GpioResource(36), "GPIO36", GpioCapability::AnalogInput},
+    {GpioResource(39), "GPIO39", GpioCapability::AnalogInput},
 };
 
 const BoardI2CBusCapability CurrentBoardI2CBuses[] = {
@@ -85,7 +95,8 @@ const BoardI2CBusCapability* BoardCapabilities::i2cBusAt(size_t index) const {
 
 HardwareResourceValidationResult BoardCapabilities::validate(
     HardwareInterfaceKind interfaceKind,
-    const HardwareResourceAssignment& assignment) const {
+    const HardwareResourceAssignment& assignment,
+    GpioCapability requiredGpioCapabilities) const {
     if (interfaceKind == HardwareInterfaceKind::Simulation) {
         return assignment.kind == HardwareResourceKind::None
             ? HardwareResourceValidationResult::Valid
@@ -101,7 +112,8 @@ HardwareResourceValidationResult BoardCapabilities::validate(
             ? HardwareResourceValidationResult::Valid
             : HardwareResourceValidationResult::ResourceDoesNotExist;
     }
-    if (interfaceKind != HardwareInterfaceKind::GPIO) {
+    if (interfaceKind != HardwareInterfaceKind::GPIO
+        && interfaceKind != HardwareInterfaceKind::ADC) {
         return HardwareResourceValidationResult::ResourceKindMismatch;
     }
     if (assignment.kind != HardwareResourceKind::GPIO) {
@@ -109,8 +121,12 @@ HardwareResourceValidationResult BoardCapabilities::validate(
     }
     const BoardGpioCapability* capability = gpio(assignment.gpio);
     if (capability == nullptr) return HardwareResourceValidationResult::ResourceDoesNotExist;
-    if (capability->reserved) return HardwareResourceValidationResult::ResourceReserved;
-    if (!capability->available) return HardwareResourceValidationResult::ResourceUnavailable;
+    const GpioCapability required = interfaceKind == HardwareInterfaceKind::ADC
+        ? requiredGpioCapabilities | GpioCapability::AnalogInput
+        : requiredGpioCapabilities;
+    if (!hasGpioCapabilities(capability->capabilities, required)) {
+        return HardwareResourceValidationResult::ResourceUnavailable;
+    }
     return HardwareResourceValidationResult::Valid;
 }
 

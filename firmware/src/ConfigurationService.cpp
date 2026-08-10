@@ -126,8 +126,8 @@ void ConfigurationService::initializeSensorDefaults() {
     am2302.name = "Outside";
     am2302.implementation = SensorImplementation::AM2302;
     am2302.schedule = SensorSchedule::periodic(5000);
-    am2302.hardware = HardwareResourceAssignment::gpioResource(GpioResource(27));
-    am2302.implementationConfiguration.am2302 = AM2302Configuration(GpioResource(27));
+    am2302.hardware = HardwareResourceAssignment::gpioResource(GpioResource(4));
+    am2302.implementationConfiguration.am2302 = AM2302Configuration(GpioResource(4));
 }
 
 void ConfigurationService::loadFromPreferences() {
@@ -628,7 +628,8 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
     if (metadata->interfaceKind == HardwareInterfaceKind::Simulation) {
         return slot.hardware.kind == HardwareResourceKind::None;
     }
-    if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware)
+    if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware,
+            metadata->requiredGpioCapabilities)
         != HardwareResourceValidationResult::Valid) return false;
     if (slot.implementation == SensorImplementation::AM2302) {
         return slot.hardware.kind == HardwareResourceKind::GPIO

@@ -30,6 +30,7 @@ struct SensorImplementationMetadata {
     MeasurementType measurementTypes[MaxImplementationMeasurementTypeCount];
     size_t measurementTypeCount;
     HardwareInterfaceKind interfaceKind;
+    GpioCapability requiredGpioCapabilities;
     const char* protocolDescription;
     SensorSchedule defaultSchedule;
     const char* configurationSchemaDescription;

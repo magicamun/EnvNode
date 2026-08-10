@@ -42,7 +42,8 @@ ISensor* SensorFactory::create(
         result = SensorFactoryResult::UnknownImplementation;
         return nullptr;
     }
-    if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware)
+    if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware,
+            metadata->requiredGpioCapabilities)
         != HardwareResourceValidationResult::Valid) {
         result = SensorFactoryResult::InvalidResource;
         return nullptr;

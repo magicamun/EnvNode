@@ -54,10 +54,29 @@ struct HardwareResourceAssignment {
     static HardwareResourceAssignment i2cResource(I2CResource resource);
 };
 
+enum class GpioCapability : uint8_t {
+    None = 0,
+    DigitalInput = 1U << 0,
+    DigitalOutput = 1U << 1,
+    Interrupt = 1U << 2,
+    InternalPullup = 1U << 3,
+    AnalogInput = 1U << 4,
+};
+
+constexpr GpioCapability operator|(GpioCapability left, GpioCapability right) {
+    return static_cast<GpioCapability>(
+        static_cast<uint8_t>(left) | static_cast<uint8_t>(right));
+}
+
+constexpr bool hasGpioCapabilities(GpioCapability available, GpioCapability required) {
+    return (static_cast<uint8_t>(available) & static_cast<uint8_t>(required))
+        == static_cast<uint8_t>(required);
+}
+
 struct BoardGpioCapability {
     GpioResource resource;
-    bool available;
-    bool reserved;
+    const char* displayName;
+    GpioCapability capabilities;
 };
 
 struct BoardI2CBusCapability {
@@ -96,7 +115,8 @@ public:
     const BoardI2CBusCapability* i2cBusAt(size_t index) const;
     HardwareResourceValidationResult validate(
         HardwareInterfaceKind interfaceKind,
-        const HardwareResourceAssignment& assignment) const;
+        const HardwareResourceAssignment& assignment,
+        GpioCapability requiredGpioCapabilities = GpioCapability::None) const;
 
 private:
     BoardCapabilities(const BoardGpioCapability* gpios, size_t gpioCount,
