@@ -98,6 +98,7 @@ void ConfigurationService::initializeSensorDefaults() {
         slot.schedule = SensorSchedule::eventOnly(false);
         slot.hardware = HardwareResourceAssignment::none();
         slot.implementationConfiguration.am2302 = AM2302Configuration();
+        slot.implementationConfiguration.bme280 = BME280Configuration();
         slot.implementationConfiguration.rainGauge = RainGaugeConfiguration();
     }
 
@@ -214,11 +215,20 @@ void ConfigurationService::loadSensorSlots() {
         loaded[index].schedule.enabled = loaded[index].enabled;
         const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
             sensorKey(expectedId, "gpio").c_str(), 0));
-        loaded[index].hardware = (loaded[index].implementation == SensorImplementation::AM2302
-                || loaded[index].implementation == SensorImplementation::RainGauge)
-            ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
-            : HardwareResourceAssignment::none();
+        const uint8_t i2cAddress = static_cast<uint8_t>(preferences_.getUInt(
+            sensorKey(expectedId, "i2caddr").c_str(), 0x76));
+        if (loaded[index].implementation == SensorImplementation::AM2302
+            || loaded[index].implementation == SensorImplementation::RainGauge) {
+            loaded[index].hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
+        } else if (loaded[index].implementation == SensorImplementation::BME280) {
+            loaded[index].hardware = HardwareResourceAssignment::i2cResource(
+                I2CResource(I2CBus::I2C0, i2cAddress));
+        } else {
+            loaded[index].hardware = HardwareResourceAssignment::none();
+        }
         loaded[index].implementationConfiguration.am2302 = AM2302Configuration(GpioResource(gpio));
+        loaded[index].implementationConfiguration.bme280 = BME280Configuration(
+            I2CResource(I2CBus::I2C0, i2cAddress));
         loaded[index].implementationConfiguration.rainGauge = RainGaugeConfiguration(
             GpioResource(gpio),
             preferences_.getFloat(sensorKey(expectedId, "rgmm").c_str(), 0.2794F),
@@ -625,6 +635,12 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
             && slot.implementationConfiguration.rainGauge.debounceMs >= 1
             && slot.implementationConfiguration.rainGauge.debounceMs <= 5000;
     }
+    if (slot.implementation == SensorImplementation::BME280) {
+        return slot.hardware.kind == HardwareResourceKind::I2C
+            && slot.implementationConfiguration.bme280.i2c.bus == slot.hardware.i2c.bus
+            && slot.implementationConfiguration.bme280.i2c.address == slot.hardware.i2c.address
+            && (slot.hardware.i2c.address == 0x76 || slot.hardware.i2c.address == 0x77);
+    }
     return true;
 }
 
@@ -656,6 +672,8 @@ bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot
         && persistUInt(sensorKey(id, "int").c_str(), slot.schedule.sampleIntervalMs)
         && persistUInt(sensorKey(id, "gpio").c_str(),
             slot.hardware.kind == HardwareResourceKind::GPIO ? slot.hardware.gpio.number : 0)
+        && persistUInt(sensorKey(id, "i2caddr").c_str(),
+            slot.hardware.kind == HardwareResourceKind::I2C ? slot.hardware.i2c.address : 0x76)
         && persistFloat(sensorKey(id, "rgmm").c_str(),
             slot.implementationConfiguration.rainGauge.millimetersPerTip)
         && persistUInt(sensorKey(id, "rgdeb").c_str(),

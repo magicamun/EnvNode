@@ -18,6 +18,7 @@ enum class HardwareInterfaceKind {
 enum class HardwareResourceKind {
     None,
     GPIO,
+    I2C,
 };
 
 struct GpioResource {
@@ -28,12 +29,28 @@ struct GpioResource {
     uint8_t number;
 };
 
+enum class I2CBus : uint8_t {
+    I2C0 = 0,
+};
+
+struct I2CResource {
+    I2CResource(I2CBus busNumber = I2CBus::I2C0, uint8_t deviceAddress = 0x76)
+        : bus(busNumber)
+        , address(deviceAddress) {
+    }
+
+    I2CBus bus;
+    uint8_t address;
+};
+
 struct HardwareResourceAssignment {
     HardwareResourceKind kind = HardwareResourceKind::None;
     GpioResource gpio;
+    I2CResource i2c;
 
     static HardwareResourceAssignment none();
     static HardwareResourceAssignment gpioResource(GpioResource resource);
+    static HardwareResourceAssignment i2cResource(I2CResource resource);
 };
 
 struct BoardGpioCapability {

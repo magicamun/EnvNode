@@ -161,12 +161,18 @@ String hardwareAssignment(const SensorRuntimeInfo& info) {
     if (info.hardware.kind == HardwareResourceKind::GPIO) {
         return "GPIO" + String(info.hardware.gpio.number);
     }
+    if (info.hardware.kind == HardwareResourceKind::I2C) {
+        return "I2C0 / 0x" + String(info.hardware.i2c.address, HEX);
+    }
     return "None";
 }
 
 String configuredHardwareAssignment(const SensorSlotConfiguration& slot) {
     if (slot.hardware.kind == HardwareResourceKind::GPIO) {
         return "GPIO" + String(slot.hardware.gpio.number);
+    }
+    if (slot.hardware.kind == HardwareResourceKind::I2C) {
+        return "I2C0 / 0x" + String(slot.hardware.i2c.address, HEX);
     }
     return "None";
 }
@@ -175,8 +181,13 @@ bool sameHardwareAssignment(
     const HardwareResourceAssignment& first,
     const HardwareResourceAssignment& second) {
     if (first.kind != second.kind) return false;
-    return first.kind != HardwareResourceKind::GPIO
-        || first.gpio.number == second.gpio.number;
+    if (first.kind == HardwareResourceKind::GPIO) {
+        return first.gpio.number == second.gpio.number;
+    }
+    if (first.kind == HardwareResourceKind::I2C) {
+        return first.i2c.bus == second.i2c.bus && first.i2c.address == second.i2c.address;
+    }
+    return true;
 }
 
 bool gpioAssignedToOtherEnabledSlot(
@@ -713,13 +724,14 @@ void WebService::handleSensorEdit() {
     c += "<label>Name<input name='name' maxlength='" + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += "<label>Implementation<select id='sensorImplementation' name='implementation'>" + options + "</select></label>";
     c += "<div id='gpioConfiguration'><label>GPIO<select name='gpio'>" + gpioOptions + "</select></label><p class='help'>AM2302 uses a custom single-wire protocol. Rain Gauge uses a digital interrupt.</p></div>";
+    c += "<div id='i2cConfiguration'><label>I²C address<select name='i2cAddress'><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label><p class='help'>Bus: I2C0</p></div>";
     c += "<div id='rainGaugeConfiguration'><label>Millimetres per tip<input type='number' name='millimetersPerTip' min='0.0001' max='100' step='0.0001' value='" + String(slot.implementationConfiguration.rainGauge.millimetersPerTip, 4) + "'></label><label>Debounce time (ms)<input type='number' name='debounceMs' min='1' max='5000' value='" + String(slot.implementationConfiguration.rainGauge.debounceMs) + "'></label></div>";
     c += "<label>Sample interval (ms)<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='" + String(slot.schedule.sampleIntervalMs) + "'></label>";
     c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/sensors'>Cancel</a></div></form></section>";
     if (selected != nullptr) {
         c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>" + escapeHtml(selected->displayType) + "</span><span>Interface</span><span>" + hardwareInterfaceKindName(selected->interfaceKind) + " / " + escapeHtml(selected->protocolDescription) + "</span><span>Provenance</span><span>" + String(selected->provenance == SensorProvenance::Simulated ? "Simulated" : "Physical") + "</span><span>Measurements</span><span>" + implementationMeasurements(selected) + "</span></div></section>";
     }
-    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
+    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
     sendPage("Configure Sensor Slot", "/sensors", c);
 }
 
@@ -907,6 +919,16 @@ void WebService::handleSensorSave() {
                 }
             }
         }
+        if (slot.implementation == SensorImplementation::BME280) {
+            const long address = server_.arg("i2cAddress").toInt();
+            if (address != 0x76 && address != 0x77) {
+                ok = false;
+            } else {
+                const I2CResource resource(I2CBus::I2C0, static_cast<uint8_t>(address));
+                slot.hardware = HardwareResourceAssignment::i2cResource(resource);
+                slot.implementationConfiguration.bme280 = BME280Configuration(resource);
+            }
+        }
     }
     if (ok) ok = configurationService_.setSensorSlotConfiguration(slot);
     sendConfigurationResult(
@@ -914,7 +936,7 @@ void WebService::handleSensorSave() {
         "Sensor Slot saved",
         "Sensor Slot save failed",
         "/sensors",
-        "Invalid Slot configuration, schedule, hardware resource, or exclusive GPIO conflict.");
+        "Invalid Slot configuration, schedule, hardware resource, or resource conflict.");
 }
 void WebService::handleSensorApply() {
     if (runtimeManager_.pendingAction() != RuntimeAction::RestartSensorManager) {

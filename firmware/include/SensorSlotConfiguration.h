@@ -21,6 +21,14 @@ struct AM2302Configuration {
     GpioResource gpio;
 };
 
+struct BME280Configuration {
+    explicit BME280Configuration(I2CResource i2cResource = I2CResource())
+        : i2c(i2cResource) {
+    }
+
+    I2CResource i2c;
+};
+
 struct RainGaugeConfiguration {
     RainGaugeConfiguration(
         GpioResource inputGpio = GpioResource(),
@@ -41,6 +49,7 @@ struct SensorImplementationConfiguration {
     SimulatedHumidityConfiguration simulatedHumidity;
     SimulatedPressureConfiguration simulatedPressure;
     AM2302Configuration am2302;
+    BME280Configuration bme280;
     RainGaugeConfiguration rainGauge;
 };
 

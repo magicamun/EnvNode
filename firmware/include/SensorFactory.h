@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "AM2302Sensor.h"
+#include "BME280Sensor.h"
 #include "HardwareResources.h"
 #include "Logger.h"
 #include "SimulatedHumiditySensor.h"
@@ -40,6 +41,7 @@ private:
         SimulatedHumiditySensor,
         SimulatedPressureSensor,
         AM2302Sensor,
+        BME280Sensor,
         RainGaugeSensor>::type;
 
     void destroy(size_t storageIndex);

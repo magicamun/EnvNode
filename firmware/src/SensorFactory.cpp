@@ -54,6 +54,13 @@ ISensor* SensorFactory::create(
         result = SensorFactoryResult::InvalidResource;
         return nullptr;
     }
+    if (slot.implementation == SensorImplementation::BME280
+        && (slot.hardware.kind != HardwareResourceKind::I2C
+            || slot.implementationConfiguration.bme280.i2c.bus != slot.hardware.i2c.bus
+            || slot.implementationConfiguration.bme280.i2c.address != slot.hardware.i2c.address)) {
+        result = SensorFactoryResult::InvalidResource;
+        return nullptr;
+    }
 
     void* target = &storage_[storageIndex];
     ISensor* sensor = nullptr;
@@ -78,6 +85,12 @@ ISensor* SensorFactory::create(
             sensor = new (target) RainGaugeSensor(
                 slot.slotId,
                 slot.implementationConfiguration.rainGauge,
+                logger_);
+            break;
+        case SensorImplementation::BME280:
+            sensor = new (target) BME280Sensor(
+                slot.slotId,
+                slot.implementationConfiguration.bme280.i2c.address,
                 logger_);
             break;
         case SensorImplementation::None:
@@ -107,6 +120,9 @@ void SensorFactory::destroy(size_t storageIndex) {
             break;
         case SensorImplementation::RainGauge:
             static_cast<RainGaugeSensor*>(target)->~RainGaugeSensor();
+            break;
+        case SensorImplementation::BME280:
+            static_cast<BME280Sensor*>(target)->~BME280Sensor();
             break;
         case SensorImplementation::None:
         default:

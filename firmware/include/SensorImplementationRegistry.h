@@ -16,9 +16,10 @@ enum class SensorImplementation : uint8_t {
     SimulatedPressure = 3,
     AM2302 = 4,
     RainGauge = 5,
+    BME280 = 6,
 };
 
-constexpr size_t MaxImplementationMeasurementTypeCount = 2;
+constexpr size_t MaxImplementationMeasurementTypeCount = 3;
 
 struct SensorImplementationMetadata {
     SensorImplementation implementation;

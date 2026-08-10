@@ -5,34 +5,38 @@
 namespace WeatherStation {
 namespace {
 
-constexpr size_t ImplementationCount = 6;
+constexpr size_t ImplementationCount = 7;
 
 const SensorImplementationMetadata* implementations() {
     static const SensorImplementationMetadata registeredImplementations[ImplementationCount] = {
         {SensorImplementation::None, "none", "None",
-            SensorProvenance::Simulated, {MeasurementType::Unknown, MeasurementType::Unknown}, 0,
+            SensorProvenance::Simulated, {MeasurementType::Unknown, MeasurementType::Unknown, MeasurementType::Unknown}, 0,
             HardwareInterfaceKind::Simulation, "No runtime sensor", SensorSchedule::eventOnly(false),
             "No implementation-specific configuration"},
         {SensorImplementation::SimulatedTemperature, "simulated_temperature", "Simulated Temperature",
-            SensorProvenance::Simulated, {MeasurementType::Temperature, MeasurementType::Unknown}, 1,
+            SensorProvenance::Simulated, {MeasurementType::Temperature, MeasurementType::Unknown, MeasurementType::Unknown}, 1,
             HardwareInterfaceKind::Simulation, "Firmware simulation", SensorSchedule::periodic(5000),
             "No implementation-specific configuration"},
         {SensorImplementation::SimulatedHumidity, "simulated_humidity", "Simulated Humidity",
-            SensorProvenance::Simulated, {MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 1,
+            SensorProvenance::Simulated, {MeasurementType::RelativeHumidity, MeasurementType::Unknown, MeasurementType::Unknown}, 1,
             HardwareInterfaceKind::Simulation, "Firmware simulation", SensorSchedule::periodic(5000),
             "No implementation-specific configuration"},
         {SensorImplementation::SimulatedPressure, "simulated_pressure", "Simulated Pressure",
-            SensorProvenance::Simulated, {MeasurementType::AtmosphericPressure, MeasurementType::Temperature}, 2,
+            SensorProvenance::Simulated, {MeasurementType::AtmosphericPressure, MeasurementType::Temperature, MeasurementType::Unknown}, 2,
             HardwareInterfaceKind::Simulation, "Firmware simulation", SensorSchedule::periodic(10000),
             "No implementation-specific configuration"},
         {SensorImplementation::AM2302, "am2302", "AM2302 / DHT22",
-            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity}, 2,
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 2,
             HardwareInterfaceKind::GPIO, "Custom single-wire protocol", SensorSchedule::periodic(5000),
             "AM2302Configuration: GPIO resource"},
         {SensorImplementation::RainGauge, "rain_gauge", "Rain Gauge",
-            SensorProvenance::Physical, {MeasurementType::RainGaugeTip, MeasurementType::RainfallIncrement}, 2,
+            SensorProvenance::Physical, {MeasurementType::RainGaugeTip, MeasurementType::RainfallIncrement, MeasurementType::Unknown}, 2,
             HardwareInterfaceKind::GPIO, "Digital interrupt", SensorSchedule::eventOnly(true),
             "RainGaugeConfiguration: GPIO, millimetres per tip, debounce"},
+        {SensorImplementation::BME280, "bme280", "BME280",
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::AtmosphericPressure}, 3,
+            HardwareInterfaceKind::I2C, "I2C", SensorSchedule::periodic(5000),
+            "BME280Configuration: I2C0 address"},
     };
     return registeredImplementations;
 }

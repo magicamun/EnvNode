@@ -24,6 +24,13 @@ HardwareResourceAssignment HardwareResourceAssignment::gpioResource(GpioResource
     return assignment;
 }
 
+HardwareResourceAssignment HardwareResourceAssignment::i2cResource(I2CResource resource) {
+    HardwareResourceAssignment assignment;
+    assignment.kind = HardwareResourceKind::I2C;
+    assignment.i2c = resource;
+    return assignment;
+}
+
 BoardCapabilities::BoardCapabilities(const BoardGpioCapability* gpios, size_t gpioCount)
     : gpios_(gpios)
     , gpioCount_(gpioCount) {
@@ -61,6 +68,16 @@ HardwareResourceValidationResult BoardCapabilities::validate(
             ? HardwareResourceValidationResult::Valid
             : HardwareResourceValidationResult::ResourceNotRequired;
     }
+    if (interfaceKind == HardwareInterfaceKind::I2C) {
+        if (assignment.kind != HardwareResourceKind::I2C) {
+            return HardwareResourceValidationResult::ResourceKindMismatch;
+        }
+        return assignment.i2c.bus == I2CBus::I2C0
+                && assignment.i2c.address >= 0x08
+                && assignment.i2c.address <= 0x77
+            ? HardwareResourceValidationResult::Valid
+            : HardwareResourceValidationResult::ResourceDoesNotExist;
+    }
     if (interfaceKind != HardwareInterfaceKind::GPIO) {
         return HardwareResourceValidationResult::ResourceKindMismatch;
     }
@@ -90,9 +107,14 @@ const char* hardwareInterfaceKindName(HardwareInterfaceKind kind) {
 bool exclusiveHardwareResourceConflict(
     const HardwareResourceAssignment& first,
     const HardwareResourceAssignment& second) {
-    return first.kind == HardwareResourceKind::GPIO
+    const bool gpioConflict = first.kind == HardwareResourceKind::GPIO
         && second.kind == HardwareResourceKind::GPIO
         && first.gpio.number == second.gpio.number;
+    const bool i2cConflict = first.kind == HardwareResourceKind::I2C
+        && second.kind == HardwareResourceKind::I2C
+        && first.i2c.bus == second.i2c.bus
+        && first.i2c.address == second.i2c.address;
+    return gpioConflict || i2cConflict;
 }
 
 } // namespace WeatherStation
