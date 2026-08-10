@@ -17,6 +17,7 @@ enum class SensorImplementation : uint8_t {
     AM2302 = 4,
     RainGauge = 5,
     BME280 = 6,
+    SHT4x = 7,
 };
 
 constexpr size_t MaxImplementationMeasurementTypeCount = 3;

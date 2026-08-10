@@ -735,14 +735,14 @@ void WebService::handleSensorEdit() {
     c += "<label>Name<input name='name' maxlength='" + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += "<label>Implementation<select id='sensorImplementation' name='implementation'>" + options + "</select></label>";
     c += "<div id='gpioConfiguration'><label>GPIO<select name='gpio'>" + gpioOptions + "</select></label><p class='help'>AM2302 uses a custom single-wire protocol. Rain Gauge uses a digital interrupt.</p></div>";
-    c += "<div id='i2cConfiguration'><label>Bus<select name='i2cBus'>" + i2cBusOptions + "</select></label><label>I²C address<select name='i2cAddress'><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label></div>";
+    c += "<div id='i2cConfiguration'><label>Bus<select name='i2cBus'>" + i2cBusOptions + "</select></label><label>I²C address<select id='i2cAddress' name='i2cAddress'><option value='68'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x44 ? " selected" : "") + ">0x44</option><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label></div>";
     c += "<div id='rainGaugeConfiguration'><label>Millimetres per tip<input type='number' name='millimetersPerTip' min='0.0001' max='100' step='0.0001' value='" + String(slot.implementationConfiguration.rainGauge.millimetersPerTip, 4) + "'></label><label>Debounce time (ms)<input type='number' name='debounceMs' min='1' max='5000' value='" + String(slot.implementationConfiguration.rainGauge.debounceMs) + "'></label></div>";
     c += "<label>Sample interval (ms)<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='" + String(slot.schedule.sampleIntervalMs) + "'></label>";
     c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/sensors'>Cancel</a></div></form></section>";
     if (selected != nullptr) {
         c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>" + escapeHtml(selected->displayType) + "</span><span>Interface</span><span>" + hardwareInterfaceKindName(selected->interfaceKind) + " / " + escapeHtml(selected->protocolDescription) + "</span><span>Provenance</span><span>" + String(selected->provenance == SensorProvenance::Simulated ? "Simulated" : "Physical") + "</span><span>Measurements</span><span>" + implementationMeasurements(selected) + "</span></div></section>";
     }
-    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
+    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='bme280'?x.value==='68':false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='bme280'&&a.value==='68')a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
     sendPage("Configure Sensor Slot", "/sensors", c);
 }
 
@@ -930,11 +930,14 @@ void WebService::handleSensorSave() {
                 }
             }
         }
-        if (slot.implementation == SensorImplementation::BME280) {
+        if (slot.implementation == SensorImplementation::BME280
+            || slot.implementation == SensorImplementation::SHT4x) {
             const long address = server_.arg("i2cAddress").toInt();
             const long busValue = server_.arg("i2cBus").toInt();
             const I2CBus bus = static_cast<I2CBus>(busValue);
-            if ((address != 0x76 && address != 0x77)
+            const bool validAddress = slot.implementation == SensorImplementation::SHT4x
+                ? address == 0x44 : (address == 0x76 || address == 0x77);
+            if (!validAddress
                 || busValue < 0 || busValue > 255
                 || BoardCapabilities::current().i2cBus(bus) == nullptr) {
                 ok = false;
@@ -942,6 +945,7 @@ void WebService::handleSensorSave() {
                 const I2CResource resource(bus, static_cast<uint8_t>(address));
                 slot.hardware = HardwareResourceAssignment::i2cResource(resource);
                 slot.implementationConfiguration.bme280 = BME280Configuration(resource);
+                slot.implementationConfiguration.sht4x = SHT4xConfiguration(resource);
             }
         }
     }

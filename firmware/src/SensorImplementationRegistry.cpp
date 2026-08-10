@@ -5,7 +5,7 @@
 namespace WeatherStation {
 namespace {
 
-constexpr size_t ImplementationCount = 7;
+constexpr size_t ImplementationCount = 8;
 
 const SensorImplementationMetadata* implementations() {
     static const SensorImplementationMetadata registeredImplementations[ImplementationCount] = {
@@ -37,6 +37,10 @@ const SensorImplementationMetadata* implementations() {
             SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::AtmosphericPressure}, 3,
             HardwareInterfaceKind::I2C, "I2C", SensorSchedule::periodic(5000),
             "BME280Configuration: I2C bus and address"},
+        {SensorImplementation::SHT4x, "sht4x", "SHT4x",
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 2,
+            HardwareInterfaceKind::I2C, "I2C", SensorSchedule::periodic(5000),
+            "SHT4xConfiguration: I2C bus and address"},
     };
     return registeredImplementations;
 }
