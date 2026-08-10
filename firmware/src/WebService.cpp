@@ -697,6 +697,8 @@ void WebService::handleSensorEdit() {
         options += "<option value='" + String(metadata->stableId) + "' data-interface='";
         options += hardwareInterfaceKindName(metadata->interfaceKind);
         options += "' data-kind='" + String(metadata->stableId)
+            + "' data-requires='"
+            + String(static_cast<unsigned>(metadata->requiredGpioCapabilities))
             + "' data-interval='" + String(metadata->defaultSchedule.sampleIntervalMs) + "'";
         if (metadata->implementation == slot.implementation) options += " selected";
         options += ">" + escapeHtml(metadata->displayType) + "</option>";
@@ -708,16 +710,12 @@ void WebService::handleSensorEdit() {
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
         if (gpio == nullptr) continue;
-        const HardwareResourceAssignment candidate =
-            HardwareResourceAssignment::gpioResource(gpio->resource);
-        if (selected == nullptr
-            || board.validate(selected->interfaceKind, candidate,
-                selected->requiredGpioCapabilities)
-                != HardwareResourceValidationResult::Valid
-            || gpioAssignedToOtherEnabledSlot(configuration, slot.slotId, gpio->resource)) {
+        if (gpioAssignedToOtherEnabledSlot(configuration, slot.slotId, gpio->resource)) {
             continue;
         }
-        gpioOptions += "<option value='" + String(gpio->resource.number) + "'";
+        gpioOptions += "<option value='" + String(gpio->resource.number)
+            + "' data-capabilities='"
+            + String(static_cast<unsigned>(gpio->capabilities)) + "'";
         if (slot.hardware.kind == HardwareResourceKind::GPIO
             && slot.hardware.gpio.number == gpio->resource.number) gpioOptions += " selected";
         gpioOptions += ">" + String(gpio->displayName) + "</option>";
@@ -744,7 +742,7 @@ void WebService::handleSensorEdit() {
     if (selected != nullptr) {
         c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>" + escapeHtml(selected->displayType) + "</span><span>Interface</span><span>" + hardwareInterfaceKindName(selected->interfaceKind) + " / " + escapeHtml(selected->protocolDescription) + "</span><span>Provenance</span><span>" + String(selected->provenance == SensorProvenance::Simulated ? "Simulated" : "Physical") + "</span><span>Measurements</span><span>" + implementationMeasurements(selected) + "</span></div></section>";
     }
-    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='bme280'?x.value==='68':false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='bme280'&&a.value==='68')a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
+    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='bme280'?x.value==='68':false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='bme280'&&a.value==='68')a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
     sendPage("Configure Sensor Slot", "/sensors", c);
 }
 
