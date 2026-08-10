@@ -2,11 +2,11 @@
 
 #include "IMonotonicClock.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class ArduinoMonotonicClock : public IMonotonicClock {
 public:
     uint32_t nowMs() const override;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

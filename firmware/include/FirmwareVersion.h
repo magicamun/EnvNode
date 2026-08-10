@@ -1,7 +1,7 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
-constexpr const char* FirmwareVersion = "0.1.0";
+constexpr const char* FirmwareVersion = "0.5.0";
 
-} // namespace WeatherStation
+} // namespace EnvNode

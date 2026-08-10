@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 const char* runtimeActionName(RuntimeAction action) {
     switch (action) {
@@ -80,4 +80,4 @@ void RuntimeManager::performPendingRestart() {
     ESP.restart();
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

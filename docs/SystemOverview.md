@@ -1,6 +1,6 @@
-# WeatherStation System Overview
+# EnvNode System Overview
 
-**Project:** WeatherStation  
+**Project:** EnvNode
 **Status:** Active Development  
 **Document Version:** August 2026
 
@@ -8,7 +8,7 @@
 
 # 1. Vision
 
-WeatherStation is a modular embedded platform for environmental sensing and local automation.
+EnvNode is a modular embedded platform for environmental sensing and local automation.
 
 Although the initial focus is weather observation, the architecture is intentionally designed to support a much broader class of measurement and automation applications.
 
@@ -204,7 +204,7 @@ User-visible names may change without affecting integrations.
 Measurements are published using:
 
 ```
-weatherstation/<device>/sensor/<sensorId>/<measurement>
+envnode/<device>/sensor/<sensorId>/<measurement>
 ```
 
 Properties:
@@ -219,7 +219,7 @@ Measurements intentionally remain stateless.
 
 # 8. Home Assistant
 
-WeatherStation supports MQTT Device Discovery.
+EnvNode supports MQTT Device Discovery.
 
 Discovery is retained.
 
@@ -436,7 +436,7 @@ Future:
 
 # 17. Project Philosophy
 
-WeatherStation is designed as a reusable embedded platform.
+EnvNode is designed as a reusable embedded platform.
 
 The objective is not to build a single weather station.
 

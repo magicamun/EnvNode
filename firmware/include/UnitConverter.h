@@ -2,7 +2,7 @@
 
 #include "MeasurementType.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class UnitConverter {
 public:
@@ -18,4 +18,4 @@ public:
     static bool parseStableKey(const char* key, PresentationUnit& unit);
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

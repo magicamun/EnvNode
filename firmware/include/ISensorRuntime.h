@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class ISensorRuntime {
 public:
@@ -10,4 +10,4 @@ public:
     virtual bool rebuild(size_t& activeSensorCount, const char*& failureReason) = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

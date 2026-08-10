@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IWebService {
 public:
@@ -10,4 +10,4 @@ public:
     virtual void loop() = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

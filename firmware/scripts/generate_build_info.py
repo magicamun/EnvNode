@@ -71,7 +71,7 @@ header = """#pragma once
 
 #include \"FirmwareVersion.h\"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace FirmwareBuildInfo {
 
 constexpr const char* SemanticVersion = FirmwareVersion;
@@ -84,7 +84,7 @@ constexpr const char* CompactIdentity = %s;
 constexpr bool SourceDirty = %s;
 
 } // namespace FirmwareBuildInfo
-} // namespace WeatherStation
+} // namespace EnvNode
 """ % (
     cpp_string(build_number),
     cpp_string(commit),

@@ -7,7 +7,7 @@
 #include "SensorId.h"
 #include "SensorProvenance.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 struct Measurement {
     MeasurementType type = MeasurementType::Unknown;
@@ -22,4 +22,4 @@ struct Measurement {
 bool isMeasurementContentStructurallyValid(const Measurement& measurement);
 bool isMeasurementStructurallyValid(const Measurement& measurement);
 
-} // namespace WeatherStation
+} // namespace EnvNode

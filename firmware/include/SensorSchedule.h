@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class AcquisitionMode {
     EventOnly,
@@ -30,4 +30,4 @@ struct SensorSchedule {
     }
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

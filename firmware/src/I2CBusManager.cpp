@@ -1,6 +1,6 @@
 #include "I2CBusManager.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 I2CBusManager::I2CBusManager(ILogger& logger) : logger_(logger) {}
 
@@ -29,4 +29,4 @@ bool I2CBusManager::available(I2CBus bus) const {
     return index < 2 && initialized_[index];
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

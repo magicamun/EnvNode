@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class ValueKind {
     None,
@@ -81,4 +81,4 @@ private:
     Storage storage_;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

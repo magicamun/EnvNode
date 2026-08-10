@@ -2,7 +2,7 @@
 
 #include "SensorImplementationRegistry.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 SensorRuntime::SensorRuntime(
     IConfigurationService& configurationService,
@@ -124,4 +124,4 @@ bool SensorRuntime::rebuild(size_t& activeSensorCount, const char*& failureReaso
     return true;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

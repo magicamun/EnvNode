@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class HardwareInterfaceKind {
     Simulation,
@@ -136,4 +136,4 @@ bool exclusiveHardwareResourceConflict(
 
 const char* hardwareInterfaceKindName(HardwareInterfaceKind kind);
 
-} // namespace WeatherStation
+} // namespace EnvNode

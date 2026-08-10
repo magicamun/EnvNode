@@ -1,6 +1,6 @@
 #include "Measurement.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const PresentationUnit NoUnit[] = {PresentationUnit::None};
@@ -119,4 +119,4 @@ bool isMeasurementStructurallyValid(const Measurement& measurement) {
         && measurement.timestamp > 0;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

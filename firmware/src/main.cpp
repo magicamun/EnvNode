@@ -24,7 +24,7 @@
 #include "MeasurementSnapshotCache.h"
 #include "I2CBusManager.h"
 
-using namespace WeatherStation;
+using namespace EnvNode;
 
 static SerialLogger serialLogger;
 static I2CBusManager i2cBusManager(serialLogger);

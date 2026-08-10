@@ -1,8 +1,8 @@
-#include "WeatherLocale.h"
+#include "EnvNode/Locale.h"
 
 #include <string.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 const char* localeKey(Locale locale) {
     switch (locale) {
@@ -29,4 +29,4 @@ bool parseLocaleKey(const char* key, Locale& locale) {
     return false;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

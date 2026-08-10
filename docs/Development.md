@@ -14,7 +14,7 @@ The resulting Web-OTA image is located at:
 .pio/build/<environment>/firmware.bin
 ```
 
-Open the WeatherStation Web Administration Firmware page and select that
+Open the EnvNode Web Administration Firmware page and select that
 `firmware.bin` file. A successful upload stages the image but does not restart
 the device. Use **Restart Now** to activate it, or leave the current firmware
 running and restart later.

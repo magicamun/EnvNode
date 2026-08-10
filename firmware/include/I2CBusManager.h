@@ -5,7 +5,7 @@
 #include "HardwareResources.h"
 #include "Logger.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class I2CBusManager {
 public:
@@ -20,4 +20,4 @@ private:
     bool initialized_[2] = {false, false};
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

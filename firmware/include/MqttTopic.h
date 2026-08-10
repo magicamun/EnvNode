@@ -4,9 +4,11 @@
 
 #include "MeasurementType.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
+const char* mqttTopicRoot();
 String mqttTopicSafeDeviceName(const String& deviceName);
+String mqttDeviceTopicRoot(const String& deviceName);
 const char* mqttMeasurementTypeTopic(MeasurementType type);
 
-} // namespace WeatherStation
+} // namespace EnvNode

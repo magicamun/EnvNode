@@ -1,6 +1,6 @@
 #include "HardwareResources.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const BoardGpioCapability CurrentBoardGpios[] = {
@@ -164,4 +164,4 @@ bool exclusiveHardwareResourceConflict(
     return gpioConflict || i2cConflict;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

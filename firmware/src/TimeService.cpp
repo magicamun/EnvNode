@@ -3,7 +3,7 @@
 #include <esp_sntp.h>
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 namespace {
 constexpr const char* DefaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
@@ -143,4 +143,4 @@ String TimeService::formatIso8601(time_t timestamp, bool local) const {
     return String(buffer);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

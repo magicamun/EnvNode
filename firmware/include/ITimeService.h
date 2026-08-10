@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class ITimeService {
 public:
@@ -19,4 +19,4 @@ public:
     virtual uint32_t epoch() const = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

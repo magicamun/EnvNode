@@ -7,7 +7,7 @@
 #include "HardwareResources.h"
 #include "I2CBusManager.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class BME280Sensor : public ISensor {
 public:
@@ -37,4 +37,4 @@ private:
     SensorState state_ = SensorState::Unknown;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

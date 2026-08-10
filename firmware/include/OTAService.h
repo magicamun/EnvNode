@@ -5,7 +5,7 @@
 #include "Logger.h"
 #include "RuntimeManager.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class OTAState : uint8_t {
     Idle,
@@ -49,4 +49,4 @@ private:
     String lastError_;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

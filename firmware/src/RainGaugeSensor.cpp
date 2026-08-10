@@ -1,6 +1,6 @@
 #include "RainGaugeSensor.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 RainGaugeSensor::RainGaugeSensor(
     SensorId id,
@@ -109,4 +109,4 @@ void RainGaugeSensor::emitTip(IMeasurementSink& output) {
     output.emit(increment);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

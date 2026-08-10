@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 constexpr float MinimumTemperatureCelsius = -40.0F;
 constexpr float MaximumTemperatureCelsius = 125.0F;
@@ -87,4 +87,4 @@ void SHT4xSensor::emit(IMeasurementSink& output, MeasurementType type, float val
     output.emit(measurement);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

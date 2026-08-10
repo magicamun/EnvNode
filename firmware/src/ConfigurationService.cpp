@@ -6,7 +6,7 @@
 #include "HardwareResources.h"
 #include <cmath>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 namespace {
 constexpr const char* PreferencesNamespace = "weather";
@@ -720,4 +720,4 @@ bool ConfigurationService::resetToDefaults() {
     return true;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

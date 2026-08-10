@@ -15,7 +15,7 @@
 #include "RainGaugeSensor.h"
 #include "I2CBusManager.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class SensorFactoryResult {
     Created,
@@ -56,4 +56,4 @@ private:
     SensorImplementation constructed_[MaxSensorSlotCount];
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

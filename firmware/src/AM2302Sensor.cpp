@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const float MinimumTemperatureCelsius = -40.0F;
@@ -123,4 +123,4 @@ void AM2302Sensor::emitMeasurement(
     output.emit(measurement);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

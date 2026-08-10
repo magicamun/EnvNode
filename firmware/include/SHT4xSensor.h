@@ -7,7 +7,7 @@
 #include "ISensor.h"
 #include "Logger.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class SHT4xSensor : public ISensor {
 public:
@@ -36,4 +36,4 @@ private:
     SensorState state_ = SensorState::Unknown;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

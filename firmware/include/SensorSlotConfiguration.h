@@ -7,7 +7,7 @@
 #include "SensorImplementationRegistry.h"
 #include "SensorSchedule.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 struct SimulatedTemperatureConfiguration {};
 struct SimulatedHumidityConfiguration {};
@@ -75,4 +75,4 @@ struct SensorSlotConfiguration {
 constexpr size_t MaxSensorSlotCount = 16;
 constexpr size_t MaxSensorSlotNameLength = 32;
 
-} // namespace WeatherStation
+} // namespace EnvNode

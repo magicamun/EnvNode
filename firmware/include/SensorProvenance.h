@@ -1,10 +1,10 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class SensorProvenance {
     Physical,
     Simulated,
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IWiFiService {
 public:
@@ -17,4 +17,4 @@ public:
     virtual int32_t rssi() const = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

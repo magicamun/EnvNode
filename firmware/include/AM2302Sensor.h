@@ -8,7 +8,7 @@
 #include "ISensor.h"
 #include "Logger.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class AM2302Sensor : public ISensor {
 public:
@@ -42,4 +42,4 @@ private:
     uint32_t readyAtMs_ = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

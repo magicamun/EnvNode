@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 LocaleFormatter::LocaleFormatter(IConfigurationService& configurationService)
     : configurationService_(configurationService) {
@@ -85,4 +85,4 @@ String LocaleFormatter::groupedNumber(
     return formatted;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

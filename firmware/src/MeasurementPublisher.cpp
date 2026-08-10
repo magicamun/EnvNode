@@ -2,7 +2,7 @@
 #include "UnitConverter.h"
 #include "MqttTopic.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const bool RetainMeasurements = false;
@@ -29,8 +29,7 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
     }
 
     const Configuration& configuration = configurationService_.getConfiguration();
-    const String deviceName = mqttTopicSafeDeviceName(configuration.device.name);
-    const String topic = String("weatherstation/") + deviceName + "/sensor/"
+    const String topic = mqttDeviceTopicRoot(configuration.device.name) + "/sensor/"
         + String(static_cast<unsigned int>(measurement.source)) + "/" + typeTopic;
     const String timestamp = timeService_.iso8601Local(measurement.timestamp);
     const MeasurementTypeMetadata& metadata = measurementTypeMetadata(measurement.type);
@@ -136,4 +135,4 @@ String MeasurementPublisher::serializePayload(
     return payload;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

@@ -5,7 +5,7 @@
 #include "SensorFactory.h"
 #include "SensorManager.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class SensorRuntime : public ISensorRuntime {
 public:
@@ -40,4 +40,4 @@ private:
     ISensor* activeSensors_[MaxSensorSlotCount] = {};
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

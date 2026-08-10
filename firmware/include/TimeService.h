@@ -6,7 +6,7 @@
 #include "IWiFiService.h"
 #include "Logger.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class TimeService : public ITimeService {
 public:
@@ -34,4 +34,4 @@ private:
     bool synchronized_ = false;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

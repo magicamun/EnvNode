@@ -2,10 +2,10 @@
 
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 uint32_t ArduinoMonotonicClock::nowMs() const {
     return millis();
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

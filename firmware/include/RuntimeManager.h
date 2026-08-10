@@ -4,7 +4,7 @@
 #include "RuntimeAction.h"
 #include "ISensorRuntime.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class RuntimeManager {
 public:
@@ -27,4 +27,4 @@ private:
     RuntimeAction pendingAction_ = RuntimeAction::None;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

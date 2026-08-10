@@ -2,7 +2,7 @@
 
 #include <Update.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 const char* otaStateName(OTAState state) {
     switch (state) {
@@ -123,4 +123,4 @@ String OTAService::updateError(const char* fallback) const {
         ? String(detail) : String(fallback);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

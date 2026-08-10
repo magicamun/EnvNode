@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class DiscoveryRepublishResult {
     Published,
@@ -15,4 +15,4 @@ public:
     virtual DiscoveryRepublishResult republish() = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

@@ -6,7 +6,7 @@
 #include "Logger.h"
 #include "SensorSlotConfiguration.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class RainGaugeSensor : public ISensor {
 public:
@@ -38,4 +38,4 @@ private:
     bool interruptAttached_ = false;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

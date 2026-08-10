@@ -3,7 +3,7 @@
 #include <PubSubClient.h>
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 static WiFiClient espClient;
 static PubSubClient client(espClient);
@@ -70,7 +70,7 @@ void MqttService::attemptConnect() {
     if (now - lastAttemptMs_ < ReconnectIntervalMs) return;
 
     const Configuration& cfg = configurationService_.getConfiguration();
-    String clientId = String("WeatherStation-") + (cfg.device.name.isEmpty() ? "Device" : cfg.device.name);
+    String clientId = String("EnvNode-") + (cfg.device.name.isEmpty() ? "Device" : cfg.device.name);
     clientId.replace(' ', '-');
 
     client.setServer(cfg.mqtt.server.c_str(), cfg.mqtt.port);
@@ -126,4 +126,4 @@ bool MqttService::publish(const char* topic, const char* payload, bool retained)
     return client.publish(topic, payload, retained);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

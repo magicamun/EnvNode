@@ -1,7 +1,7 @@
 #include "WiFiService.h"
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 WiFiService::WiFiService(ILogger& logger, IConfigurationService& configurationService)
     : logger_(logger)
@@ -173,4 +173,4 @@ void WiFiService::updateReconnectingState() {
     }
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

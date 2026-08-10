@@ -6,7 +6,7 @@
 #include "MqttTopic.h"
 #include "UnitConverter.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const MeasurementType DiscoverableMeasurementTypes[] = {
@@ -147,18 +147,18 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
     size_t& entityCount) const {
     const Configuration& configuration = configurationService_.getConfiguration();
     const String deviceId = stableDeviceId();
-    const String stateRoot = "weatherstation/" + mqttTopicSafeDeviceName(configuration.device.name);
+    const String stateRoot = mqttDeviceTopicRoot(configuration.device.name);
     String payload;
     payload.reserve(12288);
     payload = "{\"dev\":{\"ids\":[";
     appendJsonString(payload, deviceId.c_str());
     payload += "],\"name\":";
     appendJsonString(payload, configuration.device.name.c_str());
-    payload += ",\"mf\":\"WeatherStation Project\",\"mdl\":\"WeatherStation\",\"sw\":";
+    payload += ",\"mf\":\"EnvNode Project\",\"mdl\":\"EnvNode\",\"sw\":";
     appendJsonString(payload, FirmwareVersion);
     payload += ",\"sn\":";
     appendJsonString(payload, deviceId.c_str());
-    payload += "},\"o\":{\"name\":\"WeatherStation\",\"sw\":";
+    payload += "},\"o\":{\"name\":\"EnvNode\",\"sw\":";
     appendJsonString(payload, FirmwareVersion);
     payload += "},\"cmps\":{";
 
@@ -328,4 +328,4 @@ size_t HomeAssistantDiscoveryPublisher::lastEntityCount() const {
     return lastEntityCount_;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

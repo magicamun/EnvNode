@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const float CenterHumidityPercent = 52.5F;
@@ -74,4 +74,4 @@ SensorOperationResult SimulatedHumiditySensor::sample(IMeasurementSink& output) 
     return SensorOperationResult::Completed;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

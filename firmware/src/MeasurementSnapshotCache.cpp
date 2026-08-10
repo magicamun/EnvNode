@@ -1,6 +1,6 @@
 #include "MeasurementSnapshotCache.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 bool MeasurementSnapshotCache::entryIndex(
     SensorId sensorId,
@@ -42,4 +42,4 @@ bool MeasurementSnapshotCache::snapshot(
     return true;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const uint32_t MaximumScheduleIntervalMs = 0x7FFFFFFFUL;
@@ -310,4 +310,4 @@ const SensorManager::SensorEntry* SensorManager::findEntry(SensorId id) const {
     return nullptr;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

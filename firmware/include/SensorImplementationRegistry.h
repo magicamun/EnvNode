@@ -7,7 +7,7 @@
 #include "SensorProvenance.h"
 #include "SensorSchedule.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class SensorImplementation : uint8_t {
     None = 0,
@@ -44,4 +44,4 @@ public:
     static const SensorImplementationMetadata* findByStableId(const char* stableId);
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

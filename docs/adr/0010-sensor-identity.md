@@ -60,17 +60,17 @@ Conceptually:
 
 The initial MQTT representation therefore becomes:
 
-    weatherstation/<device>/sensor/<sensorId>/<measurementType>
+    envnode/<device>/sensor/<sensorId>/<measurementType>
 
 Examples:
 
-    weatherstation/WeatherStation/sensor/4/temperature
+    envnode/WeatherStation/sensor/4/temperature
 
-    weatherstation/WeatherStation/sensor/4/relativehumidity
+    envnode/WeatherStation/sensor/4/relativehumidity
 
-    weatherstation/WeatherStation/sensor/3/temperature
+    envnode/WeatherStation/sensor/3/temperature
 
-    weatherstation/WeatherStation/sensor/3/atmosphericpressure
+    envnode/WeatherStation/sensor/3/atmosphericpressure
 
 MeasurementType alone is no longer considered sufficient as an external address.
 
@@ -220,7 +220,7 @@ later replaced by:
 
 The external address remains:
 
-    weatherstation/<device>/sensor/4/temperature
+    envnode/<device>/sensor/4/temperature
 
 Consumers therefore do not require reconfiguration after hardware replacement.
 

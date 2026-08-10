@@ -2,7 +2,7 @@
 
 #include "Measurement.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IMeasurementSink {
 public:
@@ -13,4 +13,4 @@ public:
     virtual void emit(const Measurement& measurementContent) = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

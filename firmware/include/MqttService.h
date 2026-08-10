@@ -6,7 +6,7 @@
 #include "IWiFiService.h"
 #include "Logger.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class MqttService : public IMqttService {
 public:
@@ -39,4 +39,4 @@ private:
     static constexpr unsigned long ReconnectIntervalMs = 5000;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

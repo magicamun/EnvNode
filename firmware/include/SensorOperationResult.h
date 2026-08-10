@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class SensorOperationResult {
     // The operation succeeded. sample() normally emitted at least one Measurement.
@@ -11,4 +11,4 @@ enum class SensorOperationResult {
     HardwareFailure,
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

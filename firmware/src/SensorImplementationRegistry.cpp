@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 constexpr size_t ImplementationCount = 8;
@@ -78,4 +78,4 @@ const SensorImplementationMetadata* SensorImplementationRegistry::findByStableId
     return nullptr;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

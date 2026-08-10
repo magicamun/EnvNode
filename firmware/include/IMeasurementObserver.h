@@ -4,7 +4,7 @@
 
 #include "Measurement.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IMeasurementObserver {
 public:
@@ -13,4 +13,4 @@ public:
     virtual void clear() = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

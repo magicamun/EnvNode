@@ -5,7 +5,7 @@
 
 #include "IConfigurationService.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class LocaleFormatter {
 public:
@@ -23,4 +23,4 @@ private:
     IConfigurationService& configurationService_;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

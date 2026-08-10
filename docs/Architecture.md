@@ -2,7 +2,7 @@
 
 ## Purpose
 
-WeatherStation is an open-source embedded measurement platform designed for home automation systems.
+EnvNode is an open-source embedded measurement platform designed for home automation systems.
 
 Its primary purpose is to acquire reliable environmental measurements and make them available through standard interfaces.
 
@@ -24,7 +24,7 @@ The firmware intentionally focuses on measurement rather than interpretation.
                             MQTT / HTTP
                                |
 +-------------------------------------------------------------+
-|                     WeatherStation                          |
+|                     EnvNode                          |
 |-------------------------------------------------------------|
 |                                                             |
 |  Configuration                                              |
@@ -57,7 +57,7 @@ The automation platform owns the interpretation.
 
 # Responsibilities
 
-The WeatherStation firmware is responsible for:
+The EnvNode firmware is responsible for:
 
 - acquiring physical measurements
 - converting sensor signals into physical units
@@ -185,7 +185,7 @@ Typical examples include:
 
 # System Boundary
 
-The WeatherStation firmware ends at the communication interface.
+The EnvNode firmware ends at the communication interface.
 
 Everything beyond MQTT or the local web interface belongs to higher software layers.
 

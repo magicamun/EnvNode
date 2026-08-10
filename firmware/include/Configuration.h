@@ -2,10 +2,10 @@
 
 #include <Arduino.h>
 #include "MeasurementType.h"
-#include "WeatherLocale.h"
+#include "EnvNode/Locale.h"
 #include "SensorSlotConfiguration.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class NetworkAddressMode : uint8_t {
     Dhcp = 0,
@@ -76,4 +76,4 @@ struct Configuration {
     }
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

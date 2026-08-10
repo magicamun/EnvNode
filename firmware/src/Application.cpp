@@ -2,7 +2,7 @@
 #include "FirmwareBuildInfo.h"
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher)
     : logger_(logger)
@@ -59,4 +59,4 @@ void Application::loop() {
     runtimeManager_.service();
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

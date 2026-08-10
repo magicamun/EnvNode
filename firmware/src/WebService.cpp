@@ -11,7 +11,7 @@
 #include "SensorImplementationRegistry.h"
 #include "SensorSlotConfiguration.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const char SharedStyle[] PROGMEM = R"CSS(
@@ -489,9 +489,9 @@ String WebService::renderPage(const char* title, const char* active, const Strin
     html.reserve(content.length() + 1200);
     html = "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>";
     html += escapeHtml(title);
-    html += " · WeatherStation</title><link rel='stylesheet' href='/style.css'></head><body><div class='shell'><aside class='side'><div class='brand'>";
+    html += " · EnvNode</title><link rel='stylesheet' href='/style.css'></head><body><div class='shell'><aside class='side'><div class='brand'>";
     html += escapeHtml(cfg.device.name);
-    html += "</div><div class='version'>WeatherStation · v";
+    html += "</div><div class='version'>EnvNode · v";
     html += FirmwareBuildInfo::SemanticVersion;
     html += "</div>";
     html += navigationHtml(active);
@@ -985,4 +985,4 @@ void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult("Facto
 void WebService::handleNotFound() { server_.send(404,"text/plain","Not Found"); }
 void WebService::performExplicitRestart() { server_.client().flush(); runtimeManager_.performPendingRestart(); }
 
-} // namespace WeatherStation
+} // namespace EnvNode

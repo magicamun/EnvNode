@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This document defines the functional domain model of WeatherStation.
+This document defines the functional domain model of EnvNode.
 
 It describes the core concepts of the system independently from their technical implementation.
 
 The purpose of this document is to answer one question:
 
-> Which concepts exist in the WeatherStation domain?
+> Which concepts exist in the EnvNode domain?
 
 The following topics are intentionally excluded from this document:
 
@@ -29,7 +29,7 @@ Those belong to the Technical Architecture.
 
 # Core Domain
 
-The WeatherStation domain consists of six fundamental concepts:
+The EnvNode domain consists of six fundamental concepts:
 
 - Device
 - Configuration
@@ -52,13 +52,13 @@ Conceptually:
       │
       └──────── Actuators
 
-The Device is the aggregate root of the WeatherStation domain.
+The Device is the aggregate root of the EnvNode domain.
 
 Everything belongs to exactly one Device.
 
 Measurements are the primary domain objects produced by the Device.
 
-The WeatherStation exists to acquire reliable Measurements from the physical world.
+The EnvNode exists to acquire reliable Measurements from the physical world.
 
 All other domain concepts ultimately support that goal.
 
@@ -66,7 +66,7 @@ All other domain concepts ultimately support that goal.
 
 # Device
 
-A Device represents one physical WeatherStation installation.
+A Device represents one physical EnvNode installation.
 
 The Device owns:
 
@@ -75,7 +75,7 @@ The Device owns:
 - Actuators
 - Diagnostics
 
-The Device coordinates the complete WeatherStation.
+The Device coordinates the complete EnvNode.
 
 Typical properties include:
 
@@ -529,7 +529,7 @@ Those remain Sensor responsibilities.
 
 The primary purpose of the Device is to acquire Measurements rather than permanently storing them.
 
-Long-term storage, aggregation and historical analysis belong outside the WeatherStation domain.
+Long-term storage, aggregation and historical analysis belong outside the EnvNode domain.
 
 ---
 
@@ -733,7 +733,7 @@ Consumers must not distinguish between:
 
 Simulation therefore belongs inside the Sensor abstraction.
 
-The purpose of simulation is to validate the complete WeatherStation domain model before physical hardware is available.
+The purpose of simulation is to validate the complete EnvNode domain model before physical hardware is available.
 
 Replacing a simulated Sensor with a physical Sensor must not require architectural changes outside the Sensor implementation.
 
@@ -795,7 +795,7 @@ Each concept owns one clearly defined domain responsibility.
 
 # Domain Boundary
 
-The WeatherStation domain ends with:
+The EnvNode domain ends with:
 
 - canonical Measurements
 - Configuration
@@ -817,7 +817,7 @@ Presentation Unit selection belongs to Device Configuration because it expresses
 
 Presentation conversion itself occurs at the external representation boundary and does not change the canonical domain Measurement.
 
-The domain describes what the WeatherStation measures and how those Measurements are represented canonically.
+The domain describes what the EnvNode measures and how those Measurements are represented canonically.
 
 The Technical Architecture describes how canonical Measurements are converted, serialized and transported externally.
 
@@ -825,7 +825,7 @@ The Technical Architecture describes how canonical Measurements are converted, s
 
 # Core Rule
 
-The central rule of the WeatherStation domain is:
+The central rule of the EnvNode domain is:
 
 Sensors produce Measurements.
 
@@ -862,5 +862,4 @@ The Device measures.
 
 External systems understand.
 
-This distinction is fundamental to the WeatherStation architecture.
-
+This distinction is fundamental to the EnvNode architecture.

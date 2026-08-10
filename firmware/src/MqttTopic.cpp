@@ -1,7 +1,9 @@
 #include "MqttTopic.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
+
+constexpr char MqttTopicRoot[] = "envnode";
 
 bool isTopicSafeCharacter(char character) {
     return (character >= 'a' && character <= 'z')
@@ -13,6 +15,10 @@ bool isTopicSafeCharacter(char character) {
 
 } // namespace
 
+const char* mqttTopicRoot() {
+    return MqttTopicRoot;
+}
+
 String mqttTopicSafeDeviceName(const String& deviceName) {
     if (deviceName.isEmpty()) return "device";
     String normalized;
@@ -22,6 +28,10 @@ String mqttTopicSafeDeviceName(const String& deviceName) {
         normalized += isTopicSafeCharacter(character) ? character : '_';
     }
     return normalized;
+}
+
+String mqttDeviceTopicRoot(const String& deviceName) {
+    return String(mqttTopicRoot()) + "/" + mqttTopicSafeDeviceName(deviceName);
 }
 
 const char* mqttMeasurementTypeTopic(MeasurementType type) {
@@ -40,4 +50,4 @@ const char* mqttMeasurementTypeTopic(MeasurementType type) {
     }
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

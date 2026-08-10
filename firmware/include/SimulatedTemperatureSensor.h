@@ -5,7 +5,7 @@
 #include "IMonotonicClock.h"
 #include "ISensor.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class SimulatedTemperatureSensor : public ISensor {
 public:
@@ -29,4 +29,4 @@ private:
     uint64_t elapsedMs_ = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

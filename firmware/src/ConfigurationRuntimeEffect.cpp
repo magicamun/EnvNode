@@ -1,6 +1,6 @@
 #include "ConfigurationRuntimeEffect.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 RuntimeAction runtimeActionFor(ConfigurationArea area) {
     switch (area) {
@@ -39,4 +39,4 @@ ConfigurationSaveResult configurationSaveResult(
     };
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

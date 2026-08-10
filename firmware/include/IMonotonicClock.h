@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IMonotonicClock {
 public:
@@ -11,4 +11,4 @@ public:
     virtual uint32_t nowMs() const = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

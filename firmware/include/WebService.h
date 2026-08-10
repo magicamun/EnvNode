@@ -16,7 +16,7 @@
 #include "Logger.h"
 #include "IDiscoveryPublisher.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class WebService : public IWebService {
 public:
@@ -96,4 +96,4 @@ private:
     String firmwareUploadRequestError_;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

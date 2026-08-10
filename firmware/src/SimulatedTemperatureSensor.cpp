@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const float CenterTemperatureCelsius = 20.0F;
@@ -75,4 +75,4 @@ SensorOperationResult SimulatedTemperatureSensor::sample(IMeasurementSink& outpu
     return SensorOperationResult::Completed;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

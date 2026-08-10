@@ -1,6 +1,8 @@
-# WeatherStation
+# EnvNode
 
-WeatherStation is an open-source ESP32-based weather station designed for reliable environmental measurements and seamless integration into modern home automation systems.
+EnvNode is an open-source ESP32-based embedded platform for reliable environmental measurements and seamless integration into modern home automation systems.
+
+WeatherStation is the first reference application built on the reusable EnvNode platform.
 
 The project intentionally separates **measurement** from **interpretation**.
 
@@ -8,7 +10,7 @@ The firmware is responsible for acquiring reliable physical Measurements and pub
 
 Higher-level concepts such as weather interpretation, historical aggregation, evapotranspiration (ETo), irrigation logic and visualization intentionally remain outside the firmware.
 
-WeatherStation is developed as a complete open-source product including:
+EnvNode is developed as a complete open-source product including:
 
 - firmware
 - hardware (KiCad)
@@ -23,7 +25,7 @@ The goal is to build a reliable measurement platform.
 
 # Vision
 
-WeatherStation provides an open, transparent and extensible weather sensor platform for Home Assistant and other home automation systems.
+EnvNode provides an open, transparent and extensible weather sensor platform for Home Assistant and other home automation systems.
 
 The ESP32 acts as a dedicated measurement node.
 
@@ -54,7 +56,7 @@ Rather than replacing individual algorithms, the firmware was redesigned from fi
 
 # Core Philosophy
 
-The WeatherStation project follows one simple principle:
+The EnvNode project follows one simple principle:
 
 > Measure first.
 >
@@ -212,7 +214,7 @@ Project documentation is intentionally separated by responsibility.
 
 # Non Goals
 
-WeatherStation intentionally does not:
+EnvNode intentionally does not:
 
 - perform weather forecasting
 - calculate evapotranspiration (ETo)

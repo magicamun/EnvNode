@@ -3,7 +3,7 @@
 #include "IMeasurementObserver.h"
 #include "SensorSlotConfiguration.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 struct MeasurementSnapshot {
     Measurement measurement;
@@ -33,4 +33,4 @@ private:
     Entry entries_[MaximumEntryCount];
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

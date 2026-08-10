@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class PresentationUnit : uint8_t {
     None = 0,
@@ -18,4 +18,4 @@ enum class PresentationUnit : uint8_t {
     Millimeter = 10,
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

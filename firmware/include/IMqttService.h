@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IMqttService {
 public:
@@ -14,4 +14,4 @@ public:
     virtual bool publish(const char* topic, const char* payload, bool retained) = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

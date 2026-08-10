@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document defines the technical architecture of WeatherStation.
+This document defines the technical architecture of EnvNode.
 
-It describes how the WeatherStation domain model is realized on the embedded platform and how the different technical layers interact.
+It describes how the EnvNode domain model is realized on the embedded platform and how the different technical layers interact.
 
 The domain model itself is defined separately in `DomainModel.md`.
 
@@ -25,7 +25,7 @@ The goal is to keep the technical architecture modular, maintainable and largely
 
 Hardware may evolve over time without requiring architectural changes to higher software layers.
 
-The WeatherStation firmware intentionally limits itself to acquiring and publishing measurements.
+The EnvNode firmware intentionally limits itself to acquiring and publishing measurements.
 
 Interpretation of weather data belongs to external systems such as Home Assistant or other automation platforms.
 
@@ -45,7 +45,7 @@ The fundamental architectural principle therefore remains:
 
 # Architectural Layers
 
-WeatherStation is divided into four technical layers:
+EnvNode is divided into four technical layers:
 
 1. Application Layer
 2. Communication Layer
@@ -117,7 +117,7 @@ Hardware remains unaware of application behaviour.
 
 # Application Layer
 
-The Application Layer coordinates the WeatherStation as a whole.
+The Application Layer coordinates the EnvNode as a whole.
 
 It connects the domain model to the technical infrastructure services.
 
@@ -194,7 +194,7 @@ This separation keeps the firmware modular while allowing infrastructure compone
 
 # Communication Layer
 
-The Communication Layer exposes WeatherStation functionality to external systems.
+The Communication Layer exposes EnvNode functionality to external systems.
 
 Communication protocols remain independent from the transport mechanisms underneath them.
 
@@ -278,7 +278,7 @@ only downstream publishing sink.
 
 Topics use:
 
-    weatherstation/<deviceName>/sensor/<sensorId>/<measurementType>
+    envnode/<deviceName>/sensor/<sensorId>/<measurementType>
 
 with deterministic topic-safe device-name normalization, decimal SensorId serialization and stable lowercase MeasurementType names. Sensor names and implementation types are metadata and never form part of the external address.
 
@@ -449,7 +449,7 @@ These rules apply equally to:
 
 The Web Interface provides an explicit reset-to-defaults function.
 
-Reset clears the complete WeatherStation configuration namespace in persistent storage.
+Reset clears the complete EnvNode configuration namespace in persistent storage.
 
 Conceptually:
 
@@ -716,7 +716,7 @@ Generated firmware:
     .pio/build/<environment>/firmware.bin
 
 
-The generated binary can be uploaded through the WeatherStation Web Interface.
+The generated binary can be uploaded through the EnvNode Web Interface.
 
 The OTA process then performs:
 
@@ -935,7 +935,7 @@ Persistent storage is intentionally **not** used for:
 
 Historical data belongs outside the embedded device.
 
-The WeatherStation firmware is designed to measure and publish data, not to archive it.
+The EnvNode firmware is designed to measure and publish data, not to archive it.
 
 ---
 # Configuration Ownership
@@ -1044,7 +1044,7 @@ This prevents divergence between runtime configuration and persistent storage.
 
 ## Reset to Defaults
 
-Factory reset clears the complete WeatherStation Preferences namespace.
+Factory reset clears the complete EnvNode Preferences namespace.
 
 Conceptually:
 
@@ -1324,7 +1324,7 @@ This allows hardware replacement without changing application logic.
 
 # Sensor Drivers
 
-A Sensor Driver bridges physical hardware and the WeatherStation domain model.
+A Sensor Driver bridges physical hardware and the EnvNode domain model.
 
 Its responsibility is to convert hardware interaction into canonical domain Measurements.
 
@@ -1760,7 +1760,7 @@ Measurement publication currently follows best-effort delivery. Measurements are
 
 # Runtime Model
 
-WeatherStation uses a long-running embedded runtime.
+EnvNode uses a long-running embedded runtime.
 
 The top-level execution model intentionally remains simple.
 
@@ -1895,7 +1895,7 @@ They never change Sensor acquisition cadence or canonical Measurement values.
 
 # Event-Driven and Periodic Behaviour
 
-WeatherStation supports both periodic and event-driven Measurements.
+EnvNode supports both periodic and event-driven Measurements.
 
 Examples of periodic measurements include:
 
@@ -2174,7 +2174,7 @@ The runtime Configuration has exactly one authoritative owner.
 
 # Memory Management
 
-WeatherStation runs on a memory-constrained embedded platform.
+EnvNode runs on a memory-constrained embedded platform.
 
 The implementation should therefore prefer deterministic memory usage.
 
@@ -2193,7 +2193,7 @@ Readability and maintainability remain more important than premature micro-optim
 
 # Security Boundary
 
-WeatherStation is intended for trusted local networks.
+EnvNode is intended for trusted local networks.
 
 Nevertheless:
 
@@ -2268,7 +2268,7 @@ firmware build.
 
 # Repository Boundary
 
-The WeatherStation repository contains the complete product.
+The EnvNode repository contains the complete product.
 
 It includes:
 
@@ -2280,7 +2280,7 @@ It includes:
 
 Conceptually:
 
-    WeatherStation/
+    EnvNode/
     |
     +-- firmware/
     |

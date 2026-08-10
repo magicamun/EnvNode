@@ -2,7 +2,7 @@
 
 #include "RuntimeAction.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class ConfigurationArea {
     Network,
@@ -28,4 +28,4 @@ ConfigurationSaveResult configurationSaveResult(
     ConfigurationArea secondArea,
     bool secondChanged);
 
-} // namespace WeatherStation
+} // namespace EnvNode

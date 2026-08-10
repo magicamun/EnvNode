@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 using SensorId = uint16_t;
 
@@ -12,4 +12,4 @@ inline bool isValidSensorId(SensorId id) {
     return id != InvalidSensorId;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

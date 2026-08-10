@@ -10,7 +10,7 @@
 #include "Logger.h"
 #include "IDiscoveryPublisher.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class Application {
 public:
@@ -32,4 +32,4 @@ private:
     bool timeSyncLogged_ = false;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

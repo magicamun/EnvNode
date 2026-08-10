@@ -1,8 +1,8 @@
 # AGENTS.md
 
-# WeatherStation Development Guidelines
+# EnvNode Development Guidelines
 
-This document defines the architectural rules and development principles for the WeatherStation project.
+This document defines the architectural rules and development principles for the EnvNode project.
 
 These rules are intentionally stricter than normal coding guidelines.
 
@@ -12,7 +12,7 @@ Whenever implementation convenience conflicts with these rules, the architecture
 
 # Project Mission
 
-WeatherStation is an open-source ESP32-based weather sensor platform.
+EnvNode is an open-source ESP32-based weather sensor platform.
 
 Its purpose is to provide reliable physical measurements and expose them through a clean and transparent interface.
 
@@ -257,7 +257,7 @@ None of these is considered secondary.
 
 # Repository Structure
 
-WeatherStation/
+EnvNode/
 
 ├── firmware/
 

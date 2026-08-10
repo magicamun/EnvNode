@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace WeatherStation {
+namespace EnvNode {
 namespace {
 
 const float CenterPressurePascal = 101000.0F;
@@ -91,4 +91,4 @@ SensorOperationResult SimulatedPressureSensor::sample(IMeasurementSink& output) 
     return SensorOperationResult::Completed;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

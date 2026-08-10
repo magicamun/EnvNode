@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class RuntimeAction : uint8_t {
     None = 0,
@@ -15,4 +15,4 @@ enum class RuntimeAction : uint8_t {
 
 const char* runtimeActionName(RuntimeAction action);
 
-} // namespace WeatherStation
+} // namespace EnvNode

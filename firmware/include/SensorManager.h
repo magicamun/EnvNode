@@ -12,7 +12,7 @@
 #include "SensorImplementationRegistry.h"
 #include "SensorSlotConfiguration.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 constexpr size_t MaxSensorCount = 16;
 
@@ -157,4 +157,4 @@ private:
     uint32_t operationEmissionCount_ = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

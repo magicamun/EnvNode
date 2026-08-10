@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "IDiscoveryPublisher.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class HomeAssistantDiscoveryPublisher : public IDiscoveryPublisher {
 public:
@@ -49,4 +49,4 @@ private:
     size_t lastEntityCount_ = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

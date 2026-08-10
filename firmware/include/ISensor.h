@@ -7,7 +7,7 @@
 #include "SensorProvenance.h"
 #include "SensorState.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class ISensor {
 public:
@@ -24,4 +24,4 @@ public:
     virtual SensorOperationResult sample(IMeasurementSink& output) = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

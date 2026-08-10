@@ -2,7 +2,7 @@
 
 #include "Configuration.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class IConfigurationService {
 public:
@@ -31,4 +31,4 @@ public:
     virtual bool resetToDefaults() = 0;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

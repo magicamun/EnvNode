@@ -4,7 +4,7 @@
 
 #include "SensorImplementationRegistry.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 SensorFactory::SensorFactory(IMonotonicClock& monotonicClock,
     I2CBusManager& i2cBusManager, ILogger& logger)
@@ -152,4 +152,4 @@ void SensorFactory::destroyAll() {
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) destroy(index);
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode

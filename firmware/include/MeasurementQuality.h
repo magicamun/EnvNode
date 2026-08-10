@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class MeasurementQuality {
     Good,
@@ -8,4 +8,4 @@ enum class MeasurementQuality {
     Degraded,
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

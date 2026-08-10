@@ -8,7 +8,7 @@
 #include "ITimeService.h"
 #include "PresentationUnit.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class MeasurementPublisher : public IMeasurementSink {
 public:
@@ -33,4 +33,4 @@ private:
     IMqttService& mqttService_;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

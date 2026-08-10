@@ -4,7 +4,7 @@
 #include "Configuration.h"
 #include "IConfigurationService.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 class ConfigurationService : public IConfigurationService {
 public:
@@ -60,4 +60,4 @@ private:
     bool preferencesInitialized_ = false;
 };
 
-} // namespace WeatherStation
+} // namespace EnvNode

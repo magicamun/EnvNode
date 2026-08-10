@@ -3,7 +3,7 @@
 #include "MeasurementValue.h"
 #include "PresentationUnit.h"
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class MeasurementType : uint8_t {
     Unknown,
@@ -43,4 +43,4 @@ bool isSupportedMeasurementType(MeasurementType type);
 const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type);
 bool supportsPresentationUnit(MeasurementType type, PresentationUnit unit);
 
-} // namespace WeatherStation
+} // namespace EnvNode

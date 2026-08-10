@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WeatherStation {
+namespace EnvNode {
 
 enum class SensorState {
     Unknown,
@@ -14,4 +14,4 @@ inline bool isSensorAvailable(SensorState state) {
     return state == SensorState::Ready || state == SensorState::Degraded;
 }
 
-} // namespace WeatherStation
+} // namespace EnvNode
