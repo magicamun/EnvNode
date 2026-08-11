@@ -604,6 +604,183 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:C_Polarized"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C_Polarized"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Polarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "CP_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "C_Polarized_0_1"
+				(rectangle
+					(start -2.286 0.508)
+					(end 2.286 1.016)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 2.286) (xy -0.762 2.286)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 2.794) (xy -1.27 1.778)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 2.286 -0.508)
+					(end -2.286 -1.016)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "C_Polarized_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:R"
 			(pin_numbers
 				(hide yes)
@@ -727,6 +904,184 @@
 					(at 0 -3.81 90)
 					(length 1.27)
 					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Jumper:SolderJumper_2_Open"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "JP"
+				(at 0 2.032 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "SolderJumper_2_Open"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 -7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Solder Jumper, 2-pole, open"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "solder jumper SPST"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "SolderJumper*Open*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SolderJumper_2_Open_0_1"
+				(polyline
+					(pts
+						(xy -0.254 1.016) (xy -0.254 -1.016)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -0.254 -1.016)
+					(mid -1.2656 0)
+					(end -0.254 1.016)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(arc
+					(start 0.254 1.016)
+					(mid 1.2656 0)
+					(end 0.254 -1.016)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.254 1.016) (xy 0.254 -1.016)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "SolderJumper_2_Open_1_1"
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "B"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2181,12 +2536,6 @@
 		(uuid "d24947c8-75e7-4e1e-b745-f3c2b4fae255")
 	)
 	(junction
-		(at 241.3 55.88)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "00b049e1-c4ed-47e4-aaee-cd443efa593a")
-	)
-	(junction
 		(at 214.63 55.88)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2205,16 +2554,22 @@
 		(uuid "6f01d87b-8867-485f-a625-677a7e3143e6")
 	)
 	(junction
-		(at 241.3 45.72)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "99caa7b7-ed8d-48c4-a0d2-90e6a2aec2f5")
-	)
-	(junction
 		(at 207.01 45.72)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "a236803b-1b72-4b8f-a80a-49f011aa626a")
+	)
+	(junction
+		(at 241.3 45.72)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "bf755ccf-b8ea-4fdb-964f-cf819b0c74f2")
+	)
+	(junction
+		(at 241.3 55.88)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c291b67b-a65e-4fb5-bdcf-b6f75e0de792")
 	)
 	(no_connect
 		(at 265.43 125.73)
@@ -2324,16 +2679,6 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 45.72) (xy 241.3 48.26)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1b31456b-7e10-44d3-aa97-8b2314b5c945")
-	)
-	(wire
-		(pts
 			(xy 62.23 83.82) (xy 62.23 92.71)
 		)
 		(stroke
@@ -2354,7 +2699,17 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 55.88) (xy 228.6 55.88)
+			(xy 241.3 45.72) (xy 252.73 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "285a6f4c-97d6-461d-8ec3-9824b6e26726")
+	)
+	(wire
+		(pts
+			(xy 228.6 55.88) (xy 241.3 55.88)
 		)
 		(stroke
 			(width 0)
@@ -2414,17 +2769,7 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 55.88) (xy 252.73 55.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "56dbfe50-ab8f-497e-94d1-6080267dbef7")
-	)
-	(wire
-		(pts
-			(xy 241.3 45.72) (xy 252.73 45.72)
+			(xy 238.76 45.72) (xy 241.3 45.72)
 		)
 		(stroke
 			(width 0)
@@ -2514,16 +2859,6 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 45.72) (xy 241.3 45.72)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "84308f69-6da0-4951-8f4a-0ade8f690785")
-	)
-	(wire
-		(pts
 			(xy 85.09 83.82) (xy 85.09 92.71)
 		)
 		(stroke
@@ -2561,6 +2896,16 @@
 			(type default)
 		)
 		(uuid "90286b9c-7feb-4a8a-8a6e-814fe718e501")
+	)
+	(wire
+		(pts
+			(xy 241.3 55.88) (xy 252.73 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9c7442b0-5f42-476d-a461-99b4cbc9e7b5")
 	)
 	(wire
 		(pts
@@ -2641,6 +2986,16 @@
 			(type default)
 		)
 		(uuid "cb78535f-2701-4c6e-ad2c-95d0f54e767d")
+	)
+	(wire
+		(pts
+			(xy 241.3 45.72) (xy 241.3 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cbd011e6-312e-4f3e-9f20-d6d2a5ec2dba")
 	)
 	(wire
 		(pts
@@ -2780,7 +3135,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SDA"
+	(global_label "I2C1_SDA"
 		(shape input)
 		(at 139.7 175.26 270)
 		(fields_autoplaced yes)
@@ -2792,7 +3147,7 @@
 		)
 		(uuid "0bbc25ce-62d8-415e-a79b-3a3ac66d98f7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 139.7 187.1352 90)
+			(at 139.7 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2876,7 +3231,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SCL"
+	(global_label "I2C1_SCL"
 		(shape input)
 		(at 265.43 110.49 0)
 		(fields_autoplaced yes)
@@ -2888,7 +3243,7 @@
 		)
 		(uuid "1d69756c-a6eb-4df9-a501-3a38de7fccdc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 277.2447 110.49 0)
+			(at 277.1842 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2900,7 +3255,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SDA"
+	(global_label "I2C0_SDA"
 		(shape input)
 		(at 46.99 175.26 270)
 		(fields_autoplaced yes)
@@ -2912,7 +3267,7 @@
 		)
 		(uuid "1fc33d9f-6bed-418c-8c9b-75845828cb35")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 46.99 186.9538 90)
+			(at 46.99 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2948,7 +3303,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SDA"
+	(global_label "I2C0_SDA"
 		(shape input)
 		(at 80.01 175.26 270)
 		(fields_autoplaced yes)
@@ -2960,7 +3315,7 @@
 		)
 		(uuid "234c5921-17fb-4699-b049-0ad7789a653d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 80.01 186.9538 90)
+			(at 80.01 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2996,7 +3351,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SDA"
+	(global_label "I2C1_SDA"
 		(shape input)
 		(at 121.92 175.26 270)
 		(fields_autoplaced yes)
@@ -3008,7 +3363,7 @@
 		)
 		(uuid "2c2dd598-f84c-4433-a927-3a1c3686c4aa")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 121.92 187.1352 90)
+			(at 121.92 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3020,7 +3375,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SDA"
+	(global_label "I2C1_SDA"
 		(shape input)
 		(at 105.41 175.26 270)
 		(fields_autoplaced yes)
@@ -3032,7 +3387,7 @@
 		)
 		(uuid "2c65ee74-9fac-4152-897a-4c6cdadaec74")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 105.41 187.1352 90)
+			(at 105.41 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3116,7 +3471,31 @@
 			)
 		)
 	)
-	(global_label "I2CB_SCL"
+	(global_label "+3V3"
+		(shape input)
+		(at 165.1 160.02 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "32ba58e4-d50d-46bc-9208-b5fcc94bdc50")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 173.1652 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "I2C1_SCL"
 		(shape input)
 		(at 102.87 175.26 270)
 		(fields_autoplaced yes)
@@ -3128,7 +3507,7 @@
 		)
 		(uuid "3a0a232b-c4f2-4f37-80c6-dc158ec55922")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 102.87 187.0747 90)
+			(at 102.87 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3164,7 +3543,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SDA"
+	(global_label "I2C1_SDA"
 		(shape input)
 		(at 157.48 175.26 270)
 		(fields_autoplaced yes)
@@ -3176,7 +3555,7 @@
 		)
 		(uuid "45e182ff-407d-48c8-9649-a356fe5ad83d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 157.48 187.1352 90)
+			(at 157.48 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3212,19 +3591,19 @@
 			)
 		)
 	)
-	(global_label "+3V3"
+	(global_label "I2C0_SDA"
 		(shape input)
-		(at 119.38 160.02 0)
+		(at 68.58 160.02 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
-		(uuid "59d478c9-a501-4ad3-bc20-4348f6b0cc54")
+		(uuid "500121e8-4d4e-4b19-bd7c-2f57cb7706af")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127.4452 160.02 0)
+			(at 56.7653 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3232,11 +3611,11 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 	)
-	(global_label "I2CA_SCL"
+	(global_label "I2C0_SCL"
 		(shape input)
 		(at 77.47 175.26 270)
 		(fields_autoplaced yes)
@@ -3248,7 +3627,7 @@
 		)
 		(uuid "60f3a21b-cf9f-427b-81f3-b35570b67194")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 77.47 186.8933 90)
+			(at 77.47 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3284,7 +3663,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SDA"
+	(global_label "I2C0_SDA"
 		(shape input)
 		(at 265.43 100.33 0)
 		(fields_autoplaced yes)
@@ -3296,7 +3675,7 @@
 		)
 		(uuid "77473457-c260-4097-96bf-582b09809517")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 277.1238 100.33 0)
+			(at 277.2447 100.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3332,55 +3711,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SCL"
-		(shape input)
-		(at 149.86 160.02 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "7b87e2f7-d9c8-489c-9a84-36b893c47a31")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 138.0453 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "+3V3"
-		(shape input)
-		(at 157.48 160.02 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "83973685-f853-4393-a49c-f46cb938c1c7")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 165.5452 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
-	(global_label "I2CA_SDA"
+	(global_label "I2C0_SDA"
 		(shape input)
 		(at 63.5 175.26 270)
 		(fields_autoplaced yes)
@@ -3392,7 +3723,7 @@
 		)
 		(uuid "83e75e31-a2b8-48f2-805a-12e620dd24e4")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 63.5 186.9538 90)
+			(at 63.5 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3428,9 +3759,9 @@
 			)
 		)
 	)
-	(global_label "I2CA_SDA"
+	(global_label "I2C0_SCL"
 		(shape input)
-		(at 35.56 160.02 180)
+		(at 31.75 160.02 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3440,7 +3771,7 @@
 		)
 		(uuid "886c529a-8e65-4504-9951-ac0d88eaa2b4")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 23.8662 160.02 0)
+			(at 19.9958 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3452,7 +3783,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SCL"
+	(global_label "I2C0_SCL"
 		(shape input)
 		(at 60.96 175.26 270)
 		(fields_autoplaced yes)
@@ -3464,7 +3795,7 @@
 		)
 		(uuid "88db036f-482f-4d78-892d-797f922d3992")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 60.96 186.8933 90)
+			(at 60.96 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3500,7 +3831,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SDA"
+	(global_label "I2C0_SDA"
 		(shape input)
 		(at 30.48 175.26 270)
 		(fields_autoplaced yes)
@@ -3512,7 +3843,7 @@
 		)
 		(uuid "9d2c8588-b1c7-4e4f-a153-336e57c035f4")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 30.48 186.9538 90)
+			(at 30.48 187.0747 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3524,7 +3855,31 @@
 			)
 		)
 	)
-	(global_label "I2CB_SCL"
+	(global_label "+3V3"
+		(shape input)
+		(at 127 160.02 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9dcd6099-ba00-4ff1-ae18-ce6b633389ff")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 135.0652 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "I2C1_SCL"
 		(shape input)
 		(at 119.38 175.26 270)
 		(fields_autoplaced yes)
@@ -3536,7 +3891,7 @@
 		)
 		(uuid "a2d5aab0-c548-4e09-be1a-da0a6bcc95ae")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 119.38 187.0747 90)
+			(at 119.38 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3548,7 +3903,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SDA"
+	(global_label "I2C1_SDA"
 		(shape input)
 		(at 265.43 107.95 0)
 		(fields_autoplaced yes)
@@ -3560,7 +3915,7 @@
 		)
 		(uuid "a5747833-43ea-4250-a889-5837362f8e31")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 277.3052 107.95 0)
+			(at 277.2447 107.95 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3692,7 +4047,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SCL"
+	(global_label "I2C1_SCL"
 		(shape input)
 		(at 154.94 175.26 270)
 		(fields_autoplaced yes)
@@ -3704,7 +4059,7 @@
 		)
 		(uuid "ace69c46-ac32-46a3-bce0-705c4b6c252d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 154.94 187.0747 90)
+			(at 154.94 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3742,7 +4097,7 @@
 	)
 	(global_label "+3V3"
 		(shape input)
-		(at 43.18 160.02 0)
+		(at 49.53 160.02 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3752,7 +4107,7 @@
 		)
 		(uuid "b3427fd7-ef37-42e5-b35d-418a9b06c96c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 51.2452 160.02 0)
+			(at 57.5952 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3836,31 +4191,7 @@
 			)
 		)
 	)
-	(global_label "+3V3"
-		(shape input)
-		(at 77.47 160.02 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "ba4f60f4-2438-4e21-a4da-d23aca00726f")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 85.5352 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
-	(global_label "I2CB_SCL"
+	(global_label "I2C1_SCL"
 		(shape input)
 		(at 137.16 175.26 270)
 		(fields_autoplaced yes)
@@ -3872,7 +4203,7 @@
 		)
 		(uuid "bb0928fd-92d3-4736-ad28-bb7fb33ea0d5")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 137.16 187.0747 90)
+			(at 137.16 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3932,31 +4263,7 @@
 			)
 		)
 	)
-	(global_label "I2CB_SDA"
-		(shape input)
-		(at 111.76 160.02 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "beceba38-4385-48c7-afe6-2676dc4e4dd1")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 99.8848 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "I2CA_SCL"
+	(global_label "I2C0_SCL"
 		(shape input)
 		(at 265.43 102.87 0)
 		(fields_autoplaced yes)
@@ -3968,7 +4275,7 @@
 		)
 		(uuid "bfda93f5-846c-47cb-abd9-06188ed08a50")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 277.0633 102.87 0)
+			(at 277.1842 102.87 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3980,7 +4287,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SCL"
+	(global_label "I2C0_SCL"
 		(shape input)
 		(at 27.94 175.26 270)
 		(fields_autoplaced yes)
@@ -3992,7 +4299,7 @@
 		)
 		(uuid "c53a20f2-ffaf-4753-9f82-07ef2f097822")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 27.94 186.8933 90)
+			(at 27.94 187.0142 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4172,7 +4479,7 @@
 			)
 		)
 	)
-	(global_label "I2CA_SCL"
+	(global_label "I2C0_SCL"
 		(shape input)
 		(at 44.45 175.26 270)
 		(fields_autoplaced yes)
@@ -4184,7 +4491,31 @@
 		)
 		(uuid "de5ee2e7-49f5-4f46-9ce2-8314c3f3a95b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 44.45 186.8933 90)
+			(at 44.45 187.0142 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "I2C1_SDA"
+		(shape input)
+		(at 147.32 160.02 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e42ba49c-bc27-4980-81a4-40feebc1b161")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 135.5053 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4268,6 +4599,30 @@
 			)
 		)
 	)
+	(global_label "+3V3"
+		(shape input)
+		(at 86.36 160.02 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f248e585-d1c0-47b3-b358-b67a7b6e68f6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 94.4252 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
 	(global_label "GPIO4"
 		(shape input)
 		(at 265.43 90.17 0)
@@ -4292,6 +4647,30 @@
 			)
 		)
 	)
+	(global_label "I2C1_SCL"
+		(shape input)
+		(at 109.22 160.02 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "fa6f4408-97a8-4e0d-897b-2e6c80a29cd0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 97.4658 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
 	(global_label "GPIO35"
 		(shape input)
 		(at 82.55 83.82 270)
@@ -4305,30 +4684,6 @@
 		(uuid "fa8d8087-0d29-42bb-9633-b55d1130d5fd")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 82.55 93.6995 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "I2CA_SCL"
-		(shape input)
-		(at 69.85 160.02 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "fef2b11c-9beb-4efa-9d20-1cb6e12c7d25")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 58.2167 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4508,7 +4863,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "05ca0126-bcfc-4b52-afc6-879a3187824b")
-		(property "Reference" "I2CA_4"
+		(property "Reference" "I2C0_4"
 			(at 81.28 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4576,7 +4931,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CA_4")
+					(reference "I2C0_4")
 					(unit 1)
 				)
 			)
@@ -4811,6 +5166,86 @@
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 44.45 160.02 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "10f81474-29f5-4ab3-b0d2-baef1bb0a218")
+		(property "Reference" "JP1"
+			(at 44.45 153.67 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Open"
+			(at 44.45 156.21 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
+			(at 44.45 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 44.45 167.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 44.45 165.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "930bc289-2bb4-4596-b617-07fdb49e887c")
+		)
+		(pin "2"
+			(uuid "904cc7c8-828a-4b49-9420-624b0ca40020")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "JP1")
 					(unit 1)
 				)
 			)
@@ -5209,6 +5644,248 @@
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR034")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 241.3 52.07 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "25a07929-1dcb-406e-84eb-d53b204d92e2")
+		(property "Reference" "C2"
+			(at 245.11 49.9109 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "47uF"
+			(at 245.11 52.4509 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
+			(at 242.2652 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 241.3 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Polarized capacitor"
+			(at 241.3 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "702583ef-85aa-4b55-bc46-0589582a5a8d")
+		)
+		(pin "2"
+			(uuid "1b975bce-6420-4891-b232-a39f070b6596")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "C2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 72.39 160.02 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "26a57d57-4d0d-4b1f-8817-ce1f42719e18")
+		(property "Reference" "R2"
+			(at 72.39 153.67 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "4,7 kOhm"
+			(at 72.39 156.21 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
+			(at 72.39 161.798 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 72.39 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 72.39 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "48bef3f7-a624-4dde-b240-58375fa67cea")
+		)
+		(pin "2"
+			(uuid "fcee24ad-5b8f-4e4c-9078-c411f5c69042")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "R2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 151.13 160.02 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2cd4bfab-bc2a-477f-bfbf-490954a513aa")
+		(property "Reference" "R4"
+			(at 151.13 153.67 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "4,7 kOhm"
+			(at 151.13 156.21 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
+			(at 151.13 161.798 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 151.13 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 151.13 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "eded3a67-a7a6-4226-9389-8ebb4d257aa4")
+		)
+		(pin "2"
+			(uuid "c46ca9f1-fb17-4690-a2b1-4234caa6d5a1")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -5616,7 +6293,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3cb4dc7d-2f72-4a85-ad12-e8cf5f3d145b")
-		(property "Reference" "I2CB_3"
+		(property "Reference" "I2C1_3"
 			(at 140.97 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5684,7 +6361,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CB_3")
+					(reference "I2C1_3")
 					(unit 1)
 				)
 			)
@@ -5763,86 +6440,6 @@
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR021")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 153.67 160.02 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "4366b71e-d9ad-4c2d-ad20-75a1466662e7")
-		(property "Reference" "R4"
-			(at 153.67 153.67 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4,7 kOhm"
-			(at 153.67 156.21 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 153.67 158.242 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 153.67 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 153.67 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "a96f27f7-7e10-4eff-9510-358907fde1ac")
-		)
-		(pin "2"
-			(uuid "fbb250d7-37e0-4945-b15c-cb8dd2a2e47f")
-		)
-		(instances
-			(project "EnvNode"
-				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -6094,88 +6691,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:C")
-		(at 241.3 52.07 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "4cb76e75-5269-4503-b2fe-3dbdb5608c31")
-		(property "Reference" "C2"
-			(at 245.11 50.7999 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10uF"
-			(at 245.11 53.3399 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
-			(at 242.2652 55.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 241.3 52.07 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 241.3 52.07 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "34d7ef03-e3de-4780-b91c-95cb74cbd81c")
-		)
-		(pin "2"
-			(uuid "47adc453-b731-4c60-8642-996f0ffa098c")
-		)
-		(instances
-			(project "EnvNode"
-				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "C2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+3V3")
 		(at 62.23 132.08 180)
 		(unit 1)
@@ -6340,6 +6855,86 @@
 		)
 	)
 	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 121.92 160.02 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "54ab27ce-dc50-48ef-8aac-56e228aa1593")
+		(property "Reference" "JP3"
+			(at 121.92 153.67 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Open"
+			(at 121.92 156.21 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
+			(at 121.92 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 121.92 167.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 121.92 165.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "90755d12-99db-40a5-a337-f66ef688af10")
+		)
+		(pin "2"
+			(uuid "222c4f1a-2f31-43dc-94e7-0916847527f3")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "JP3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x04_Pin")
 		(at 67.31 118.11 270)
 		(unit 1)
@@ -6427,7 +7022,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 39.37 160.02 90)
+		(at 35.56 160.02 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6438,7 +7033,7 @@
 		(fields_autoplaced yes)
 		(uuid "5bacf03c-fc49-4b42-9a18-7318220e3e3d")
 		(property "Reference" "R1"
-			(at 39.37 153.67 90)
+			(at 35.56 153.67 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6448,7 +7043,7 @@
 			)
 		)
 		(property "Value" "4,7 kOhm"
-			(at 39.37 156.21 90)
+			(at 35.56 156.21 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6458,7 +7053,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 39.37 161.798 90)
+			(at 35.56 161.798 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6469,7 +7064,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 39.37 160.02 0)
+			(at 35.56 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6480,7 +7075,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 39.37 160.02 0)
+			(at 35.56 160.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7836,7 +8431,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7a89250c-6dc4-42ef-ade2-37c993a89254")
-		(property "Reference" "I2CB_1"
+		(property "Reference" "I2C1_1"
 			(at 106.68 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7904,7 +8499,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CB_1")
+					(reference "I2C1_1")
 					(unit 1)
 				)
 			)
@@ -7983,6 +8578,86 @@
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR044")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 113.03 160.02 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7bc87ec5-73ce-4b87-968f-cdd5e9682015")
+		(property "Reference" "R3"
+			(at 113.03 153.67 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "4,7 kOhm"
+			(at 113.03 156.21 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
+			(at 113.03 161.798 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 113.03 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 113.03 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ce06a023-174b-4d86-ba71-0262901c7e22")
+		)
+		(pin "2"
+			(uuid "81a03ba1-dce1-4183-a8b3-12168d627227")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "R3")
 					(unit 1)
 				)
 			)
@@ -8311,6 +8986,86 @@
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR052")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 81.28 160.02 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7e639c37-3933-492a-9bdc-2856be3b90b8")
+		(property "Reference" "JP2"
+			(at 81.28 153.67 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Open"
+			(at 81.28 156.21 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
+			(at 81.28 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 81.28 167.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 81.28 165.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "61d46894-506f-45d9-a718-3fe21577b9da")
+		)
+		(pin "2"
+			(uuid "0cf725a2-0f6c-4451-aa0c-474306cc5acd")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "JP2")
 					(unit 1)
 				)
 			)
@@ -8652,7 +9407,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "941f910d-a092-4f2d-9da2-1958a0d40258")
-		(property "Reference" "I2CA_1"
+		(property "Reference" "I2C0_1"
 			(at 31.75 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8720,7 +9475,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CA_1")
+					(reference "I2C0_1")
 					(unit 1)
 				)
 			)
@@ -9297,7 +10052,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a78bdf69-5cb7-498a-a248-7d97e8387d00")
-		(property "Reference" "I2CA_3"
+		(property "Reference" "I2C0_3"
 			(at 64.77 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9365,7 +10120,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CA_3")
+					(reference "I2C0_3")
 					(unit 1)
 				)
 			)
@@ -9383,7 +10138,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a7b41ef7-a3bf-4f17-8498-6c23e3ac4543")
-		(property "Reference" "I2CB_2"
+		(property "Reference" "I2C1_2"
 			(at 123.19 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9451,7 +10206,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CB_2")
+					(reference "I2C1_2")
 					(unit 1)
 				)
 			)
@@ -10176,6 +10931,86 @@
 		)
 	)
 	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 160.02 160.02 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c825c6fc-8b9b-483c-8515-8a37b48f9aee")
+		(property "Reference" "JP4"
+			(at 160.02 153.67 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Open"
+			(at 160.02 156.21 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
+			(at 160.02 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 160.02 167.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 160.02 165.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "fc50822e-d795-4d5f-8225-0d2cf8d7ff09")
+		)
+		(pin "2"
+			(uuid "3ac5b52e-27f0-4228-b591-a3fedc8aeb8c")
+		)
+		(instances
+			(project "EnvNode"
+				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
+					(reference "JP4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 232.41 143.51 0)
 		(unit 1)
@@ -10886,166 +11721,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 115.57 160.02 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "d98f298a-a981-4918-8adb-664c17352b23")
-		(property "Reference" "R3"
-			(at 115.57 153.67 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4,7 kOhm"
-			(at 115.57 156.21 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 115.57 161.798 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 115.57 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 115.57 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "51657bc6-3600-4a22-9b1d-a8153c209683")
-		)
-		(pin "2"
-			(uuid "5c37aa45-c953-4845-8223-e31c188d3f80")
-		)
-		(instances
-			(project "EnvNode"
-				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "R3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 73.66 160.02 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "da7aedc6-bf1b-487f-8f48-b596578ef736")
-		(property "Reference" "R2"
-			(at 73.66 153.67 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4,7 kOhm"
-			(at 73.66 156.21 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 73.66 158.242 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 73.66 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 73.66 160.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "7ed14038-ff9b-48f8-8151-6219f34cd7de")
-		)
-		(pin "2"
-			(uuid "fdaba366-2956-48ee-88ad-e0f2b8e4b12c")
-		)
-		(instances
-			(project "EnvNode"
-				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "R2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+5V")
 		(at 85.09 132.08 180)
 		(unit 1)
@@ -11526,7 +12201,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f2151fc8-e796-4612-8d45-a3db74f5b1a5")
-		(property "Reference" "I2CA_2"
+		(property "Reference" "I2C0_2"
 			(at 48.26 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11594,7 +12269,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CA_2")
+					(reference "I2C0_2")
 					(unit 1)
 				)
 			)
@@ -11768,7 +12443,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f76fca3f-a598-409c-bb4f-bef350fd3087")
-		(property "Reference" "I2CB_4"
+		(property "Reference" "I2C1_4"
 			(at 158.75 165.1 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11836,7 +12511,7 @@
 		(instances
 			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
-					(reference "I2CB_4")
+					(reference "I2C1_4")
 					(unit 1)
 				)
 			)
