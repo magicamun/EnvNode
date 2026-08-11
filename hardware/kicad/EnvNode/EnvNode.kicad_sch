@@ -8363,7 +8363,7 @@
 				)
 			)
 		)
-		(property "Value" "LT1963AxST-3.3"
+		(property "Value" "LM3940IMP-3,3/NOPB"
 			(at 228.6 40.64 0)
 			(show_name no)
 			(do_not_autoplace no)
