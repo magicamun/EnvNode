@@ -4410,7 +4410,7 @@
 			(uuid "69b0a8d9-090d-4708-a764-f6de1da21561")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR011")
 					(unit 1)
@@ -4488,7 +4488,7 @@
 			(uuid "ee4ea714-f1d7-4eb5-a212-622d8028f408")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR048")
 					(unit 1)
@@ -4574,7 +4574,7 @@
 			(uuid "2904cec3-05dc-4f20-b2b2-a581e94cd0c5")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CA_4")
 					(unit 1)
@@ -4652,7 +4652,7 @@
 			(uuid "a1f4bbe1-d739-4270-8e06-49acbca4dd92")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR017")
 					(unit 1)
@@ -4730,7 +4730,7 @@
 			(uuid "e2b52a6d-72c0-4352-9c04-1edd9658014f")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR058")
 					(unit 1)
@@ -4808,7 +4808,7 @@
 			(uuid "4b6287ba-c081-487b-b546-8500bfe7057c")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR02")
 					(unit 1)
@@ -4886,7 +4886,7 @@
 			(uuid "461fe52f-1473-43f5-b709-7f030cfccc00")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR032")
 					(unit 1)
@@ -4964,7 +4964,7 @@
 			(uuid "01b73378-b134-4242-ae1e-08edcc9191d1")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR054")
 					(unit 1)
@@ -5050,7 +5050,7 @@
 			(uuid "7b957521-373f-47c9-9431-e10fe2776004")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO36")
 					(unit 1)
@@ -5128,7 +5128,7 @@
 			(uuid "e61d2773-b2f7-4772-81bd-9a3122e931c8")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR030")
 					(unit 1)
@@ -5206,7 +5206,7 @@
 			(uuid "429fd188-0bc2-41fb-be5a-a498251d6c9b")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR034")
 					(unit 1)
@@ -5284,7 +5284,7 @@
 			(uuid "9a751a9a-30f4-49ae-9e6c-43062c1f20c0")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR057")
 					(unit 1)
@@ -5362,7 +5362,7 @@
 			(uuid "931e8846-b9db-4411-bccf-c3b02231d288")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR043")
 					(unit 1)
@@ -5440,7 +5440,7 @@
 			(uuid "1f7fbeea-648e-4196-adf1-1ffba9ac760e")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR023")
 					(unit 1)
@@ -5518,7 +5518,7 @@
 			(uuid "91d196c2-3789-423f-b84a-34c89b212ef9")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR016")
 					(unit 1)
@@ -5596,7 +5596,7 @@
 			(uuid "f261e1fd-6dc5-405a-93b6-5f6d67daab7a")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR014")
 					(unit 1)
@@ -5682,7 +5682,7 @@
 			(uuid "c83a6dcc-eebd-47d7-86e1-5adda4fbd1bd")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CB_3")
 					(unit 1)
@@ -5760,7 +5760,7 @@
 			(uuid "acbf222c-5676-406c-b67b-b2d3ab0356f3")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR021")
 					(unit 1)
@@ -5840,7 +5840,7 @@
 			(uuid "fbb250d7-37e0-4945-b15c-cb8dd2a2e47f")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "R4")
 					(unit 1)
@@ -5918,7 +5918,7 @@
 			(uuid "dd0f3303-2f9d-4f54-a4d5-77febc190fa4")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR029")
 					(unit 1)
@@ -6004,7 +6004,7 @@
 			(uuid "ab019903-c9d7-4e69-804f-1753c8e3a3af")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO23")
 					(unit 1)
@@ -6085,7 +6085,7 @@
 			(uuid "9c25a7e7-5332-4e60-8a69-0619966f46d1")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "C3")
 					(unit 1)
@@ -6167,7 +6167,7 @@
 			(uuid "47adc453-b731-4c60-8642-996f0ffa098c")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "C2")
 					(unit 1)
@@ -6245,7 +6245,7 @@
 			(uuid "866049f2-28e7-47c4-8d3a-d2602e1cbd4f")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR015")
 					(unit 1)
@@ -6331,7 +6331,7 @@
 			(uuid "30cdce59-968f-4190-a0d8-9bd96fd48f6e")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO32")
 					(unit 1)
@@ -6417,7 +6417,7 @@
 			(uuid "2ba29075-d7ec-47bf-9aa2-bfdefcafbd7a")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO14")
 					(unit 1)
@@ -6497,7 +6497,7 @@
 			(uuid "490b74d5-d48e-459a-89ec-5fdca50b3544")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "R1")
 					(unit 1)
@@ -6575,7 +6575,7 @@
 			(uuid "f0abc73b-730d-4317-b7a2-c277f72f2894")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR03")
 					(unit 1)
@@ -6661,7 +6661,7 @@
 			(uuid "8d86f8c0-526b-446d-883c-591a884a0754")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO15")
 					(unit 1)
@@ -6739,7 +6739,7 @@
 			(uuid "c463e37d-1724-43c3-9610-3940659a03eb")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR045")
 					(unit 1)
@@ -6817,7 +6817,7 @@
 			(uuid "f585d4c3-1cdf-48d0-aa37-ba28f14bbe9c")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR040")
 					(unit 1)
@@ -6895,7 +6895,7 @@
 			(uuid "cbb1dc38-a794-4b46-bf13-1eeddad483fb")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR013")
 					(unit 1)
@@ -6973,7 +6973,7 @@
 			(uuid "3b753c4a-aaaf-4eeb-a8be-4b3269556ed4")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR047")
 					(unit 1)
@@ -7051,7 +7051,7 @@
 			(uuid "8926ec27-db7b-4624-9f0a-7a511fbb4d3a")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR033")
 					(unit 1)
@@ -7129,7 +7129,7 @@
 			(uuid "d5997cfc-c5a3-43a4-adb0-67c1268dbd69")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR04")
 					(unit 1)
@@ -7215,7 +7215,7 @@
 			(uuid "a3e8f5c5-6fb6-4ce7-9b72-fb40a3599671")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO34")
 					(unit 1)
@@ -7301,7 +7301,7 @@
 			(uuid "1078ac98-3a21-4b2e-8158-07e520918f43")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO13")
 					(unit 1)
@@ -7379,7 +7379,7 @@
 			(uuid "bbd7fcae-cc30-4042-8deb-2fbbeaf6f707")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR041")
 					(unit 1)
@@ -7569,7 +7569,7 @@
 			(uuid "6643a2a1-77eb-49b9-8f82-c8a746a1346f")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "U2")
 					(unit 1)
@@ -7655,7 +7655,7 @@
 			(uuid "4ca0b85e-a4ff-4049-9556-149e3c216a0c")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO35")
 					(unit 1)
@@ -7733,7 +7733,7 @@
 			(uuid "45da1bc5-7a28-4929-9c05-9c5d5f6ce89d")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR051")
 					(unit 1)
@@ -7816,7 +7816,7 @@
 			(uuid "73e6020b-d93b-4e1c-ad6e-7d68fc640c93")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "U1")
 					(unit 1)
@@ -7902,7 +7902,7 @@
 			(uuid "54ec98c6-a874-4c69-acfe-9c6fea12eac2")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CB_1")
 					(unit 1)
@@ -7980,7 +7980,7 @@
 			(uuid "58684471-2d08-4865-843e-144b461408a3")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR044")
 					(unit 1)
@@ -8066,7 +8066,7 @@
 			(uuid "c4da2c2c-6e67-445c-8e21-5506a01f2662")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO18")
 					(unit 1)
@@ -8152,7 +8152,7 @@
 			(uuid "7b31e495-60d9-4d85-bb59-032d879474ab")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO16")
 					(unit 1)
@@ -8230,7 +8230,7 @@
 			(uuid "7895e3c4-34b8-4729-8b3d-f837801a21fa")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR05")
 					(unit 1)
@@ -8308,7 +8308,7 @@
 			(uuid "3912f881-a5e5-43b8-ad3a-cef7b773cd6b")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR052")
 					(unit 1)
@@ -8386,7 +8386,7 @@
 			(uuid "9d9d42e1-6cea-4216-ac98-5b0e9f12c1d2")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR026")
 					(unit 1)
@@ -8472,7 +8472,7 @@
 			(uuid "f94b1ec3-4f29-44b9-97f7-fc2448ec60f1")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO39")
 					(unit 1)
@@ -8550,7 +8550,7 @@
 			(uuid "f1edb9fe-669e-4719-ac85-d0db9c28d643")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR012")
 					(unit 1)
@@ -8632,7 +8632,7 @@
 			(uuid "16dd679d-9ead-42cd-a702-16b759b0b106")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "C1")
 					(unit 1)
@@ -8718,7 +8718,7 @@
 			(uuid "018750bb-6a87-41b3-9a4b-68fa4eb32a9f")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CA_1")
 					(unit 1)
@@ -8798,7 +8798,7 @@
 			(uuid "b15f2bf8-a613-4bcc-95ce-d31d92083a63")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "J1")
 					(unit 1)
@@ -8876,7 +8876,7 @@
 			(uuid "2df9f583-8fbb-4f08-8122-d75917bb9dfb")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR056")
 					(unit 1)
@@ -8954,7 +8954,7 @@
 			(uuid "1b2e3c19-adf2-460c-910a-269d16c802a6")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR09")
 					(unit 1)
@@ -9032,7 +9032,7 @@
 			(uuid "d1fbf2cd-f986-45d9-bbf3-cff67e45edf6")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR046")
 					(unit 1)
@@ -9110,7 +9110,7 @@
 			(uuid "6bdcb20e-5912-4434-8a0f-9c3c530f5ba8")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR024")
 					(unit 1)
@@ -9191,7 +9191,7 @@
 			(uuid "c84c4b58-2e29-4fba-a1b1-b2bef227ef55")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "C4")
 					(unit 1)
@@ -9277,7 +9277,7 @@
 			(uuid "377e9f8e-1113-48ae-b499-63cf093d7415")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO33")
 					(unit 1)
@@ -9363,7 +9363,7 @@
 			(uuid "d9eae21c-e044-49ca-a1c1-de002a2e20ba")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CA_3")
 					(unit 1)
@@ -9449,7 +9449,7 @@
 			(uuid "d23755f2-b7de-44e7-8758-fa4f0049ec33")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CB_2")
 					(unit 1)
@@ -9527,7 +9527,7 @@
 			(uuid "97427fa5-1996-49bd-87dc-721b59ddc322")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR039")
 					(unit 1)
@@ -9605,7 +9605,7 @@
 			(uuid "f6bc4682-3ab7-4d34-867a-40ddc44f409e")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR010")
 					(unit 1)
@@ -9683,7 +9683,7 @@
 			(uuid "7e0a6f58-f303-473d-8740-695a509b2fa4")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR027")
 					(unit 1)
@@ -9761,7 +9761,7 @@
 			(uuid "5903d325-84b8-4f17-847f-bd0ed24e40af")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR059")
 					(unit 1)
@@ -9847,7 +9847,7 @@
 			(uuid "8d016f70-cce2-4b01-867b-10e701131461")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO19")
 					(unit 1)
@@ -9925,7 +9925,7 @@
 			(uuid "0eff086f-0843-4ce0-a7ea-6aed15321105")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR035")
 					(unit 1)
@@ -10003,7 +10003,7 @@
 			(uuid "d4baec5b-62ec-4d6a-8b2e-21bc9cf5a2da")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR042")
 					(unit 1)
@@ -10081,7 +10081,7 @@
 			(uuid "78b7dbcb-a0c3-4bfa-9f5f-8348b31fbb64")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR049")
 					(unit 1)
@@ -10167,7 +10167,7 @@
 			(uuid "ebdbd137-d2f3-4405-ac61-342076e5f7ba")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO4")
 					(unit 1)
@@ -10245,7 +10245,7 @@
 			(uuid "43c47062-7a1d-44a4-ba5a-e5a8f49a7ad2")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR038")
 					(unit 1)
@@ -10323,7 +10323,7 @@
 			(uuid "036bb126-cd1c-4977-bf89-e065a8fc81ad")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR08")
 					(unit 1)
@@ -10401,7 +10401,7 @@
 			(uuid "5776fce0-bf93-44fd-83f6-083c948ad6f4")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR037")
 					(unit 1)
@@ -10479,7 +10479,7 @@
 			(uuid "01cb8c37-eac9-4feb-9cf1-51e0e950953d")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR022")
 					(unit 1)
@@ -10557,7 +10557,7 @@
 			(uuid "04038f94-ce0b-4b45-b668-8d8d6e1434ac")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR053")
 					(unit 1)
@@ -10635,7 +10635,7 @@
 			(uuid "d6a596ff-326d-4da4-bb18-8ea15b6f5d6b")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR01")
 					(unit 1)
@@ -10713,7 +10713,7 @@
 			(uuid "3a333946-c8de-414b-8b6b-05ddb9b367b7")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR025")
 					(unit 1)
@@ -10799,7 +10799,7 @@
 			(uuid "f2a4aecc-3d2b-44f6-9daf-a5bcba1dfb5c")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "GPIO17")
 					(unit 1)
@@ -10877,7 +10877,7 @@
 			(uuid "234f12e2-2392-409a-9a2b-a3188f0a0746")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR06")
 					(unit 1)
@@ -10957,7 +10957,7 @@
 			(uuid "5c37aa45-c953-4845-8223-e31c188d3f80")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "R3")
 					(unit 1)
@@ -11037,7 +11037,7 @@
 			(uuid "fdaba366-2956-48ee-88ad-e0f2b8e4b12c")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "R2")
 					(unit 1)
@@ -11115,7 +11115,7 @@
 			(uuid "a6cede73-347b-4873-96fe-93571ae41673")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR019")
 					(unit 1)
@@ -11193,7 +11193,7 @@
 			(uuid "23e1d809-08fb-49e6-98b1-da0fedfa526f")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR028")
 					(unit 1)
@@ -11271,7 +11271,7 @@
 			(uuid "f5336b5c-6e14-4d6b-b867-a03925fffdd5")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR031")
 					(unit 1)
@@ -11350,7 +11350,7 @@
 			(uuid "60d4485d-29a0-40e3-99bd-af8e16fea78d")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR036")
 					(unit 1)
@@ -11428,7 +11428,7 @@
 			(uuid "9cb959ca-06d0-4e76-b280-794b527ed021")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR055")
 					(unit 1)
@@ -11506,7 +11506,7 @@
 			(uuid "6da18f23-482f-4333-8424-c99f0b0e8ad4")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR020")
 					(unit 1)
@@ -11592,7 +11592,7 @@
 			(uuid "1a7edb49-c8b9-43bc-a06e-f06fa0e1c601")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CA_2")
 					(unit 1)
@@ -11670,7 +11670,7 @@
 			(uuid "39f98e9c-3927-4113-b20d-3f7cb203bf8a")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR050")
 					(unit 1)
@@ -11748,7 +11748,7 @@
 			(uuid "ff28b8e1-b683-45ef-a6ce-91941143a0a1")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR018")
 					(unit 1)
@@ -11834,7 +11834,7 @@
 			(uuid "cf685462-0d70-45cf-a9b9-5b6f4e634b66")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "I2CB_4")
 					(unit 1)
@@ -11912,7 +11912,7 @@
 			(uuid "3a605e0d-a54f-4965-a402-1e8aa19fef44")
 		)
 		(instances
-			(project "WeatherStation"
+			(project "EnvNode"
 				(path "/4cc529e4-f126-4541-9f71-d2fae66595d2"
 					(reference "#PWR07")
 					(unit 1)

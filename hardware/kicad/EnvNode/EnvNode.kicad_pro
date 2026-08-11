@@ -488,7 +488,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "WeatherStation.kicad_pro",
+    "filename": "EnvNode.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -656,7 +656,7 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "WeatherStation.kicad_sch",
+        "filename": "EnvNode.kicad_sch",
         "name": "EnvNode",
         "uuid": "4cc529e4-f126-4541-9f71-d2fae66595d2"
       }
