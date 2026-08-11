@@ -9,7 +9,7 @@ firmware/.vscode/
 hardware/kicad/*/*-backups/
 hardware/kicad/_autosave-*
 hardware/kicad/*/*.lck
-
+hardware/kicad/*/Gerber/*
 
 .pio/
 
