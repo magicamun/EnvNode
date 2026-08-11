@@ -6,11 +6,10 @@ firmware/.vscode/
 .DS_Store
 
 # KiCad backups / autosave
-hardware/kicad/*-backups/
+hardware/kicad/*/*-backups/
 hardware/kicad/_autosave-*
-hardware/kicad/WeatherStation/*.lck
-hardware/kicad/WeatherStation/_autosave-MCU.kicad_sch
-hardware/kicad/WeatherStation/_autosave-WeatherStation.kicad_pcb
+hardware/kicad/*/*.lck
+
 
 .pio/
 
