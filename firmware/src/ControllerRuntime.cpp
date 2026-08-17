@@ -191,6 +191,9 @@ bool ControllerRuntime::constructComposition(
             entry.info.targetActuatorId = threshold.targetActuatorId;
             entry.info.sourceSensorId = threshold.source.sensorId;
             entry.info.sourceMeasurementType = threshold.source.measurementType;
+            entry.info.onThreshold = threshold.onThreshold;
+            entry.info.offThreshold = threshold.offThreshold;
+            entry.info.maxMeasurementAgeMs = threshold.maxMeasurementAgeMs;
         }
         const ControllerFactoryInstance instance = factory.create(
             slotIndex, slot, entry.info.constructionResult);

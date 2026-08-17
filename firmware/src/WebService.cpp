@@ -13,6 +13,7 @@
 #include "SensorSlotConfiguration.h"
 #include "ActuatorImplementationRegistry.h"
 #include "ControllerImplementationRegistry.h"
+#include "ControllerWebSupport.h"
 
 namespace EnvNode {
 namespace {
@@ -82,6 +83,15 @@ const char* blinkPhaseName(BlinkPhase phase) {
         case BlinkPhase::WaitingForTarget: return "Waiting for target";
         case BlinkPhase::On: return "On";
         case BlinkPhase::Off: return "Off";
+        default: return "Unknown";
+    }
+}
+
+const char* thresholdDecisionName(ThresholdDecision decision) {
+    switch (decision) {
+        case ThresholdDecision::On: return "On";
+        case ThresholdDecision::Off: return "Off";
+        case ThresholdDecision::Unknown:
         default: return "Unknown";
     }
 }
@@ -794,11 +804,11 @@ void WebService::handleActuators() {
 
 void WebService::handleControllers() {
     String c;
-    c.reserve(1300 + MaxControllerSlotCount * 620);
+    c.reserve(1500 + MaxControllerSlotCount * 900);
     if (runtimeManager_.pendingAction() == RuntimeAction::RestartControllerRuntime) {
         c = "<div class='notice'><strong>Controller apply required</strong><p>Saved Controller configuration differs from the active runtime composition.</p><form method='post' action='/controllers/apply'><button>Apply Controller Changes</button></form></div>";
     }
-    c += "<section class='card'><h2>Controller Slots</h2><p class='help'>Saved configuration is activated with Apply Controller Changes. Start and Stop affect only the active runtime and do not change saved configuration.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th>Target</th><th>Timing</th><th>Runtime</th><th>Status</th><th>Diagnostics</th><th>Controls</th><th class='sensor-actions'></th></tr></thead><tbody>";
+    c += "<section class='card'><h2>Controller Slots</h2><p class='help'>Saved configuration is activated with Apply Controller Changes. Start and Stop affect only the active runtime and do not change saved configuration.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th>Source / Target</th><th>Policy</th><th>Runtime</th><th>Status</th><th>Diagnostics</th><th>Controls</th><th class='sensor-actions'></th></tr></thead><tbody>";
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t slotIndex = 0; slotIndex < MaxControllerSlotCount; ++slotIndex) {
         const ControllerSlotConfiguration& slot = configuration.controllerSlots[slotIndex];
@@ -817,25 +827,70 @@ void WebService::handleControllers() {
         }
         const BlinkControllerConfiguration& blink =
             slot.implementationConfiguration.blink;
+        const ThresholdControllerConfiguration& threshold =
+            slot.implementationConfiguration.threshold;
         const bool expectsRuntime = slot.enabled
             && slot.implementation != ControllerImplementation::None;
-        const bool runtimeMatches = expectsRuntime == hasRuntime
-            && (!hasRuntime || (runtime.implementation == slot.implementation
-                && String(runtime.name) == slot.name
-                && runtime.targetActuatorId == blink.targetActuatorId
-                && runtime.onDurationMs == blink.onDurationMs
-                && runtime.offDurationMs == blink.offDurationMs));
+        bool runtimeMatches = expectsRuntime == hasRuntime;
+        if (runtimeMatches && hasRuntime) {
+            runtimeMatches = runtime.implementation == slot.implementation
+                && String(runtime.name) == slot.name;
+            if (runtimeMatches && slot.implementation == ControllerImplementation::Blink) {
+                runtimeMatches = runtime.targetActuatorId == blink.targetActuatorId
+                    && runtime.onDurationMs == blink.onDurationMs
+                    && runtime.offDurationMs == blink.offDurationMs;
+            } else if (runtimeMatches
+                && slot.implementation == ControllerImplementation::Threshold) {
+                runtimeMatches = runtime.sourceSensorId == threshold.source.sensorId
+                    && runtime.sourceMeasurementType == threshold.source.measurementType
+                    && runtime.targetActuatorId == threshold.targetActuatorId
+                    && runtime.onThreshold == threshold.onThreshold
+                    && runtime.offThreshold == threshold.offThreshold
+                    && runtime.maxMeasurementAgeMs == threshold.maxMeasurementAgeMs;
+            }
+        }
 
         c += "<tr><td class='sensor-technical'>" + String(slot.slotId)
             + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
         c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
         c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
         c += "</td><td class='sensor-technical'>";
-        c += slot.implementation == ControllerImplementation::Blink
-            ? "Actuator " + String(blink.targetActuatorId) : String("—");
+        if (slot.implementation == ControllerImplementation::Blink) {
+            c += "Target: Actuator " + String(blink.targetActuatorId);
+            if (isValidActuatorId(blink.targetActuatorId)
+                && blink.targetActuatorId <= MaxActuatorSlotCount) {
+                c += " · " + escapeHtml(configuration.actuatorSlots[
+                    blink.targetActuatorId - 1].name);
+            }
+        } else if (slot.implementation == ControllerImplementation::Threshold) {
+            c += "Source: Sensor " + String(threshold.source.sensorId);
+            if (isValidSensorId(threshold.source.sensorId)
+                && threshold.source.sensorId <= MaxSensorSlotCount) {
+                c += " · " + escapeHtml(configuration.sensorSlots[
+                    threshold.source.sensorId - 1].name);
+            }
+            c += "<br>Measurement: ";
+            c += escapeHtml(measurementTypeMetadata(
+                threshold.source.measurementType).displayName);
+            c += "<br>Target: Actuator " + String(threshold.targetActuatorId);
+            if (isValidActuatorId(threshold.targetActuatorId)
+                && threshold.targetActuatorId <= MaxActuatorSlotCount) {
+                c += " · " + escapeHtml(configuration.actuatorSlots[
+                    threshold.targetActuatorId - 1].name);
+            }
+        } else {
+            c += "—";
+        }
         c += "</td><td class='sensor-technical'>";
         if (slot.implementation == ControllerImplementation::Blink) {
             c += String(blink.onDurationMs) + " ms On<br>" + String(blink.offDurationMs) + " ms Off";
+        } else if (slot.implementation == ControllerImplementation::Threshold) {
+            const char* unit = UnitConverter::symbol(
+                measurementTypeMetadata(threshold.source.measurementType).canonicalUnit);
+            if (unit == nullptr) unit = "";
+            c += "On ≥ " + String(threshold.onThreshold, 4) + " " + unit;
+            c += "<br>Off ≤ " + String(threshold.offThreshold, 4) + " " + unit;
+            c += "<br>Max age " + String(threshold.maxMeasurementAgeMs) + " ms";
         } else {
             c += "—";
         }
@@ -848,10 +903,38 @@ void WebService::handleControllers() {
         c += "</td><td class='sensor-technical'>";
         if (!hasRuntime) {
             c += "—";
-        } else {
+        } else if (runtime.implementation == ControllerImplementation::Blink) {
             c += runtime.targetAvailable ? "Target available" : "Target unavailable";
             c += "<br>" + String(blinkPhaseName(runtime.blinkPhase));
             c += "<br>" + String(controllerOperationName(runtime.lastOperationResult));
+        } else if (runtime.implementation == ControllerImplementation::Threshold) {
+            if (!runtime.hasLatestSnapshot) {
+                c += "No current Measurement";
+            } else if (runtime.latestSnapshotStale) {
+                c += "Stale Measurement (" + String(runtime.latestSnapshotAgeMs) + " ms)";
+            } else if (!runtime.latestMeasurementValid) {
+                c += "Invalid Measurement";
+            } else if (!runtime.sourceAvailable) {
+                c += "Unusable Measurement";
+            } else {
+                c += "Usable Measurement";
+                if (runtime.latestNumericValueAvailable) {
+                    c += ": " + String(runtime.latestNumericValue, 4);
+                }
+            }
+            c += "<br>Decision: ";
+            c += runtime.thresholdDecision == ThresholdDecision::Unknown
+                ? badge("Unknown", "")
+                : runtime.thresholdDecision == ThresholdDecision::On
+                    ? badge("On", "good") : badge("Off", "warn");
+            c += "<br>";
+            c += runtime.targetAvailable ? "Target available" : "Target unavailable";
+            if (runtime.outputApplicationPending) {
+                c += "<br>" + badge("Output application pending", "warn");
+            }
+            c += "<br>" + String(controllerOperationName(runtime.lastOperationResult));
+        } else {
+            c += "Unsupported runtime implementation";
         }
         c += "</td><td>";
         if (hasRuntime) {
@@ -1070,31 +1153,93 @@ void WebService::handleControllerEdit() {
         }
         implementationOptions += ">" + escapeHtml(metadata->displayType) + "</option>";
     }
-    String targetOptions;
+    String blinkTargetOptions;
+    String thresholdTargetOptions;
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
         const ActuatorSlotConfiguration& actuator = configuration.actuatorSlots[index];
+        if (isControllerTargetClaimedByOtherEnabledSlot(
+                configuration.controllerSlots,
+                MaxControllerSlotCount,
+                slot.slotId,
+                actuator.slotId)) {
+            continue;
+        }
         const ActuatorImplementationMetadata* metadata =
             ActuatorImplementationRegistry::find(actuator.implementation);
         if (metadata == nullptr
             || !hasActuatorCapability(metadata->capabilities, ActuatorCapability::OnOff)) {
             continue;
         }
-        targetOptions += "<option value='" + String(actuator.slotId) + "'";
+        blinkTargetOptions += "<option value='" + String(actuator.slotId) + "'";
         if (slot.implementationConfiguration.blink.targetActuatorId == actuator.slotId) {
-            targetOptions += " selected";
+            blinkTargetOptions += " selected";
         }
-        targetOptions += ">Actuator " + String(actuator.slotId) + " · "
+        blinkTargetOptions += ">Actuator " + String(actuator.slotId) + " · "
             + escapeHtml(actuator.name);
-        if (!actuator.enabled) targetOptions += " (disabled)";
-        targetOptions += "</option>";
+        if (!actuator.enabled) blinkTargetOptions += " (disabled)";
+        blinkTargetOptions += "</option>";
+
+        if (isEligibleThresholdActuator(actuator)) {
+            thresholdTargetOptions += "<option value='" + String(actuator.slotId) + "'";
+            if (slot.implementationConfiguration.threshold.targetActuatorId
+                == actuator.slotId) {
+                thresholdTargetOptions += " selected";
+            }
+            thresholdTargetOptions += ">Actuator Slot " + String(actuator.slotId)
+                + " · " + escapeHtml(actuator.name) + "</option>";
+        }
     }
-    if (targetOptions.isEmpty()) {
-        targetOptions = "<option value='0'>No compatible On/Off actuator configured</option>";
+    if (blinkTargetOptions.isEmpty()) {
+        blinkTargetOptions = "<option value='0'>No compatible On/Off actuator configured</option>";
+    }
+    if (thresholdTargetOptions.isEmpty()) {
+        thresholdTargetOptions = "<option value='0'>No enabled On/Off actuator configured</option>";
     }
 
     const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
+    const ThresholdControllerConfiguration& threshold =
+        slot.implementationConfiguration.threshold;
+    String sourceOptions = "<option value='0'>Select a compatible Sensor</option>";
+    String measurementOptions =
+        "<option value='unknown' data-unit=''>Select a Measurement</option>";
+    String measurementCatalog = "{";
+    bool firstCatalogSensor = true;
+    for (size_t sensorIndex = 0; sensorIndex < MaxSensorSlotCount; ++sensorIndex) {
+        const SensorSlotConfiguration& sensor = configuration.sensorSlots[sensorIndex];
+        if (!isEligibleThresholdSensor(sensor)) continue;
+        sourceOptions += "<option value='" + String(sensor.slotId) + "'";
+        if (threshold.source.sensorId == sensor.slotId) sourceOptions += " selected";
+        sourceOptions += ">Sensor Slot " + String(sensor.slotId) + " · "
+            + escapeHtml(sensor.name) + "</option>";
+        MeasurementType types[MaxImplementationMeasurementTypeCount];
+        const size_t typeCount = thresholdMeasurementTypesForSensor(
+            sensor, types, MaxImplementationMeasurementTypeCount);
+        if (!firstCatalogSensor) measurementCatalog += ",";
+        firstCatalogSensor = false;
+        measurementCatalog += "'" + String(sensor.slotId) + "':[";
+        for (size_t typeIndex = 0; typeIndex < typeCount; ++typeIndex) {
+            const MeasurementType type = types[typeIndex];
+            const MeasurementTypeMetadata& typeMetadata = measurementTypeMetadata(type);
+            const char* unit = UnitConverter::symbol(typeMetadata.canonicalUnit);
+            if (typeIndex != 0) measurementCatalog += ",";
+            measurementCatalog += "{value:'" + String(typeMetadata.stableId)
+                + "',label:'" + escapeHtml(typeMetadata.displayName)
+                + "',unit:'" + escapeHtml(unit == nullptr ? "" : unit) + "'}";
+            if (threshold.source.sensorId == sensor.slotId) {
+                measurementOptions += "<option value='" + String(typeMetadata.stableId)
+                    + "' data-unit='" + escapeHtml(unit == nullptr ? "" : unit) + "'";
+                if (threshold.source.measurementType == type) {
+                    measurementOptions += " selected";
+                }
+                measurementOptions += ">" + escapeHtml(typeMetadata.displayName)
+                    + "</option>";
+            }
+        }
+        measurementCatalog += "]";
+    }
+    measurementCatalog += "}";
     String c;
-    c.reserve(2400);
+    c.reserve(4200 + sourceOptions.length() + measurementOptions.length());
     c = "<section class='card'><h2>Configure Slot " + String(slot.slotId)
         + "</h2><p class='help'>Saved changes become active after applying the Controller composition.</p><form method='post' action='/controllers/save'><input type='hidden' name='slot' value='"
         + String(slot.slotId) + "'>";
@@ -1105,11 +1250,24 @@ void WebService::handleControllerEdit() {
     c += "<label>Implementation<select id='controllerImplementation' name='implementation'>"
         + implementationOptions + "</select></label>";
     c += "<div id='blinkConfiguration'><label>Target On/Off actuator<select name='targetActuator'>"
-        + targetOptions + "</select></label>";
+        + blinkTargetOptions + "</select></label>";
     c += "<label>On duration (ms)<input type='number' name='onDuration' min='1' max='2147483647' value='"
         + String(blink.onDurationMs) + "'></label>";
     c += "<label>Off duration (ms)<input type='number' name='offDuration' min='1' max='2147483647' value='"
         + String(blink.offDurationMs) + "'></label></div>";
+    c += "<div id='thresholdConfiguration'><label>Source Sensor<select id='thresholdSourceSensor' name='thresholdSourceSensor'>"
+        + sourceOptions + "</select></label>";
+    c += "<label>Measurement<select id='thresholdMeasurement' name='thresholdMeasurement'>"
+        + measurementOptions + "</select></label>";
+    c += "<p class='help'>Threshold values use the canonical Measurement unit: <span id='thresholdUnit'></span>.</p>";
+    c += "<label>Target On/Off actuator<select name='thresholdTargetActuator'>"
+        + thresholdTargetOptions + "</select></label>";
+    c += "<label>On threshold<input type='number' step='any' name='onThreshold' value='"
+        + String(threshold.onThreshold, 6) + "'></label>";
+    c += "<label>Off threshold<input type='number' step='any' name='offThreshold' value='"
+        + String(threshold.offThreshold, 6) + "'></label>";
+    c += "<label>Maximum Measurement age (ms)<input type='number' min='1' max='2147483647' name='maxMeasurementAge' value='"
+        + String(threshold.maxMeasurementAgeMs) + "'></label></div>";
     c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/controllers'>Cancel</a></div></form></section>";
     if (selected != nullptr) {
         c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>"
@@ -1119,7 +1277,7 @@ void WebService::handleControllerEdit() {
             + "</span><span>Description</span><span>" + escapeHtml(selected->description)
             + "</span></div></section>";
     }
-    c += "<script>function controllerFields(){const s=document.getElementById('controllerImplementation');const o=s.options[s.selectedIndex];document.getElementById('blinkConfiguration').style.display=o.dataset.kind==='blink'?'block':'none'}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);controllerFields();</script>";
+    c += "<script>const thresholdMeasurementCatalog=" + measurementCatalog + ";function thresholdMeasurements(rebuild){const s=document.getElementById('thresholdSourceSensor'),m=document.getElementById('thresholdMeasurement'),previous=m.value;if(rebuild){m.replaceChildren(new Option('Select a Measurement','unknown'));for(const x of thresholdMeasurementCatalog[s.value]||[]){const o=new Option(x.label,x.value);o.dataset.unit=x.unit;m.add(o)}if(Array.from(m.options).some(o=>o.value===previous))m.value=previous;else m.value='unknown'}const o=m.options[m.selectedIndex];document.getElementById('thresholdUnit').textContent=o?o.dataset.unit||'':''}function controllerFields(){const s=document.getElementById('controllerImplementation'),k=s.options[s.selectedIndex].dataset.kind;document.getElementById('blinkConfiguration').style.display=k==='blink'?'block':'none';document.getElementById('thresholdConfiguration').style.display=k==='threshold'?'block':'none';thresholdMeasurements(false)}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);document.getElementById('thresholdSourceSensor').addEventListener('change',()=>thresholdMeasurements(true));document.getElementById('thresholdMeasurement').addEventListener('change',()=>thresholdMeasurements(false));controllerFields();</script>";
     sendPage("Configure Controller Slot", "/controllers", c);
 }
 
@@ -1457,6 +1615,15 @@ void WebService::handleControllerSave() {
                 slot.implementationConfiguration.blink.onDurationMs = onDuration;
                 slot.implementationConfiguration.blink.offDurationMs = offDuration;
             }
+        } else if (slot.implementation == ControllerImplementation::Threshold) {
+            ok = applyThresholdControllerWebFields(
+                server_.arg("thresholdSourceSensor"),
+                server_.arg("thresholdMeasurement"),
+                server_.arg("thresholdTargetActuator"),
+                server_.arg("onThreshold"),
+                server_.arg("offThreshold"),
+                server_.arg("maxMeasurementAge"),
+                slot);
         }
     }
     if (ok) ok = configurationService_.setControllerSlotConfiguration(slot);
@@ -1465,7 +1632,7 @@ void WebService::handleControllerSave() {
         "Controller Slot saved",
         "Controller Slot save failed",
         "/controllers",
-        "Invalid Slot configuration, target actuator, or timing values.");
+        "Invalid Controller configuration. Check the source Measurement, target actuator, thresholds, and timing values.");
 }
 void WebService::handleControllerApply() {
     if (runtimeManager_.pendingAction() != RuntimeAction::RestartControllerRuntime) {

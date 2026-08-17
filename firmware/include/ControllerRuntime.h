@@ -15,6 +15,9 @@ struct ControllerRuntimeInfo {
     uint32_t offDurationMs = 0;
     SensorId sourceSensorId = InvalidSensorId;
     MeasurementType sourceMeasurementType = MeasurementType::Unknown;
+    float onThreshold = 0.0F;
+    float offThreshold = 0.0F;
+    uint32_t maxMeasurementAgeMs = 0;
     bool sourceAvailable = false;
     bool hasLatestSnapshot = false;
     bool latestMeasurementValid = false;

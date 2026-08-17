@@ -6,6 +6,7 @@
 
 #include "ConfigurationService.h"
 #include "ControllerImplementationRegistry.h"
+#include "ControllerWebSupport.h"
 
 using namespace EnvNode;
 
@@ -172,12 +173,76 @@ void test_invalid_blink_durations_are_rejected() {
     TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
 }
 
-void test_multiple_enabled_controllers_may_share_target() {
+void test_enabled_controllers_must_exclusively_own_their_targets() {
     Fixture fixture;
     TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
         fixture.enabledActuator()));
     TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink(1)));
-    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink(2)));
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(fixture.blink(2)));
+    const ControllerSlotConfiguration& rejected =
+        fixture.service.getConfiguration().controllerSlots[1];
+    TEST_ASSERT_FALSE(rejected.enabled);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerImplementation::None),
+        static_cast<int>(rejected.implementation));
+}
+
+void test_disabled_controller_does_not_claim_target_and_enable_is_revalidated() {
+    Fixture fixture;
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
+        fixture.enabledActuator()));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink(1)));
+    ControllerSlotConfiguration second = fixture.blink(2);
+    second.enabled = false;
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(second));
+    second.enabled = true;
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(second));
+
+    ControllerSlotConfiguration first = fixture.blink(1);
+    first.enabled = false;
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(first));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(second));
+}
+
+void test_target_exclusivity_applies_across_controller_implementations() {
+    Fixture fixture;
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
+        fixture.enabledActuator()));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink(1)));
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(
+        fixture.threshold(2, 1, MeasurementType::Temperature, 1)));
+
+    ControllerSlotConfiguration switched = fixture.threshold(
+        1, 1, MeasurementType::Temperature, 1);
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(switched));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerImplementation::Threshold),
+        static_cast<int>(fixture.service.getConfiguration().controllerSlots[0].implementation));
+}
+
+void test_enabled_controllers_may_own_different_targets() {
+    Fixture fixture;
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
+        fixture.enabledActuator(1)));
+    ActuatorSlotConfiguration secondActuator = fixture.enabledActuator(2);
+    secondActuator.hardware =
+        HardwareResourceAssignment::gpioResource(GpioResource(17));
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(secondActuator));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink(1, 1)));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(
+        fixture.threshold(2, 1, MeasurementType::Temperature, 2)));
+}
+
+void test_controller_web_target_filter_excludes_other_claim_but_keeps_own_claim() {
+    Fixture fixture;
+    ControllerSlotConfiguration slots[2] = {
+        fixture.blink(1, 2), fixture.threshold(
+            2, 1, MeasurementType::Temperature, 3)};
+    TEST_ASSERT_FALSE(isControllerTargetClaimedByOtherEnabledSlot(
+        slots, 2, 1, 2));
+    TEST_ASSERT_TRUE(isControllerTargetClaimedByOtherEnabledSlot(
+        slots, 2, 2, 2));
+    slots[0].enabled = false;
+    TEST_ASSERT_FALSE(isControllerTargetClaimedByOtherEnabledSlot(
+        slots, 2, 2, 2));
 }
 
 void test_referenced_actuator_cannot_be_disabled_or_made_incompatible() {
@@ -408,6 +473,156 @@ void test_threshold_persistence_round_trips_stable_source_and_parameters() {
     TEST_ASSERT_EQUAL_UINT32(30000, threshold.maxMeasurementAgeMs);
 }
 
+void test_threshold_web_filters_measurements_sensors_and_actuators_by_metadata() {
+    TEST_ASSERT_TRUE(isThresholdCompatibleMeasurementType(MeasurementType::Temperature));
+    TEST_ASSERT_TRUE(isThresholdCompatibleMeasurementType(
+        MeasurementType::RelativeHumidity));
+    TEST_ASSERT_FALSE(isThresholdCompatibleMeasurementType(
+        MeasurementType::RainDetectorWet));
+    TEST_ASSERT_FALSE(isThresholdCompatibleMeasurementType(
+        MeasurementType::RainGaugeTip));
+    TEST_ASSERT_FALSE(isThresholdCompatibleMeasurementType(
+        MeasurementType::RainfallIncrement));
+
+    Fixture fixture;
+    const SensorSlotConfiguration& am2302 =
+        fixture.service.getConfiguration().sensorSlots[3];
+    TEST_ASSERT_TRUE(isEligibleThresholdSensor(am2302));
+    TEST_ASSERT_TRUE(sensorSupportsThresholdMeasurement(
+        am2302, MeasurementType::Temperature));
+    TEST_ASSERT_TRUE(sensorSupportsThresholdMeasurement(
+        am2302, MeasurementType::RelativeHumidity));
+    TEST_ASSERT_FALSE(sensorSupportsThresholdMeasurement(
+        am2302, MeasurementType::RainDetectorWet));
+    SensorSlotConfiguration rain = fixture.rainGauge();
+    TEST_ASSERT_FALSE(isEligibleThresholdSensor(rain));
+
+    ActuatorSlotConfiguration actuator = fixture.enabledActuator();
+    TEST_ASSERT_TRUE(isEligibleThresholdActuator(actuator));
+    actuator.enabled = false;
+    TEST_ASSERT_FALSE(isEligibleThresholdActuator(actuator));
+    actuator.enabled = true;
+    actuator.implementation = ActuatorImplementation::None;
+    TEST_ASSERT_FALSE(isEligibleThresholdActuator(actuator));
+}
+
+void test_threshold_web_measurements_are_scoped_to_selected_sensor_implementation() {
+    Fixture fixture;
+    SensorSlotConfiguration temperature =
+        fixture.service.getConfiguration().sensorSlots[0];
+    MeasurementType types[MaxImplementationMeasurementTypeCount];
+    size_t count = thresholdMeasurementTypesForSensor(
+        temperature, types, MaxImplementationMeasurementTypeCount);
+    TEST_ASSERT_EQUAL_UINT32(1, count);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
+        static_cast<int>(types[0]));
+
+    const SensorSlotConfiguration& temperatureAndHumidity =
+        fixture.service.getConfiguration().sensorSlots[3];
+    count = thresholdMeasurementTypesForSensor(
+        temperatureAndHumidity, types, MaxImplementationMeasurementTypeCount);
+    TEST_ASSERT_EQUAL_UINT32(2, count);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
+        static_cast<int>(types[0]));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),
+        static_cast<int>(types[1]));
+}
+
+void test_threshold_web_bme280_measurements_are_compatible_unique_state_values() {
+    Fixture fixture;
+    SensorSlotConfiguration bme280 =
+        fixture.service.getConfiguration().sensorSlots[0];
+    bme280.enabled = true;
+    bme280.implementation = SensorImplementation::BME280;
+    MeasurementType types[MaxImplementationMeasurementTypeCount];
+    const size_t count = thresholdMeasurementTypesForSensor(
+        bme280, types, MaxImplementationMeasurementTypeCount);
+    TEST_ASSERT_EQUAL_UINT32(3, count);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
+        static_cast<int>(types[0]));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),
+        static_cast<int>(types[1]));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::AtmosphericPressure),
+        static_cast<int>(types[2]));
+    for (size_t left = 0; left < count; ++left) {
+        TEST_ASSERT_TRUE(isThresholdCompatibleMeasurementType(types[left]));
+        for (size_t right = left + 1; right < count; ++right) {
+            TEST_ASSERT_NOT_EQUAL(static_cast<int>(types[left]),
+                static_cast<int>(types[right]));
+        }
+    }
+
+    SensorSlotConfiguration eventSensor = fixture.rainGauge();
+    TEST_ASSERT_EQUAL_UINT32(0, thresholdMeasurementTypesForSensor(
+        eventSensor, types, MaxImplementationMeasurementTypeCount));
+    TEST_ASSERT_FALSE(isThresholdCompatibleMeasurementType(
+        MeasurementType::RainDetectorWet));
+}
+
+void test_threshold_web_sensor_switch_preserves_only_a_supported_measurement() {
+    Fixture fixture;
+    const SensorSlotConfiguration& temperatureAndHumidity =
+        fixture.service.getConfiguration().sensorSlots[3];
+    const SensorSlotConfiguration& temperatureOnly =
+        fixture.service.getConfiguration().sensorSlots[0];
+
+    TEST_ASSERT_TRUE(sensorSupportsThresholdMeasurement(
+        temperatureAndHumidity, MeasurementType::RelativeHumidity));
+    TEST_ASSERT_FALSE(sensorSupportsThresholdMeasurement(
+        temperatureOnly, MeasurementType::RelativeHumidity));
+    TEST_ASSERT_TRUE(sensorSupportsThresholdMeasurement(
+        temperatureOnly, MeasurementType::Temperature));
+}
+
+void test_threshold_web_fields_map_to_typed_configuration_without_changing_common_or_blink_fields() {
+    ControllerSlotConfiguration slot;
+    slot.enabled = true;
+    slot.name = "Web Threshold";
+    slot.implementation = ControllerImplementation::Threshold;
+    slot.implementationConfiguration.blink.targetActuatorId = 7;
+    slot.implementationConfiguration.blink.onDurationMs = 123;
+    slot.implementationConfiguration.blink.offDurationMs = 456;
+    TEST_ASSERT_TRUE(applyThresholdControllerWebFields(
+        "4", "relative_humidity", "1", "70.5", "64.25", "15000", slot));
+    const ThresholdControllerConfiguration& threshold =
+        slot.implementationConfiguration.threshold;
+    TEST_ASSERT_TRUE(slot.enabled);
+    TEST_ASSERT_EQUAL_STRING("Web Threshold", slot.name.c_str());
+    TEST_ASSERT_EQUAL_UINT16(4, threshold.source.sensorId);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),
+        static_cast<int>(threshold.source.measurementType));
+    TEST_ASSERT_EQUAL_UINT16(1, threshold.targetActuatorId);
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 70.5F, threshold.onThreshold);
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 64.25F, threshold.offThreshold);
+    TEST_ASSERT_EQUAL_UINT32(15000, threshold.maxMeasurementAgeMs);
+    TEST_ASSERT_EQUAL_UINT16(7,
+        slot.implementationConfiguration.blink.targetActuatorId);
+    TEST_ASSERT_EQUAL_UINT32(123,
+        slot.implementationConfiguration.blink.onDurationMs);
+    TEST_ASSERT_EQUAL_UINT32(456,
+        slot.implementationConfiguration.blink.offDurationMs);
+}
+
+void test_threshold_web_syntax_and_configuration_validation_reject_invalid_posts() {
+    Fixture fixture;
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
+        fixture.enabledActuator()));
+    ControllerSlotConfiguration slot = fixture.threshold();
+    TEST_ASSERT_FALSE(applyThresholdControllerWebFields(
+        "bad", "temperature", "1", "70", "65", "15000", slot));
+    TEST_ASSERT_FALSE(applyThresholdControllerWebFields(
+        "1", "unknown", "1", "70", "65", "15000", slot));
+    TEST_ASSERT_FALSE(applyThresholdControllerWebFields(
+        "1", "temperature", "1", "nan", "65", "15000", slot));
+
+    TEST_ASSERT_TRUE(applyThresholdControllerWebFields(
+        "2", "temperature", "1", "70", "65", "15000", slot));
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
+    TEST_ASSERT_TRUE(applyThresholdControllerWebFields(
+        "1", "temperature", "1", "65", "70", "15000", slot));
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_controller_registry_uses_stable_ids_and_on_off_requirement);
@@ -418,7 +633,11 @@ int main(int, char**) {
     RUN_TEST(test_invalid_or_disabled_or_none_target_is_rejected);
     RUN_TEST(test_incompatible_capability_metadata_is_detected);
     RUN_TEST(test_invalid_blink_durations_are_rejected);
-    RUN_TEST(test_multiple_enabled_controllers_may_share_target);
+    RUN_TEST(test_enabled_controllers_must_exclusively_own_their_targets);
+    RUN_TEST(test_disabled_controller_does_not_claim_target_and_enable_is_revalidated);
+    RUN_TEST(test_target_exclusivity_applies_across_controller_implementations);
+    RUN_TEST(test_enabled_controllers_may_own_different_targets);
+    RUN_TEST(test_controller_web_target_filter_excludes_other_claim_but_keeps_own_claim);
     RUN_TEST(test_referenced_actuator_cannot_be_disabled_or_made_incompatible);
     RUN_TEST(test_disabled_controller_does_not_constrain_actuator_configuration);
     RUN_TEST(test_persistence_uses_stable_id_and_round_trips_blink_parameters);
@@ -432,5 +651,11 @@ int main(int, char**) {
     RUN_TEST(test_disabled_threshold_does_not_constrain_sensor_or_actuator_changes);
     RUN_TEST(test_threshold_reverse_actuator_integrity_protects_only_referenced_target);
     RUN_TEST(test_threshold_persistence_round_trips_stable_source_and_parameters);
+    RUN_TEST(test_threshold_web_filters_measurements_sensors_and_actuators_by_metadata);
+    RUN_TEST(test_threshold_web_measurements_are_scoped_to_selected_sensor_implementation);
+    RUN_TEST(test_threshold_web_bme280_measurements_are_compatible_unique_state_values);
+    RUN_TEST(test_threshold_web_sensor_switch_preserves_only_a_supported_measurement);
+    RUN_TEST(test_threshold_web_fields_map_to_typed_configuration_without_changing_common_or_blink_fields);
+    RUN_TEST(test_threshold_web_syntax_and_configuration_validation_reject_invalid_posts);
     return UNITY_END();
 }

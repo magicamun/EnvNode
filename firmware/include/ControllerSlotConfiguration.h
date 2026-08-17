@@ -39,6 +39,25 @@ struct ControllerSlotConfiguration {
     ControllerImplementationConfiguration implementationConfiguration;
 };
 
+inline bool configuredControllerTargetActuatorId(
+    const ControllerSlotConfiguration& slot,
+    ActuatorId& targetActuatorId) {
+    switch (slot.implementation) {
+        case ControllerImplementation::Blink:
+            targetActuatorId =
+                slot.implementationConfiguration.blink.targetActuatorId;
+            return true;
+        case ControllerImplementation::Threshold:
+            targetActuatorId =
+                slot.implementationConfiguration.threshold.targetActuatorId;
+            return true;
+        case ControllerImplementation::None:
+        default:
+            targetActuatorId = InvalidActuatorId;
+            return false;
+    }
+}
+
 constexpr size_t MaxControllerSlotCount = 16;
 constexpr size_t MaxControllerSlotNameLength = 32;
 

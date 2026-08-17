@@ -833,17 +833,15 @@ bool ConfigurationService::validateControllerSlot(
         ControllerImplementationRegistry::find(slot.implementation);
     if (metadata == nullptr) return false;
     if (slot.implementation == ControllerImplementation::None) return true;
+    if (!slot.enabled) return true;
 
-    ActuatorId targetActuatorId = InvalidActuatorId;
     if (slot.implementation == ControllerImplementation::Blink) {
         const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
         if (blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
             || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
             return false;
         }
-        targetActuatorId = blink.targetActuatorId;
     } else if (slot.implementation == ControllerImplementation::Threshold) {
-        if (!slot.enabled) return true;
         const ThresholdControllerConfiguration& threshold =
             slot.implementationConfiguration.threshold;
         if (!std::isfinite(threshold.onThreshold)
@@ -884,16 +882,16 @@ bool ConfigurationService::validateControllerSlot(
             || measurementMetadata.semantics != MeasurementSemantics::State) {
             return false;
         }
-        targetActuatorId = threshold.targetActuatorId;
     } else {
         return false;
     }
 
+    ActuatorId targetActuatorId = InvalidActuatorId;
+    if (!configuredControllerTargetActuatorId(slot, targetActuatorId)) return false;
     if (!isValidActuatorId(targetActuatorId)
         || targetActuatorId > MaxActuatorSlotCount) {
         return false;
     }
-    if (!slot.enabled) return true;
     if (actuatorSlots == nullptr) return false;
     const ActuatorSlotConfiguration& target = actuatorSlots[targetActuatorId - 1];
     if (target.slotId != targetActuatorId
@@ -922,6 +920,21 @@ bool ConfigurationService::validateControllerSlots(
                 controllerSlots[index], sensorSlots, actuatorSlots)) {
             return false;
         }
+    }
+    bool claimedTargets[MaxActuatorSlotCount + 1] = {};
+    for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
+        const ControllerSlotConfiguration& slot = controllerSlots[index];
+        if (!slot.enabled || slot.implementation == ControllerImplementation::None) {
+            continue;
+        }
+        ActuatorId targetActuatorId = InvalidActuatorId;
+        if (!configuredControllerTargetActuatorId(slot, targetActuatorId)
+            || !isValidActuatorId(targetActuatorId)
+            || targetActuatorId > MaxActuatorSlotCount
+            || claimedTargets[targetActuatorId]) {
+            return false;
+        }
+        claimedTargets[targetActuatorId] = true;
     }
     return true;
 }
