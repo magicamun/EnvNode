@@ -25,6 +25,8 @@
 #include "I2CBusManager.h"
 #include "ActuatorFactory.h"
 #include "ActuatorRuntime.h"
+#include "ActuatorMqttAdapter.h"
+#include "ActuatorStatePublisher.h"
 
 using namespace EnvNode;
 
@@ -36,6 +38,10 @@ static ConfigurationService configurationService;
 static WiFiService wifiService(serialLogger, configurationService);
 static TimeService timeService(serialLogger, configurationService, wifiService);
 static MqttService mqttService(serialLogger, configurationService, wifiService);
+static ActuatorMqttAdapter actuatorMqttAdapter(
+    serialLogger, configurationService, mqttService, actuatorRuntime);
+static ActuatorStatePublisher actuatorStatePublisher(
+    serialLogger, configurationService, mqttService, actuatorRuntime);
 static ArduinoMonotonicClock monotonicClock;
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static MeasurementSnapshotCache measurementSnapshotCache;
@@ -60,7 +66,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
 static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, runtimeManager, homeAssistantDiscoveryPublisher);
+static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, runtimeManager, homeAssistantDiscoveryPublisher, actuatorMqttAdapter, actuatorStatePublisher);
 
 void setup() {
     i2cBusManager.begin();

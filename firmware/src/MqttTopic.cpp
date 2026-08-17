@@ -1,5 +1,8 @@
 #include "MqttTopic.h"
 
+#include <cstdlib>
+#include <cstring>
+
 namespace EnvNode {
 namespace {
 
@@ -48,6 +51,44 @@ const char* mqttMeasurementTypeTopic(MeasurementType type) {
         case MeasurementType::Unknown:
         default: return nullptr;
     }
+}
+
+String mqttActuatorCommandSubscription(const String& deviceName) {
+    return mqttDeviceTopicRoot(deviceName) + "/actuator/+/cmd/on_off";
+}
+
+String mqttActuatorCommandTopic(const String& deviceName, ActuatorId id) {
+    return mqttDeviceTopicRoot(deviceName) + "/actuator/"
+        + String(static_cast<unsigned int>(id)) + "/cmd/on_off";
+}
+
+String mqttActuatorStatusTopic(const String& deviceName, ActuatorId id) {
+    return mqttDeviceTopicRoot(deviceName) + "/actuator/"
+        + String(static_cast<unsigned int>(id)) + "/status/on_off";
+}
+
+bool parseMqttActuatorCommandTopic(
+    const char* topic,
+    const String& deviceName,
+    ActuatorId& id) {
+    if (topic == nullptr) return false;
+    const String prefixString = mqttDeviceTopicRoot(deviceName) + "/actuator/";
+    const char* prefix = prefixString.c_str();
+    const size_t prefixLength = strlen(prefix);
+    if (strncmp(topic, prefix, prefixLength) != 0) return false;
+
+    const char* slotStart = topic + prefixLength;
+    if (*slotStart < '0' || *slotStart > '9') return false;
+    char* slotEnd = nullptr;
+    const unsigned long parsed = strtoul(slotStart, &slotEnd, 10);
+    if (slotEnd == slotStart
+        || strcmp(slotEnd, "/cmd/on_off") != 0
+        || parsed == 0
+        || parsed > 0xFFFFUL) {
+        return false;
+    }
+    id = static_cast<ActuatorId>(parsed);
+    return true;
 }
 
 } // namespace EnvNode

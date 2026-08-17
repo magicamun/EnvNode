@@ -16,6 +16,8 @@ public:
     void loop() override;
     bool connected() const override;
     bool publish(const char* topic, const char* payload, bool retained) override;
+    bool subscribe(const char* topic) override;
+    void setMessageHandler(IMqttMessageHandler* handler) override;
 
 private:
     enum class State {
@@ -28,10 +30,14 @@ private:
 
     void attemptConnect();
     void logStateTransition(State next);
+    static void receiveMessage(char* topic, uint8_t* payload, unsigned int length);
 
     ILogger& logger_;
     IConfigurationService& configurationService_;
     IWiFiService& wifiService_;
+    IMqttMessageHandler* messageHandler_ = nullptr;
+
+    static MqttService* instance_;
 
     // MQTT client objects allocated in source file
     State state_ = State::Uninitialized;

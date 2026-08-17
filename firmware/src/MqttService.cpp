@@ -7,17 +7,20 @@ namespace EnvNode {
 
 static WiFiClient espClient;
 static PubSubClient client(espClient);
+MqttService* MqttService::instance_ = nullptr;
 
 MqttService::MqttService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService) {
+    instance_ = this;
 }
 
 void MqttService::begin() {
     if (state_ != State::Uninitialized) return;
     state_ = State::WaitingForWiFi;
     client.setKeepAlive(60);
+    client.setCallback(receiveMessage);
     if (!client.setBufferSize(16384)) {
         logger_.println("MQTT packet buffer allocation failed");
     }
@@ -124,6 +127,22 @@ bool MqttService::publish(const char* topic, const char* payload, bool retained)
     }
 
     return client.publish(topic, payload, retained);
+}
+
+bool MqttService::subscribe(const char* topic) {
+    return client.connected() && topic != nullptr && client.subscribe(topic);
+}
+
+void MqttService::setMessageHandler(IMqttMessageHandler* handler) {
+    messageHandler_ = handler;
+}
+
+void MqttService::receiveMessage(
+    char* topic,
+    uint8_t* payload,
+    unsigned int length) {
+    if (instance_ == nullptr || instance_->messageHandler_ == nullptr) return;
+    instance_->messageHandler_->handleMqttMessage(topic, payload, length);
 }
 
 } // namespace EnvNode

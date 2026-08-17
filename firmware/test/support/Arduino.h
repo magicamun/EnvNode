@@ -10,6 +10,9 @@ public:
     String(const char* value)
         : value_(value == nullptr ? "" : value) {
     }
+    String(unsigned int value)
+        : value_(std::to_string(value)) {
+    }
 
     String& operator=(const char* value) {
         value_ = value == nullptr ? "" : value;
@@ -26,6 +29,36 @@ public:
 
     size_t length() const {
         return value_.length();
+    }
+
+    char charAt(size_t index) const {
+        return index < value_.length() ? value_[index] : '\0';
+    }
+
+    void reserve(size_t size) {
+        value_.reserve(size);
+    }
+
+    String& operator+=(const char* value) {
+        value_ += value == nullptr ? "" : value;
+        return *this;
+    }
+
+    String& operator+=(char value) {
+        value_ += value;
+        return *this;
+    }
+
+    friend String operator+(const String& left, const char* right) {
+        String result(left);
+        result += right;
+        return result;
+    }
+
+    friend String operator+(const String& left, const String& right) {
+        String result(left);
+        result.value_ += right.value_;
+        return result;
     }
 
 private:

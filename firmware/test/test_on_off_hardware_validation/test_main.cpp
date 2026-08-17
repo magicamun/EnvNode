@@ -12,6 +12,7 @@ using namespace EnvNode;
 
 HardwareSerial Serial;
 std::string serialOutput;
+size_t serialWriteCallCount = 0;
 int gpioModes[256] = {};
 int gpioValues[256] = {};
 int gpioEventPins[512] = {};
@@ -27,6 +28,7 @@ void HardwareSerial::println(const char* value) {
 }
 
 size_t HardwareSerial::write(const uint8_t* data, size_t length) {
+    ++serialWriteCallCount;
     serialOutput.append(reinterpret_cast<const char*>(data), length);
     return length;
 }
@@ -310,12 +312,25 @@ void test_serial_logger_preserves_messages_longer_than_old_buffer() {
 void test_serial_logger_println_writes_exact_text_bytes() {
     SerialLogger logger;
     serialOutput.clear();
+    serialWriteCallCount = 0;
 
     logger.println("Actuator runtime rebuild started");
 
     TEST_ASSERT_EQUAL_STRING(
         "Actuator runtime rebuild started\r\n",
         serialOutput.c_str());
+    TEST_ASSERT_EQUAL_UINT32(2, serialWriteCallCount);
+}
+
+void test_serial_logger_printf_uses_one_explicit_length_write() {
+    SerialLogger logger;
+    serialOutput.clear();
+    serialWriteCallCount = 0;
+
+    logger.printf("value=%u\n", 17U);
+
+    TEST_ASSERT_EQUAL_STRING("value=17\n", serialOutput.c_str());
+    TEST_ASSERT_EQUAL_UINT32(1, serialWriteCallCount);
 }
 
 void test_actuator_configuration_requires_runtime_apply() {
@@ -433,6 +448,7 @@ int main(int, char**) {
     RUN_TEST(test_capability_lookup_exposes_on_off_interface);
     RUN_TEST(test_serial_logger_preserves_messages_longer_than_old_buffer);
     RUN_TEST(test_serial_logger_println_writes_exact_text_bytes);
+    RUN_TEST(test_serial_logger_printf_uses_one_explicit_length_write);
     RUN_TEST(test_actuator_configuration_requires_runtime_apply);
     RUN_TEST(test_runtime_rebuild_adds_an_actuator_initialized_off);
     RUN_TEST(test_runtime_rebuild_moves_actuator_after_releasing_old_gpio);

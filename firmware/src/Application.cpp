@@ -4,7 +4,7 @@
 
 namespace EnvNode {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -15,6 +15,8 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , actuatorRuntime_(actuatorRuntime)
     , runtimeManager_(runtimeManager)
     , discoveryPublisher_(discoveryPublisher)
+    , actuatorMqttAdapter_(actuatorMqttAdapter)
+    , actuatorStatePublisher_(actuatorStatePublisher)
     , timeSyncLogged_(false) {
 }
 
@@ -29,6 +31,7 @@ void Application::setup(bool configurationAlreadyLoaded) {
     actuatorRuntime_.initialize(configurationService_.getConfiguration().actuatorSlots);
     webService_.begin();
     mqttService_.begin();
+    actuatorMqttAdapter_.begin();
 
     const Configuration& configuration = configurationService_.getConfiguration();
 
@@ -57,6 +60,8 @@ void Application::loop() {
     sensorManager_.loop();
     webService_.loop();
     mqttService_.loop();
+    actuatorMqttAdapter_.loop();
+    actuatorStatePublisher_.loop();
     discoveryPublisher_.loop();
     runtimeManager_.service();
 }
