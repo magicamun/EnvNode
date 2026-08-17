@@ -190,6 +190,77 @@ Application logic therefore remains largely independent from hardware details an
 
 This separation keeps the firmware modular while allowing infrastructure components to evolve independently.
 
+## Domain runtime compositions
+
+EnvNode deliberately has three separate runtime models. They share slot, registry, factory and lifecycle patterns, but not domain behavior.
+
+```mermaid
+flowchart LR
+    SC[SensorSlotConfiguration] --> SR[SensorRuntime]
+    SR --> SM[SensorManager]
+    SM --> IS[ISensor]
+    IS --> M[Measurement]
+    M --> MP[MeasurementPublisher]
+
+    AC[ActuatorSlotConfiguration] --> AR[ActuatorRuntime]
+    AR --> IO[IOnOffActuator]
+    IO --> GA[GpioOnOffActuator]
+    GA --> GPIO[GPIO]
+
+    CC[ControllerSlotConfiguration] --> CR[ControllerRuntime]
+    CR --> BC[BlinkController]
+    BC --> RES[IOnOffActuatorResolver]
+    RES --> AR
+```
+
+### Sensor runtime
+
+`SensorImplementationRegistry` describes compiled Sensor implementations, supported Measurements, scheduling defaults and hardware requirements. Persistent fixed `SensorSlotConfiguration`s select reusable implementations, names, schedules and hardware assignments.
+
+`SensorFactory` constructs enabled instances. `SensorRuntime` manages composition replacement, while `SensorManager` owns acquisition scheduling, Measurement acceptance and delivery to `MeasurementSnapshotCache` and `MeasurementPublisher`. Sensor configuration can be applied through the implemented Sensor rebuild path without restarting the ESP32.
+
+### Actuator runtime
+
+`ActuatorImplementationRegistry` describes reusable implementations, capabilities and required hardware capabilities. Persistent fixed `ActuatorSlotConfiguration`s provide stable `ActuatorId`, enablement, name, implementation and the sole hardware assignment.
+
+`ActuatorFactory` constructs deterministic in-place instances. `ActuatorRuntime` owns their lifecycle and exposes capability lookup by `ActuatorId`. The current `gpio_on_off` implementation exposes `IOnOffActuator`; callers never manipulate its GPIO directly.
+
+Live rebuild stages a new composition, safely shuts down the previous outputs Off where possible, and replaces the active instances without a Device restart.
+
+### Controller runtime
+
+`ControllerImplementationRegistry` describes reusable Controller implementations and required Actuator capabilities. Fixed `ControllerSlotConfiguration`s provide stable `ControllerId`, enablement, name, implementation and typed implementation configuration.
+
+`ControllerFactory` constructs `IController` instances. `ControllerRuntime` owns composition, cooperative servicing, diagnostics and transient Start/Stop operations. Enabled Controllers start automatically when a composition is initialized or rebuilt; manually stopped state is not persisted across rebuild.
+
+Blink is the first implementation. It uses `ActuatorId` and `IOnOffActuatorResolver` to obtain the current capability from `ActuatorRuntime`. It never retains a concrete Actuator pointer across an Actuator rebuild. It uses monotonic, non-blocking timing and has no Web, MQTT, GPIO, wall-clock or NTP dependency.
+
+Controller validation checks configured target identity, enablement and advertised capability. Runtime availability remains separate and may temporarily fail despite valid configuration.
+
+### Hardware occupancy
+
+Sensors and Actuators share one authoritative hardware occupancy validation pass across enabled slots. Board capability validation remains a separate concern.
+
+- exclusive GPIO collisions are rejected across Sensor/Sensor, Sensor/Actuator and Actuator/Actuator assignments
+- identical I2C bus/address claims conflict where applicable
+- different addresses may share an I2C bus
+- disabled slots do not claim hardware
+- Controllers own no `HardwareResourceAssignment`
+
+Web option filtering assists the user but does not replace ConfigurationService validation.
+
+### Runtime apply effects
+
+Configuration changes request the narrowest implemented lifecycle action:
+
+```text
+Sensor change     -> RestartSensorManager     -> Sensor runtime rebuild
+Actuator change   -> RestartActuatorRuntime   -> ActuatorRuntime rebuild
+Controller change -> RestartControllerRuntime -> ControllerRuntime rebuild
+```
+
+These apply paths keep WiFi, MQTT, Web and unrelated domain runtimes operating. They do not promise a generic hot-swap mechanism for arbitrary subsystems.
+
 ---
 
 # Communication Layer
@@ -259,6 +330,8 @@ MQTT is not responsible for:
 - storing long-term data
 
 MqttService owns broker connectivity and transport only.
+
+Inbound protocol adapters share the single MqttService callback through `MqttMessageRouter`. The router only multiplexes transport messages; it is not a domain command bus or event bus.
 
 Translation of domain Measurements into MQTT topics and payloads belongs to MeasurementPublisher.
 
@@ -338,6 +411,44 @@ MQTT connectivity may become available before valid system time exists.
 
 However, publication of timestamped Measurements should only begin after TimeService reports successful synchronization.
 
+### Actuator and Controller MQTT adapters
+
+Actuator runtime commands resolve `ActuatorId` through `ActuatorRuntime` and use `IOnOffActuator`. `ActuatorStatePublisher` observes actual state independently of whether the latest command came from Web, MQTT or a Controller.
+
+Controller MQTT topics use the normalized root and Device name:
+
+```text
+envnode/<device>/controller/<slot>/status
+envnode/<device>/controller/<slot>/cmd
+envnode/<device>/controller/<slot>/parameter/<parameter>
+envnode/<device>/controller/<slot>/cmd/parameter/<parameter>
+```
+
+Their semantics are deliberately distinct:
+
+- `status` is retained runtime truth: running, phase, target availability and last result.
+- `cmd` accepts transient `START` or `STOP`; these do not change persistent `enabled`.
+- `parameter/<parameter>` is authoritative retained persisted parameter state published by EnvNode.
+- `cmd/parameter/<parameter>` is an external request to mutate persistent configuration.
+
+For Blink, the current parameters are `on_duration_ms` and `off_duration_ms`. Parameter commands follow:
+
+```text
+MQTT cmd/parameter
+ -> ControllerMqttAdapter
+ -> candidate ControllerSlotConfiguration
+ -> IConfigurationService validation and persistence
+ -> RestartControllerRuntime
+ -> ControllerRuntime rebuild
+ -> retained parameter state publication
+```
+
+An unchanged requested value is a no-op and does not persist or rebuild. EnvNode never subscribes to authoritative `parameter/...` state topics. State and command topics are separated specifically to prevent retained publications from feeding back into configuration mutation.
+
+The same persisted Controller configuration is rendered by WebService. Conversely, Web-originated parameter changes are observed and published by `ControllerStatePublisher`.
+
+Controller and generic Actuator Home Assistant discovery are not implemented. Existing Home Assistant discovery describes Sensors only.
+
 ### Home Assistant MQTT Discovery
 
 `HomeAssistantDiscoveryPublisher` is a representation-only component separate from Sensors,
@@ -395,6 +506,16 @@ The Web Interface does not own configuration.
 Instead it retrieves and modifies configuration exclusively through ConfigurationService.
 
 This ensures that ConfigurationService remains the single owner of persistent configuration.
+
+WebService also exposes runtime operations through domain runtime boundaries:
+
+```text
+Web Actuator command -> ActuatorId -> ActuatorRuntime -> IOnOffActuator
+Web Controller command -> ControllerId -> ControllerRuntime Start/Stop
+Web Controller edit -> IConfigurationService -> runtime effect -> ControllerRuntime rebuild
+```
+
+WebService does not construct Actuators or Controllers, manipulate GPIO, or call concrete `BlinkController` or `GpioOnOffActuator` objects.
 
 ---
 
@@ -2323,24 +2444,38 @@ Implemented
 - configurable timezone
 - configurable NTP servers
 - UTC and local ISO-8601 timestamps
-- Measurement domain implementation
-- canonical MeasurementType metadata
-- SensorManager
-- monotonic Sensor scheduling
-- deterministic SimulatedTemperatureSensor
-- MeasurementPublisher
-- MQTT Measurement publishing
-- end-to-end simulated Sensor-to-MQTT pipeline
+- typed Measurement domain and canonical MeasurementType metadata
+- fixed Sensor slots, registry, factory, runtime and SensorManager scheduling
+- physical and simulated Sensor implementations
+- MeasurementSnapshotCache and MeasurementPublisher
+- MQTT Measurement publishing and Sensor Home Assistant discovery
+- fixed Actuator slots, registry and stable ActuatorId
+- unified Sensor/Actuator hardware capability and occupancy validation
+- OnOff capability and GPIO On/Off implementation
+- deterministic ActuatorFactory and ActuatorRuntime
+- safe Actuator shutdown and live runtime rebuild
+- Web and MQTT Actuator configuration/control and independent state publication
+- fixed Controller slots, registry and stable ControllerId
+- BlinkController, ControllerFactory and ControllerRuntime
+- cooperative non-blocking Controller service
+- live Controller rebuild and transient Start/Stop
+- Web Controller configuration, diagnostics and Start/Stop
+- MQTT Controller runtime status and START/STOP
+- retained Blink parameter state and persistent MQTT parameter commands
+- runtime Actuator capability resolution without retained concrete pointers
+- OTA firmware staging and centralized restart boundary
 
-Planned
+Deliberately future or not implemented
 
-- Presentation Unit configuration
-- UnitConverter
-- MQTT unit metadata
-- Web Interface for Presentation Unit configuration
-- additional simulated Sensors
-- OTA service
-- physical Sensor drivers
+- generic external Actuator and Controller self-description
+- additional Actuator capabilities such as Level/percentage
+- additional Controller implementations
+- Measurement-driven and threshold/hysteresis Controllers
+- command-source ownership or arbitration
+- generic Controller parameter-description schema
+- Controller and generic Actuator Home Assistant discovery
+- scripting/rule engine
+- generic command or event bus
 
 ---
 

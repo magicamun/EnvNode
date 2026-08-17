@@ -88,6 +88,10 @@ Initial runtime effects include:
 - RestartSensorManager
 - RestartDevice
 
+## Implementation status (2026-08-17)
+
+Implemented. The runtime-effect set now also includes `RestartActuatorRuntime` and `RestartControllerRuntime`. Sensor, Actuator and Controller configuration can be applied through their separate live rebuild paths without a full Device restart. `RuntimeManager` remains the lifecycle boundary and does not merge these domain runtimes into a generic manager.
+
 The exact enum names are implementation details.
 
 The architectural principle is that configuration changes declare their required runtime effect rather than performing the effect themselves.

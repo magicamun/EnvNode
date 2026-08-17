@@ -88,6 +88,16 @@ The Web Interface does not own:
 
 Every configuration change is delegated to ConfigurationService.
 
+## Implementation status (2026-08-17)
+
+Implemented and extended with Sensors, Actuators and Controllers administration. WebService remains an adapter:
+
+- configuration edits use `IConfigurationService` and explicit runtime-apply actions
+- Actuator runtime commands use `ActuatorRuntime` capability lookup
+- Controller Start/Stop uses `ControllerRuntime`
+
+WebService does not construct domain objects, manipulate GPIO, or call concrete Actuator or Controller implementations.
+
 ---
 
 ## Relationship to Configuration

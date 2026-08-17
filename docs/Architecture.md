@@ -12,46 +12,43 @@ The firmware intentionally focuses on measurement rather than interpretation.
 
 # Architecture Overview
 
-```
-                    +----------------------+
-                    | Automation Platform  |
-                    | Home Assistant       |
-                    | Node-RED             |
-                    | Custom Applications  |
-                    +----------+-----------+
-                               ^
-                               |
-                            MQTT / HTTP
-                               |
-+-------------------------------------------------------------+
-|                     EnvNode                          |
-|-------------------------------------------------------------|
-|                                                             |
-|  Configuration                                              |
-|  Diagnostics                                                |
-|  OTA                                                        |
-|  Web Interface                                              |
-|                                                             |
-|  Sensor Manager                                             |
-|      Temperature                                            |
-|      Humidity                                               |
-|      Pressure                                               |
-|      Solar Radiation                                        |
-|      Rain Detection                                         |
-|      Rain Gauge                                             |
-|                                                             |
-|  Hardware Control                                           |
-|      Rain Heater                                            |
-|                                                             |
-+-------------------------------------------------------------+
-                               ^
-                               |
-                         Physical Sensors
+```mermaid
+flowchart TB
+    EXT[Home Assistant / external clients]
+    WEB[Web adapter]
+    MQTT[MQTT adapters]
+    CFG[IConfigurationService]
+    SR[SensorRuntime / SensorManager]
+    AR[ActuatorRuntime]
+    CR[ControllerRuntime]
+    M[Measurements]
+    CAP[IOnOffActuator]
+    HW[Physical inputs and outputs]
+
+    EXT <--> WEB
+    EXT <--> MQTT
+    WEB --> CFG
+    MQTT --> CFG
+    WEB --> AR
+    MQTT --> AR
+    WEB --> CR
+    MQTT --> CR
+    CFG --> SR
+    CFG --> AR
+    CFG --> CR
+    SR --> M
+    M --> MQTT
+    CR -->|ActuatorId capability resolution| AR
+    AR --> CAP
+    SR --> HW
+    CAP --> HW
 ```
 
 The firmware owns the hardware.
 
 The automation platform owns the interpretation.
+
+Web and MQTT are external adapters over shared configuration and runtime interfaces. They do not define the internal Sensor, Actuator or Controller architecture.
 
 ---
 

@@ -1,194 +1,83 @@
-# Actuator Model
+# Actuator and Controller Model
 
-## Purpose
+## Responsibility split
 
-EnvNode distinguishes between sensing, decision-making, and physical output.
+- Sensors observe physical reality and produce typed `Measurement`s.
+- Controllers coordinate behavior over time.
+- Actuators apply requested physical output through typed capabilities.
+- Web and MQTT adapt external requests to the same internal interfaces.
 
-- **Sensors** observe the environment and produce `Measurement`s.
-- **Controllers** consume `Measurement`s and decide what should happen.
-- **Actuators** apply a requested physical output.
-- **Adapters**, such as MQTT, expose or control these concepts externally but are not part of the internal control model.
+Actuator state is runtime control state, not a Measurement. Controllers are not Sensors or Actuators.
 
-An actuator must not contain application-specific control logic.
+## Configured Actuators
 
-Its responsibility is limited to applying a requested output state to hardware.
+The implemented composition path is:
 
-## Design Principle
+```mermaid
+flowchart LR
+    C[ActuatorSlotConfiguration] --> R[ActuatorImplementationRegistry]
+    C --> F[ActuatorFactory]
+    F --> RT[ActuatorRuntime]
+    RT --> I[IOnOffActuator]
+    I --> G[GpioOnOffActuator]
+    G --> P[GPIO output]
+```
 
-Actuators describe **what can be controlled**, not **how the hardware implements it**.
+`ActuatorId` is the stable identity of a configured Slot. The registry describes reusable implementations and their capability and hardware requirements. `slot.hardware` is the single source of truth for the instance's `HardwareResourceAssignment`.
 
-Examples:
+The current implementation is `gpio_on_off`. It requires a GPIO with `DigitalOutput` capability and exposes the `OnOff` domain capability through `IOnOffActuator`.
 
-- GPIO output
-- relay
-- MOSFET
-- PWM output
-- DAC output
+An adapter or Controller addresses an Actuator Slot and capability. It never addresses `GpioOnOffActuator` or GPIO directly.
 
-These are implementation details.
+## Capabilities
 
-A controller should not need to know whether an actuator drives an LED, a relay, or the heater MOSFET of a RainDetector.
-
-## Initial Capabilities
-
-EnvNode initially supports two actuator capabilities.
-
-### OnOff
-
-An `OnOff` actuator supports two logical states:
+`OnOff` is currently the only implemented Actuator capability:
 
 - `Off`
 - `On`
 
-Typical examples:
+Capability metadata lets clients request behavior without depending on its physical implementation. A future relay, remote output or other implementation may expose the same `OnOff` interface.
 
-- relay
-- valve
-- digital output
-- LED
-- heater enable
+Level/percentage control remains future architecture. It is not currently implemented.
 
-The physical implementation may use a GPIO or another output mechanism.
+## Runtime ownership and rebuild
 
-### Level
+`ActuatorRuntime` owns the application-lifetime runtime composition and capability lookup by `ActuatorId`. `ActuatorFactory` uses fixed, aligned storage for deterministic construction.
 
-A `Level` actuator accepts a normalized value from:
+A live rebuild stages a replacement composition, safely shuts down old Actuators, and activates the new composition without restarting the ESP32. Shutdown requests `Off` before releasing GPIO ownership where the implementation can do so.
 
-`0 ... 100 %`
+Actuator state is independent of command source. Web, MQTT and Controllers all reach the same `IOnOffActuator`; `ActuatorStatePublisher` observes actual state and publishes it independently.
 
-Semantics:
+## Hardware validation
 
-- `0 %` means **Off**
-- `100 %` means maximum output
-- values between `0 %` and `100 %` represent proportional output
+Actuators share EnvNode's hardware capability and occupancy infrastructure with Sensors:
 
-Typical examples:
+- `BoardCapabilities` validates whether an assigned resource provides required capabilities.
+- unified occupancy validation detects conflicts across enabled Sensor and Actuator slots
+- exclusive GPIO reuse conflicts
+- identical I2C bus/address claims conflict where applicable
+- different addresses may share an I2C bus
+- disabled slots do not claim hardware
 
-- PWM-controlled heater
-- dimmable LED
-- fan speed
-- proportional valve
+Controllers do not own hardware assignments and do not participate in occupancy validation.
 
-The percentage is a domain-level value.
+## Controllers and capability resolution
 
-A caller must not need to know the PWM resolution, PWM frequency, DAC range, GPIO implementation, or other hardware details.
+The first Controller implementation is Blink:
 
-## Capability Relationship
+```mermaid
+flowchart LR
+    C[ControllerSlotConfiguration] --> CR[ControllerRuntime]
+    CR --> B[BlinkController]
+    B -->|ActuatorId| R[IOnOffActuatorResolver]
+    R --> A[ActuatorRuntime]
+    A --> I[IOnOffActuator]
+```
 
-A `Level` actuator can functionally represent an Off state by setting its level to `0 %`.
+Blink retains an `ActuatorId`, not a concrete pointer. It resolves the current `IOnOffActuator` for each operation. An Actuator runtime rebuild may therefore replace or move the physical implementation without leaving the Controller with a stale pointer.
 
-However, `OnOff` and `Level` remain distinct capabilities.
+Blink contains timing and sequencing; the basic Actuator does not. Its cooperative monotonic state machine commands On and Off only at scheduled transitions. STOP cancels future transitions and requests Off.
 
-A pure `OnOff` actuator does not support intermediate values.
+## Contention
 
-A `Level` actuator does.
-
-This distinction allows Controllers to declare the capability they require.
-
-## No Timing Logic Inside Basic Actuators
-
-Basic actuators do not implement timing behavior such as:
-
-- blinking
-- periodic switching
-- delays
-- pulse sequences
-- schedules
-- regulation loops
-
-For example, a blinking LED is still an `OnOff` actuator.
-
-The sequence
-
-`On -> Off -> On -> Off`
-
-is produced by a Controller or another higher-level control component.
-
-This keeps the actuator deterministic and reusable.
-
-## Hardware Independence
-
-The first implementation may use an LED connected through a resistor to an ESP32 GPIO.
-
-This is only a test implementation.
-
-The same actuator abstraction must later be usable for hardware such as:
-
-`ESP32 GPIO -> MOSFET -> RainDetector heater`
-
-without requiring application logic to change.
-
-## Hardware Resource Integration
-
-Actuators use the existing EnvNode hardware resource model.
-
-An actuator declares the capabilities required from its assigned hardware resource.
-
-Hardware resource assignments are validated through `BoardCapabilities`.
-
-Actuators must not introduce a separate GPIO or hardware resource configuration model.
-
-The hardware resource model distinguishes between:
-
-- the capabilities provided by the board,
-- the hardware resource assigned to an actuator,
-- and whether that resource is already in use.
-
-For example, an `OnOff` actuator using a GPIO requires
-`GpioCapability::DigitalOutput`.
-
-The actuator must not depend directly on an arbitrary GPIO number without
-going through the existing hardware resource assignment and validation model.
-
-## Initial Development Steps
-
-The first actuator implementation should be deliberately small.
-
-1. Introduce the actuator abstraction.
-2. Implement an `OnOff` GPIO actuator.
-3. Use an LED with a resistor as test hardware.
-4. Verify explicit `On` and `Off` commands.
-5. Add external timing logic that periodically switches the actuator to demonstrate blinking.
-6. Only after the `OnOff` model is stable, introduce the `Level` capability and PWM-based output.
-
-MQTT integration and measurement-based Controllers are deliberately outside this first implementation step.
-
-## Architectural Constraints
-
-- Actuators must not depend on MQTT.
-- Actuators must not consume Sensor Measurements directly.
-- Actuators must not make control decisions.
-- Hardware-specific details must remain behind the actuator implementation.
-- Controllers depend on actuator capabilities, not on concrete GPIO or PWM implementations.
-- `Level` values exposed to the domain are normalized to `0 ... 100 %`.
-- `Level(0)` is defined as Off.
-
-## Guiding Example
-
-For the initial LED experiment:
-
-`Controller / test logic`
-↓
-`OnOff capability`
-↓
-`GPIO actuator`
-↓
-`ESP32 GPIO`
-↓
-`LED + resistor`
-
-Later:
-
-`Controller`
-↓
-`Level capability`
-↓
-`PWM actuator`
-↓
-`ESP32 PWM`
-↓
-`MOSFET`
-↓
-`RainDetector heater`
-
-The upper layers should not depend on the physical load connected to the output.
+Current command behavior is deliberately simple: last command wins. A manual Web or MQTT Actuator command can temporarily change state while Blink is running; Blink may overwrite it at its next scheduled transition. No ownership, priority or arbitration model is implemented.

@@ -88,6 +88,10 @@ The Slot configuration defines what this Device should instantiate.
 
 The hardware assignment defines which physical resources the selected implementation may use.
 
+## Implementation status (2026-08-17)
+
+Implemented for Sensors and extended, without changing Sensor domain ownership, to Actuator Slots. Board capability validation is separate from one unified occupancy validation across enabled Sensor and Actuator assignments. Exclusive GPIO reuse is rejected across both categories; I2C devices may share a bus when addresses differ. Controllers own no hardware assignment and do not participate in occupancy validation.
+
 ---
 
 ## Sensor Implementation Registry

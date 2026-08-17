@@ -91,6 +91,12 @@ Examples:
 - MeasurementPublisher consumes PresentationConfiguration
 - Sensor creation consumes SensorConfiguration
 
+## Implementation status (2026-08-17)
+
+Implemented. The authoritative `Configuration` now includes fixed Sensor, Actuator and Controller Slot arrays. Each Slot selects a stable implementation and owns its typed instance configuration. `ConfigurationService` validates and persists all three categories; runtime objects and external adapters do not own separate configuration stores.
+
+The original conceptual `SensorConfiguration[]` terminology became `SensorSlotConfiguration[]`. Parallel `ActuatorSlotConfiguration[]` and `ControllerSlotConfiguration[]` sections were added without changing the one-owner decision.
+
 Conceptually:
 
     Persistent Storage

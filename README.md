@@ -118,6 +118,10 @@ Sensors do not interpret weather.
 
 Sensors produce Measurements.
 
+### Controllers coordinate Actuators through capabilities
+
+Controllers implement cooperative local behavior and address configured Actuators by `ActuatorId` and capability. They do not manipulate GPIO or use MQTT as an internal control path.
+
 ---
 
 ### Configuration has one authoritative owner
@@ -179,23 +183,26 @@ Implemented
 - configurable timezone
 - MQTT connectivity
 - authenticated MQTT client
-- factory reset
-- technical architecture
-- domain model
+- factory reset and OTA firmware update
+- typed Measurement pipeline and MQTT publication
+- fixed Sensor slots, physical/simulated implementations and live runtime composition
+- Sensor Home Assistant discovery
+- fixed Actuator slots and unified hardware validation
+- OnOff capability and GPIO On/Off Actuator
+- live Actuator runtime rebuild
+- Web and MQTT Actuator configuration/control
+- fixed Controller slots and BlinkController
+- cooperative Controller runtime and live rebuild
+- Web and MQTT Controller configuration, status and Start/Stop
+- persistent MQTT Blink parameter commands and retained parameter state
 
-Currently under development
+Deliberately future
 
-- Measurement implementation
-- SensorManager
-- simulated Sensors
-- MeasurementPublisher
-
-Planned
-
-- physical Sensor drivers
-- OTA firmware updates
-- calibration support
-- extended diagnostics
+- additional Actuator capabilities and Controller implementations
+- Measurement-driven Controllers
+- command-source arbitration/ownership
+- generic external Actuator/Controller self-description
+- Controller and generic Actuator Home Assistant discovery
 
 ---
 
@@ -208,6 +215,8 @@ Project documentation is intentionally separated by responsibility.
 | README.md | Project overview |
 | DomainModel.md | Functional domain concepts |
 | TechnicalArchitecture.md | Technical architecture |
+| ActuatorModel.md | Actuator capabilities and Controller interaction |
+| MQTT.md | Current MQTT protocol boundaries and topics |
 | ADRs | Architectural decisions |
 
 ---
@@ -229,8 +238,4 @@ These responsibilities belong to higher software layers.
 
 # Project Status
 
-The architecture is considered stable.
-
-Infrastructure services are implemented.
-
-The current development focus is the Measurement domain and Sensor framework.
+The Sensor, Actuator and Controller architecture is implemented and physically verified. Current open work concerns further capabilities, Controller implementations and external self-description rather than replacing these runtime boundaries.
