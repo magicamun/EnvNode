@@ -4,7 +4,7 @@
 
 namespace EnvNode {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -13,6 +13,7 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , timeService_(timeService)
     , sensorManager_(sensorManager)
     , actuatorRuntime_(actuatorRuntime)
+    , controllerRuntime_(controllerRuntime)
     , runtimeManager_(runtimeManager)
     , discoveryPublisher_(discoveryPublisher)
     , actuatorMqttAdapter_(actuatorMqttAdapter)
@@ -29,6 +30,10 @@ void Application::setup(bool configurationAlreadyLoaded) {
     timeService_.begin();
     sensorManager_.begin();
     actuatorRuntime_.initialize(configurationService_.getConfiguration().actuatorSlots);
+    if (!controllerRuntime_.initialize(
+            configurationService_.getConfiguration().controllerSlots)) {
+        logger_.println("Controller runtime initialization failed");
+    }
     webService_.begin();
     mqttService_.begin();
     actuatorMqttAdapter_.begin();
@@ -61,6 +66,7 @@ void Application::loop() {
     webService_.loop();
     mqttService_.loop();
     actuatorMqttAdapter_.loop();
+    controllerRuntime_.loop();
     actuatorStatePublisher_.loop();
     discoveryPublisher_.loop();
     runtimeManager_.service();

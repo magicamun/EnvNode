@@ -16,6 +16,7 @@
 #include "OTAService.h"
 #include "Logger.h"
 #include "IDiscoveryPublisher.h"
+#include "ControllerRuntime.h"
 
 namespace EnvNode {
 
@@ -30,6 +31,7 @@ public:
         LocaleFormatter& localeFormatter,
         SensorManager& sensorManager,
         ActuatorRuntime& actuatorRuntime,
+        ControllerRuntime& controllerRuntime,
         MeasurementSnapshotCache& measurementSnapshotCache,
         IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
@@ -42,6 +44,7 @@ private:
     void handleStatus();
     void handleSensors();
     void handleActuators();
+    void handleControllers();
     void handleMeasurements();
     void handleSensorEdit();
     void handleSensorSave();
@@ -52,6 +55,12 @@ private:
     void handleActuatorOn();
     void handleActuatorOff();
     void handleActuatorState(OnOffState state);
+    void handleControllerEdit();
+    void handleControllerSave();
+    void handleControllerApply();
+    void handleControllerStart();
+    void handleControllerStop();
+    void handleControllerRuntimeOperation(bool start);
     void handleNetwork();
     void handleMqtt();
     void handleTime();
@@ -97,6 +106,7 @@ private:
     LocaleFormatter& localeFormatter_;
     SensorManager& sensorManager_;
     ActuatorRuntime& actuatorRuntime_;
+    ControllerRuntime& controllerRuntime_;
     MeasurementSnapshotCache& measurementSnapshotCache_;
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;

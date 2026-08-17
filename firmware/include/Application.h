@@ -12,12 +12,13 @@
 #include "ActuatorRuntime.h"
 #include "ActuatorMqttAdapter.h"
 #include "ActuatorStatePublisher.h"
+#include "ControllerRuntime.h"
 
 namespace EnvNode {
 
 class Application {
 public:
-    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher);
+    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher);
 
     void setup(bool configurationAlreadyLoaded = false);
     void loop();
@@ -31,6 +32,7 @@ private:
     ITimeService& timeService_;
     SensorManager& sensorManager_;
     ActuatorRuntime& actuatorRuntime_;
+    ControllerRuntime& controllerRuntime_;
     RuntimeManager& runtimeManager_;
     IDiscoveryPublisher& discoveryPublisher_;
     ActuatorMqttAdapter& actuatorMqttAdapter_;

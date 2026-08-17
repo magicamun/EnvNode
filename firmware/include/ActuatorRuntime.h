@@ -3,6 +3,7 @@
 #include <cstddef>
 
 #include "ActuatorFactory.h"
+#include "IOnOffActuatorResolver.h"
 
 namespace EnvNode {
 
@@ -18,7 +19,7 @@ struct ActuatorRuntimeInfo {
     bool available = false;
 };
 
-class ActuatorRuntime {
+class ActuatorRuntime : public IOnOffActuatorResolver {
 public:
     ActuatorRuntime(ActuatorFactory& factory, ILogger& logger);
     ~ActuatorRuntime();
@@ -28,7 +29,7 @@ public:
     size_t runtimeCount() const;
     size_t availableCount() const;
     bool runtimeInfo(size_t index, ActuatorRuntimeInfo& info) const;
-    IOnOffActuator* onOffActuator(ActuatorId id);
+    IOnOffActuator* onOffActuator(ActuatorId id) override;
     const IOnOffActuator* onOffActuator(ActuatorId id) const;
 
 private:

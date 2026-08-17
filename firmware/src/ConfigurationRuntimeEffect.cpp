@@ -14,6 +14,7 @@ RuntimeAction runtimeActionFor(ConfigurationArea area) {
             return RuntimeAction::RestartMqtt;
         case ConfigurationArea::Sensors: return RuntimeAction::RestartSensorManager;
         case ConfigurationArea::Actuators: return RuntimeAction::RestartActuatorRuntime;
+        case ConfigurationArea::Controllers: return RuntimeAction::RestartControllerRuntime;
         default: return RuntimeAction::None;
     }
 }

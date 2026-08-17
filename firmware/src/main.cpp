@@ -27,6 +27,8 @@
 #include "ActuatorRuntime.h"
 #include "ActuatorMqttAdapter.h"
 #include "ActuatorStatePublisher.h"
+#include "ControllerFactory.h"
+#include "ControllerRuntime.h"
 
 using namespace EnvNode;
 
@@ -43,6 +45,9 @@ static ActuatorMqttAdapter actuatorMqttAdapter(
 static ActuatorStatePublisher actuatorStatePublisher(
     serialLogger, configurationService, mqttService, actuatorRuntime);
 static ArduinoMonotonicClock monotonicClock;
+static ControllerFactory controllerFactory(
+    actuatorRuntime, monotonicClock, serialLogger);
+static ControllerRuntime controllerRuntime(controllerFactory, serialLogger);
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static MeasurementSnapshotCache measurementSnapshotCache;
 static SensorManager sensorManager(
@@ -58,15 +63,16 @@ static SensorRuntime sensorRuntime(
     secondSensorFactory,
     sensorManager);
 static LocaleFormatter localeFormatter(configurationService);
-static RuntimeManager runtimeManager(serialLogger, &sensorRuntime, &actuatorRuntime);
+static RuntimeManager runtimeManager(
+    serialLogger, &sensorRuntime, &actuatorRuntime, &controllerRuntime);
 static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     serialLogger,
     configurationService,
     mqttService,
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, runtimeManager, homeAssistantDiscoveryPublisher, actuatorMqttAdapter, actuatorStatePublisher);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
+static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, actuatorMqttAdapter, actuatorStatePublisher);
 
 void setup() {
     i2cBusManager.begin();

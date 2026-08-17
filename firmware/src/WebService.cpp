@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_netif.h>
+#include <climits>
 #include <cmath>
 #include <cstdlib>
 #include "FirmwareVersion.h"
@@ -11,6 +12,7 @@
 #include "SensorImplementationRegistry.h"
 #include "SensorSlotConfiguration.h"
 #include "ActuatorImplementationRegistry.h"
+#include "ControllerImplementationRegistry.h"
 
 namespace EnvNode {
 namespace {
@@ -72,6 +74,40 @@ const char* actuatorOperationFailure(ActuatorOperationResult result) {
         default:
             return "The actuator operation failed.";
     }
+}
+
+const char* blinkPhaseName(BlinkPhase phase) {
+    switch (phase) {
+        case BlinkPhase::Stopped: return "Stopped";
+        case BlinkPhase::WaitingForTarget: return "Waiting for target";
+        case BlinkPhase::On: return "On";
+        case BlinkPhase::Off: return "Off";
+        default: return "Unknown";
+    }
+}
+
+const char* controllerOperationName(ControllerOperationResult result) {
+    switch (result) {
+        case ControllerOperationResult::Completed: return "Completed";
+        case ControllerOperationResult::NoAction: return "No action required";
+        case ControllerOperationResult::TargetUnavailable: return "Target unavailable";
+        case ControllerOperationResult::ActuatorOperationFailed: return "Actuator operation failed";
+        case ControllerOperationResult::InvalidConfiguration: return "Invalid configuration";
+        case ControllerOperationResult::NotRunning: return "Not running";
+        case ControllerOperationResult::ControllerNotFound: return "Controller not found";
+        default: return "Unknown";
+    }
+}
+
+bool parseControllerDuration(const String& text, uint32_t& duration) {
+    if (text.isEmpty()) return false;
+    char* end = nullptr;
+    const unsigned long long parsed = strtoull(text.c_str(), &end, 10);
+    if (end == text.c_str() || *end != '\0' || parsed == 0 || parsed > INT32_MAX) {
+        return false;
+    }
+    duration = static_cast<uint32_t>(parsed);
+    return true;
 }
 
 String lastMeasurementDisplay(
@@ -347,11 +383,13 @@ String measurementTimeDisplay(
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
     SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime,
+    ControllerRuntime& controllerRuntime,
     MeasurementSnapshotCache& measurementSnapshotCache,
     IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
+      controllerRuntime_(controllerRuntime),
       measurementSnapshotCache_(measurementSnapshotCache),
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService) {}
 
@@ -360,9 +398,11 @@ void WebService::begin() {
     server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
     server_.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
+    server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
+    server_.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
     server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
     server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
     server_.on("/time", HTTP_GET, [this]() { handleTime(); });
@@ -387,6 +427,10 @@ void WebService::begin() {
     server_.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
     server_.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
     server_.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
+    server_.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
+    server_.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
+    server_.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
+    server_.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
     server_.on("/restart", HTTP_POST, [this]() { handleRestart(); });
     server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
     server_.onNotFound([this]() { handleNotFound(); });
@@ -448,6 +492,7 @@ const char* WebService::pendingActionMessage() const {
         case RuntimeAction::RestartWiFi: return "Configuration saved. WiFi restart required.";
         case RuntimeAction::RestartSensorManager: return "Configuration saved. Sensor Manager restart required.";
         case RuntimeAction::RestartActuatorRuntime: return "Configuration saved. Actuator runtime apply required.";
+        case RuntimeAction::RestartControllerRuntime: return "Configuration saved. Controller runtime apply required.";
         case RuntimeAction::RestartDevice: return "Configuration saved. Device restart required.";
         default: return "Configuration saved. Runtime action required.";
     }
@@ -465,6 +510,7 @@ String WebService::pendingRuntimeActionHtml() const {
         case RuntimeAction::RestartWiFi: html += "WiFi restart"; break;
         case RuntimeAction::RestartSensorManager: html += "Sensor Manager restart"; break;
         case RuntimeAction::RestartActuatorRuntime: html += "Actuator runtime apply"; break;
+        case RuntimeAction::RestartControllerRuntime: html += "Controller runtime apply"; break;
         case RuntimeAction::RestartDevice: html += "Device restart"; break;
         case RuntimeAction::None: break;
     }
@@ -504,7 +550,7 @@ String WebService::otaStatusHtml() const {
 }
 
 String WebService::navigationHtml(const char* active) const {
-    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/actuators","Actuators"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
+    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/actuators","Actuators"},{"/controllers","Controllers"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
     String html;
     html.reserve(560);
     html = "<nav class='nav'>";
@@ -746,6 +792,84 @@ void WebService::handleActuators() {
     sendPage("Actuators", "/actuators", c);
 }
 
+void WebService::handleControllers() {
+    String c;
+    c.reserve(1300 + MaxControllerSlotCount * 620);
+    if (runtimeManager_.pendingAction() == RuntimeAction::RestartControllerRuntime) {
+        c = "<div class='notice'><strong>Controller apply required</strong><p>Saved Controller configuration differs from the active runtime composition.</p><form method='post' action='/controllers/apply'><button>Apply Controller Changes</button></form></div>";
+    }
+    c += "<section class='card'><h2>Controller Slots</h2><p class='help'>Saved configuration is activated with Apply Controller Changes. Start and Stop affect only the active runtime and do not change saved configuration.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th>Target</th><th>Timing</th><th>Runtime</th><th>Status</th><th>Diagnostics</th><th>Controls</th><th class='sensor-actions'></th></tr></thead><tbody>";
+    const Configuration& configuration = configurationService_.getConfiguration();
+    for (size_t slotIndex = 0; slotIndex < MaxControllerSlotCount; ++slotIndex) {
+        const ControllerSlotConfiguration& slot = configuration.controllerSlots[slotIndex];
+        const ControllerImplementationMetadata* metadata =
+            ControllerImplementationRegistry::find(slot.implementation);
+        ControllerRuntimeInfo runtime;
+        bool hasRuntime = false;
+        for (size_t runtimeIndex = 0; runtimeIndex < controllerRuntime_.runtimeCount(); ++runtimeIndex) {
+            ControllerRuntimeInfo candidate;
+            if (controllerRuntime_.runtimeInfo(runtimeIndex, candidate)
+                && candidate.id == slot.slotId) {
+                runtime = candidate;
+                hasRuntime = true;
+                break;
+            }
+        }
+        const BlinkControllerConfiguration& blink =
+            slot.implementationConfiguration.blink;
+        const bool expectsRuntime = slot.enabled
+            && slot.implementation != ControllerImplementation::None;
+        const bool runtimeMatches = expectsRuntime == hasRuntime
+            && (!hasRuntime || (runtime.implementation == slot.implementation
+                && String(runtime.name) == slot.name
+                && runtime.targetActuatorId == blink.targetActuatorId
+                && runtime.onDurationMs == blink.onDurationMs
+                && runtime.offDurationMs == blink.offDurationMs));
+
+        c += "<tr><td class='sensor-technical'>" + String(slot.slotId)
+            + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
+        c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
+        c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
+        c += "</td><td class='sensor-technical'>";
+        c += slot.implementation == ControllerImplementation::Blink
+            ? "Actuator " + String(blink.targetActuatorId) : String("—");
+        c += "</td><td class='sensor-technical'>";
+        if (slot.implementation == ControllerImplementation::Blink) {
+            c += String(blink.onDurationMs) + " ms On<br>" + String(blink.offDurationMs) + " ms Off";
+        } else {
+            c += "—";
+        }
+        c += "</td><td>";
+        c += hasRuntime ? escapeHtml(runtime.name) : String("No runtime Controller");
+        if (!runtimeMatches) c += "<br>" + badge("Controller apply required", "warn");
+        c += "</td><td class='sensor-technical'>";
+        if (!hasRuntime) c += "—";
+        else c += runtime.running ? badge("Running", "good") : badge("Stopped", "warn");
+        c += "</td><td class='sensor-technical'>";
+        if (!hasRuntime) {
+            c += "—";
+        } else {
+            c += runtime.targetAvailable ? "Target available" : "Target unavailable";
+            c += "<br>" + String(blinkPhaseName(runtime.blinkPhase));
+            c += "<br>" + String(controllerOperationName(runtime.lastOperationResult));
+        }
+        c += "</td><td>";
+        if (hasRuntime) {
+            const char* action = runtime.running ? "stop" : "start";
+            const char* label = runtime.running ? "Stop" : "Start";
+            c += "<form method='post' action='/controllers/" + String(action)
+                + "'><input type='hidden' name='slot' value='" + String(slot.slotId)
+                + "'><button type='submit'>" + label + "</button></form>";
+        } else {
+            c += "—";
+        }
+        c += "</td><td class='sensor-actions'><a class='button' href='/controllers/edit?slot="
+            + String(slot.slotId) + "'>Configure</a></td></tr>";
+    }
+    c += "</tbody></table></div></section>";
+    sendPage("Controllers", "/controllers", c);
+}
+
 void WebService::handleMeasurements() {
     String content;
     content.reserve(600 + sensorManager_.sensorCount() * 1200);
@@ -920,6 +1044,83 @@ void WebService::handleActuatorEdit() {
     }
     c += "<script>function actuatorFields(reset){const s=document.getElementById('actuatorImplementation');const o=s.options[s.selectedIndex];const p=document.getElementById('actuatorGpioConfiguration');p.style.display=o.dataset.interface==='GPIO'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}}document.getElementById('actuatorImplementation').addEventListener('change',()=>actuatorFields(true));actuatorFields(false);</script>";
     sendPage("Configure Actuator Slot", "/actuators", c);
+}
+
+void WebService::handleControllerEdit() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    if (requestedSlot < 1 || requestedSlot > static_cast<long>(MaxControllerSlotCount)) {
+        sendResult("Invalid Controller Slot", "/controllers",
+            "The requested Slot does not exist.", false);
+        return;
+    }
+    const Configuration& configuration = configurationService_.getConfiguration();
+    const ControllerSlotConfiguration& slot =
+        configuration.controllerSlots[requestedSlot - 1];
+    const ControllerImplementationMetadata* selected =
+        ControllerImplementationRegistry::find(slot.implementation);
+    String implementationOptions;
+    for (size_t index = 0; index < ControllerImplementationRegistry::count(); ++index) {
+        const ControllerImplementationMetadata* metadata =
+            ControllerImplementationRegistry::at(index);
+        if (metadata == nullptr) continue;
+        implementationOptions += "<option value='" + String(metadata->stableId)
+            + "' data-kind='" + String(metadata->stableId) + "'";
+        if (metadata->implementation == slot.implementation) {
+            implementationOptions += " selected";
+        }
+        implementationOptions += ">" + escapeHtml(metadata->displayType) + "</option>";
+    }
+    String targetOptions;
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        const ActuatorSlotConfiguration& actuator = configuration.actuatorSlots[index];
+        const ActuatorImplementationMetadata* metadata =
+            ActuatorImplementationRegistry::find(actuator.implementation);
+        if (metadata == nullptr
+            || !hasActuatorCapability(metadata->capabilities, ActuatorCapability::OnOff)) {
+            continue;
+        }
+        targetOptions += "<option value='" + String(actuator.slotId) + "'";
+        if (slot.implementationConfiguration.blink.targetActuatorId == actuator.slotId) {
+            targetOptions += " selected";
+        }
+        targetOptions += ">Actuator " + String(actuator.slotId) + " · "
+            + escapeHtml(actuator.name);
+        if (!actuator.enabled) targetOptions += " (disabled)";
+        targetOptions += "</option>";
+    }
+    if (targetOptions.isEmpty()) {
+        targetOptions = "<option value='0'>No compatible On/Off actuator configured</option>";
+    }
+
+    const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
+    String c;
+    c.reserve(2400);
+    c = "<section class='card'><h2>Configure Slot " + String(slot.slotId)
+        + "</h2><p class='help'>Saved changes become active after applying the Controller composition.</p><form method='post' action='/controllers/save'><input type='hidden' name='slot' value='"
+        + String(slot.slotId) + "'>";
+    c += "<label class='choice'><input type='checkbox' name='enabled' value='1'"
+        + String(slot.enabled ? " checked" : "") + ">Enabled</label>";
+    c += "<label>Name<input name='name' maxlength='" + String(MaxControllerSlotNameLength)
+        + "' required value='" + escapeHtml(slot.name) + "'></label>";
+    c += "<label>Implementation<select id='controllerImplementation' name='implementation'>"
+        + implementationOptions + "</select></label>";
+    c += "<div id='blinkConfiguration'><label>Target On/Off actuator<select name='targetActuator'>"
+        + targetOptions + "</select></label>";
+    c += "<label>On duration (ms)<input type='number' name='onDuration' min='1' max='2147483647' value='"
+        + String(blink.onDurationMs) + "'></label>";
+    c += "<label>Off duration (ms)<input type='number' name='offDuration' min='1' max='2147483647' value='"
+        + String(blink.offDurationMs) + "'></label></div>";
+    c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/controllers'>Cancel</a></div></form></section>";
+    if (selected != nullptr) {
+        c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>"
+            + escapeHtml(selected->displayType) + "</span><span>Required actuator capability</span><span>"
+            + String(hasActuatorCapability(selected->requiredActuatorCapabilities,
+                ActuatorCapability::OnOff) ? "On/Off" : "None")
+            + "</span><span>Description</span><span>" + escapeHtml(selected->description)
+            + "</span></div></section>";
+    }
+    c += "<script>function controllerFields(){const s=document.getElementById('controllerImplementation');const o=s.options[s.selectedIndex];document.getElementById('blinkConfiguration').style.display=o.dataset.kind==='blink'?'block':'none'}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);controllerFields();</script>";
+    sendPage("Configure Controller Slot", "/controllers", c);
 }
 
 void WebService::handleDiagnostics() {
@@ -1226,6 +1427,90 @@ void WebService::handleActuatorApply() {
         return;
     }
     server_.sendHeader("Location", "/actuators", true);
+    server_.send(303, "text/plain", "See Other");
+}
+void WebService::handleControllerSave() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    const ControllerImplementationMetadata* metadata =
+        ControllerImplementationRegistry::findByStableId(
+            server_.arg("implementation").c_str());
+    bool ok = requestedSlot >= 1
+        && requestedSlot <= static_cast<long>(MaxControllerSlotCount)
+        && metadata != nullptr;
+    ControllerSlotConfiguration slot;
+    if (ok) {
+        slot = configurationService_.getConfiguration().controllerSlots[requestedSlot - 1];
+        slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
+        slot.name = server_.arg("name");
+        slot.implementation = metadata->implementation;
+        if (slot.implementation == ControllerImplementation::Blink) {
+            const long target = server_.arg("targetActuator").toInt();
+            uint32_t onDuration = 0;
+            uint32_t offDuration = 0;
+            if (target < 1 || target > static_cast<long>(MaxActuatorSlotCount)
+                || !parseControllerDuration(server_.arg("onDuration"), onDuration)
+                || !parseControllerDuration(server_.arg("offDuration"), offDuration)) {
+                ok = false;
+            } else {
+                slot.implementationConfiguration.blink.targetActuatorId =
+                    static_cast<ActuatorId>(target);
+                slot.implementationConfiguration.blink.onDurationMs = onDuration;
+                slot.implementationConfiguration.blink.offDurationMs = offDuration;
+            }
+        }
+    }
+    if (ok) ok = configurationService_.setControllerSlotConfiguration(slot);
+    sendConfigurationResult(
+        configurationSaveResult(ok, ConfigurationArea::Controllers),
+        "Controller Slot saved",
+        "Controller Slot save failed",
+        "/controllers",
+        "Invalid Slot configuration, target actuator, or timing values.");
+}
+void WebService::handleControllerApply() {
+    if (runtimeManager_.pendingAction() != RuntimeAction::RestartControllerRuntime) {
+        sendResult("Controller changes not applied", "/controllers",
+            "No Controller runtime apply is pending, or a stronger runtime action takes priority.",
+            false);
+        return;
+    }
+    if (!runtimeManager_.applyPendingControllerChanges(
+            configurationService_.getConfiguration().controllerSlots)) {
+        sendResult("Controller changes not applied", "/controllers",
+            "The Controller runtime rebuild failed. The previous composition was retained or restored; see logs.",
+            false);
+        return;
+    }
+    server_.sendHeader("Location", "/controllers", true);
+    server_.send(303, "text/plain", "See Other");
+}
+void WebService::handleControllerStart() {
+    handleControllerRuntimeOperation(true);
+}
+void WebService::handleControllerStop() {
+    handleControllerRuntimeOperation(false);
+}
+void WebService::handleControllerRuntimeOperation(bool start) {
+    const long requestedSlot = server_.arg("slot").toInt();
+    if (requestedSlot < 1 || requestedSlot > static_cast<long>(MaxControllerSlotCount)) {
+        sendResult("Controller command failed", "/controllers",
+            "The requested Controller Slot does not exist.", false);
+        return;
+    }
+    const ControllerId id = static_cast<ControllerId>(requestedSlot);
+    const ControllerOperationResult result = start
+        ? controllerRuntime_.startController(id)
+        : controllerRuntime_.stopController(id);
+    if (result != ControllerOperationResult::Completed
+        && result != ControllerOperationResult::NoAction) {
+        String message = start ? "The Controller could not be started: "
+            : "The Controller could not be stopped cleanly: ";
+        message += controllerOperationName(result);
+        message += ".";
+        sendResult("Controller command failed", "/controllers", message.c_str(), false);
+        return;
+    }
+    server_.sendHeader("Location", "/controllers", true);
     server_.send(303, "text/plain", "See Other");
 }
 void WebService::handleRestart() { if(otaService_.busy()){sendResult("Restart unavailable","/firmware","A firmware upload is currently active.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Restarting","/firmware","The device is restarting now.",true); performExplicitRestart(); }

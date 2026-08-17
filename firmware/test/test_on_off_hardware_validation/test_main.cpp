@@ -339,6 +339,12 @@ void test_actuator_configuration_requires_runtime_apply() {
         static_cast<int>(runtimeActionFor(ConfigurationArea::Actuators)));
 }
 
+void test_controller_configuration_requires_dedicated_runtime_apply() {
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(RuntimeAction::RestartControllerRuntime),
+        static_cast<int>(runtimeActionFor(ConfigurationArea::Controllers)));
+}
+
 void test_runtime_rebuild_adds_an_actuator_initialized_off() {
     TestLogger logger;
     ActuatorFactory factory(logger);
@@ -450,6 +456,7 @@ int main(int, char**) {
     RUN_TEST(test_serial_logger_println_writes_exact_text_bytes);
     RUN_TEST(test_serial_logger_printf_uses_one_explicit_length_write);
     RUN_TEST(test_actuator_configuration_requires_runtime_apply);
+    RUN_TEST(test_controller_configuration_requires_dedicated_runtime_apply);
     RUN_TEST(test_runtime_rebuild_adds_an_actuator_initialized_off);
     RUN_TEST(test_runtime_rebuild_moves_actuator_after_releasing_old_gpio);
     RUN_TEST(test_runtime_rebuild_removes_and_deinitializes_actuator);

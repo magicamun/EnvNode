@@ -12,6 +12,7 @@ const char* runtimeActionName(RuntimeAction action) {
         case RuntimeAction::RestartWiFi: return "RestartWiFi";
         case RuntimeAction::RestartSensorManager: return "RestartSensorManager";
         case RuntimeAction::RestartActuatorRuntime: return "RestartActuatorRuntime";
+        case RuntimeAction::RestartControllerRuntime: return "RestartControllerRuntime";
         case RuntimeAction::RestartDevice: return "RestartDevice";
         default: return "Unknown";
     }
@@ -20,10 +21,12 @@ const char* runtimeActionName(RuntimeAction action) {
 RuntimeManager::RuntimeManager(
     ILogger& logger,
     ISensorRuntime* sensorRuntime,
-    ActuatorRuntime* actuatorRuntime)
+    ActuatorRuntime* actuatorRuntime,
+    ControllerRuntime* controllerRuntime)
     : logger_(logger)
     , sensorRuntime_(sensorRuntime)
-    , actuatorRuntime_(actuatorRuntime) {
+    , actuatorRuntime_(actuatorRuntime)
+    , controllerRuntime_(controllerRuntime) {
 }
 
 void RuntimeManager::request(RuntimeAction action) {
@@ -89,6 +92,22 @@ bool RuntimeManager::applyPendingActuatorChanges(
     logger_.println("Actuator runtime rebuild started");
     if (!actuatorRuntime_->rebuild(slots)) {
         logger_.println("Actuator runtime rebuild failed");
+        return false;
+    }
+    pendingAction_ = RuntimeAction::None;
+    return true;
+}
+
+bool RuntimeManager::applyPendingControllerChanges(
+    const ControllerSlotConfiguration* slots) {
+    if (pendingAction_ != RuntimeAction::RestartControllerRuntime
+        || controllerRuntime_ == nullptr
+        || slots == nullptr) {
+        return false;
+    }
+    logger_.println("Controller runtime rebuild started");
+    if (!controllerRuntime_->rebuild(slots)) {
+        logger_.println("Controller runtime rebuild failed");
         return false;
     }
     pendingAction_ = RuntimeAction::None;

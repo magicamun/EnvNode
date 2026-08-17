@@ -4,6 +4,7 @@
 #include "RuntimeAction.h"
 #include "ISensorRuntime.h"
 #include "ActuatorRuntime.h"
+#include "ControllerRuntime.h"
 
 namespace EnvNode {
 
@@ -12,7 +13,8 @@ public:
     explicit RuntimeManager(
         ILogger& logger,
         ISensorRuntime* sensorRuntime = nullptr,
-        ActuatorRuntime* actuatorRuntime = nullptr);
+        ActuatorRuntime* actuatorRuntime = nullptr,
+        ControllerRuntime* controllerRuntime = nullptr);
 
     void request(RuntimeAction action);
     RuntimeAction pendingAction() const;
@@ -21,6 +23,7 @@ public:
     void clearPending();
     bool applyPendingSensorChanges();
     bool applyPendingActuatorChanges(const ActuatorSlotConfiguration* slots);
+    bool applyPendingControllerChanges(const ControllerSlotConfiguration* slots);
 
     // This is the firmware's single device-restart boundary. No other code may
     // call ESP.restart() directly.
@@ -30,6 +33,7 @@ private:
     ILogger& logger_;
     ISensorRuntime* sensorRuntime_;
     ActuatorRuntime* actuatorRuntime_;
+    ControllerRuntime* controllerRuntime_;
     RuntimeAction pendingAction_ = RuntimeAction::None;
 };
 

@@ -13,6 +13,7 @@ enum class ConfigurationArea {
     Device,
     Sensors,
     Actuators,
+    Controllers,
 };
 
 struct ConfigurationSaveResult {
