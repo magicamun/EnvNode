@@ -81,7 +81,8 @@ private:
     void handleFactoryReset();
     void handleNotFound();
 
-    void sendPage(const char* title, const char* activeRoute, const String& content, int status = 200);
+    void sendPage(const char* title, const char* activeRoute, const String& content,
+        int status = 200, bool wideContent = false);
     void sendResult(const char* title, const char* activeRoute, const char* message, bool success);
     void sendConfigurationResult(
         const ConfigurationSaveResult& result,
@@ -89,7 +90,8 @@ private:
         const char* failureTitle,
         const char* activeRoute,
         const char* failureMessage);
-    String renderPage(const char* title, const char* activeRoute, const String& content) const;
+    String renderPage(const char* title, const char* activeRoute, const String& content,
+        bool wideContent = false) const;
     String navigationHtml(const char* activeRoute) const;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;

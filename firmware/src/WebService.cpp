@@ -19,7 +19,7 @@ namespace EnvNode {
 namespace {
 
 const char SharedStyle[] PROGMEM = R"CSS(
-:root{--bg:#f3f6f8;--panel:#fff;--ink:#17212b;--muted:#637282;--line:#dbe3e8;--brand:#176b87;--brand2:#0f536a;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#123644;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#b8d0da;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#dbeaf0;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#1d5367;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help{color:var(--muted)}.help{font-size:13px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px;min-width:0;max-width:100%}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#e8edf0;max-width:100%;white-space:normal;overflow-wrap:anywhere}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #bfcbd2;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:normal}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.sensor-technical,.sensor-last-measurement,.sensor-actions,.sensor-actions .button{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.scroll{overflow-x:auto;max-width:100%;min-width:0}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}}
+:root{--bg:#f3f6f8;--panel:#fff;--ink:#17212b;--muted:#637282;--line:#dbe3e8;--brand:#176b87;--brand2:#0f536a;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#123644;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#b8d0da;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#dbeaf0;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#1d5367;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.main.main-wide{max-width:none}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help,.secondary{color:var(--muted)}.help,.secondary{font-size:13px}.secondary{display:block;margin-top:4px}.grid,.summary-grid{display:grid;gap:16px;min-width:0;max-width:100%;margin-bottom:16px}.grid{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}.summary-grid.primary{grid-template-columns:repeat(4,minmax(0,1fr))}.summary-grid.domain{grid-template-columns:repeat(3,minmax(0,1fr))}.grid>.card,.summary-grid>.card{margin-bottom:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#e8edf0;max-width:100%;white-space:nowrap;overflow-wrap:normal}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #bfcbd2;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:nowrap}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.nowrap,.sensor-technical,.sensor-last-measurement,.sensor-actions{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.table-scroll,.scroll{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}.table-actions{display:flex;gap:8px;align-items:center;justify-content:center;margin:0}.table-actions.vertical{flex-direction:column}.table-actions form{margin:0}.table-actions button,.table-action{min-width:max-content;white-space:nowrap}.measurement-table{min-width:620px}.measurement-table .measurement-name{width:auto}.measurement-table .measurement-value{min-width:130px;white-space:nowrap}.measurement-table .measurement-quality{min-width:90px;white-space:nowrap}.measurement-table .measurement-time{min-width:175px;white-space:nowrap}.actuator-table{min-width:1120px}.actuator-table th{white-space:nowrap;overflow-wrap:normal}.actuator-table td{vertical-align:middle}.actuator-table .actuator-slot{width:58px;white-space:nowrap}.actuator-table .actuator-name{min-width:145px}.actuator-table .actuator-configured{min-width:130px}.actuator-table .actuator-hardware{min-width:90px;white-space:nowrap}.actuator-table .actuator-runtime{min-width:175px}.actuator-table .actuator-initialization{min-width:120px;white-space:nowrap}.actuator-table .actuator-state{min-width:68px;white-space:nowrap}.actuator-table .actuator-controls{min-width:90px;text-align:center}.actuator-table .actuator-configure{min-width:112px;text-align:center}.actuator-table .actuator-controls button{min-width:58px}.controller-table{min-width:1320px}.controller-table th{white-space:nowrap;overflow-wrap:normal}.controller-table td{vertical-align:middle}.controller-table .controller-slot{width:58px;white-space:nowrap}.controller-table .controller-name{min-width:190px}.controller-table .controller-name .secondary{white-space:nowrap}.controller-table .controller-route{min-width:290px}.controller-table .controller-policy{min-width:210px}.controller-table .controller-runtime{min-width:150px}.controller-table .controller-diagnostics{min-width:245px}.controller-table .controller-controls{min-width:120px;text-align:center}.controller-table .controller-controls .table-actions{align-items:stretch}.controller-table .controller-controls button,.controller-table .controller-controls .button{width:100%}.diagnostic-stack{line-height:1.55}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}@media(max-width:900px){.summary-grid.primary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}.summary-grid.domain{grid-template-columns:1fr}}@media(max-width:480px){.summary-grid.primary{grid-template-columns:1fr}}
 )CSS";
 
 struct TimezoneOption { const char* label; const char* value; };
@@ -454,12 +454,13 @@ void WebService::loop() {
 
 bool WebService::administrationAvailable() const { return wifiService_.inSetupAccessPointMode() || wifiService_.connected(); }
 
-void WebService::sendPage(const char* title, const char* activeRoute, const String& content, int status) {
+void WebService::sendPage(const char* title, const char* activeRoute, const String& content,
+    int status, bool wideContent) {
     if (!administrationAvailable()) {
         server_.send(503, "text/plain", "Administration unavailable while network is connecting");
         return;
     }
-    const String page = renderPage(title, activeRoute, content);
+    const String page = renderPage(title, activeRoute, content, wideContent);
     server_.send(status, "text/html; charset=utf-8", page);
 }
 
@@ -577,19 +578,24 @@ String WebService::navigationHtml(const char* active) const {
     return html;
 }
 
-String WebService::renderPage(const char* title, const char* active, const String& content) const {
+String WebService::renderPage(const char* title, const char* active, const String& content,
+    bool wideContent) const {
     const Configuration& cfg = configurationService_.getConfiguration();
     String html;
     html.reserve(content.length() + 1200);
     html = "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>";
     html += escapeHtml(title);
-    html += " · EnvNode</title><link rel='stylesheet' href='/style.css'></head><body><div class='shell'><aside class='side'><div class='brand'>";
+    html += " · EnvNode</title><link rel='stylesheet' href='/style.css?build=";
+    html += FirmwareBuildInfo::BuildTimestampUtc;
+    html += "'></head><body><div class='shell'><aside class='side'><div class='brand'>";
     html += escapeHtml(cfg.device.name);
     html += "</div><div class='version'>EnvNode · v";
     html += FirmwareBuildInfo::SemanticVersion;
     html += "</div>";
     html += navigationHtml(active);
-    html += "</aside><main class='main'><div class='top'><div><h1>";
+    html += "</aside><main class='main";
+    if (wideContent) html += " main-wide";
+    html += "'><div class='top'><div><h1>";
     html += escapeHtml(title);
     html += "</h1>";
     if (wifiService_.inSetupAccessPointMode()) html += "<p class='muted'>Setup access point mode</p>";
@@ -622,7 +628,7 @@ void WebService::handleStatus() {
     const String macAddress = setupAccessPoint ? WiFi.softAPmacAddress() : WiFi.macAddress();
     String c;
     c.reserve(2300);
-    c = "<div class='grid'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareBuildInfo::SemanticVersion + "</span><span>Build</span><span>" + FirmwareBuildInfo::CompactIdentity + "</span><span>Uptime</span><span>" + localeFormatter_.formatNumber(millis()/1000UL, 0) + " seconds</span><span>Free heap</span><span>" + localeFormatter_.formatNumber(ESP.getFreeHeap(), 0) + " bytes</span><span>Flash</span><span>" + localeFormatter_.formatNumber(ESP.getFlashChipSize()/1024UL, 0) + " KB</span></div></section>";
+    c = "<div class='summary-grid primary'><section class='card'><h2>Device</h2><div class='kv'><span>Name</span><span>" + escapeHtml(cfg.device.name) + "</span><span>Firmware</span><span>" + FirmwareBuildInfo::SemanticVersion + "</span><span>Build</span><span>" + FirmwareBuildInfo::CompactIdentity + "</span><span>Uptime</span><span>" + localeFormatter_.formatNumber(millis()/1000UL, 0) + " seconds</span><span>Free heap</span><span>" + localeFormatter_.formatNumber(ESP.getFreeHeap(), 0) + " bytes</span><span>Flash</span><span>" + localeFormatter_.formatNumber(ESP.getFlashChipSize()/1024UL, 0) + " KB</span></div></section>";
     c += "<section class='card'><h2>Network</h2><div class='kv'><span>Status</span><span>" + (connected?badge("Connected","good"):setupAccessPoint?badge("Setup AP","warn"):badge("Disconnected","bad")) + "</span>";
     c += "<span>Connection mode</span><span>" + effectiveConnectionMode(setupAccessPoint) + "</span><span>Hostname</span><span>" + availableValue(hostname) + "</span><span>SSID</span><span>" + availableValue(ssid) + "</span>";
     c += "<span>IPv4 address</span><span>" + availableValue(ipv4Address) + "</span><span>Subnet mask</span><span>" + availableValue(subnetMask) + "</span><span>Default gateway</span><span>" + availableValue(gateway) + "</span>";
@@ -631,8 +637,25 @@ void WebService::handleStatus() {
     c += "<span>MAC address</span><span>" + availableValue(macAddress) + "</span><span>RSSI</span><span>" + (connected?localeFormatter_.formatNumber(wifiService_.rssi(),0)+" dBm":"—") + "</span></div></section>";
     const bool configured = !cfg.mqtt.server.isEmpty();
     c += "<section class='card'><h2>MQTT</h2><div class='kv'><span>Configuration</span><span>" + badge(configured?"Configured":"Not configured",configured?"good":"warn") + "</span><span>Runtime</span><span>" + badge(mqttService_.connected()?"Connected":"Disconnected",mqttService_.connected()?"good":"bad") + "</span></div></section>";
-    c += "<section class='card'><h2>Time</h2><div class='kv'><span>Status</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + "</span></div></section>";
-    c += "<section class='card'><h2>Sensors</h2><div class='kv'><span>Registered</span><span>" + localeFormatter_.formatNumber(sensorManager_.sensorCount(), 0) + "</span></div><p><a href='/sensors'>View sensor runtime state</a></p></section></div>";
+    c += "<section class='card'><h2>Time</h2><div class='kv'><span>Status</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + "</span></div></section></div>";
+    size_t runningControllerCount = 0;
+    for (size_t index = 0; index < controllerRuntime_.runtimeCount(); ++index) {
+        ControllerRuntimeInfo info;
+        if (controllerRuntime_.runtimeInfo(index, info) && info.running) {
+            ++runningControllerCount;
+        }
+    }
+    c += "<div class='summary-grid domain'><section class='card domain-summary'><h2>Sensors</h2><div class='kv'><span>Active</span><span>"
+        + localeFormatter_.formatNumber(sensorManager_.sensorCount(), 0)
+        + "</span></div><p><a href='/sensors'>View Sensors</a></p></section>";
+    c += "<section class='card domain-summary'><h2>Actuators</h2><div class='kv'><span>Active</span><span>"
+        + localeFormatter_.formatNumber(actuatorRuntime_.runtimeCount(), 0)
+        + "</span></div><p><a href='/actuators'>View Actuators</a></p></section>";
+    c += "<section class='card domain-summary'><h2>Controllers</h2><div class='kv'><span>Active</span><span>"
+        + localeFormatter_.formatNumber(controllerRuntime_.runtimeCount(), 0)
+        + "</span><span>Running</span><span>"
+        + localeFormatter_.formatNumber(runningControllerCount, 0)
+        + "</span></div><p><a href='/controllers'>View Controllers</a></p></section></div>";
     sendPage("Status", "/status", c);
 }
 
@@ -741,7 +764,7 @@ void WebService::handleActuators() {
     if (runtimeManager_.pendingAction() == RuntimeAction::RestartActuatorRuntime) {
         c = "<div class='notice'><strong>Actuator apply required</strong><p>Saved actuator configuration differs from the active runtime composition.</p><form method='post' action='/actuators/apply'><button>Apply Actuator Changes</button></form></div>";
     }
-    c += "<section class='card'><h2>Actuator Slots</h2><p class='help'>Saved configuration is activated with Apply Actuator Changes. Runtime controls operate the currently active actuator.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th class='sensor-technical'>Hardware</th><th>Runtime</th><th class='sensor-technical'>Initialization</th><th class='sensor-technical'>State</th><th>Controls</th><th class='sensor-actions'></th></tr></thead><tbody>";
+    c += "<section class='card'><h2>Actuator Slots</h2><p class='help'>Saved configuration is activated with Apply Actuator Changes. Runtime controls operate the currently active actuator.</p><div class='table-scroll actuator-table-wrap'><table class='actuator-table'><thead><tr><th class='actuator-slot'>Slot</th><th class='actuator-name'>Name</th><th class='actuator-configured'>Configured</th><th class='actuator-hardware'>Hardware</th><th class='actuator-runtime'>Runtime</th><th class='actuator-initialization'>Initialization</th><th class='actuator-state'>State</th><th class='actuator-controls'>Controls</th><th class='actuator-configure'></th></tr></thead><tbody>";
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
         const ActuatorSlotConfiguration& slot = configuration.actuatorSlots[slotIndex];
@@ -766,12 +789,13 @@ void WebService::handleActuators() {
                 && sameHardwareAssignment(runtime.hardware, slot.hardware)));
         IOnOffActuator* onOff = actuatorRuntime_.onOffActuator(slot.slotId);
 
-        c += "<tr><td class='sensor-technical'>" + String(slot.slotId)
-            + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
+        c += "<tr><td class='actuator-slot'>" + String(slot.slotId)
+            + "</td><td class='actuator-name'>" + escapeHtml(slot.name)
+            + "</td><td class='actuator-configured'>";
         c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
         c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
-        c += "</td><td class='sensor-technical'>"
-            + configuredHardwareAssignment(slot.hardware) + "</td><td>";
+        c += "</td><td class='actuator-hardware'>"
+            + configuredHardwareAssignment(slot.hardware) + "</td><td class='actuator-runtime'>";
         if (hasRuntime) {
             c += escapeHtml(runtime.name) + " / "
                 + configuredHardwareAssignment(runtime.hardware);
@@ -779,27 +803,27 @@ void WebService::handleActuators() {
             c += "No runtime Actuator";
         }
         if (!runtimeMatches) c += "<br>" + badge("Actuator apply required", "warn");
-        c += "</td><td class='sensor-technical'>";
+        c += "</td><td class='actuator-initialization'>";
         if (!hasRuntime) c += "—";
         else if (runtime.available) c += badge("Initialized", "good");
         else if (runtime.initializationAttempted) c += badge("Failed", "bad");
         else c += badge("Construction failed", "bad");
-        c += "</td><td class='sensor-technical'>";
+        c += "</td><td class='actuator-state'>";
         c += onOff == nullptr ? "—" : onOffStateName(onOff->state());
-        c += "</td><td>";
+        c += "</td><td class='actuator-controls'>";
         if (onOff != nullptr) {
-            c += "<div class='actions'><form method='post' action='/actuators/on'><input type='hidden' name='slot' value='"
+            c += "<div class='table-actions vertical'><form method='post' action='/actuators/on'><input type='hidden' name='slot' value='"
                 + String(slot.slotId) + "'><button type='submit'>On</button></form>"
                 + "<form method='post' action='/actuators/off'><input type='hidden' name='slot' value='"
                 + String(slot.slotId) + "'><button type='submit'>Off</button></form></div>";
         } else {
             c += "—";
         }
-        c += "</td><td class='sensor-actions'><a class='button' href='/actuators/edit?slot="
+        c += "</td><td class='actuator-configure'><a class='button table-action' href='/actuators/edit?slot="
             + String(slot.slotId) + "'>Configure</a></td></tr>";
     }
     c += "</tbody></table></div></section>";
-    sendPage("Actuators", "/actuators", c);
+    sendPage("Actuators", "/actuators", c, 200, true);
 }
 
 void WebService::handleControllers() {
@@ -808,7 +832,7 @@ void WebService::handleControllers() {
     if (runtimeManager_.pendingAction() == RuntimeAction::RestartControllerRuntime) {
         c = "<div class='notice'><strong>Controller apply required</strong><p>Saved Controller configuration differs from the active runtime composition.</p><form method='post' action='/controllers/apply'><button>Apply Controller Changes</button></form></div>";
     }
-    c += "<section class='card'><h2>Controller Slots</h2><p class='help'>Saved configuration is activated with Apply Controller Changes. Start and Stop affect only the active runtime and do not change saved configuration.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th>Source / Target</th><th>Policy</th><th>Runtime</th><th>Status</th><th>Diagnostics</th><th>Controls</th><th class='sensor-actions'></th></tr></thead><tbody>";
+    c += "<section class='card'><h2>Controller Slots</h2><p class='help'>Saved configuration is activated with Apply Controller Changes. Start and Stop affect only the active runtime and do not change saved configuration.</p><div class='table-scroll controller-table-wrap'><table class='controller-table'><thead><tr><th class='controller-slot'>Slot</th><th class='controller-name'>Controller</th><th class='controller-route'>Source / Target</th><th class='controller-policy'>Policy</th><th class='controller-runtime'>Runtime</th><th class='controller-diagnostics'>Diagnostics</th><th class='controller-controls'>Controls</th></tr></thead><tbody>";
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t slotIndex = 0; slotIndex < MaxControllerSlotCount; ++slotIndex) {
         const ControllerSlotConfiguration& slot = configuration.controllerSlots[slotIndex];
@@ -850,11 +874,12 @@ void WebService::handleControllers() {
             }
         }
 
-        c += "<tr><td class='sensor-technical'>" + String(slot.slotId)
-            + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
+        c += "<tr><td class='controller-slot'>" + String(slot.slotId)
+            + "</td><td class='controller-name'>" + escapeHtml(slot.name) + "<br>";
         c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
-        c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
-        c += "</td><td class='sensor-technical'>";
+        c += "<span class='secondary'>" + escapeHtml(
+            metadata == nullptr ? "Invalid" : metadata->displayType) + "</span>";
+        c += "</td><td class='controller-route'>";
         if (slot.implementation == ControllerImplementation::Blink) {
             c += "Target: Actuator " + String(blink.targetActuatorId);
             if (isValidActuatorId(blink.targetActuatorId)
@@ -881,7 +906,7 @@ void WebService::handleControllers() {
         } else {
             c += "—";
         }
-        c += "</td><td class='sensor-technical'>";
+        c += "</td><td class='controller-policy'>";
         if (slot.implementation == ControllerImplementation::Blink) {
             c += String(blink.onDurationMs) + " ms On<br>" + String(blink.offDurationMs) + " ms Off";
         } else if (slot.implementation == ControllerImplementation::Threshold) {
@@ -894,13 +919,15 @@ void WebService::handleControllers() {
         } else {
             c += "—";
         }
-        c += "</td><td>";
-        c += hasRuntime ? escapeHtml(runtime.name) : String("No runtime Controller");
+        c += "</td><td class='controller-runtime'>";
+        if (!hasRuntime) {
+            c += "No runtime Controller";
+        } else {
+            c += runtime.running ? badge("Running", "good") : badge("Stopped", "warn");
+            c += "<span class='secondary'>Active runtime</span>";
+        }
         if (!runtimeMatches) c += "<br>" + badge("Controller apply required", "warn");
-        c += "</td><td class='sensor-technical'>";
-        if (!hasRuntime) c += "—";
-        else c += runtime.running ? badge("Running", "good") : badge("Stopped", "warn");
-        c += "</td><td class='sensor-technical'>";
+        c += "</td><td class='controller-diagnostics'><div class='diagnostic-stack'>";
         if (!hasRuntime) {
             c += "—";
         } else if (runtime.implementation == ControllerImplementation::Blink) {
@@ -936,21 +963,20 @@ void WebService::handleControllers() {
         } else {
             c += "Unsupported runtime implementation";
         }
-        c += "</td><td>";
+        c += "</div></td><td class='controller-controls'>";
+        c += "<div class='table-actions vertical'>";
         if (hasRuntime) {
             const char* action = runtime.running ? "stop" : "start";
             const char* label = runtime.running ? "Stop" : "Start";
             c += "<form method='post' action='/controllers/" + String(action)
                 + "'><input type='hidden' name='slot' value='" + String(slot.slotId)
                 + "'><button type='submit'>" + label + "</button></form>";
-        } else {
-            c += "—";
         }
-        c += "</td><td class='sensor-actions'><a class='button' href='/controllers/edit?slot="
-            + String(slot.slotId) + "'>Configure</a></td></tr>";
+        c += "<a class='button table-action' href='/controllers/edit?slot="
+            + String(slot.slotId) + "'>Configure</a></div></td></tr>";
     }
     c += "</tbody></table></div></section>";
-    sendPage("Controllers", "/controllers", c);
+    sendPage("Controllers", "/controllers", c, 200, true);
 }
 
 void WebService::handleMeasurements() {
@@ -967,21 +993,21 @@ void WebService::handleMeasurements() {
         content += escapeHtml(runtime.name);
         content += "</h2><p class='help'>";
         content += escapeHtml(runtime.type);
-        content += "</p><div class='scroll'><table><thead><tr><th>Measurement</th><th>Current Value</th><th>Quality</th><th class='sensor-last-measurement'>Last Accepted</th></tr></thead><tbody>";
+        content += "</p><div class='table-scroll measurement-table-wrap'><table class='measurement-table'><thead><tr><th class='measurement-name'>Measurement</th><th class='measurement-value'>Current Value</th><th class='measurement-quality'>Quality</th><th class='measurement-time'>Last Accepted</th></tr></thead><tbody>";
         for (uint8_t typeValue = 1; typeValue <= SupportedMeasurementTypeCount; ++typeValue) {
             const MeasurementType type = static_cast<MeasurementType>(typeValue);
             if (!runtimeSupportsMeasurement(runtime, type)) continue;
             MeasurementSnapshot snapshot;
             const bool hasSnapshot = measurementSnapshotCache_.snapshot(runtime.id, type, snapshot);
-            content += "<tr><td>";
+            content += "<tr><td class='measurement-name'>";
             content += measurementTypeMetadata(type).displayName;
-            content += "</td><td class='sensor-technical'>";
+            content += "</td><td class='measurement-value'>";
             content += hasSnapshot
                 ? presentedMeasurementValue(snapshot.measurement, configuration, localeFormatter_)
                 : String("—");
-            content += "</td><td class='sensor-technical'>";
+            content += "</td><td class='measurement-quality'>";
             content += hasSnapshot ? measurementQualityName(snapshot.measurement.quality) : "—";
-            content += "</td><td class='sensor-last-measurement'>";
+            content += "</td><td class='measurement-time'>";
             content += hasSnapshot ? measurementTimeDisplay(snapshot, localeFormatter_) : String("—");
             content += "</td></tr>";
         }
