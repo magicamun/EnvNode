@@ -23,6 +23,10 @@ bool parseMqttActuatorCommandTopic(
 enum class ControllerMqttParameter : uint8_t {
     OnDurationMs,
     OffDurationMs,
+    OnThreshold,
+    OffThreshold,
+    MaxMeasurementAgeMs,
+    Count,
 };
 
 const char* mqttControllerParameterName(ControllerMqttParameter parameter);

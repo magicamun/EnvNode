@@ -1,5 +1,7 @@
 #include "ControllerStatePublisher.h"
 
+#include <cstdio>
+
 #include "MqttTopic.h"
 
 namespace EnvNode {
@@ -26,6 +28,21 @@ const char* resultName(ControllerOperationResult result) {
         case ControllerOperationResult::ControllerNotFound: return "controller_not_found";
         default: return "unknown";
     }
+}
+
+const char* decisionName(ThresholdDecision decision) {
+    switch (decision) {
+        case ThresholdDecision::On: return "on";
+        case ThresholdDecision::Off: return "off";
+        case ThresholdDecision::Unknown:
+        default: return "unknown";
+    }
+}
+
+String compactFloat(float value) {
+    char buffer[24];
+    snprintf(buffer, sizeof(buffer), "%.9g", static_cast<double>(value));
+    return String(buffer);
 }
 
 } // namespace
@@ -62,9 +79,15 @@ void ControllerStatePublisher::loop() {
         const size_t slotIndex = info.id - 1;
         active[slotIndex] = true;
         StatusSnapshot current;
+        current.implementation = info.implementation;
         current.running = info.running;
         current.targetAvailable = info.targetAvailable;
         current.phase = info.blinkPhase;
+        current.sourceAvailable = info.sourceAvailable;
+        current.measurementValid = info.latestMeasurementValid;
+        current.stale = info.latestSnapshotStale;
+        current.decision = info.thresholdDecision;
+        current.outputPending = info.outputApplicationPending;
         current.lastResult = info.lastOperationResult;
         if (!forcePublish && statusKnown_[slotIndex]
             && sameStatus(statuses_[slotIndex], current)) continue;
@@ -86,41 +109,29 @@ void ControllerStatePublisher::loop() {
         }
 
         const ControllerSlotConfiguration& slot = configuration.controllerSlots[index];
-        const bool hasParameters = slot.implementation == ControllerImplementation::Blink;
-        if (hasParameters) {
-            const uint32_t on = slot.implementationConfiguration.blink.onDurationMs;
-            const uint32_t off = slot.implementationConfiguration.blink.offDurationMs;
-            if (forcePublish || !onParametersKnown_[index] || onDurations_[index] != on) {
+        for (uint8_t parameterValueIndex = 0;
+             parameterValueIndex < static_cast<uint8_t>(ControllerMqttParameter::Count);
+             ++parameterValueIndex) {
+            const ControllerMqttParameter parameter =
+                static_cast<ControllerMqttParameter>(parameterValueIndex);
+            String value;
+            const bool supported = parameterValue(slot, parameter, value);
+            if (supported
+                && (forcePublish
+                    || !parameterKnown_[index][parameterValueIndex]
+                    || parameterValues_[index][parameterValueIndex] != value)) {
                 const String topic = mqttControllerParameterTopic(
-                    configuration.device.name, id, ControllerMqttParameter::OnDurationMs);
-                const String payload(on);
-                if (mqttService_.publish(topic.c_str(), payload.c_str(), true)) {
-                    onDurations_[index] = on;
-                    onParametersKnown_[index] = true;
+                    configuration.device.name, id, parameter);
+                if (mqttService_.publish(topic.c_str(), value.c_str(), true)) {
+                    parameterValues_[index][parameterValueIndex] = value;
+                    parameterKnown_[index][parameterValueIndex] = true;
                 }
-            }
-            if (forcePublish || !offParametersKnown_[index] || offDurations_[index] != off) {
+            } else if (!supported && parameterKnown_[index][parameterValueIndex]) {
                 const String topic = mqttControllerParameterTopic(
-                    configuration.device.name, id, ControllerMqttParameter::OffDurationMs);
-                const String payload(off);
-                if (mqttService_.publish(topic.c_str(), payload.c_str(), true)) {
-                    offDurations_[index] = off;
-                    offParametersKnown_[index] = true;
-                }
-            }
-        } else {
-            if (onParametersKnown_[index]) {
-                const String topic = mqttControllerParameterTopic(
-                    configuration.device.name, id, ControllerMqttParameter::OnDurationMs);
+                    configuration.device.name, id, parameter);
                 if (mqttService_.publish(topic.c_str(), "", true)) {
-                    onParametersKnown_[index] = false;
-                }
-            }
-            if (offParametersKnown_[index]) {
-                const String topic = mqttControllerParameterTopic(
-                    configuration.device.name, id, ControllerMqttParameter::OffDurationMs);
-                if (mqttService_.publish(topic.c_str(), "", true)) {
-                    offParametersKnown_[index] = false;
+                    parameterKnown_[index][parameterValueIndex] = false;
+                    parameterValues_[index][parameterValueIndex] = String();
                 }
             }
         }
@@ -130,17 +141,67 @@ void ControllerStatePublisher::loop() {
 bool ControllerStatePublisher::sameStatus(
     const StatusSnapshot& left,
     const StatusSnapshot& right) {
-    return left.running == right.running
+    return left.implementation == right.implementation
+        && left.running == right.running
         && left.targetAvailable == right.targetAvailable
         && left.phase == right.phase
+        && left.sourceAvailable == right.sourceAvailable
+        && left.measurementValid == right.measurementValid
+        && left.stale == right.stale
+        && left.decision == right.decision
+        && left.outputPending == right.outputPending
         && left.lastResult == right.lastResult;
 }
 
 String ControllerStatePublisher::statusPayload(const ControllerRuntimeInfo& info) {
+    if (info.implementation == ControllerImplementation::Threshold) {
+        return String("{\"running\":") + (info.running ? "true" : "false")
+            + ",\"source_available\":" + (info.sourceAvailable ? "true" : "false")
+            + ",\"measurement_valid\":" + (info.latestMeasurementValid ? "true" : "false")
+            + ",\"stale\":" + (info.latestSnapshotStale ? "true" : "false")
+            + ",\"decision\":\"" + decisionName(info.thresholdDecision)
+            + "\",\"target_available\":" + (info.targetAvailable ? "true" : "false")
+            + ",\"output_pending\":" + (info.outputApplicationPending ? "true" : "false")
+            + ",\"last_result\":\"" + resultName(info.lastOperationResult) + "\"}";
+    }
     return String("{\"running\":") + (info.running ? "true" : "false")
         + ",\"phase\":\"" + phaseName(info.blinkPhase)
         + "\",\"target_available\":" + (info.targetAvailable ? "true" : "false")
         + ",\"last_result\":\"" + resultName(info.lastOperationResult) + "\"}";
+}
+
+bool ControllerStatePublisher::parameterValue(
+    const ControllerSlotConfiguration& slot,
+    ControllerMqttParameter parameter,
+    String& value) {
+    if (slot.implementation == ControllerImplementation::Blink) {
+        if (parameter == ControllerMqttParameter::OnDurationMs) {
+            value = String(slot.implementationConfiguration.blink.onDurationMs);
+            return true;
+        }
+        if (parameter == ControllerMqttParameter::OffDurationMs) {
+            value = String(slot.implementationConfiguration.blink.offDurationMs);
+            return true;
+        }
+        return false;
+    }
+    if (slot.implementation == ControllerImplementation::Threshold) {
+        const ThresholdControllerConfiguration& threshold =
+            slot.implementationConfiguration.threshold;
+        if (parameter == ControllerMqttParameter::OnThreshold) {
+            value = compactFloat(threshold.onThreshold);
+            return true;
+        }
+        if (parameter == ControllerMqttParameter::OffThreshold) {
+            value = compactFloat(threshold.offThreshold);
+            return true;
+        }
+        if (parameter == ControllerMqttParameter::MaxMeasurementAgeMs) {
+            value = String(threshold.maxMeasurementAgeMs);
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace EnvNode

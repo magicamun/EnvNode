@@ -1,6 +1,10 @@
 #include "ControllerMqttAdapter.h"
 
 #include <climits>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 namespace EnvNode {
@@ -111,32 +115,60 @@ void ControllerMqttAdapter::handleParameter(
     ControllerMqttParameter parameter,
     const uint8_t* payload,
     size_t length) {
-    uint32_t duration = 0;
-    if (!parseDuration(payload, length, duration)) {
-        logger_.printf("MQTT Controller %u parameter rejected: invalid duration\n",
-            static_cast<unsigned int>(id));
-        return;
-    }
     ControllerSlotConfiguration candidate =
         configurationService_.getConfiguration().controllerSlots[id - 1];
-    if (candidate.implementation != ControllerImplementation::Blink) {
-        logger_.printf("MQTT Controller %u parameter rejected: implementation is not blink\n",
+    String acceptedValue;
+    if (candidate.implementation == ControllerImplementation::Blink
+        && (parameter == ControllerMqttParameter::OnDurationMs
+            || parameter == ControllerMqttParameter::OffDurationMs)) {
+        uint32_t duration = 0;
+        if (!parseDuration(payload, length, duration)) {
+            logger_.printf("MQTT Controller %u parameter rejected: invalid duration\n",
+                static_cast<unsigned int>(id));
+            return;
+        }
+        uint32_t& configured = parameter == ControllerMqttParameter::OnDurationMs
+            ? candidate.implementationConfiguration.blink.onDurationMs
+            : candidate.implementationConfiguration.blink.offDurationMs;
+        if (duration == configured) return;
+        configured = duration;
+        acceptedValue = String(duration);
+    } else if (candidate.implementation == ControllerImplementation::Threshold
+        && (parameter == ControllerMqttParameter::OnThreshold
+            || parameter == ControllerMqttParameter::OffThreshold
+            || parameter == ControllerMqttParameter::MaxMeasurementAgeMs)) {
+        ThresholdControllerConfiguration& threshold =
+            candidate.implementationConfiguration.threshold;
+        if (parameter == ControllerMqttParameter::MaxMeasurementAgeMs) {
+            uint32_t age = 0;
+            if (!parseUnsignedInteger(payload, length, age)) {
+                logger_.printf("MQTT Controller %u parameter rejected: invalid unsigned integer\n",
+                    static_cast<unsigned int>(id));
+                return;
+            }
+            if (age == threshold.maxMeasurementAgeMs) return;
+            threshold.maxMeasurementAgeMs = age;
+            acceptedValue = String(age);
+        } else {
+            float thresholdValue = 0.0F;
+            if (!parseFiniteFloat(payload, length, thresholdValue)) {
+                logger_.printf("MQTT Controller %u parameter rejected: invalid finite decimal\n",
+                    static_cast<unsigned int>(id));
+                return;
+            }
+            float& configured = parameter == ControllerMqttParameter::OnThreshold
+                ? threshold.onThreshold : threshold.offThreshold;
+            if (thresholdValue == configured) return;
+            configured = thresholdValue;
+            char formatted[24];
+            snprintf(formatted, sizeof(formatted), "%.9g",
+                static_cast<double>(thresholdValue));
+            acceptedValue = String(formatted);
+        }
+    } else {
+        logger_.printf("MQTT Controller %u parameter rejected: unsupported for implementation\n",
             static_cast<unsigned int>(id));
         return;
-    }
-    const uint32_t currentDuration = parameter == ControllerMqttParameter::OnDurationMs
-        ? candidate.implementationConfiguration.blink.onDurationMs
-        : candidate.implementationConfiguration.blink.offDurationMs;
-    if (duration == currentDuration) {
-        logger_.printf("MQTT Controller %u parameter unchanged: %s=%u\n",
-            static_cast<unsigned int>(id), mqttControllerParameterName(parameter),
-            static_cast<unsigned int>(duration));
-        return;
-    }
-    if (parameter == ControllerMqttParameter::OnDurationMs) {
-        candidate.implementationConfiguration.blink.onDurationMs = duration;
-    } else {
-        candidate.implementationConfiguration.blink.offDurationMs = duration;
     }
     if (!configurationService_.setControllerSlotConfiguration(candidate)) {
         logger_.printf("MQTT Controller %u parameter rejected by configuration validation\n",
@@ -150,9 +182,9 @@ void ControllerMqttAdapter::handleParameter(
             static_cast<unsigned int>(id));
         return;
     }
-    logger_.printf("MQTT Controller %u parameter accepted: %s=%u\n",
+    logger_.printf("MQTT Controller %u parameter accepted: %s=%s\n",
         static_cast<unsigned int>(id), mqttControllerParameterName(parameter),
-        static_cast<unsigned int>(duration));
+        acceptedValue.c_str());
 }
 
 bool ControllerMqttAdapter::parseDuration(
@@ -168,6 +200,61 @@ bool ControllerMqttAdapter::parseDuration(
         parsed = parsed * 10U + digit;
     }
     if (parsed == 0 || parsed > static_cast<uint32_t>(INT32_MAX)) return false;
+    value = parsed;
+    return true;
+}
+
+bool ControllerMqttAdapter::parseUnsignedInteger(
+    const uint8_t* payload,
+    size_t length,
+    uint32_t& value) {
+    if (payload == nullptr || length == 0 || length > 10) return false;
+    uint32_t parsed = 0;
+    for (size_t index = 0; index < length; ++index) {
+        if (payload[index] < '0' || payload[index] > '9') return false;
+        const uint32_t digit = payload[index] - '0';
+        if (parsed > (UINT32_MAX - digit) / 10U) return false;
+        parsed = parsed * 10U + digit;
+    }
+    value = parsed;
+    return true;
+}
+
+bool ControllerMqttAdapter::parseFiniteFloat(
+    const uint8_t* payload,
+    size_t length,
+    float& value) {
+    if (payload == nullptr || length == 0 || length > 47) return false;
+    size_t index = 0;
+    if (payload[index] == '+' || payload[index] == '-') ++index;
+    bool hasDigit = false;
+    while (index < length && payload[index] >= '0' && payload[index] <= '9') {
+        hasDigit = true;
+        ++index;
+    }
+    if (index < length && payload[index] == '.') {
+        ++index;
+        while (index < length && payload[index] >= '0' && payload[index] <= '9') {
+            hasDigit = true;
+            ++index;
+        }
+    }
+    if (!hasDigit) return false;
+    if (index < length && (payload[index] == 'e' || payload[index] == 'E')) {
+        ++index;
+        if (index < length && (payload[index] == '+' || payload[index] == '-')) ++index;
+        const size_t exponentStart = index;
+        while (index < length && payload[index] >= '0' && payload[index] <= '9') ++index;
+        if (index == exponentStart) return false;
+    }
+    if (index != length) return false;
+    char text[48];
+    memcpy(text, payload, length);
+    text[length] = '\0';
+    char* end = nullptr;
+    errno = 0;
+    const float parsed = strtof(text, &end);
+    if (end != text + length || errno == ERANGE || !std::isfinite(parsed)) return false;
     value = parsed;
     return true;
 }

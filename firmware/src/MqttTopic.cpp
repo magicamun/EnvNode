@@ -95,6 +95,10 @@ const char* mqttControllerParameterName(ControllerMqttParameter parameter) {
     switch (parameter) {
         case ControllerMqttParameter::OnDurationMs: return "on_duration_ms";
         case ControllerMqttParameter::OffDurationMs: return "off_duration_ms";
+        case ControllerMqttParameter::OnThreshold: return "on_threshold";
+        case ControllerMqttParameter::OffThreshold: return "off_threshold";
+        case ControllerMqttParameter::MaxMeasurementAgeMs:
+            return "max_measurement_age_ms";
         default: return nullptr;
     }
 }
@@ -179,15 +183,15 @@ bool parseMqttControllerParameterCommandTopic(
     const char prefix[] = "/cmd/parameter/";
     if (strncmp(suffix, prefix, sizeof(prefix) - 1) != 0) return false;
     const char* name = suffix + sizeof(prefix) - 1;
-    if (strcmp(name, mqttControllerParameterName(
-            ControllerMqttParameter::OnDurationMs)) == 0) {
-        parameter = ControllerMqttParameter::OnDurationMs;
-        return true;
-    }
-    if (strcmp(name, mqttControllerParameterName(
-            ControllerMqttParameter::OffDurationMs)) == 0) {
-        parameter = ControllerMqttParameter::OffDurationMs;
-        return true;
+    for (uint8_t value = 0;
+         value < static_cast<uint8_t>(ControllerMqttParameter::Count);
+         ++value) {
+        const ControllerMqttParameter candidate =
+            static_cast<ControllerMqttParameter>(value);
+        if (strcmp(name, mqttControllerParameterName(candidate)) == 0) {
+            parameter = candidate;
+            return true;
+        }
     }
     return false;
 }

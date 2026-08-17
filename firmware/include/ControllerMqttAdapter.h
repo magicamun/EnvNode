@@ -33,6 +33,11 @@ private:
         const uint8_t* payload,
         size_t length);
     static bool parseDuration(const uint8_t* payload, size_t length, uint32_t& value);
+    static bool parseUnsignedInteger(
+        const uint8_t* payload,
+        size_t length,
+        uint32_t& value);
+    static bool parseFiniteFloat(const uint8_t* payload, size_t length, float& value);
 
     ILogger& logger_;
     IConfigurationService& configurationService_;

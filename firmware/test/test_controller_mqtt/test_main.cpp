@@ -1,6 +1,7 @@
 #include <unity.h>
 
 #include <climits>
+#include <cmath>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -74,12 +75,29 @@ public:
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration&) override { return false; }
     bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) override {
         ++controllerSetCount;
-        if (!isValidControllerId(slot.slotId) || slot.slotId > MaxControllerSlotCount
-            || slot.implementation != ControllerImplementation::Blink
-            || slot.implementationConfiguration.blink.onDurationMs == 0
-            || slot.implementationConfiguration.blink.onDurationMs > INT32_MAX
-            || slot.implementationConfiguration.blink.offDurationMs == 0
-            || slot.implementationConfiguration.blink.offDurationMs > INT32_MAX) return false;
+        if (!isValidControllerId(slot.slotId) || slot.slotId > MaxControllerSlotCount) {
+            return false;
+        }
+        if (slot.implementation == ControllerImplementation::Blink) {
+            if (slot.implementationConfiguration.blink.onDurationMs == 0
+                || slot.implementationConfiguration.blink.onDurationMs > INT32_MAX
+                || slot.implementationConfiguration.blink.offDurationMs == 0
+                || slot.implementationConfiguration.blink.offDurationMs > INT32_MAX) {
+                return false;
+            }
+        } else if (slot.implementation == ControllerImplementation::Threshold) {
+            const ThresholdControllerConfiguration& threshold =
+                slot.implementationConfiguration.threshold;
+            if (!std::isfinite(threshold.onThreshold)
+                || !std::isfinite(threshold.offThreshold)
+                || threshold.offThreshold >= threshold.onThreshold
+                || threshold.maxMeasurementAgeMs == 0
+                || threshold.maxMeasurementAgeMs > INT32_MAX) {
+                return false;
+            }
+        } else {
+            return false;
+        }
         configuration.controllerSlots[slot.slotId - 1] = slot;
         return true;
     }
@@ -162,11 +180,47 @@ struct Fixture {
         initializeConfiguration(configuration.configuration);
         TEST_ASSERT_TRUE(runtime.initialize(configuration.configuration.controllerSlots));
     }
+
+    void useThreshold() {
+        ControllerSlotConfiguration& slot = configuration.configuration.controllerSlots[0];
+        slot.name = "Test Threshold";
+        slot.implementation = ControllerImplementation::Threshold;
+        ThresholdControllerConfiguration& threshold =
+            slot.implementationConfiguration.threshold;
+        threshold.source = MeasurementSourceReference(1, MeasurementType::Temperature);
+        threshold.targetActuatorId = 1;
+        threshold.onThreshold = 70.0F;
+        threshold.offThreshold = 65.0F;
+        threshold.maxMeasurementAgeMs = 15000;
+        TEST_ASSERT_TRUE(runtime.rebuild(configuration.configuration.controllerSlots));
+        configuration.controllerSetCount = 0;
+        mqtt.messages.clear();
+    }
 };
 
 void deliver(ControllerMqttAdapter& adapter, const char* topic, const char* payload) {
     adapter.handleMqttMessage(topic,
         reinterpret_cast<const uint8_t*>(payload), strlen(payload));
+}
+
+Measurement temperatureMeasurement(float value, bool valid = true) {
+    Measurement measurement;
+    measurement.source = 1;
+    measurement.type = MeasurementType::Temperature;
+    measurement.value = valid
+        ? MeasurementValue::floatingPoint(value) : MeasurementValue::none();
+    measurement.valid = valid;
+    measurement.quality = MeasurementQuality::Good;
+    return measurement;
+}
+
+const PublishedMessage* lastMessageForTopic(
+    const TestMqttService& mqtt,
+    const char* topic) {
+    for (size_t index = mqtt.messages.size(); index > 0; --index) {
+        if (mqtt.messages[index - 1].topic == topic) return &mqtt.messages[index - 1];
+    }
+    return nullptr;
 }
 
 void test_controller_topics_generate_and_parse() {
@@ -184,6 +238,12 @@ void test_controller_topics_generate_and_parse() {
     TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/controller/2/cmd/parameter/on_duration_ms",
         mqttControllerParameterCommandTopic(
             device, 2, ControllerMqttParameter::OnDurationMs).c_str());
+    TEST_ASSERT_EQUAL_STRING("on_threshold",
+        mqttControllerParameterName(ControllerMqttParameter::OnThreshold));
+    TEST_ASSERT_EQUAL_STRING("off_threshold",
+        mqttControllerParameterName(ControllerMqttParameter::OffThreshold));
+    TEST_ASSERT_EQUAL_STRING("max_measurement_age_ms",
+        mqttControllerParameterName(ControllerMqttParameter::MaxMeasurementAgeMs));
     ControllerId id = InvalidControllerId;
     ControllerMqttParameter parameter = ControllerMqttParameter::OnDurationMs;
     TEST_ASSERT_TRUE(parseMqttControllerCommandTopic(
@@ -194,6 +254,16 @@ void test_controller_topics_generate_and_parse() {
         device, id, parameter));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerMqttParameter::OffDurationMs),
         static_cast<int>(parameter));
+    TEST_ASSERT_TRUE(parseMqttControllerParameterCommandTopic(
+        "envnode/Weather_Station/controller/2/cmd/parameter/on_threshold",
+        device, id, parameter));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerMqttParameter::OnThreshold),
+        static_cast<int>(parameter));
+    TEST_ASSERT_TRUE(parseMqttControllerParameterCommandTopic(
+        "envnode/Weather_Station/controller/2/cmd/parameter/max_measurement_age_ms",
+        device, id, parameter));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerMqttParameter::MaxMeasurementAgeMs),
+        static_cast<int>(parameter));
     TEST_ASSERT_FALSE(parseMqttControllerCommandTopic(
         "envnode/Weather_Station/controller/x/cmd", device, id));
     TEST_ASSERT_FALSE(parseMqttControllerParameterCommandTopic(
@@ -201,6 +271,17 @@ void test_controller_topics_generate_and_parse() {
     TEST_ASSERT_FALSE(parseMqttControllerParameterCommandTopic(
         "envnode/Weather_Station/controller/1/parameter/on_duration_ms",
         device, id, parameter));
+}
+
+void test_cross_implementation_parameters_are_rejected() {
+    Fixture fixture;
+    deliver(fixture.adapter,
+        "envnode/Weather_Station/controller/1/cmd/parameter/on_threshold", "72");
+    TEST_ASSERT_EQUAL_UINT32(0, fixture.configuration.controllerSetCount);
+    fixture.useThreshold();
+    deliver(fixture.adapter,
+        "envnode/Weather_Station/controller/1/cmd/parameter/on_duration_ms", "250");
+    TEST_ASSERT_EQUAL_UINT32(0, fixture.configuration.controllerSetCount);
 }
 
 void test_start_stop_commands_are_transient_runtime_operations() {
@@ -272,6 +353,74 @@ void test_invalid_parameter_payloads_do_not_mutate_configuration() {
         .implementationConfiguration.blink.offDurationMs);
 }
 
+void test_threshold_float_parsing_accepts_protocol_decimals_and_rejects_invalid_text() {
+    Fixture fixture;
+    fixture.useThreshold();
+    const char* onTopic =
+        "envnode/Weather_Station/controller/1/cmd/parameter/on_threshold";
+    const char* offTopic =
+        "envnode/Weather_Station/controller/1/cmd/parameter/off_threshold";
+    deliver(fixture.adapter, onTopic, "72");
+    deliver(fixture.adapter, offTopic, "64.5");
+    deliver(fixture.adapter, offTopic, "-5.25");
+    TEST_ASSERT_EQUAL_UINT32(3, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001F, -5.25F, fixture.configuration.configuration
+        .controllerSlots[0].implementationConfiguration.threshold.offThreshold);
+    const uint32_t revision = fixture.runtime.compositionRevision();
+    const char* invalid[] = {"", "value", "65x", "NaN", "Infinity", "-Infinity", " 65", "65,5"};
+    for (size_t index = 0; index < sizeof(invalid) / sizeof(invalid[0]); ++index) {
+        deliver(fixture.adapter, offTopic, invalid[index]);
+    }
+    TEST_ASSERT_EQUAL_UINT32(3, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(revision, fixture.runtime.compositionRevision());
+}
+
+void test_threshold_age_parsing_and_configuration_validation_are_strict() {
+    Fixture fixture;
+    fixture.useThreshold();
+    const char* topic =
+        "envnode/Weather_Station/controller/1/cmd/parameter/max_measurement_age_ms";
+    deliver(fixture.adapter, topic, "20000");
+    TEST_ASSERT_EQUAL_UINT32(1, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(20000, fixture.configuration.configuration
+        .controllerSlots[0].implementationConfiguration.threshold.maxMeasurementAgeMs);
+    const uint32_t revision = fixture.runtime.compositionRevision();
+    deliver(fixture.adapter, topic, "0");
+    deliver(fixture.adapter, topic, "-1");
+    deliver(fixture.adapter, topic, "1.5");
+    deliver(fixture.adapter, topic, "2147483648");
+    deliver(fixture.adapter, topic, "12ms");
+    TEST_ASSERT_EQUAL_UINT32(3, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(revision, fixture.runtime.compositionRevision());
+    TEST_ASSERT_EQUAL_UINT32(20000, fixture.configuration.configuration
+        .controllerSlots[0].implementationConfiguration.threshold.maxMeasurementAgeMs);
+}
+
+void test_threshold_parameter_update_rebuilds_once_noop_and_invalid_order_do_not() {
+    Fixture fixture;
+    fixture.useThreshold();
+    const char* topic =
+        "envnode/Weather_Station/controller/1/cmd/parameter/on_threshold";
+    const uint32_t before = fixture.runtime.compositionRevision();
+    deliver(fixture.adapter, topic, "72");
+    TEST_ASSERT_EQUAL_UINT32(1, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(before + 1, fixture.runtime.compositionRevision());
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 72.0F, fixture.configuration.configuration
+        .controllerSlots[0].implementationConfiguration.threshold.onThreshold);
+    ControllerRuntimeInfo info;
+    TEST_ASSERT_TRUE(fixture.runtime.runtimeInfo(0, info));
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 72.0F, info.onThreshold);
+
+    deliver(fixture.adapter, topic, "72");
+    TEST_ASSERT_EQUAL_UINT32(1, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(before + 1, fixture.runtime.compositionRevision());
+    deliver(fixture.adapter, topic, "60");
+    TEST_ASSERT_EQUAL_UINT32(2, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(before + 1, fixture.runtime.compositionRevision());
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 72.0F, fixture.configuration.configuration
+        .controllerSlots[0].implementationConfiguration.threshold.onThreshold);
+}
+
 void test_status_and_parameters_are_retained_and_change_detected() {
     Fixture fixture;
     fixture.publisher.loop();
@@ -289,6 +438,145 @@ void test_status_and_parameters_are_retained_and_change_detected() {
     fixture.publisher.loop();
     TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.messages.size());
     TEST_ASSERT_TRUE(fixture.mqtt.messages[3].payload.find("\"phase\":\"off\"") != std::string::npos);
+}
+
+void test_threshold_status_and_parameters_are_retained_and_unchanged_status_is_silent() {
+    Fixture fixture;
+    fixture.useThreshold();
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.messages.size());
+    const PublishedMessage* status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_NOT_NULL(status);
+    TEST_ASSERT_EQUAL_STRING(
+        "{\"running\":true,\"source_available\":false,\"measurement_valid\":false,\"stale\":false,\"decision\":\"unknown\",\"target_available\":false,\"output_pending\":false,\"last_result\":\"completed\"}",
+        status->payload.c_str());
+    TEST_ASSERT_TRUE(status->retained);
+    const PublishedMessage* on = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/on_threshold");
+    const PublishedMessage* off = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/off_threshold");
+    const PublishedMessage* age = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/max_measurement_age_ms");
+    TEST_ASSERT_NOT_NULL(on);
+    TEST_ASSERT_NOT_NULL(off);
+    TEST_ASSERT_NOT_NULL(age);
+    TEST_ASSERT_EQUAL_STRING("70", on->payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("65", off->payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("15000", age->payload.c_str());
+    TEST_ASSERT_TRUE(on->retained);
+    TEST_ASSERT_TRUE(off->retained);
+    TEST_ASSERT_TRUE(age->retained);
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.messages.size());
+}
+
+void test_threshold_status_tracks_decision_stale_target_and_stop_start() {
+    Fixture fixture;
+    fixture.useThreshold();
+    fixture.publisher.loop();
+    fixture.measurements.observe(temperatureMeasurement(72.0F), fixture.clock.now);
+    fixture.runtime.loop();
+    fixture.publisher.loop();
+    const PublishedMessage* status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_TRUE(status->payload.find("\"source_available\":true") != std::string::npos);
+    TEST_ASSERT_TRUE(status->payload.find("\"measurement_valid\":true") != std::string::npos);
+    TEST_ASSERT_TRUE(status->payload.find("\"decision\":\"on\"") != std::string::npos);
+
+    fixture.measurements.observe(temperatureMeasurement(60.0F), fixture.clock.now);
+    fixture.runtime.loop();
+    fixture.publisher.loop();
+    status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_TRUE(status->payload.find("\"decision\":\"off\"") != std::string::npos);
+
+    fixture.clock.now = 15001;
+    fixture.runtime.loop();
+    fixture.publisher.loop();
+    status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_TRUE(status->payload.find("\"stale\":true") != std::string::npos);
+    TEST_ASSERT_TRUE(status->payload.find("\"source_available\":false") != std::string::npos);
+    TEST_ASSERT_TRUE(status->payload.find("\"decision\":\"off\"") != std::string::npos);
+
+    fixture.resolver.target = nullptr;
+    fixture.measurements.observe(temperatureMeasurement(72.0F), fixture.clock.now);
+    fixture.runtime.loop();
+    fixture.publisher.loop();
+    status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_TRUE(status->payload.find("\"target_available\":false") != std::string::npos);
+    TEST_ASSERT_TRUE(status->payload.find("\"output_pending\":true") != std::string::npos);
+
+    const bool persistedEnabled =
+        fixture.configuration.configuration.controllerSlots[0].enabled;
+    deliver(fixture.adapter, "envnode/Weather_Station/controller/1/cmd", "STOP");
+    fixture.publisher.loop();
+    status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_TRUE(status->payload.find("\"running\":false") != std::string::npos);
+    TEST_ASSERT_TRUE(status->payload.find("\"decision\":\"unknown\"") != std::string::npos);
+    TEST_ASSERT_EQUAL(persistedEnabled,
+        fixture.configuration.configuration.controllerSlots[0].enabled);
+    fixture.resolver.target = &fixture.actuator;
+    deliver(fixture.adapter, "envnode/Weather_Station/controller/1/cmd", "START");
+    fixture.publisher.loop();
+    status = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/status");
+    TEST_ASSERT_TRUE(status->payload.find("\"running\":true") != std::string::npos);
+    TEST_ASSERT_EQUAL_UINT32(0, fixture.configuration.controllerSetCount);
+}
+
+void test_threshold_parameter_publication_tracks_mqtt_web_and_rejects_invalid_update() {
+    Fixture fixture;
+    fixture.useThreshold();
+    fixture.publisher.loop();
+    fixture.mqtt.messages.clear();
+    deliver(fixture.adapter,
+        "envnode/Weather_Station/controller/1/cmd/parameter/on_threshold", "72.5");
+    fixture.publisher.loop();
+    const PublishedMessage* on = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/on_threshold");
+    TEST_ASSERT_NOT_NULL(on);
+    TEST_ASSERT_EQUAL_STRING("72.5", on->payload.c_str());
+
+    fixture.mqtt.messages.clear();
+    deliver(fixture.adapter,
+        "envnode/Weather_Station/controller/1/cmd/parameter/on_threshold", "60");
+    fixture.publisher.loop();
+    TEST_ASSERT_NULL(lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/on_threshold"));
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 72.5F, fixture.configuration.configuration
+        .controllerSlots[0].implementationConfiguration.threshold.onThreshold);
+
+    ControllerSlotConfiguration web =
+        fixture.configuration.configuration.controllerSlots[0];
+    web.implementationConfiguration.threshold.offThreshold = 64.25F;
+    TEST_ASSERT_TRUE(fixture.configuration.setControllerSlotConfiguration(web));
+    fixture.publisher.loop();
+    const PublishedMessage* off = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/off_threshold");
+    TEST_ASSERT_NOT_NULL(off);
+    TEST_ASSERT_EQUAL_STRING("64.25", off->payload.c_str());
+}
+
+void test_threshold_reconnect_republishes_without_rebuild_or_feedback() {
+    Fixture fixture;
+    fixture.useThreshold();
+    fixture.adapter.loop();
+    fixture.publisher.loop();
+    const uint32_t revision = fixture.runtime.compositionRevision();
+    fixture.mqtt.isConnected = false;
+    fixture.adapter.loop();
+    fixture.publisher.loop();
+    fixture.mqtt.isConnected = true;
+    fixture.adapter.loop();
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.subscriptions.size());
+    TEST_ASSERT_EQUAL_UINT32(8, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_UINT32(0, fixture.configuration.controllerSetCount);
+    TEST_ASSERT_EQUAL_UINT32(revision, fixture.runtime.compositionRevision());
 }
 
 void test_web_originated_parameter_change_is_published() {
@@ -349,12 +637,20 @@ void test_router_delivers_to_both_independent_handlers() {
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_controller_topics_generate_and_parse);
+    RUN_TEST(test_cross_implementation_parameters_are_rejected);
     RUN_TEST(test_start_stop_commands_are_transient_runtime_operations);
     RUN_TEST(test_invalid_commands_and_ids_are_rejected);
     RUN_TEST(test_parameter_update_persists_and_rebuilds_runtime);
     RUN_TEST(test_parameter_state_echo_and_unchanged_command_do_not_rebuild);
     RUN_TEST(test_invalid_parameter_payloads_do_not_mutate_configuration);
+    RUN_TEST(test_threshold_float_parsing_accepts_protocol_decimals_and_rejects_invalid_text);
+    RUN_TEST(test_threshold_age_parsing_and_configuration_validation_are_strict);
+    RUN_TEST(test_threshold_parameter_update_rebuilds_once_noop_and_invalid_order_do_not);
     RUN_TEST(test_status_and_parameters_are_retained_and_change_detected);
+    RUN_TEST(test_threshold_status_and_parameters_are_retained_and_unchanged_status_is_silent);
+    RUN_TEST(test_threshold_status_tracks_decision_stale_target_and_stop_start);
+    RUN_TEST(test_threshold_parameter_publication_tracks_mqtt_web_and_rejects_invalid_update);
+    RUN_TEST(test_threshold_reconnect_republishes_without_rebuild_or_feedback);
     RUN_TEST(test_web_originated_parameter_change_is_published);
     RUN_TEST(test_reconnect_restores_subscriptions_and_republishes_state);
     RUN_TEST(test_runtime_rebuild_republishes_status_without_retaining_controller_pointer);
