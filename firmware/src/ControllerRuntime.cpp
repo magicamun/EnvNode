@@ -1,6 +1,7 @@
 #include "ControllerRuntime.h"
 
 #include <climits>
+#include <cmath>
 #include <cstring>
 
 namespace EnvNode {
@@ -9,7 +10,8 @@ ControllerRuntime::ControllerRuntime(ControllerFactory& factory, ILogger& logger
     : activeFactory_(&factory)
     , inactiveFactory_(&secondaryFactory_)
     , secondaryFactory_(
-        factory.actuatorResolver(), factory.monotonicClock(), logger)
+        factory.measurementResolver(), factory.actuatorResolver(),
+        factory.monotonicClock(), logger)
     , logger_(logger) {
 }
 
@@ -131,11 +133,31 @@ bool ControllerRuntime::validateComposition(
             return false;
         }
         if (!slot.enabled || slot.implementation == ControllerImplementation::None) continue;
-        const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
-        if (slot.implementation != ControllerImplementation::Blink
-            || !isValidActuatorId(blink.targetActuatorId)
-            || blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
-            || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
+        if (slot.implementation == ControllerImplementation::Blink) {
+            const BlinkControllerConfiguration& blink =
+                slot.implementationConfiguration.blink;
+            if (!isValidActuatorId(blink.targetActuatorId)
+                || blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
+                || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
+                return false;
+            }
+        } else if (slot.implementation == ControllerImplementation::Threshold) {
+            const ThresholdControllerConfiguration& threshold =
+                slot.implementationConfiguration.threshold;
+            const MeasurementTypeMetadata& metadata =
+                measurementTypeMetadata(threshold.source.measurementType);
+            if (!isValidSensorId(threshold.source.sensorId)
+                || metadata.expectedValueKind != ValueKind::FloatingPoint
+                || metadata.semantics != MeasurementSemantics::State
+                || !isValidActuatorId(threshold.targetActuatorId)
+                || !std::isfinite(threshold.onThreshold)
+                || !std::isfinite(threshold.offThreshold)
+                || threshold.offThreshold >= threshold.onThreshold
+                || threshold.maxMeasurementAgeMs == 0
+                || threshold.maxMeasurementAgeMs > INT32_MAX) {
+                return false;
+            }
+        } else {
             return false;
         }
     }
@@ -157,16 +179,24 @@ bool ControllerRuntime::constructComposition(
         strncpy(entry.info.name, slot.name.c_str(), MaxControllerSlotNameLength);
         entry.info.name[MaxControllerSlotNameLength] = '\0';
         entry.info.implementation = slot.implementation;
-        entry.info.targetActuatorId =
-            slot.implementationConfiguration.blink.targetActuatorId;
-        entry.info.onDurationMs =
-            slot.implementationConfiguration.blink.onDurationMs;
-        entry.info.offDurationMs =
-            slot.implementationConfiguration.blink.offDurationMs;
+        if (slot.implementation == ControllerImplementation::Blink) {
+            const BlinkControllerConfiguration& blink =
+                slot.implementationConfiguration.blink;
+            entry.info.targetActuatorId = blink.targetActuatorId;
+            entry.info.onDurationMs = blink.onDurationMs;
+            entry.info.offDurationMs = blink.offDurationMs;
+        } else if (slot.implementation == ControllerImplementation::Threshold) {
+            const ThresholdControllerConfiguration& threshold =
+                slot.implementationConfiguration.threshold;
+            entry.info.targetActuatorId = threshold.targetActuatorId;
+            entry.info.sourceSensorId = threshold.source.sensorId;
+            entry.info.sourceMeasurementType = threshold.source.measurementType;
+        }
         const ControllerFactoryInstance instance = factory.create(
             slotIndex, slot, entry.info.constructionResult);
         entry.controller = instance.controller;
         entry.blink = instance.blink;
+        entry.threshold = instance.threshold;
         if (entry.info.constructionResult != ControllerFactoryResult::Created
             || entry.controller == nullptr) {
             logger_.printf("Controller %u construction failed: result=%u\n",
@@ -208,10 +238,26 @@ void ControllerRuntime::stopComposition(
 }
 
 void ControllerRuntime::updateRuntimeInfo(RuntimeEntry& entry) {
-    if (entry.blink == nullptr) return;
-    entry.info.running = entry.blink->running();
-    entry.info.targetAvailable = entry.blink->targetAvailable();
-    entry.info.blinkPhase = entry.blink->phase();
+    if (entry.blink != nullptr) {
+        entry.info.running = entry.blink->running();
+        entry.info.targetAvailable = entry.blink->targetAvailable();
+        entry.info.blinkPhase = entry.blink->phase();
+    } else if (entry.threshold != nullptr) {
+        entry.info.running = entry.threshold->running();
+        entry.info.targetAvailable = entry.threshold->targetAvailable();
+        entry.info.sourceAvailable = entry.threshold->sourceAvailable();
+        entry.info.hasLatestSnapshot = entry.threshold->hasLatestSnapshot();
+        entry.info.latestMeasurementValid =
+            entry.threshold->latestMeasurementValid();
+        entry.info.latestNumericValueAvailable =
+            entry.threshold->latestNumericValueAvailable();
+        entry.info.latestNumericValue = entry.threshold->latestNumericValue();
+        entry.info.latestSnapshotStale = entry.threshold->latestSnapshotStale();
+        entry.info.latestSnapshotAgeMs = entry.threshold->latestSnapshotAgeMs();
+        entry.info.thresholdDecision = entry.threshold->decision();
+        entry.info.outputApplicationPending =
+            entry.threshold->outputApplicationPending();
+    }
 }
 
 ControllerRuntime::RuntimeEntry* ControllerRuntime::findEntry(ControllerId id) {

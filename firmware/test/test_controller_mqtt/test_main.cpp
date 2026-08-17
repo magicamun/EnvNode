@@ -8,6 +8,7 @@
 #include "ControllerMqttAdapter.h"
 #include "ControllerStatePublisher.h"
 #include "MqttMessageRouter.h"
+#include "MeasurementSnapshotCache.h"
 
 using namespace EnvNode;
 
@@ -142,6 +143,7 @@ struct Fixture {
     TestClock clock;
     TestActuator actuator;
     TestResolver resolver;
+    MeasurementSnapshotCache measurements;
     TestConfigurationService configuration;
     TestMqttService mqtt;
     ControllerFactory factory;
@@ -151,7 +153,7 @@ struct Fixture {
     ControllerStatePublisher publisher;
 
     Fixture()
-        : factory(resolver, clock, logger)
+        : factory(measurements, resolver, clock, logger)
         , runtime(factory, logger)
         , runtimeManager(logger, nullptr, nullptr, &runtime)
         , adapter(logger, configuration, mqtt, runtime, runtimeManager)

@@ -13,6 +13,17 @@ struct ControllerRuntimeInfo {
     ActuatorId targetActuatorId = InvalidActuatorId;
     uint32_t onDurationMs = 0;
     uint32_t offDurationMs = 0;
+    SensorId sourceSensorId = InvalidSensorId;
+    MeasurementType sourceMeasurementType = MeasurementType::Unknown;
+    bool sourceAvailable = false;
+    bool hasLatestSnapshot = false;
+    bool latestMeasurementValid = false;
+    bool latestNumericValueAvailable = false;
+    float latestNumericValue = 0.0F;
+    bool latestSnapshotStale = false;
+    uint32_t latestSnapshotAgeMs = 0;
+    ThresholdDecision thresholdDecision = ThresholdDecision::Unknown;
+    bool outputApplicationPending = false;
     ControllerFactoryResult constructionResult =
         ControllerFactoryResult::NoRuntimeController;
     bool initializationAttempted = false;
@@ -42,6 +53,7 @@ private:
         ControllerRuntimeInfo info;
         IController* controller = nullptr;
         BlinkController* blink = nullptr;
+        ThresholdController* threshold = nullptr;
     };
 
     bool validateComposition(const ControllerSlotConfiguration* slots) const;

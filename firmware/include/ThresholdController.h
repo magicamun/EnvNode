@@ -1,0 +1,73 @@
+#pragma once
+
+#include "ControllerSlotConfiguration.h"
+#include "IController.h"
+#include "IMeasurementResolver.h"
+#include "IMonotonicClock.h"
+#include "IOnOffActuatorResolver.h"
+#include "Logger.h"
+
+namespace EnvNode {
+
+enum class ThresholdDecision : uint8_t {
+    Unknown,
+    On,
+    Off,
+};
+
+class ThresholdController : public IController {
+public:
+    ThresholdController(
+        const ThresholdControllerConfiguration& configuration,
+        IMeasurementResolver& measurementResolver,
+        IOnOffActuatorResolver& actuatorResolver,
+        IMonotonicClock& monotonicClock,
+        ILogger& logger);
+
+    ControllerOperationResult begin() override;
+    ControllerOperationResult service() override;
+    ControllerOperationResult stop() override;
+
+    bool running() const;
+    bool sourceAvailable() const;
+    bool hasLatestSnapshot() const;
+    bool latestMeasurementValid() const;
+    bool latestNumericValueAvailable() const;
+    float latestNumericValue() const;
+    bool latestSnapshotStale() const;
+    uint32_t latestSnapshotAgeMs() const;
+    ThresholdDecision decision() const;
+    bool targetAvailable() const;
+    bool outputApplicationPending() const;
+    bool hasProcessedRevision() const;
+    uint32_t lastProcessedRevision() const;
+
+private:
+    bool configurationValid() const;
+    void updateSourceAvailability(bool available);
+    void evaluateValue(float value);
+    ControllerOperationResult applyPendingDecision();
+
+    ThresholdControllerConfiguration configuration_;
+    IMeasurementResolver& measurementResolver_;
+    IOnOffActuatorResolver& actuatorResolver_;
+    IMonotonicClock& monotonicClock_;
+    ILogger& logger_;
+    bool running_ = false;
+    bool sourceAvailable_ = false;
+    bool sourceAvailabilityKnown_ = false;
+    bool hasLatestSnapshot_ = false;
+    bool latestMeasurementValid_ = false;
+    bool latestNumericValueAvailable_ = false;
+    float latestNumericValue_ = 0.0F;
+    bool latestSnapshotStale_ = false;
+    uint32_t latestSnapshotAgeMs_ = 0;
+    bool hasProcessedRevision_ = false;
+    uint32_t lastProcessedRevision_ = 0;
+    ThresholdDecision decision_ = ThresholdDecision::Unknown;
+    bool targetAvailable_ = false;
+    bool outputApplicationPending_ = false;
+    bool targetUnavailabilityLogged_ = false;
+};
+
+} // namespace EnvNode

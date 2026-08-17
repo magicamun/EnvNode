@@ -48,11 +48,11 @@ static ActuatorMqttAdapter actuatorMqttAdapter(
 static ActuatorStatePublisher actuatorStatePublisher(
     serialLogger, configurationService, mqttService, actuatorRuntime);
 static ArduinoMonotonicClock monotonicClock;
+static MeasurementSnapshotCache measurementSnapshotCache;
 static ControllerFactory controllerFactory(
-    actuatorRuntime, monotonicClock, serialLogger);
+    measurementSnapshotCache, actuatorRuntime, monotonicClock, serialLogger);
 static ControllerRuntime controllerRuntime(controllerFactory, serialLogger);
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
-static MeasurementSnapshotCache measurementSnapshotCache;
 static SensorManager sensorManager(
     timeService,
     monotonicClock,

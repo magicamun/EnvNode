@@ -7,6 +7,8 @@
 #include "ControllerFactory.h"
 #include "ControllerRuntime.h"
 #include "ActuatorStatePublisher.h"
+#include "MeasurementSnapshotCache.h"
+#include "ThresholdController.h"
 
 using namespace EnvNode;
 
@@ -277,7 +279,8 @@ void test_factory_and_runtime_handle_slots_and_multiple_controllers() {
     TestResolver resolver;
     resolver.targets[0] = &first;
     resolver.targets[1] = &second;
-    ControllerFactory factory(resolver, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
     ControllerRuntime runtime(factory, logger);
     ControllerSlotConfiguration slots[MaxControllerSlotCount];
     initializeControllerSlots(slots);
@@ -304,7 +307,8 @@ void test_disabled_and_none_slots_create_no_runtime_controller() {
     TestLogger logger;
     TestClock clock;
     TestResolver resolver;
-    ControllerFactory factory(resolver, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
     ControllerRuntime runtime(factory, logger);
     ControllerSlotConfiguration slots[MaxControllerSlotCount];
     initializeControllerSlots(slots);
@@ -321,7 +325,8 @@ void test_runtime_rebuild_stops_old_and_activates_new_composition() {
     TestResolver resolver;
     resolver.targets[0] = &first;
     resolver.targets[1] = &second;
-    ControllerFactory factory(resolver, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
     ControllerRuntime runtime(factory, logger);
     ControllerSlotConfiguration slots[MaxControllerSlotCount];
     initializeControllerSlots(slots);
@@ -342,7 +347,8 @@ void test_runtime_start_and_stop_are_transient_and_restart_a_fresh_cycle() {
     TestActuator actuator;
     TestResolver resolver;
     resolver.targets[0] = &actuator;
-    ControllerFactory factory(resolver, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
     ControllerRuntime runtime(factory, logger);
     ControllerSlotConfiguration slots[MaxControllerSlotCount];
     initializeControllerSlots(slots);
@@ -381,7 +387,8 @@ void test_rebuild_applies_updated_timing_and_restarts_stopped_controller() {
     TestActuator actuator;
     TestResolver resolver;
     resolver.targets[0] = &actuator;
-    ControllerFactory factory(resolver, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
     ControllerRuntime runtime(factory, logger);
     ControllerSlotConfiguration slots[MaxControllerSlotCount];
     initializeControllerSlots(slots);
@@ -417,7 +424,8 @@ void test_failed_rebuild_leaves_active_composition_untouched() {
     TestActuator actuator;
     TestResolver resolver;
     resolver.targets[0] = &actuator;
-    ControllerFactory factory(resolver, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
     ControllerRuntime runtime(factory, logger);
     ControllerSlotConfiguration slots[MaxControllerSlotCount];
     initializeControllerSlots(slots);
@@ -441,7 +449,9 @@ void test_actuator_runtime_replacement_is_resolved_by_controller() {
     actuatorRuntime.initialize(actuatorSlots);
     TEST_ASSERT_NOT_NULL(actuatorRuntime.onOffActuator(1));
 
-    ControllerFactory controllerFactory(actuatorRuntime, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory controllerFactory(
+        measurements, actuatorRuntime, clock, logger);
     ControllerRuntime controllerRuntime(controllerFactory, logger);
     ControllerSlotConfiguration controllerSlots[MaxControllerSlotCount];
     initializeControllerSlots(controllerSlots);
@@ -471,7 +481,9 @@ void test_mqtt_state_publisher_observes_blink_driven_changes() {
     configureActuatorSlot(actuatorSlots[0], 16);
     actuatorRuntime.initialize(actuatorSlots);
 
-    ControllerFactory controllerFactory(actuatorRuntime, clock, logger);
+    MeasurementSnapshotCache measurements;
+    ControllerFactory controllerFactory(
+        measurements, actuatorRuntime, clock, logger);
     ControllerRuntime controllerRuntime(controllerFactory, logger);
     ControllerSlotConfiguration controllerSlots[MaxControllerSlotCount];
     initializeControllerSlots(controllerSlots);
