@@ -32,6 +32,7 @@
 #include "ControllerMqttAdapter.h"
 #include "ControllerStatePublisher.h"
 #include "MqttMessageRouter.h"
+#include "MqttDescriptionPublisher.h"
 
 using namespace EnvNode;
 
@@ -74,6 +75,8 @@ static MqttMessageRouter mqttMessageRouter(
     mqttService, actuatorMqttAdapter, controllerMqttAdapter);
 static ControllerStatePublisher controllerStatePublisher(
     serialLogger, configurationService, mqttService, controllerRuntime);
+static MqttDescriptionPublisher mqttDescriptionPublisher(
+    serialLogger, configurationService, mqttService, monotonicClock);
 static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     serialLogger,
     configurationService,
@@ -81,7 +84,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
 static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher);
+static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
 
 void setup() {
     i2cBusManager.begin();

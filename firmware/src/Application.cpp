@@ -4,7 +4,7 @@
 
 namespace EnvNode {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher, MqttDescriptionPublisher& descriptionPublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -21,6 +21,7 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , actuatorStatePublisher_(actuatorStatePublisher)
     , controllerMqttAdapter_(controllerMqttAdapter)
     , controllerStatePublisher_(controllerStatePublisher)
+    , descriptionPublisher_(descriptionPublisher)
     , timeSyncLogged_(false) {
 }
 
@@ -75,6 +76,7 @@ void Application::loop() {
     controllerRuntime_.loop();
     actuatorStatePublisher_.loop();
     controllerStatePublisher_.loop();
+    descriptionPublisher_.loop();
     discoveryPublisher_.loop();
     runtimeManager_.service();
 }

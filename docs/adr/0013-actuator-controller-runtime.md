@@ -12,6 +12,11 @@ Accepted
 
 Controller infrastructure v1 is implemented, tested and physically verified for Blink and Threshold/Hysteresis behavior.
 
+Actuator and Controller external self-description schema 1 is implemented through a separate MQTT
+publication adapter. Pure builders translate persisted slot configuration plus registry metadata
+into protocol documents; the retained publisher reconciles all fixed slots on connection and
+configuration changes. Runtime status remains a separate concern.
+
 ## Context
 
 EnvNode needs local physical-output control without coupling Web, MQTT or local coordination behavior to GPIO drivers. Runtime composition must support configured instances, deterministic embedded storage and live replacement. Controllers must remain operational across Actuator replacement without retaining stale pointers.
@@ -83,7 +88,7 @@ The original implementation allowed multiple Controllers to target one Actuator 
 - the three runtimes contain some parallel lifecycle mechanics
 - manual external command contention with the owning Controller is currently last-command-wins
 - implementation-specific Controller parameters require explicit adapter support
-- external generic Actuator/Controller self-description remains unresolved
+- retained external descriptions add a second configured-truth representation to maintain
 
 ## Alternatives considered
 

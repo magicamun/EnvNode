@@ -467,6 +467,21 @@ Threshold source identity is intentionally not split into scalar MQTT mutation p
 
 Controller and generic Actuator Home Assistant discovery are not implemented. Existing Home Assistant discovery describes Sensors only.
 
+`MqttDescriptionPublisher` exposes retained schema-1 Actuator and Controller descriptions through a
+separate configured-truth path:
+
+```text
+Configuration + implementation registries
+ -> pure ExternalDescriptionBuilder
+ -> MqttDescriptionPublisher
+ -> retained per-slot description topic
+```
+
+It fingerprints description-relevant persisted fields, publishes changes without waiting for a
+runtime rebuild, clears `None` slots and forces complete fixed-slot reconciliation after reconnect.
+It has no Actuator, Controller or Sensor runtime dependency. Runtime-only state continues to use
+the existing status publishers and cannot trigger description publication.
+
 ### Home Assistant MQTT Discovery
 
 `HomeAssistantDiscoveryPublisher` is a representation-only component separate from Sensors,

@@ -67,6 +67,11 @@ String mqttActuatorStatusTopic(const String& deviceName, ActuatorId id) {
         + String(static_cast<unsigned int>(id)) + "/status/on_off";
 }
 
+String mqttActuatorDescriptionTopic(const String& deviceName, ActuatorId id) {
+    return mqttDeviceTopicRoot(deviceName) + "/actuator/"
+        + String(static_cast<unsigned int>(id)) + "/description";
+}
+
 bool parseMqttActuatorCommandTopic(
     const char* topic,
     const String& deviceName,
@@ -113,6 +118,11 @@ String mqttControllerCommandTopic(const String& deviceName, ControllerId id) {
 String mqttControllerStatusTopic(const String& deviceName, ControllerId id) {
     return mqttDeviceTopicRoot(deviceName) + "/controller/"
         + String(static_cast<unsigned int>(id)) + "/status";
+}
+
+String mqttControllerDescriptionTopic(const String& deviceName, ControllerId id) {
+    return mqttDeviceTopicRoot(deviceName) + "/controller/"
+        + String(static_cast<unsigned int>(id)) + "/description";
 }
 
 String mqttControllerParameterTopic(

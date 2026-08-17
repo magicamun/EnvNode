@@ -118,12 +118,46 @@ Web and MQTT share the same persistent Controller configuration. Web changes the
 
 Threshold's `MeasurementSourceReference` is structural (`SensorId + MeasurementType`) and is intentionally not exposed as independently mutable scalar MQTT parameters. There are no `source_sensor_id` or `source_measurement_type` mutation topics; source selection currently uses the complete configuration/Web path to avoid invalid intermediate references.
 
+## Actuator and Controller self-description
+
+Configured Actuator and Controller slots publish schema-1 JSON descriptions retained at:
+
+```text
+envnode/<device>/actuator/<ActuatorId>/description
+envnode/<device>/controller/<ControllerId>/description
+```
+
+Descriptions are configured truth, not runtime status. They contain stable implementation,
+capability, input and parameter metadata produced from slot configuration and implementation
+registries. Disabled but configured slots remain described with `"enabled":false`. A `None`
+slot has no description: EnvNode publishes an empty retained payload to remove any stale broker
+value.
+
+Example Actuator description:
+
+```json
+{"schema":1,"id":1,"name":"Heater","enabled":true,"implementation":"gpio_on_off","implementation_name":"GPIO On/Off","capabilities":["on_off"]}
+```
+
+Blink and Threshold descriptions additionally contain `START`/`STOP`, their target and required
+capability, input metadata, parameter descriptors and current persisted parameter values. They do
+not contain running state, phase, decisions, Measurement values, freshness or availability.
+
+The publisher reconciles every fixed Actuator and Controller slot after each MQTT connection and
+retries failed retained publications cooperatively. Persisted configuration changes are detected
+independently of whether they came from Web or MQTT and independently of runtime application.
+EnvNode does not subscribe to description topics.
+
+Reconciliation is complete within the current MQTT device root. If the configured Device name and
+therefore MQTT root changes, retained descriptions under the previous root cannot currently be
+guaranteed to be removed after reboot.
+
 ## Reconnect behavior
 
 After reconnect, command subscriptions are restored and current retained Actuator state, Controller status and Controller parameters are republished. EnvNode does not infer commands from retained state.
 
 Controller status describes behavior and decision. Actuator status describes actual output. A manual Actuator command can therefore make actual state temporarily differ from a Controller's last phase or decision without causing MQTT-side reconciliation.
 
-## Home Assistant and self-description
+## Home Assistant
 
-Sensor Home Assistant discovery is implemented. Controller discovery, generic Actuator discovery, and generic external Actuator/Controller capability or parameter self-description are not implemented.
+Sensor Home Assistant discovery is implemented. Controller and generic Actuator Home Assistant discovery are not implemented. Generic Actuator and Controller self-description uses the retained schema-1 topics documented above and is independent of Home Assistant discovery.

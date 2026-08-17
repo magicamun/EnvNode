@@ -16,6 +16,7 @@ const char* mqttMeasurementTypeTopic(MeasurementType type);
 String mqttActuatorCommandSubscription(const String& deviceName);
 String mqttActuatorCommandTopic(const String& deviceName, ActuatorId id);
 String mqttActuatorStatusTopic(const String& deviceName, ActuatorId id);
+String mqttActuatorDescriptionTopic(const String& deviceName, ActuatorId id);
 bool parseMqttActuatorCommandTopic(
     const char* topic,
     const String& deviceName,
@@ -26,6 +27,7 @@ String mqttControllerCommandSubscription(const String& deviceName);
 String mqttControllerParameterCommandSubscription(const String& deviceName);
 String mqttControllerCommandTopic(const String& deviceName, ControllerId id);
 String mqttControllerStatusTopic(const String& deviceName, ControllerId id);
+String mqttControllerDescriptionTopic(const String& deviceName, ControllerId id);
 String mqttControllerParameterTopic(
     const String& deviceName,
     ControllerId id,
