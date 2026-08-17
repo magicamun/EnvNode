@@ -27,6 +27,7 @@ public:
     bool setPresentationUnit(MeasurementType type, PresentationUnit unit) override;
     bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) override;
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) override;
+    bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) override;
     bool resetToDefaults() override;
 
 private:
@@ -60,6 +61,15 @@ private:
     bool persistActuatorSlot(const ActuatorSlotConfiguration& slot);
     bool validateActuatorSlot(const ActuatorSlotConfiguration& slot) const;
     bool validateActuatorSlots(const ActuatorSlotConfiguration* slots) const;
+    void initializeControllerDefaults();
+    void loadControllerSlots();
+    bool persistControllerSlot(const ControllerSlotConfiguration& slot);
+    bool validateControllerSlot(
+        const ControllerSlotConfiguration& slot,
+        const ActuatorSlotConfiguration* actuatorSlots) const;
+    bool validateControllerSlots(
+        const ControllerSlotConfiguration* controllerSlots,
+        const ActuatorSlotConfiguration* actuatorSlots) const;
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots) const;

@@ -47,6 +47,7 @@ public:
     bool setPresentationUnit(MeasurementType, PresentationUnit) override { return false; }
     bool setSensorSlotConfiguration(const SensorSlotConfiguration&) override { return false; }
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration&) override { return false; }
+    bool setControllerSlotConfiguration(const ControllerSlotConfiguration&) override { return false; }
     bool resetToDefaults() override { return false; }
 };
 

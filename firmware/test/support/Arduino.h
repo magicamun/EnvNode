@@ -35,6 +35,10 @@ public:
         return index < value_.length() ? value_[index] : '\0';
     }
 
+    char operator[](size_t index) const {
+        return value_[index];
+    }
+
     void reserve(size_t size) {
         value_.reserve(size);
     }
@@ -59,6 +63,21 @@ public:
         String result(left);
         result.value_ += right.value_;
         return result;
+    }
+
+
+    friend String operator+(const char* left, const String& right) {
+        String result(left);
+        result.value_ += right.value_;
+        return result;
+    }
+
+    friend bool operator==(const String& left, const String& right) {
+        return left.value_ == right.value_;
+    }
+
+    friend bool operator!=(const String& left, const String& right) {
+        return !(left == right);
     }
 
 private:

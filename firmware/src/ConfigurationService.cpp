@@ -4,6 +4,7 @@
 #include <IPAddress.h>
 #include "SensorImplementationRegistry.h"
 #include "ActuatorImplementationRegistry.h"
+#include "ControllerImplementationRegistry.h"
 #include "HardwareResources.h"
 #include <cmath>
 
@@ -54,6 +55,10 @@ String sensorKey(SensorId slotId, const char* field) {
 String actuatorKey(ActuatorId slotId, const char* field) {
     return "a" + String(slotId) + "_" + field;
 }
+
+String controllerKey(ControllerId slotId, const char* field) {
+    return "c" + String(slotId) + "_" + field;
+}
 }
 
 void ConfigurationService::ensurePreferencesStarted() {
@@ -92,6 +97,7 @@ void ConfigurationService::initializeDefaults() {
         measurementTypeMetadata(MeasurementType::RainDetectorLevel).defaultPresentationUnit;
     initializeSensorDefaults();
     initializeActuatorDefaults();
+    initializeControllerDefaults();
 }
 
 void ConfigurationService::initializeSensorDefaults() {
@@ -144,6 +150,17 @@ void ConfigurationService::initializeActuatorDefaults() {
         slot.name = "Actuator Slot " + String(index + 1);
         slot.implementation = ActuatorImplementation::None;
         slot.hardware = HardwareResourceAssignment::none();
+    }
+}
+
+void ConfigurationService::initializeControllerDefaults() {
+    for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
+        ControllerSlotConfiguration& slot = configuration_.controllerSlots[index];
+        slot.slotId = static_cast<ControllerId>(index + 1);
+        slot.enabled = false;
+        slot.name = "Controller Slot " + String(index + 1);
+        slot.implementation = ControllerImplementation::None;
+        slot.implementationConfiguration.blink = BlinkControllerConfiguration{};
     }
 }
 
@@ -204,6 +221,7 @@ void ConfigurationService::loadFromPreferences() {
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
     loadSensorSlots();
     loadActuatorSlots();
+    loadControllerSlots();
 }
 
 void ConfigurationService::loadSensorSlots() {
@@ -300,6 +318,42 @@ void ConfigurationService::loadActuatorSlots() {
         && validateHardwareOccupancy(configuration_.sensorSlots, loaded)) {
         for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
             configuration_.actuatorSlots[index] = loaded[index];
+        }
+    }
+}
+
+void ConfigurationService::loadControllerSlots() {
+    ControllerSlotConfiguration loaded[MaxControllerSlotCount];
+    for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
+        loaded[index] = configuration_.controllerSlots[index];
+        const ControllerId expectedId = static_cast<ControllerId>(index + 1);
+        const String implementationKey = controllerKey(expectedId, "impl");
+        if (!preferences_.isKey(implementationKey.c_str())) continue;
+
+        loaded[index].slotId = static_cast<ControllerId>(preferences_.getUInt(
+            controllerKey(expectedId, "id").c_str(), expectedId));
+        loaded[index].enabled = preferences_.getUInt(
+            controllerKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
+        loaded[index].name = preferences_.getString(
+            controllerKey(expectedId, "name").c_str(), loaded[index].name);
+        const String stableImplementation = preferences_.getString(
+            implementationKey.c_str(), "none");
+        const ControllerImplementationMetadata* metadata =
+            ControllerImplementationRegistry::findByStableId(stableImplementation.c_str());
+        loaded[index].implementation = metadata == nullptr
+            ? static_cast<ControllerImplementation>(255) : metadata->implementation;
+        loaded[index].implementationConfiguration.blink.targetActuatorId =
+            static_cast<ActuatorId>(preferences_.getUInt(
+                controllerKey(expectedId, "act").c_str(), InvalidActuatorId));
+        loaded[index].implementationConfiguration.blink.onDurationMs = preferences_.getUInt(
+            controllerKey(expectedId, "onms").c_str(), 1000);
+        loaded[index].implementationConfiguration.blink.offDurationMs = preferences_.getUInt(
+            controllerKey(expectedId, "offms").c_str(), 1000);
+    }
+
+    if (validateControllerSlots(loaded, configuration_.actuatorSlots)) {
+        for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
+            configuration_.controllerSlots[index] = loaded[index];
         }
     }
 }
@@ -748,6 +802,62 @@ bool ConfigurationService::validateActuatorSlots(
     return true;
 }
 
+bool ConfigurationService::validateControllerSlot(
+    const ControllerSlotConfiguration& slot,
+    const ActuatorSlotConfiguration* actuatorSlots) const {
+    if (!isValidControllerId(slot.slotId)
+        || slot.slotId > MaxControllerSlotCount
+        || slot.name.isEmpty()
+        || slot.name.length() > MaxControllerSlotNameLength) {
+        return false;
+    }
+    const ControllerImplementationMetadata* metadata =
+        ControllerImplementationRegistry::find(slot.implementation);
+    if (metadata == nullptr) return false;
+    if (slot.implementation == ControllerImplementation::None) return true;
+    if (slot.implementation != ControllerImplementation::Blink) return false;
+
+    const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
+    if (blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
+        || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
+        return false;
+    }
+    if (!isValidActuatorId(blink.targetActuatorId)
+        || blink.targetActuatorId > MaxActuatorSlotCount) {
+        return false;
+    }
+    if (!slot.enabled) return true;
+    if (actuatorSlots == nullptr) {
+        return false;
+    }
+    const ActuatorSlotConfiguration& target =
+        actuatorSlots[blink.targetActuatorId - 1];
+    if (target.slotId != blink.targetActuatorId
+        || !target.enabled
+        || target.implementation == ActuatorImplementation::None) {
+        return false;
+    }
+    const ActuatorImplementationMetadata* actuatorMetadata =
+        ActuatorImplementationRegistry::find(target.implementation);
+    return actuatorMetadata != nullptr
+        && hasActuatorCapability(
+            actuatorMetadata->capabilities,
+            metadata->requiredActuatorCapabilities);
+}
+
+bool ConfigurationService::validateControllerSlots(
+    const ControllerSlotConfiguration* controllerSlots,
+    const ActuatorSlotConfiguration* actuatorSlots) const {
+    if (controllerSlots == nullptr || actuatorSlots == nullptr) return false;
+    for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
+        if (controllerSlots[index].slotId != index + 1
+            || !validateControllerSlot(controllerSlots[index], actuatorSlots)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ConfigurationService::validateHardwareOccupancy(
     const SensorSlotConfiguration* sensorSlots,
     const ActuatorSlotConfiguration* actuatorSlots) const {
@@ -830,8 +940,43 @@ bool ConfigurationService::setActuatorSlotConfiguration(
     candidate[slot.slotId - 1] = slot;
     if (!validateActuatorSlots(candidate)
         || !validateHardwareOccupancy(configuration_.sensorSlots, candidate)
+        || !validateControllerSlots(configuration_.controllerSlots, candidate)
         || !persistActuatorSlot(slot)) return false;
     configuration_.actuatorSlots[slot.slotId - 1] = slot;
+    return true;
+}
+
+bool ConfigurationService::persistControllerSlot(
+    const ControllerSlotConfiguration& slot) {
+    const ControllerImplementationMetadata* metadata =
+        ControllerImplementationRegistry::find(slot.implementation);
+    if (metadata == nullptr) return false;
+    const ControllerId id = slot.slotId;
+    const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
+    return persistUInt(controllerKey(id, "id").c_str(), id)
+        && persistUInt(controllerKey(id, "en").c_str(), slot.enabled ? 1 : 0)
+        && persistString(controllerKey(id, "name").c_str(), slot.name)
+        && persistString(controllerKey(id, "impl").c_str(), metadata->stableId)
+        && persistUInt(controllerKey(id, "act").c_str(), blink.targetActuatorId)
+        && persistUInt(controllerKey(id, "onms").c_str(), blink.onDurationMs)
+        && persistUInt(controllerKey(id, "offms").c_str(), blink.offDurationMs);
+}
+
+bool ConfigurationService::setControllerSlotConfiguration(
+    const ControllerSlotConfiguration& slot) {
+    if (!isValidControllerId(slot.slotId) || slot.slotId > MaxControllerSlotCount) {
+        return false;
+    }
+    ControllerSlotConfiguration candidate[MaxControllerSlotCount];
+    for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
+        candidate[index] = configuration_.controllerSlots[index];
+    }
+    candidate[slot.slotId - 1] = slot;
+    if (!validateControllerSlots(candidate, configuration_.actuatorSlots)
+        || !persistControllerSlot(slot)) {
+        return false;
+    }
+    configuration_.controllerSlots[slot.slotId - 1] = slot;
     return true;
 }
 
