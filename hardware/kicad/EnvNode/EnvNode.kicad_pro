@@ -829,7 +829,7 @@
         "uuid": "4cc529e4-f126-4541-9f71-d2fae66595d2"
       }
     ],
-    "used_designators": "GPIO4-5,GPIO13-27,I2CB_1-4,I2CA_1-6,U1-2,R1-4,JP1-4,#PWR1-62,C1-4,J1-2",
+    "used_designators": "GPIO4-5,GPIO13-27,I2CB_1-4,I2CA_1-6,U1-2,JP1-4,R1-4,C1-4,#PWR1-62,J1-2",
     "variants": []
   },
   "sheets": [
