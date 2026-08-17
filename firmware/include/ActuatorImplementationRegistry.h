@@ -17,6 +17,13 @@ enum class ActuatorCapability : uint8_t {
     OnOff = 1U << 0,
 };
 
+constexpr bool hasActuatorCapability(
+    ActuatorCapability available,
+    ActuatorCapability required) {
+    return (static_cast<uint8_t>(available) & static_cast<uint8_t>(required))
+        == static_cast<uint8_t>(required);
+}
+
 struct ActuatorImplementationMetadata {
     ActuatorImplementation implementation;
     const char* stableId;

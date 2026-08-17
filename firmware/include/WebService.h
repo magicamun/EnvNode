@@ -15,7 +15,6 @@
 #include "OTAService.h"
 #include "Logger.h"
 #include "IDiscoveryPublisher.h"
-#include "IOnOffActuator.h"
 
 namespace EnvNode {
 
@@ -32,8 +31,7 @@ public:
         MeasurementSnapshotCache& measurementSnapshotCache,
         IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
-        OTAService& otaService,
-        IOnOffActuator& temporaryLedActuator);
+        OTAService& otaService);
 
     void begin() override;
     void loop() override;
@@ -42,9 +40,6 @@ private:
     void handleStatus();
     void handleSensors();
     void handleMeasurements();
-    void handleActuator();
-    void handleActuatorOn();
-    void handleActuatorOff();
     void handleSensorEdit();
     void handleSensorSave();
     void handleSensorApply();
@@ -84,7 +79,6 @@ private:
     const char* pendingActionMessage() const;
     void performExplicitRestart();
     bool administrationAvailable() const;
-    void setTemporaryLedState(OnOffState state);
 
     ILogger& logger_;
     IConfigurationService& configurationService_;
@@ -97,7 +91,6 @@ private:
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;
-    IOnOffActuator& temporaryLedActuator_;
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

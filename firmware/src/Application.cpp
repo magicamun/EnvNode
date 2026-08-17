@@ -4,7 +4,7 @@
 
 namespace EnvNode {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -12,6 +12,7 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , mqttService_(mqttService)
     , timeService_(timeService)
     , sensorManager_(sensorManager)
+    , actuatorRuntime_(actuatorRuntime)
     , runtimeManager_(runtimeManager)
     , discoveryPublisher_(discoveryPublisher)
     , timeSyncLogged_(false) {
@@ -25,6 +26,7 @@ void Application::setup(bool configurationAlreadyLoaded) {
     wifiService_.begin();
     timeService_.begin();
     sensorManager_.begin();
+    actuatorRuntime_.initialize(configurationService_.getConfiguration().actuatorSlots);
     webService_.begin();
     mqttService_.begin();
 
