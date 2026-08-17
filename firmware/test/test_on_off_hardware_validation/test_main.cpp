@@ -307,6 +307,17 @@ void test_serial_logger_preserves_messages_longer_than_old_buffer() {
         serialOutput.c_str());
 }
 
+void test_serial_logger_println_writes_exact_text_bytes() {
+    SerialLogger logger;
+    serialOutput.clear();
+
+    logger.println("Actuator runtime rebuild started");
+
+    TEST_ASSERT_EQUAL_STRING(
+        "Actuator runtime rebuild started\r\n",
+        serialOutput.c_str());
+}
+
 void test_actuator_configuration_requires_runtime_apply() {
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(RuntimeAction::RestartActuatorRuntime),
@@ -421,6 +432,7 @@ int main(int, char**) {
     RUN_TEST(test_invalid_hardware_is_unavailable_without_blocking_valid_slot);
     RUN_TEST(test_capability_lookup_exposes_on_off_interface);
     RUN_TEST(test_serial_logger_preserves_messages_longer_than_old_buffer);
+    RUN_TEST(test_serial_logger_println_writes_exact_text_bytes);
     RUN_TEST(test_actuator_configuration_requires_runtime_apply);
     RUN_TEST(test_runtime_rebuild_adds_an_actuator_initialized_off);
     RUN_TEST(test_runtime_rebuild_moves_actuator_after_releasing_old_gpio);

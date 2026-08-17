@@ -3,13 +3,20 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 
 void SerialLogger::begin(unsigned long baud) {
     Serial.begin(baud);
 }
 
 void SerialLogger::println(const char* message) {
-    Serial.println(message);
+    if (message != nullptr) {
+        Serial.write(
+            reinterpret_cast<const uint8_t*>(message),
+            strlen(message));
+    }
+    static const uint8_t newline[] = {'\r', '\n'};
+    Serial.write(newline, sizeof(newline));
 }
 
 void SerialLogger::printf(const char* format, ...) {
