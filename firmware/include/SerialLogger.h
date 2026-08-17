@@ -3,19 +3,16 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Logger.h"
+#include "ILogEntrySink.h"
 
-class SerialLogger : public ILogger {
+class SerialLogger : public EnvNode::ILogEntrySink {
 public:
     void begin(unsigned long baud) override;
-    void println(const char* message) override;
-    void printf(const char* format, ...) override;
+    void write(const EnvNode::LogEntry& entry) override;
 
 private:
     enum class WriteOperation : uint8_t {
-        PrintlnText,
-        PrintlnNewline,
-        Formatted,
+        CanonicalEntry,
     };
 
     void writeBytes(

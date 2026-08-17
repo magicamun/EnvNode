@@ -1,7 +1,5 @@
 #include "SerialLogger.h"
 #include <Arduino.h>
-#include <cstdarg>
-#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
@@ -26,53 +24,17 @@ void SerialLogger::begin(unsigned long baud) {
     Serial.begin(baud);
 }
 
-void SerialLogger::println(const char* message) {
-    if (message != nullptr) {
-        writeBytes(
-            reinterpret_cast<const uint8_t*>(message),
-            strlen(message),
-            WriteOperation::PrintlnText);
-    }
-    static const uint8_t newline[] = {'\r', '\n'};
-    writeBytes(newline, sizeof(newline), WriteOperation::PrintlnNewline);
-}
-
-void SerialLogger::printf(const char* format, ...) {
-    if (format == nullptr) return;
-
-    char localBuffer[128];
-    va_list args;
-    va_start(args, format);
-
-    va_list lengthArgs;
-    va_copy(lengthArgs, args);
-    const int requiredLength = vsnprintf(nullptr, 0, format, lengthArgs);
-    va_end(lengthArgs);
-    if (requiredLength < 0) {
-        va_end(args);
-        return;
-    }
-
-    char* output = localBuffer;
-    if (static_cast<size_t>(requiredLength) >= sizeof(localBuffer)) {
-        output = static_cast<char*>(malloc(static_cast<size_t>(requiredLength) + 1));
-        if (output == nullptr) {
-            va_end(args);
-            return;
-        }
-    }
-
-    const size_t outputCapacity = static_cast<size_t>(requiredLength) + 1;
-    const int formattedLength = vsnprintf(output, outputCapacity, format, args);
-    va_end(args);
-    if (formattedLength >= 0) {
-        writeBytes(
-            reinterpret_cast<const uint8_t*>(output),
-            static_cast<size_t>(formattedLength),
-            WriteOperation::Formatted);
-    }
-
-    if (output != localBuffer) free(output);
+void SerialLogger::write(const EnvNode::LogEntry& entry) {
+    char line[EnvNode::LogMessageCapacity + 2];
+    const size_t messageLength = strnlen(
+        entry.message, EnvNode::LogMessageCapacity - 1);
+    memcpy(line, entry.message, messageLength);
+    line[messageLength] = '\r';
+    line[messageLength + 1] = '\n';
+    writeBytes(
+        reinterpret_cast<const uint8_t*>(line),
+        messageLength + 2,
+        WriteOperation::CanonicalEntry);
 }
 
 void SerialLogger::writeBytes(
@@ -84,9 +46,7 @@ void SerialLogger::writeBytes(
 #if ENVNODE_SERIAL_WRITE_DIAGNOSTICS
     const char* operationText = "unknown";
     switch (operation) {
-        case WriteOperation::PrintlnText: operationText = "println"; break;
-        case WriteOperation::PrintlnNewline: operationText = "newline"; break;
-        case WriteOperation::Formatted: operationText = "printf"; break;
+        case WriteOperation::CanonicalEntry: operationText = "entry"; break;
     }
     char diagnostic[112];
     const int diagnosticLength = snprintf(

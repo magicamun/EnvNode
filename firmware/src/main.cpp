@@ -33,34 +33,40 @@
 #include "ControllerStatePublisher.h"
 #include "MqttMessageRouter.h"
 #include "MqttDescriptionPublisher.h"
+#include "StructuredLogger.h"
+#include "RecentLogStore.h"
+#include "SystemLogTimeProvider.h"
 
 using namespace EnvNode;
 
-static SerialLogger serialLogger;
-static ActuatorFactory actuatorFactory(serialLogger);
-static ActuatorRuntime actuatorRuntime(actuatorFactory, serialLogger);
-static I2CBusManager i2cBusManager(serialLogger);
-static ConfigurationService configurationService;
-static WiFiService wifiService(serialLogger, configurationService);
-static TimeService timeService(serialLogger, configurationService, wifiService);
-static MqttService mqttService(serialLogger, configurationService, wifiService);
-static ActuatorMqttAdapter actuatorMqttAdapter(
-    serialLogger, configurationService, mqttService, actuatorRuntime);
-static ActuatorStatePublisher actuatorStatePublisher(
-    serialLogger, configurationService, mqttService, actuatorRuntime);
 static ArduinoMonotonicClock monotonicClock;
+static SystemLogTimeProvider logTimeProvider(monotonicClock);
+static RecentLogStore recentLogStore;
+static SerialLogger serialLogSink;
+static StructuredLogger logger(recentLogStore, logTimeProvider, serialLogSink);
+static ActuatorFactory actuatorFactory(logger);
+static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
+static I2CBusManager i2cBusManager(logger);
+static ConfigurationService configurationService;
+static WiFiService wifiService(logger, configurationService);
+static TimeService timeService(logger, configurationService, wifiService);
+static MqttService mqttService(logger, configurationService, wifiService);
+static ActuatorMqttAdapter actuatorMqttAdapter(
+    logger, configurationService, mqttService, actuatorRuntime);
+static ActuatorStatePublisher actuatorStatePublisher(
+    logger, configurationService, mqttService, actuatorRuntime);
 static MeasurementSnapshotCache measurementSnapshotCache;
 static ControllerFactory controllerFactory(
-    measurementSnapshotCache, actuatorRuntime, monotonicClock, serialLogger);
-static ControllerRuntime controllerRuntime(controllerFactory, serialLogger);
+    measurementSnapshotCache, actuatorRuntime, monotonicClock, logger);
+static ControllerRuntime controllerRuntime(controllerFactory, logger);
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static SensorManager sensorManager(
     timeService,
     monotonicClock,
     measurementPublisher,
     measurementSnapshotCache);
-static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, serialLogger);
-static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, serialLogger);
+static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger);
+static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger);
 static SensorRuntime sensorRuntime(
     configurationService,
     firstSensorFactory,
@@ -68,23 +74,23 @@ static SensorRuntime sensorRuntime(
     sensorManager);
 static LocaleFormatter localeFormatter(configurationService);
 static RuntimeManager runtimeManager(
-    serialLogger, &sensorRuntime, &actuatorRuntime, &controllerRuntime);
+    logger, &sensorRuntime, &actuatorRuntime, &controllerRuntime);
 static ControllerMqttAdapter controllerMqttAdapter(
-    serialLogger, configurationService, mqttService, controllerRuntime, runtimeManager);
+    logger, configurationService, mqttService, controllerRuntime, runtimeManager);
 static MqttMessageRouter mqttMessageRouter(
     mqttService, actuatorMqttAdapter, controllerMqttAdapter);
 static ControllerStatePublisher controllerStatePublisher(
-    serialLogger, configurationService, mqttService, controllerRuntime);
+    logger, configurationService, mqttService, controllerRuntime);
 static MqttDescriptionPublisher mqttDescriptionPublisher(
-    serialLogger, configurationService, mqttService, monotonicClock);
+    logger, configurationService, mqttService, monotonicClock);
 static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
-    serialLogger,
+    logger,
     configurationService,
     mqttService,
     sensorManager);
-static OTAService otaService(serialLogger, runtimeManager);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
+static OTAService otaService(logger, runtimeManager);
+static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
+static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
 
 void setup() {
     i2cBusManager.begin();
@@ -95,7 +101,7 @@ void setup() {
         activeSensorCount, sensorFailureReason);
     app.setup(true);
     if (!sensorsInitialized) {
-        serialLogger.printf("Sensor runtime initialization failed: %s\n",
+        logger.printf("Sensor runtime initialization failed: %s\n",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
     }
 }

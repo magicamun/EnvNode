@@ -7,6 +7,9 @@
 #include "ActuatorRuntime.h"
 #include "ConfigurationRuntimeEffect.h"
 #include "SerialLogger.h"
+#include "StructuredLogger.h"
+#include "RecentLogStore.h"
+#include "ILogTimeProvider.h"
 
 using namespace EnvNode;
 
@@ -55,6 +58,12 @@ public:
 
     void printf(const char*, ...) override {
     }
+};
+
+class TestLogTimeProvider : public ILogTimeProvider {
+public:
+    uint32_t monotonicMs() const override { return 0; }
+    bool wallClockEpochSeconds(int64_t&) const override { return false; }
 };
 
 void initializeActuatorSlots(ActuatorSlotConfiguration* slots) {
@@ -298,19 +307,25 @@ void test_capability_lookup_exposes_on_off_interface() {
 }
 
 void test_serial_logger_preserves_messages_longer_than_old_buffer() {
-    SerialLogger logger;
-    const std::string longValue(300, 'x');
+    RecentLogStore store;
+    TestLogTimeProvider timeProvider;
+    SerialLogger sink;
+    StructuredLogger logger(store, timeProvider, sink);
+    const std::string longValue(180, 'x');
     serialOutput.clear();
 
     logger.printf("prefix:%s:suffix\n", longValue.c_str());
 
     TEST_ASSERT_EQUAL_STRING(
-        (std::string("prefix:") + longValue + ":suffix\n").c_str(),
+        (std::string("prefix:") + longValue + ":suffix\r\n").c_str(),
         serialOutput.c_str());
 }
 
 void test_serial_logger_println_writes_exact_text_bytes() {
-    SerialLogger logger;
+    RecentLogStore store;
+    TestLogTimeProvider timeProvider;
+    SerialLogger sink;
+    StructuredLogger logger(store, timeProvider, sink);
     serialOutput.clear();
     serialWriteCallCount = 0;
 
@@ -319,17 +334,20 @@ void test_serial_logger_println_writes_exact_text_bytes() {
     TEST_ASSERT_EQUAL_STRING(
         "Actuator runtime rebuild started\r\n",
         serialOutput.c_str());
-    TEST_ASSERT_EQUAL_UINT32(2, serialWriteCallCount);
+    TEST_ASSERT_EQUAL_UINT32(1, serialWriteCallCount);
 }
 
 void test_serial_logger_printf_uses_one_explicit_length_write() {
-    SerialLogger logger;
+    RecentLogStore store;
+    TestLogTimeProvider timeProvider;
+    SerialLogger sink;
+    StructuredLogger logger(store, timeProvider, sink);
     serialOutput.clear();
     serialWriteCallCount = 0;
 
     logger.printf("value=%u\n", 17U);
 
-    TEST_ASSERT_EQUAL_STRING("value=17\n", serialOutput.c_str());
+    TEST_ASSERT_EQUAL_STRING("value=17\r\n", serialOutput.c_str());
     TEST_ASSERT_EQUAL_UINT32(1, serialWriteCallCount);
 }
 
