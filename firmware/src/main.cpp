@@ -59,12 +59,11 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService, temporaryLedActuator);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, runtimeManager, homeAssistantDiscoveryPublisher);
 
-// Temporary hardware smoke test. Remove after the GPIO OnOff actuator has been
-// verified with an LED and series resistor on GPIO14.
-static void runTemporaryLedActuatorSmokeTest() {
+// Temporary fixed runtime actuator for an LED and series resistor on GPIO16.
+static void initializeTemporaryLedActuator() {
     const Configuration& configuration = configurationService.getConfiguration();
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         const SensorSlotConfiguration& slot = configuration.sensorSlots[index];
@@ -72,7 +71,7 @@ static void runTemporaryLedActuatorSmokeTest() {
             && slot.implementation != SensorImplementation::None
             && exclusiveHardwareResourceConflict(slot.hardware, temporaryLedHardware)) {
             serialLogger.printf(
-                "Temporary LED actuator smoke test skipped: GPIO14 conflicts with sensor %u\n",
+                "Temporary LED actuator initialization skipped: GPIO16 conflicts with sensor %u\n",
                 slot.slotId);
             return;
         }
@@ -81,26 +80,12 @@ static void runTemporaryLedActuatorSmokeTest() {
     const ActuatorOperationResult initializationResult = temporaryLedActuator.begin();
     if (initializationResult != ActuatorOperationResult::Completed) {
         serialLogger.printf(
-            "Temporary LED actuator smoke test initialization failed: result=%u\n",
+            "Temporary LED actuator initialization failed: result=%u\n",
             static_cast<unsigned int>(initializationResult));
         return;
     }
 
-    serialLogger.println("Temporary LED actuator smoke test initialized successfully");
-    if (temporaryLedActuator.setState(OnOffState::On)
-        != ActuatorOperationResult::Completed) {
-        serialLogger.println("Temporary LED actuator smoke test failed to switch On");
-        return;
-    }
-    serialLogger.println("Temporary LED actuator smoke test: On for 3000 ms");
-    delay(3000);
-
-    if (temporaryLedActuator.setState(OnOffState::Off)
-        != ActuatorOperationResult::Completed) {
-        serialLogger.println("Temporary LED actuator smoke test failed to switch Off");
-        return;
-    }
-    serialLogger.println("Temporary LED actuator smoke test: Off");
+    serialLogger.println("Temporary LED actuator initialized successfully: Off");
 }
 
 void setup() {
@@ -112,7 +97,7 @@ void setup() {
         activeSensorCount, sensorFailureReason);
 
     app.setup(true);
-    runTemporaryLedActuatorSmokeTest();
+    initializeTemporaryLedActuator();
     if (!sensorsInitialized) {
         serialLogger.printf("Sensor runtime initialization failed: %s\n",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);

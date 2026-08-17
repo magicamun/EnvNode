@@ -319,17 +319,20 @@ String measurementTimeDisplay(
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
     SensorManager& sensorManager, MeasurementSnapshotCache& measurementSnapshotCache,
-    IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService)
+    IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService,
+    IOnOffActuator& temporaryLedActuator)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), measurementSnapshotCache_(measurementSnapshotCache),
-      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService) {}
+      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
+      temporaryLedActuator_(temporaryLedActuator) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
+    server_.on("/actuator", HTTP_GET, [this]() { handleActuator(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
     server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
@@ -351,6 +354,8 @@ void WebService::begin() {
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
     server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
     server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
+    server_.on("/actuator/on", HTTP_POST, [this]() { handleActuatorOn(); });
+    server_.on("/actuator/off", HTTP_POST, [this]() { handleActuatorOff(); });
     server_.on("/restart", HTTP_POST, [this]() { handleRestart(); });
     server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
     server_.onNotFound([this]() { handleNotFound(); });
@@ -466,7 +471,7 @@ String WebService::otaStatusHtml() const {
 }
 
 String WebService::navigationHtml(const char* active) const {
-    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
+    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/actuator","Actuator"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
     String html;
     html.reserve(560);
     html = "<nav class='nav'>";
@@ -540,6 +545,45 @@ void WebService::handleStatus() {
     c += "<section class='card'><h2>Time</h2><div class='kv'><span>Status</span><span>" + badge(timeService_.synchronized()?"Synchronized":"Synchronizing",timeService_.synchronized()?"good":"warn") + "</span><span>Local time</span><span>" + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + "</span></div></section>";
     c += "<section class='card'><h2>Sensors</h2><div class='kv'><span>Registered</span><span>" + localeFormatter_.formatNumber(sensorManager_.sensorCount(), 0) + "</span></div><p><a href='/sensors'>View sensor runtime state</a></p></section></div>";
     sendPage("Status", "/status", c);
+}
+
+void WebService::handleActuator() {
+    const bool initialized = temporaryLedActuator_.initialized();
+    const OnOffState state = temporaryLedActuator_.state();
+    String content;
+    content.reserve(700);
+    content = "<section class='card'><h2>Test LED</h2><p class='help'>Temporary runtime actuator. Its state is not stored in configuration.</p><div class='kv'><span>Initialization</span><span>";
+    content += initialized ? badge("Initialized", "good") : badge("Unavailable", "bad");
+    content += "</span><span>Current state</span><span>";
+    content += state == OnOffState::On ? badge("On", "good") : badge("Off", "warn");
+    content += "</span></div><div class='actions'><form method='post' action='/actuator/on'><button type='submit'";
+    if (!initialized) content += " disabled";
+    content += ">On</button></form><form method='post' action='/actuator/off'><button type='submit'";
+    if (!initialized) content += " disabled";
+    content += ">Off</button></form></div></section>";
+    sendPage("Actuator", "/actuator", content);
+}
+
+void WebService::handleActuatorOn() {
+    setTemporaryLedState(OnOffState::On);
+}
+
+void WebService::handleActuatorOff() {
+    setTemporaryLedState(OnOffState::Off);
+}
+
+void WebService::setTemporaryLedState(OnOffState state) {
+    const ActuatorOperationResult result = temporaryLedActuator_.setState(state);
+    if (result == ActuatorOperationResult::Completed) {
+        server_.sendHeader("Location", "/actuator");
+        server_.send(303);
+        return;
+    }
+
+    const char* message = result == ActuatorOperationResult::NotInitialized
+        ? "Test LED is not initialized. The command was not applied."
+        : "Test LED hardware is unavailable. The command was not applied.";
+    sendResult("Test LED update failed", "/actuator", message, false);
 }
 
 void WebService::handleNetwork() {
