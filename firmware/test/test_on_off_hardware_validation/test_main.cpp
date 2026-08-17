@@ -5,8 +5,25 @@
 #include "ActuatorImplementationRegistry.h"
 #include "ActuatorFactory.h"
 #include "ActuatorRuntime.h"
+#include "SerialLogger.h"
 
 using namespace EnvNode;
+
+HardwareSerial Serial;
+std::string serialOutput;
+
+void HardwareSerial::begin(unsigned long) {
+}
+
+void HardwareSerial::println(const char* value) {
+    serialOutput += value == nullptr ? "" : value;
+    serialOutput += '\n';
+}
+
+size_t HardwareSerial::write(const uint8_t* data, size_t length) {
+    serialOutput.append(reinterpret_cast<const char*>(data), length);
+    return length;
+}
 
 void pinMode(unsigned char, int) {
 }
@@ -258,6 +275,18 @@ void test_capability_lookup_exposes_on_off_interface() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(capability->state()));
 }
 
+void test_serial_logger_preserves_messages_longer_than_old_buffer() {
+    SerialLogger logger;
+    const std::string longValue(300, 'x');
+    serialOutput.clear();
+
+    logger.printf("prefix:%s:suffix\n", longValue.c_str());
+
+    TEST_ASSERT_EQUAL_STRING(
+        (std::string("prefix:") + longValue + ":suffix\n").c_str(),
+        serialOutput.c_str());
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_gpio_with_digital_output_is_accepted);
@@ -275,5 +304,6 @@ int main(int, char**) {
     RUN_TEST(test_disabled_and_none_slots_do_not_create_runtime_actuators);
     RUN_TEST(test_invalid_hardware_is_unavailable_without_blocking_valid_slot);
     RUN_TEST(test_capability_lookup_exposes_on_off_interface);
+    RUN_TEST(test_serial_logger_preserves_messages_longer_than_old_buffer);
     return UNITY_END();
 }

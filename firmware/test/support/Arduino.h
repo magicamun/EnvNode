@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 class String {
@@ -29,3 +30,12 @@ constexpr int HIGH = 1;
 
 void pinMode(unsigned char pin, int mode);
 void digitalWrite(unsigned char pin, int value);
+
+class HardwareSerial {
+public:
+    void begin(unsigned long baud);
+    void println(const char* value);
+    size_t write(const uint8_t* data, size_t length);
+};
+
+extern HardwareSerial Serial;
