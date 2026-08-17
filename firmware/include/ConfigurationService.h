@@ -26,6 +26,7 @@ public:
     bool setLocale(Locale locale) override;
     bool setPresentationUnit(MeasurementType type, PresentationUnit unit) override;
     bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) override;
+    bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) override;
     bool resetToDefaults() override;
 
 private:
@@ -54,6 +55,14 @@ private:
     bool persistSensorSlot(const SensorSlotConfiguration& slot);
     bool validateSensorSlot(const SensorSlotConfiguration& slot) const;
     bool validateSensorSlots(const SensorSlotConfiguration* slots) const;
+    void initializeActuatorDefaults();
+    void loadActuatorSlots();
+    bool persistActuatorSlot(const ActuatorSlotConfiguration& slot);
+    bool validateActuatorSlot(const ActuatorSlotConfiguration& slot) const;
+    bool validateActuatorSlots(const ActuatorSlotConfiguration* slots) const;
+    bool validateHardwareOccupancy(
+        const SensorSlotConfiguration* sensorSlots,
+        const ActuatorSlotConfiguration* actuatorSlots) const;
 
     Configuration configuration_;
     Preferences preferences_;

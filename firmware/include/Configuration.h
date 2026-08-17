@@ -4,6 +4,7 @@
 #include "MeasurementType.h"
 #include "EnvNode/Locale.h"
 #include "SensorSlotConfiguration.h"
+#include "ActuatorSlotConfiguration.h"
 
 namespace EnvNode {
 
@@ -70,6 +71,7 @@ struct Configuration {
     LocaleConfiguration locale;
     PresentationConfiguration presentation;
     SensorSlotConfiguration sensorSlots[MaxSensorSlotCount];
+    ActuatorSlotConfiguration actuatorSlots[MaxActuatorSlotCount];
 
     PresentationUnit presentationUnitFor(MeasurementType type) const {
         return presentation.unitFor(type);

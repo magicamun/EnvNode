@@ -28,6 +28,7 @@ public:
     virtual bool setLocale(Locale locale) = 0;
     virtual bool setPresentationUnit(MeasurementType type, PresentationUnit unit) = 0;
     virtual bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) = 0;
+    virtual bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) = 0;
     virtual bool resetToDefaults() = 0;
 };
 

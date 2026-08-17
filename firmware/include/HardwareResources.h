@@ -54,6 +54,18 @@ struct HardwareResourceAssignment {
     static HardwareResourceAssignment i2cResource(I2CResource resource);
 };
 
+struct HardwareResourceClaim {
+    HardwareResourceClaim(
+        bool isActive = false,
+        HardwareResourceAssignment resourceAssignment = HardwareResourceAssignment())
+        : active(isActive)
+        , assignment(resourceAssignment) {
+    }
+
+    bool active;
+    HardwareResourceAssignment assignment;
+};
+
 enum class GpioCapability : uint8_t {
     None = 0,
     DigitalInput = 1U << 0,
@@ -133,6 +145,10 @@ const char* i2cBusName(I2CBus bus);
 bool exclusiveHardwareResourceConflict(
     const HardwareResourceAssignment& first,
     const HardwareResourceAssignment& second);
+
+bool validateExclusiveHardwareResourceOccupancy(
+    const HardwareResourceClaim* claims,
+    size_t claimCount);
 
 const char* hardwareInterfaceKindName(HardwareInterfaceKind kind);
 

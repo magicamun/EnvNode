@@ -164,4 +164,21 @@ bool exclusiveHardwareResourceConflict(
     return gpioConflict || i2cConflict;
 }
 
+bool validateExclusiveHardwareResourceOccupancy(
+    const HardwareResourceClaim* claims,
+    size_t claimCount) {
+    if (claims == nullptr && claimCount != 0) return false;
+    for (size_t index = 0; index < claimCount; ++index) {
+        if (!claims[index].active) continue;
+        for (size_t other = index + 1; other < claimCount; ++other) {
+            if (claims[other].active
+                && exclusiveHardwareResourceConflict(
+                    claims[index].assignment, claims[other].assignment)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 } // namespace EnvNode

@@ -3,6 +3,7 @@
 #include <Preferences.h>
 #include <IPAddress.h>
 #include "SensorImplementationRegistry.h"
+#include "ActuatorImplementationRegistry.h"
 #include "HardwareResources.h"
 #include <cmath>
 
@@ -49,6 +50,10 @@ constexpr size_t MaxHostnameLength = 63;
 String sensorKey(SensorId slotId, const char* field) {
     return "s" + String(slotId) + "_" + field;
 }
+
+String actuatorKey(ActuatorId slotId, const char* field) {
+    return "a" + String(slotId) + "_" + field;
+}
 }
 
 void ConfigurationService::ensurePreferencesStarted() {
@@ -86,6 +91,7 @@ void ConfigurationService::initializeDefaults() {
     configuration_.presentation.rainDetectorLevel =
         measurementTypeMetadata(MeasurementType::RainDetectorLevel).defaultPresentationUnit;
     initializeSensorDefaults();
+    initializeActuatorDefaults();
 }
 
 void ConfigurationService::initializeSensorDefaults() {
@@ -128,6 +134,17 @@ void ConfigurationService::initializeSensorDefaults() {
     am2302.schedule = SensorSchedule::periodic(5000);
     am2302.hardware = HardwareResourceAssignment::gpioResource(GpioResource(4));
     am2302.implementationConfiguration.am2302 = AM2302Configuration(GpioResource(4));
+}
+
+void ConfigurationService::initializeActuatorDefaults() {
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        ActuatorSlotConfiguration& slot = configuration_.actuatorSlots[index];
+        slot.slotId = static_cast<ActuatorId>(index + 1);
+        slot.enabled = false;
+        slot.name = "Actuator Slot " + String(index + 1);
+        slot.implementation = ActuatorImplementation::None;
+        slot.hardware = HardwareResourceAssignment::none();
+    }
 }
 
 void ConfigurationService::loadFromPreferences() {
@@ -186,6 +203,7 @@ void ConfigurationService::loadFromPreferences() {
     configuration_.presentation.rainDetectorLevel =
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
     loadSensorSlots();
+    loadActuatorSlots();
 }
 
 void ConfigurationService::loadSensorSlots() {
@@ -243,9 +261,45 @@ void ConfigurationService::loadSensorSlots() {
             preferences_.getUInt(sensorKey(expectedId, "rgdeb").c_str(), 50));
     }
 
-    if (validateSensorSlots(loaded)) {
+    if (validateSensorSlots(loaded)
+        && validateHardwareOccupancy(loaded, configuration_.actuatorSlots)) {
         for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
             configuration_.sensorSlots[index] = loaded[index];
+        }
+    }
+}
+
+void ConfigurationService::loadActuatorSlots() {
+    ActuatorSlotConfiguration loaded[MaxActuatorSlotCount];
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        loaded[index] = configuration_.actuatorSlots[index];
+        const ActuatorId expectedId = static_cast<ActuatorId>(index + 1);
+        const String implementationKey = actuatorKey(expectedId, "impl");
+        if (!preferences_.isKey(implementationKey.c_str())) continue;
+
+        loaded[index].slotId = static_cast<ActuatorId>(preferences_.getUInt(
+            actuatorKey(expectedId, "id").c_str(), expectedId));
+        loaded[index].enabled = preferences_.getUInt(
+            actuatorKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
+        loaded[index].name = preferences_.getString(
+            actuatorKey(expectedId, "name").c_str(), loaded[index].name);
+        const String stableImplementation = preferences_.getString(
+            implementationKey.c_str(), "none");
+        const ActuatorImplementationMetadata* metadata =
+            ActuatorImplementationRegistry::findByStableId(stableImplementation.c_str());
+        loaded[index].implementation = metadata == nullptr
+            ? static_cast<ActuatorImplementation>(255) : metadata->implementation;
+        const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
+            actuatorKey(expectedId, "gpio").c_str(), 0));
+        loaded[index].hardware = loaded[index].implementation == ActuatorImplementation::GpioOnOff
+            ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
+            : HardwareResourceAssignment::none();
+    }
+
+    if (validateActuatorSlots(loaded)
+        && validateHardwareOccupancy(configuration_.sensorSlots, loaded)) {
+        for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+            configuration_.actuatorSlots[index] = loaded[index];
         }
     }
 }
@@ -662,16 +716,56 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
 bool ConfigurationService::validateSensorSlots(const SensorSlotConfiguration* slots) const {
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         if (slots[index].slotId != index + 1 || !validateSensorSlot(slots[index])) return false;
-        if (!slots[index].enabled || slots[index].implementation == SensorImplementation::None) continue;
-        for (size_t other = index + 1; other < MaxSensorSlotCount; ++other) {
-            if (slots[other].enabled
-                && slots[other].implementation != SensorImplementation::None
-                && exclusiveHardwareResourceConflict(slots[index].hardware, slots[other].hardware)) {
-                return false;
-            }
+    }
+    return true;
+}
+
+bool ConfigurationService::validateActuatorSlot(
+    const ActuatorSlotConfiguration& slot) const {
+    if (!isValidActuatorId(slot.slotId) || slot.slotId > MaxActuatorSlotCount
+        || slot.name.isEmpty() || slot.name.length() > MaxActuatorSlotNameLength) {
+        return false;
+    }
+    const ActuatorImplementationMetadata* metadata =
+        ActuatorImplementationRegistry::find(slot.implementation);
+    if (metadata == nullptr) return false;
+    if (slot.implementation == ActuatorImplementation::None) {
+        return slot.hardware.kind == HardwareResourceKind::None;
+    }
+    return BoardCapabilities::current().validate(
+        metadata->interfaceKind,
+        slot.hardware,
+        metadata->requiredGpioCapabilities) == HardwareResourceValidationResult::Valid;
+}
+
+bool ConfigurationService::validateActuatorSlots(
+    const ActuatorSlotConfiguration* slots) const {
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        if (slots[index].slotId != index + 1 || !validateActuatorSlot(slots[index])) {
+            return false;
         }
     }
     return true;
+}
+
+bool ConfigurationService::validateHardwareOccupancy(
+    const SensorSlotConfiguration* sensorSlots,
+    const ActuatorSlotConfiguration* actuatorSlots) const {
+    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount];
+    size_t claimIndex = 0;
+    for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        claims[claimIndex].active = sensorSlots[index].enabled
+            && sensorSlots[index].implementation != SensorImplementation::None;
+        claims[claimIndex].assignment = sensorSlots[index].hardware;
+        ++claimIndex;
+    }
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        claims[claimIndex].active = actuatorSlots[index].enabled
+            && actuatorSlots[index].implementation != ActuatorImplementation::None;
+        claims[claimIndex].assignment = actuatorSlots[index].hardware;
+        ++claimIndex;
+    }
+    return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
 
 bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot) {
@@ -706,8 +800,38 @@ bool ConfigurationService::setSensorSlotConfiguration(const SensorSlotConfigurat
         candidate[index] = configuration_.sensorSlots[index];
     }
     candidate[slot.slotId - 1] = slot;
-    if (!validateSensorSlots(candidate) || !persistSensorSlot(slot)) return false;
+    if (!validateSensorSlots(candidate)
+        || !validateHardwareOccupancy(candidate, configuration_.actuatorSlots)
+        || !persistSensorSlot(slot)) return false;
     configuration_.sensorSlots[slot.slotId - 1] = slot;
+    return true;
+}
+
+bool ConfigurationService::persistActuatorSlot(const ActuatorSlotConfiguration& slot) {
+    const ActuatorImplementationMetadata* metadata =
+        ActuatorImplementationRegistry::find(slot.implementation);
+    if (metadata == nullptr) return false;
+    const ActuatorId id = slot.slotId;
+    return persistUInt(actuatorKey(id, "id").c_str(), id)
+        && persistUInt(actuatorKey(id, "en").c_str(), slot.enabled ? 1 : 0)
+        && persistString(actuatorKey(id, "name").c_str(), slot.name)
+        && persistString(actuatorKey(id, "impl").c_str(), metadata->stableId)
+        && persistUInt(actuatorKey(id, "gpio").c_str(),
+            slot.hardware.kind == HardwareResourceKind::GPIO ? slot.hardware.gpio.number : 0);
+}
+
+bool ConfigurationService::setActuatorSlotConfiguration(
+    const ActuatorSlotConfiguration& slot) {
+    if (!isValidActuatorId(slot.slotId) || slot.slotId > MaxActuatorSlotCount) return false;
+    ActuatorSlotConfiguration candidate[MaxActuatorSlotCount];
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        candidate[index] = configuration_.actuatorSlots[index];
+    }
+    candidate[slot.slotId - 1] = slot;
+    if (!validateActuatorSlots(candidate)
+        || !validateHardwareOccupancy(configuration_.sensorSlots, candidate)
+        || !persistActuatorSlot(slot)) return false;
+    configuration_.actuatorSlots[slot.slotId - 1] = slot;
     return true;
 }
 
