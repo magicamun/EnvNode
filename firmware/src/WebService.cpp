@@ -10,6 +10,7 @@
 #include "UnitConverter.h"
 #include "SensorImplementationRegistry.h"
 #include "SensorSlotConfiguration.h"
+#include "ActuatorImplementationRegistry.h"
 
 namespace EnvNode {
 namespace {
@@ -53,6 +54,23 @@ const char* sensorStateName(SensorState state) {
         case SensorState::Degraded: return "Degraded";
         case SensorState::Failed: return "Failed";
         default: return "Unknown";
+    }
+}
+
+const char* onOffStateName(OnOffState state) {
+    return state == OnOffState::On ? "On" : "Off";
+}
+
+const char* actuatorOperationFailure(ActuatorOperationResult result) {
+    switch (result) {
+        case ActuatorOperationResult::InvalidHardwareResource:
+            return "The actuator hardware resource is invalid.";
+        case ActuatorOperationResult::NotInitialized:
+            return "The actuator is not initialized.";
+        case ActuatorOperationResult::Completed:
+            return "The actuator operation completed.";
+        default:
+            return "The actuator operation failed.";
     }
 }
 
@@ -168,13 +186,13 @@ String hardwareAssignment(const SensorRuntimeInfo& info) {
     return "None";
 }
 
-String configuredHardwareAssignment(const SensorSlotConfiguration& slot) {
-    if (slot.hardware.kind == HardwareResourceKind::GPIO) {
-        return "GPIO" + String(slot.hardware.gpio.number);
+String configuredHardwareAssignment(const HardwareResourceAssignment& hardware) {
+    if (hardware.kind == HardwareResourceKind::GPIO) {
+        return "GPIO" + String(hardware.gpio.number);
     }
-    if (slot.hardware.kind == HardwareResourceKind::I2C) {
-        return String(i2cBusName(slot.hardware.i2c.bus)) + " / 0x"
-            + String(slot.hardware.i2c.address, HEX);
+    if (hardware.kind == HardwareResourceKind::I2C) {
+        return String(i2cBusName(hardware.i2c.bus)) + " / 0x"
+            + String(hardware.i2c.address, HEX);
     }
     return "None";
 }
@@ -194,15 +212,25 @@ bool sameHardwareAssignment(
 
 bool gpioAssignedToOtherEnabledSlot(
     const Configuration& configuration,
-    SensorId editedSlotId,
+    SensorId editedSensorSlotId,
+    ActuatorId editedActuatorSlotId,
     GpioResource gpio) {
     const HardwareResourceAssignment candidate =
         HardwareResourceAssignment::gpioResource(gpio);
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         const SensorSlotConfiguration& other = configuration.sensorSlots[index];
-        if (other.slotId == editedSlotId
+        if (other.slotId == editedSensorSlotId
             || !other.enabled
             || other.implementation == SensorImplementation::None) {
+            continue;
+        }
+        if (exclusiveHardwareResourceConflict(other.hardware, candidate)) return true;
+    }
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        const ActuatorSlotConfiguration& other = configuration.actuatorSlots[index];
+        if (other.slotId == editedActuatorSlotId
+            || !other.enabled
+            || other.implementation == ActuatorImplementation::None) {
             continue;
         }
         if (exclusiveHardwareResourceConflict(other.hardware, candidate)) return true;
@@ -318,19 +346,23 @@ String measurementTimeDisplay(
 
 WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
-    SensorManager& sensorManager, MeasurementSnapshotCache& measurementSnapshotCache,
+    SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime,
+    MeasurementSnapshotCache& measurementSnapshotCache,
     IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
-      sensorManager_(sensorManager), measurementSnapshotCache_(measurementSnapshotCache),
+      sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
+      measurementSnapshotCache_(measurementSnapshotCache),
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
+    server_.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
+    server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
     server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
     server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
     server_.on("/time", HTTP_GET, [this]() { handleTime(); });
@@ -351,6 +383,10 @@ void WebService::begin() {
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
     server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
     server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
+    server_.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
+    server_.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
+    server_.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
+    server_.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
     server_.on("/restart", HTTP_POST, [this]() { handleRestart(); });
     server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
     server_.onNotFound([this]() { handleNotFound(); });
@@ -411,6 +447,7 @@ const char* WebService::pendingActionMessage() const {
         case RuntimeAction::RestartTime: return "Configuration saved. Time service restart required.";
         case RuntimeAction::RestartWiFi: return "Configuration saved. WiFi restart required.";
         case RuntimeAction::RestartSensorManager: return "Configuration saved. Sensor Manager restart required.";
+        case RuntimeAction::RestartActuatorRuntime: return "Configuration saved. Actuator runtime apply required.";
         case RuntimeAction::RestartDevice: return "Configuration saved. Device restart required.";
         default: return "Configuration saved. Runtime action required.";
     }
@@ -421,12 +458,13 @@ String WebService::pendingRuntimeActionHtml() const {
     if (action == RuntimeAction::None) return String();
     String html;
     html.reserve(180);
-    html = "<div class='notice'><strong>Restart required</strong><p>Pending runtime action: ";
+    html = "<div class='notice'><strong>Runtime action required</strong><p>Pending runtime action: ";
     switch (action) {
         case RuntimeAction::RestartMqtt: html += "MQTT restart"; break;
         case RuntimeAction::RestartTime: html += "Time service restart"; break;
         case RuntimeAction::RestartWiFi: html += "WiFi restart"; break;
         case RuntimeAction::RestartSensorManager: html += "Sensor Manager restart"; break;
+        case RuntimeAction::RestartActuatorRuntime: html += "Actuator runtime apply"; break;
         case RuntimeAction::RestartDevice: html += "Device restart"; break;
         case RuntimeAction::None: break;
     }
@@ -466,7 +504,7 @@ String WebService::otaStatusHtml() const {
 }
 
 String WebService::navigationHtml(const char* active) const {
-    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
+    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/actuators","Actuators"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
     String html;
     html.reserve(560);
     html = "<nav class='nav'>";
@@ -616,7 +654,7 @@ void WebService::handleSensors() {
         c += "<tr><td class='sensor-technical'>" + String(slot.slotId) + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
         c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
         c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
-        c += "</td><td class='sensor-technical'>" + configuredHardwareAssignment(slot) + "</td><td class='sensor-technical'>";
+        c += "</td><td class='sensor-technical'>" + configuredHardwareAssignment(slot.hardware) + "</td><td class='sensor-technical'>";
         c += slot.schedule.acquisitionMode == AcquisitionMode::Periodic
             ? String(slot.schedule.sampleIntervalMs) + " ms" : "Event only";
         c += "</td><td>";
@@ -639,6 +677,73 @@ void WebService::handleSensors() {
     }
     c += "</tbody></table></div></section>";
     sendPage("Sensors", "/sensors", c);
+}
+
+void WebService::handleActuators() {
+    String c;
+    c.reserve(1300 + MaxActuatorSlotCount * 520);
+    if (runtimeManager_.pendingAction() == RuntimeAction::RestartActuatorRuntime) {
+        c = "<div class='notice'><strong>Actuator apply required</strong><p>Saved actuator configuration differs from the active runtime composition.</p><form method='post' action='/actuators/apply'><button>Apply Actuator Changes</button></form></div>";
+    }
+    c += "<section class='card'><h2>Actuator Slots</h2><p class='help'>Saved configuration is activated with Apply Actuator Changes. Runtime controls operate the currently active actuator.</p><div class='scroll'><table><thead><tr><th class='sensor-technical'>Slot</th><th>Name</th><th>Configured</th><th class='sensor-technical'>Hardware</th><th>Runtime</th><th class='sensor-technical'>Initialization</th><th class='sensor-technical'>State</th><th>Controls</th><th class='sensor-actions'></th></tr></thead><tbody>";
+    const Configuration& configuration = configurationService_.getConfiguration();
+    for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
+        const ActuatorSlotConfiguration& slot = configuration.actuatorSlots[slotIndex];
+        const ActuatorImplementationMetadata* metadata =
+            ActuatorImplementationRegistry::find(slot.implementation);
+        ActuatorRuntimeInfo runtime;
+        bool hasRuntime = false;
+        for (size_t runtimeIndex = 0; runtimeIndex < actuatorRuntime_.runtimeCount(); ++runtimeIndex) {
+            ActuatorRuntimeInfo candidate;
+            if (actuatorRuntime_.runtimeInfo(runtimeIndex, candidate)
+                && candidate.id == slot.slotId) {
+                runtime = candidate;
+                hasRuntime = true;
+                break;
+            }
+        }
+        const bool expectsRuntime = slot.enabled
+            && slot.implementation != ActuatorImplementation::None;
+        const bool runtimeMatches = expectsRuntime == hasRuntime
+            && (!hasRuntime || (runtime.implementation == slot.implementation
+                && String(runtime.name) == slot.name
+                && sameHardwareAssignment(runtime.hardware, slot.hardware)));
+        IOnOffActuator* onOff = actuatorRuntime_.onOffActuator(slot.slotId);
+
+        c += "<tr><td class='sensor-technical'>" + String(slot.slotId)
+            + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
+        c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
+        c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
+        c += "</td><td class='sensor-technical'>"
+            + configuredHardwareAssignment(slot.hardware) + "</td><td>";
+        if (hasRuntime) {
+            c += escapeHtml(runtime.name) + " / "
+                + configuredHardwareAssignment(runtime.hardware);
+        } else {
+            c += "No runtime Actuator";
+        }
+        if (!runtimeMatches) c += "<br>" + badge("Actuator apply required", "warn");
+        c += "</td><td class='sensor-technical'>";
+        if (!hasRuntime) c += "—";
+        else if (runtime.available) c += badge("Initialized", "good");
+        else if (runtime.initializationAttempted) c += badge("Failed", "bad");
+        else c += badge("Construction failed", "bad");
+        c += "</td><td class='sensor-technical'>";
+        c += onOff == nullptr ? "—" : onOffStateName(onOff->state());
+        c += "</td><td>";
+        if (onOff != nullptr) {
+            c += "<div class='actions'><form method='post' action='/actuators/on'><input type='hidden' name='slot' value='"
+                + String(slot.slotId) + "'><button type='submit'>On</button></form>"
+                + "<form method='post' action='/actuators/off'><input type='hidden' name='slot' value='"
+                + String(slot.slotId) + "'><button type='submit'>Off</button></form></div>";
+        } else {
+            c += "—";
+        }
+        c += "</td><td class='sensor-actions'><a class='button' href='/actuators/edit?slot="
+            + String(slot.slotId) + "'>Configure</a></td></tr>";
+    }
+    c += "</tbody></table></div></section>";
+    sendPage("Actuators", "/actuators", c);
 }
 
 void WebService::handleMeasurements() {
@@ -710,7 +815,8 @@ void WebService::handleSensorEdit() {
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
         if (gpio == nullptr) continue;
-        if (gpioAssignedToOtherEnabledSlot(configuration, slot.slotId, gpio->resource)) {
+        if (gpioAssignedToOtherEnabledSlot(
+                configuration, slot.slotId, InvalidActuatorId, gpio->resource)) {
             continue;
         }
         gpioOptions += "<option value='" + String(gpio->resource.number)
@@ -744,6 +850,76 @@ void WebService::handleSensorEdit() {
     }
     c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='bme280'?x.value==='68':false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='bme280'&&a.value==='68')a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
     sendPage("Configure Sensor Slot", "/sensors", c);
+}
+
+void WebService::handleActuatorEdit() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    if (requestedSlot < 1 || requestedSlot > static_cast<long>(MaxActuatorSlotCount)) {
+        sendResult("Invalid Actuator Slot", "/actuators",
+            "The requested Slot does not exist.", false);
+        return;
+    }
+    const ActuatorSlotConfiguration& slot =
+        configurationService_.getConfiguration().actuatorSlots[requestedSlot - 1];
+    const ActuatorImplementationMetadata* selected =
+        ActuatorImplementationRegistry::find(slot.implementation);
+    String options;
+    for (size_t index = 0; index < ActuatorImplementationRegistry::count(); ++index) {
+        const ActuatorImplementationMetadata* metadata =
+            ActuatorImplementationRegistry::at(index);
+        if (metadata == nullptr) continue;
+        options += "<option value='" + String(metadata->stableId)
+            + "' data-interface='" + hardwareInterfaceKindName(metadata->interfaceKind)
+            + "' data-requires='"
+            + String(static_cast<unsigned>(metadata->requiredGpioCapabilities)) + "'";
+        if (metadata->implementation == slot.implementation) options += " selected";
+        options += ">" + escapeHtml(metadata->displayType) + "</option>";
+    }
+    String gpioOptions;
+    const BoardCapabilities& board = BoardCapabilities::current();
+    const Configuration& configuration = configurationService_.getConfiguration();
+    for (size_t index = 0; index < board.gpioCount(); ++index) {
+        const BoardGpioCapability* gpio = board.gpioAt(index);
+        if (gpio == nullptr
+            || gpioAssignedToOtherEnabledSlot(
+                configuration, InvalidSensorId, slot.slotId, gpio->resource)) {
+            continue;
+        }
+        gpioOptions += "<option value='" + String(gpio->resource.number)
+            + "' data-capabilities='"
+            + String(static_cast<unsigned>(gpio->capabilities)) + "'";
+        if (slot.hardware.kind == HardwareResourceKind::GPIO
+            && slot.hardware.gpio.number == gpio->resource.number) {
+            gpioOptions += " selected";
+        }
+        gpioOptions += ">" + String(gpio->displayName) + "</option>";
+    }
+    String c;
+    c.reserve(2200);
+    c = "<section class='card'><h2>Configure Slot " + String(slot.slotId)
+        + "</h2><p class='help'>Saved changes become active after applying the actuator composition.</p><form method='post' action='/actuators/save'><input type='hidden' name='slot' value='"
+        + String(slot.slotId) + "'>";
+    c += "<label class='choice'><input type='checkbox' name='enabled' value='1'"
+        + String(slot.enabled ? " checked" : "") + ">Enabled</label>";
+    c += "<label>Name<input name='name' maxlength='"
+        + String(MaxActuatorSlotNameLength) + "' required value='"
+        + escapeHtml(slot.name) + "'></label>";
+    c += "<label>Implementation<select id='actuatorImplementation' name='implementation'>"
+        + options + "</select></label>";
+    c += "<div id='actuatorGpioConfiguration'><label>GPIO<select name='gpio'>"
+        + gpioOptions + "</select></label></div>";
+    c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/actuators'>Cancel</a></div></form></section>";
+    if (selected != nullptr) {
+        c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>"
+            + escapeHtml(selected->displayType) + "</span><span>Interface</span><span>"
+            + hardwareInterfaceKindName(selected->interfaceKind) + " / "
+            + escapeHtml(selected->protocolDescription)
+            + "</span><span>Capability</span><span>"
+            + String(hasActuatorCapability(selected->capabilities, ActuatorCapability::OnOff)
+                ? "On/Off" : "None") + "</span></div></section>";
+    }
+    c += "<script>function actuatorFields(reset){const s=document.getElementById('actuatorImplementation');const o=s.options[s.selectedIndex];const p=document.getElementById('actuatorGpioConfiguration');p.style.display=o.dataset.interface==='GPIO'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}}document.getElementById('actuatorImplementation').addEventListener('change',()=>actuatorFields(true));actuatorFields(false);</script>";
+    sendPage("Configure Actuator Slot", "/actuators", c);
 }
 
 void WebService::handleDiagnostics() {
@@ -979,6 +1155,78 @@ void WebService::handleSensorApply() {
         "/sensors",
         "The complete Sensor runtime composition was rebuilt successfully.",
         true);
+}
+void WebService::handleActuatorSave() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    const ActuatorImplementationMetadata* metadata =
+        ActuatorImplementationRegistry::findByStableId(
+            server_.arg("implementation").c_str());
+    bool ok = requestedSlot >= 1
+        && requestedSlot <= static_cast<long>(MaxActuatorSlotCount)
+        && metadata != nullptr;
+    ActuatorSlotConfiguration slot;
+    if (ok) {
+        slot = configurationService_.getConfiguration().actuatorSlots[requestedSlot - 1];
+        slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
+        slot.name = server_.arg("name");
+        slot.implementation = metadata->implementation;
+        slot.hardware = HardwareResourceAssignment::none();
+        if (metadata->interfaceKind == HardwareInterfaceKind::GPIO) {
+            const long gpio = server_.arg("gpio").toInt();
+            if (gpio < 0 || gpio > 255) ok = false;
+            else slot.hardware = HardwareResourceAssignment::gpioResource(
+                GpioResource(static_cast<uint8_t>(gpio)));
+        }
+    }
+    if (ok) ok = configurationService_.setActuatorSlotConfiguration(slot);
+    sendConfigurationResult(
+        configurationSaveResult(ok, ConfigurationArea::Actuators),
+        "Actuator Slot saved",
+        "Actuator Slot save failed",
+        "/actuators",
+        "Invalid Slot configuration, hardware resource, or resource conflict.");
+}
+void WebService::handleActuatorOn() { handleActuatorState(OnOffState::On); }
+void WebService::handleActuatorOff() { handleActuatorState(OnOffState::Off); }
+void WebService::handleActuatorState(OnOffState state) {
+    const long requestedSlot = server_.arg("slot").toInt();
+    if (requestedSlot < 1 || requestedSlot > static_cast<long>(MaxActuatorSlotCount)) {
+        sendResult("Actuator command failed", "/actuators",
+            "The requested Actuator Slot does not exist.", false);
+        return;
+    }
+    IOnOffActuator* actuator = actuatorRuntime_.onOffActuator(
+        static_cast<ActuatorId>(requestedSlot));
+    if (actuator == nullptr) {
+        sendResult("Actuator command failed", "/actuators",
+            "No initialized On/Off actuator is active for this Slot.", false);
+        return;
+    }
+    const ActuatorOperationResult result = actuator->setState(state);
+    if (result != ActuatorOperationResult::Completed) {
+        sendResult("Actuator command failed", "/actuators",
+            actuatorOperationFailure(result), false);
+        return;
+    }
+    server_.sendHeader("Location", "/actuators", true);
+    server_.send(303, "text/plain", "See Other");
+}
+void WebService::handleActuatorApply() {
+    if (runtimeManager_.pendingAction() != RuntimeAction::RestartActuatorRuntime) {
+        sendResult("Actuator changes not applied", "/actuators",
+            "No actuator runtime apply is pending, or a stronger runtime action takes priority.",
+            false);
+        return;
+    }
+    if (!runtimeManager_.applyPendingActuatorChanges(
+            configurationService_.getConfiguration().actuatorSlots)) {
+        sendResult("Actuator changes not applied", "/actuators",
+            "The actuator runtime rebuild failed. The previous composition was retained or restored; see logs.",
+            false);
+        return;
+    }
+    server_.sendHeader("Location", "/actuators", true);
+    server_.send(303, "text/plain", "See Other");
 }
 void WebService::handleRestart() { if(otaService_.busy()){sendResult("Restart unavailable","/firmware","A firmware upload is currently active.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Restarting","/firmware","The device is restarting now.",true); performExplicitRestart(); }
 void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult("Factory reset unavailable","/firmware","A firmware upload is currently active.",false);return;} if(!configurationService_.resetToDefaults()){sendResult("Factory reset failed","/firmware","Stored configuration could not be cleared.",false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult("Factory reset complete","/firmware","Configuration erased. Restarting into provisioning mode.",true);performExplicitRestart(); }

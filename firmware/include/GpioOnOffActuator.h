@@ -13,6 +13,7 @@ public:
         ILogger& logger);
 
     ActuatorOperationResult begin() override;
+    ActuatorOperationResult shutdown() override;
     ActuatorOperationResult setState(OnOffState state) override;
     OnOffState state() const override;
     bool initialized() const override;

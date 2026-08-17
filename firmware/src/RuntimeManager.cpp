@@ -11,14 +11,19 @@ const char* runtimeActionName(RuntimeAction action) {
         case RuntimeAction::RestartTime: return "RestartTime";
         case RuntimeAction::RestartWiFi: return "RestartWiFi";
         case RuntimeAction::RestartSensorManager: return "RestartSensorManager";
+        case RuntimeAction::RestartActuatorRuntime: return "RestartActuatorRuntime";
         case RuntimeAction::RestartDevice: return "RestartDevice";
         default: return "Unknown";
     }
 }
 
-RuntimeManager::RuntimeManager(ILogger& logger, ISensorRuntime* sensorRuntime)
+RuntimeManager::RuntimeManager(
+    ILogger& logger,
+    ISensorRuntime* sensorRuntime,
+    ActuatorRuntime* actuatorRuntime)
     : logger_(logger)
-    , sensorRuntime_(sensorRuntime) {
+    , sensorRuntime_(sensorRuntime)
+    , actuatorRuntime_(actuatorRuntime) {
 }
 
 void RuntimeManager::request(RuntimeAction action) {
@@ -71,6 +76,22 @@ bool RuntimeManager::applyPendingSensorChanges() {
     pendingAction_ = RuntimeAction::None;
     logger_.printf("Sensor runtime rebuild successful: %u sensors active\n",
         static_cast<unsigned int>(activeSensorCount));
+    return true;
+}
+
+bool RuntimeManager::applyPendingActuatorChanges(
+    const ActuatorSlotConfiguration* slots) {
+    if (pendingAction_ != RuntimeAction::RestartActuatorRuntime
+        || actuatorRuntime_ == nullptr
+        || slots == nullptr) {
+        return false;
+    }
+    logger_.println("Actuator runtime rebuild started");
+    if (!actuatorRuntime_->rebuild(slots)) {
+        logger_.println("Actuator runtime rebuild failed");
+        return false;
+    }
+    pendingAction_ = RuntimeAction::None;
     return true;
 }
 

@@ -52,14 +52,14 @@ static SensorRuntime sensorRuntime(
     secondSensorFactory,
     sensorManager);
 static LocaleFormatter localeFormatter(configurationService);
-static RuntimeManager runtimeManager(serialLogger, &sensorRuntime);
+static RuntimeManager runtimeManager(serialLogger, &sensorRuntime, &actuatorRuntime);
 static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     serialLogger,
     configurationService,
     mqttService,
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
-static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
+static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
 static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, runtimeManager, homeAssistantDiscoveryPublisher);
 
 void setup() {

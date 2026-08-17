@@ -10,6 +10,7 @@ enum class RuntimeAction : uint8_t {
     RestartTime,
     RestartWiFi,
     RestartSensorManager,
+    RestartActuatorRuntime,
     RestartDevice,
 };
 

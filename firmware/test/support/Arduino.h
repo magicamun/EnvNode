@@ -20,11 +20,20 @@ public:
         return value_.c_str();
     }
 
+    bool isEmpty() const {
+        return value_.empty();
+    }
+
+    size_t length() const {
+        return value_.length();
+    }
+
 private:
     std::string value_;
 };
 
 constexpr int OUTPUT = 1;
+constexpr int INPUT = 0;
 constexpr int LOW = 0;
 constexpr int HIGH = 1;
 

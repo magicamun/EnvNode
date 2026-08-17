@@ -5,12 +5,18 @@
 #include "ActuatorImplementationRegistry.h"
 #include "ActuatorFactory.h"
 #include "ActuatorRuntime.h"
+#include "ConfigurationRuntimeEffect.h"
 #include "SerialLogger.h"
 
 using namespace EnvNode;
 
 HardwareSerial Serial;
 std::string serialOutput;
+int gpioModes[256] = {};
+int gpioValues[256] = {};
+int gpioEventPins[512] = {};
+int gpioEventActions[512] = {};
+size_t gpioEventCount = 0;
 
 void HardwareSerial::begin(unsigned long) {
 }
@@ -25,10 +31,16 @@ size_t HardwareSerial::write(const uint8_t* data, size_t length) {
     return length;
 }
 
-void pinMode(unsigned char, int) {
+void pinMode(unsigned char pin, int mode) {
+    gpioModes[pin] = mode;
+    gpioEventPins[gpioEventCount] = pin;
+    gpioEventActions[gpioEventCount++] = 100 + mode;
 }
 
-void digitalWrite(unsigned char, int) {
+void digitalWrite(unsigned char pin, int value) {
+    gpioValues[pin] = value;
+    gpioEventPins[gpioEventCount] = pin;
+    gpioEventActions[gpioEventCount++] = value;
 }
 
 class TestLogger : public ILogger {
@@ -196,6 +208,14 @@ void test_runtime_constructs_independent_gpio_on_off_instances_and_looks_up_by_i
         static_cast<int>(first->setState(OnOffState::On)));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On), static_cast<int>(first->state()));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(second->state()));
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ActuatorOperationResult::Completed),
+        static_cast<int>(second->setState(OnOffState::On)));
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ActuatorOperationResult::Completed),
+        static_cast<int>(first->setState(OnOffState::Off)));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(first->state()));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On), static_cast<int>(second->state()));
     TEST_ASSERT_EQUAL_UINT32(2, runtime.runtimeCount());
     TEST_ASSERT_EQUAL_UINT32(2, runtime.availableCount());
 }
@@ -287,6 +307,102 @@ void test_serial_logger_preserves_messages_longer_than_old_buffer() {
         serialOutput.c_str());
 }
 
+void test_actuator_configuration_requires_runtime_apply() {
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(RuntimeAction::RestartActuatorRuntime),
+        static_cast<int>(runtimeActionFor(ConfigurationArea::Actuators)));
+}
+
+void test_runtime_rebuild_adds_an_actuator_initialized_off() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    runtime.initialize(slots);
+
+    configureGpioOnOffSlot(slots[0], "Added", 16);
+    TEST_ASSERT_TRUE(runtime.rebuild(slots));
+
+    IOnOffActuator* actuator = runtime.onOffActuator(1);
+    TEST_ASSERT_NOT_NULL(actuator);
+    TEST_ASSERT_TRUE(actuator->initialized());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(actuator->state()));
+    TEST_ASSERT_EQUAL_INT(OUTPUT, gpioModes[16]);
+    TEST_ASSERT_EQUAL_INT(LOW, gpioValues[16]);
+}
+
+void test_runtime_rebuild_moves_actuator_after_releasing_old_gpio() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    configureGpioOnOffSlot(slots[0], "Moved", 16);
+    runtime.initialize(slots);
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ActuatorOperationResult::Completed),
+        static_cast<int>(runtime.onOffActuator(1)->setState(OnOffState::On)));
+
+    slots[0].hardware = HardwareResourceAssignment::gpioResource(GpioResource(17));
+    gpioEventCount = 0;
+    TEST_ASSERT_TRUE(runtime.rebuild(slots));
+
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT32(4, gpioEventCount);
+    TEST_ASSERT_EQUAL_INT(16, gpioEventPins[0]);
+    TEST_ASSERT_EQUAL_INT(LOW, gpioEventActions[0]);
+    TEST_ASSERT_EQUAL_INT(16, gpioEventPins[1]);
+    TEST_ASSERT_EQUAL_INT(100 + INPUT, gpioEventActions[1]);
+    TEST_ASSERT_EQUAL_INT(17, gpioEventPins[2]);
+    TEST_ASSERT_EQUAL_INT(100 + OUTPUT, gpioEventActions[2]);
+    TEST_ASSERT_EQUAL_INT(LOW, gpioValues[16]);
+    TEST_ASSERT_EQUAL_INT(INPUT, gpioModes[16]);
+    TEST_ASSERT_EQUAL_INT(OUTPUT, gpioModes[17]);
+    IOnOffActuator* moved = runtime.onOffActuator(1);
+    TEST_ASSERT_NOT_NULL(moved);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(moved->state()));
+}
+
+void test_runtime_rebuild_removes_and_deinitializes_actuator() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    configureGpioOnOffSlot(slots[0], "Removed", 16);
+    runtime.initialize(slots);
+    runtime.onOffActuator(1)->setState(OnOffState::On);
+
+    slots[0].enabled = false;
+    TEST_ASSERT_TRUE(runtime.rebuild(slots));
+
+    TEST_ASSERT_NULL(runtime.onOffActuator(1));
+    TEST_ASSERT_EQUAL_UINT32(0, runtime.runtimeCount());
+    TEST_ASSERT_EQUAL_INT(LOW, gpioValues[16]);
+    TEST_ASSERT_EQUAL_INT(INPUT, gpioModes[16]);
+}
+
+void test_failed_rebuild_does_not_activate_invalid_new_composition() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    configureGpioOnOffSlot(slots[0], "Existing", 16);
+    runtime.initialize(slots);
+    runtime.onOffActuator(1)->setState(OnOffState::On);
+
+    slots[0].hardware = HardwareResourceAssignment::gpioResource(GpioResource(34));
+    TEST_ASSERT_FALSE(runtime.rebuild(slots));
+
+    IOnOffActuator* existing = runtime.onOffActuator(1);
+    TEST_ASSERT_NOT_NULL(existing);
+    TEST_ASSERT_TRUE(existing->initialized());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On), static_cast<int>(existing->state()));
+    TEST_ASSERT_EQUAL_INT(OUTPUT, gpioModes[16]);
+    TEST_ASSERT_NOT_EQUAL(OUTPUT, gpioModes[34]);
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_gpio_with_digital_output_is_accepted);
@@ -305,5 +421,10 @@ int main(int, char**) {
     RUN_TEST(test_invalid_hardware_is_unavailable_without_blocking_valid_slot);
     RUN_TEST(test_capability_lookup_exposes_on_off_interface);
     RUN_TEST(test_serial_logger_preserves_messages_longer_than_old_buffer);
+    RUN_TEST(test_actuator_configuration_requires_runtime_apply);
+    RUN_TEST(test_runtime_rebuild_adds_an_actuator_initialized_off);
+    RUN_TEST(test_runtime_rebuild_moves_actuator_after_releasing_old_gpio);
+    RUN_TEST(test_runtime_rebuild_removes_and_deinitializes_actuator);
+    RUN_TEST(test_failed_rebuild_does_not_activate_invalid_new_composition);
     return UNITY_END();
 }

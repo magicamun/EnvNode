@@ -8,6 +8,7 @@
 #include "IMqttService.h"
 #include "ITimeService.h"
 #include "SensorManager.h"
+#include "ActuatorRuntime.h"
 #include "MeasurementSnapshotCache.h"
 #include "LocaleFormatter.h"
 #include "RuntimeManager.h"
@@ -28,6 +29,7 @@ public:
         ITimeService& timeService,
         LocaleFormatter& localeFormatter,
         SensorManager& sensorManager,
+        ActuatorRuntime& actuatorRuntime,
         MeasurementSnapshotCache& measurementSnapshotCache,
         IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
@@ -39,10 +41,17 @@ public:
 private:
     void handleStatus();
     void handleSensors();
+    void handleActuators();
     void handleMeasurements();
     void handleSensorEdit();
     void handleSensorSave();
     void handleSensorApply();
+    void handleActuatorEdit();
+    void handleActuatorSave();
+    void handleActuatorApply();
+    void handleActuatorOn();
+    void handleActuatorOff();
+    void handleActuatorState(OnOffState state);
     void handleNetwork();
     void handleMqtt();
     void handleTime();
@@ -87,6 +96,7 @@ private:
     ITimeService& timeService_;
     LocaleFormatter& localeFormatter_;
     SensorManager& sensorManager_;
+    ActuatorRuntime& actuatorRuntime_;
     MeasurementSnapshotCache& measurementSnapshotCache_;
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;

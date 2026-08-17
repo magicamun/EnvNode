@@ -12,6 +12,7 @@ enum class ConfigurationArea {
     PresentationUnits,
     Device,
     Sensors,
+    Actuators,
 };
 
 struct ConfigurationSaveResult {
