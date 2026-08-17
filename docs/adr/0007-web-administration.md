@@ -95,8 +95,11 @@ Implemented and extended with Sensors, Actuators and Controllers administration.
 - configuration edits use `IConfigurationService` and explicit runtime-apply actions
 - Actuator runtime commands use `ActuatorRuntime` capability lookup
 - Controller Start/Stop uses `ControllerRuntime`
+- Blink and Threshold edits use typed Controller Slot configuration
+- Threshold source Measurements are derived from the selected Sensor implementation's metadata
+- target filtering reflects `OnOff` capability and other enabled Controllers' ownership
 
-WebService does not construct domain objects, manipulate GPIO, or call concrete Actuator or Controller implementations.
+ConfigurationService remains authoritative over compatibility, cross-reference integrity and exclusive Controller target ownership. WebService does not construct domain objects, manipulate GPIO, or call concrete Actuator or Controller implementations.
 
 ---
 

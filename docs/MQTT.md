@@ -45,6 +45,14 @@ Status is retained runtime truth. Blink currently publishes a compact JSON objec
 
 It changes after Start/Stop, Blink phase transitions, target availability or operation-result changes, runtime rebuild and MQTT reconnect. It does not duplicate target Actuator state.
 
+Threshold publishes this exact field contract:
+
+```json
+{"running":true,"source_available":true,"measurement_valid":true,"stale":false,"decision":"on","target_available":true,"output_pending":false,"last_result":"completed"}
+```
+
+`decision` is `unknown`, `on` or `off`; Unknown is not mapped to Off. Status represents current Controller diagnostics and does not reinterpret missing, invalid or stale input as an Off command. It intentionally omits the latest numeric value because Sensor MQTT remains authoritative for Measurement telemetry. Change detection prevents identical status from being published every application loop.
+
 ## Controller runtime commands
 
 ```text
@@ -55,7 +63,7 @@ Accepted payloads are exact `START` and `STOP` values. They call `ControllerRunt
 
 ## Controller parameter state and commands
 
-Blink parameter state is published retained on:
+Implementation-specific parameter state is published retained and is authoritative persisted configuration. Blink uses:
 
 ```text
 envnode/<device>/controller/<ControllerId>/parameter/on_duration_ms
@@ -64,6 +72,14 @@ envnode/<device>/controller/<ControllerId>/parameter/off_duration_ms
 
 These are authoritative persisted values. EnvNode does not subscribe to these topics.
 
+Threshold uses:
+
+```text
+envnode/<device>/controller/<ControllerId>/parameter/on_threshold
+envnode/<device>/controller/<ControllerId>/parameter/off_threshold
+envnode/<device>/controller/<ControllerId>/parameter/max_measurement_age_ms
+```
+
 External mutation requests use separate, non-retained command topics:
 
 ```text
@@ -71,7 +87,15 @@ envnode/<device>/controller/<ControllerId>/cmd/parameter/on_duration_ms
 envnode/<device>/controller/<ControllerId>/cmd/parameter/off_duration_ms
 ```
 
-Payloads are decimal milliseconds from 1 through `INT32_MAX`.
+Threshold mutation topics are:
+
+```text
+envnode/<device>/controller/<ControllerId>/cmd/parameter/on_threshold
+envnode/<device>/controller/<ControllerId>/cmd/parameter/off_threshold
+envnode/<device>/controller/<ControllerId>/cmd/parameter/max_measurement_age_ms
+```
+
+Blink durations and Threshold maximum age use decimal milliseconds. Threshold values use finite, locale-independent decimal floating-point syntax. Complete candidate validation enforces threshold ordering, freshness range, source compatibility, target capability and exclusive enabled-Controller target ownership.
 
 The mutation path is:
 
@@ -92,9 +116,13 @@ Separating `parameter/...` state from `cmd/parameter/...` mutation prevents EnvN
 
 Web and MQTT share the same persistent Controller configuration. Web changes therefore update retained MQTT parameter state, and accepted MQTT changes appear in Web administration.
 
+Threshold's `MeasurementSourceReference` is structural (`SensorId + MeasurementType`) and is intentionally not exposed as independently mutable scalar MQTT parameters. There are no `source_sensor_id` or `source_measurement_type` mutation topics; source selection currently uses the complete configuration/Web path to avoid invalid intermediate references.
+
 ## Reconnect behavior
 
 After reconnect, command subscriptions are restored and current retained Actuator state, Controller status and Controller parameters are republished. EnvNode does not infer commands from retained state.
+
+Controller status describes behavior and decision. Actuator status describes actual output. A manual Actuator command can therefore make actual state temporarily differ from a Controller's last phase or decision without causing MQTT-side reconciliation.
 
 ## Home Assistant and self-description
 

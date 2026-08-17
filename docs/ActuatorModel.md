@@ -63,21 +63,37 @@ Controllers do not own hardware assignments and do not participate in occupancy 
 
 ## Controllers and capability resolution
 
-The first Controller implementation is Blink:
+The implemented Controller composition and Measurement-driven path are:
 
 ```mermaid
 flowchart LR
-    C[ControllerSlotConfiguration] --> CR[ControllerRuntime]
+    S[Sensor] --> M[Measurement]
+    M --> C[MeasurementSnapshotCache]
+    C --> MR[IMeasurementResolver]
+    CC[ControllerSlotConfiguration] --> REG[ControllerImplementationRegistry]
+    REG --> F[ControllerFactory]
+    F --> CR[ControllerRuntime]
     CR --> B[BlinkController]
+    CR --> T[ThresholdController]
+    MR --> T
     B -->|ActuatorId| R[IOnOffActuatorResolver]
+    T -->|ActuatorId| R
     R --> A[ActuatorRuntime]
     A --> I[IOnOffActuator]
 ```
 
-Blink retains an `ActuatorId`, not a concrete pointer. It resolves the current `IOnOffActuator` for each operation. An Actuator runtime rebuild may therefore replace or move the physical implementation without leaving the Controller with a stale pointer.
+Both Controllers retain an `ActuatorId`, not a concrete pointer. They resolve the current `IOnOffActuator` when needed. An Actuator runtime rebuild may therefore replace or move the physical implementation without leaving a stale pointer.
 
 Blink contains timing and sequencing; the basic Actuator does not. Its cooperative monotonic state machine commands On and Off only at scheduled transitions. STOP cancels future transitions and requests Off.
 
+Threshold consumes one copied Measurement snapshot identified by `MeasurementSourceReference` (`SensorId + MeasurementType`). It accepts `FloatingPoint` + `State` metadata, evaluates `onThreshold`/`offThreshold` hysteresis and uses `maxMeasurementAgeMs` against monotonic acceptance time. It retains neither a Sensor pointer nor cache storage. Missing, invalid or stale input produces no new decision and does not automatically force Off.
+
+`ControllerRuntime` owns Controller instances and supports staged live replacement. Controller configuration changes request only `RestartControllerRuntime`; they do not inherently restart SensorRuntime or ActuatorRuntime.
+
+## Controller target ownership
+
+One configured enabled Controller may target an Actuator. A second enabled Blink or Threshold targeting the same `ActuatorId` is rejected across implementation types. Disabled Controllers do not claim a target, but runtime STOP does not release ownership because persistent `enabled` remains true. ConfigurationService is authoritative; Web filtering is convenience only.
+
 ## Contention
 
-Current command behavior is deliberately simple: last command wins. A manual Web or MQTT Actuator command can temporarily change state while Blink is running; Blink may overwrite it at its next scheduled transition. No ownership, priority or arbitration model is implemented.
+Controller-versus-Controller contention is prevented by exclusive enabled-Controller target ownership. Manual Web or MQTT Actuator commands remain deliberately last-command-wins relative to the owner. A manual change may remain until Blink's next scheduled transition or Threshold's next decision transition; Controllers do not continuously reconcile actual output state. No priority, lease or manual-versus-Controller arbitration model is implemented.

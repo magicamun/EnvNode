@@ -192,15 +192,18 @@ Implemented
 - live Actuator runtime rebuild
 - Web and MQTT Actuator configuration/control
 - fixed Controller slots and BlinkController
+- ThresholdController with typed Measurement input, hysteresis and monotonic freshness
 - cooperative Controller runtime and live rebuild
 - Web and MQTT Controller configuration, status and Start/Stop
-- persistent MQTT Blink parameter commands and retained parameter state
+- persistent MQTT Blink/Threshold parameter commands and retained parameter state
+- exclusive enabled-Controller ownership of Actuator targets
+- physically verified Sensor -> Measurement -> Controller -> Actuator operation
 
 Deliberately future
 
-- additional Actuator capabilities and Controller implementations
-- Measurement-driven Controllers
-- command-source arbitration/ownership
+- additional Actuator capabilities and typed Controller implementations
+- multi-input, Boolean/contact and event-driven Controllers
+- richer manual-versus-Controller arbitration
 - generic external Actuator/Controller self-description
 - Controller and generic Actuator Home Assistant discovery
 

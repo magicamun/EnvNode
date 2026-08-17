@@ -342,45 +342,21 @@ The goal is to diagnose devices directly from the embedded web interface.
 
 ---
 
-# 14. Future Architecture
+# 14. Actuator and Controller Architecture
 
 ## Actuators
 
-Future firmware versions will introduce Actuators.
-
-Responsibilities:
-
-- control physical outputs
-- receive Commands
-- expose state
-
-Initially Actuators are controlled externally.
-
-Examples:
-
-- MQTT
-- Web UI
+Configured Actuator Slots expose typed physical-output capabilities. `ActuatorRuntime` owns runtime instances and resolves capability by `ActuatorId`; the implemented `gpio_on_off` implementation exposes `OnOff` through `IOnOffActuator`. Web, MQTT and Controllers never manipulate GPIO directly.
 
 ---
 
 ## Controllers
 
-Controllers are a planned future domain concept.
+Controllers are configured local behaviors owned by `ControllerRuntime`. Blink provides cooperative non-blocking timing. Threshold consumes one `MeasurementSourceReference` through copied snapshots, applies hysteresis and commands an `OnOff` target. One enabled Controller may own each target; runtime STOP does not release configured ownership.
 
-Responsibilities:
+Web and MQTT are adapters over the same configuration and runtime model. Manual Actuator commands remain last-command-wins relative to a Controller, while Controller-versus-Controller target conflicts are rejected.
 
-- consume Measurements
-- execute local decision logic
-- generate Commands for Actuators
-
-Examples:
-
-- Cistern Controller
-- Rain Detector Heater Controller
-
-Controllers enable autonomous local behaviour without Home Assistant.
-
-This concept is intentionally postponed until required by the first real application.
+Future typed implementations may add multi-input RainDetector behavior, Boolean/contact or event semantics. Level/percentage capability, self-description, Controller Home Assistant discovery and richer manual arbitration are not implemented.
 
 ---
 
@@ -401,7 +377,7 @@ without modifying:
 - Runtime
 - Web infrastructure
 
-The same philosophy will later apply to Actuators and Controllers.
+The same registry, typed-interface and composition principles apply to Sensors, Actuators and Controllers while their domain lifecycles remain separate.
 
 ---
 
@@ -418,19 +394,21 @@ Implemented:
 - Runtime Diagnostics
 - Build Identity
 - Web Configuration
-
-Currently under development:
-
-- SHT4x
-- BMP390
+- Actuator Slots, OnOff capability and live ActuatorRuntime
+- Controller Slots, BlinkController and ThresholdController
+- MeasurementSourceReference and monotonic freshness
+- live ControllerRuntime rebuild and transient START/STOP
+- Web and MQTT Controller configuration/status/parameters
+- exclusive enabled-Controller target ownership
 
 Future:
 
 - ADS1115 Service
 - Radiation Sensor
 - Pressure Probe
-- Actuator Framework
-- Controller Framework
+- additional typed Controller implementations
+- Level/percentage Actuator capability
+- external Controller/Actuator self-description and Controller discovery
 
 ---
 

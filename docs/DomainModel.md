@@ -89,11 +89,11 @@ Persistent Controller configuration and runtime state are deliberately separate:
 | Persistent configuration | Runtime state |
 |---|---|
 | enabled | running/stopped |
-| implementation | current phase |
+| implementation | current phase or decision |
 | target `ActuatorId` | target available/unavailable |
 | implementation parameters | last operation result |
 
-START and STOP are transient runtime operations. They do not rewrite persistent `enabled`. An enabled Controller may therefore be manually stopped and started again without a configuration rebuild.
+START and STOP are transient runtime operations. They do not rewrite persistent `enabled`. An enabled Controller may therefore be manually stopped and started again without a configuration rebuild. Blink START begins a fresh Blink cycle. Threshold START resets decision to Unknown and immediately evaluates a currently usable snapshot when one exists. STOP halts behavior and requests target Off where possible.
 
 ## BlinkController
 
@@ -110,6 +110,33 @@ STOP  -> stop transitions -> request target Off where available
 
 Blink does not depend on GPIO, `GpioOnOffActuator`, MQTT, Web, wall-clock time or NTP.
 
+## MeasurementSourceReference and ThresholdController
+
+A Controller input identifies a specific Measurement stream with `MeasurementSourceReference`:
+
+- `SensorId`
+- `MeasurementType`
+
+This is more precise than identifying only a Sensor because one Sensor implementation may advertise several Measurement types. Sensor names, implementations, GPIO assignments, MQTT topics and runtime Sensor pointers are not part of Measurement identity.
+
+Threshold is the implemented Measurement-driven Controller. Its typed configuration contains one `MeasurementSourceReference`, target `ActuatorId`, `onThreshold`, `offThreshold` and `maxMeasurementAgeMs`. It accepts only Measurement metadata classified as `FloatingPoint` and `State`; Boolean state, event and numeric event/delta Measurements are excluded.
+
+Its hysteresis decision is:
+
+```text
+value >= onThreshold               -> On
+value <= offThreshold              -> Off
+offThreshold < value < onThreshold -> retain previous decision
+```
+
+The initial decision is `Unknown`. A first usable in-band Measurement leaves it Unknown and issues no Actuator command. Missing, invalid or stale input creates no new decision and does not force Off. The previous decision remains diagnostically visible. Explicit STOP is different: it stops evaluation, resets the decision lifecycle and requests target Off where possible.
+
+Threshold freshness uses monotonic elapsed time from the snapshot's `acceptedMonotonicMs`, not NTP, timezone, wall-clock Measurement timestamp or Sensor schedule. `MeasurementQuality` remains visible but Good, Estimated and Degraded are all accepted when the Measurement is otherwise valid, compatible and fresh; no generic Controller quality policy exists.
+
+`MeasurementSnapshotCache` stores bounded latest snapshots indexed by `SensorId + MeasurementType`. Each snapshot includes monotonic acceptance time and a revision identifying accepted changes. `IMeasurementResolver` returns copied snapshots through a narrow read-only interface, so Controllers do not depend on cache internals or retain Sensor pointers. It is neither a history buffer nor an event bus.
+
+A SensorRuntime rebuild clears SensorManager and the snapshot cache. Controllers then cannot evaluate the old composition's snapshots; a replacement Sensor must emit a new Measurement. ControllerRuntime need not be rebuilt merely because the implementation behind the same `SensorId` is replaced while the referenced Measurement remains compatible.
+
 ## Capability resolution and runtime replacement
 
 Controllers retain `ActuatorId`, not a long-lived pointer to a concrete Actuator. Each operation resolves the current capability through:
@@ -122,7 +149,13 @@ IOnOffActuatorResolver
 
 If Actuator Slot 1 is rebuilt from GPIO16 to GPIO17, a Controller still targets ActuatorId 1 and resolves the replacement runtime instance. This is deliberate domain decoupling and stale-pointer/lifetime protection.
 
-Configuration-time compatibility and runtime availability are different. Validation ensures an enabled Controller references a valid enabled Actuator implementation advertising its required capability. Initialization may still fail or the runtime capability may be temporarily unavailable. Blink waits cooperatively and can recover when resolution succeeds again.
+Configuration-time compatibility and runtime availability are different. Validation ensures an enabled Controller references a valid enabled Actuator implementation advertising its required capability. Initialization may still fail or the runtime capability may be temporarily unavailable.
+
+Measurement-driven Controllers likewise retain `SensorId + MeasurementType`, not Sensor pointers, and resolve copied snapshots through `IMeasurementResolver`. SensorRuntime, ActuatorRuntime and ControllerRuntime can therefore be rebuilt independently when stable identities and capabilities remain compatible.
+
+## Configuration integrity
+
+ConfigurationService validates the complete candidate composition before persistence. An enabled Threshold Controller requires an enabled source Sensor whose selected implementation advertises the referenced Threshold-compatible Measurement, plus an enabled target Actuator advertising `OnOff`. Enabled Blink requires an enabled `OnOff` target. Reverse integrity rejects changing a referenced Sensor to an incompatible source or disabling/removing/making a referenced Actuator capability-incompatible. Duplicate targets across enabled Controllers are rejected regardless of Controller implementation. Web and MQTT filtering never replace these authoritative checks.
 
 ## Hardware ownership
 
@@ -142,15 +175,19 @@ Web filtering is only a convenience. Configuration validation remains authoritat
 
 Web and MQTT translate external requests into the same configuration, runtime and capability interfaces. They do not manipulate GPIO or concrete Controller/Actuator implementations.
 
-If Web, MQTT and a running Controller command the same Actuator, current behavior is last-command-wins. Blink commands only at scheduled transitions, so a manual change may remain until the next transition. No ownership, priority, locking or arbitration model currently exists.
+Only one configured enabled Controller may target a given Actuator. A disabled Controller does not claim its configured target, but transient runtime STOP does not release ownership: the Controller remains configured enabled. This prevents Controller-versus-Controller contention without runtime locks or arbitration.
 
-## Future Measurement-driven Controllers
+Manual Web and MQTT Actuator commands remain allowed while a Controller owns the target. Current behavior is last-command-wins. Controllers do not continuously reconcile actual Actuator state with an internal phase or decision. For example, after Threshold commands On, a user may command Off; Threshold does not immediately reassert On every loop, but a later decision transition may command again. No priority, lease or manual-versus-Controller arbitration model exists.
 
-Future Controllers may consume specific Measurement sources. Such an input should identify the Measurement by `SensorId + MeasurementType`, not merely by Sensor. Threshold or hysteresis control is a possible future implementation, not current behavior.
+## Future multi-input Controllers
+
+Future typed implementations may contain multiple `MeasurementSourceReference` values when a real behavior requires them. A future RainDetectorController might combine rain/wet or detector-level input with outside and detector-surface temperatures. EnvNode intentionally does not introduce Boolean-expression syntax, scripting or a generic rule engine. Generalization should follow multiple demonstrated use cases.
 
 ## Current status
 
 ### Implemented and verified
+
+Controller infrastructure v1 is implemented, tested and physically verified for the current Blink and Threshold/Hysteresis feature set. This establishes the runtime, configuration and adapter boundaries without claiming that all future Controller needs are solved.
 
 - fixed Sensor slots, implementation registry, factory/runtime composition and scheduling
 - typed Measurement pipeline, snapshots and MQTT publication
@@ -163,19 +200,25 @@ Future Controllers may consume specific Measurement sources. Such an input shoul
 - fixed Controller slots and stable `ControllerId`
 - Controller implementation registry, factory and runtime
 - BlinkController with cooperative non-blocking service
+- ThresholdController with MeasurementSourceReference, hysteresis and monotonic freshness
+- bounded MeasurementSnapshotCache and read-only IMeasurementResolver
 - live Controller rebuild and transient runtime START/STOP
-- Web Controller configuration and control
-- MQTT Controller status, START/STOP, retained Blink parameter state and persistent parameter commands
+- exclusive enabled-Controller target ownership
+- Web Controller configuration, compatible source/target filtering, diagnostics and control
+- MQTT Controller status, START/STOP, retained Blink/Threshold parameter state and persistent parameter commands
 - capability resolution across Actuator runtime replacement
+- physically verified Sensor -> Measurement -> Controller -> Actuator behavior
 
 ### Deliberately future or not implemented
 
 - Level/percentage and other Actuator capabilities
 - additional Controller implementations
-- Measurement-driven and threshold/hysteresis Controllers
+- multi-input, Boolean/contact and event-driven Controller semantics
+- RainDetector-specific control behavior
+- atomic external mutation of structural Measurement source configuration
 - generic external Actuator or Controller self-description
 - generic Controller parameter-description schema
 - Controller Home Assistant discovery
 - generic Actuator Home Assistant discovery
-- command-source arbitration or ownership
+- richer manual-versus-Controller arbitration
 - scripting/rule engine and generic command/event bus

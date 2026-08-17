@@ -10,7 +10,7 @@ Accepted
 
 ## Implementation status
 
-Implemented and physically verified.
+Controller infrastructure v1 is implemented, tested and physically verified for Blink and Threshold/Hysteresis behavior.
 
 ## Context
 
@@ -46,7 +46,9 @@ ControllerSlotConfiguration
  -> concrete implementation
 ```
 
-The first implementation is Blink. It retains target `ActuatorId` and resolves the current `IOnOffActuator` through `IOnOffActuatorResolver` and `ActuatorRuntime`. It does not retain a concrete Actuator pointer across runtime replacement.
+The implemented Controller types are Blink and Threshold. Both retain target `ActuatorId` and resolve the current `IOnOffActuator` through `IOnOffActuatorResolver` and `ActuatorRuntime`; neither retains a concrete Actuator pointer across runtime replacement.
+
+Threshold identifies one input stream with `MeasurementSourceReference` (`SensorId + MeasurementType`). It reads copied latest snapshots through `IMeasurementResolver`; it retains no Sensor pointer. `MeasurementSnapshotCache` supplies bounded latest-value storage, monotonic acceptance time for freshness and revision identity for change processing.
 
 Both runtimes use bounded deterministic construction and live composition rebuild. Actuator shutdown requests a safe Off state where possible. Enabled Controllers start when a composition is activated; manual Start/Stop is transient and does not alter persistent `enabled`.
 
@@ -58,6 +60,12 @@ Web and MQTT are adapters over the same runtime and configuration boundaries. Co
 - `cmd/parameter/<name>`: external persistent mutation request
 
 EnvNode subscribes only to command topics. This prevents retained parameter state from feeding back into configuration mutation and runtime rebuild.
+
+Exactly one configured enabled Controller may target an Actuator. Runtime STOP does not release that persisted ownership. This prevents Controller-versus-Controller contention without adding runtime arbitration. Manual Web or MQTT Actuator commands remain allowed and currently use last-command-wins semantics relative to the owning Controller.
+
+## Evolution
+
+The original implementation allowed multiple Controllers to target one Actuator and treated all command contention as last-command-wins. During Threshold integration on 2026-08-17, the configuration model evolved to reject duplicate targets across enabled Controllers. The original manual-command behavior remains: Web or MQTT may temporarily override an Actuator, and a later Controller transition may command it again.
 
 ## Consequences
 
@@ -73,7 +81,7 @@ EnvNode subscribes only to command topics. This prevents retained parameter stat
 ### Negative
 
 - the three runtimes contain some parallel lifecycle mechanics
-- command contention is currently last-command-wins
+- manual external command contention with the owning Controller is currently last-command-wins
 - implementation-specific Controller parameters require explicit adapter support
 - external generic Actuator/Controller self-description remains unresolved
 

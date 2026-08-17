@@ -191,3 +191,7 @@ SensorManager validates and completes Measurements without interpreting them.
 MeasurementPublisher prepares communication.
 
 MqttService performs communication.
+
+## Implementation evolution (2026-08-17)
+
+The accepted-Measurement boundary now fans out synchronously to both `MeasurementPublisher` and bounded `MeasurementSnapshotCache`. The cache stores only the latest copied snapshot per `SensorId + MeasurementType`, including monotonic acceptance time and revision identity. `IMeasurementResolver` exposes those copies to Measurement-driven Controllers without changing MQTT's role or introducing history storage or an event bus.

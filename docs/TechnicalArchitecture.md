@@ -209,7 +209,12 @@ flowchart LR
 
     CC[ControllerSlotConfiguration] --> CR[ControllerRuntime]
     CR --> BC[BlinkController]
+    CR --> TC[ThresholdController]
+    SM --> MSC[MeasurementSnapshotCache]
+    MSC --> MR[IMeasurementResolver]
+    MR --> TC
     BC --> RES[IOnOffActuatorResolver]
+    TC --> RES
     RES --> AR
 ```
 
@@ -233,9 +238,13 @@ Live rebuild stages a new composition, safely shuts down the previous outputs Of
 
 `ControllerFactory` constructs `IController` instances. `ControllerRuntime` owns composition, cooperative servicing, diagnostics and transient Start/Stop operations. Enabled Controllers start automatically when a composition is initialized or rebuilt; manually stopped state is not persisted across rebuild.
 
-Blink is the first implementation. It uses `ActuatorId` and `IOnOffActuatorResolver` to obtain the current capability from `ActuatorRuntime`. It never retains a concrete Actuator pointer across an Actuator rebuild. It uses monotonic, non-blocking timing and has no Web, MQTT, GPIO, wall-clock or NTP dependency.
+Blink uses `ActuatorId` and `IOnOffActuatorResolver` to obtain the current capability from `ActuatorRuntime`. It never retains a concrete Actuator pointer across an Actuator rebuild. It uses monotonic, non-blocking timing and has no Web, MQTT, GPIO, wall-clock or NTP dependency.
 
-Controller validation checks configured target identity, enablement and advertised capability. Runtime availability remains separate and may temporarily fail despite valid configuration.
+Threshold identifies exactly one input stream with `MeasurementSourceReference` (`SensorId + MeasurementType`). It obtains copied `MeasurementSnapshot`s from `IMeasurementResolver` and retains no Sensor or cache pointer. Its compatible inputs are metadata-classified `FloatingPoint` + `State` Measurements. `acceptedMonotonicMs` supplies freshness and `revision` supplies accepted-change identity; wall-clock Measurement timestamp remains diagnostic/external time.
+
+Threshold begins with decision `Unknown`. Values at or above `onThreshold` decide On, values at or below `offThreshold` decide Off, and in-band values retain the previous decision. First input in-band remains Unknown. Missing, invalid or stale input makes no new decision and does not force Off. Good, Estimated and Degraded quality labels do not independently reject otherwise usable input.
+
+Controller validation checks configured references, enablement and advertised types/capabilities. An enabled Threshold source Sensor must advertise the selected compatible Measurement; Blink and Threshold targets must advertise `OnOff`. Reverse validation prevents referenced Sensors or Actuators becoming incompatible. One configured enabled Controller may claim each target across all implementations. Runtime STOP does not release this configured ownership. Runtime availability remains separate and may temporarily fail despite valid configuration.
 
 ### Hardware occupancy
 
@@ -340,13 +349,18 @@ The initial MeasurementPublisher publishes every accepted Measurement without bu
 ### Measurement Snapshot Diagnostics
 
 `MeasurementSnapshotCache` is a passive observer at SensorManager's accepted-Measurement
-boundary. It retains only the latest completed canonical Measurement and monotonic acceptance
-time for each active SensorId and MeasurementType. Web diagnostics receive read-only access
-to these snapshots and apply Presentation Unit conversion only while rendering.
+boundary. It uses fixed bounded storage and retains only the latest completed canonical
+Measurement, monotonic acceptance time and revision for each SensorId and MeasurementType.
+`IMeasurementResolver` is the narrow read-only Controller-facing boundary and returns copied
+snapshots. Web diagnostics also receive read-only access and apply Presentation Unit conversion
+only while rendering.
 
 The cache does not publish MQTT, own Sensor runtime, aggregate values, persist data or
-influence Measurement acceptance and delivery. It is cleared with the active Sensor runtime
-composition. MeasurementPublisher remains the authoritative Measurement publisher and the
+influence Measurement acceptance and delivery. It is not history storage or an event bus. It
+is cleared with the active Sensor runtime composition, so Controllers cannot continue using
+pre-rebuild snapshots and a replacement Sensor must emit a new Measurement. A ControllerRuntime
+rebuild is not inherently required when the same SensorId continues providing the referenced
+MeasurementType. MeasurementPublisher remains the authoritative Measurement publisher and the
 only downstream publishing sink.
 
 Topics use:
@@ -426,12 +440,14 @@ envnode/<device>/controller/<slot>/cmd/parameter/<parameter>
 
 Their semantics are deliberately distinct:
 
-- `status` is retained runtime truth: running, phase, target availability and last result.
+- `status` is retained implementation-specific runtime truth.
 - `cmd` accepts transient `START` or `STOP`; these do not change persistent `enabled`.
 - `parameter/<parameter>` is authoritative retained persisted parameter state published by EnvNode.
 - `cmd/parameter/<parameter>` is an external request to mutate persistent configuration.
 
-For Blink, the current parameters are `on_duration_ms` and `off_duration_ms`. Parameter commands follow:
+Blink status fields are `running`, `phase`, `target_available` and `last_result`. Threshold status fields are `running`, `source_available`, `measurement_valid`, `stale`, `decision`, `target_available`, `output_pending` and `last_result`. Threshold decision strings are `unknown`, `on` and `off`. Latest Measurement value is intentionally not duplicated; Sensor MQTT remains authoritative Measurement telemetry.
+
+Blink parameters are `on_duration_ms` and `off_duration_ms`. Threshold parameters are `on_threshold`, `off_threshold` and `max_measurement_age_ms`. Parameter commands follow:
 
 ```text
 MQTT cmd/parameter
@@ -446,6 +462,8 @@ MQTT cmd/parameter
 An unchanged requested value is a no-op and does not persist or rebuild. EnvNode never subscribes to authoritative `parameter/...` state topics. State and command topics are separated specifically to prevent retained publications from feeding back into configuration mutation.
 
 The same persisted Controller configuration is rendered by WebService. Conversely, Web-originated parameter changes are observed and published by `ControllerStatePublisher`.
+
+Threshold source identity is intentionally not split into scalar MQTT mutation parameters. `MeasurementSourceReference` remains an atomic structural configuration selected through the complete configuration/Web path.
 
 Controller and generic Actuator Home Assistant discovery are not implemented. Existing Home Assistant discovery describes Sensors only.
 
@@ -515,7 +533,9 @@ Web Controller command -> ControllerId -> ControllerRuntime Start/Stop
 Web Controller edit -> IConfigurationService -> runtime effect -> ControllerRuntime rebuild
 ```
 
-WebService does not construct Actuators or Controllers, manipulate GPIO, or call concrete `BlinkController` or `GpioOnOffActuator` objects.
+Controller Slot editing exposes common enabled, name and implementation fields. Blink adds target OnOff Actuator and On/Off durations. Threshold adds source Sensor, Measurement, target OnOff Actuator, On/Off thresholds and maximum Measurement age. Threshold Measurement choices come only from the selected configured Sensor implementation and are filtered to `FloatingPoint` + `State`; targets are filtered by `OnOff` capability and claims by other enabled Controllers. These filters improve presentation, while ConfigurationService remains authoritative.
+
+WebService does not construct Actuators or Controllers, manipulate GPIO, or call concrete `BlinkController`, `ThresholdController` or `GpioOnOffActuator` objects.
 
 ---
 
@@ -1706,20 +1726,19 @@ Conceptually:
                             | assign provenance
                             v
                  Completed canonical Measurement
-                            |--------------------------+
-                            |                          |
-                            v                          v
-                  MeasurementPublisher      MeasurementSnapshotCache
-                            |                          |
-                            | select Presentation Unit| latest snapshot only
-                            | convert representation  | read-only diagnostics
-                            | attach unit metadata    |
-                            | serialize               |
-                            v
-                      MqttService
                             |
-                            v
-                      MQTT Broker
+             +--------------+----------------+
+             |                               |
+             v                               v
+    MeasurementPublisher          MeasurementSnapshotCache
+             |                               |
+             | presentation conversion       | latest snapshot + revision
+             | unit metadata + serialization | copied read-only resolution
+             v                               v
+        MqttService                 IMeasurementResolver
+             |                               |
+             v                               v
+        MQTT Broker                  ThresholdController
 
 Simulation intentionally shares the identical processing path used by physical hardware.
 
@@ -2456,13 +2475,17 @@ Implemented
 - safe Actuator shutdown and live runtime rebuild
 - Web and MQTT Actuator configuration/control and independent state publication
 - fixed Controller slots, registry and stable ControllerId
-- BlinkController, ControllerFactory and ControllerRuntime
+- BlinkController, ThresholdController, ControllerFactory and ControllerRuntime
+- MeasurementSourceReference, IMeasurementResolver and bounded latest snapshots
+- monotonic Threshold freshness, revision processing and hysteresis
 - cooperative non-blocking Controller service
 - live Controller rebuild and transient Start/Stop
-- Web Controller configuration, diagnostics and Start/Stop
+- exclusive enabled-Controller ownership of Actuator targets
+- Web Blink/Threshold configuration, diagnostics and Start/Stop
 - MQTT Controller runtime status and START/STOP
-- retained Blink parameter state and persistent MQTT parameter commands
+- retained Blink/Threshold parameter state and persistent MQTT parameter commands
 - runtime Actuator capability resolution without retained concrete pointers
+- physically verified Sensor -> Measurement -> Controller -> Actuator operation
 - OTA firmware staging and centralized restart boundary
 
 Deliberately future or not implemented
@@ -2470,8 +2493,10 @@ Deliberately future or not implemented
 - generic external Actuator and Controller self-description
 - additional Actuator capabilities such as Level/percentage
 - additional Controller implementations
-- Measurement-driven and threshold/hysteresis Controllers
-- command-source ownership or arbitration
+- multi-input, Boolean/contact and event-driven Controllers
+- RainDetector-specific typed Controller behavior
+- richer manual-versus-Controller arbitration
+- atomic external mutation of structural Measurement source configuration
 - generic Controller parameter-description schema
 - Controller and generic Actuator Home Assistant discovery
 - scripting/rule engine

@@ -97,6 +97,8 @@ Implemented. The authoritative `Configuration` now includes fixed Sensor, Actuat
 
 The original conceptual `SensorConfiguration[]` terminology became `SensorSlotConfiguration[]`. Parallel `ActuatorSlotConfiguration[]` and `ControllerSlotConfiguration[]` sections were added without changing the one-owner decision.
 
+Controller configuration now includes typed Blink and Threshold parameters. ConfigurationService validates complete candidate compositions, including Threshold `MeasurementSourceReference`, Sensor/Measurement compatibility, target Actuator capability, reverse Sensor/Actuator reference integrity and one enabled Controller per Actuator target. External adapters cannot bypass this validation.
+
 Conceptually:
 
     Persistent Storage

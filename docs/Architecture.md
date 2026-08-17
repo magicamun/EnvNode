@@ -21,6 +21,10 @@ flowchart TB
     SR[SensorRuntime / SensorManager]
     AR[ActuatorRuntime]
     CR[ControllerRuntime]
+    CACHE[MeasurementSnapshotCache]
+    MR[IMeasurementResolver]
+    TC[ThresholdController]
+    ARES[IOnOffActuatorResolver]
     M[Measurements]
     CAP[IOnOffActuator]
     HW[Physical inputs and outputs]
@@ -38,7 +42,12 @@ flowchart TB
     CFG --> CR
     SR --> M
     M --> MQTT
-    CR -->|ActuatorId capability resolution| AR
+    M --> CACHE
+    CACHE --> MR
+    CR --> TC
+    MR --> TC
+    TC --> ARES
+    ARES -->|ActuatorId capability resolution| AR
     AR --> CAP
     SR --> HW
     CAP --> HW
@@ -46,9 +55,11 @@ flowchart TB
 
 The firmware owns the hardware.
 
-The automation platform owns the interpretation.
+The automation platform owns weather analysis and higher-level automation. EnvNode may own explicit typed local control behavior such as Blink and Threshold/Hysteresis without becoming a weather-analysis engine.
 
 Web and MQTT are external adapters over shared configuration and runtime interfaces. They do not define the internal Sensor, Actuator or Controller architecture.
+
+Sensors observe and produce typed Measurements. Controllers consume runtime information and apply typed local behavior. Actuators expose physical-output capabilities. MQTT is an external representation and command adapter, never the internal Controller path.
 
 ---
 
