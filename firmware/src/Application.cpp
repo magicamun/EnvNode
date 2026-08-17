@@ -26,9 +26,6 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
 }
 
 void Application::setup(bool configurationAlreadyLoaded) {
-    logger_.begin(115200);
-    delay(500);
-
     if (!configurationAlreadyLoaded) configurationService_.loadConfiguration();
     wifiService_.begin();
     timeService_.begin();

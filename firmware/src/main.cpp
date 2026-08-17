@@ -93,6 +93,8 @@ static WebService webService(logger, configurationService, wifiService, mqttServ
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
 
 void setup() {
+    logger.begin(115200);
+    delay(500);
     i2cBusManager.begin();
     configurationService.loadConfiguration();
     size_t activeSensorCount = 0;

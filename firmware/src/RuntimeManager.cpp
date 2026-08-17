@@ -32,18 +32,18 @@ RuntimeManager::RuntimeManager(
 void RuntimeManager::request(RuntimeAction action) {
     if (action == RuntimeAction::None) return;
 
-    logger_.printf("INFO Runtime action requested: %s\n", runtimeActionName(action));
+    logger_.infof("Runtime action requested: %s", runtimeActionName(action));
     if (static_cast<uint8_t>(action) <= static_cast<uint8_t>(pendingAction_)) return;
 
     if (pendingAction_ != RuntimeAction::None) {
-        logger_.printf(
-            "INFO Runtime action upgraded: %s -> %s\n",
+        logger_.infof(
+            "Runtime action upgraded: %s -> %s",
             runtimeActionName(pendingAction_),
             runtimeActionName(action));
     }
     pendingAction_ = action;
     if (pendingAction_ == RuntimeAction::RestartDevice) {
-        logger_.println("INFO Pending restart: device restart required");
+        logger_.info("Pending restart: device restart required");
     }
 }
 
@@ -116,7 +116,7 @@ bool RuntimeManager::applyPendingControllerChanges(
 
 void RuntimeManager::performPendingRestart() {
     if (pendingAction_ != RuntimeAction::RestartDevice) return;
-    logger_.println("INFO Device restart executed");
+    logger_.info("Device restart executed");
 #if defined(ARDUINO_ARCH_ESP32)
     ESP.restart();
 #endif

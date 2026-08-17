@@ -33,11 +33,11 @@ bool OTAService::beginUpload(size_t totalBytes) {
     }
 
     state_ = OTAState::Uploading;
-    logger_.println("INFO OTA upload started");
+    logger_.info("OTA upload started");
     if (totalBytesKnown()) {
-        logger_.printf("INFO OTA expected size: %u bytes\n", static_cast<unsigned int>(totalBytes_));
+        logger_.infof("OTA expected size: %u bytes", static_cast<unsigned int>(totalBytes_));
     } else {
-        logger_.println("INFO OTA expected size: unknown");
+        logger_.info("OTA expected size: unknown");
     }
     return true;
 }
@@ -76,9 +76,9 @@ bool OTAService::finishUpload() {
 
     state_ = OTAState::FirmwareStaged;
     lastError_ = String();
-    logger_.printf("INFO OTA staging succeeded: %u bytes\n", static_cast<unsigned int>(bytesReceived_));
+    logger_.infof("OTA staging succeeded: %u bytes", static_cast<unsigned int>(bytesReceived_));
     runtimeManager_.request(RuntimeAction::RestartDevice);
-    logger_.println("INFO OTA requested device restart for staged firmware activation");
+    logger_.info("OTA requested device restart for staged firmware activation");
     return true;
 }
 
@@ -114,7 +114,7 @@ void OTAService::fail(const String& reason, bool abortUpdate) {
     if (abortUpdate && Update.isRunning()) Update.abort();
     state_ = OTAState::Failed;
     lastError_ = reason;
-    logger_.printf("ERROR OTA upload failed: %s\n", lastError_.c_str());
+    logger_.errorf("OTA upload failed: %s", lastError_.c_str());
 }
 
 String OTAService::updateError(const char* fallback) const {

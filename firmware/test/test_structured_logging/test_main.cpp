@@ -2,6 +2,8 @@
 #include <unity.h>
 
 #include <cstring>
+#include <cstdlib>
+#include <ctime>
 #include <string>
 #include <vector>
 
@@ -10,13 +12,22 @@
 #include "LogLevel.h"
 #include "RecentLogStore.h"
 #include "StructuredLogger.h"
+#include "SerialLogger.h"
 
 using namespace EnvNode;
 
 HardwareSerial Serial;
-void HardwareSerial::begin(unsigned long) {}
+bool serialInitialized = false;
+size_t serialWriteLimit = static_cast<size_t>(-1);
+std::vector<std::string> serialWrites;
+void HardwareSerial::begin(unsigned long) { serialInitialized = true; }
 void HardwareSerial::println(const char*) {}
-size_t HardwareSerial::write(const uint8_t*, size_t length) { return length; }
+size_t HardwareSerial::write(const uint8_t* data, size_t length) {
+    const size_t written = length < serialWriteLimit ? length : serialWriteLimit;
+    serialWrites.push_back(std::string(
+        reinterpret_cast<const char*>(data), written));
+    return written;
+}
 void pinMode(unsigned char, int) {}
 void digitalWrite(unsigned char, int) {}
 
@@ -212,6 +223,118 @@ void test_store_is_updated_before_sink_and_legacy_api_maps_to_info() {
     TEST_ASSERT_EQUAL_STRING("legacy value=23", entryAt(fixture.store, 1).message);
 }
 
+void resetSerialCapture() {
+    serialInitialized = false;
+    serialWriteLimit = static_cast<size_t>(-1);
+    serialWrites.clear();
+}
+
+LogEntry serialEntry(
+    uint32_t sequence,
+    uint32_t monotonicMs,
+    LogLevel level,
+    const char* message) {
+    LogEntry entry;
+    entry.sequence = sequence;
+    entry.monotonicMs = monotonicMs;
+    entry.level = level;
+    strncpy(entry.message, message, LogMessageCapacity - 1);
+    entry.message[LogMessageCapacity - 1] = '\0';
+    return entry;
+}
+
+void test_serial_pre_ntp_levels_sequences_and_one_write() {
+    resetSerialCapture();
+    SerialLogger sink;
+    sink.begin(115200);
+    const LogLevel levels[] = {
+        LogLevel::Debug, LogLevel::Info, LogLevel::Warn, LogLevel::Error};
+    const char* expectedLevels[] = {"DEBUG", "INFO ", "WARN ", "ERROR"};
+    for (size_t index = 0; index < 4; ++index) {
+        const LogEntry entry = serialEntry(
+            index == 3 ? UINT32_MAX : static_cast<uint32_t>(index + 1),
+            3723004,
+            levels[index],
+            "message");
+        sink.write(entry);
+        const std::string expected = std::string("+01:02:03.004 ")
+            + expectedLevels[index] + " #"
+            + std::to_string(entry.sequence) + " message\r\n";
+        TEST_ASSERT_EQUAL_STRING(expected.c_str(), serialWrites[index].c_str());
+    }
+    TEST_ASSERT_EQUAL_UINT32(4, serialWrites.size());
+}
+
+void test_serial_post_ntp_uses_stored_epoch_and_local_timezone() {
+    resetSerialCapture();
+    setenv("TZ", "UTC0", 1);
+    tzset();
+    SerialLogger sink;
+    sink.begin(115200);
+    LogEntry entry = serialEntry(123, 1, LogLevel::Info, "MQTT connected");
+    entry.wallClockValid = true;
+    entry.epochSeconds = 1786986900LL;
+    sink.write(entry);
+    TEST_ASSERT_EQUAL_UINT32(1, serialWrites.size());
+    TEST_ASSERT_EQUAL_STRING(
+        "2026-08-17 17:15:00 INFO  #123 MQTT connected\r\n",
+        serialWrites[0].c_str());
+    TEST_ASSERT_EQUAL_INT64(1786986900LL, entry.epochSeconds);
+    TEST_ASSERT_EQUAL_STRING("MQTT connected", entry.message);
+}
+
+void test_serial_handles_long_uptime_maximum_message_and_exact_length() {
+    resetSerialCapture();
+    SerialLogger sink;
+    sink.begin(115200);
+    LogEntry entry = serialEntry(1, UINT32_MAX, LogLevel::Warn, "");
+    memset(entry.message, 'x', LogMessageCapacity - 1);
+    entry.message[LogMessageCapacity - 1] = '\0';
+    sink.write(entry);
+    TEST_ASSERT_EQUAL_UINT32(1, serialWrites.size());
+    TEST_ASSERT_NOT_NULL(strstr(serialWrites[0].c_str(),
+        "+1193:02:47.295 WARN  #1 "));
+    TEST_ASSERT_EQUAL_UINT32(
+        strlen("+1193:02:47.295 WARN  #1 ") + LogMessageCapacity - 1 + 2,
+        serialWrites[0].size());
+    TEST_ASSERT_EQUAL_STRING("\r\n",
+        serialWrites[0].substr(serialWrites[0].size() - 2).c_str());
+    TEST_ASSERT_EQUAL_UINT32(0, sink.renderFailureCount());
+}
+
+void test_serial_rejects_write_before_begin_and_counts_short_write() {
+    resetSerialCapture();
+    SerialLogger sink;
+    const LogEntry entry = serialEntry(1, 0, LogLevel::Info, "safe");
+    sink.write(entry);
+    TEST_ASSERT_EQUAL_UINT32(0, serialWrites.size());
+
+    sink.begin(115200);
+    serialWriteLimit = 3;
+    sink.write(entry);
+    TEST_ASSERT_TRUE(serialInitialized);
+    TEST_ASSERT_EQUAL_UINT32(1, serialWrites.size());
+    TEST_ASSERT_EQUAL_UINT32(1, sink.shortWriteCount());
+}
+
+void test_legacy_newlines_render_once_from_canonical_store_entry() {
+    resetSerialCapture();
+    RecentLogStore store;
+    TestTimeProvider time;
+    SerialLogger sink;
+    StructuredLogger logger(store, time, sink);
+    logger.begin(115200);
+    logger.printf("Test\n");
+    logger.info("first\r\nsecond\n");
+    TEST_ASSERT_EQUAL_UINT32(2, serialWrites.size());
+    TEST_ASSERT_EQUAL_STRING(
+        "+00:00:00.000 INFO  #1 Test\r\n", serialWrites[0].c_str());
+    TEST_ASSERT_EQUAL_STRING(
+        "+00:00:00.000 INFO  #2 first second\r\n", serialWrites[1].c_str());
+    TEST_ASSERT_EQUAL_STRING("Test", entryAt(store, 0).message);
+    TEST_ASSERT_EQUAL_STRING("first second", entryAt(store, 1).message);
+}
+
 } // namespace
 
 int main(int, char**) {
@@ -223,5 +346,10 @@ int main(int, char**) {
     RUN_TEST(test_ring_buffer_orders_overwrites_wraps_and_clears);
     RUN_TEST(test_timestamp_transition_does_not_modify_earlier_entry);
     RUN_TEST(test_store_is_updated_before_sink_and_legacy_api_maps_to_info);
+    RUN_TEST(test_serial_pre_ntp_levels_sequences_and_one_write);
+    RUN_TEST(test_serial_post_ntp_uses_stored_epoch_and_local_timezone);
+    RUN_TEST(test_serial_handles_long_uptime_maximum_message_and_exact_length);
+    RUN_TEST(test_serial_rejects_write_before_begin_and_counts_short_write);
+    RUN_TEST(test_legacy_newlines_render_once_from_canonical_store_entry);
     return UNITY_END();
 }

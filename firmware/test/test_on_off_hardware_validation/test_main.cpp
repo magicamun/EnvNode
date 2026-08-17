@@ -16,6 +16,7 @@ using namespace EnvNode;
 HardwareSerial Serial;
 std::string serialOutput;
 size_t serialWriteCallCount = 0;
+bool serialBegan = false;
 int gpioModes[256] = {};
 int gpioValues[256] = {};
 int gpioEventPins[512] = {};
@@ -23,6 +24,7 @@ int gpioEventActions[512] = {};
 size_t gpioEventCount = 0;
 
 void HardwareSerial::begin(unsigned long) {
+    serialBegan = true;
 }
 
 void HardwareSerial::println(const char* value) {
@@ -313,11 +315,12 @@ void test_serial_logger_preserves_messages_longer_than_old_buffer() {
     StructuredLogger logger(store, timeProvider, sink);
     const std::string longValue(180, 'x');
     serialOutput.clear();
+    logger.begin(115200);
 
     logger.printf("prefix:%s:suffix\n", longValue.c_str());
 
     TEST_ASSERT_EQUAL_STRING(
-        (std::string("prefix:") + longValue + ":suffix\r\n").c_str(),
+        (std::string("+00:00:00.000 INFO  #1 prefix:") + longValue + ":suffix\r\n").c_str(),
         serialOutput.c_str());
 }
 
@@ -328,11 +331,12 @@ void test_serial_logger_println_writes_exact_text_bytes() {
     StructuredLogger logger(store, timeProvider, sink);
     serialOutput.clear();
     serialWriteCallCount = 0;
+    logger.begin(115200);
 
     logger.println("Actuator runtime rebuild started");
 
     TEST_ASSERT_EQUAL_STRING(
-        "Actuator runtime rebuild started\r\n",
+        "+00:00:00.000 INFO  #1 Actuator runtime rebuild started\r\n",
         serialOutput.c_str());
     TEST_ASSERT_EQUAL_UINT32(1, serialWriteCallCount);
 }
@@ -344,10 +348,12 @@ void test_serial_logger_printf_uses_one_explicit_length_write() {
     StructuredLogger logger(store, timeProvider, sink);
     serialOutput.clear();
     serialWriteCallCount = 0;
+    logger.begin(115200);
 
     logger.printf("value=%u\n", 17U);
 
-    TEST_ASSERT_EQUAL_STRING("value=17\r\n", serialOutput.c_str());
+    TEST_ASSERT_EQUAL_STRING(
+        "+00:00:00.000 INFO  #1 value=17\r\n", serialOutput.c_str());
     TEST_ASSERT_EQUAL_UINT32(1, serialWriteCallCount);
 }
 
