@@ -6,6 +6,10 @@ size_t RecentLogStore::count() const {
     return count_;
 }
 
+size_t RecentLogStore::capacity() const {
+    return RecentLogCapacity;
+}
+
 bool RecentLogStore::copyEntry(size_t logicalIndex, LogEntry& result) const {
     if (logicalIndex >= count_) return false;
     result = entries_[(oldestIndex_ + logicalIndex) % RecentLogCapacity];

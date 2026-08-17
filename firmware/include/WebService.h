@@ -17,6 +17,7 @@
 #include "Logger.h"
 #include "IDiscoveryPublisher.h"
 #include "ControllerRuntime.h"
+#include "IRecentLogReader.h"
 
 namespace EnvNode {
 
@@ -33,6 +34,7 @@ public:
         ActuatorRuntime& actuatorRuntime,
         ControllerRuntime& controllerRuntime,
         MeasurementSnapshotCache& measurementSnapshotCache,
+        const IRecentLogReader& logReader,
         IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
         OTAService& otaService);
@@ -67,6 +69,7 @@ private:
     void handleUnits();
     void handleDevice();
     void handleDiagnostics();
+    void handleLogs();
     void handleFirmware();
     void handleFirmwareUpload();
     void handleFirmwareUploadData();
@@ -92,7 +95,6 @@ private:
         const char* failureMessage);
     String renderPage(const char* title, const char* activeRoute, const String& content,
         bool wideContent = false) const;
-    String navigationHtml(const char* activeRoute) const;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;
     String otaStatusHtml() const;
@@ -110,6 +112,7 @@ private:
     ActuatorRuntime& actuatorRuntime_;
     ControllerRuntime& controllerRuntime_;
     MeasurementSnapshotCache& measurementSnapshotCache_;
+    const IRecentLogReader& logReader_;
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;

@@ -1319,6 +1319,30 @@ Measurement publication, however, should begin only after valid synchronized tim
 
 Logging is an infrastructure service.
 
+The structured logging path is:
+
+    caller
+        -> StructuredLogger
+        -> owned canonical LogEntry
+        -> RecentLogStore
+        -> SerialLogger
+
+`RecentLogStore` is a fixed-capacity, 64-entry RAM ring buffer. Entries are copied
+out through the read-only `IRecentLogReader` boundary; internal storage and physical
+ring indices are not exposed. `WebService` reads this boundary at `GET /logs` and
+renders newest entries first. It is a diagnostic consumer and is never part of the
+logging write path.
+
+Serial and Web rendering share the stored event timestamp semantics. Entries accepted
+before synchronized wall-clock time render as boot-relative `+HH:MM:SS.mmm`; later
+entries render their stored epoch in the currently configured local timezone. The Web
+viewer represents only project-owned structured entries. Framework output and other
+UART bytes are intentionally absent, making the store a useful boundary when diagnosing
+downstream Serial, UART bridge, or host-capture corruption.
+
+The Web history is read-only, overwrites its oldest entry when full, and does not
+survive restart. It is not persistent logging.
+
 The current implementation provides centralized logging through Logger abstractions.
 
 Logging should provide useful information about:

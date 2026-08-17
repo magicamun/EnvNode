@@ -59,6 +59,8 @@ Conceptually:
         |
         +---- Diagnostics
         |
+        +---- Logs
+        |
         +---- Firmware
 
 The exact visual representation may evolve.
@@ -98,6 +100,13 @@ Implemented and extended with Sensors, Actuators and Controllers administration.
 - Blink and Threshold edits use typed Controller Slot configuration
 - Threshold source Measurements are derived from the selected Sensor implementation's metadata
 - target filtering reflects `OnOff` capability and other enabled Controllers' ownership
+- Logs provides read-only access to canonical entries retained in the 64-entry RAM log store
+
+The `GET /logs` page receives a narrow `IRecentLogReader` dependency. It copies entries
+without exposing mutable storage, displays newest first, and shares timestamp formatting
+with the Serial renderer. It has manual refresh only: no clear action, streaming, polling,
+JSON API, or persistence. Framework/ESP-IDF UART output is outside this view because it
+does not pass through the EnvNode structured logger.
 
 ConfigurationService remains authoritative over compatibility, cross-reference integrity and exclusive Controller target ownership. WebService does not construct domain objects, manipulate GPIO, or call concrete Actuator or Controller implementations.
 

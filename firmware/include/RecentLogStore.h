@@ -2,16 +2,17 @@
 
 #include <cstddef>
 
-#include "LogEntry.h"
+#include "IRecentLogReader.h"
 
 namespace EnvNode {
 
 constexpr size_t RecentLogCapacity = 64;
 
-class RecentLogStore {
+class RecentLogStore : public IRecentLogReader {
 public:
-    size_t count() const;
-    bool copyEntry(size_t logicalIndex, LogEntry& result) const;
+    size_t count() const override;
+    size_t capacity() const override;
+    bool copyEntry(size_t logicalIndex, LogEntry& result) const override;
     void append(const LogEntry& entry);
     void clear();
 

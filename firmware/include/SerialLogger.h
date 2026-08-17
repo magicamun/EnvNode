@@ -23,11 +23,6 @@ private:
         const uint8_t* data,
         size_t length,
         WriteOperation operation);
-    bool formatTimestamp(
-        const EnvNode::LogEntry& entry,
-        char* output,
-        size_t outputSize) const;
-
     bool initialized_ = false;
     uint32_t writeSequence_ = 0;
     uint32_t shortWriteCount_ = 0;

@@ -1,4 +1,7 @@
 #include "WebService.h"
+#include "HtmlEscaping.h"
+#include "LogWebView.h"
+#include "WebNavigation.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -21,6 +24,8 @@ namespace {
 
 const char SharedStyle[] PROGMEM = R"CSS(
 :root{--bg:#f3f6f8;--panel:#fff;--ink:#17212b;--muted:#637282;--line:#dbe3e8;--brand:#176b87;--brand2:#0f536a;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#123644;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#b8d0da;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#dbeaf0;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#1d5367;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.main.main-wide{max-width:none}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help,.secondary{color:var(--muted)}.help,.secondary{font-size:13px}.secondary{display:block;margin-top:4px}.grid,.summary-grid{display:grid;gap:16px;min-width:0;max-width:100%;margin-bottom:16px}.grid{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}.summary-grid.primary{grid-template-columns:repeat(4,minmax(0,1fr))}.summary-grid.domain{grid-template-columns:repeat(3,minmax(0,1fr))}.grid>.card,.summary-grid>.card{margin-bottom:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#e8edf0;max-width:100%;white-space:nowrap;overflow-wrap:normal}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #bfcbd2;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:nowrap}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.nowrap,.sensor-technical,.sensor-last-measurement,.sensor-actions{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.table-scroll,.scroll{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}.table-actions{display:flex;gap:8px;align-items:center;justify-content:center;margin:0}.table-actions.vertical{flex-direction:column}.table-actions form{margin:0}.table-actions button,.table-action{min-width:max-content;white-space:nowrap}.measurement-table{min-width:620px}.measurement-table .measurement-name{width:auto}.measurement-table .measurement-value{min-width:130px;white-space:nowrap}.measurement-table .measurement-quality{min-width:90px;white-space:nowrap}.measurement-table .measurement-time{min-width:175px;white-space:nowrap}.actuator-table{min-width:1120px}.actuator-table th{white-space:nowrap;overflow-wrap:normal}.actuator-table td{vertical-align:middle}.actuator-table .actuator-slot{width:58px;white-space:nowrap}.actuator-table .actuator-name{min-width:145px}.actuator-table .actuator-configured{min-width:130px}.actuator-table .actuator-hardware{min-width:90px;white-space:nowrap}.actuator-table .actuator-runtime{min-width:175px}.actuator-table .actuator-initialization{min-width:120px;white-space:nowrap}.actuator-table .actuator-state{min-width:68px;white-space:nowrap}.actuator-table .actuator-controls{min-width:90px;text-align:center}.actuator-table .actuator-configure{min-width:112px;text-align:center}.actuator-table .actuator-controls button{min-width:58px}.controller-table{min-width:1320px}.controller-table th{white-space:nowrap;overflow-wrap:normal}.controller-table td{vertical-align:middle}.controller-table .controller-slot{width:58px;white-space:nowrap}.controller-table .controller-name{min-width:190px}.controller-table .controller-name .secondary{white-space:nowrap}.controller-table .controller-route{min-width:290px}.controller-table .controller-policy{min-width:210px}.controller-table .controller-runtime{min-width:150px}.controller-table .controller-diagnostics{min-width:245px}.controller-table .controller-controls{min-width:120px;text-align:center}.controller-table .controller-controls .table-actions{align-items:stretch}.controller-table .controller-controls button,.controller-table .controller-controls .button{width:100%}.diagnostic-stack{line-height:1.55}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}@media(max-width:900px){.summary-grid.primary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}.summary-grid.domain{grid-template-columns:1fr}}@media(max-width:480px){.summary-grid.primary{grid-template-columns:1fr}}
+)CSS" R"CSS(
+.log-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.log-summary .help{margin-bottom:0}.log-table{min-width:620px;table-layout:fixed}.log-table .log-seq{width:84px;white-space:nowrap;overflow-wrap:normal}.log-table .log-time{width:190px;white-space:nowrap;overflow-wrap:normal}.log-table .log-level-cell{width:86px;white-space:nowrap;overflow-wrap:normal}.log-table .log-message{white-space:normal;overflow-wrap:anywhere}.log-level.debug{color:var(--muted)}.log-level.info{color:var(--brand)}@media(max-width:480px){.log-summary{display:block}.log-summary .button{display:inline-block;margin-top:10px}}
 )CSS";
 
 struct TimezoneOption { const char* label; const char* value; };
@@ -30,22 +35,6 @@ const TimezoneOption TimezoneOptions[] = {
     {"America/Chicago", "CST6CDT,M3.2.0/2,M11.1.0/2"}, {"America/Denver", "MST7MDT,M3.2.0/2,M11.1.0/2"},
     {"America/Los_Angeles", "PST8PDT,M3.2.0/2,M11.1.0/2"},
 };
-
-String escapeHtml(const String& value) {
-    String escaped;
-    escaped.reserve(value.length() * 2 + 8);
-    for (size_t index = 0; index < value.length(); ++index) {
-        switch (value[index]) {
-            case '&': escaped += "&amp;"; break;
-            case '<': escaped += "&lt;"; break;
-            case '>': escaped += "&gt;"; break;
-            case '"': escaped += "&quot;"; break;
-            case '\'': escaped += "&#39;"; break;
-            default: escaped += value[index]; break;
-        }
-    }
-    return escaped;
-}
 
 String badge(const char* text, const char* style) {
     return "<span class='badge " + String(style) + "'>" + text + "</span>";
@@ -395,12 +384,14 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime,
     ControllerRuntime& controllerRuntime,
     MeasurementSnapshotCache& measurementSnapshotCache,
+    const IRecentLogReader& logReader,
     IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
       controllerRuntime_(controllerRuntime),
       measurementSnapshotCache_(measurementSnapshotCache),
+      logReader_(logReader),
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService) {}
 
 void WebService::begin() {
@@ -419,6 +410,7 @@ void WebService::begin() {
     server_.on("/units", HTTP_GET, [this]() { handleUnits(); });
     server_.on("/device", HTTP_GET, [this]() { handleDevice(); });
     server_.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
+    server_.on("/logs", HTTP_GET, [this]() { handleLogs(); });
     server_.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
     server_.on("/firmware/upload", HTTP_POST,
         [this]() { handleFirmwareUpload(); },
@@ -560,24 +552,6 @@ String WebService::otaStatusHtml() const {
     return html;
 }
 
-String WebService::navigationHtml(const char* active) const {
-    const char* routes[][2] = {{"/status","Status"},{"/sensors","Sensors"},{"/measurements","Measurements"},{"/actuators","Actuators"},{"/controllers","Controllers"},{"/network","Network"},{"/mqtt","MQTT"},{"/time","Locale & Time"},{"/units","Units"},{"/device","Device"},{"/diagnostics","Diagnostics"},{"/firmware","Firmware"}};
-    String html;
-    html.reserve(560);
-    html = "<nav class='nav'>";
-    for (const auto& route : routes) {
-        html += "<a href='";
-        html += route[0];
-        html += "' class='";
-        if (strcmp(active, route[0]) == 0) html += "active";
-        html += "'>";
-        html += route[1];
-        html += "</a>";
-    }
-    html += "</nav>";
-    return html;
-}
-
 String WebService::renderPage(const char* title, const char* active, const String& content,
     bool wideContent) const {
     const Configuration& cfg = configurationService_.getConfiguration();
@@ -592,7 +566,7 @@ String WebService::renderPage(const char* title, const char* active, const Strin
     html += "</div><div class='version'>EnvNode · v";
     html += FirmwareBuildInfo::SemanticVersion;
     html += "</div>";
-    html += navigationHtml(active);
+    html += buildWebNavigationHtml(active);
     html += "</aside><main class='main";
     if (wideContent) html += " main-wide";
     html += "'><div class='top'><div><h1>";
@@ -1314,6 +1288,10 @@ void WebService::handleDiagnostics() {
     c = "<div class='grid'><section class='card'><h2>System</h2><div class='kv'><span>Uptime</span><span>"+localeFormatter_.formatNumber(millis()/1000UL,0)+" s</span><span>Free heap</span><span>"+localeFormatter_.formatNumber(ESP.getFreeHeap(),0)+" bytes</span><span>Flash</span><span>"+localeFormatter_.formatNumber(ESP.getFlashChipSize(),0)+" bytes</span></div></section><section class='card'><h2>Services</h2><div class='kv'><span>WiFi</span><span>"+(wifiService_.connected()?"Connected":"Disconnected")+"</span><span>MQTT</span><span>"+(mqttService_.connected()?"Connected":"Disconnected")+"</span><span>Time</span><span>"+(timeService_.synchronized()?"Synchronized":"Pending")+"</span></div></section></div>";
     for(size_t index=0;index<sensorManager_.sensorCount();++index){SensorRuntimeInfo i; if(!sensorManager_.runtimeInfo(index,i))continue;SensorRuntimeStatus s;sensorManager_.runtimeStatus(i.id,s);c+="<section class='card'><h2>Sensor "+localeFormatter_.formatNumber(i.id,0)+" · "+escapeHtml(i.name)+"</h2><div class='kv'><span>Type</span><span>"+escapeHtml(i.type)+"</span><span>State</span><span>"+sensorStateName(i.state)+"</span><span>Accepted</span><span>"+localeFormatter_.formatNumber(s.acceptedMeasurementCount,0)+"</span><span>Rejected</span><span>"+localeFormatter_.formatNumber(s.rejectedMeasurementCount,0)+"</span><span>Pre-sync discarded</span><span>"+localeFormatter_.formatNumber(s.preSyncDiscardCount,0)+"</span><span>Last sample emissions</span><span>"+localeFormatter_.formatNumber(s.lastSampleEmissionCount,0)+"</span></div></section>";}
     sendPage("Diagnostics", "/diagnostics", c);
+}
+
+void WebService::handleLogs() {
+    sendPage("Logs", "/logs", buildRecentLogHtml(logReader_));
 }
 
 void WebService::handleFirmware() {
