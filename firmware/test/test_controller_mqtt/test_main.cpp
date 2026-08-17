@@ -234,35 +234,35 @@ void test_controller_topics_generate_and_parse() {
     TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/controller/2/cmd",
         mqttControllerCommandTopic(device, 2).c_str());
     TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/controller/2/parameter/on_duration_ms",
-        mqttControllerParameterTopic(device, 2, ControllerMqttParameter::OnDurationMs).c_str());
+        mqttControllerParameterTopic(device, 2, ControllerParameter::OnDurationMs).c_str());
     TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/controller/2/cmd/parameter/on_duration_ms",
         mqttControllerParameterCommandTopic(
-            device, 2, ControllerMqttParameter::OnDurationMs).c_str());
+            device, 2, ControllerParameter::OnDurationMs).c_str());
     TEST_ASSERT_EQUAL_STRING("on_threshold",
-        mqttControllerParameterName(ControllerMqttParameter::OnThreshold));
+        mqttControllerParameterName(ControllerParameter::OnThreshold));
     TEST_ASSERT_EQUAL_STRING("off_threshold",
-        mqttControllerParameterName(ControllerMqttParameter::OffThreshold));
+        mqttControllerParameterName(ControllerParameter::OffThreshold));
     TEST_ASSERT_EQUAL_STRING("max_measurement_age_ms",
-        mqttControllerParameterName(ControllerMqttParameter::MaxMeasurementAgeMs));
+        mqttControllerParameterName(ControllerParameter::MaxMeasurementAgeMs));
     ControllerId id = InvalidControllerId;
-    ControllerMqttParameter parameter = ControllerMqttParameter::OnDurationMs;
+    ControllerParameter parameter = ControllerParameter::OnDurationMs;
     TEST_ASSERT_TRUE(parseMqttControllerCommandTopic(
         "envnode/Weather_Station/controller/2/cmd", device, id));
     TEST_ASSERT_EQUAL_UINT16(2, id);
     TEST_ASSERT_TRUE(parseMqttControllerParameterCommandTopic(
         "envnode/Weather_Station/controller/2/cmd/parameter/off_duration_ms",
         device, id, parameter));
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerMqttParameter::OffDurationMs),
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerParameter::OffDurationMs),
         static_cast<int>(parameter));
     TEST_ASSERT_TRUE(parseMqttControllerParameterCommandTopic(
         "envnode/Weather_Station/controller/2/cmd/parameter/on_threshold",
         device, id, parameter));
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerMqttParameter::OnThreshold),
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerParameter::OnThreshold),
         static_cast<int>(parameter));
     TEST_ASSERT_TRUE(parseMqttControllerParameterCommandTopic(
         "envnode/Weather_Station/controller/2/cmd/parameter/max_measurement_age_ms",
         device, id, parameter));
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerMqttParameter::MaxMeasurementAgeMs),
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerParameter::MaxMeasurementAgeMs),
         static_cast<int>(parameter));
     TEST_ASSERT_FALSE(parseMqttControllerCommandTopic(
         "envnode/Weather_Station/controller/x/cmd", device, id));

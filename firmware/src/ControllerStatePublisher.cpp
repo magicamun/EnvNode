@@ -110,10 +110,10 @@ void ControllerStatePublisher::loop() {
 
         const ControllerSlotConfiguration& slot = configuration.controllerSlots[index];
         for (uint8_t parameterValueIndex = 0;
-             parameterValueIndex < static_cast<uint8_t>(ControllerMqttParameter::Count);
+             parameterValueIndex < static_cast<uint8_t>(ControllerParameter::Count);
              ++parameterValueIndex) {
-            const ControllerMqttParameter parameter =
-                static_cast<ControllerMqttParameter>(parameterValueIndex);
+            const ControllerParameter parameter =
+                static_cast<ControllerParameter>(parameterValueIndex);
             String value;
             const bool supported = parameterValue(slot, parameter, value);
             if (supported
@@ -172,14 +172,14 @@ String ControllerStatePublisher::statusPayload(const ControllerRuntimeInfo& info
 
 bool ControllerStatePublisher::parameterValue(
     const ControllerSlotConfiguration& slot,
-    ControllerMqttParameter parameter,
+    ControllerParameter parameter,
     String& value) {
     if (slot.implementation == ControllerImplementation::Blink) {
-        if (parameter == ControllerMqttParameter::OnDurationMs) {
+        if (parameter == ControllerParameter::OnDurationMs) {
             value = String(slot.implementationConfiguration.blink.onDurationMs);
             return true;
         }
-        if (parameter == ControllerMqttParameter::OffDurationMs) {
+        if (parameter == ControllerParameter::OffDurationMs) {
             value = String(slot.implementationConfiguration.blink.offDurationMs);
             return true;
         }
@@ -188,15 +188,15 @@ bool ControllerStatePublisher::parameterValue(
     if (slot.implementation == ControllerImplementation::Threshold) {
         const ThresholdControllerConfiguration& threshold =
             slot.implementationConfiguration.threshold;
-        if (parameter == ControllerMqttParameter::OnThreshold) {
+        if (parameter == ControllerParameter::OnThreshold) {
             value = compactFloat(threshold.onThreshold);
             return true;
         }
-        if (parameter == ControllerMqttParameter::OffThreshold) {
+        if (parameter == ControllerParameter::OffThreshold) {
             value = compactFloat(threshold.offThreshold);
             return true;
         }
-        if (parameter == ControllerMqttParameter::MaxMeasurementAgeMs) {
+        if (parameter == ControllerParameter::MaxMeasurementAgeMs) {
             value = String(threshold.maxMeasurementAgeMs);
             return true;
         }

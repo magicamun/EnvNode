@@ -5,6 +5,7 @@
 #include "MeasurementType.h"
 #include "ActuatorId.h"
 #include "ControllerId.h"
+#include "ControllerParameterMetadata.h"
 
 namespace EnvNode {
 
@@ -20,16 +21,7 @@ bool parseMqttActuatorCommandTopic(
     const String& deviceName,
     ActuatorId& id);
 
-enum class ControllerMqttParameter : uint8_t {
-    OnDurationMs,
-    OffDurationMs,
-    OnThreshold,
-    OffThreshold,
-    MaxMeasurementAgeMs,
-    Count,
-};
-
-const char* mqttControllerParameterName(ControllerMqttParameter parameter);
+const char* mqttControllerParameterName(ControllerParameter parameter);
 String mqttControllerCommandSubscription(const String& deviceName);
 String mqttControllerParameterCommandSubscription(const String& deviceName);
 String mqttControllerCommandTopic(const String& deviceName, ControllerId id);
@@ -37,11 +29,11 @@ String mqttControllerStatusTopic(const String& deviceName, ControllerId id);
 String mqttControllerParameterTopic(
     const String& deviceName,
     ControllerId id,
-    ControllerMqttParameter parameter);
+    ControllerParameter parameter);
 String mqttControllerParameterCommandTopic(
     const String& deviceName,
     ControllerId id,
-    ControllerMqttParameter parameter);
+    ControllerParameter parameter);
 bool parseMqttControllerCommandTopic(
     const char* topic,
     const String& deviceName,
@@ -50,6 +42,6 @@ bool parseMqttControllerParameterCommandTopic(
     const char* topic,
     const String& deviceName,
     ControllerId& id,
-    ControllerMqttParameter& parameter);
+    ControllerParameter& parameter);
 
 } // namespace EnvNode

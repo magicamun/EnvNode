@@ -36,7 +36,7 @@ private:
     static String statusPayload(const ControllerRuntimeInfo& info);
     static bool parameterValue(
         const ControllerSlotConfiguration& slot,
-        ControllerMqttParameter parameter,
+        ControllerParameter parameter,
         String& value);
 
     ILogger& logger_;
@@ -48,9 +48,9 @@ private:
     bool statusKnown_[MaxControllerSlotCount] = {};
     StatusSnapshot statuses_[MaxControllerSlotCount];
     bool parameterKnown_[MaxControllerSlotCount]
-        [static_cast<size_t>(ControllerMqttParameter::Count)] = {};
+        [static_cast<size_t>(ControllerParameter::Count)] = {};
     String parameterValues_[MaxControllerSlotCount]
-        [static_cast<size_t>(ControllerMqttParameter::Count)];
+        [static_cast<size_t>(ControllerParameter::Count)];
 };
 
 } // namespace EnvNode

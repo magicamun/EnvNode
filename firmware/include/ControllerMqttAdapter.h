@@ -29,7 +29,7 @@ private:
     void handleCommand(ControllerId id, const uint8_t* payload, size_t length);
     void handleParameter(
         ControllerId id,
-        ControllerMqttParameter parameter,
+        ControllerParameter parameter,
         const uint8_t* payload,
         size_t length);
     static bool parseDuration(const uint8_t* payload, size_t length, uint32_t& value);

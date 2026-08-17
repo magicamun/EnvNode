@@ -67,7 +67,7 @@ void ControllerMqttAdapter::handleMqttMessage(
         handleCommand(id, payload, length);
         return;
     }
-    ControllerMqttParameter parameter = ControllerMqttParameter::OnDurationMs;
+    ControllerParameter parameter = ControllerParameter::OnDurationMs;
     if (parseMqttControllerParameterCommandTopic(topic, deviceName, id, parameter)) {
         if (id > MaxControllerSlotCount) {
             logger_.printf("MQTT Controller parameter rejected: slot %u is out of range\n",
@@ -112,34 +112,34 @@ void ControllerMqttAdapter::handleCommand(
 
 void ControllerMqttAdapter::handleParameter(
     ControllerId id,
-    ControllerMqttParameter parameter,
+    ControllerParameter parameter,
     const uint8_t* payload,
     size_t length) {
     ControllerSlotConfiguration candidate =
         configurationService_.getConfiguration().controllerSlots[id - 1];
     String acceptedValue;
     if (candidate.implementation == ControllerImplementation::Blink
-        && (parameter == ControllerMqttParameter::OnDurationMs
-            || parameter == ControllerMqttParameter::OffDurationMs)) {
+        && (parameter == ControllerParameter::OnDurationMs
+            || parameter == ControllerParameter::OffDurationMs)) {
         uint32_t duration = 0;
         if (!parseDuration(payload, length, duration)) {
             logger_.printf("MQTT Controller %u parameter rejected: invalid duration\n",
                 static_cast<unsigned int>(id));
             return;
         }
-        uint32_t& configured = parameter == ControllerMqttParameter::OnDurationMs
+        uint32_t& configured = parameter == ControllerParameter::OnDurationMs
             ? candidate.implementationConfiguration.blink.onDurationMs
             : candidate.implementationConfiguration.blink.offDurationMs;
         if (duration == configured) return;
         configured = duration;
         acceptedValue = String(duration);
     } else if (candidate.implementation == ControllerImplementation::Threshold
-        && (parameter == ControllerMqttParameter::OnThreshold
-            || parameter == ControllerMqttParameter::OffThreshold
-            || parameter == ControllerMqttParameter::MaxMeasurementAgeMs)) {
+        && (parameter == ControllerParameter::OnThreshold
+            || parameter == ControllerParameter::OffThreshold
+            || parameter == ControllerParameter::MaxMeasurementAgeMs)) {
         ThresholdControllerConfiguration& threshold =
             candidate.implementationConfiguration.threshold;
-        if (parameter == ControllerMqttParameter::MaxMeasurementAgeMs) {
+        if (parameter == ControllerParameter::MaxMeasurementAgeMs) {
             uint32_t age = 0;
             if (!parseUnsignedInteger(payload, length, age)) {
                 logger_.printf("MQTT Controller %u parameter rejected: invalid unsigned integer\n",
@@ -156,7 +156,7 @@ void ControllerMqttAdapter::handleParameter(
                     static_cast<unsigned int>(id));
                 return;
             }
-            float& configured = parameter == ControllerMqttParameter::OnThreshold
+            float& configured = parameter == ControllerParameter::OnThreshold
                 ? threshold.onThreshold : threshold.offThreshold;
             if (thresholdValue == configured) return;
             configured = thresholdValue;

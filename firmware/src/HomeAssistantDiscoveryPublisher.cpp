@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "FirmwareVersion.h"
+#include "JsonWriter.h"
 #include "MqttTopic.h"
 #include "UnitConverter.h"
 
@@ -20,25 +21,6 @@ const MeasurementType DiscoverableMeasurementTypes[] = {
     MeasurementType::RainGaugeTip,
     MeasurementType::RainfallIncrement,
 };
-
-void appendJsonString(String& output, const char* value) {
-    output += '"';
-    if (value != nullptr) {
-        for (const char* cursor = value; *cursor != '\0'; ++cursor) {
-            switch (*cursor) {
-                case '"': output += "\\\""; break;
-                case '\\': output += "\\\\"; break;
-                case '\n': output += "\\n"; break;
-                case '\r': output += "\\r"; break;
-                case '\t': output += "\\t"; break;
-                default:
-                    if (static_cast<uint8_t>(*cursor) >= 0x20) output += *cursor;
-                    break;
-            }
-        }
-    }
-    output += '"';
-}
 
 void hashByte(uint32_t& hash, uint8_t value) {
     hash ^= value;
