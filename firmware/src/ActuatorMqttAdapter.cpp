@@ -18,7 +18,6 @@ ActuatorMqttAdapter::ActuatorMqttAdapter(
 }
 
 void ActuatorMqttAdapter::begin() {
-    mqttService_.setMessageHandler(this);
 }
 
 void ActuatorMqttAdapter::loop() {
@@ -47,8 +46,10 @@ void ActuatorMqttAdapter::handleMqttMessage(
     if (!parseMqttActuatorCommandTopic(
             topic,
             configurationService_.getConfiguration().device.name,
-            id)
-        || id > MaxActuatorSlotCount) {
+            id)) {
+        return;
+    }
+    if (id > MaxActuatorSlotCount) {
         logger_.printf("MQTT actuator command rejected: invalid topic %s\n",
             topic == nullptr ? "(null)" : topic);
         return;

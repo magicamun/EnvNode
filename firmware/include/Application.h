@@ -13,12 +13,15 @@
 #include "ActuatorMqttAdapter.h"
 #include "ActuatorStatePublisher.h"
 #include "ControllerRuntime.h"
+#include "ControllerMqttAdapter.h"
+#include "ControllerStatePublisher.h"
+#include "MqttMessageRouter.h"
 
 namespace EnvNode {
 
 class Application {
 public:
-    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher);
+    Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher);
 
     void setup(bool configurationAlreadyLoaded = false);
     void loop();
@@ -35,8 +38,11 @@ private:
     ControllerRuntime& controllerRuntime_;
     RuntimeManager& runtimeManager_;
     IDiscoveryPublisher& discoveryPublisher_;
+    MqttMessageRouter& mqttMessageRouter_;
     ActuatorMqttAdapter& actuatorMqttAdapter_;
     ActuatorStatePublisher& actuatorStatePublisher_;
+    ControllerMqttAdapter& controllerMqttAdapter_;
+    ControllerStatePublisher& controllerStatePublisher_;
     bool timeSyncLogged_ = false;
 };
 

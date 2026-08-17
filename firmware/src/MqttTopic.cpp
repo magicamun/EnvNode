@@ -91,4 +91,105 @@ bool parseMqttActuatorCommandTopic(
     return true;
 }
 
+const char* mqttControllerParameterName(ControllerMqttParameter parameter) {
+    switch (parameter) {
+        case ControllerMqttParameter::OnDurationMs: return "on_duration_ms";
+        case ControllerMqttParameter::OffDurationMs: return "off_duration_ms";
+        default: return nullptr;
+    }
+}
+
+String mqttControllerCommandSubscription(const String& deviceName) {
+    return mqttDeviceTopicRoot(deviceName) + "/controller/+/cmd";
+}
+
+String mqttControllerParameterCommandSubscription(const String& deviceName) {
+    return mqttDeviceTopicRoot(deviceName) + "/controller/+/cmd/parameter/+";
+}
+
+String mqttControllerCommandTopic(const String& deviceName, ControllerId id) {
+    return mqttDeviceTopicRoot(deviceName) + "/controller/"
+        + String(static_cast<unsigned int>(id)) + "/cmd";
+}
+
+String mqttControllerStatusTopic(const String& deviceName, ControllerId id) {
+    return mqttDeviceTopicRoot(deviceName) + "/controller/"
+        + String(static_cast<unsigned int>(id)) + "/status";
+}
+
+String mqttControllerParameterTopic(
+    const String& deviceName,
+    ControllerId id,
+    ControllerMqttParameter parameter) {
+    const char* name = mqttControllerParameterName(parameter);
+    return mqttDeviceTopicRoot(deviceName) + "/controller/"
+        + String(static_cast<unsigned int>(id)) + "/parameter/"
+        + (name == nullptr ? "" : name);
+}
+
+String mqttControllerParameterCommandTopic(
+    const String& deviceName,
+    ControllerId id,
+    ControllerMqttParameter parameter) {
+    const char* name = mqttControllerParameterName(parameter);
+    return mqttDeviceTopicRoot(deviceName) + "/controller/"
+        + String(static_cast<unsigned int>(id)) + "/cmd/parameter/"
+        + (name == nullptr ? "" : name);
+}
+
+namespace {
+
+bool parseControllerTopicSlot(
+    const char* topic,
+    const String& deviceName,
+    const char*& suffix,
+    ControllerId& id) {
+    if (topic == nullptr) return false;
+    const String prefixString = mqttDeviceTopicRoot(deviceName) + "/controller/";
+    const size_t prefixLength = prefixString.length();
+    if (strncmp(topic, prefixString.c_str(), prefixLength) != 0) return false;
+    const char* slotStart = topic + prefixLength;
+    if (*slotStart < '0' || *slotStart > '9') return false;
+    char* slotEnd = nullptr;
+    const unsigned long parsed = strtoul(slotStart, &slotEnd, 10);
+    if (slotEnd == slotStart || parsed == 0 || parsed > 0xFFFFUL) return false;
+    id = static_cast<ControllerId>(parsed);
+    suffix = slotEnd;
+    return true;
+}
+
+} // namespace
+
+bool parseMqttControllerCommandTopic(
+    const char* topic,
+    const String& deviceName,
+    ControllerId& id) {
+    const char* suffix = nullptr;
+    return parseControllerTopicSlot(topic, deviceName, suffix, id)
+        && strcmp(suffix, "/cmd") == 0;
+}
+
+bool parseMqttControllerParameterCommandTopic(
+    const char* topic,
+    const String& deviceName,
+    ControllerId& id,
+    ControllerMqttParameter& parameter) {
+    const char* suffix = nullptr;
+    if (!parseControllerTopicSlot(topic, deviceName, suffix, id)) return false;
+    const char prefix[] = "/cmd/parameter/";
+    if (strncmp(suffix, prefix, sizeof(prefix) - 1) != 0) return false;
+    const char* name = suffix + sizeof(prefix) - 1;
+    if (strcmp(name, mqttControllerParameterName(
+            ControllerMqttParameter::OnDurationMs)) == 0) {
+        parameter = ControllerMqttParameter::OnDurationMs;
+        return true;
+    }
+    if (strcmp(name, mqttControllerParameterName(
+            ControllerMqttParameter::OffDurationMs)) == 0) {
+        parameter = ControllerMqttParameter::OffDurationMs;
+        return true;
+    }
+    return false;
+}
+
 } // namespace EnvNode

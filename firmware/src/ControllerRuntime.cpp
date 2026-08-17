@@ -33,6 +33,7 @@ bool ControllerRuntime::initialize(const ControllerSlotConfiguration* slots) {
         runtimeCount_ = 0;
         return false;
     }
+    ++compositionRevision_;
     return true;
 }
 
@@ -69,6 +70,7 @@ bool ControllerRuntime::rebuild(const ControllerSlotConfiguration* slots) {
     inactiveFactory_ = previousFactory;
     memcpy(entries_, stagedEntries, sizeof(entries_));
     runtimeCount_ = stagedRuntimeCount;
+    ++compositionRevision_;
     logger_.printf("Controller runtime rebuild successful: %u controllers active\n",
         static_cast<unsigned int>(runtimeCount_));
     return true;
@@ -87,6 +89,7 @@ void ControllerRuntime::loop() {
 }
 
 size_t ControllerRuntime::runtimeCount() const { return runtimeCount_; }
+uint32_t ControllerRuntime::compositionRevision() const { return compositionRevision_; }
 
 bool ControllerRuntime::runtimeInfo(size_t index, ControllerRuntimeInfo& info) const {
     if (index >= runtimeCount_) return false;

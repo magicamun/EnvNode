@@ -4,7 +4,7 @@
 
 namespace EnvNode {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -16,8 +16,11 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , controllerRuntime_(controllerRuntime)
     , runtimeManager_(runtimeManager)
     , discoveryPublisher_(discoveryPublisher)
+    , mqttMessageRouter_(mqttMessageRouter)
     , actuatorMqttAdapter_(actuatorMqttAdapter)
     , actuatorStatePublisher_(actuatorStatePublisher)
+    , controllerMqttAdapter_(controllerMqttAdapter)
+    , controllerStatePublisher_(controllerStatePublisher)
     , timeSyncLogged_(false) {
 }
 
@@ -36,7 +39,9 @@ void Application::setup(bool configurationAlreadyLoaded) {
     }
     webService_.begin();
     mqttService_.begin();
+    mqttMessageRouter_.begin();
     actuatorMqttAdapter_.begin();
+    controllerMqttAdapter_.begin();
 
     const Configuration& configuration = configurationService_.getConfiguration();
 
@@ -66,8 +71,10 @@ void Application::loop() {
     webService_.loop();
     mqttService_.loop();
     actuatorMqttAdapter_.loop();
+    controllerMqttAdapter_.loop();
     controllerRuntime_.loop();
     actuatorStatePublisher_.loop();
+    controllerStatePublisher_.loop();
     discoveryPublisher_.loop();
     runtimeManager_.service();
 }

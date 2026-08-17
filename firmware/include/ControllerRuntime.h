@@ -32,6 +32,7 @@ public:
     bool rebuild(const ControllerSlotConfiguration* slots);
     void loop();
     size_t runtimeCount() const;
+    uint32_t compositionRevision() const;
     bool runtimeInfo(size_t index, ControllerRuntimeInfo& info) const;
     ControllerOperationResult startController(ControllerId id);
     ControllerOperationResult stopController(ControllerId id);
@@ -60,6 +61,7 @@ private:
     ILogger& logger_;
     RuntimeEntry entries_[MaxControllerSlotCount];
     size_t runtimeCount_ = 0;
+    uint32_t compositionRevision_ = 0;
     bool initialized_ = false;
 };
 

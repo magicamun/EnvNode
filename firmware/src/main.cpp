@@ -29,6 +29,9 @@
 #include "ActuatorStatePublisher.h"
 #include "ControllerFactory.h"
 #include "ControllerRuntime.h"
+#include "ControllerMqttAdapter.h"
+#include "ControllerStatePublisher.h"
+#include "MqttMessageRouter.h"
 
 using namespace EnvNode;
 
@@ -65,6 +68,12 @@ static SensorRuntime sensorRuntime(
 static LocaleFormatter localeFormatter(configurationService);
 static RuntimeManager runtimeManager(
     serialLogger, &sensorRuntime, &actuatorRuntime, &controllerRuntime);
+static ControllerMqttAdapter controllerMqttAdapter(
+    serialLogger, configurationService, mqttService, controllerRuntime, runtimeManager);
+static MqttMessageRouter mqttMessageRouter(
+    mqttService, actuatorMqttAdapter, controllerMqttAdapter);
+static ControllerStatePublisher controllerStatePublisher(
+    serialLogger, configurationService, mqttService, controllerRuntime);
 static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     serialLogger,
     configurationService,
@@ -72,7 +81,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     sensorManager);
 static OTAService otaService(serialLogger, runtimeManager);
 static WebService webService(serialLogger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, homeAssistantDiscoveryPublisher, runtimeManager, otaService);
-static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, actuatorMqttAdapter, actuatorStatePublisher);
+static Application app(serialLogger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher);
 
 void setup() {
     i2cBusManager.begin();

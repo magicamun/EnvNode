@@ -117,7 +117,9 @@ bool RuntimeManager::applyPendingControllerChanges(
 void RuntimeManager::performPendingRestart() {
     if (pendingAction_ != RuntimeAction::RestartDevice) return;
     logger_.println("INFO Device restart executed");
+#if defined(ARDUINO_ARCH_ESP32)
     ESP.restart();
+#endif
 }
 
 } // namespace EnvNode
