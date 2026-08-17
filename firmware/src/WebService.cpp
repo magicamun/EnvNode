@@ -14,6 +14,7 @@
 #include "ActuatorImplementationRegistry.h"
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
+#include "ElapsedTimeFormatter.h"
 
 namespace EnvNode {
 namespace {
@@ -136,10 +137,10 @@ String lastMeasurementDisplay(
         result = "Pre-sync activity";
     }
 
-    const uint32_t ageSeconds = (millis() - status.lastMeasurementMonotonicMs) / 1000UL;
+    const uint32_t ageMs = millis() - status.lastMeasurementMonotonicMs;
     result += "<br><span class='help'>";
-    result += localeFormatter.formatNumber(ageSeconds, 0);
-    result += " s ago</span>";
+    result += formatElapsedDuration(ageMs);
+    result += " ago</span>";
     return result;
 }
 
@@ -382,9 +383,8 @@ String measurementTimeDisplay(
     if (localtime_r(&timestamp, &localTime) == nullptr) return "—";
     String result = localeFormatter.formatDateTime(localTime);
     result += "<br><span class='help'>";
-    result += localeFormatter.formatNumber(
-        (millis() - snapshot.acceptedMonotonicMs) / 1000UL, 0);
-    result += " s ago</span>";
+    result += formatElapsedDuration(millis() - snapshot.acceptedMonotonicMs);
+    result += " ago</span>";
     return result;
 }
 
@@ -938,7 +938,8 @@ void WebService::handleControllers() {
             if (!runtime.hasLatestSnapshot) {
                 c += "No current Measurement";
             } else if (runtime.latestSnapshotStale) {
-                c += "Stale Measurement (" + String(runtime.latestSnapshotAgeMs) + " ms)";
+                c += "Stale Measurement ("
+                    + formatElapsedDuration(runtime.latestSnapshotAgeMs) + " ago)";
             } else if (!runtime.latestMeasurementValid) {
                 c += "Invalid Measurement";
             } else if (!runtime.sourceAvailable) {
