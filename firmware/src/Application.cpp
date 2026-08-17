@@ -21,8 +21,7 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , actuatorStatePublisher_(actuatorStatePublisher)
     , controllerMqttAdapter_(controllerMqttAdapter)
     , controllerStatePublisher_(controllerStatePublisher)
-    , descriptionPublisher_(descriptionPublisher)
-    , timeSyncLogged_(false) {
+    , descriptionPublisher_(descriptionPublisher) {
 }
 
 void Application::setup(bool configurationAlreadyLoaded) {
@@ -33,7 +32,7 @@ void Application::setup(bool configurationAlreadyLoaded) {
     actuatorRuntime_.initialize(configurationService_.getConfiguration().actuatorSlots);
     if (!controllerRuntime_.initialize(
             configurationService_.getConfiguration().controllerSlots)) {
-        logger_.println("Controller runtime initialization failed");
+        logger_.error("Controller runtime initialization failed");
     }
     webService_.begin();
     mqttService_.begin();
@@ -43,27 +42,22 @@ void Application::setup(bool configurationAlreadyLoaded) {
 
     const Configuration& configuration = configurationService_.getConfiguration();
 
-    logger_.println(configuration.device.name.c_str());
-    logger_.printf("Firmware version: %s\n", FirmwareBuildInfo::SemanticVersion);
-    logger_.printf("Build: %s\n", FirmwareBuildInfo::BuildNumber);
-    logger_.printf("Git commit: %s\n", FirmwareBuildInfo::GitCommit);
-    logger_.printf("Git branch: %s\n", FirmwareBuildInfo::GitBranch);
-    logger_.printf("Git working tree: %s\n", FirmwareBuildInfo::SourceState);
-    logger_.printf("Built: %s\n", FirmwareBuildInfo::BuildTimestampUtc);
-    logger_.printf("Chip model: %s\n", ESP.getChipModel());
-    logger_.printf("CPU frequency: %u MHz\n", ESP.getCpuFreqMHz());
-    logger_.printf("Flash size: %u KB\n", ESP.getFlashChipSize() / 1024);
-    logger_.printf("Free heap: %u bytes\n", ESP.getFreeHeap());
+    logger_.info(configuration.device.name.c_str());
+    logger_.infof("Firmware version: %s", FirmwareBuildInfo::SemanticVersion);
+    logger_.infof("Build: %s", FirmwareBuildInfo::BuildNumber);
+    logger_.infof("Git commit: %s", FirmwareBuildInfo::GitCommit);
+    logger_.debugf("Git branch: %s", FirmwareBuildInfo::GitBranch);
+    logger_.debugf("Git working tree: %s", FirmwareBuildInfo::SourceState);
+    logger_.debugf("Built: %s", FirmwareBuildInfo::BuildTimestampUtc);
+    logger_.debugf("Chip model: %s", ESP.getChipModel());
+    logger_.debugf("CPU frequency: %u MHz", ESP.getCpuFreqMHz());
+    logger_.debugf("Flash size: %u KB", ESP.getFlashChipSize() / 1024);
+    logger_.debugf("Free heap: %u bytes", ESP.getFreeHeap());
 }
 
 void Application::loop() {
     wifiService_.loop();
     timeService_.loop();
-
-    if (!timeSyncLogged_ && timeService_.synchronized()) {
-        logger_.println("Time synchronized");
-        timeSyncLogged_ = true;
-    }
 
     sensorManager_.loop();
     webService_.loop();

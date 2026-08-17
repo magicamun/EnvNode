@@ -53,7 +53,8 @@ ControllerFactoryInstance ControllerFactory::create(
             return instance;
         }
         instance.blink = new (target) BlinkController(
-            blink, actuatorResolver_, monotonicClock_, logger_);
+            blink, actuatorResolver_, monotonicClock_, logger_,
+            slot.slotId, slot.name);
         instance.controller = instance.blink;
         constructed_[storageIndex] = ControllerImplementation::Blink;
     } else if (slot.implementation == ControllerImplementation::Threshold) {
@@ -75,7 +76,8 @@ ControllerFactoryInstance ControllerFactory::create(
         }
         instance.threshold = new (target) ThresholdController(
             threshold,
-            measurementResolver_, actuatorResolver_, monotonicClock_, logger_);
+            measurementResolver_, actuatorResolver_, monotonicClock_, logger_,
+            slot.slotId, slot.name);
         instance.controller = instance.threshold;
         constructed_[storageIndex] = ControllerImplementation::Threshold;
     } else {

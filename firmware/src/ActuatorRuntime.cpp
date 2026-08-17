@@ -26,7 +26,7 @@ void ActuatorRuntime::initialize(const ActuatorSlotConfiguration* slots) {
 
 bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
     if (!initialized_ || !validateComposition(slots)) {
-        logger_.println("Actuator runtime rebuild rejected: invalid composition");
+        logger_.error("Actuator runtime rebuild rejected: invalid composition");
         return false;
     }
 
@@ -36,7 +36,7 @@ bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
     if (!constructComposition(
             *inactiveFactory_, slots, stagedEntries, stagedRuntimeCount)) {
         inactiveFactory_->destroyAll();
-        logger_.println("Actuator runtime rebuild failed during staging");
+        logger_.error("Actuator runtime rebuild failed during staging");
         return false;
     }
 
@@ -50,9 +50,12 @@ bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
         availableCount_ = 0;
         const bool rollbackSucceeded = initializeComposition(
             entries_, runtimeCount_, availableCount_);
-        logger_.println(rollbackSucceeded
-            ? "Actuator runtime rebuild failed; previous composition restored"
-            : "Actuator runtime rebuild failed; previous composition rollback incomplete");
+        if (rollbackSucceeded) {
+            logger_.error("Actuator runtime rebuild failed; previous composition restored");
+        } else {
+            logger_.error(
+                "Actuator runtime rebuild failed; previous composition rollback incomplete");
+        }
         return false;
     }
 
@@ -63,7 +66,7 @@ bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
     memcpy(entries_, stagedEntries, sizeof(entries_));
     runtimeCount_ = stagedRuntimeCount;
     availableCount_ = stagedAvailableCount;
-    logger_.printf("Actuator runtime rebuild successful: %u actuators active\n",
+    logger_.infof("Actuator runtime rebuild successful: %u actuators active",
         static_cast<unsigned int>(availableCount_));
     return true;
 }
@@ -127,7 +130,7 @@ bool ActuatorRuntime::constructComposition(
         entry.onOff = instance.onOff;
         if (factoryResult != ActuatorFactoryResult::Created || entry.onOff == nullptr) {
             success = false;
-            logger_.printf("Actuator %u construction failed: result=%u\n",
+            logger_.errorf("Actuator %u construction failed: result=%u",
                 static_cast<unsigned int>(slot.slotId),
                 static_cast<unsigned int>(factoryResult));
         }
@@ -152,14 +155,14 @@ bool ActuatorRuntime::initializeComposition(
         entry.info.initializationResult = entry.onOff->begin();
         if (entry.info.initializationResult != ActuatorOperationResult::Completed) {
             success = false;
-            logger_.printf("Actuator %u initialization failed: result=%u\n",
+            logger_.errorf("Actuator %u initialization failed: result=%u",
                 static_cast<unsigned int>(entry.info.id),
                 static_cast<unsigned int>(entry.info.initializationResult));
             continue;
         }
         entry.info.available = true;
         ++availableCount;
-        logger_.printf("Actuator %u initialized successfully: %s\n",
+        logger_.infof("Actuator %u initialized successfully: %s",
             static_cast<unsigned int>(entry.info.id), entry.info.name);
     }
     return success;

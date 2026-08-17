@@ -25,6 +25,7 @@ private:
     bool wasConnected_ = false;
     bool known_[MaxActuatorSlotCount] = {};
     OnOffState states_[MaxActuatorSlotCount] = {};
+    bool publicationFailureReported_[MaxActuatorSlotCount] = {};
 };
 
 } // namespace EnvNode

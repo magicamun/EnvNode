@@ -8,11 +8,15 @@ BlinkController::BlinkController(
     const BlinkControllerConfiguration& configuration,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
-    ILogger& logger)
+    ILogger& logger,
+    ControllerId controllerId,
+    const String& controllerName)
     : configuration_(configuration)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
-    , logger_(logger) {
+    , logger_(logger)
+    , controllerId_(controllerId)
+    , controllerName_(controllerName) {
 }
 
 ControllerOperationResult BlinkController::begin() {
@@ -79,7 +83,8 @@ ControllerOperationResult BlinkController::command(
         targetAvailable_ = false;
         phase_ = BlinkPhase::WaitingForTarget;
         if (!unavailabilityLogged_) {
-            logger_.printf("Controller target actuator %u unavailable\n",
+            logger_.warnf("Controller %u \"%s\": target Actuator %u unavailable",
+                static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
                 static_cast<unsigned int>(configuration_.targetActuatorId));
             unavailabilityLogged_ = true;
         }
@@ -87,13 +92,32 @@ ControllerOperationResult BlinkController::command(
     }
     targetAvailable_ = true;
     if (unavailabilityLogged_) {
-        logger_.printf("Controller target actuator %u available again\n",
+        logger_.infof("Controller %u \"%s\": target Actuator %u available",
+            static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
             static_cast<unsigned int>(configuration_.targetActuatorId));
         unavailabilityLogged_ = false;
     }
-    if (actuator->setState(state) != ActuatorOperationResult::Completed) {
+    const ActuatorOperationResult operationResult = actuator->setState(state);
+    if (operationResult != ActuatorOperationResult::Completed) {
         phase_ = BlinkPhase::WaitingForTarget;
+        if (!operationFailureLogged_) {
+            logger_.warnf(
+                "Controller %u \"%s\": target Actuator %u could not apply %s, result=%u; retry pending",
+                static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+                static_cast<unsigned int>(configuration_.targetActuatorId),
+                state == OnOffState::On ? "On" : "Off",
+                static_cast<unsigned int>(operationResult));
+            operationFailureLogged_ = true;
+        }
         return ControllerOperationResult::ActuatorOperationFailed;
+    }
+    if (operationFailureLogged_) {
+        logger_.infof(
+            "Controller %u \"%s\": target Actuator %u applied %s after retry",
+            static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+            static_cast<unsigned int>(configuration_.targetActuatorId),
+            state == OnOffState::On ? "On" : "Off");
+        operationFailureLogged_ = false;
     }
     phase_ = successfulPhase;
     const uint32_t duration = successfulPhase == BlinkPhase::On

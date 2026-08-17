@@ -46,6 +46,8 @@ private:
     RuntimeManager& runtimeManager_;
     bool commandSubscribed_ = false;
     bool parameterSubscribed_ = false;
+    bool commandSubscriptionFailureReported_ = false;
+    bool parameterSubscriptionFailureReported_ = false;
 };
 
 } // namespace EnvNode

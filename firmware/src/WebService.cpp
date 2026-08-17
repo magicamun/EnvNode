@@ -437,7 +437,7 @@ void WebService::begin() {
     server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
     server_.onNotFound([this]() { handleNotFound(); });
     server_.begin();
-    logger_.println("Web administration started");
+    logger_.info("Web administration started");
 }
 
 void WebService::loop() {

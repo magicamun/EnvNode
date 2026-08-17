@@ -28,6 +28,7 @@ private:
     IMqttService& mqttService_;
     ActuatorRuntime& actuatorRuntime_;
     bool subscribed_ = false;
+    bool subscriptionFailureReported_ = false;
 };
 
 } // namespace EnvNode

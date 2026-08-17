@@ -47,6 +47,7 @@ private:
     uint32_t observedCompositionRevision_ = 0;
     bool statusKnown_[MaxControllerSlotCount] = {};
     StatusSnapshot statuses_[MaxControllerSlotCount];
+    bool statusPublicationFailureReported_[MaxControllerSlotCount] = {};
     bool parameterKnown_[MaxControllerSlotCount]
         [static_cast<size_t>(ControllerParameter::Count)] = {};
     String parameterValues_[MaxControllerSlotCount]

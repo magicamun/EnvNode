@@ -95,7 +95,7 @@ void MqttDescriptionPublisher::beginReconciliation() {
     reconciliationActive_ = true;
     failureReported_ = false;
     retryAtMs_ = 0;
-    logger_.println("MQTT description reconciliation started");
+    logger_.debug("MQTT description reconciliation started");
 }
 
 bool MqttDescriptionPublisher::synchronizeActuator(
@@ -155,17 +155,17 @@ void MqttDescriptionPublisher::loop() {
     }
 
     if (!success) {
-        if (!failureReported_) logger_.println("MQTT description publication failed; retry scheduled");
+        if (!failureReported_) logger_.warn("MQTT description publication failed; retry scheduled");
         failureReported_ = true;
         retryAtMs_ = now + RetryDelayMs;
         return;
     }
     if (reconciliationActive_) {
-        logger_.printf("MQTT description reconciliation completed: %u actuator and %u controller slots synchronized\n",
+        logger_.debugf("MQTT description reconciliation completed: %u actuator and %u controller slots synchronized",
             static_cast<unsigned int>(MaxActuatorSlotCount),
             static_cast<unsigned int>(MaxControllerSlotCount));
     } else if (failureReported_) {
-        logger_.println("MQTT description publication recovered");
+        logger_.info("MQTT description publication recovered");
     }
     reconciliationActive_ = false;
     failureReported_ = false;

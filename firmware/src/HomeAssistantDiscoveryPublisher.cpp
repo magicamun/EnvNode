@@ -244,7 +244,7 @@ bool HomeAssistantDiscoveryPublisher::publishDiscovery(
     lastPayloadSize_ = payload.length();
     lastEntityCount_ = entityCount;
     if (logPublication) {
-        logger_.printf("Home Assistant discovery published: %u entities\n",
+        logger_.infof("Home Assistant discovery published: %u entities",
             static_cast<unsigned int>(entityCount));
     }
     return true;
@@ -264,7 +264,7 @@ DiscoveryRepublishResult HomeAssistantDiscoveryPublisher::republish() {
     }
     publishedSignature_ = signature;
     wasConnected_ = true;
-    logger_.printf("Home Assistant Discovery manually republished: %u entities\n",
+    logger_.infof("Home Assistant Discovery manually republished: %u entities",
         static_cast<unsigned int>(lastEntityCount_));
     return DiscoveryRepublishResult::Published;
 }
@@ -287,17 +287,27 @@ void HomeAssistantDiscoveryPublisher::loop() {
 
     if (!clearedAfterBoot_) {
         if (!publishPayload(String())) {
-            logger_.println("Discovery publication failed");
+            if (!publicationFailureReported_) {
+                logger_.warn("Discovery publication failed; retry pending");
+                publicationFailureReported_ = true;
+            }
             return;
         }
         clearedAfterBoot_ = true;
     }
     if (!publishDiscovery(componentMasks)) {
-        logger_.println("Discovery publication failed");
+        if (!publicationFailureReported_) {
+            logger_.warn("Discovery publication failed; retry pending");
+            publicationFailureReported_ = true;
+        }
         return;
     }
+    if (publicationFailureReported_) {
+        logger_.info("Discovery publication recovered");
+        publicationFailureReported_ = false;
+    }
     if (publishedSignature_ != 0 && signature != publishedSignature_) {
-        logger_.println("Discovery updated after Sensor composition change");
+        logger_.info("Discovery updated after Sensor composition change");
     }
     publishedSignature_ = signature;
 }

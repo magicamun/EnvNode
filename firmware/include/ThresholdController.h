@@ -22,7 +22,9 @@ public:
         IMeasurementResolver& measurementResolver,
         IOnOffActuatorResolver& actuatorResolver,
         IMonotonicClock& monotonicClock,
-        ILogger& logger);
+        ILogger& logger,
+        ControllerId controllerId = InvalidControllerId,
+        const String& controllerName = String());
 
     ControllerOperationResult begin() override;
     ControllerOperationResult service() override;
@@ -44,7 +46,8 @@ public:
 
 private:
     bool configurationValid() const;
-    void updateSourceAvailability(bool available);
+    enum class SourceStatus : uint8_t { Unknown, Available, Unavailable, Stale };
+    void updateSourceAvailability(SourceStatus status);
     void evaluateValue(float value);
     ControllerOperationResult applyPendingDecision();
 
@@ -53,6 +56,8 @@ private:
     IOnOffActuatorResolver& actuatorResolver_;
     IMonotonicClock& monotonicClock_;
     ILogger& logger_;
+    ControllerId controllerId_;
+    String controllerName_;
     bool running_ = false;
     bool sourceAvailable_ = false;
     bool sourceAvailabilityKnown_ = false;
@@ -68,6 +73,8 @@ private:
     bool targetAvailable_ = false;
     bool outputApplicationPending_ = false;
     bool targetUnavailabilityLogged_ = false;
+    bool targetOperationFailureLogged_ = false;
+    SourceStatus sourceStatus_ = SourceStatus::Unknown;
 };
 
 } // namespace EnvNode

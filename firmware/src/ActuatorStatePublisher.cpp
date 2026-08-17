@@ -45,13 +45,22 @@ void ActuatorStatePublisher::loop() {
                 topic.c_str(), state == OnOffState::On ? "ON" : "OFF", true)) {
             known_[slotIndex] = true;
             states_[slotIndex] = state;
+            if (publicationFailureReported_[slotIndex]) {
+                logger_.infof("MQTT actuator %u status publication recovered",
+                    static_cast<unsigned int>(info.id));
+                publicationFailureReported_[slotIndex] = false;
+            }
         } else {
-            logger_.printf("MQTT actuator %u status publish failed\n",
-                static_cast<unsigned int>(info.id));
+            if (!publicationFailureReported_[slotIndex]) {
+                logger_.warnf("MQTT actuator %u status publish failed; retry pending",
+                    static_cast<unsigned int>(info.id));
+                publicationFailureReported_[slotIndex] = true;
+            }
         }
     }
 
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        if (!active[index]) publicationFailureReported_[index] = false;
         if (!known_[index] || active[index]) continue;
         const ActuatorId id = static_cast<ActuatorId>(index + 1);
         const String topic = mqttActuatorStatusTopic(

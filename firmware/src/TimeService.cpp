@@ -38,9 +38,9 @@ void TimeService::loop() {
 
     if (isTimeValid()) {
         synchronized_ = true;
-        logger_.println("Time synchronized successfully");
-        logger_.printf("UTC timestamp: %s\n", iso8601Utc().c_str());
-        logger_.printf("Local timestamp: %s\n", iso8601Local().c_str());
+        logger_.info("Time synchronized successfully");
+        logger_.debugf("UTC timestamp: %s", iso8601Utc().c_str());
+        logger_.debugf("Local timestamp: %s", iso8601Local().c_str());
     }
 }
 
@@ -79,8 +79,8 @@ void TimeService::startSynchronization() {
     const char* ntpServer1 = cfg.time.ntpServer1.isEmpty() ? DefaultNtpServer1 : cfg.time.ntpServer1.c_str();
     const char* ntpServer2 = cfg.time.ntpServer2.isEmpty() ? DefaultNtpServer2 : cfg.time.ntpServer2.c_str();
 
-    logger_.println("Time synchronization started");
-    logger_.printf("NTP server used: %s, %s\n", ntpServer1, ntpServer2);
+    logger_.info("Time synchronization started");
+    logger_.debugf("NTP servers: %s, %s", ntpServer1, ntpServer2);
 
     if (esp_sntp_enabled()) {
         esp_sntp_stop();

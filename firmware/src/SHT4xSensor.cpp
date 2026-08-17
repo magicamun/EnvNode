@@ -27,17 +27,17 @@ bool SHT4xSensor::supports(MeasurementType type) const {
 
 void SHT4xSensor::begin() {
     state_ = SensorState::Initializing;
-    logger_.printf("SHT4x sensor %u initializing on %s address 0x%02X\n",
+    logger_.debugf("SHT4x sensor %u initializing on %s address 0x%02X",
         id_, i2cBusName(resource_.bus), resource_.address);
     TwoWire* wire = i2cBusManager_.wire(resource_.bus);
     if (wire == nullptr || !sht4x_.begin(wire)) {
         state_ = SensorState::Failed;
-        logger_.printf("SHT4x sensor %u initialization failed on %s address 0x%02X\n",
+        logger_.errorf("SHT4x sensor %u initialization failed on %s address 0x%02X",
             id_, i2cBusName(resource_.bus), resource_.address);
         return;
     }
     state_ = SensorState::Ready;
-    logger_.printf("SHT4x sensor %u ready\n", id_);
+    logger_.infof("SHT4x sensor %u ready", id_);
 }
 
 SensorOperationResult SHT4xSensor::service(IMeasurementSink& output) {
@@ -59,12 +59,12 @@ SensorOperationResult SHT4xSensor::sample(IMeasurementSink& output) {
     emit(output, MeasurementType::Temperature, temperature, temperatureValid);
     emit(output, MeasurementType::RelativeHumidity, humidity, humidityValid);
     if (!temperatureValid || !humidityValid) {
-        if (state_ != SensorState::Degraded) logger_.printf("SHT4x sensor %u read failure\n", id_);
+        if (state_ != SensorState::Degraded) logger_.warnf("SHT4x sensor %u read failure", id_);
         state_ = SensorState::Degraded;
         return SensorOperationResult::HardwareFailure;
     }
     if (state_ == SensorState::Degraded) {
-        logger_.printf("SHT4x sensor %u recovered after read failure\n", id_);
+        logger_.infof("SHT4x sensor %u recovered after read failure", id_);
     }
     state_ = SensorState::Ready;
     return SensorOperationResult::Completed;

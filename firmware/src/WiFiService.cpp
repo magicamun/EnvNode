@@ -73,17 +73,17 @@ void WiFiService::startConnection() {
     const Configuration& configuration = configurationService_.getConfiguration();
 
 
-    logger_.println("WiFi connection parameters:");
+    logger_.debug("WiFi connection parameters:");
     const NetworkConfiguration& network = configuration.network;
-    logger_.printf("  SSID: '%s'\n", network.wifiSSID.c_str());
-    logger_.printf("  SSID length: %u\n", network.wifiSSID.length());
-    logger_.printf("  Password length: %u\n", network.wifiPassword.length());
-    logger_.printf("  Hostname: '%s'\n", network.hostname.c_str());
+    logger_.debugf("SSID: '%s'", network.wifiSSID.c_str());
+    logger_.debugf("SSID length: %u", network.wifiSSID.length());
+    logger_.debugf("Password length: %u", network.wifiPassword.length());
+    logger_.debugf("Hostname: '%s'", network.hostname.c_str());
 
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(network.hostname.c_str());
     if (!applyAddressConfiguration(network)) {
-        logger_.println("Static network configuration could not be applied");
+        logger_.error("Static network configuration could not be applied");
         startSetupAccessPoint();
         return;
     }
@@ -98,7 +98,7 @@ void WiFiService::startSetupAccessPoint() {
     const String apSsid = configuration.network.hostname + "-Setup";
     WiFi.mode(WIFI_AP);
     WiFi.softAP(apSsid.c_str());
-    logger_.printf("Setup access point started: %s\n", apSsid.c_str());
+    logger_.infof("Setup access point started: %s", apSsid.c_str());
     state_ = State::SetupAccessPoint;
 }
 
@@ -127,18 +127,18 @@ void WiFiService::logStateTransition(State nextState) {
 
     switch (nextState) {
         case State::Connecting:
-            logger_.println("WiFi connecting");
+            logger_.info("WiFi connecting");
             break;
         case State::Connected:
-            logger_.println("WiFi connected");
-            logger_.printf("IP: %s\n",
+            logger_.info("WiFi connected");
+            logger_.infof("IP: %s",
                WiFi.localIP().toString().c_str());
             break;
         case State::Reconnecting:
-            logger_.println("WiFi reconnecting");
+            logger_.warn("WiFi reconnecting");
             break;
         case State::SetupAccessPoint:
-            logger_.println("setup access point started");
+            logger_.info("Setup access point started");
             break;
         case State::Uninitialized:
             break;

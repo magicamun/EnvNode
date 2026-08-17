@@ -55,7 +55,7 @@ void RainGaugeSensor::begin() {
         FALLING);
     interruptAttached_ = true;
     state_ = SensorState::Ready;
-    logger_.printf("RainGauge sensor %u initialized on GPIO%u\n",
+    logger_.infof("RainGauge sensor %u initialized on GPIO%u",
         id_, configuration_.gpio.number);
 }
 

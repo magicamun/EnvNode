@@ -96,13 +96,22 @@ void ControllerStatePublisher::loop() {
         if (mqttService_.publish(topic.c_str(), payload.c_str(), true)) {
             statusKnown_[slotIndex] = true;
             statuses_[slotIndex] = current;
+            if (statusPublicationFailureReported_[slotIndex]) {
+                logger_.infof("MQTT Controller %u status publication recovered",
+                    static_cast<unsigned int>(info.id));
+                statusPublicationFailureReported_[slotIndex] = false;
+            }
         } else {
-            logger_.printf("MQTT Controller %u status publish failed\n",
-                static_cast<unsigned int>(info.id));
+            if (!statusPublicationFailureReported_[slotIndex]) {
+                logger_.warnf("MQTT Controller %u status publish failed; retry pending",
+                    static_cast<unsigned int>(info.id));
+                statusPublicationFailureReported_[slotIndex] = true;
+            }
         }
     }
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         const ControllerId id = static_cast<ControllerId>(index + 1);
+        if (!active[index]) statusPublicationFailureReported_[index] = false;
         if (statusKnown_[index] && !active[index]) {
             const String topic = mqttControllerStatusTopic(configuration.device.name, id);
             if (mqttService_.publish(topic.c_str(), "", true)) statusKnown_[index] = false;

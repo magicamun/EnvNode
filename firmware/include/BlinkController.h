@@ -21,7 +21,9 @@ public:
         const BlinkControllerConfiguration& configuration,
         IOnOffActuatorResolver& actuatorResolver,
         IMonotonicClock& monotonicClock,
-        ILogger& logger);
+        ILogger& logger,
+        ControllerId controllerId = InvalidControllerId,
+        const String& controllerName = String());
 
     ControllerOperationResult begin() override;
     ControllerOperationResult service() override;
@@ -41,11 +43,14 @@ private:
     IOnOffActuatorResolver& actuatorResolver_;
     IMonotonicClock& monotonicClock_;
     ILogger& logger_;
+    ControllerId controllerId_;
+    String controllerName_;
     BlinkPhase phase_ = BlinkPhase::Stopped;
     uint32_t nextTransitionMs_ = 0;
     bool running_ = false;
     bool targetAvailable_ = false;
     bool unavailabilityLogged_ = false;
+    bool operationFailureLogged_ = false;
 };
 
 } // namespace EnvNode

@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <cmath>
+#include "UnitConverter.h"
 
 namespace EnvNode {
 namespace {
@@ -22,12 +23,16 @@ ThresholdController::ThresholdController(
     IMeasurementResolver& measurementResolver,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
-    ILogger& logger)
+    ILogger& logger,
+    ControllerId controllerId,
+    const String& controllerName)
     : configuration_(configuration)
     , measurementResolver_(measurementResolver)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
-    , logger_(logger) {
+    , logger_(logger)
+    , controllerId_(controllerId)
+    , controllerName_(controllerName) {
 }
 
 ControllerOperationResult ThresholdController::begin() {
@@ -47,6 +52,8 @@ ControllerOperationResult ThresholdController::begin() {
     targetAvailable_ = false;
     outputApplicationPending_ = false;
     targetUnavailabilityLogged_ = false;
+    targetOperationFailureLogged_ = false;
+    sourceStatus_ = SourceStatus::Unknown;
     const ControllerOperationResult result = service();
     return result == ControllerOperationResult::NoAction
         ? ControllerOperationResult::Completed : result;
@@ -59,6 +66,7 @@ ControllerOperationResult ThresholdController::service() {
     const bool found = measurementResolver_.latest(configuration_.source, snapshot);
     hasLatestSnapshot_ = found;
     bool usable = false;
+    SourceStatus sourceStatus = SourceStatus::Unavailable;
     float value = 0.0F;
     if (found) {
         latestMeasurementValid_ = snapshot.measurement.valid;
@@ -68,14 +76,17 @@ ControllerOperationResult ThresholdController::service() {
             measurementTypeMetadata(snapshot.measurement.type);
         latestNumericValueAvailable_ = snapshot.measurement.value.tryGetFloatingPoint(value);
         if (latestNumericValueAvailable_) latestNumericValue_ = value;
-        usable = snapshot.measurement.source == configuration_.source.sensorId
+        const bool compatible = snapshot.measurement.source == configuration_.source.sensorId
             && snapshot.measurement.type == configuration_.source.measurementType
             && snapshot.measurement.valid
             && latestNumericValueAvailable_
             && std::isfinite(value)
             && metadata.expectedValueKind == ValueKind::FloatingPoint
-            && metadata.semantics == MeasurementSemantics::State
-            && !latestSnapshotStale_;
+            && metadata.semantics == MeasurementSemantics::State;
+        usable = compatible && !latestSnapshotStale_;
+        sourceStatus = compatible && latestSnapshotStale_
+            ? SourceStatus::Stale
+            : usable ? SourceStatus::Available : SourceStatus::Unavailable;
         if (!hasProcessedRevision_ || snapshot.revision != lastProcessedRevision_) {
             hasProcessedRevision_ = true;
             lastProcessedRevision_ = snapshot.revision;
@@ -87,7 +98,7 @@ ControllerOperationResult ThresholdController::service() {
         latestSnapshotStale_ = false;
         latestSnapshotAgeMs_ = 0;
     }
-    updateSourceAvailability(usable);
+    updateSourceAvailability(sourceStatus);
 
     return outputApplicationPending_
         ? applyPendingDecision() : ControllerOperationResult::NoAction;
@@ -144,26 +155,72 @@ bool ThresholdController::configurationValid() const {
         && configuration_.maxMeasurementAgeMs <= INT32_MAX;
 }
 
-void ThresholdController::updateSourceAvailability(bool available) {
-    if (sourceAvailabilityKnown_ && sourceAvailable_ != available) {
-        logger_.printf("Threshold source Sensor %u %s\n",
-            static_cast<unsigned int>(configuration_.source.sensorId),
-            available ? "available" : "unavailable");
+void ThresholdController::updateSourceAvailability(SourceStatus status) {
+    if (status != sourceStatus_) {
+        const char* type = measurementTypeStableId(configuration_.source.measurementType);
+        if (status == SourceStatus::Available) {
+            if (sourceStatus_ != SourceStatus::Unknown) {
+                logger_.infof(
+                    "Controller %u \"%s\": Measurement source Sensor %u %s available",
+                    static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+                    static_cast<unsigned int>(configuration_.source.sensorId), type);
+            }
+        } else if (status == SourceStatus::Stale) {
+            logger_.warnf(
+                "Controller %u \"%s\": Measurement source Sensor %u %s stale, age=%lu ms, maximum=%lu ms",
+                static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+                static_cast<unsigned int>(configuration_.source.sensorId), type,
+                static_cast<unsigned long>(latestSnapshotAgeMs_),
+                static_cast<unsigned long>(configuration_.maxMeasurementAgeMs));
+        } else if (status == SourceStatus::Unavailable) {
+            logger_.warnf(
+                "Controller %u \"%s\": Measurement source Sensor %u %s unavailable",
+                static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+                static_cast<unsigned int>(configuration_.source.sensorId), type);
+        }
     }
-    sourceAvailable_ = available;
+    sourceStatus_ = status;
+    sourceAvailable_ = status == SourceStatus::Available;
     sourceAvailabilityKnown_ = true;
 }
 
 void ThresholdController::evaluateValue(float value) {
+    const ThresholdDecision previous = decision_;
     ThresholdDecision next = decision_;
     if (value >= configuration_.onThreshold) {
         next = ThresholdDecision::On;
     } else if (value <= configuration_.offThreshold) {
         next = ThresholdDecision::Off;
     }
-    if (next == decision_ || next == ThresholdDecision::Unknown) return;
-    logger_.printf("Threshold decision %s -> %s\n",
-        decisionName(decision_), decisionName(next));
+    const MeasurementTypeMetadata& metadata =
+        measurementTypeMetadata(configuration_.source.measurementType);
+    const char* type = metadata.stableId;
+    const char* unit = UnitConverter::symbol(metadata.canonicalUnit);
+    const bool hasUnit = unit != nullptr && unit[0] != '\0';
+    if (!hasUnit) unit = "";
+    logger_.debugf(
+        "Controller %u \"%s\": evaluate Sensor %u %s=%g%s%s, thresholds off=%g on=%g%s%s, age=%lu ms/%lu ms, decision=%s -> %s",
+        static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+        static_cast<unsigned int>(configuration_.source.sensorId), type,
+        static_cast<double>(value), hasUnit ? " " : "", unit,
+        static_cast<double>(configuration_.offThreshold),
+        static_cast<double>(configuration_.onThreshold),
+        hasUnit ? " " : "", unit,
+        static_cast<unsigned long>(latestSnapshotAgeMs_),
+        static_cast<unsigned long>(configuration_.maxMeasurementAgeMs),
+        decisionName(previous), decisionName(next));
+    if (next == previous || next == ThresholdDecision::Unknown) return;
+    const float triggeringThreshold = next == ThresholdDecision::On
+        ? configuration_.onThreshold : configuration_.offThreshold;
+    logger_.infof(
+        "Controller %u \"%s\": Threshold decision %s -> %s, Sensor %u %s=%g%s%s, %s threshold=%g%s%s",
+        static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+        decisionName(previous), decisionName(next),
+        static_cast<unsigned int>(configuration_.source.sensorId), type,
+        static_cast<double>(value), hasUnit ? " " : "", unit,
+        next == ThresholdDecision::On ? "on" : "off",
+        static_cast<double>(triggeringThreshold),
+        hasUnit ? " " : "", unit);
     decision_ = next;
     outputApplicationPending_ = true;
 }
@@ -174,7 +231,8 @@ ControllerOperationResult ThresholdController::applyPendingDecision() {
     if (actuator == nullptr) {
         targetAvailable_ = false;
         if (!targetUnavailabilityLogged_) {
-            logger_.printf("Threshold target actuator %u unavailable\n",
+            logger_.warnf("Controller %u \"%s\": target Actuator %u unavailable",
+                static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
                 static_cast<unsigned int>(configuration_.targetActuatorId));
             targetUnavailabilityLogged_ = true;
         }
@@ -182,14 +240,33 @@ ControllerOperationResult ThresholdController::applyPendingDecision() {
     }
     targetAvailable_ = true;
     if (targetUnavailabilityLogged_) {
-        logger_.printf("Threshold target actuator %u available again\n",
+        logger_.infof("Controller %u \"%s\": target Actuator %u available",
+            static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
             static_cast<unsigned int>(configuration_.targetActuatorId));
         targetUnavailabilityLogged_ = false;
     }
     const OnOffState desired = decision_ == ThresholdDecision::On
         ? OnOffState::On : OnOffState::Off;
-    if (actuator->setState(desired) != ActuatorOperationResult::Completed) {
+    const ActuatorOperationResult operationResult = actuator->setState(desired);
+    if (operationResult != ActuatorOperationResult::Completed) {
+        if (!targetOperationFailureLogged_) {
+            logger_.warnf(
+                "Controller %u \"%s\": target Actuator %u could not apply %s, result=%u; retry pending",
+                static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+                static_cast<unsigned int>(configuration_.targetActuatorId),
+                desired == OnOffState::On ? "On" : "Off",
+                static_cast<unsigned int>(operationResult));
+            targetOperationFailureLogged_ = true;
+        }
         return ControllerOperationResult::ActuatorOperationFailed;
+    }
+    if (targetOperationFailureLogged_) {
+        logger_.infof(
+            "Controller %u \"%s\": target Actuator %u applied %s after retry",
+            static_cast<unsigned int>(controllerId_), controllerName_.c_str(),
+            static_cast<unsigned int>(configuration_.targetActuatorId),
+            desired == OnOffState::On ? "On" : "Off");
+        targetOperationFailureLogged_ = false;
     }
     outputApplicationPending_ = false;
     return ControllerOperationResult::Completed;

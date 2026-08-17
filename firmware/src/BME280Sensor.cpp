@@ -35,17 +35,17 @@ bool BME280Sensor::supports(MeasurementType type) const {
 
 void BME280Sensor::begin() {
     state_ = SensorState::Initializing;
-    logger_.printf("BME280 sensor %u initializing on %s address 0x%02X\n",
+    logger_.debugf("BME280 sensor %u initializing on %s address 0x%02X",
         id_, i2cBusName(resource_.bus), resource_.address);
     TwoWire* wire = i2cBusManager_.wire(resource_.bus);
     if (wire == nullptr || !bme280_.begin(resource_.address, wire)) {
         state_ = SensorState::Failed;
-        logger_.printf("BME280 sensor %u initialization failed on %s address 0x%02X\n",
+        logger_.errorf("BME280 sensor %u initialization failed on %s address 0x%02X",
             id_, i2cBusName(resource_.bus), resource_.address);
         return;
     }
     state_ = SensorState::Ready;
-    logger_.printf("BME280 sensor %u ready\n", id_);
+    logger_.infof("BME280 sensor %u ready", id_);
 }
 
 SensorOperationResult BME280Sensor::service(IMeasurementSink& output) {
@@ -71,13 +71,13 @@ SensorOperationResult BME280Sensor::sample(IMeasurementSink& output) {
 
     if (!temperatureValid || !humidityValid || !pressureValid) {
         if (state_ != SensorState::Degraded) {
-            logger_.printf("BME280 sensor %u read failure\n", id_);
+            logger_.warnf("BME280 sensor %u read failure", id_);
         }
         state_ = SensorState::Degraded;
         return SensorOperationResult::HardwareFailure;
     }
     if (state_ == SensorState::Degraded) {
-        logger_.printf("BME280 sensor %u recovered after read failure\n", id_);
+        logger_.infof("BME280 sensor %u recovered after read failure", id_);
     }
     state_ = SensorState::Ready;
     return SensorOperationResult::Completed;

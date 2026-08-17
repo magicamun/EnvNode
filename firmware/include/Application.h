@@ -45,7 +45,6 @@ private:
     ControllerMqttAdapter& controllerMqttAdapter_;
     ControllerStatePublisher& controllerStatePublisher_;
     MqttDescriptionPublisher& descriptionPublisher_;
-    bool timeSyncLogged_ = false;
 };
 
 } // namespace EnvNode

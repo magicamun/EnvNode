@@ -18,8 +18,8 @@ ActuatorOperationResult GpioOnOffActuator::begin() {
         GpioCapability::DigitalOutput);
     if (validation != HardwareResourceValidationResult::Valid) {
         initialized_ = false;
-        logger_.printf(
-            "GPIO OnOff actuator initialization failed: invalid hardware resource (%u)\n",
+        logger_.errorf(
+            "GPIO OnOff actuator initialization failed: invalid hardware resource (%u)",
             static_cast<unsigned int>(validation));
         return ActuatorOperationResult::InvalidHardwareResource;
     }
@@ -28,7 +28,7 @@ ActuatorOperationResult GpioOnOffActuator::begin() {
     digitalWrite(hardware_.gpio.number, LOW);
     state_ = OnOffState::Off;
     initialized_ = true;
-    logger_.printf("GPIO OnOff actuator initialized Off on GPIO%u\n", hardware_.gpio.number);
+    logger_.debugf("GPIO OnOff actuator initialized Off on GPIO%u", hardware_.gpio.number);
     return ActuatorOperationResult::Completed;
 }
 
@@ -45,7 +45,7 @@ ActuatorOperationResult GpioOnOffActuator::shutdown() {
     state_ = OnOffState::Off;
     pinMode(hardware_.gpio.number, INPUT);
     initialized_ = false;
-    logger_.printf("GPIO OnOff actuator shut down Off on GPIO%u\n", hardware_.gpio.number);
+    logger_.debugf("GPIO OnOff actuator shut down Off on GPIO%u", hardware_.gpio.number);
     return ActuatorOperationResult::Completed;
 }
 

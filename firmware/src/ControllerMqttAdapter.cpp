@@ -29,6 +29,8 @@ void ControllerMqttAdapter::loop() {
     if (!mqttService_.connected()) {
         commandSubscribed_ = false;
         parameterSubscribed_ = false;
+        commandSubscriptionFailureReported_ = false;
+        parameterSubscriptionFailureReported_ = false;
         return;
     }
     const String& deviceName = configurationService_.getConfiguration().device.name;
@@ -36,18 +38,36 @@ void ControllerMqttAdapter::loop() {
         const String topic = mqttControllerCommandSubscription(deviceName);
         commandSubscribed_ = mqttService_.subscribe(topic.c_str());
         if (commandSubscribed_) {
-            logger_.printf("MQTT Controller commands subscribed: %s\n", topic.c_str());
+            if (commandSubscriptionFailureReported_) {
+                logger_.info("MQTT Controller command subscription recovered");
+            } else {
+                logger_.debugf("MQTT Controller commands subscribed: %s", topic.c_str());
+            }
+            commandSubscriptionFailureReported_ = false;
         } else {
-            logger_.printf("MQTT Controller command subscription failed: %s\n", topic.c_str());
+            if (!commandSubscriptionFailureReported_) {
+                logger_.warnf(
+                    "MQTT Controller command subscription failed: %s", topic.c_str());
+                commandSubscriptionFailureReported_ = true;
+            }
         }
     }
     if (!parameterSubscribed_) {
         const String topic = mqttControllerParameterCommandSubscription(deviceName);
         parameterSubscribed_ = mqttService_.subscribe(topic.c_str());
         if (parameterSubscribed_) {
-            logger_.printf("MQTT Controller parameters subscribed: %s\n", topic.c_str());
+            if (parameterSubscriptionFailureReported_) {
+                logger_.info("MQTT Controller parameter subscription recovered");
+            } else {
+                logger_.debugf("MQTT Controller parameters subscribed: %s", topic.c_str());
+            }
+            parameterSubscriptionFailureReported_ = false;
         } else {
-            logger_.printf("MQTT Controller parameter subscription failed: %s\n", topic.c_str());
+            if (!parameterSubscriptionFailureReported_) {
+                logger_.warnf(
+                    "MQTT Controller parameter subscription failed: %s", topic.c_str());
+                parameterSubscriptionFailureReported_ = true;
+            }
         }
     }
 }
@@ -60,7 +80,7 @@ void ControllerMqttAdapter::handleMqttMessage(
     ControllerId id = InvalidControllerId;
     if (parseMqttControllerCommandTopic(topic, deviceName, id)) {
         if (id > MaxControllerSlotCount) {
-            logger_.printf("MQTT Controller command rejected: slot %u is out of range\n",
+            logger_.warnf("MQTT Controller command rejected: slot %u is out of range",
                 static_cast<unsigned int>(id));
             return;
         }
@@ -70,7 +90,7 @@ void ControllerMqttAdapter::handleMqttMessage(
     ControllerParameter parameter = ControllerParameter::OnDurationMs;
     if (parseMqttControllerParameterCommandTopic(topic, deviceName, id, parameter)) {
         if (id > MaxControllerSlotCount) {
-            logger_.printf("MQTT Controller parameter rejected: slot %u is out of range\n",
+            logger_.warnf("MQTT Controller parameter rejected: slot %u is out of range",
                 static_cast<unsigned int>(id));
             return;
         }
@@ -79,7 +99,7 @@ void ControllerMqttAdapter::handleMqttMessage(
     }
     const String prefix = mqttDeviceTopicRoot(deviceName) + "/controller/";
     if (topic != nullptr && strncmp(topic, prefix.c_str(), prefix.length()) == 0) {
-        logger_.printf("MQTT Controller message rejected: invalid topic %s\n", topic);
+        logger_.warnf("MQTT Controller message rejected: invalid topic %s", topic);
     }
 }
 
@@ -96,16 +116,16 @@ void ControllerMqttAdapter::handleCommand(
         command = "STOP";
         result = controllerRuntime_.stopController(id);
     } else {
-        logger_.printf("MQTT Controller %u command rejected: expected START or STOP\n",
+        logger_.warnf("MQTT Controller %u command rejected: expected START or STOP",
             static_cast<unsigned int>(id));
         return;
     }
     if (result == ControllerOperationResult::Completed
         || result == ControllerOperationResult::NoAction) {
-        logger_.printf("MQTT Controller %u command accepted: %s\n",
+        logger_.infof("MQTT Controller %u command accepted: %s",
             static_cast<unsigned int>(id), command);
     } else {
-        logger_.printf("MQTT Controller %u command failed: result=%u\n",
+        logger_.warnf("MQTT Controller %u command failed: result=%u",
             static_cast<unsigned int>(id), static_cast<unsigned int>(result));
     }
 }
@@ -123,7 +143,7 @@ void ControllerMqttAdapter::handleParameter(
             || parameter == ControllerParameter::OffDurationMs)) {
         uint32_t duration = 0;
         if (!parseDuration(payload, length, duration)) {
-            logger_.printf("MQTT Controller %u parameter rejected: invalid duration\n",
+            logger_.warnf("MQTT Controller %u parameter rejected: invalid duration",
                 static_cast<unsigned int>(id));
             return;
         }
@@ -142,7 +162,7 @@ void ControllerMqttAdapter::handleParameter(
         if (parameter == ControllerParameter::MaxMeasurementAgeMs) {
             uint32_t age = 0;
             if (!parseUnsignedInteger(payload, length, age)) {
-                logger_.printf("MQTT Controller %u parameter rejected: invalid unsigned integer\n",
+                logger_.warnf("MQTT Controller %u parameter rejected: invalid unsigned integer",
                     static_cast<unsigned int>(id));
                 return;
             }
@@ -152,7 +172,7 @@ void ControllerMqttAdapter::handleParameter(
         } else {
             float thresholdValue = 0.0F;
             if (!parseFiniteFloat(payload, length, thresholdValue)) {
-                logger_.printf("MQTT Controller %u parameter rejected: invalid finite decimal\n",
+                logger_.warnf("MQTT Controller %u parameter rejected: invalid finite decimal",
                     static_cast<unsigned int>(id));
                 return;
             }
@@ -166,23 +186,23 @@ void ControllerMqttAdapter::handleParameter(
             acceptedValue = String(formatted);
         }
     } else {
-        logger_.printf("MQTT Controller %u parameter rejected: unsupported for implementation\n",
+        logger_.warnf("MQTT Controller %u parameter rejected: unsupported for implementation",
             static_cast<unsigned int>(id));
         return;
     }
     if (!configurationService_.setControllerSlotConfiguration(candidate)) {
-        logger_.printf("MQTT Controller %u parameter rejected by configuration validation\n",
+        logger_.warnf("MQTT Controller %u parameter rejected by configuration validation",
             static_cast<unsigned int>(id));
         return;
     }
     runtimeManager_.request(RuntimeAction::RestartControllerRuntime);
     if (!runtimeManager_.applyPendingControllerChanges(
             configurationService_.getConfiguration().controllerSlots)) {
-        logger_.printf("MQTT Controller %u parameter persisted but runtime apply failed\n",
+        logger_.errorf("MQTT Controller %u parameter persisted but runtime apply failed",
             static_cast<unsigned int>(id));
         return;
     }
-    logger_.printf("MQTT Controller %u parameter accepted: %s=%s\n",
+    logger_.infof("MQTT Controller %u parameter accepted: %s=%s",
         static_cast<unsigned int>(id), mqttControllerParameterName(parameter),
         acceptedValue.c_str());
 }

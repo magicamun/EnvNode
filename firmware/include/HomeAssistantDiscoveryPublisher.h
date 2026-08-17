@@ -47,6 +47,7 @@ private:
     uint16_t publishedComponentMasks_[MaxSensorCount] = {};
     size_t lastPayloadSize_ = 0;
     size_t lastEntityCount_ = 0;
+    bool publicationFailureReported_ = false;
 };
 
 } // namespace EnvNode

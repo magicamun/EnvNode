@@ -22,7 +22,7 @@ void MqttService::begin() {
     client.setKeepAlive(60);
     client.setCallback(receiveMessage);
     if (!client.setBufferSize(16384)) {
-        logger_.println("MQTT packet buffer allocation failed");
+        logger_.error("MQTT packet buffer allocation failed");
     }
 }
 
@@ -78,7 +78,7 @@ void MqttService::attemptConnect() {
 
     client.setServer(cfg.mqtt.server.c_str(), cfg.mqtt.port);
     logStateTransition(State::Connecting);
-    logger_.printf("Connecting to MQTT broker %s:%u user=%s client_id=%s password_length=%u\n",
+    logger_.debugf("Connecting to MQTT broker %s:%u user=%s client_id=%s password_length=%u",
                     cfg.mqtt.server.c_str(), cfg.mqtt.port,
                     cfg.mqtt.username.c_str(), clientId.c_str(),
                     static_cast<unsigned int>(cfg.mqtt.password.length()));
@@ -87,10 +87,13 @@ void MqttService::attemptConnect() {
         logStateTransition(State::Connected);
     } else {
         int mqttState = client.state();
-        logger_.printf("MQTT connect failed: state=%d broker=%s port=%u user=%s client_id=%s password_length=%u\n",
-                        mqttState, cfg.mqtt.server.c_str(), cfg.mqtt.port,
-                        cfg.mqtt.username.c_str(), clientId.c_str(),
-                        static_cast<unsigned int>(cfg.mqtt.password.length()));
+        if (!connectionFailureReported_) {
+            logger_.warnf("MQTT connect failed: state=%d broker=%s port=%u user=%s client_id=%s password_length=%u; retry pending",
+                            mqttState, cfg.mqtt.server.c_str(), cfg.mqtt.port,
+                            cfg.mqtt.username.c_str(), clientId.c_str(),
+                            static_cast<unsigned int>(cfg.mqtt.password.length()));
+            connectionFailureReported_ = true;
+        }
         logStateTransition(State::Reconnecting);
         lastAttemptMs_ = now;
     }
@@ -100,16 +103,21 @@ void MqttService::logStateTransition(State next) {
     if (next == state_) return;
     switch (next) {
         case State::WaitingForWiFi:
-            logger_.println("MQTT waiting for WiFi");
+            logger_.warn("MQTT waiting for WiFi");
             break;
         case State::Connecting:
-            logger_.println("MQTT connecting to broker");
+            if (connectionFailureReported_) {
+                logger_.debug("MQTT connection retry started");
+            } else {
+                logger_.info("MQTT connecting to broker");
+            }
             break;
         case State::Connected:
-            logger_.println("MQTT connected");
+            logger_.info("MQTT connected");
+            connectionFailureReported_ = false;
             break;
         case State::Reconnecting:
-            logger_.println("MQTT reconnecting");
+            if (!connectionFailureReported_) logger_.warn("MQTT reconnecting");
             break;
         case State::Uninitialized:
             break;

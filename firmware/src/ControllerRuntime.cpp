@@ -41,7 +41,7 @@ bool ControllerRuntime::initialize(const ControllerSlotConfiguration* slots) {
 
 bool ControllerRuntime::rebuild(const ControllerSlotConfiguration* slots) {
     if (!initialized_ || !validateComposition(slots)) {
-        logger_.println("Controller runtime rebuild rejected: invalid composition");
+        logger_.error("Controller runtime rebuild rejected: invalid composition");
         return false;
     }
 
@@ -51,7 +51,7 @@ bool ControllerRuntime::rebuild(const ControllerSlotConfiguration* slots) {
     if (!constructComposition(
             *inactiveFactory_, slots, stagedEntries, stagedRuntimeCount)) {
         inactiveFactory_->destroyAll();
-        logger_.println("Controller runtime rebuild failed during staging");
+        logger_.error("Controller runtime rebuild failed during staging");
         return false;
     }
 
@@ -60,9 +60,12 @@ bool ControllerRuntime::rebuild(const ControllerSlotConfiguration* slots) {
         stopComposition(stagedEntries, stagedRuntimeCount);
         inactiveFactory_->destroyAll();
         const bool restored = beginComposition(entries_, runtimeCount_);
-        logger_.println(restored
-            ? "Controller runtime rebuild failed; previous composition restored"
-            : "Controller runtime rebuild failed; previous composition rollback incomplete");
+        if (restored) {
+            logger_.error("Controller runtime rebuild failed; previous composition restored");
+        } else {
+            logger_.error(
+                "Controller runtime rebuild failed; previous composition rollback incomplete");
+        }
         return false;
     }
 
@@ -73,7 +76,7 @@ bool ControllerRuntime::rebuild(const ControllerSlotConfiguration* slots) {
     memcpy(entries_, stagedEntries, sizeof(entries_));
     runtimeCount_ = stagedRuntimeCount;
     ++compositionRevision_;
-    logger_.printf("Controller runtime rebuild successful: %u controllers active\n",
+    logger_.infof("Controller runtime rebuild successful: %u controllers active",
         static_cast<unsigned int>(runtimeCount_));
     return true;
 }
@@ -202,7 +205,7 @@ bool ControllerRuntime::constructComposition(
         entry.threshold = instance.threshold;
         if (entry.info.constructionResult != ControllerFactoryResult::Created
             || entry.controller == nullptr) {
-            logger_.printf("Controller %u construction failed: result=%u\n",
+            logger_.errorf("Controller %u construction failed: result=%u",
                 static_cast<unsigned int>(slot.slotId),
                 static_cast<unsigned int>(entry.info.constructionResult));
             return false;
@@ -222,7 +225,7 @@ bool ControllerRuntime::beginComposition(
         if (entry.info.lastOperationResult == ControllerOperationResult::InvalidConfiguration) {
             return false;
         }
-        logger_.printf("Controller %u activated: %s\n",
+        logger_.infof("Controller %u activated: %s",
             static_cast<unsigned int>(entry.info.id), entry.info.name);
     }
     return true;

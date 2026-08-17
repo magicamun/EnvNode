@@ -103,7 +103,7 @@ void setup() {
         activeSensorCount, sensorFailureReason);
     app.setup(true);
     if (!sensorsInitialized) {
-        logger.printf("Sensor runtime initialization failed: %s\n",
+        logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
     }
 }

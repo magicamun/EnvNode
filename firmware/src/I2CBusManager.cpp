@@ -13,9 +13,14 @@ void I2CBusManager::begin() {
         if (busIndex >= 2 || initialized_[busIndex]) continue;
         TwoWire* instance = capability->bus == I2CBus::I2C0 ? &Wire : &Wire1;
         initialized_[busIndex] = instance->begin(capability->sda.number, capability->scl.number);
-        logger_.printf("%s %s\nSDA=%u\nSCL=%u\n", i2cBusName(capability->bus),
-            initialized_[busIndex] ? "initialized" : "initialization failed",
-            capability->sda.number, capability->scl.number);
+        if (initialized_[busIndex]) {
+            logger_.infof("%s initialized SDA=%u SCL=%u", i2cBusName(capability->bus),
+                capability->sda.number, capability->scl.number);
+        } else {
+            logger_.errorf("%s initialization failed SDA=%u SCL=%u",
+                i2cBusName(capability->bus),
+                capability->sda.number, capability->scl.number);
+        }
     }
 }
 

@@ -42,6 +42,7 @@ private:
     // MQTT client objects allocated in source file
     State state_ = State::Uninitialized;
     unsigned long lastAttemptMs_ = 0;
+    bool connectionFailureReported_ = false;
     static constexpr unsigned long ReconnectIntervalMs = 5000;
 };
 

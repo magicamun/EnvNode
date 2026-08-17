@@ -68,16 +68,16 @@ bool RuntimeManager::applyPendingSensorChanges() {
     if (pendingAction_ != RuntimeAction::RestartSensorManager || sensorRuntime_ == nullptr) {
         return false;
     }
-    logger_.println("Sensor runtime rebuild started");
+    logger_.info("Sensor runtime rebuild started");
     size_t activeSensorCount = 0;
     const char* failureReason = nullptr;
     if (!sensorRuntime_->rebuild(activeSensorCount, failureReason)) {
-        logger_.printf("Sensor runtime rebuild failed: %s\n",
+        logger_.errorf("Sensor runtime rebuild failed: %s",
             failureReason == nullptr ? "unknown failure" : failureReason);
         return false;
     }
     pendingAction_ = RuntimeAction::None;
-    logger_.printf("Sensor runtime rebuild successful: %u sensors active\n",
+    logger_.infof("Sensor runtime rebuild successful: %u sensors active",
         static_cast<unsigned int>(activeSensorCount));
     return true;
 }
@@ -89,9 +89,9 @@ bool RuntimeManager::applyPendingActuatorChanges(
         || slots == nullptr) {
         return false;
     }
-    logger_.println("Actuator runtime rebuild started");
+    logger_.info("Actuator runtime rebuild started");
     if (!actuatorRuntime_->rebuild(slots)) {
-        logger_.println("Actuator runtime rebuild failed");
+        logger_.error("Actuator runtime rebuild failed");
         return false;
     }
     pendingAction_ = RuntimeAction::None;
@@ -105,9 +105,9 @@ bool RuntimeManager::applyPendingControllerChanges(
         || slots == nullptr) {
         return false;
     }
-    logger_.println("Controller runtime rebuild started");
+    logger_.info("Controller runtime rebuild started");
     if (!controllerRuntime_->rebuild(slots)) {
-        logger_.println("Controller runtime rebuild failed");
+        logger_.error("Controller runtime rebuild failed");
         return false;
     }
     pendingAction_ = RuntimeAction::None;

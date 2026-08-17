@@ -24,6 +24,7 @@ void ActuatorMqttAdapter::loop() {
     const bool connected = mqttService_.connected();
     if (!connected) {
         subscribed_ = false;
+        subscriptionFailureReported_ = false;
         return;
     }
     if (!subscribed_) {
@@ -31,9 +32,18 @@ void ActuatorMqttAdapter::loop() {
             configurationService_.getConfiguration().device.name);
         if (mqttService_.subscribe(topic.c_str())) {
             subscribed_ = true;
-            logger_.printf("MQTT actuator commands subscribed: %s\n", topic.c_str());
+            if (subscriptionFailureReported_) {
+                logger_.info("MQTT actuator command subscription recovered");
+            } else {
+                logger_.debugf("MQTT actuator commands subscribed: %s", topic.c_str());
+            }
+            subscriptionFailureReported_ = false;
         } else {
-            logger_.printf("MQTT actuator command subscription failed: %s\n", topic.c_str());
+            if (!subscriptionFailureReported_) {
+                logger_.warnf(
+                    "MQTT actuator command subscription failed: %s", topic.c_str());
+                subscriptionFailureReported_ = true;
+            }
         }
     }
 }
@@ -50,7 +60,7 @@ void ActuatorMqttAdapter::handleMqttMessage(
         return;
     }
     if (id > MaxActuatorSlotCount) {
-        logger_.printf("MQTT actuator command rejected: invalid topic %s\n",
+        logger_.warnf("MQTT actuator command rejected: invalid topic %s",
             topic == nullptr ? "(null)" : topic);
         return;
     }
@@ -61,20 +71,20 @@ void ActuatorMqttAdapter::handleMqttMessage(
     } else if (length == 3 && payload != nullptr && memcmp(payload, "OFF", 3) == 0) {
         requestedState = OnOffState::Off;
     } else {
-        logger_.printf("MQTT actuator %u command rejected: invalid on_off payload\n",
+        logger_.warnf("MQTT actuator %u command rejected: invalid on_off payload",
             static_cast<unsigned int>(id));
         return;
     }
 
     IOnOffActuator* actuator = actuatorRuntime_.onOffActuator(id);
     if (actuator == nullptr) {
-        logger_.printf("MQTT actuator %u command rejected: OnOff capability unavailable\n",
+        logger_.warnf("MQTT actuator %u command rejected: OnOff capability unavailable",
             static_cast<unsigned int>(id));
         return;
     }
     const ActuatorOperationResult result = actuator->setState(requestedState);
     if (result != ActuatorOperationResult::Completed) {
-        logger_.printf("MQTT actuator %u command failed: result=%u\n",
+        logger_.warnf("MQTT actuator %u command failed: result=%u",
             static_cast<unsigned int>(id),
             static_cast<unsigned int>(result));
     }

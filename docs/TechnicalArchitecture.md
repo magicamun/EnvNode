@@ -1343,6 +1343,20 @@ downstream Serial, UART bridge, or host-capture corruption.
 The Web history is read-only, overwrites its oldest entry when full, and does not
 survive restart. It is not persistent logging.
 
+Structured severities have consistent operational meaning:
+
+- `DEBUG` records development and troubleshooting detail.
+- `INFO` records normal lifecycle events and meaningful state transitions.
+- `WARN` records recoverable degradation or a temporarily unavailable operation.
+- `ERROR` records a failed operation or violated invariant that prevents the current
+  operation from completing.
+
+Conditions observed from `loop()` or `service()` are normally logged only when they
+change. Persistent source, target, connection and publication failures must not append
+the same warning on every pass. Recovery is logged once when useful. Threshold
+Controllers emit detailed per-revision Measurement evaluation at `DEBUG`; only actual
+hysteresis decision transitions are emitted at `INFO`.
+
 The current implementation provides centralized logging through Logger abstractions.
 
 Logging should provide useful information about:

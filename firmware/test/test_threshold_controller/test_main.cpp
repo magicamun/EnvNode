@@ -1,5 +1,7 @@
 #include <unity.h>
 
+#include <cstring>
+#include <string>
 #include <vector>
 
 #include "ActuatorSlotConfiguration.h"
@@ -22,9 +24,39 @@ void digitalWrite(unsigned char pin, int value) { gpioValues[pin] = value; }
 
 class TestLogger : public ILogger {
 public:
+    struct Entry {
+        LogLevel level;
+        std::string message;
+    };
+
+    explicit TestLogger(LogLevel minimum = LogLevel::Info) : minimum_(minimum) {}
     void begin(unsigned long) override {}
     void println(const char*) override {}
     void printf(const char*, ...) override {}
+    bool accepts(LogLevel level) const override {
+        return static_cast<uint8_t>(level) >= static_cast<uint8_t>(minimum_);
+    }
+    void log(LogLevel level, const char* message) override {
+        entries.push_back({level, message == nullptr ? "" : message});
+    }
+    size_t count(LogLevel level) const {
+        size_t result = 0;
+        for (const Entry& entry : entries) if (entry.level == level) ++result;
+        return result;
+    }
+    const Entry* find(LogLevel level, const char* text) const {
+        for (const Entry& entry : entries) {
+            if (entry.level == level && entry.message.find(text) != std::string::npos) {
+                return &entry;
+            }
+        }
+        return nullptr;
+    }
+
+    std::vector<Entry> entries;
+
+private:
+    LogLevel minimum_;
 };
 
 class TestClock : public IMonotonicClock {
@@ -523,6 +555,154 @@ void test_actuator_runtime_replacement_is_resolved_without_reasserting_output() 
     TEST_ASSERT_EQUAL_INT(HIGH, gpioValues[17]);
 }
 
+void test_threshold_debug_evaluation_and_info_transitions_are_self_contained() {
+    TestLogger logger(LogLevel::Debug);
+    TestClock clock;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    TestMeasurementResolver measurements;
+    setSnapshot(measurements, 72.0F, 100, 1);
+    clock.now = 150;
+    ThresholdController controller(
+        thresholdConfiguration(), measurements, actuators, clock, logger,
+        3, "Heater Control");
+    controller.begin();
+
+    const TestLogger::Entry* evaluation = logger.find(LogLevel::Debug, "evaluate Sensor 1");
+    TEST_ASSERT_NOT_NULL(evaluation);
+    TEST_ASSERT_NOT_NULL(strstr(evaluation->message.c_str(), "Controller 3 \"Heater Control\""));
+    TEST_ASSERT_NOT_NULL(strstr(evaluation->message.c_str(), "relative_humidity=72 %"));
+    TEST_ASSERT_NOT_NULL(strstr(evaluation->message.c_str(), "thresholds off=65 on=70 %"));
+    TEST_ASSERT_NOT_NULL(strstr(evaluation->message.c_str(), "age=50 ms/1000 ms"));
+    TEST_ASSERT_NOT_NULL(strstr(evaluation->message.c_str(), "decision=Unknown -> On"));
+
+    const TestLogger::Entry* on = logger.find(LogLevel::Info, "Threshold decision Unknown -> On");
+    TEST_ASSERT_NOT_NULL(on);
+    TEST_ASSERT_NOT_NULL(strstr(on->message.c_str(), "Controller 3 \"Heater Control\""));
+    TEST_ASSERT_NOT_NULL(strstr(on->message.c_str(), "Sensor 1 relative_humidity=72 %"));
+    TEST_ASSERT_NOT_NULL(strstr(on->message.c_str(), "on threshold=70 %"));
+
+    clock.now = 250;
+    setSnapshot(measurements, 64.0F, 200, 2);
+    controller.service();
+    const TestLogger::Entry* off = logger.find(LogLevel::Info, "Threshold decision On -> Off");
+    TEST_ASSERT_NOT_NULL(off);
+    TEST_ASSERT_NOT_NULL(strstr(off->message.c_str(), "Sensor 1 relative_humidity=64 %"));
+    TEST_ASSERT_NOT_NULL(strstr(off->message.c_str(), "off threshold=65 %"));
+}
+
+void test_unchanged_decision_is_debug_only_and_debug_filtering_is_authoritative() {
+    TestClock clock;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    TestMeasurementResolver measurements;
+    setSnapshot(measurements, 68.0F, 0, 1);
+
+    TestLogger debugLogger(LogLevel::Debug);
+    ThresholdController debugController(
+        thresholdConfiguration(), measurements, actuators, clock, debugLogger,
+        2, "Humidity Hold");
+    debugController.begin();
+    TEST_ASSERT_EQUAL_UINT32(1, debugLogger.count(LogLevel::Debug));
+    TEST_ASSERT_EQUAL_UINT32(0, debugLogger.count(LogLevel::Info));
+
+    TestLogger infoLogger(LogLevel::Info);
+    ThresholdController infoController(
+        thresholdConfiguration(), measurements, actuators, clock, infoLogger,
+        2, "Humidity Hold");
+    infoController.begin();
+    TEST_ASSERT_EQUAL_UINT32(0, infoLogger.count(LogLevel::Debug));
+    TEST_ASSERT_EQUAL_UINT32(0, infoLogger.count(LogLevel::Info));
+}
+
+void test_source_loss_stale_and_recovery_log_once_per_transition() {
+    TestLogger logger;
+    TestClock clock;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    TestMeasurementResolver measurements;
+    setSnapshot(measurements, 68.0F, 0, 1);
+    ThresholdController controller(
+        thresholdConfiguration(), measurements, actuators, clock, logger,
+        4, "Ventilation");
+    controller.begin();
+
+    measurements.available = false;
+    controller.service();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(1, logger.count(LogLevel::Warn));
+    TEST_ASSERT_NOT_NULL(logger.find(LogLevel::Warn,
+        "Controller 4 \"Ventilation\": Measurement source Sensor 1 relative_humidity unavailable"));
+
+    measurements.available = true;
+    controller.service();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(1, logger.count(LogLevel::Info));
+
+    clock.now = 1001;
+    controller.service();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(2, logger.count(LogLevel::Warn));
+    const TestLogger::Entry* stale = logger.find(LogLevel::Warn, "stale, age=1001 ms, maximum=1000 ms");
+    TEST_ASSERT_NOT_NULL(stale);
+
+    setSnapshot(measurements, 68.0F, 1001, 2);
+    controller.service();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(2, logger.count(LogLevel::Info));
+}
+
+void test_target_loss_and_retryable_operation_failure_are_suppressed_and_recover() {
+    TestLogger logger;
+    TestClock clock;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    TestMeasurementResolver measurements;
+    setSnapshot(measurements, 72.0F, 0, 1);
+    ThresholdController controller(
+        thresholdConfiguration(), measurements, actuators, clock, logger,
+        5, "Pump");
+    controller.begin();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(1, logger.count(LogLevel::Warn));
+    TEST_ASSERT_NOT_NULL(logger.find(LogLevel::Warn, "target Actuator 1 unavailable"));
+
+    actuators.targets[0] = &actuator;
+    actuator.operationResult = ActuatorOperationResult::NotInitialized;
+    controller.service();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(2, logger.count(LogLevel::Warn));
+    TEST_ASSERT_NOT_NULL(logger.find(LogLevel::Warn, "could not apply On"));
+
+    actuator.operationResult = ActuatorOperationResult::Completed;
+    controller.service();
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(3, logger.count(LogLevel::Info));
+    TEST_ASSERT_NOT_NULL(logger.find(LogLevel::Info, "applied On after retry"));
+}
+
+void test_blink_phase_cycles_do_not_create_info_log_spam() {
+    TestLogger logger;
+    TestClock clock;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    BlinkControllerConfiguration configuration;
+    configuration.targetActuatorId = 1;
+    configuration.onDurationMs = 10;
+    configuration.offDurationMs = 10;
+    BlinkController controller(configuration, actuators, clock, logger, 6, "Blinker");
+    controller.begin();
+    for (uint32_t now = 10; now <= 100; now += 10) {
+        clock.now = now;
+        controller.service();
+    }
+    TEST_ASSERT_EQUAL_UINT32(0, logger.entries.size());
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_begin_handles_missing_stale_invalid_and_initial_in_band_input);
@@ -536,5 +716,10 @@ int main(int, char**) {
     RUN_TEST(test_stop_and_start_reset_decision_and_evaluate_current_snapshot);
     RUN_TEST(test_factory_and_runtime_support_mixed_composition_and_live_rebuild);
     RUN_TEST(test_actuator_runtime_replacement_is_resolved_without_reasserting_output);
+    RUN_TEST(test_threshold_debug_evaluation_and_info_transitions_are_self_contained);
+    RUN_TEST(test_unchanged_decision_is_debug_only_and_debug_filtering_is_authoritative);
+    RUN_TEST(test_source_loss_stale_and_recovery_log_once_per_transition);
+    RUN_TEST(test_target_loss_and_retryable_operation_failure_are_suppressed_and_recover);
+    RUN_TEST(test_blink_phase_cycles_do_not_create_info_log_spam);
     return UNITY_END();
 }

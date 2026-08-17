@@ -48,7 +48,7 @@ bool AM2302Sensor::supports(MeasurementType type) const {
 
 void AM2302Sensor::begin() {
     state_ = SensorState::Initializing;
-    logger_.printf("AM2302 sensor %u initializing on GPIO%u\n", id_, dataPin_);
+    logger_.debugf("AM2302 sensor %u initializing on GPIO%u", id_, dataPin_);
     dht_.begin();
     readyAtMs_ = monotonicClock_.nowMs() + StartupStabilizationMs;
 }
@@ -58,7 +58,7 @@ SensorOperationResult AM2302Sensor::service(IMeasurementSink& output) {
     if (state_ == SensorState::Initializing
         && static_cast<int32_t>(monotonicClock_.nowMs() - readyAtMs_) >= 0) {
         state_ = SensorState::Ready;
-        logger_.printf("AM2302 sensor %u ready\n", id_);
+        logger_.infof("AM2302 sensor %u ready", id_);
     }
     return SensorOperationResult::NoData;
 }
@@ -84,8 +84,8 @@ SensorOperationResult AM2302Sensor::sample(IMeasurementSink& output) {
 
     if (!temperatureValid || !humidityValid) {
         if (state_ != SensorState::Degraded) {
-            logger_.printf(
-                "AM2302 sensor %u read failure: temperatureValid=%s humidityValid=%s\n",
+            logger_.warnf(
+                "AM2302 sensor %u read failure: temperatureValid=%s humidityValid=%s",
                 id_, temperatureValid ? "true" : "false", humidityValid ? "true" : "false");
         }
         state_ = SensorState::Degraded;
@@ -93,7 +93,7 @@ SensorOperationResult AM2302Sensor::sample(IMeasurementSink& output) {
     }
 
     if (state_ == SensorState::Degraded) {
-        logger_.printf("AM2302 sensor %u recovered after read failure\n", id_);
+        logger_.infof("AM2302 sensor %u recovered after read failure", id_);
     }
     state_ = SensorState::Ready;
     return SensorOperationResult::Completed;
