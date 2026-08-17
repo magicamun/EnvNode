@@ -1,5 +1,7 @@
 #include "Measurement.h"
 
+#include <cstring>
+
 namespace EnvNode {
 namespace {
 
@@ -28,33 +30,33 @@ constexpr uint8_t unitCount(const PresentationUnit (&)[Size]) {
 }
 
 const MeasurementTypeMetadata MeasurementMetadata[] = {
-    {MeasurementType::Unknown, "Unknown", ValueKind::None, PresentationUnit::None, 0,
+    {MeasurementType::Unknown, "unknown", "Unknown", ValueKind::None, PresentationUnit::None, 0,
         MeasurementSemantics::Unknown, NoUnit, unitCount(NoUnit), PresentationUnit::None},
-    {MeasurementType::Temperature, "Temperature", ValueKind::FloatingPoint,
+    {MeasurementType::Temperature, "temperature", "Temperature", ValueKind::FloatingPoint,
         PresentationUnit::DegreeCelsius, 1, MeasurementSemantics::State,
         TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius},
-    {MeasurementType::RelativeHumidity, "Relative Humidity", ValueKind::FloatingPoint,
+    {MeasurementType::RelativeHumidity, "relative_humidity", "Relative Humidity", ValueKind::FloatingPoint,
         PresentationUnit::Percent, 1, MeasurementSemantics::State,
         HumidityUnits, unitCount(HumidityUnits), PresentationUnit::Percent},
-    {MeasurementType::AtmosphericPressure, "Atmospheric Pressure", ValueKind::FloatingPoint,
+    {MeasurementType::AtmosphericPressure, "atmospheric_pressure", "Atmospheric Pressure", ValueKind::FloatingPoint,
         PresentationUnit::Pascal, 1, MeasurementSemantics::State,
         PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal},
-    {MeasurementType::SolarIrradiance, "Solar Irradiance", ValueKind::FloatingPoint,
+    {MeasurementType::SolarIrradiance, "solar_irradiance", "Solar Irradiance", ValueKind::FloatingPoint,
         PresentationUnit::WattPerSquareMetre, 1, MeasurementSemantics::State,
         IrradianceUnits, unitCount(IrradianceUnits), PresentationUnit::WattPerSquareMetre},
-    {MeasurementType::SolarCellTemperature, "Solar Cell Temperature", ValueKind::FloatingPoint,
+    {MeasurementType::SolarCellTemperature, "solar_cell_temperature", "Solar Cell Temperature", ValueKind::FloatingPoint,
         PresentationUnit::DegreeCelsius, 1, MeasurementSemantics::State,
         TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius},
-    {MeasurementType::RainDetectorLevel, "Rain Detector Level", ValueKind::FloatingPoint,
+    {MeasurementType::RainDetectorLevel, "rain_detector_level", "Rain Detector Level", ValueKind::FloatingPoint,
         PresentationUnit::Ratio, 2, MeasurementSemantics::State,
         RainLevelUnits, unitCount(RainLevelUnits), PresentationUnit::Ratio},
-    {MeasurementType::RainDetectorWet, "Rain Detector Wet", ValueKind::Boolean,
+    {MeasurementType::RainDetectorWet, "rain_detector_wet", "Rain Detector Wet", ValueKind::Boolean,
         PresentationUnit::None, 0, MeasurementSemantics::State,
         NoUnit, unitCount(NoUnit), PresentationUnit::None},
-    {MeasurementType::RainGaugeTip, "Rain Gauge Tip", ValueKind::None,
+    {MeasurementType::RainGaugeTip, "rain_gauge_tip", "Rain Gauge Tip", ValueKind::None,
         PresentationUnit::None, 0, MeasurementSemantics::Event,
         NoUnit, unitCount(NoUnit), PresentationUnit::None},
-    {MeasurementType::RainfallIncrement, "Rainfall Increment", ValueKind::FloatingPoint,
+    {MeasurementType::RainfallIncrement, "rainfall_increment", "Rainfall Increment", ValueKind::FloatingPoint,
         PresentationUnit::Millimeter, 3, MeasurementSemantics::Event,
         RainfallIncrementUnits, unitCount(RainfallIncrementUnits), PresentationUnit::Millimeter},
 };
@@ -91,6 +93,20 @@ const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type) {
         return MeasurementMetadata[0];
     }
     return MeasurementMetadata[index];
+}
+
+const char* measurementTypeStableId(MeasurementType type) {
+    return measurementTypeMetadata(type).stableId;
+}
+
+MeasurementType measurementTypeFromStableId(const char* stableId) {
+    if (stableId == nullptr) return MeasurementType::Unknown;
+    for (size_t index = 1; index < MeasurementMetadataCount; ++index) {
+        if (strcmp(MeasurementMetadata[index].stableId, stableId) == 0) {
+            return MeasurementMetadata[index].type;
+        }
+    }
+    return MeasurementType::Unknown;
 }
 
 bool supportsPresentationUnit(MeasurementType type, PresentationUnit unit) {

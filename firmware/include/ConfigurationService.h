@@ -66,9 +66,11 @@ private:
     bool persistControllerSlot(const ControllerSlotConfiguration& slot);
     bool validateControllerSlot(
         const ControllerSlotConfiguration& slot,
+        const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots) const;
     bool validateControllerSlots(
         const ControllerSlotConfiguration* controllerSlots,
+        const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots) const;
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,

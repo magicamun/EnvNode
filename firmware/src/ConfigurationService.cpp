@@ -161,6 +161,7 @@ void ConfigurationService::initializeControllerDefaults() {
         slot.name = "Controller Slot " + String(index + 1);
         slot.implementation = ControllerImplementation::None;
         slot.implementationConfiguration.blink = BlinkControllerConfiguration{};
+        slot.implementationConfiguration.threshold = ThresholdControllerConfiguration{};
     }
 }
 
@@ -349,9 +350,25 @@ void ConfigurationService::loadControllerSlots() {
             controllerKey(expectedId, "onms").c_str(), 1000);
         loaded[index].implementationConfiguration.blink.offDurationMs = preferences_.getUInt(
             controllerKey(expectedId, "offms").c_str(), 1000);
+        ThresholdControllerConfiguration& threshold =
+            loaded[index].implementationConfiguration.threshold;
+        threshold.source.sensorId = static_cast<SensorId>(preferences_.getUInt(
+            controllerKey(expectedId, "src").c_str(), InvalidSensorId));
+        threshold.source.measurementType = measurementTypeFromStableId(
+            preferences_.getString(
+                controllerKey(expectedId, "type").c_str(), "unknown").c_str());
+        threshold.targetActuatorId = static_cast<ActuatorId>(preferences_.getUInt(
+            controllerKey(expectedId, "tact").c_str(), InvalidActuatorId));
+        threshold.onThreshold = preferences_.getFloat(
+            controllerKey(expectedId, "on").c_str(), 70.0F);
+        threshold.offThreshold = preferences_.getFloat(
+            controllerKey(expectedId, "off").c_str(), 65.0F);
+        threshold.maxMeasurementAgeMs = preferences_.getUInt(
+            controllerKey(expectedId, "age").c_str(), 15000);
     }
 
-    if (validateControllerSlots(loaded, configuration_.actuatorSlots)) {
+    if (validateControllerSlots(
+            loaded, configuration_.sensorSlots, configuration_.actuatorSlots)) {
         for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
             configuration_.controllerSlots[index] = loaded[index];
         }
@@ -804,6 +821,7 @@ bool ConfigurationService::validateActuatorSlots(
 
 bool ConfigurationService::validateControllerSlot(
     const ControllerSlotConfiguration& slot,
+    const SensorSlotConfiguration* sensorSlots,
     const ActuatorSlotConfiguration* actuatorSlots) const {
     if (!isValidControllerId(slot.slotId)
         || slot.slotId > MaxControllerSlotCount
@@ -815,24 +833,70 @@ bool ConfigurationService::validateControllerSlot(
         ControllerImplementationRegistry::find(slot.implementation);
     if (metadata == nullptr) return false;
     if (slot.implementation == ControllerImplementation::None) return true;
-    if (slot.implementation != ControllerImplementation::Blink) return false;
 
-    const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
-    if (blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
-        || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
+    ActuatorId targetActuatorId = InvalidActuatorId;
+    if (slot.implementation == ControllerImplementation::Blink) {
+        const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
+        if (blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
+            || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
+            return false;
+        }
+        targetActuatorId = blink.targetActuatorId;
+    } else if (slot.implementation == ControllerImplementation::Threshold) {
+        if (!slot.enabled) return true;
+        const ThresholdControllerConfiguration& threshold =
+            slot.implementationConfiguration.threshold;
+        if (!std::isfinite(threshold.onThreshold)
+            || !std::isfinite(threshold.offThreshold)
+            || threshold.offThreshold >= threshold.onThreshold
+            || threshold.maxMeasurementAgeMs == 0
+            || threshold.maxMeasurementAgeMs > INT32_MAX) {
+            return false;
+        }
+        if (sensorSlots == nullptr
+            || !isValidSensorId(threshold.source.sensorId)
+            || threshold.source.sensorId > MaxSensorSlotCount) {
+            return false;
+        }
+        const SensorSlotConfiguration& source =
+            sensorSlots[threshold.source.sensorId - 1];
+        if (source.slotId != threshold.source.sensorId
+            || !source.enabled
+            || source.implementation == SensorImplementation::None) {
+            return false;
+        }
+        const SensorImplementationMetadata* sensorMetadata =
+            SensorImplementationRegistry::find(source.implementation);
+        bool supportsType = false;
+        if (sensorMetadata != nullptr) {
+            for (size_t index = 0; index < sensorMetadata->measurementTypeCount; ++index) {
+                if (sensorMetadata->measurementTypes[index]
+                    == threshold.source.measurementType) {
+                    supportsType = true;
+                    break;
+                }
+            }
+        }
+        const MeasurementTypeMetadata& measurementMetadata =
+            measurementTypeMetadata(threshold.source.measurementType);
+        if (!supportsType
+            || measurementMetadata.expectedValueKind != ValueKind::FloatingPoint
+            || measurementMetadata.semantics != MeasurementSemantics::State) {
+            return false;
+        }
+        targetActuatorId = threshold.targetActuatorId;
+    } else {
         return false;
     }
-    if (!isValidActuatorId(blink.targetActuatorId)
-        || blink.targetActuatorId > MaxActuatorSlotCount) {
+
+    if (!isValidActuatorId(targetActuatorId)
+        || targetActuatorId > MaxActuatorSlotCount) {
         return false;
     }
     if (!slot.enabled) return true;
-    if (actuatorSlots == nullptr) {
-        return false;
-    }
-    const ActuatorSlotConfiguration& target =
-        actuatorSlots[blink.targetActuatorId - 1];
-    if (target.slotId != blink.targetActuatorId
+    if (actuatorSlots == nullptr) return false;
+    const ActuatorSlotConfiguration& target = actuatorSlots[targetActuatorId - 1];
+    if (target.slotId != targetActuatorId
         || !target.enabled
         || target.implementation == ActuatorImplementation::None) {
         return false;
@@ -847,11 +911,15 @@ bool ConfigurationService::validateControllerSlot(
 
 bool ConfigurationService::validateControllerSlots(
     const ControllerSlotConfiguration* controllerSlots,
+    const SensorSlotConfiguration* sensorSlots,
     const ActuatorSlotConfiguration* actuatorSlots) const {
-    if (controllerSlots == nullptr || actuatorSlots == nullptr) return false;
+    if (controllerSlots == nullptr || sensorSlots == nullptr || actuatorSlots == nullptr) {
+        return false;
+    }
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         if (controllerSlots[index].slotId != index + 1
-            || !validateControllerSlot(controllerSlots[index], actuatorSlots)) {
+            || !validateControllerSlot(
+                controllerSlots[index], sensorSlots, actuatorSlots)) {
             return false;
         }
     }
@@ -912,6 +980,8 @@ bool ConfigurationService::setSensorSlotConfiguration(const SensorSlotConfigurat
     candidate[slot.slotId - 1] = slot;
     if (!validateSensorSlots(candidate)
         || !validateHardwareOccupancy(candidate, configuration_.actuatorSlots)
+        || !validateControllerSlots(
+            configuration_.controllerSlots, candidate, configuration_.actuatorSlots)
         || !persistSensorSlot(slot)) return false;
     configuration_.sensorSlots[slot.slotId - 1] = slot;
     return true;
@@ -940,7 +1010,8 @@ bool ConfigurationService::setActuatorSlotConfiguration(
     candidate[slot.slotId - 1] = slot;
     if (!validateActuatorSlots(candidate)
         || !validateHardwareOccupancy(configuration_.sensorSlots, candidate)
-        || !validateControllerSlots(configuration_.controllerSlots, candidate)
+        || !validateControllerSlots(
+            configuration_.controllerSlots, configuration_.sensorSlots, candidate)
         || !persistActuatorSlot(slot)) return false;
     configuration_.actuatorSlots[slot.slotId - 1] = slot;
     return true;
@@ -953,13 +1024,23 @@ bool ConfigurationService::persistControllerSlot(
     if (metadata == nullptr) return false;
     const ControllerId id = slot.slotId;
     const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
+    const ThresholdControllerConfiguration& threshold =
+        slot.implementationConfiguration.threshold;
     return persistUInt(controllerKey(id, "id").c_str(), id)
         && persistUInt(controllerKey(id, "en").c_str(), slot.enabled ? 1 : 0)
         && persistString(controllerKey(id, "name").c_str(), slot.name)
         && persistString(controllerKey(id, "impl").c_str(), metadata->stableId)
         && persistUInt(controllerKey(id, "act").c_str(), blink.targetActuatorId)
         && persistUInt(controllerKey(id, "onms").c_str(), blink.onDurationMs)
-        && persistUInt(controllerKey(id, "offms").c_str(), blink.offDurationMs);
+        && persistUInt(controllerKey(id, "offms").c_str(), blink.offDurationMs)
+        && persistUInt(controllerKey(id, "src").c_str(), threshold.source.sensorId)
+        && persistString(controllerKey(id, "type").c_str(),
+            measurementTypeStableId(threshold.source.measurementType))
+        && persistUInt(controllerKey(id, "tact").c_str(), threshold.targetActuatorId)
+        && persistFloat(controllerKey(id, "on").c_str(), threshold.onThreshold)
+        && persistFloat(controllerKey(id, "off").c_str(), threshold.offThreshold)
+        && persistUInt(controllerKey(id, "age").c_str(),
+            threshold.maxMeasurementAgeMs);
 }
 
 bool ConfigurationService::setControllerSlotConfiguration(
@@ -972,7 +1053,8 @@ bool ConfigurationService::setControllerSlotConfiguration(
         candidate[index] = configuration_.controllerSlots[index];
     }
     candidate[slot.slotId - 1] = slot;
-    if (!validateControllerSlots(candidate, configuration_.actuatorSlots)
+    if (!validateControllerSlots(
+            candidate, configuration_.sensorSlots, configuration_.actuatorSlots)
         || !persistControllerSlot(slot)) {
         return false;
     }

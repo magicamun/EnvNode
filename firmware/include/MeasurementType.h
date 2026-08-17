@@ -29,6 +29,7 @@ enum class MeasurementSemantics : uint8_t {
 
 struct MeasurementTypeMetadata {
     MeasurementType type;
+    const char* stableId;
     const char* displayName;
     ValueKind expectedValueKind;
     PresentationUnit canonicalUnit;
@@ -41,6 +42,8 @@ struct MeasurementTypeMetadata {
 
 bool isSupportedMeasurementType(MeasurementType type);
 const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type);
+const char* measurementTypeStableId(MeasurementType type);
+MeasurementType measurementTypeFromStableId(const char* stableId);
 bool supportsPresentationUnit(MeasurementType type, PresentationUnit unit);
 
 } // namespace EnvNode

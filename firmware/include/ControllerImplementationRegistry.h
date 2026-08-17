@@ -10,6 +10,7 @@ namespace EnvNode {
 enum class ControllerImplementation : uint8_t {
     None = 0,
     Blink = 1,
+    Threshold = 2,
 };
 
 struct ControllerImplementationMetadata {
