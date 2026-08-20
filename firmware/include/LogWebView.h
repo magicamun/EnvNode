@@ -7,5 +7,6 @@
 namespace EnvNode {
 
 String buildRecentLogHtml(const IRecentLogReader& logReader);
+String buildRecentLogJson(const IRecentLogReader& logReader);
 
 } // namespace EnvNode

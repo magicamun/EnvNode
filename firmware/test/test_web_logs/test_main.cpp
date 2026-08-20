@@ -49,7 +49,7 @@ void testNavigationIncludesActiveLogsLink() {
 void testEmptyStoreRendersNeutralStateAndCapacity() {
     RecentLogStore store;
     const String html = buildRecentLogHtml(store);
-    assertContains(html, "Recent in-memory log entries: 0 / 64");
+    assertContains(html, "id='log-count'>0 / 64</span>");
     assertContains(html, "No log entries available.");
     TEST_ASSERT_NULL(strstr(html.c_str(), "<table"));
 }
@@ -82,7 +82,7 @@ void testLevelsAndMessageEscapingAreRendered() {
     assertContains(html, "class='badge warn log-level'>WARN</span>");
     assertContains(html, "class='badge bad log-level'>ERROR</span>");
     assertContains(html, "&lt;script&gt;&amp;&quot;&#39; bad&lt;/script&gt;");
-    TEST_ASSERT_NULL(strstr(html.c_str(), "<script>"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "<script>&\"' bad</script>"));
 }
 
 void testFullStoreShowsRetainedEntriesAndWrappingMarkup() {
@@ -94,12 +94,56 @@ void testFullStoreShowsRetainedEntriesAndWrappingMarkup() {
         store.append(makeEntry(sequence, LogLevel::Info, message));
     }
     const String html = buildRecentLogHtml(store);
-    assertContains(html, "Recent in-memory log entries: 64 / 64");
+    assertContains(html, "id='log-count'>64 / 64</span>");
     assertContains(html, "table-scroll log-table-wrap");
     assertContains(html, "class='log-table'");
     TEST_ASSERT_TRUE(strstr(html.c_str(), ">#70</td>") < strstr(html.c_str(), ">#7</td>"));
     TEST_ASSERT_NULL(strstr(html.c_str(), ">#6</td>"));
-    TEST_ASSERT_TRUE(html.length() < 30000);
+    TEST_ASSERT_TRUE(html.length() < 33000);
+}
+
+void testEmptyStoreProducesCompactValidJson() {
+    RecentLogStore store;
+    TEST_ASSERT_EQUAL_STRING(
+        "{\"count\":0,\"capacity\":64,\"entries\":[]}",
+        buildRecentLogJson(store).c_str());
+}
+
+void testJsonUsesNewestFirstOrderSharedTimesLevelsAndEscaping() {
+    setenv("TZ", "UTC0", 1);
+    tzset();
+    RecentLogStore store;
+    store.append(makeEntry(1, LogLevel::Debug, "debug", 3723004));
+    store.append(makeEntry(2, LogLevel::Info, "info"));
+    store.append(makeEntry(3, LogLevel::Warn, "warn"));
+    store.append(makeEntry(
+        4, LogLevel::Error, "quote \" slash \\ newline\n tab\t control\x01",
+        0, true, 1786986900));
+    const String json = buildRecentLogJson(store);
+    assertContains(json, "\"count\":4,\"capacity\":64");
+    const char* fourth = strstr(json.c_str(), "\"sequence\":4");
+    const char* third = strstr(json.c_str(), "\"sequence\":3");
+    const char* second = strstr(json.c_str(), "\"sequence\":2");
+    const char* first = strstr(json.c_str(), "\"sequence\":1");
+    TEST_ASSERT_TRUE(fourth < third && third < second && second < first);
+    assertContains(json, "\"time\":\"2026-08-17 17:15:00\",\"level\":\"ERROR\"");
+    assertContains(json, "\"level\":\"WARN\"");
+    assertContains(json, "\"level\":\"INFO\"");
+    assertContains(json, "\"time\":\"+01:02:03.004\",\"level\":\"DEBUG\"");
+    assertContains(json, "quote \\\" slash \\\\ newline\\n tab\\t control\\u0001");
+}
+
+void testLogPageContainsLocalPollingAndPauseControl() {
+    RecentLogStore store;
+    const String html = buildRecentLogHtml(store);
+    assertContains(html, "id='log-auto-refresh' type='checkbox' checked");
+    assertContains(html, "id='log-refresh-status'>On · 2 s");
+    assertContains(html, "intervalMs=2000");
+    assertContains(html, "fetch('/logs/data',{cache:'no-store'})");
+    assertContains(html, "setInterval(refresh,intervalMs)");
+    assertContains(html, "if(!box.checked)return");
+    assertContains(html, "cell(row,'log-message',entry.message)");
+    TEST_ASSERT_NULL(strstr(html.c_str(), "innerHTML"));
 }
 
 } // namespace
@@ -111,5 +155,8 @@ int main(int, char**) {
     RUN_TEST(testEntriesRenderNewestFirstWithCanonicalSequenceAndTimes);
     RUN_TEST(testLevelsAndMessageEscapingAreRendered);
     RUN_TEST(testFullStoreShowsRetainedEntriesAndWrappingMarkup);
+    RUN_TEST(testEmptyStoreProducesCompactValidJson);
+    RUN_TEST(testJsonUsesNewestFirstOrderSharedTimesLevelsAndEscaping);
+    RUN_TEST(testLogPageContainsLocalPollingAndPauseControl);
     return UNITY_END();
 }

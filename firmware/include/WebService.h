@@ -70,6 +70,7 @@ private:
     void handleDevice();
     void handleDiagnostics();
     void handleLogs();
+    void handleLogData();
     void handleFirmware();
     void handleFirmwareUpload();
     void handleFirmwareUploadData();
