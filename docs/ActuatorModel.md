@@ -18,27 +18,35 @@ flowchart LR
     C[ActuatorSlotConfiguration] --> R[ActuatorImplementationRegistry]
     C --> F[ActuatorFactory]
     F --> RT[ActuatorRuntime]
-    RT --> I[IOnOffActuator]
-    I --> G[GpioOnOffActuator]
-    G --> P[GPIO output]
+    RT --> O[IOnOffActuator]
+    RT --> L[ILevelActuator]
+    O --> G[GpioOnOffActuator]
+    L --> P[GpioPwmActuator]
+    G --> H[GPIO output]
+    P --> H
 ```
 
 `ActuatorId` is the stable identity of a configured Slot. The registry describes reusable implementations and their capability and hardware requirements. `slot.hardware` is the single source of truth for the instance's `HardwareResourceAssignment`.
 
-The current implementation is `gpio_on_off`. It requires a GPIO with `DigitalOutput` capability and exposes the `OnOff` domain capability through `IOnOffActuator`.
+`gpio_on_off` exposes the `OnOff` domain capability through `IOnOffActuator`.
+`gpio_pwm` exposes normalized `Level` through `ILevelActuator` and implements it with ESP32
+LEDC PWM. Both require a GPIO with `DigitalOutput`; PWM frequency, resolution, channel and
+duty remain implementation details.
 
 An adapter or Controller addresses an Actuator Slot and capability. It never addresses `GpioOnOffActuator` or GPIO directly.
 
 ## Capabilities
 
-`OnOff` is currently the only implemented Actuator capability:
+The implemented Actuator capabilities are:
 
-- `Off`
-- `On`
+- `OnOff`: `Off` and `On`
+- `Level`: normalized integer percentage 0–100
 
-Capability metadata lets clients request behavior without depending on its physical implementation. A future relay, remote output or other implementation may expose the same `OnOff` interface.
+`Level` centrally satisfies `OnOff`: Off maps to 0%, On maps to 100%, and On never restores
+a previous partial Level. An OnOff-only implementation cannot satisfy a Level requirement.
+Capability metadata lets clients request behavior without depending on its physical implementation.
 
-Level/percentage control remains future architecture. It is not currently implemented.
+The GPIO PWM implementation starts and shuts down at Level 0. Runtime Level is not persisted.
 
 ## Runtime ownership and rebuild
 
@@ -46,7 +54,10 @@ Level/percentage control remains future architecture. It is not currently implem
 
 A live rebuild stages a replacement composition, safely shuts down old Actuators, and activates the new composition without restarting the ESP32. Shutdown requests `Off` before releasing GPIO ownership where the implementation can do so.
 
-Actuator state is independent of command source. Web, MQTT and Controllers all reach the same `IOnOffActuator`; `ActuatorStatePublisher` observes actual state and publishes it independently.
+Actuator state is independent of command source. Web, MQTT and Controllers resolve typed
+capabilities through `ActuatorRuntime`; `ActuatorStatePublisher` observes OnOff and Level state
+independently. MQTT Level commands use `actuator/<slot>/cmd/level`, with retained authoritative
+state on `actuator/<slot>/status/level`.
 
 ## Hardware validation
 

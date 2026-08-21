@@ -31,11 +31,14 @@ public:
     bool runtimeInfo(size_t index, ActuatorRuntimeInfo& info) const;
     IOnOffActuator* onOffActuator(ActuatorId id) override;
     const IOnOffActuator* onOffActuator(ActuatorId id) const;
+    ILevelActuator* levelActuator(ActuatorId id);
+    const ILevelActuator* levelActuator(ActuatorId id) const;
 
 private:
     struct RuntimeEntry {
         ActuatorRuntimeInfo info;
         IOnOffActuator* onOff = nullptr;
+        ILevelActuator* level = nullptr;
     };
 
     RuntimeEntry* findEntry(ActuatorId id);

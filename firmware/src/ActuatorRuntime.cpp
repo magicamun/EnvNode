@@ -128,6 +128,7 @@ bool ActuatorRuntime::constructComposition(
             slotIndex, slot, factoryResult);
         entry.info.constructionResult = factoryResult;
         entry.onOff = instance.onOff;
+        entry.level = instance.level;
         if (factoryResult != ActuatorFactoryResult::Created || entry.onOff == nullptr) {
             success = false;
             logger_.errorf("Actuator %u construction failed: result=%u",
@@ -204,6 +205,20 @@ const IOnOffActuator* ActuatorRuntime::onOffActuator(ActuatorId id) const {
     return entry != nullptr && entry->info.available
         && hasActuatorCapability(entry->info.capabilities, ActuatorCapability::OnOff)
         ? entry->onOff : nullptr;
+}
+
+ILevelActuator* ActuatorRuntime::levelActuator(ActuatorId id) {
+    RuntimeEntry* entry = findEntry(id);
+    return entry != nullptr && entry->info.available
+        && hasActuatorCapability(entry->info.capabilities, ActuatorCapability::Level)
+        ? entry->level : nullptr;
+}
+
+const ILevelActuator* ActuatorRuntime::levelActuator(ActuatorId id) const {
+    const RuntimeEntry* entry = findEntry(id);
+    return entry != nullptr && entry->info.available
+        && hasActuatorCapability(entry->info.capabilities, ActuatorCapability::Level)
+        ? entry->level : nullptr;
 }
 
 ActuatorRuntime::RuntimeEntry* ActuatorRuntime::findEntry(ActuatorId id) {

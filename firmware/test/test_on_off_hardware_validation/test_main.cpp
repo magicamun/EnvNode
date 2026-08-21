@@ -89,6 +89,16 @@ void configureGpioOnOffSlot(
     slot.hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
 }
 
+void configureGpioPwmSlot(
+    ActuatorSlotConfiguration& slot,
+    const char* name,
+    uint8_t gpio) {
+    slot.enabled = true;
+    slot.name = name;
+    slot.implementation = ActuatorImplementation::GpioPwm;
+    slot.hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
+}
+
 void test_gpio_with_digital_output_is_accepted() {
     const HardwareResourceAssignment assignment =
         HardwareResourceAssignment::gpioResource(GpioResource(4));
@@ -184,6 +194,57 @@ void test_current_board_profile_preserves_analog_capabilities() {
 void test_on_off_state_has_stable_binary_values() {
     TEST_ASSERT_EQUAL_UINT8(0, static_cast<uint8_t>(OnOffState::Off));
     TEST_ASSERT_EQUAL_UINT8(1, static_cast<uint8_t>(OnOffState::On));
+}
+
+void test_actuator_level_validation_and_pwm_mapping() {
+    const uint8_t validPercentages[] = {0, 1, 50, 99, 100};
+    for (size_t index = 0; index < sizeof(validPercentages); ++index) {
+        ActuatorLevel level;
+        TEST_ASSERT_TRUE(ActuatorLevel::tryCreate(validPercentages[index], level));
+        TEST_ASSERT_EQUAL_UINT8(validPercentages[index], level.percent());
+    }
+    ActuatorLevel invalid;
+    TEST_ASSERT_FALSE(ActuatorLevel::tryCreate(101, invalid));
+    TEST_ASSERT_EQUAL_UINT32(0, gpioPwmDutyForLevel(ActuatorLevel::off()));
+    ActuatorLevel half;
+    TEST_ASSERT_TRUE(ActuatorLevel::tryCreate(50, half));
+    TEST_ASSERT_EQUAL_UINT32(128, gpioPwmDutyForLevel(half));
+    TEST_ASSERT_EQUAL_UINT32(255, gpioPwmDutyForLevel(ActuatorLevel::full()));
+}
+
+void test_level_capability_centrally_satisfies_on_off_but_not_inverse() {
+    TEST_ASSERT_TRUE(hasActuatorCapability(
+        ActuatorCapability::OnOff, ActuatorCapability::OnOff));
+    TEST_ASSERT_FALSE(hasActuatorCapability(
+        ActuatorCapability::OnOff, ActuatorCapability::Level));
+    TEST_ASSERT_TRUE(hasActuatorCapability(
+        ActuatorCapability::Level, ActuatorCapability::OnOff));
+    TEST_ASSERT_TRUE(hasActuatorCapability(
+        ActuatorCapability::Level, ActuatorCapability::Level));
+}
+
+void test_gpio_pwm_level_on_off_mapping_does_not_restore_previous_level() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    configureGpioPwmSlot(slots[0], "Level", 16);
+    runtime.initialize(slots);
+
+    ILevelActuator* actuator = runtime.levelActuator(1);
+    TEST_ASSERT_NOT_NULL(actuator);
+    TEST_ASSERT_NOT_NULL(runtime.onOffActuator(1));
+    TEST_ASSERT_EQUAL_UINT8(0, actuator->level().percent());
+    ActuatorLevel partial;
+    TEST_ASSERT_TRUE(ActuatorLevel::tryCreate(37, partial));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ActuatorOperationResult::Completed),
+        static_cast<int>(actuator->setLevel(partial)));
+    TEST_ASSERT_EQUAL_UINT8(37, actuator->level().percent());
+    actuator->setState(OnOffState::Off);
+    TEST_ASSERT_EQUAL_UINT8(0, actuator->level().percent());
+    actuator->setState(OnOffState::On);
+    TEST_ASSERT_EQUAL_UINT8(100, actuator->level().percent());
 }
 
 void test_gpio_on_off_registry_metadata_is_stable() {
@@ -525,6 +586,9 @@ int main(int, char**) {
     RUN_TEST(test_current_board_profile_has_exact_gpio_and_i2c_mapping);
     RUN_TEST(test_current_board_profile_preserves_analog_capabilities);
     RUN_TEST(test_on_off_state_has_stable_binary_values);
+    RUN_TEST(test_actuator_level_validation_and_pwm_mapping);
+    RUN_TEST(test_level_capability_centrally_satisfies_on_off_but_not_inverse);
+    RUN_TEST(test_gpio_pwm_level_on_off_mapping_does_not_restore_previous_level);
     RUN_TEST(test_gpio_on_off_registry_metadata_is_stable);
     RUN_TEST(test_multiple_gpio_on_off_slots_on_different_gpios_are_valid);
     RUN_TEST(test_duplicate_actuator_gpio_is_rejected);

@@ -252,7 +252,11 @@ flowchart LR
 
 `ActuatorImplementationRegistry` describes reusable implementations, capabilities and required hardware capabilities. Persistent fixed `ActuatorSlotConfiguration`s provide stable `ActuatorId`, enablement, name, implementation and the sole hardware assignment.
 
-`ActuatorFactory` constructs deterministic in-place instances. `ActuatorRuntime` owns their lifecycle and exposes capability lookup by `ActuatorId`. The current `gpio_on_off` implementation exposes `IOnOffActuator`; callers never manipulate its GPIO directly.
+`ActuatorFactory` constructs deterministic in-place instances. `ActuatorRuntime` owns their
+lifecycle and exposes capability lookup by `ActuatorId`. `gpio_on_off` exposes
+`IOnOffActuator`; `gpio_pwm` exposes `ILevelActuator` and implements normalized 0–100 Level
+using ESP32 LEDC. Level centrally satisfies OnOff with Off=0 and On=100. Callers never
+manipulate GPIO, LEDC channels or PWM duty directly.
 
 Live rebuild stages a new composition, safely shuts down the previous outputs Off where possible, and replaces the active instances without a Device restart.
 
@@ -2568,7 +2572,7 @@ Implemented
 Deliberately future or not implemented
 
 - generic external Actuator and Controller self-description
-- additional Actuator capabilities such as Level/percentage
+- additional Actuator capabilities beyond OnOff and Level
 - additional Controller implementations
 - multi-input, Boolean/contact and event-driven Controllers
 - RainDetector-specific typed Controller behavior

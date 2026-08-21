@@ -122,6 +122,26 @@ void test_valid_blink_targets_enabled_on_off_actuator() {
     TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink()));
 }
 
+void test_on_off_controller_accepts_level_actuator_and_persistence_round_trips() {
+    Fixture fixture;
+    ActuatorSlotConfiguration actuator = fixture.enabledActuator();
+    actuator.implementation = ActuatorImplementation::GpioPwm;
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(actuator));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(fixture.blink()));
+    TEST_ASSERT_EQUAL_STRING("gpio_pwm", Preferences::storedString("a1_impl").c_str());
+
+    ConfigurationService loadedService;
+    loadedService.loadConfiguration();
+    const ActuatorSlotConfiguration& loaded =
+        loadedService.getConfiguration().actuatorSlots[0];
+    TEST_ASSERT_TRUE(loaded.enabled);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ActuatorImplementation::GpioPwm),
+        static_cast<int>(loaded.implementation));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareResourceKind::GPIO),
+        static_cast<int>(loaded.hardware.kind));
+    TEST_ASSERT_EQUAL_UINT8(16, loaded.hardware.gpio.number);
+}
+
 void test_invalid_controller_slot_identity_is_rejected() {
     Fixture fixture;
     ControllerSlotConfiguration slot = fixture.blink();
@@ -629,6 +649,7 @@ int main(int, char**) {
     RUN_TEST(test_threshold_registry_uses_stable_id_and_on_off_requirement);
     RUN_TEST(test_default_controller_slots_are_disabled_and_stably_identified);
     RUN_TEST(test_valid_blink_targets_enabled_on_off_actuator);
+    RUN_TEST(test_on_off_controller_accepts_level_actuator_and_persistence_round_trips);
     RUN_TEST(test_invalid_controller_slot_identity_is_rejected);
     RUN_TEST(test_invalid_or_disabled_or_none_target_is_rejected);
     RUN_TEST(test_incompatible_capability_metadata_is_detected);

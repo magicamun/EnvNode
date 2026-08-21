@@ -5,7 +5,7 @@
 namespace EnvNode {
 namespace {
 
-constexpr size_t ImplementationCount = 2;
+constexpr size_t ImplementationCount = 3;
 
 const ActuatorImplementationMetadata* implementations() {
     static const ActuatorImplementationMetadata registeredImplementations[ImplementationCount] = {
@@ -14,6 +14,9 @@ const ActuatorImplementationMetadata* implementations() {
         {ActuatorImplementation::GpioOnOff, "gpio_on_off", "GPIO On/Off",
             ActuatorCapability::OnOff, HardwareInterfaceKind::GPIO,
             GpioCapability::DigitalOutput, "Digital output"},
+        {ActuatorImplementation::GpioPwm, "gpio_pwm", "GPIO PWM Level",
+            ActuatorCapability::Level, HardwareInterfaceKind::GPIO,
+            GpioCapability::DigitalOutput, "PWM output"},
     };
     return registeredImplementations;
 }

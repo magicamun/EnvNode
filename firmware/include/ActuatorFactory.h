@@ -5,6 +5,7 @@
 
 #include "ActuatorSlotConfiguration.h"
 #include "GpioOnOffActuator.h"
+#include "GpioPwmActuator.h"
 #include "Logger.h"
 
 namespace EnvNode {
@@ -20,6 +21,7 @@ enum class ActuatorFactoryResult : uint8_t {
 
 struct ActuatorFactoryInstance {
     IOnOffActuator* onOff = nullptr;
+    ILevelActuator* level = nullptr;
 };
 
 class ActuatorFactory {
@@ -34,7 +36,8 @@ public:
     void destroyAll();
 
 private:
-    using ActuatorStorage = typename std::aligned_union<0, GpioOnOffActuator>::type;
+    using ActuatorStorage = typename std::aligned_union<
+        0, GpioOnOffActuator, GpioPwmActuator>::type;
 
     void destroy(size_t storageIndex);
 

@@ -33,9 +33,16 @@ void appendJsonFloat(String& output, float value) {
 
 void appendCapabilities(String& output, ActuatorCapability capabilities) {
     output += '[';
+    bool appended = false;
     if (hasActuatorCapability(capabilities, ActuatorCapability::OnOff)) {
         appendJsonString(output,
             actuatorCapabilityStableName(ActuatorCapability::OnOff));
+        appended = true;
+    }
+    if (hasActuatorCapability(capabilities, ActuatorCapability::Level)) {
+        if (appended) output += ',';
+        appendJsonString(output,
+            actuatorCapabilityStableName(ActuatorCapability::Level));
     }
     output += ']';
 }

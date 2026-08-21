@@ -92,6 +92,11 @@ constexpr int HIGH = 1;
 void pinMode(unsigned char pin, int mode);
 void digitalWrite(unsigned char pin, int value);
 
+inline uint32_t ledcSetup(uint8_t, uint32_t frequency, uint8_t) { return frequency; }
+inline void ledcWrite(uint8_t, uint32_t) {}
+inline void ledcAttachPin(uint8_t, uint8_t) {}
+inline void ledcDetachPin(uint8_t) {}
+
 class HardwareSerial {
 public:
     void begin(unsigned long baud);

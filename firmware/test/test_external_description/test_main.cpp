@@ -74,6 +74,8 @@ void test_parameter_metadata_is_neutral_stable_and_typed() {
 void test_external_stable_names_and_mqtt_parameter_names_match() {
     TEST_ASSERT_EQUAL_STRING("on_off",
         actuatorCapabilityStableName(ActuatorCapability::OnOff));
+    TEST_ASSERT_EQUAL_STRING("level",
+        actuatorCapabilityStableName(ActuatorCapability::Level));
     TEST_ASSERT_EQUAL_STRING("START", controllerRuntimeCommandStableName(
         ControllerRuntimeCommand::Start));
     TEST_ASSERT_EQUAL_STRING("STOP", controllerRuntimeCommandStableName(
@@ -129,6 +131,19 @@ void test_actuator_description_is_configured_contract_only() {
     slot.implementation = ActuatorImplementation::None;
     TEST_ASSERT_FALSE(buildActuatorDescription(slot, payload));
     TEST_ASSERT_EQUAL_STRING("", payload.c_str());
+}
+
+void test_level_actuator_description_advertises_effective_capabilities() {
+    ActuatorSlotConfiguration slot;
+    slot.slotId = 2;
+    slot.enabled = true;
+    slot.name = "Variable output";
+    slot.implementation = ActuatorImplementation::GpioPwm;
+    slot.hardware = HardwareResourceAssignment::gpioResource(GpioResource(17));
+    String payload;
+    TEST_ASSERT_TRUE(buildActuatorDescription(slot, payload));
+    assertContains(payload, "\"implementation\":\"gpio_pwm\"");
+    assertContains(payload, "\"capabilities\":[\"on_off\",\"level\"]");
 }
 
 void test_blink_description_contains_target_commands_and_parameters() {
@@ -204,6 +219,7 @@ int main(int, char**) {
     RUN_TEST(test_external_stable_names_and_mqtt_parameter_names_match);
     RUN_TEST(test_json_string_escaping_handles_quotes_slashes_and_controls);
     RUN_TEST(test_actuator_description_is_configured_contract_only);
+    RUN_TEST(test_level_actuator_description_advertises_effective_capabilities);
     RUN_TEST(test_blink_description_contains_target_commands_and_parameters);
     RUN_TEST(test_threshold_description_uses_measurement_metadata_and_values);
     return UNITY_END();

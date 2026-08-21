@@ -439,6 +439,7 @@ void WebService::begin() {
     server_.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
     server_.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
     server_.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
+    server_.on("/actuators/level", HTTP_POST, [this]() { handleActuatorLevel(); });
     server_.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
     server_.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
     server_.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
@@ -772,6 +773,7 @@ void WebService::handleActuators() {
                 && String(runtime.name) == slot.name
                 && sameHardwareAssignment(runtime.hardware, slot.hardware)));
         IOnOffActuator* onOff = actuatorRuntime_.onOffActuator(slot.slotId);
+        ILevelActuator* level = actuatorRuntime_.levelActuator(slot.slotId);
 
         c += "<tr><td class='actuator-slot'>" + String(slot.slotId)
             + "</td><td class='actuator-name'>" + escapeHtml(slot.name)
@@ -794,12 +796,22 @@ void WebService::handleActuators() {
         else c += badge("Construction failed", "bad");
         c += "</td><td class='actuator-state'>";
         c += onOff == nullptr ? "—" : onOffStateName(onOff->state());
+        if (level != nullptr) {
+            c += "<span class='secondary'>Level "
+                + String(level->level().percent()) + " %</span>";
+        }
         c += "</td><td class='actuator-controls'>";
         if (onOff != nullptr) {
             c += "<div class='table-actions vertical'><form method='post' action='/actuators/on'><input type='hidden' name='slot' value='"
                 + String(slot.slotId) + "'><button type='submit'>On</button></form>"
                 + "<form method='post' action='/actuators/off'><input type='hidden' name='slot' value='"
                 + String(slot.slotId) + "'><button type='submit'>Off</button></form></div>";
+            if (level != nullptr) {
+                c += "<form method='post' action='/actuators/level'><input type='hidden' name='slot' value='"
+                    + String(slot.slotId) + "'><label class='secondary'>Level %<input type='number' name='level' min='0' max='100' required value='"
+                    + String(level->level().percent())
+                    + "'></label><button type='submit'>Set Level</button></form>";
+            }
         } else {
             c += "—";
         }
@@ -1138,8 +1150,10 @@ void WebService::handleActuatorEdit() {
             + hardwareInterfaceKindName(selected->interfaceKind) + " / "
             + escapeHtml(selected->protocolDescription)
             + "</span><span>Capability</span><span>"
-            + String(hasActuatorCapability(selected->capabilities, ActuatorCapability::OnOff)
-                ? "On/Off" : "None") + "</span></div></section>";
+            + String(hasActuatorCapability(selected->capabilities, ActuatorCapability::Level)
+                ? "On/Off, Level"
+                : hasActuatorCapability(selected->capabilities, ActuatorCapability::OnOff)
+                    ? "On/Off" : "None") + "</span></div></section>";
     }
     c += "<script>function actuatorFields(reset){const s=document.getElementById('actuatorImplementation');const o=s.options[s.selectedIndex];const p=document.getElementById('actuatorGpioConfiguration');p.style.display=o.dataset.interface==='GPIO'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}}document.getElementById('actuatorImplementation').addEventListener('change',()=>actuatorFields(true));actuatorFields(false);</script>";
     sendPage("Configure Actuator Slot", "/actuators", c);
@@ -1644,6 +1658,39 @@ void WebService::handleActuatorState(OnOffState state) {
     if (result != ActuatorOperationResult::Completed) {
         sendResult("Actuator command failed", "/actuators",
             actuatorOperationFailure(result), false);
+        return;
+    }
+    server_.sendHeader("Location", "/actuators", true);
+    server_.send(303, "text/plain", "See Other");
+}
+void WebService::handleActuatorLevel() {
+    const long requestedSlot = server_.arg("slot").toInt();
+    const String levelText = server_.arg("level");
+    char* levelEnd = nullptr;
+    const long requestedLevel = strtol(levelText.c_str(), &levelEnd, 10);
+    if (requestedSlot < 1
+        || requestedSlot > static_cast<long>(MaxActuatorSlotCount)
+        || levelText.isEmpty()
+        || levelEnd == levelText.c_str()
+        || *levelEnd != '\0'
+        || requestedLevel < ActuatorLevel::Minimum
+        || requestedLevel > ActuatorLevel::Maximum) {
+        sendResult("Actuator Level command failed", "/actuators",
+            "The requested Actuator Slot or Level is invalid.", false);
+        return;
+    }
+    ILevelActuator* actuator = actuatorRuntime_.levelActuator(
+        static_cast<ActuatorId>(requestedSlot));
+    if (actuator == nullptr) {
+        sendResult("Actuator Level command failed", "/actuators",
+            "No initialized Level-capable actuator is active for this Slot.", false);
+        return;
+    }
+    ActuatorLevel level = ActuatorLevel::off();
+    if (!ActuatorLevel::tryCreate(static_cast<uint8_t>(requestedLevel), level)
+        || actuator->setLevel(level) != ActuatorOperationResult::Completed) {
+        sendResult("Actuator Level command failed", "/actuators",
+            "The Level-capable actuator rejected the operation.", false);
         return;
     }
     server_.sendHeader("Location", "/actuators", true);

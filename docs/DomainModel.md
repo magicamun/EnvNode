@@ -69,14 +69,15 @@ Four concepts remain distinct:
 
 | Concept | Current example |
 |---|---|
-| Domain capability | `OnOff` |
-| Reusable implementation | `gpio_on_off` / `GpioOnOffActuator` |
+| Domain capability | `OnOff`, `Level` |
+| Reusable implementation | `gpio_on_off` / `GpioOnOffActuator`, `gpio_pwm` / `GpioPwmActuator` |
 | Configured instance | Actuator Slot N, identified by `ActuatorId` |
 | Physical resource | `HardwareResourceAssignment` to a GPIO |
 
-The currently implemented capability is `OnOff`, represented by `IOnOffActuator` and the states `On` and `Off`. A caller requiring this behavior depends on the capability, not on GPIO, `GpioOnOffActuator`, or a hardware assignment. Future hardware or protocol implementations may expose the same capability.
-
-Level/percentage control is an established future direction, not an implemented capability.
+`OnOff` is represented by `IOnOffActuator`. `Level` is a validated normalized 0–100 percentage
+represented by `ILevelActuator`; it is independent of PWM. Level centrally satisfies OnOff,
+mapping Off to 0 and On to 100 without previous-Level restoration. A caller depends on the
+capability, not on GPIO, PWM, a concrete Actuator, or a hardware assignment.
 
 ## Controller
 

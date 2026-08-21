@@ -26,6 +26,9 @@ private:
     bool known_[MaxActuatorSlotCount] = {};
     OnOffState states_[MaxActuatorSlotCount] = {};
     bool publicationFailureReported_[MaxActuatorSlotCount] = {};
+    bool levelKnown_[MaxActuatorSlotCount] = {};
+    ActuatorLevel levels_[MaxActuatorSlotCount] = {};
+    bool levelPublicationFailureReported_[MaxActuatorSlotCount] = {};
 };
 
 } // namespace EnvNode

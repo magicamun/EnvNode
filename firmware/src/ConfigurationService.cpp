@@ -310,7 +310,8 @@ void ConfigurationService::loadActuatorSlots() {
             ? static_cast<ActuatorImplementation>(255) : metadata->implementation;
         const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
             actuatorKey(expectedId, "gpio").c_str(), 0));
-        loaded[index].hardware = loaded[index].implementation == ActuatorImplementation::GpioOnOff
+        loaded[index].hardware = metadata != nullptr
+                && metadata->interfaceKind == HardwareInterfaceKind::GPIO
             ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
             : HardwareResourceAssignment::none();
     }

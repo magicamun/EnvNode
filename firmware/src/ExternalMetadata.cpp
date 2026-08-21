@@ -3,7 +3,11 @@
 namespace EnvNode {
 
 const char* actuatorCapabilityStableName(ActuatorCapability capability) {
-    return capability == ActuatorCapability::OnOff ? "on_off" : nullptr;
+    switch (capability) {
+        case ActuatorCapability::OnOff: return "on_off";
+        case ActuatorCapability::Level: return "level";
+        default: return nullptr;
+    }
 }
 
 const char* measurementSemanticsStableName(MeasurementSemantics semantics) {

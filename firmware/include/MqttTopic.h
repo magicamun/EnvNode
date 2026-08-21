@@ -21,8 +21,15 @@ String mqttMeasurementTopic(
 String mqttActuatorCommandSubscription(const String& deviceName);
 String mqttActuatorCommandTopic(const String& deviceName, ActuatorId id);
 String mqttActuatorStatusTopic(const String& deviceName, ActuatorId id);
+String mqttActuatorLevelCommandSubscription(const String& deviceName);
+String mqttActuatorLevelCommandTopic(const String& deviceName, ActuatorId id);
+String mqttActuatorLevelStatusTopic(const String& deviceName, ActuatorId id);
 String mqttActuatorDescriptionTopic(const String& deviceName, ActuatorId id);
 bool parseMqttActuatorCommandTopic(
+    const char* topic,
+    const String& deviceName,
+    ActuatorId& id);
+bool parseMqttActuatorLevelCommandTopic(
     const char* topic,
     const String& deviceName,
     ActuatorId& id);

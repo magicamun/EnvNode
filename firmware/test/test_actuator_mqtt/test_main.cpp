@@ -99,6 +99,13 @@ void configureSlot(ActuatorSlotConfiguration& slot, uint8_t gpio) {
     slot.hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
 }
 
+void configureLevelSlot(ActuatorSlotConfiguration& slot, uint8_t gpio) {
+    slot.enabled = true;
+    slot.name = "Level Test";
+    slot.implementation = ActuatorImplementation::GpioPwm;
+    slot.hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
+}
+
 struct Fixture {
     TestLogger logger;
     TestConfigurationService configuration;
@@ -135,12 +142,24 @@ void test_actuator_topics_generate_and_parse_slot_id() {
     TEST_ASSERT_EQUAL_STRING(
         "envnode/Weather_Station/actuator/2/status/on_off",
         mqttActuatorStatusTopic(device, 2).c_str());
+    TEST_ASSERT_EQUAL_STRING(
+        "envnode/Weather_Station/actuator/+/cmd/level",
+        mqttActuatorLevelCommandSubscription(device).c_str());
+    TEST_ASSERT_EQUAL_STRING(
+        "envnode/Weather_Station/actuator/2/cmd/level",
+        mqttActuatorLevelCommandTopic(device, 2).c_str());
+    TEST_ASSERT_EQUAL_STRING(
+        "envnode/Weather_Station/actuator/2/status/level",
+        mqttActuatorLevelStatusTopic(device, 2).c_str());
     ActuatorId id = InvalidActuatorId;
     TEST_ASSERT_TRUE(parseMqttActuatorCommandTopic(
         "envnode/Weather_Station/actuator/2/cmd/on_off", device, id));
     TEST_ASSERT_EQUAL_UINT16(2, id);
     TEST_ASSERT_FALSE(parseMqttActuatorCommandTopic(
         "envnode/Weather_Station/actuator/x/cmd/on_off", device, id));
+    TEST_ASSERT_TRUE(parseMqttActuatorLevelCommandTopic(
+        "envnode/Weather_Station/actuator/2/cmd/level", device, id));
+    TEST_ASSERT_EQUAL_UINT16(2, id);
 }
 
 void test_measurement_topics_cover_current_sensor_measurement_compositions() {
@@ -214,14 +233,73 @@ void test_subscription_is_restored_after_reconnect() {
     Fixture fixture;
     fixture.initialize();
     fixture.adapter.loop();
-    TEST_ASSERT_EQUAL_UINT32(1, fixture.mqtt.subscribeCount);
+    TEST_ASSERT_EQUAL_UINT32(2, fixture.mqtt.subscribeCount);
     fixture.adapter.loop();
-    TEST_ASSERT_EQUAL_UINT32(1, fixture.mqtt.subscribeCount);
+    TEST_ASSERT_EQUAL_UINT32(2, fixture.mqtt.subscribeCount);
     fixture.mqtt.isConnected = false;
     fixture.adapter.loop();
     fixture.mqtt.isConnected = true;
     fixture.adapter.loop();
-    TEST_ASSERT_EQUAL_UINT32(2, fixture.mqtt.subscribeCount);
+    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.subscribeCount);
+}
+
+void test_level_commands_are_validated_and_on_off_maps_to_boundaries() {
+    Fixture fixture;
+    configureLevelSlot(fixture.slots[0], 16);
+    fixture.initialize();
+    ILevelActuator* actuator = fixture.runtime.levelActuator(1);
+    TEST_ASSERT_NOT_NULL(actuator);
+
+    fixture.adapter.handleMqttMessage(
+        "envnode/Weather_Station/actuator/1/cmd/level",
+        reinterpret_cast<const uint8_t*>("37"), 2);
+    TEST_ASSERT_EQUAL_UINT8(37, actuator->level().percent());
+    fixture.adapter.handleMqttMessage(
+        "envnode/Weather_Station/actuator/1/cmd/level",
+        reinterpret_cast<const uint8_t*>("101"), 3);
+    TEST_ASSERT_EQUAL_UINT8(37, actuator->level().percent());
+    fixture.adapter.handleMqttMessage(
+        "envnode/Weather_Station/actuator/1/cmd/on_off",
+        reinterpret_cast<const uint8_t*>("OFF"), 3);
+    TEST_ASSERT_EQUAL_UINT8(0, actuator->level().percent());
+    fixture.adapter.handleMqttMessage(
+        "envnode/Weather_Station/actuator/1/cmd/on_off",
+        reinterpret_cast<const uint8_t*>("ON"), 2);
+    TEST_ASSERT_EQUAL_UINT8(100, actuator->level().percent());
+}
+
+void test_level_state_publishes_retained_level_and_derived_on_off() {
+    Fixture fixture;
+    configureLevelSlot(fixture.slots[0], 16);
+    fixture.initialize();
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(2, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_STRING("OFF", fixture.mqtt.messages[0].payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("0", fixture.mqtt.messages[1].payload.c_str());
+    TEST_ASSERT_TRUE(fixture.mqtt.messages[1].retained);
+
+    ActuatorLevel partial;
+    TEST_ASSERT_TRUE(ActuatorLevel::tryCreate(50, partial));
+    fixture.runtime.levelActuator(1)->setLevel(partial);
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_STRING("ON", fixture.mqtt.messages[2].payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("50", fixture.mqtt.messages[3].payload.c_str());
+
+    fixture.mqtt.isConnected = false;
+    fixture.publisher.loop();
+    fixture.mqtt.isConnected = true;
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(6, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_STRING("ON", fixture.mqtt.messages[4].payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("50", fixture.mqtt.messages[5].payload.c_str());
+
+    fixture.slots[0].enabled = false;
+    TEST_ASSERT_TRUE(fixture.runtime.rebuild(fixture.slots));
+    fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(8, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_STRING("", fixture.mqtt.messages[6].payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("", fixture.mqtt.messages[7].payload.c_str());
 }
 
 void test_status_is_retained_and_observes_non_mqtt_state_change() {
@@ -267,6 +345,8 @@ int main(int, char**) {
     RUN_TEST(test_commands_map_exact_payloads_to_correct_actuators);
     RUN_TEST(test_invalid_payload_and_actuator_id_are_rejected);
     RUN_TEST(test_subscription_is_restored_after_reconnect);
+    RUN_TEST(test_level_commands_are_validated_and_on_off_maps_to_boundaries);
+    RUN_TEST(test_level_state_publishes_retained_level_and_derived_on_off);
     RUN_TEST(test_status_is_retained_and_observes_non_mqtt_state_change);
     RUN_TEST(test_status_republishes_after_reconnect_and_clears_removed_slot);
     return UNITY_END();

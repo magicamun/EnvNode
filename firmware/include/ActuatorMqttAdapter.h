@@ -27,8 +27,10 @@ private:
     IConfigurationService& configurationService_;
     IMqttService& mqttService_;
     ActuatorRuntime& actuatorRuntime_;
-    bool subscribed_ = false;
-    bool subscriptionFailureReported_ = false;
+    bool onOffSubscribed_ = false;
+    bool levelSubscribed_ = false;
+    bool onOffSubscriptionFailureReported_ = false;
+    bool levelSubscriptionFailureReported_ = false;
 };
 
 } // namespace EnvNode

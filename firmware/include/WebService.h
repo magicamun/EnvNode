@@ -59,6 +59,7 @@ private:
     void handleActuatorOn();
     void handleActuatorOff();
     void handleActuatorState(OnOffState state);
+    void handleActuatorLevel();
     void handleControllerEdit();
     void handleControllerSave();
     void handleControllerApply();

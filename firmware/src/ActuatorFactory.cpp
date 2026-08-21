@@ -53,6 +53,11 @@ ActuatorFactoryInstance ActuatorFactory::create(
         case ActuatorImplementation::GpioOnOff:
             instance.onOff = new (target) GpioOnOffActuator(slot.hardware, logger_);
             break;
+        case ActuatorImplementation::GpioPwm:
+            instance.level = new (target) GpioPwmActuator(
+                slot.hardware, static_cast<uint8_t>(storageIndex), logger_);
+            instance.onOff = instance.level;
+            break;
         case ActuatorImplementation::None:
         default:
             result = ActuatorFactoryResult::UnknownImplementation;
@@ -68,6 +73,9 @@ void ActuatorFactory::destroy(size_t storageIndex) {
     if (constructed_[storageIndex] == ActuatorImplementation::GpioOnOff) {
         static_cast<GpioOnOffActuator*>(
             static_cast<void*>(&storage_[storageIndex]))->~GpioOnOffActuator();
+    } else if (constructed_[storageIndex] == ActuatorImplementation::GpioPwm) {
+        static_cast<GpioPwmActuator*>(
+            static_cast<void*>(&storage_[storageIndex]))->~GpioPwmActuator();
     }
     constructed_[storageIndex] = ActuatorImplementation::None;
 }
