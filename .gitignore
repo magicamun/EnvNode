@@ -21,3 +21,4 @@ hardware/kicad/*/Gerber/*
 
 __pycache__/
 
+hardware/~$*.xls*
