@@ -8,6 +8,18 @@ The first real-world use case is a hydrostatic cistern probe with a 4–20 mA ou
 
 The C++ structures shown here are pseudocode. Names and details may be adapted to existing EnvNode conventions during implementation, provided that the responsibility boundaries described here remain intact.
 
+## Current Implementation Status
+
+Analog-sensor support is implemented and tested in isolation, but not runtime-integrated.
+
+`IAnalogInput`, `AverageAnalogSampler`, two-point calibration, and `AnalogPressureSensor` are implemented and covered by native tests. `AnalogPressureSensor` contains the domain logic for hydrostatic pressure, optional water level, electrical validity boundaries, and the `below_measurement_range` quality classification.
+
+The sensor is not yet integrated into the running EnvNode firmware. No concrete `IAnalogInput` backend exists, the sensor is not registered in `SensorImplementationRegistry` or constructed by `SensorFactory`, and there is no persisted or web-based configuration for it. Consequently, no real analog pressure measurement is currently performed or published at runtime.
+
+ADS1115 integration is intentionally deferred because the required hardware and electrical design are not yet available. ESP32 ADC integration is also deferred until the intended ADC pin, electrical input circuit, voltage range, and validation setup have been decided.
+
+Tank-volume derivation remains future work.
+
 ## Motivation
 
 An analog measurement consists of several conceptually different steps:
