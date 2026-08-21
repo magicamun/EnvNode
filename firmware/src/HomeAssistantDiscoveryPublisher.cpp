@@ -70,17 +70,43 @@ bool hasMeasurementStateClass(MeasurementType type) {
         && measurementTypeMetadata(type).expectedValueKind == ValueKind::FloatingPoint;
 }
 
+enum ActuatorDiscoveryPlatform : uint8_t {
+    NoActuatorPlatform = 0,
+    SwitchActuatorPlatform = 1,
+    LightActuatorPlatform = 2,
+};
+
+uint8_t actuatorDiscoveryPlatform(ActuatorCapability capabilities) {
+    if (hasActuatorCapability(capabilities, ActuatorCapability::Level)) {
+        return LightActuatorPlatform;
+    }
+    if (hasActuatorCapability(capabilities, ActuatorCapability::OnOff)) {
+        return SwitchActuatorPlatform;
+    }
+    return NoActuatorPlatform;
+}
+
+const char* actuatorPlatformName(uint8_t platform) {
+    switch (platform) {
+        case SwitchActuatorPlatform: return "switch";
+        case LightActuatorPlatform: return "light";
+        default: return nullptr;
+    }
+}
+
 } // namespace
 
 HomeAssistantDiscoveryPublisher::HomeAssistantDiscoveryPublisher(
     ILogger& logger,
     IConfigurationService& configurationService,
     IMqttService& mqttService,
-    SensorManager& sensorManager)
+    SensorManager& sensorManager,
+    ActuatorRuntime& actuatorRuntime)
     : logger_(logger)
     , configurationService_(configurationService)
     , mqttService_(mqttService)
-    , sensorManager_(sensorManager) {
+    , sensorManager_(sensorManager)
+    , actuatorRuntime_(actuatorRuntime) {
 }
 
 String HomeAssistantDiscoveryPublisher::stableDeviceId() const {
@@ -95,8 +121,11 @@ String HomeAssistantDiscoveryPublisher::discoveryTopic() const {
     return "homeassistant/device/" + stableDeviceId() + "/config";
 }
 
-uint32_t HomeAssistantDiscoveryPublisher::discoverySignature(uint16_t* componentMasks) const {
-    for (size_t index = 0; index < MaxSensorCount; ++index) componentMasks[index] = 0;
+uint32_t HomeAssistantDiscoveryPublisher::discoverySignature(
+    uint16_t* sensorComponentMasks,
+    uint8_t* actuatorPlatforms) const {
+    for (size_t index = 0; index < MaxSensorCount; ++index) sensorComponentMasks[index] = 0;
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) actuatorPlatforms[index] = 0;
     uint32_t hash = 2166136261UL;
     const Configuration& configuration = configurationService_.getConfiguration();
     hashText(hash, configuration.device.name.c_str());
@@ -116,16 +145,31 @@ uint32_t HomeAssistantDiscoveryPublisher::discoverySignature(uint16_t* component
         for (MeasurementType type : DiscoverableMeasurementTypes) {
             if (!supports(info, type)) continue;
             const uint8_t bit = static_cast<uint8_t>(type) - 1;
-            componentMasks[info.id - 1] |= static_cast<uint16_t>(1U << bit);
+            sensorComponentMasks[info.id - 1] |= static_cast<uint16_t>(1U << bit);
             hashByte(hash, static_cast<uint8_t>(type));
         }
+    }
+    for (size_t index = 0; index < actuatorRuntime_.runtimeCount(); ++index) {
+        ActuatorRuntimeInfo info;
+        if (!actuatorRuntime_.runtimeInfo(index, info)
+            || !isValidActuatorId(info.id)
+            || info.id > MaxActuatorSlotCount) continue;
+        const uint8_t platform = actuatorDiscoveryPlatform(info.capabilities);
+        if (platform == NoActuatorPlatform) continue;
+        actuatorPlatforms[info.id - 1] = platform;
+        hashByte(hash, static_cast<uint8_t>(info.id & 0xFF));
+        hashByte(hash, static_cast<uint8_t>(info.id >> 8));
+        hashText(hash, info.name);
+        hashByte(hash, platform);
     }
     return hash;
 }
 
 String HomeAssistantDiscoveryPublisher::buildPayload(
-    const uint16_t* componentMasks,
-    const uint16_t* removalMasks,
+    const uint16_t* sensorComponentMasks,
+    const uint16_t* sensorRemovalMasks,
+    const uint8_t* actuatorPlatforms,
+    const uint8_t* actuatorRemovalPlatforms,
     size_t& entityCount) const {
     const Configuration& configuration = configurationService_.getConfiguration();
     const String deviceId = stableDeviceId();
@@ -161,9 +205,9 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
         for (MeasurementType type : DiscoverableMeasurementTypes) {
             const uint8_t bit = static_cast<uint8_t>(type) - 1;
             const uint16_t bitMask = static_cast<uint16_t>(1U << bit);
-            const bool current = (componentMasks[slotIndex] & bitMask) != 0;
-            const bool remove = removalMasks != nullptr
-                && (removalMasks[slotIndex] & bitMask) != 0;
+            const bool current = (sensorComponentMasks[slotIndex] & bitMask) != 0;
+            const bool remove = sensorRemovalMasks != nullptr
+                && (sensorRemovalMasks[slotIndex] & bitMask) != 0;
             if (!current && !remove) continue;
             const char* typeTopic = mqttMeasurementTypeTopic(type);
             if (typeTopic == nullptr) continue;
@@ -213,6 +257,67 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
             payload += '}';
         }
     }
+    for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
+        const uint8_t platform = actuatorPlatforms[slotIndex];
+        const uint8_t removalPlatform = actuatorRemovalPlatforms == nullptr
+            ? NoActuatorPlatform : actuatorRemovalPlatforms[slotIndex];
+        const uint8_t emittedPlatform = removalPlatform != NoActuatorPlatform
+            ? removalPlatform : platform;
+        const char* platformName = actuatorPlatformName(emittedPlatform);
+        if (platformName == nullptr) continue;
+
+        ActuatorRuntimeInfo runtime;
+        bool hasRuntime = false;
+        for (size_t runtimeIndex = 0;
+             runtimeIndex < actuatorRuntime_.runtimeCount();
+             ++runtimeIndex) {
+            ActuatorRuntimeInfo candidate;
+            if (actuatorRuntime_.runtimeInfo(runtimeIndex, candidate)
+                && candidate.id == slotIndex + 1) {
+                runtime = candidate;
+                hasRuntime = true;
+                break;
+            }
+        }
+
+        const String uniqueId = deviceId + "_actuator_" + String(slotIndex + 1);
+        if (!firstComponent) payload += ',';
+        firstComponent = false;
+        appendJsonString(payload, uniqueId.c_str());
+        payload += ":{\"p\":";
+        appendJsonString(payload, platformName);
+        if (platform == NoActuatorPlatform || removalPlatform != NoActuatorPlatform) {
+            payload += '}';
+            continue;
+        }
+
+        ++entityCount;
+        const ActuatorId id = static_cast<ActuatorId>(slotIndex + 1);
+        payload += ",\"en\":true,\"unique_id\":";
+        appendJsonString(payload, uniqueId.c_str());
+        payload += ",\"name\":";
+        appendJsonString(payload, hasRuntime ? runtime.name : "Actuator");
+        payload += ",\"command_topic\":";
+        const String commandTopic = mqttActuatorCommandTopic(configuration.device.name, id);
+        appendJsonString(payload, commandTopic.c_str());
+        payload += ",\"state_topic\":";
+        const String statusTopic = mqttActuatorStatusTopic(configuration.device.name, id);
+        appendJsonString(payload, statusTopic.c_str());
+        payload += ",\"payload_on\":\"ON\",\"payload_off\":\"OFF\"";
+        if (platform == LightActuatorPlatform) {
+            payload += ",\"on_command_type\":\"first\"";
+            payload += ",\"brightness_command_topic\":";
+            const String levelCommandTopic = mqttActuatorLevelCommandTopic(
+                configuration.device.name, id);
+            appendJsonString(payload, levelCommandTopic.c_str());
+            payload += ",\"brightness_state_topic\":";
+            const String levelStatusTopic = mqttActuatorLevelStatusTopic(
+                configuration.device.name, id);
+            appendJsonString(payload, levelStatusTopic.c_str());
+            payload += ",\"brightness_scale\":100";
+        }
+        payload += '}';
+    }
     payload += "}}";
     return payload;
 }
@@ -222,24 +327,41 @@ bool HomeAssistantDiscoveryPublisher::publishPayload(const String& payload) {
 }
 
 bool HomeAssistantDiscoveryPublisher::publishDiscovery(
-    const uint16_t* componentMasks,
+    const uint16_t* sensorComponentMasks,
+    const uint8_t* actuatorPlatforms,
     bool logPublication) {
-    uint16_t removals[MaxSensorCount];
+    uint16_t sensorRemovals[MaxSensorCount];
+    uint8_t actuatorRemovals[MaxActuatorSlotCount];
     bool hasRemovals = false;
     for (size_t index = 0; index < MaxSensorCount; ++index) {
-        removals[index] = publishedComponentMasks_[index] & ~componentMasks[index];
-        hasRemovals = hasRemovals || removals[index] != 0;
+        sensorRemovals[index] = publishedComponentMasks_[index] & ~sensorComponentMasks[index];
+        hasRemovals = hasRemovals || sensorRemovals[index] != 0;
+    }
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        actuatorRemovals[index] = publishedActuatorPlatforms_[index] != NoActuatorPlatform
+                && publishedActuatorPlatforms_[index] != actuatorPlatforms[index]
+            ? publishedActuatorPlatforms_[index] : NoActuatorPlatform;
+        hasRemovals = hasRemovals || actuatorRemovals[index] != NoActuatorPlatform;
     }
     if (hasRemovals) {
         size_t updateEntityCount = 0;
-        const String removalPayload = buildPayload(componentMasks, removals, updateEntityCount);
+        const String removalPayload = buildPayload(
+            sensorComponentMasks,
+            sensorRemovals,
+            actuatorPlatforms,
+            actuatorRemovals,
+            updateEntityCount);
         if (!publishPayload(removalPayload)) return false;
     }
     size_t entityCount = 0;
-    const String payload = buildPayload(componentMasks, nullptr, entityCount);
+    const String payload = buildPayload(
+        sensorComponentMasks, nullptr, actuatorPlatforms, nullptr, entityCount);
     if (!publishPayload(payload)) return false;
     for (size_t index = 0; index < MaxSensorCount; ++index) {
-        publishedComponentMasks_[index] = componentMasks[index];
+        publishedComponentMasks_[index] = sensorComponentMasks[index];
+    }
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        publishedActuatorPlatforms_[index] = actuatorPlatforms[index];
     }
     lastPayloadSize_ = payload.length();
     lastEntityCount_ = entityCount;
@@ -253,13 +375,14 @@ bool HomeAssistantDiscoveryPublisher::publishDiscovery(
 DiscoveryRepublishResult HomeAssistantDiscoveryPublisher::republish() {
     if (!mqttService_.connected()) return DiscoveryRepublishResult::MqttUnavailable;
 
-    uint16_t componentMasks[MaxSensorCount];
-    const uint32_t signature = discoverySignature(componentMasks);
+    uint16_t sensorComponentMasks[MaxSensorCount];
+    uint8_t actuatorPlatforms[MaxActuatorSlotCount];
+    const uint32_t signature = discoverySignature(sensorComponentMasks, actuatorPlatforms);
     if (!clearedAfterBoot_) {
         if (!publishPayload(String())) return DiscoveryRepublishResult::PublishFailed;
         clearedAfterBoot_ = true;
     }
-    if (!publishDiscovery(componentMasks, false)) {
+    if (!publishDiscovery(sensorComponentMasks, actuatorPlatforms, false)) {
         return DiscoveryRepublishResult::PublishFailed;
     }
     publishedSignature_ = signature;
@@ -277,8 +400,9 @@ void HomeAssistantDiscoveryPublisher::loop() {
     }
     const bool connectionEstablished = !wasConnected_;
     wasConnected_ = true;
-    uint16_t componentMasks[MaxSensorCount];
-    const uint32_t signature = discoverySignature(componentMasks);
+    uint16_t sensorComponentMasks[MaxSensorCount];
+    uint8_t actuatorPlatforms[MaxActuatorSlotCount];
+    const uint32_t signature = discoverySignature(sensorComponentMasks, actuatorPlatforms);
     if (!connectionEstablished && signature == publishedSignature_) return;
     const uint32_t nowMs = millis();
     if (!connectionEstablished
@@ -295,7 +419,7 @@ void HomeAssistantDiscoveryPublisher::loop() {
         }
         clearedAfterBoot_ = true;
     }
-    if (!publishDiscovery(componentMasks)) {
+    if (!publishDiscovery(sensorComponentMasks, actuatorPlatforms)) {
         if (!publicationFailureReported_) {
             logger_.warn("Discovery publication failed; retry pending");
             publicationFailureReported_ = true;
@@ -307,7 +431,7 @@ void HomeAssistantDiscoveryPublisher::loop() {
         publicationFailureReported_ = false;
     }
     if (publishedSignature_ != 0 && signature != publishedSignature_) {
-        logger_.info("Discovery updated after Sensor composition change");
+        logger_.info("Discovery updated after runtime composition change");
     }
     publishedSignature_ = signature;
 }

@@ -87,7 +87,8 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     logger,
     configurationService,
     mqttService,
-    sensorManager);
+    sensorManager,
+    actuatorRuntime);
 static OTAService otaService(logger, runtimeManager);
 static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);

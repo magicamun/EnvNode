@@ -105,3 +105,12 @@ public:
 };
 
 extern HardwareSerial Serial;
+
+class EspClass {
+public:
+    uint64_t getEfuseMac() const { return 0x001122334455ULL; }
+};
+
+static EspClass ESP;
+
+inline uint32_t millis() { return 0; }
