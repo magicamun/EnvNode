@@ -529,7 +529,7 @@
 				)
 			)
 		)
-		(property "Value" "LT1963AxST-3.3"
+		(property "Value" "LM3940IMP-3.3/NOPB"
 			(at 0 4.5 90)
 			(layer "F.Fab")
 			(uuid "848010d4-b7ed-4155-b5c1-228345d3f6e1")
