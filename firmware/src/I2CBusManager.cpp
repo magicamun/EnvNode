@@ -34,4 +34,36 @@ bool I2CBusManager::available(I2CBus bus) const {
     return index < 2 && initialized_[index];
 }
 
+void I2CBusManager::scan(I2CBus bus, I2CScanResult& result) {
+    result = I2CScanResult(bus);
+    TwoWire* instance = wire(bus);
+    if (instance == nullptr) {
+        logger_.warnf("%s scan unavailable: bus is not initialized", i2cBusName(bus));
+        return;
+    }
+
+    for (uint8_t address = 0x08; address <= 0x77; ++address) {
+        instance->beginTransmission(address);
+        const uint8_t probeResult = instance->endTransmission();
+        if (probeResult == 0) {
+            result.addresses[result.addressCount++] = address;
+        } else if (probeResult != 2 && probeResult != 3) {
+            ++result.probeErrorCount;
+        }
+    }
+
+    result.status = result.probeErrorCount == 0
+        ? I2CScanStatus::Complete
+        : I2CScanStatus::CompleteWithProbeErrors;
+    if (result.probeErrorCount == 0) {
+        logger_.infof("%s scan complete: %u devices", i2cBusName(bus),
+            static_cast<unsigned int>(result.addressCount));
+    } else {
+        logger_.warnf("%s scan complete: %u devices, %u probe errors",
+            i2cBusName(bus),
+            static_cast<unsigned int>(result.addressCount),
+            static_cast<unsigned int>(result.probeErrorCount));
+    }
+}
+
 } // namespace EnvNode

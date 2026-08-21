@@ -18,6 +18,7 @@
 #include "IDiscoveryPublisher.h"
 #include "ControllerRuntime.h"
 #include "IRecentLogReader.h"
+#include "I2CBusManager.h"
 
 namespace EnvNode {
 
@@ -37,7 +38,8 @@ public:
         const IRecentLogReader& logReader,
         IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
-        OTAService& otaService);
+        OTAService& otaService,
+        I2CBusManager& i2cBusManager);
 
     void begin() override;
     void loop() override;
@@ -69,6 +71,7 @@ private:
     void handleUnits();
     void handleDevice();
     void handleDiagnostics();
+    void handleI2CScan();
     void handleLogs();
     void handleLogData();
     void handleFirmware();
@@ -102,6 +105,7 @@ private:
     const char* pendingActionMessage() const;
     void performExplicitRestart();
     bool administrationAvailable() const;
+    void renderDiagnostics(bool scanI2CBuses);
 
     ILogger& logger_;
     IConfigurationService& configurationService_;
@@ -117,6 +121,7 @@ private:
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;
+    I2CBusManager& i2cBusManager_;
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

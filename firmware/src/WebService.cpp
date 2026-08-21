@@ -391,14 +391,16 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     ControllerRuntime& controllerRuntime,
     MeasurementSnapshotCache& measurementSnapshotCache,
     const IRecentLogReader& logReader,
-    IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService)
+    IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService,
+    I2CBusManager& i2cBusManager)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
       controllerRuntime_(controllerRuntime),
       measurementSnapshotCache_(measurementSnapshotCache),
       logReader_(logReader),
-      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService) {}
+      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
+      i2cBusManager_(i2cBusManager) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -416,6 +418,7 @@ void WebService::begin() {
     server_.on("/units", HTTP_GET, [this]() { handleUnits(); });
     server_.on("/device", HTTP_GET, [this]() { handleDevice(); });
     server_.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
+    server_.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
     server_.on("/logs", HTTP_GET, [this]() { handleLogs(); });
     server_.on("/logs/data", HTTP_GET, [this]() { handleLogData(); });
     server_.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
@@ -1295,10 +1298,60 @@ void WebService::handleControllerEdit() {
 }
 
 void WebService::handleDiagnostics() {
+    renderDiagnostics(false);
+}
+
+void WebService::handleI2CScan() {
+    logger_.info("I2C scan started");
+    renderDiagnostics(true);
+    logger_.info("I2C scan complete");
+}
+
+void WebService::renderDiagnostics(bool scanI2CBuses) {
     String c;
     const BoardProfile& board = currentBoardProfile();
-    c.reserve(1100 + sensorManager_.sensorCount() * 450);
+    c.reserve(1800 + sensorManager_.sensorCount() * 450);
     c = "<div class='grid'><section class='card'><h2>System</h2><div class='kv'><span>Uptime</span><span>"+localeFormatter_.formatNumber(millis()/1000UL,0)+" s</span><span>Free heap</span><span>"+localeFormatter_.formatNumber(ESP.getFreeHeap(),0)+" bytes</span></div></section><section class='card'><h2>Hardware</h2><div class='kv'><span>Board</span><span>" + escapeHtml(board.displayName) + "</span><span>Board revision</span><span>" + String(board.revision.major) + "." + String(board.revision.minor) + "</span><span>MCU</span><span>" + escapeHtml(ESP.getChipModel()) + "</span><span>CPU frequency</span><span>" + localeFormatter_.formatNumber(ESP.getCpuFreqMHz(), 0) + " MHz</span><span>Flash size</span><span>"+localeFormatter_.formatNumber(ESP.getFlashChipSize(),0)+" bytes</span></div></section><section class='card'><h2>Services</h2><div class='kv'><span>WiFi</span><span>"+(wifiService_.connected()?"Connected":"Disconnected")+"</span><span>MQTT</span><span>"+(mqttService_.connected()?"Connected":"Disconnected")+"</span><span>Time</span><span>"+(timeService_.synchronized()?"Synchronized":"Pending")+"</span></div></section></div>";
+    c += "<section class='card'><h2>I²C Diagnostics</h2>";
+    if (board.i2cBusCount == 0) {
+        c += "<p>No I²C buses available on this board.</p>";
+    } else {
+        c += "<p class='help'>An explicit scan probes normal 7-bit addresses for acknowledgement without identifying or configuring devices.</p>";
+        for (size_t index = 0; index < board.i2cBusCount; ++index) {
+            const BoardI2CBusCapability& bus = board.i2cBuses[index];
+            c += "<h3>" + String(i2cBusName(bus.bus)) + "</h3><p class='secondary'>SDA GPIO"
+                + String(bus.sda.number) + " · SCL GPIO" + String(bus.scl.number) + "</p>";
+            if (!scanI2CBuses) {
+                c += "<p>Not scanned.</p>";
+                continue;
+            }
+            I2CScanResult result(bus.bus);
+            i2cBusManager_.scan(bus.bus, result);
+            if (result.status == I2CScanStatus::BusUnavailable) {
+                c += "<div class='notice error'>Bus is not initialized.</div>";
+                continue;
+            }
+            if (result.addressCount == 0) {
+                c += "<p>No devices detected.</p>";
+            } else {
+                c += "<p><strong>Detected addresses</strong><br>";
+                for (size_t addressIndex = 0; addressIndex < result.addressCount; ++addressIndex) {
+                    char addressText[5];
+                    snprintf(addressText, sizeof(addressText), "0x%02X", result.addresses[addressIndex]);
+                    if (addressIndex != 0) c += " · ";
+                    c += "<code>" + String(addressText) + "</code>";
+                }
+                c += "</p>";
+            }
+            if (result.status == I2CScanStatus::CompleteWithProbeErrors) {
+                c += "<div class='notice error'>The scan encountered "
+                    + localeFormatter_.formatNumber(result.probeErrorCount, 0)
+                    + " bus probe errors. See logs.</div>";
+            }
+        }
+        c += "<form method='post' action='/diagnostics/i2c/scan'><button type='submit'>Scan I²C buses</button></form>";
+    }
+    c += "</section>";
     for(size_t index=0;index<sensorManager_.sensorCount();++index){SensorRuntimeInfo i; if(!sensorManager_.runtimeInfo(index,i))continue;SensorRuntimeStatus s;sensorManager_.runtimeStatus(i.id,s);c+="<section class='card'><h2>Sensor "+localeFormatter_.formatNumber(i.id,0)+" · "+escapeHtml(i.name)+"</h2><div class='kv'><span>Type</span><span>"+escapeHtml(i.type)+"</span><span>State</span><span>"+sensorStateName(i.state)+"</span><span>Accepted</span><span>"+localeFormatter_.formatNumber(s.acceptedMeasurementCount,0)+"</span><span>Rejected</span><span>"+localeFormatter_.formatNumber(s.rejectedMeasurementCount,0)+"</span><span>Pre-sync discarded</span><span>"+localeFormatter_.formatNumber(s.preSyncDiscardCount,0)+"</span><span>Last sample emissions</span><span>"+localeFormatter_.formatNumber(s.lastSampleEmissionCount,0)+"</span></div></section>";}
     sendPage("Diagnostics", "/diagnostics", c);
 }

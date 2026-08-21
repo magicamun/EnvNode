@@ -178,8 +178,17 @@ are therefore never offered as generic GPIO resources.
 Future EnvNode 868 and EnvNode Nano builds can provide different immutable profiles without
 changing hardware consumers. Profile selection is build-time-only today; a future hardware
 identity source such as ID pins or EEPROM may select the same typed profile API without
-affecting consumers. Runtime selection, automatic detection, SPI definitions and I²C scanning
-are intentionally outside the current architecture step.
+affecting consumers. Runtime selection, automatic detection and SPI definitions remain
+outside the current architecture.
+
+`I2CBusManager` owns initialization and access to the physical `TwoWire` instances described
+by the active profile. Its explicit diagnostic scan probes only normal usable 7-bit addresses
+for acknowledgement on already-initialized buses. The Web Diagnostics page enumerates bus
+identity and SDA/SCL metadata from `BoardProfile`, invokes scans through `I2CBusManager`, and
+reports observed addresses without guessing device identity. Scanning is user-triggered,
+non-persistent and does not rebuild or pause Sensor runtime composition. Sensor servicing and
+Web request handling are serialized by the cooperative application loop, so their I²C
+transactions cannot overlap in the current execution model.
 
 Sensor administration is available through the Web Sensors page. A successful edit stores
 the desired Slot configuration and requests `RestartSensorManager`; it does not activate the
