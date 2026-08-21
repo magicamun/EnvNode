@@ -48,6 +48,8 @@ const char* mqttMeasurementTypeTopic(MeasurementType type) {
         case MeasurementType::RainDetectorWet: return "rain_detector_wet";
         case MeasurementType::RainGaugeTip: return "rain_gauge_tip";
         case MeasurementType::RainfallIncrement: return "rainfall_increment";
+        case MeasurementType::HydrostaticPressure: return "hydrostatic_pressure";
+        case MeasurementType::WaterLevel: return "water_level";
         case MeasurementType::Unknown:
         default: return nullptr;
     }

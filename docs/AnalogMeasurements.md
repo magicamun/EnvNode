@@ -442,22 +442,22 @@ Only a second real analog sensor type should determine which parts truly need to
 
 ## Open Design Questions
 
-The following points must be decided before or during the first implementation, based on existing EnvNode conventions:
+The first `AnalogPressureSensor` implementation resolves several V1 decisions:
 
-1. **Scheduling and ownership:** Which existing component schedules sampling, filter windows, and measurement creation? Does the sensor own the input and filter, or receive references to managed components?
-2. **Filter windows:** Are windows time-based or sample-count-based? How are delayed samples and scheduler jitter handled?
-3. **Minimum sample count:** When is a filtered value valid if individual ADC reads fail?
-4. **Value age:** How old may a filter result be when a measurement is produced?
-5. **Calibration boundary behavior:** Within `validInputMin/Max` but outside the calibration reference points, is the result extrapolated, clamped, or assigned an additional quality?
-6. **Values below the measurement range:** Does `below_measurement_range` carry the calibrated value, a boundary value, or an additional uncertainty? The calibrated value is generally more useful for diagnostics than forcibly replacing it with zero.
-7. **Quality model:** Which quality codes already exist in EnvNode, and how should `input_error`, `invalid_input`, `below_measurement_range`, and `source_invalid` map to them?
-8. **Multiple measurements:** How does one sensor atomically produce `pressure` and `water_level` with the same timestamp and source reading?
-9. **Units:** Does the internal API use fixed SI units or typed units? Configuration values must identify their units unambiguously.
-10. **Hydrostatic conversion:** Is it configured directly or modeled as a small converter between `pressure` and `water_level`?
-11. **Derived measurements:** Is there an existing dependency or transformation mechanism into which tank volume should be integrated?
-12. **Tank characteristic curve:** Which interpolation method and out-of-range behavior should a future `height -> volume` curve use?
-13. **Diagnostic data:** Should raw voltage, sample count, and rejected samples optionally be visible as diagnostics without becoming regular measurements?
-14. **Configuration validation:** When and how are contradictory boundaries, invalid intervals, and implausible calibration points reported?
+- `AverageAnalogSampler` owns time-based acquisition windows and is serviced through the sensor's fast `service()` path.
+- A completed window with too few valid samples produces invalid, degraded domain measurements but is still a completed sensor operation.
+- Electrically valid inputs are linearly extrapolated outside the calibration reference points without clamping.
+- Values below the reliable pressure boundary retain their calibrated value and use `below_measurement_range` quality.
+- Each scheduled domain `sample()` publishes the latest completed window, allowing the measurement interval to remain slower than the filter interval.
+- Optional water level is calculated directly by `AnalogPressureSensor`; tank volume remains a separate future derived measurement.
+
+The remaining questions are deliberately outside this implementation:
+
+1. **Value age:** Whether a maximum age should be imposed on the latest completed filter window.
+2. **Derived measurements:** Which future dependency or transformation mechanism should own tank volume.
+3. **Tank characteristic curve:** Which interpolation method and out-of-range behavior a future `height -> volume` curve should use.
+4. **Diagnostic data:** Whether raw voltage, sample count, and rejected samples should be exposed as diagnostics.
+5. **Configuration integration:** How configuration errors should be reported when this sensor is later added to persistence, factories, and the web UI.
 
 ## Concrete Next Implementation Steps
 

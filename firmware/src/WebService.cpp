@@ -213,6 +213,8 @@ String measurementTypes(const SensorRuntimeInfo& info) {
     appendType(info.supportsRainDetectorWet, MeasurementType::RainDetectorWet);
     appendType(info.supportsRainGaugeTip, MeasurementType::RainGaugeTip);
     appendType(info.supportsRainfallIncrement, MeasurementType::RainfallIncrement);
+    appendType(info.supportsHydrostaticPressure, MeasurementType::HydrostaticPressure);
+    appendType(info.supportsWaterLevel, MeasurementType::WaterLevel);
     if (result.endsWith(", ")) result.remove(result.length() - 2);
     return result;
 }
@@ -318,17 +320,14 @@ bool runtimeSupportsMeasurement(const SensorRuntimeInfo& info, MeasurementType t
         case MeasurementType::RainDetectorWet: return info.supportsRainDetectorWet;
         case MeasurementType::RainGaugeTip: return info.supportsRainGaugeTip;
         case MeasurementType::RainfallIncrement: return info.supportsRainfallIncrement;
+        case MeasurementType::HydrostaticPressure: return info.supportsHydrostaticPressure;
+        case MeasurementType::WaterLevel: return info.supportsWaterLevel;
         default: return false;
     }
 }
 
 const char* measurementQualityName(MeasurementQuality quality) {
-    switch (quality) {
-        case MeasurementQuality::Good: return "Good";
-        case MeasurementQuality::Estimated: return "Estimated";
-        case MeasurementQuality::Degraded: return "Degraded";
-        default: return "—";
-    }
+    return measurementQualityDisplayName(quality);
 }
 
 String presentedMeasurementValue(

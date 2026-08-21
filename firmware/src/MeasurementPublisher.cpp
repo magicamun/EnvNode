@@ -56,16 +56,7 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
 }
 
 const char* MeasurementPublisher::qualityName(MeasurementQuality quality) {
-    switch (quality) {
-        case MeasurementQuality::Good:
-            return "good";
-        case MeasurementQuality::Estimated:
-            return "estimated";
-        case MeasurementQuality::Degraded:
-            return "degraded";
-        default:
-            return "degraded";
-    }
+    return measurementQualityStableId(quality);
 }
 
 String MeasurementPublisher::serializePayload(

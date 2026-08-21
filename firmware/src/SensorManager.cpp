@@ -182,6 +182,8 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     info.supportsRainDetectorWet = entry.sensor->supports(MeasurementType::RainDetectorWet);
     info.supportsRainGaugeTip = entry.sensor->supports(MeasurementType::RainGaugeTip);
     info.supportsRainfallIncrement = entry.sensor->supports(MeasurementType::RainfallIncrement);
+    info.supportsHydrostaticPressure = entry.sensor->supports(MeasurementType::HydrostaticPressure);
+    info.supportsWaterLevel = entry.sensor->supports(MeasurementType::WaterLevel);
     return true;
 }
 

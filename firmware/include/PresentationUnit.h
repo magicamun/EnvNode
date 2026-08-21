@@ -16,6 +16,8 @@ enum class PresentationUnit : uint8_t {
     WattPerSquareMetre = 8,
     Ratio = 9,
     Millimeter = 10,
+    Metre = 11,
+    Centimetre = 12,
 };
 
 } // namespace EnvNode

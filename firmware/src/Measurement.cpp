@@ -17,6 +17,16 @@ const PresentationUnit PressureUnits[] = {
     PresentationUnit::Kilopascal,
     PresentationUnit::InchMercury,
 };
+const PresentationUnit HydrostaticPressureUnits[] = {
+    PresentationUnit::Pascal,
+    PresentationUnit::Hectopascal,
+    PresentationUnit::Kilopascal,
+};
+const PresentationUnit WaterLevelUnits[] = {
+    PresentationUnit::Metre,
+    PresentationUnit::Centimetre,
+    PresentationUnit::Millimeter,
+};
 const PresentationUnit IrradianceUnits[] = {PresentationUnit::WattPerSquareMetre};
 const PresentationUnit RainLevelUnits[] = {
     PresentationUnit::Ratio,
@@ -59,6 +69,12 @@ const MeasurementTypeMetadata MeasurementMetadata[] = {
     {MeasurementType::RainfallIncrement, "rainfall_increment", "Rainfall Increment", ValueKind::FloatingPoint,
         PresentationUnit::Millimeter, 3, MeasurementSemantics::Event,
         RainfallIncrementUnits, unitCount(RainfallIncrementUnits), PresentationUnit::Millimeter},
+    {MeasurementType::HydrostaticPressure, "hydrostatic_pressure", "Hydrostatic Pressure", ValueKind::FloatingPoint,
+        PresentationUnit::Pascal, 1, MeasurementSemantics::State,
+        HydrostaticPressureUnits, unitCount(HydrostaticPressureUnits), PresentationUnit::Pascal},
+    {MeasurementType::WaterLevel, "water_level", "Water Level", ValueKind::FloatingPoint,
+        PresentationUnit::Metre, 3, MeasurementSemantics::State,
+        WaterLevelUnits, unitCount(WaterLevelUnits), PresentationUnit::Metre},
 };
 
 constexpr size_t MeasurementMetadataCount =
