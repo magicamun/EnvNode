@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "MeasurementType.h"
+#include "SensorId.h"
 #include "ActuatorId.h"
 #include "ControllerId.h"
 #include "ControllerParameterMetadata.h"
@@ -13,6 +14,10 @@ const char* mqttTopicRoot();
 String mqttTopicSafeDeviceName(const String& deviceName);
 String mqttDeviceTopicRoot(const String& deviceName);
 const char* mqttMeasurementTypeTopic(MeasurementType type);
+String mqttMeasurementTopic(
+    const String& deviceName,
+    SensorId sensorId,
+    MeasurementType type);
 String mqttActuatorCommandSubscription(const String& deviceName);
 String mqttActuatorCommandTopic(const String& deviceName, ActuatorId id);
 String mqttActuatorStatusTopic(const String& deviceName, ActuatorId id);

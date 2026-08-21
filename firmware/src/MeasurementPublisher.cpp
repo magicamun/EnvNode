@@ -23,14 +23,10 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
         return;
     }
 
-    const char* typeTopic = mqttMeasurementTypeTopic(measurement.type);
-    if (typeTopic == nullptr) {
-        return;
-    }
-
     const Configuration& configuration = configurationService_.getConfiguration();
-    const String topic = mqttDeviceTopicRoot(configuration.device.name) + "/sensor/"
-        + String(static_cast<unsigned int>(measurement.source)) + "/" + typeTopic;
+    const String topic = mqttMeasurementTopic(
+        configuration.device.name, measurement.source, measurement.type);
+    if (topic.isEmpty()) return;
     const String timestamp = timeService_.iso8601Local(measurement.timestamp);
     const MeasurementTypeMetadata& metadata = measurementTypeMetadata(measurement.type);
     PresentationUnit presentationUnit = configuration.presentationUnitFor(measurement.type);

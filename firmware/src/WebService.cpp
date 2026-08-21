@@ -2,6 +2,7 @@
 #include "HtmlEscaping.h"
 #include "LogWebView.h"
 #include "WebNavigation.h"
+#include "MqttTopic.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -28,6 +29,8 @@ const char SharedStyle[] PROGMEM = R"CSS(
 .log-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.log-summary .help{margin-bottom:0}.log-table{min-width:620px;table-layout:fixed}.log-table .log-seq{width:84px;white-space:nowrap;overflow-wrap:normal}.log-table .log-time{width:190px;white-space:nowrap;overflow-wrap:normal}.log-table .log-level-cell{width:86px;white-space:nowrap;overflow-wrap:normal}.log-table .log-message{white-space:normal;overflow-wrap:anywhere}.log-level.debug{color:var(--muted)}.log-level.info{color:var(--brand)}@media(max-width:480px){.log-summary{display:block}.log-summary .button{display:inline-block;margin-top:10px}}
 )CSS" R"CSS(
 .log-refresh-controls{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}.log-refresh-controls .choice{margin:0}.log-refresh-controls .help{white-space:nowrap}@media(max-width:480px){.log-refresh-controls{justify-content:flex-start;margin-top:12px}}
+)CSS" R"CSS(
+.measurement-topic{font-size:12px;white-space:normal;overflow-wrap:anywhere;user-select:text}
 )CSS";
 
 struct TimezoneOption { const char* label; const char* value; };
@@ -979,6 +982,11 @@ void WebService::handleMeasurements() {
             const bool hasSnapshot = measurementSnapshotCache_.snapshot(runtime.id, type, snapshot);
             content += "<tr><td class='measurement-name'>";
             content += measurementTypeMetadata(type).displayName;
+            const String mqttTopic = mqttMeasurementTopic(
+                configuration.device.name, runtime.id, type);
+            content += "<span class='secondary'>MQTT: <code class='measurement-topic'>";
+            content += mqttTopic.isEmpty() ? "—" : escapeHtml(mqttTopic);
+            content += "</code></span>";
             content += "</td><td class='measurement-value'>";
             content += hasSnapshot
                 ? presentedMeasurementValue(snapshot.measurement, configuration, localeFormatter_)

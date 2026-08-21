@@ -53,6 +53,16 @@ const char* mqttMeasurementTypeTopic(MeasurementType type) {
     }
 }
 
+String mqttMeasurementTopic(
+    const String& deviceName,
+    SensorId sensorId,
+    MeasurementType type) {
+    const char* typeTopic = mqttMeasurementTypeTopic(type);
+    if (!isValidSensorId(sensorId) || typeTopic == nullptr) return String();
+    return mqttDeviceTopicRoot(deviceName) + "/sensor/"
+        + String(static_cast<unsigned int>(sensorId)) + "/" + typeTopic;
+}
+
 String mqttActuatorCommandSubscription(const String& deviceName) {
     return mqttDeviceTopicRoot(deviceName) + "/actuator/+/cmd/on_off";
 }

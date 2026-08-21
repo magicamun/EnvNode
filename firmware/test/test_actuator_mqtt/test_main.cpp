@@ -143,6 +143,38 @@ void test_actuator_topics_generate_and_parse_slot_id() {
         "envnode/Weather_Station/actuator/x/cmd/on_off", device, id));
 }
 
+void test_measurement_topics_cover_current_sensor_measurement_compositions() {
+    const String device("Weather Station");
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/1/temperature",
+        mqttMeasurementTopic(device, 1, MeasurementType::Temperature).c_str());
+
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/2/temperature",
+        mqttMeasurementTopic(device, 2, MeasurementType::Temperature).c_str());
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/2/relative_humidity",
+        mqttMeasurementTopic(device, 2, MeasurementType::RelativeHumidity).c_str());
+
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/3/temperature",
+        mqttMeasurementTopic(device, 3, MeasurementType::Temperature).c_str());
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/3/relative_humidity",
+        mqttMeasurementTopic(device, 3, MeasurementType::RelativeHumidity).c_str());
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/3/atmospheric_pressure",
+        mqttMeasurementTopic(device, 3, MeasurementType::AtmosphericPressure).c_str());
+
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/4/temperature",
+        mqttMeasurementTopic(device, 4, MeasurementType::Temperature).c_str());
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/4/relative_humidity",
+        mqttMeasurementTopic(device, 4, MeasurementType::RelativeHumidity).c_str());
+
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/5/rain_gauge_tip",
+        mqttMeasurementTopic(device, 5, MeasurementType::RainGaugeTip).c_str());
+    TEST_ASSERT_EQUAL_STRING("envnode/Weather_Station/sensor/5/rainfall_increment",
+        mqttMeasurementTopic(device, 5, MeasurementType::RainfallIncrement).c_str());
+    TEST_ASSERT_TRUE(mqttMeasurementTopic(
+        device, InvalidSensorId, MeasurementType::Temperature).isEmpty());
+    TEST_ASSERT_TRUE(mqttMeasurementTopic(
+        device, 1, MeasurementType::Unknown).isEmpty());
+}
+
 void test_commands_map_exact_payloads_to_correct_actuators() {
     Fixture fixture;
     configureSlot(fixture.slots[0], 16);
@@ -231,6 +263,7 @@ void test_status_republishes_after_reconnect_and_clears_removed_slot() {
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_actuator_topics_generate_and_parse_slot_id);
+    RUN_TEST(test_measurement_topics_cover_current_sensor_measurement_compositions);
     RUN_TEST(test_commands_map_exact_payloads_to_correct_actuators);
     RUN_TEST(test_invalid_payload_and_actuator_id_are_rejected);
     RUN_TEST(test_subscription_is_restored_after_reconnect);
