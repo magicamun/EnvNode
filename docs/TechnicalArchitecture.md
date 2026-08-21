@@ -162,9 +162,24 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
-The initial board capability set exposes GPIO25, GPIO26, GPIO27, GPIO32 and GPIO33 as
-general-purpose bidirectional Sensor resources. Flash, UART, bootstrapping, input-only and
-board-reserved I2C pins are intentionally excluded from Sensor administration.
+The active typed `BoardProfile` is the single immutable description of physical board
+resources. `BoardCapabilities` derives its lookup and compatibility validation from that
+profile; it does not own a second pin map. The profile is selected at the narrow build-time
+boundary through an explicit PlatformIO build flag. Firmware Build Identity and physical
+Board Identity remain separate models.
+
+The current `EnvNode Mainboard` profile is hardware revision 0.1. It exposes I2C0 on
+SDA GPIO21 / SCL GPIO22 and I2C1 on SDA GPIO25 / SCL GPIO26. Generic digital resources are
+GPIO4, GPIO13, GPIO14, GPIO15, GPIO16, GPIO17, GPIO18, GPIO19, GPIO23, GPIO32 and GPIO33.
+GPIO32 and GPIO33 additionally support analog input; GPIO34, GPIO35, GPIO36 and GPIO39 are
+analog-input-only EnvNode resources. I²C pins are described only by the bus definitions and
+are therefore never offered as generic GPIO resources.
+
+Future EnvNode 868 and EnvNode Nano builds can provide different immutable profiles without
+changing hardware consumers. Profile selection is build-time-only today; a future hardware
+identity source such as ID pins or EEPROM may select the same typed profile API without
+affecting consumers. Runtime selection, automatic detection, SPI definitions and I²C scanning
+are intentionally outside the current architecture step.
 
 Sensor administration is available through the Web Sensors page. A successful edit stores
 the desired Slot configuration and requests `RestartSensorManager`; it does not activate the

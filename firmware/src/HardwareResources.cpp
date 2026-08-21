@@ -1,32 +1,7 @@
 #include "HardwareResources.h"
+#include "BoardProfile.h"
 
 namespace EnvNode {
-namespace {
-
-const BoardGpioCapability CurrentBoardGpios[] = {
-    {GpioResource(4), "GPIO4", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(13), "GPIO13", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(14), "GPIO14", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(15), "GPIO15", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(16), "GPIO16", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(17), "GPIO17", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(18), "GPIO18", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(19), "GPIO19", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(23), "GPIO23", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
-    {GpioResource(32), "GPIO32", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
-    {GpioResource(33), "GPIO33", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
-    {GpioResource(34), "GPIO34", GpioCapability::AnalogInput},
-    {GpioResource(35), "GPIO35", GpioCapability::AnalogInput},
-    {GpioResource(36), "GPIO36", GpioCapability::AnalogInput},
-    {GpioResource(39), "GPIO39", GpioCapability::AnalogInput},
-};
-
-const BoardI2CBusCapability CurrentBoardI2CBuses[] = {
-    {I2CBus::I2C0, GpioResource(21), GpioResource(22)},
-    {I2CBus::I2C1, GpioResource(25), GpioResource(26)},
-};
-
-} // namespace
 
 HardwareResourceAssignment HardwareResourceAssignment::none() {
     return HardwareResourceAssignment{};
@@ -55,11 +30,9 @@ BoardCapabilities::BoardCapabilities(const BoardGpioCapability* gpios, size_t gp
 }
 
 const BoardCapabilities& BoardCapabilities::current() {
+    const BoardProfile& profile = currentBoardProfile();
     static const BoardCapabilities capabilities(
-        CurrentBoardGpios,
-        sizeof(CurrentBoardGpios) / sizeof(CurrentBoardGpios[0]),
-        CurrentBoardI2CBuses,
-        sizeof(CurrentBoardI2CBuses) / sizeof(CurrentBoardI2CBuses[0]));
+        profile.gpios, profile.gpioCount, profile.i2cBuses, profile.i2cBusCount);
     return capabilities;
 }
 

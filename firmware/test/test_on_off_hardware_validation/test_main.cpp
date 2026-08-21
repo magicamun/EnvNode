@@ -1,6 +1,7 @@
 #include <unity.h>
 
 #include "HardwareResources.h"
+#include "BoardProfile.h"
 #include "IOnOffActuator.h"
 #include "ActuatorImplementationRegistry.h"
 #include "ActuatorFactory.h"
@@ -122,6 +123,62 @@ void test_nonexistent_gpio_is_rejected() {
             HardwareInterfaceKind::GPIO,
             assignment,
             GpioCapability::DigitalOutput)));
+}
+
+void test_current_board_profile_describes_envnode_mainboard() {
+    const BoardProfile& profile = currentBoardProfile();
+
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(BoardProfileId::EnvNodeMainboard),
+        static_cast<int>(profile.id));
+    TEST_ASSERT_EQUAL_STRING("EnvNode Mainboard", profile.displayName);
+    TEST_ASSERT_EQUAL_UINT8(0, profile.revision.major);
+    TEST_ASSERT_EQUAL_UINT8(1, profile.revision.minor);
+    TEST_ASSERT_EQUAL_UINT32(15, profile.gpioCount);
+    TEST_ASSERT_EQUAL_UINT32(2, profile.i2cBusCount);
+}
+
+void test_current_board_profile_has_exact_gpio_and_i2c_mapping() {
+    const BoardProfile& profile = currentBoardProfile();
+    const uint8_t expectedGpios[] = {
+        4, 13, 14, 15, 16, 17, 18, 19, 23, 32, 33, 34, 35, 36, 39,
+    };
+
+    TEST_ASSERT_EQUAL_UINT32(
+        sizeof(expectedGpios) / sizeof(expectedGpios[0]), profile.gpioCount);
+    for (size_t index = 0; index < profile.gpioCount; ++index) {
+        TEST_ASSERT_EQUAL_UINT8(expectedGpios[index], profile.gpios[index].resource.number);
+    }
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(I2CBus::I2C0),
+        static_cast<int>(profile.i2cBuses[0].bus));
+    TEST_ASSERT_EQUAL_UINT8(21, profile.i2cBuses[0].sda.number);
+    TEST_ASSERT_EQUAL_UINT8(22, profile.i2cBuses[0].scl.number);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(I2CBus::I2C1),
+        static_cast<int>(profile.i2cBuses[1].bus));
+    TEST_ASSERT_EQUAL_UINT8(25, profile.i2cBuses[1].sda.number);
+    TEST_ASSERT_EQUAL_UINT8(26, profile.i2cBuses[1].scl.number);
+
+    TEST_ASSERT_NULL(BoardCapabilities::current().gpio(GpioResource(21)));
+    TEST_ASSERT_NULL(BoardCapabilities::current().gpio(GpioResource(22)));
+    TEST_ASSERT_NULL(BoardCapabilities::current().gpio(GpioResource(25)));
+    TEST_ASSERT_NULL(BoardCapabilities::current().gpio(GpioResource(26)));
+}
+
+void test_current_board_profile_preserves_analog_capabilities() {
+    const BoardCapabilities& capabilities = BoardCapabilities::current();
+    const uint8_t analogGpios[] = {32, 33, 34, 35, 36, 39};
+    for (size_t index = 0; index < sizeof(analogGpios) / sizeof(analogGpios[0]); ++index) {
+        const BoardGpioCapability* gpio = capabilities.gpio(GpioResource(analogGpios[index]));
+        TEST_ASSERT_NOT_NULL(gpio);
+        TEST_ASSERT_TRUE(hasGpioCapabilities(
+            gpio->capabilities, GpioCapability::AnalogInput));
+    }
+    TEST_ASSERT_TRUE(hasGpioCapabilities(
+        capabilities.gpio(GpioResource(32))->capabilities,
+        GpioCapability::DigitalOutput));
+    TEST_ASSERT_FALSE(hasGpioCapabilities(
+        capabilities.gpio(GpioResource(34))->capabilities,
+        GpioCapability::DigitalOutput));
 }
 
 void test_on_off_state_has_stable_binary_values() {
@@ -464,6 +521,9 @@ int main(int, char**) {
     RUN_TEST(test_gpio_with_digital_output_is_accepted);
     RUN_TEST(test_gpio_without_digital_output_is_rejected);
     RUN_TEST(test_nonexistent_gpio_is_rejected);
+    RUN_TEST(test_current_board_profile_describes_envnode_mainboard);
+    RUN_TEST(test_current_board_profile_has_exact_gpio_and_i2c_mapping);
+    RUN_TEST(test_current_board_profile_preserves_analog_capabilities);
     RUN_TEST(test_on_off_state_has_stable_binary_values);
     RUN_TEST(test_gpio_on_off_registry_metadata_is_stable);
     RUN_TEST(test_multiple_gpio_on_off_slots_on_different_gpios_are_valid);
