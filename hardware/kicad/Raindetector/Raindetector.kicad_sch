@@ -2540,7 +2540,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "A03400A"
+		(property "Value" "AO3400A"
 			(at 140.97 113.0299 0)
 			(show_name no)
 			(do_not_autoplace no)
