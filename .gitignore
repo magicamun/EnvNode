@@ -10,7 +10,7 @@ hardware/kicad/*/*-backups/
 hardware/kicad/*/_autosave-*
 hardware/kicad/*/*.lck
 hardware/kicad/*/Gerber/*
-hardware/kicad/*/*_prl
+hardware/kicad/*/*.kicad_prl
 
 .pio/
 
