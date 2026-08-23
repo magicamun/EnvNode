@@ -53,6 +53,7 @@ static BoardIdentityEeprom24AA025E48 boardIdentityEeprom(i2cBusManager);
 static BoardIdentityStore boardIdentityStore(boardIdentityEeprom);
 static BoardIdentityResolver boardIdentityResolver(
     boardIdentityStore, buildFallbackBoardProfileId());
+static BoardProvisioningService boardProvisioningService(boardIdentityStore);
 static ConfigurationService configurationService;
 static WiFiService wifiService(logger, configurationService);
 static TimeService timeService(logger, configurationService, wifiService);
@@ -96,7 +97,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     sensorManager,
     actuatorRuntime);
 static OTAService otaService(logger, runtimeManager);
-static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution());
+static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
 static bool normalRuntimeStarted = false;
 

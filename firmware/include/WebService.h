@@ -20,6 +20,7 @@
 #include "IRecentLogReader.h"
 #include "I2CBusManager.h"
 #include "BoardIdentityResolver.h"
+#include "BoardProvisioningService.h"
 
 namespace EnvNode {
 
@@ -41,7 +42,8 @@ public:
         RuntimeManager& runtimeManager,
         OTAService& otaService,
         I2CBusManager& i2cBusManager,
-        const BoardIdentityResolution& boardIdentityResolution);
+        const BoardIdentityResolution& boardIdentityResolution,
+        BoardProvisioningService& boardProvisioningService);
 
     void begin() override;
     void loop() override;
@@ -87,6 +89,7 @@ private:
     void handleTimeSave();
     void handleUnitsSave();
     void handleDeviceSave();
+    void handleBoardProvisioning();
     void handleRestart();
     void handleFactoryReset();
     void handleNotFound();
@@ -126,6 +129,7 @@ private:
     OTAService& otaService_;
     I2CBusManager& i2cBusManager_;
     const BoardIdentityResolution& boardIdentityResolution_;
+    BoardProvisioningService& boardProvisioningService_;
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

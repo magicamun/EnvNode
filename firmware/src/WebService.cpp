@@ -392,7 +392,8 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     const IRecentLogReader& logReader,
     IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService,
     I2CBusManager& i2cBusManager,
-    const BoardIdentityResolution& boardIdentityResolution)
+    const BoardIdentityResolution& boardIdentityResolution,
+    BoardProvisioningService& boardProvisioningService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
@@ -401,7 +402,8 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       logReader_(logReader),
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
       i2cBusManager_(i2cBusManager),
-      boardIdentityResolution_(boardIdentityResolution) {}
+      boardIdentityResolution_(boardIdentityResolution),
+      boardProvisioningService_(boardProvisioningService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -434,6 +436,8 @@ void WebService::begin() {
     server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
     server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
+    server_.on("/device/board-identity/write", HTTP_POST,
+        [this]() { handleBoardProvisioning(); });
     server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
     server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
     server_.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
@@ -717,6 +721,14 @@ void WebService::handleDevice() {
         c += "<div class='notice'>The EEPROM Board Identity is valid, but its board serial number is unassigned.</div>";
     }
     c += "</section>";
+    c += "<section class='card'><h2>Provision Board Identity</h2>";
+    c += "<div class='notice'><strong>Advanced operation</strong><p>This writes permanent physical-board identity data. The active BoardProfile will not change until the device is restarted.</p></div>";
+    c += "<form method='post' action='/device/board-identity/write' onsubmit='return confirm(\"Write and verify this Board Identity? The active profile changes only after restart.\")'>";
+    c += "<div class='kv'><span>Board profile</span><span>EnvNode Mainboard</span><span>BoardProfileId</span><span>0</span><span>Hardware revision</span><span>0.2</span></div>";
+    c += "<label>Board serial number<input type='number' name='serialNumber' min='0' max='4294967295' required value='" + String(identity.serialNumber) + "'></label>";
+    c += "<p class='help'>Serial number 0 explicitly means unassigned.</p>";
+    c += "<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>I understand that this writes manufacturing identity data.</label>";
+    c += "<div class='actions'><button class='danger' type='submit'>Write Board Identity</button></div></form></section>";
     sendPage("Device", "/device", c);
 }
 
@@ -1535,6 +1547,67 @@ void WebService::handleUnitsSave() {
 }
 
 void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),"Device settings saved","Device save failed","/device","Invalid device name."); }
+
+void WebService::handleBoardProvisioning() {
+    const String serialText = server_.arg("serialNumber");
+    char* end = nullptr;
+    const unsigned long long parsedSerial = strtoull(serialText.c_str(), &end, 10);
+    const bool serialValid = !serialText.isEmpty()
+        && end != serialText.c_str()
+        && *end == '\0'
+        && parsedSerial <= UINT32_MAX;
+    if (!serialValid) {
+        sendResult("Board provisioning failed", "/device",
+            "The board serial number is invalid.", false);
+        return;
+    }
+
+    const BoardIdentity requested = {
+        BoardProfileId::EnvNodeMainboard,
+        {0, 2},
+        static_cast<uint32_t>(parsedSerial),
+    };
+    const bool confirmed = server_.hasArg("confirmProvisioning")
+        && server_.arg("confirmProvisioning") == "1";
+    const BoardProvisioningResult result =
+        boardProvisioningService_.provision(requested, confirmed);
+    logger_.infof("Board provisioning result=%s profile=0 revision=0.2 serial=%lu",
+        boardProvisioningStatusName(result.status),
+        static_cast<unsigned long>(requested.serialNumber));
+
+    if (result.status == BoardProvisioningStatus::Success) {
+        String content;
+        content.reserve(600);
+        content = "<div class='notice success'><strong>Board Identity written and verified.</strong><p>The active BoardProfile is unchanged for this boot. Restart is required to select the EEPROM identity.</p></div><form method='post' action='/restart' onsubmit='return confirm(\"Restart the device now?\")'><button>Restart Now</button></form><a class='button' href='/device'>Restart Later</a>";
+        sendPage("Board Identity provisioned", "/device", content);
+        return;
+    }
+
+    const char* message = "Board Identity could not be written and verified.";
+    switch (result.status) {
+        case BoardProvisioningStatus::ConfirmationRequired:
+            message = "Explicit confirmation is required. No EEPROM data was written.";
+            break;
+        case BoardProvisioningStatus::InvalidIdentity:
+            message = "The requested Board Identity is not supported. No EEPROM data was written.";
+            break;
+        case BoardProvisioningStatus::WriteFailed:
+            message = "The EEPROM did not accept the write. It may be absent or unavailable. The active BoardProfile is unchanged.";
+            break;
+        case BoardProvisioningStatus::ReadbackFailed:
+            message = "The EEPROM write could not be read back. Provisioning was not accepted as successful.";
+            break;
+        case BoardProvisioningStatus::ReadbackInvalid:
+            message = "The EEPROM readback failed record validation. Provisioning was not accepted as successful.";
+            break;
+        case BoardProvisioningStatus::ReadbackMismatch:
+            message = "The EEPROM readback did not exactly match the requested identity. Provisioning was not accepted as successful.";
+            break;
+        default:
+            break;
+    }
+    sendResult("Board provisioning failed", "/device", message, false);
+}
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();
     const SensorImplementationMetadata* metadata =
