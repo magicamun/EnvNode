@@ -38,6 +38,10 @@ const BoardProfile EnvNodeMainboardProfile = {
     sizeof(EnvNodeMainboardI2CBuses) / sizeof(EnvNodeMainboardI2CBuses[0]),
 };
 
+const BoardProfile* const BoardProfiles[] = {
+    &EnvNodeMainboardProfile,
+};
+
 const BoardProfile* selectedProfile = nullptr;
 bool selectionFrozen = false;
 
@@ -56,12 +60,20 @@ const BoardProfile& currentBoardProfile() {
 }
 
 const BoardProfile* boardProfile(BoardProfileId id) {
-    switch (id) {
-        case BoardProfileId::EnvNodeMainboard:
-            return &EnvNodeMainboardProfile;
-        default:
-            return nullptr;
+    for (size_t index = 0; index < boardProfileCount(); ++index) {
+        if (BoardProfiles[index]->id == id) {
+            return BoardProfiles[index];
+        }
     }
+    return nullptr;
+}
+
+size_t boardProfileCount() {
+    return sizeof(BoardProfiles) / sizeof(BoardProfiles[0]);
+}
+
+const BoardProfile* boardProfileAt(size_t index) {
+    return index < boardProfileCount() ? BoardProfiles[index] : nullptr;
 }
 
 BoardProfileId buildFallbackBoardProfileId() {

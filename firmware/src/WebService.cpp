@@ -724,7 +724,16 @@ void WebService::handleDevice() {
     c += "<section class='card'><h2>Provision Board Identity</h2>";
     c += "<div class='notice'><strong>Advanced operation</strong><p>This writes permanent physical-board identity data. The active BoardProfile will not change until the device is restarted.</p></div>";
     c += "<form method='post' action='/device/board-identity/write' onsubmit='return confirm(\"Write and verify this Board Identity? The active profile changes only after restart.\")'>";
-    c += "<div class='kv'><span>Board profile</span><span>EnvNode Mainboard</span><span>BoardProfileId</span><span>0</span><span>Hardware revision</span><span>0.2</span></div>";
+    c += "<label>Board profile<select name='boardProfileId' required>";
+    for (size_t index = 0; index < boardProfileCount(); ++index) {
+        const BoardProfile* profile = boardProfileAt(index);
+        if (profile == nullptr) continue;
+        c += "<option value='" + String(encodeBoardProfileId(profile->id)) + "'";
+        if (profile->id == identity.profileId) c += " selected";
+        c += ">" + escapeHtml(profile->displayName) + "</option>";
+    }
+    c += "</select></label>";
+    c += "<p class='help'>The selected board name is stored as its stable numeric BoardProfileId. The supported hardware revision is taken from the firmware profile.</p>";
     c += "<label>Board serial number<input type='number' name='serialNumber' min='0' max='4294967295' required value='" + String(identity.serialNumber) + "'></label>";
     c += "<p class='help'>Serial number 0 explicitly means unassigned.</p>";
     c += "<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>I understand that this writes manufacturing identity data.</label>";
@@ -1549,6 +1558,16 @@ void WebService::handleUnitsSave() {
 void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),"Device settings saved","Device save failed","/device","Invalid device name."); }
 
 void WebService::handleBoardProvisioning() {
+    const String profileText = server_.arg("boardProfileId");
+    char* profileEnd = nullptr;
+    const unsigned long parsedProfile = strtoul(profileText.c_str(), &profileEnd, 10);
+    BoardProfileId profileId = BoardProfileId::EnvNodeMainboard;
+    const bool profileValid = !profileText.isEmpty()
+        && profileEnd != profileText.c_str()
+        && *profileEnd == '\0'
+        && parsedProfile <= UINT16_MAX
+        && decodeBoardProfileId(static_cast<uint16_t>(parsedProfile), profileId);
+    const BoardProfile* requestedProfile = profileValid ? boardProfile(profileId) : nullptr;
     const String serialText = server_.arg("serialNumber");
     char* end = nullptr;
     const unsigned long long parsedSerial = strtoull(serialText.c_str(), &end, 10);
@@ -1556,23 +1575,26 @@ void WebService::handleBoardProvisioning() {
         && end != serialText.c_str()
         && *end == '\0'
         && parsedSerial <= UINT32_MAX;
-    if (!serialValid) {
+    if (requestedProfile == nullptr || !serialValid) {
         sendResult("Board provisioning failed", "/device",
-            "The board serial number is invalid.", false);
+            "The selected board profile or board serial number is invalid.", false);
         return;
     }
 
     const BoardIdentity requested = {
-        BoardProfileId::EnvNodeMainboard,
-        {0, 2},
+        requestedProfile->id,
+        requestedProfile->revision,
         static_cast<uint32_t>(parsedSerial),
     };
     const bool confirmed = server_.hasArg("confirmProvisioning")
         && server_.arg("confirmProvisioning") == "1";
     const BoardProvisioningResult result =
         boardProvisioningService_.provision(requested, confirmed);
-    logger_.infof("Board provisioning result=%s profile=0 revision=0.2 serial=%lu",
+    logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%lu",
         boardProvisioningStatusName(result.status),
+        static_cast<unsigned int>(requested.profileId),
+        requested.revision.major,
+        requested.revision.minor,
         static_cast<unsigned long>(requested.serialNumber));
 
     if (result.status == BoardProvisioningStatus::Success) {

@@ -28,6 +28,8 @@ struct BoardProfile {
 
 const BoardProfile& currentBoardProfile();
 const BoardProfile* boardProfile(BoardProfileId id);
+size_t boardProfileCount();
+const BoardProfile* boardProfileAt(size_t index);
 BoardProfileId buildFallbackBoardProfileId();
 bool selectCurrentBoardProfile(BoardProfileId id);
 
