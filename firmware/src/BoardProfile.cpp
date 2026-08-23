@@ -38,6 +38,9 @@ const BoardProfile EnvNodeMainboardProfile = {
     sizeof(EnvNodeMainboardI2CBuses) / sizeof(EnvNodeMainboardI2CBuses[0]),
 };
 
+const BoardProfile* selectedProfile = nullptr;
+bool selectionFrozen = false;
+
 #else
 #error "No EnvNode Board Profile selected. Define exactly one ENVNODE_BOARD_* build flag."
 #endif
@@ -45,9 +48,36 @@ const BoardProfile EnvNodeMainboardProfile = {
 } // namespace
 
 const BoardProfile& currentBoardProfile() {
+    if (selectedProfile == nullptr) {
+        selectedProfile = boardProfile(buildFallbackBoardProfileId());
+    }
+    selectionFrozen = true;
+    return *selectedProfile;
+}
+
+const BoardProfile* boardProfile(BoardProfileId id) {
+    switch (id) {
+        case BoardProfileId::EnvNodeMainboard:
+            return &EnvNodeMainboardProfile;
+        default:
+            return nullptr;
+    }
+}
+
+BoardProfileId buildFallbackBoardProfileId() {
 #if defined(ENVNODE_BOARD_MAINBOARD)
-    return EnvNodeMainboardProfile;
+    return BoardProfileId::EnvNodeMainboard;
 #endif
+}
+
+bool selectCurrentBoardProfile(BoardProfileId id) {
+    const BoardProfile* profile = boardProfile(id);
+    if (profile == nullptr || selectionFrozen) {
+        return false;
+    }
+    selectedProfile = profile;
+    selectionFrozen = true;
+    return true;
 }
 
 } // namespace EnvNode

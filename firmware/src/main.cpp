@@ -36,6 +36,8 @@
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
 #include "SystemLogTimeProvider.h"
+#include "BoardIdentityEeprom24AA025E48.h"
+#include "BoardIdentityResolver.h"
 
 using namespace EnvNode;
 
@@ -47,6 +49,10 @@ static StructuredLogger logger(recentLogStore, logTimeProvider, serialLogSink);
 static ActuatorFactory actuatorFactory(logger);
 static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
 static I2CBusManager i2cBusManager(logger);
+static BoardIdentityEeprom24AA025E48 boardIdentityEeprom(i2cBusManager);
+static BoardIdentityStore boardIdentityStore(boardIdentityEeprom);
+static BoardIdentityResolver boardIdentityResolver(
+    boardIdentityStore, buildFallbackBoardProfileId());
 static ConfigurationService configurationService;
 static WiFiService wifiService(logger, configurationService);
 static TimeService timeService(logger, configurationService, wifiService);
@@ -92,10 +98,27 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
 static OTAService otaService(logger, runtimeManager);
 static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
+static bool normalRuntimeStarted = false;
 
 void setup() {
     logger.begin(115200);
     delay(500);
+    i2cBusManager.beginIdentityBus();
+    const BoardIdentityResolution& identityResolution = boardIdentityResolver.resolve();
+    logger.infof(
+        "Board identity source=%s status=%s profile=%u revision=%u.%u serial=%lu",
+        boardIdentitySourceName(identityResolution.source),
+        boardIdentityStatusName(identityResolution.recordStatus),
+        static_cast<unsigned int>(identityResolution.identity.profileId),
+        identityResolution.identity.revision.major,
+        identityResolution.identity.revision.minor,
+        static_cast<unsigned long>(identityResolution.identity.serialNumber));
+    if (!identityResolution.normalRuntimeAllowed
+        || !selectCurrentBoardProfile(identityResolution.identity.profileId)) {
+        logger.error("Board identity unsupported; normal runtime initialization stopped");
+        return;
+    }
+
     i2cBusManager.begin();
     configurationService.loadConfiguration();
     size_t activeSensorCount = 0;
@@ -107,8 +130,11 @@ void setup() {
         logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
     }
+    normalRuntimeStarted = true;
 }
 
 void loop() {
-    app.loop();
+    if (normalRuntimeStarted) {
+        app.loop();
+    }
 }

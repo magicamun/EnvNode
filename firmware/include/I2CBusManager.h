@@ -31,6 +31,7 @@ class I2CBusManager {
 public:
     explicit I2CBusManager(ILogger& logger);
 
+    bool beginIdentityBus();
     void begin();
     TwoWire* wire(I2CBus bus);
     bool available(I2CBus bus) const;

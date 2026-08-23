@@ -27,5 +27,8 @@ struct BoardProfile {
 };
 
 const BoardProfile& currentBoardProfile();
+const BoardProfile* boardProfile(BoardProfileId id);
+BoardProfileId buildFallbackBoardProfileId();
+bool selectCurrentBoardProfile(BoardProfileId id);
 
 } // namespace EnvNode

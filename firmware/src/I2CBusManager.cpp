@@ -5,6 +5,21 @@ namespace EnvNode {
 
 I2CBusManager::I2CBusManager(ILogger& logger) : logger_(logger) {}
 
+bool I2CBusManager::beginIdentityBus() {
+    const size_t busIndex = static_cast<size_t>(I2CBus::I2C0);
+    if (initialized_[busIndex]) {
+        return true;
+    }
+
+    initialized_[busIndex] = Wire.begin(21, 22);
+    if (initialized_[busIndex]) {
+        logger_.info("Identity bootstrap I2C0 initialized SDA=21 SCL=22");
+    } else {
+        logger_.error("Identity bootstrap I2C0 initialization failed SDA=21 SCL=22");
+    }
+    return initialized_[busIndex];
+}
+
 void I2CBusManager::begin() {
     const BoardProfile& board = currentBoardProfile();
     for (size_t index = 0; index < board.i2cBusCount; ++index) {
