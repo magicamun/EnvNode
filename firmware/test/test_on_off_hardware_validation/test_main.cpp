@@ -143,7 +143,7 @@ void test_current_board_profile_describes_envnode_mainboard() {
         static_cast<int>(profile.id));
     TEST_ASSERT_EQUAL_STRING("EnvNode Mainboard", profile.displayName);
     TEST_ASSERT_EQUAL_UINT8(0, profile.revision.major);
-    TEST_ASSERT_EQUAL_UINT8(1, profile.revision.minor);
+    TEST_ASSERT_EQUAL_UINT8(2, profile.revision.minor);
     TEST_ASSERT_EQUAL_UINT32(15, profile.gpioCount);
     TEST_ASSERT_EQUAL_UINT32(2, profile.i2cBusCount);
 }

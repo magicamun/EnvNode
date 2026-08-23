@@ -8,7 +8,7 @@
 namespace EnvNode {
 
 enum class BoardProfileId : uint8_t {
-    EnvNodeMainboard,
+    EnvNodeMainboard = 0,
 };
 
 struct BoardRevision {
