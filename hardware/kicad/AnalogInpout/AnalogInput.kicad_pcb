@@ -9,7 +9,7 @@
 	(paper "A4")
 	(title_block
 		(title "AnalogInput")
-		(date "2026-08-22")
+		(date "2026-08-23")
 		(rev "0.1")
 	)
 	(layers
