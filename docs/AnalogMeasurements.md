@@ -471,20 +471,25 @@ The remaining questions are deliberately outside this implementation:
 4. **Diagnostic data:** Whether raw voltage, sample count, and rejected samples should be exposed as diagnostics.
 5. **Configuration integration:** How configuration errors should be reported when this sensor is later added to persistence, factories, and the web UI.
 
-## Concrete Next Implementation Steps
+## Remaining Implementation and Hardware Steps
 
-1. Review existing EnvNode interfaces for scheduling, configuration, `Measurement`, units, timestamps, and quality codes.
-2. Define `IAnalogInput` and `AnalogSample`, using volts as their common output.
-3. Implement the backend required first for the cistern setup (`Esp32AnalogInput` or `Ads1115AnalogInput`) and test it with known voltages.
-4. Implement a small time-controlled sampler with an `Average` filter. Define the behavior for individual read failures, minimum sample count, and time windows through tests.
-5. Implement two-point calibration as an independently testable function or value object.
-6. Implement `AnalogPressureSensor` with separate input-validity, calibration, and reliability boundaries.
-7. Add tests for all important boundary cases: values immediately below and above each boundary, a disconnected probe, an ADC failure, a value below the measurement range, and a normal reading.
-8. Produce `pressure` and optional `water_level` with the same time basis and traceable quality propagation.
-9. Implement tank volume as a separate derived measurement, initially for the actual tank geometry.
-10. Validate the complete chain on the real cistern setup and document observed raw voltages, noise, suitable sample intervals, and filter windows.
-11. Implement the second ADC backend against the same `IAnalogInput` interface to confirm interchangeability in practice.
-12. Only after adding another analog sensor type, evaluate which components should be generalized and whether Median, EMA, or a `height -> volume` characteristic curve is actually required.
+The analog domain foundation, time-controlled average sampler, two-point calibration,
+`AnalogPressureSensor`, pressure and optional water-level production, quality propagation, and
+their native boundary tests are implemented. The remaining work is deliberately driven by the
+real signal chain:
+
+1. Select and implement the backend required first for the cistern setup (`Esp32AnalogInput` or
+   `Ads1115AnalogInput`) and test it with known voltages.
+2. Add the pressure sensor and backend to persisted configuration, the implementation registry,
+   `SensorFactory`, runtime composition, hardware validation, and the Web UI.
+3. Validate the complete chain on the real cistern setup and document observed raw voltages,
+   disconnected-probe behavior, noise, suitable sample intervals, and filter windows.
+4. Implement tank volume as a separate derived measurement, initially for the actual tank
+   geometry, when the real installation requires it.
+5. Implement the second ADC backend against the same `IAnalogInput` interface to confirm
+   interchangeability in practice.
+6. Only after adding another analog sensor type, evaluate which components should be generalized
+   and whether Median, EMA, or a `height -> volume` characteristic curve is actually required.
 
 ## Architecture Decisions at a Glance
 

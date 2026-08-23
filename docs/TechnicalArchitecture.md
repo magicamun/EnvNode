@@ -2549,9 +2549,12 @@ Implemented
 - physical and simulated Sensor implementations
 - MeasurementSnapshotCache and MeasurementPublisher
 - MQTT Measurement publishing and Sensor Home Assistant discovery
+- EEPROM-backed Board Identity codec, storage, boot-time resolution and development fallback
+- Board Identity diagnostics and confirmed Web provisioning with readback verification
 - fixed Actuator slots, registry and stable ActuatorId
 - unified Sensor/Actuator hardware capability and occupancy validation
 - OnOff capability and GPIO On/Off implementation
+- Level capability and GPIO PWM implementation
 - deterministic ActuatorFactory and ActuatorRuntime
 - safe Actuator shutdown and live runtime rebuild
 - Web and MQTT Actuator configuration/control and independent state publication
@@ -2565,13 +2568,19 @@ Implemented
 - Web Blink/Threshold configuration, diagnostics and Start/Stop
 - MQTT Controller runtime status and START/STOP
 - retained Blink/Threshold parameter state and persistent MQTT parameter commands
+- retained external Actuator and Controller descriptions
 - runtime Actuator capability resolution without retained concrete pointers
 - physically verified Sensor -> Measurement -> Controller -> Actuator operation
 - OTA firmware staging and centralized restart boundary
 
+Current hardware-validation focus
+
+- provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.2
+- physically verify the existing Mainboard revision 0.1 before basing Module hardware on it
+- integrate and calibrate a concrete ADC backend and the pressure probe on real hardware
+
 Deliberately future or not implemented
 
-- generic external Actuator and Controller self-description
 - additional Actuator capabilities beyond OnOff and Level
 - additional Controller implementations
 - multi-input, Boolean/contact and event-driven Controllers
@@ -2582,6 +2591,7 @@ Deliberately future or not implemented
 - Controller and generic Actuator Home Assistant discovery
 - scripting/rule engine
 - generic command or event bus
+- dedicated Board Identity provisioning firmware, if operational use requires it
 
 ---
 

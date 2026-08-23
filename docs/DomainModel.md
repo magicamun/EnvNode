@@ -212,12 +212,11 @@ Controller infrastructure v1 is implemented, tested and physically verified for 
 
 ### Deliberately future or not implemented
 
-- Level/percentage and other Actuator capabilities
+- additional Actuator capabilities beyond OnOff and Level
 - additional Controller implementations
 - multi-input, Boolean/contact and event-driven Controller semantics
 - RainDetector-specific control behavior
 - atomic external mutation of structural Measurement source configuration
-- generic external Actuator or Controller self-description
 - generic Controller parameter-description schema
 - Controller Home Assistant discovery
 - generic Actuator Home Assistant discovery

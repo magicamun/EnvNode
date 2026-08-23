@@ -187,8 +187,11 @@ Implemented
 - typed Measurement pipeline and MQTT publication
 - fixed Sensor slots, physical/simulated implementations and live runtime composition
 - Sensor Home Assistant discovery
+- EEPROM-backed Board Identity, boot-time profile resolution and development fallback
+- Board Identity diagnostics and confirmed Web provisioning with readback verification
 - fixed Actuator slots and unified hardware validation
 - OnOff capability and GPIO On/Off Actuator
+- Level capability and GPIO PWM Actuator
 - live Actuator runtime rebuild
 - Web and MQTT Actuator configuration/control
 - fixed Controller slots and BlinkController
@@ -196,16 +199,23 @@ Implemented
 - cooperative Controller runtime and live rebuild
 - Web and MQTT Controller configuration, status and Start/Stop
 - persistent MQTT Blink/Threshold parameter commands and retained parameter state
+- retained external Actuator and Controller descriptions
 - exclusive enabled-Controller ownership of Actuator targets
 - physically verified Sensor -> Measurement -> Controller -> Actuator operation
 
+Current hardware-validation focus
+
+- provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.2
+- physically verify the existing Mainboard revision 0.1 before using it as the basis for Modules
+- integrate and calibrate the first concrete ADC backend and pressure probe on real hardware
+
 Deliberately future
 
-- additional Actuator capabilities and typed Controller implementations
+- additional Actuator capabilities beyond OnOff and Level, and additional typed Controller implementations
 - multi-input, Boolean/contact and event-driven Controllers
 - richer manual-versus-Controller arbitration
-- generic external Actuator/Controller self-description
 - Controller and generic Actuator Home Assistant discovery
+- a dedicated Board Identity provisioning firmware, if operational use requires it
 
 ---
 

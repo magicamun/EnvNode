@@ -346,7 +346,7 @@ The goal is to diagnose devices directly from the embedded web interface.
 
 ## Actuators
 
-Configured Actuator Slots expose typed physical-output capabilities. `ActuatorRuntime` owns runtime instances and resolves capability by `ActuatorId`; the implemented `gpio_on_off` implementation exposes `OnOff` through `IOnOffActuator`. Web, MQTT and Controllers never manipulate GPIO directly.
+Configured Actuator Slots expose typed physical-output capabilities. `ActuatorRuntime` owns runtime instances and resolves capability by `ActuatorId`; `gpio_on_off` exposes `OnOff` through `IOnOffActuator`, while `gpio_pwm` exposes normalized 0–100 `Level` through `ILevelActuator` and also satisfies `OnOff`. Web, MQTT and Controllers never manipulate GPIO directly.
 
 ---
 
@@ -356,7 +356,7 @@ Controllers are configured local behaviors owned by `ControllerRuntime`. Blink p
 
 Web and MQTT are adapters over the same configuration and runtime model. Manual Actuator commands remain last-command-wins relative to a Controller, while Controller-versus-Controller target conflicts are rejected.
 
-Future typed implementations may add multi-input RainDetector behavior, Boolean/contact or event semantics. Level/percentage capability, self-description, Controller Home Assistant discovery and richer manual arbitration are not implemented.
+Retained schema-1 descriptions provide external self-description for configured Actuators and Controllers. Future typed implementations may add multi-input RainDetector behavior, Boolean/contact or event semantics. Controller and generic Actuator Home Assistant discovery and richer manual arbitration are not implemented.
 
 ---
 
@@ -393,22 +393,29 @@ Implemented:
 - Home Assistant Discovery
 - Runtime Diagnostics
 - Build Identity
+- EEPROM-backed Board Identity, boot-time resolution and Web provisioning
 - Web Configuration
-- Actuator Slots, OnOff capability and live ActuatorRuntime
+- Actuator Slots, OnOff and Level capabilities, GPIO On/Off and PWM implementations, and live ActuatorRuntime
 - Controller Slots, BlinkController and ThresholdController
 - MeasurementSourceReference and monotonic freshness
 - live ControllerRuntime rebuild and transient START/STOP
 - Web and MQTT Controller configuration/status/parameters
+- retained external Actuator and Controller descriptions
 - exclusive enabled-Controller target ownership
 
-Future:
+Current hardware-validation focus:
+
+- Board Identity EEPROM provisioning and boot selection on a physical Mainboard revision 0.2
+- physical verification of the existing Mainboard revision 0.1 as the basis for Module development
+- integration and calibration of a concrete ADC backend and pressure probe on real hardware
+
+Future firmware extensions:
 
 - ADS1115 Service
 - Radiation Sensor
 - Pressure Probe
 - additional typed Controller implementations
-- Level/percentage Actuator capability
-- external Controller/Actuator self-description and Controller discovery
+- Controller and generic Actuator Home Assistant discovery
 
 ---
 
