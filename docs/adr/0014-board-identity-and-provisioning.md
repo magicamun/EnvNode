@@ -66,8 +66,9 @@ The conceptual EEPROM record contains at least:
 - an integrity check such as a CRC
 
 This ADR does not define field widths, byte offsets, byte order, EEPROM technology or the exact
-integrity algorithm. A separate Board Identity Record Specification will define the binary and
-electrical contract so it can evolve independently and be shared by all writers and readers.
+integrity algorithm. The separate [Board Identity Record Specification](../BoardIdentityRecord.md)
+defines the binary contract so it can evolve independently and be shared by all writers and
+readers.
 
 The serial number identifies the individual physical board. It is not an MQTT device name,
 user-visible installation name or replacement for runtime configuration.

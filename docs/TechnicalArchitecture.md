@@ -168,7 +168,7 @@ profile; it does not own a second pin map. The profile is selected at the narrow
 boundary through an explicit PlatformIO build flag. Firmware Build Identity and physical
 Board Identity remain separate models.
 
-The current `EnvNode Mainboard` profile is hardware revision 0.1. It exposes I2C0 on
+The current `EnvNode Mainboard` profile is hardware revision 0.2. It exposes I2C0 on
 SDA GPIO21 / SCL GPIO22 and I2C1 on SDA GPIO25 / SCL GPIO26. Generic digital resources are
 GPIO4, GPIO13, GPIO14, GPIO15, GPIO16, GPIO17, GPIO18, GPIO19, GPIO23, GPIO32 and GPIO33.
 GPIO32 and GPIO33 additionally support analog input; GPIO34, GPIO35, GPIO36 and GPIO39 are
