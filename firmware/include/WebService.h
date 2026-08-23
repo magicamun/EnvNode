@@ -19,6 +19,7 @@
 #include "ControllerRuntime.h"
 #include "IRecentLogReader.h"
 #include "I2CBusManager.h"
+#include "BoardIdentityResolver.h"
 
 namespace EnvNode {
 
@@ -39,7 +40,8 @@ public:
         IDiscoveryPublisher& discoveryPublisher,
         RuntimeManager& runtimeManager,
         OTAService& otaService,
-        I2CBusManager& i2cBusManager);
+        I2CBusManager& i2cBusManager,
+        const BoardIdentityResolution& boardIdentityResolution);
 
     void begin() override;
     void loop() override;
@@ -123,6 +125,7 @@ private:
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;
     I2CBusManager& i2cBusManager_;
+    const BoardIdentityResolution& boardIdentityResolution_;
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

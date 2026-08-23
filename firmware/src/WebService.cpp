@@ -391,7 +391,8 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     MeasurementSnapshotCache& measurementSnapshotCache,
     const IRecentLogReader& logReader,
     IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService,
-    I2CBusManager& i2cBusManager)
+    I2CBusManager& i2cBusManager,
+    const BoardIdentityResolution& boardIdentityResolution)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
@@ -399,7 +400,8 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       measurementSnapshotCache_(measurementSnapshotCache),
       logReader_(logReader),
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
-      i2cBusManager_(i2cBusManager) {}
+      i2cBusManager_(i2cBusManager),
+      boardIdentityResolution_(boardIdentityResolution) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -688,8 +690,33 @@ void WebService::handleUnits() {
 
 void WebService::handleDevice() {
     String c;
-    c.reserve(500);
+    c.reserve(1500);
+    const BoardProfile& board = currentBoardProfile();
+    const BoardIdentity& identity = boardIdentityResolution_.identity;
+    const bool recordFormatKnown =
+        boardIdentityResolution_.recordStatus == BoardIdentityStatus::Valid
+        || boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial;
+    const String serialNumber = identity.serialNumber == 0
+        ? String("Unassigned")
+        : localeFormatter_.formatNumber(identity.serialNumber, 0);
     c = "<section class='card'><h2>Device identity</h2><form method='post' action='/device/save'><label>Device name<input name='deviceName' required value='" + escapeHtml(configurationService_.getConfiguration().device.name) + "'></label><div class='actions'><button>Save device settings</button></div></form></section>";
+    c += "<section class='card'><h2>Board Identity</h2><div class='kv'>";
+    c += "<span>Source</span><span>" + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
+    c += "<span>Record status</span><span>" + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
+    c += "<span>Board profile</span><span>" + escapeHtml(board.displayName) + "</span>";
+    c += "<span>BoardProfileId</span><span>" + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
+    c += "<span>Hardware revision</span><span>" + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";
+    c += "<span>Serial number</span><span>" + serialNumber + "</span>";
+    c += "<span>EEPROM format</span><span>" + String(recordFormatKnown ? "1" : "—") + "</span>";
+    c += "<span>Normal runtime</span><span>" + String(boardIdentityResolution_.normalRuntimeAllowed ? "Allowed" : "Blocked") + "</span>";
+    c += "</div>";
+    if (boardIdentityResolution_.source == BoardIdentitySource::BuildFallback) {
+        c += "<div class='notice'>No usable EEPROM Board Identity was selected. This boot uses the explicit development build fallback.</div>";
+    }
+    if (boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial) {
+        c += "<div class='notice'>The EEPROM Board Identity is valid, but its board serial number is unassigned.</div>";
+    }
+    c += "</section>";
     sendPage("Device", "/device", c);
 }
 
