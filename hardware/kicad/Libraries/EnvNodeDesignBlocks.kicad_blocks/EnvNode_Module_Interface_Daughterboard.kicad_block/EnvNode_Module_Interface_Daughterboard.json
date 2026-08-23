@@ -1,5 +1,5 @@
 {
-"description": "EnvNode daughterboard-side interface with routing between Connectors except GND.\n\nConnector sockets are mounted on the bottom side of the module PCB. Module components are normally mounted on the top side, facing away from the mainboard.",
-"keywords": "",
+"description": "EnvNode dautghterboard-side module interface with two bottom-mounted keyed 2×4 connectors, standardized pin assignment and 25.40 mm pin-1 spacing. Includes the optional parallel interconnection routing between both connectors except GND.\nconnector 2x4 2.54mm 25.4mm",
+"keywords": "EnvNode module interface daughterboard ",
 "fields": {}
 }
