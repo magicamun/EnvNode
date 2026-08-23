@@ -369,7 +369,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": "${REVISION}"
+      "sch_revision": "0.2"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -829,7 +829,7 @@
         "uuid": "4cc529e4-f126-4541-9f71-d2fae66595d2"
       }
     ],
-    "used_designators": "GPIO4-5,GPIO13-27,I2CB_1-4,I2CA_1-6,U1-2,JP1-4,R1-4,C1-4,#PWR1-62,J1-2",
+    "used_designators": "GPIO4-5,GPIO13-27,I2CB_1-4,I2CA_1-6,U1-3,JP1-4,R1-4,C1-4,#PWR1-62,J1-2",
     "variants": []
   },
   "sheets": [
@@ -838,10 +838,7 @@
       "EnvNode"
     ]
   ],
-  "text_variables": {
-    "REVISION": "0.1",
-    "TITLE": "EnvNode Mainboard"
-  },
+  "text_variables": {},
   "tuning_profiles": {
     "meta": {
       "version": 0
