@@ -54,6 +54,43 @@ The same pin assignment applies to C1 and C2 and to both sides of the interface.
 
 In the common plan view of an assembled mainboard and module, pin 1 is located at the upper-right corner of each 2 × 4 connector. The mating mainboard header and bottom-mounted module receptacle shall place corresponding pin numbers at identical assembled XY positions.
 
+### 3.1 System I²C Bus
+
+On all ESP32-based EnvNode mainboard variants, the mandatory system I²C bus shall use the following GPIOs:
+
+| Signal | ESP32 GPIO |
+| --- | --- |
+| `SDA` | GPIO21 |
+| `SCL` | GPIO22 |
+
+GPIO21 and GPIO22 are reserved for the system I²C bus and form part of the EnvNode hardware ABI. Variant-specific hardware, including future 868 MHz radio implementations, shall not use these GPIOs for other functions.
+
+Mainboard-internal infrastructure devices, including the board identification EEPROM, shall use this system I²C bus.
+
+The Full Mainboard additionally assigns GPIO25 (`SDA`) and GPIO26 (`SCL`) to its second I²C bus. These GPIOs are intended to remain available for the same purpose on a future 868 MHz mainboard variant.
+
+### 3.2 Mainboard Identification
+
+Starting with Mainboard Revision 0.2, EnvNode mainboards shall provide a non-volatile board identification device on the system I²C bus.
+
+The board identification device is a Microchip `24AA025E48` EEPROM with a factory-programmed EUI-48 identifier. It shall be connected as follows:
+
+| Property | Assignment |
+| --- | --- |
+| I²C bus | System I²C bus |
+| `SDA` | GPIO21 |
+| `SCL` | GPIO22 |
+| I²C address | `0x50` |
+| `A0` | GND |
+| `A1` | GND |
+| Supply | 3.3 V |
+
+The EEPROM stores an EnvNode board identifier that maps to the same board definitions used by the EnvNode runtime firmware and the board provisioning firmware. The factory-programmed EUI-48 provides a unique physical identifier for each mainboard.
+
+Mainboard Revision 0.1 does not contain a board identification EEPROM and shall be treated as a legacy board by the firmware.
+
+These mainboard-specific requirements are included in this document while only one EnvNode mainboard family exists. They shall be moved into a dedicated mainboard hardware specification when another mainboard is derived.
+
 ## 4. Power-Rail Ownership
 
 The `24V`, `5V`, and `3V3` nets are shared power rails that form part of the module interface. Depending on the EnvNode mainboard and installed modules, a rail may be supplied by either a mainboard or a module, and other participants may consume power from it.
@@ -97,10 +134,10 @@ The following items remain intentionally open:
 4. GPIO voltage levels, direction rules, drive capability, default states, and permitted alternate functions.
 5. Required protection, including reverse-current, overvoltage, overcurrent, transient, and ESD protection.
 6. Required behavior when one or more power rails are absent or unpowered.
-7. I²C pull-up ownership, permitted pull-up values, bus voltage, bus capacitance, speed, addressing, and wiring or topology requirements.
+7. I²C pull-up ownership, permitted pull-up values, bus voltage, bus capacitance, speed, and wiring or topology requirements beyond the fixed system-bus GPIO assignment and board-EEPROM address defined above.
 8. PCB-edge placement, allowable board overhang, component keep-out areas, mating clearance, and enclosure constraints.
 9. Any required module identification, capability declaration, or rail-source indication mechanism.
 
 ## 7. Revision Status
 
-Revision 0.2 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, and the single-source-per-rail rule. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
+Revision 0.2 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, and the Mainboard Revision 0.2 identification EEPROM. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
