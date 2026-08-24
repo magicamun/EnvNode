@@ -1,0 +1,5 @@
+{
+"description": "EnvNode ESP32 core circuit including ESP32 DevKitC and non-volatile\nboard identification using a 24AA025E48 I2C EEPROM with factory-programmed\nEUI-48 identifier.\n\nThe board identification EEPROM is connected to the EnvNode system I2C bus\non GPIO21 (SDA) and GPIO22 (SCL) and uses I2C address 0x50.\n\nIntended as the common processor and board-identification building block\nfor ESP32-based EnvNode mainboard variants.",
+"keywords": "EnvNode ESP32 DevKitC Core Mainboard Board-ID EEPROM EUI-48 I2C 24AA025E48",
+"fields": {}
+}

@@ -1,0 +1,5 @@
+{
+"description": "Reusable EnvNode ESP32 core module including ESP32 DevKitC, board identification\nEEPROM (24AA025E48), system I2C connection and associated PCB layout.\n\nThe board identification EEPROM is connected to the mandatory EnvNode system\nI2C bus on GPIO21 (SDA) and GPIO22 (SCL) and uses I2C address 0x50.\n\nThe design block includes the intended component placement and routing for the\nprocessor and board-identification section and is intended for reuse across\nESP32-based EnvNode mainboard variants.",
+"keywords": "EnvNode ESP32 DevKitC Core Module Mainboard Board-ID EEPROM EUI-48 I2C 24AA025E48 PCB Layout",
+"fields": {}
+}

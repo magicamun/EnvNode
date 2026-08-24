@@ -3884,7 +3884,7 @@
 				)
 			)
 		)
-		(property "Footprint" "EnvNode:KXOB25-14X1F"
+		(property "Footprint" "EnvNode-Footprints:KXOB25-14X1F"
 			(at 37.084 33.02 90)
 			(hide yes)
 			(show_name no)
