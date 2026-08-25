@@ -1,5 +1,0 @@
-{
-"description": "EnvNode mainboard-side module interface with two top-mounted keyed 2×4 connectors, standardized pin assignment and 25.40 mm pin-1 spacing. Includes the parallel interconnection routing between both connectors except GND.",
-"keywords": "EnvNode module interface mainboard connector 2x4 2.54mm 25.4mm",
-"fields": {}
-}
