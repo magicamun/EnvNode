@@ -821,7 +821,7 @@
 				)
 			)
 		)
-		(property "Footprint" "EnvNode:PinSocket_2x04_P2.54mm_Vertical_Bottom"
+		(property "Footprint" "EnvNode-Footprints:PinSocket_2x04_P2.54mm_Vertical_Bottom"
 			(at 58.42 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -879,7 +879,7 @@
 			(uuid "375e43c7-4059-4ad5-b831-f6794c11223c")
 		)
 		(instances
-			(project "EmptyModule"
+			(project "EmptyModule_HalfSize"
 				(path "/bef1201e-12b5-4ddb-8361-fbfddd4aa238"
 					(reference "J1")
 					(unit 1)
@@ -958,7 +958,7 @@
 			(uuid "b3a09bbf-e07a-4343-b43d-6cd7f3c1dd37")
 		)
 		(instances
-			(project "EmptyModule"
+			(project "EmptyModule_HalfSize"
 				(path "/bef1201e-12b5-4ddb-8361-fbfddd4aa238"
 					(reference "#PWR03")
 					(unit 1)
@@ -998,7 +998,7 @@
 				)
 			)
 		)
-		(property "Footprint" "EnvNode:PinSocket_2x04_P2.54mm_Vertical_Bottom"
+		(property "Footprint" "EnvNode-Footprints:PinSocket_2x04_P2.54mm_Vertical_Bottom"
 			(at 99.06 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -1056,7 +1056,7 @@
 			(uuid "7c0e8a3a-7040-4b97-9823-2166f8a45bb9")
 		)
 		(instances
-			(project "EmptyModule"
+			(project "EmptyModule_HalfSize"
 				(path "/bef1201e-12b5-4ddb-8361-fbfddd4aa238"
 					(reference "J2")
 					(unit 1)
@@ -1135,7 +1135,7 @@
 			(uuid "080046f4-5506-4dc9-ad8c-6fd09fa933c5")
 		)
 		(instances
-			(project "EmptyModule"
+			(project "EmptyModule_HalfSize"
 				(path "/bef1201e-12b5-4ddb-8361-fbfddd4aa238"
 					(reference "#PWR04")
 					(unit 1)
