@@ -1,0 +1,5 @@
+{
+"description": "Reusable EnvNode ESP32 core circuit including an ESP32-DevKitC and a 24AA025E48 board-identification EEPROM with factory-programmed EUI-48 identifier.",
+"keywords": "EnvNode ESP32 DevKitC Core Mainboard Board-ID EEPROM EUI-48 I2C 24AA025E48 external 5V supply reusable design block",
+"fields": {}
+}
