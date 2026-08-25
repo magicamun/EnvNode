@@ -10,11 +10,11 @@ hardware/kicad/*/*-backups/
 hardware/kicad/*/*.kicad_prl
 hardware/kicad/*/_autosave-*
 hardware/kicad/*/*.lck
-hardware/kicad/*/Gerber/*
-hardware/kicad/DesignBlocks/*/*-backups/
-hardware/kicad/DesignBlocks/*/*.kicad_prl
-hardware/kicad/DesignBlocks/*/_autosave-*
-hardware/kicad/DesignBlocks/*/*.lck
+hardware/kicad/*/*/Gerber/*
+hardware/kicad/*/*/*-backups/
+hardware/kicad/*/*/*.kicad_prl
+hardware/kicad/*/*/_autosave-*
+hardware/kicad/*/*/*.lck
 
 .pio/
 
