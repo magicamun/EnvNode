@@ -5520,7 +5520,7 @@
 				)
 			)
 		)
-		(property "Value" "STPS3L60S"
+		(property "Value" "B360B-13-F"
 			(at 71.4375 156.21 0)
 			(show_name no)
 			(do_not_autoplace no)
