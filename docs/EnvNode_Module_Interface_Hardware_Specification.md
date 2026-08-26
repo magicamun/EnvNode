@@ -1,7 +1,7 @@
 # EnvNode Module Interface – Hardware Specification
 
 **Status:** Draft  
-**Revision:** 0.4
+**Revision:** 0.5
 
 ## 1. Purpose and Scope
 
@@ -145,13 +145,13 @@ These track widths are a reference-layout baseline, not an interface current rat
 
 Detailed usage and maintenance instructions are provided in `hardware/kicad/DesignBlocks/EnvNode_Module_Interface_Daughterboard/README.md`.
 
-### 5.2 FullSize Reference Template
+### 5.2 FullSize and HalfSize Reference Templates
 
 `hardware/kicad/Modules/EmptyModule_FullSize/` is the validated project starting point for full-size EnvNode daughterboards. It applies the daughterboard reference design block to a 38.00 mm x 64.00 mm PCB outline and completes GND with a copper zone.
 
-The FullSize dimensions are a project reference geometry and do not change the electrical interface requirements. Detailed geometry, derivation, validation, and design-block update instructions are provided in `hardware/kicad/Modules/EmptyModule_FullSize/README.md`.
+`hardware/kicad/Modules/EmptyModule_HalfSize/` is the corresponding starting point for compact daughterboards. It uses the same schematic, connector geometry, linked design block, and routing with a 38.00 mm x 32.00 mm PCB outline and a correspondingly reduced GND zone.
 
-The HalfSize template remains provisional until it has independently passed the same checks.
+The FullSize and HalfSize dimensions are project reference geometries and do not change the electrical interface requirements. Detailed geometry, derivation, validation, and design-block update instructions are provided in the `README.md` file of each template directory.
 
 ## 6. Open Points for Future Revisions
 
@@ -169,4 +169,4 @@ The following items remain intentionally open:
 
 ## 7. Revision Status
 
-Revision 0.4 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, and the validated FullSize project template. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
+Revision 0.5 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, and the FullSize and HalfSize project templates. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
