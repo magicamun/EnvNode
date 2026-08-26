@@ -762,7 +762,7 @@
 					(unit 1)
 				)
 			)
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b/d6a24f14-7c69-4160-9397-737d31e30f03"
 					(reference "J1")
 					(unit 1)
@@ -866,7 +866,7 @@
 					(unit 1)
 				)
 			)
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b/d6a24f14-7c69-4160-9397-737d31e30f03"
 					(reference "J2")
 					(unit 1)
