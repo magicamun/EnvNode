@@ -163,6 +163,14 @@ The released current limits of 3 A per channel for resistive loads and the provi
 
 Detailed pinout, circuitry, terminal order, current limits, DRC rule, safety constraints, and bring-up instructions are provided in `hardware/kicad/Modules/DuoRelay/README.md`.
 
+### 5.4 AnalogInput Reference Implementation
+
+`hardware/kicad/Modules/AnalogInput/` is a validated functional module derived from the HalfSize template. It connects one externally supplied 4–20 mA pressure probe to an ADS1115 on the system I²C bus.
+
+The module uses the interface `24V` rail for the loop supply and `3V3` for the ADC and input clamp. A precision 150 ohm burden resistor converts the loop current into approximately 0.6–3.0 V. The ADS1115 address is selected through four open solder jumpers; exactly one address jumper must be closed during assembly.
+
+The AnalogInput implementation does not change the generic EnvNode Module Interface. Its probe characteristics, ADC range, calibration, component tolerances, and power budget are module-specific requirements documented in `hardware/kicad/Modules/AnalogInput/README.md`.
+
 ## 6. Open Points for Future Revisions
 
 The following items remain intentionally open:
@@ -179,4 +187,4 @@ The following items remain intentionally open:
 
 ## 7. Revision Status
 
-Revision 0.6 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, the FullSize and HalfSize project templates, and the DuoRelay reference implementation. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
+Revision 0.6 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, the FullSize and HalfSize project templates, and the DuoRelay and AnalogInput reference implementations. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.

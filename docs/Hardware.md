@@ -19,3 +19,4 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 ## Module Implementations
 
 - [DuoRelay FullSize](../hardware/kicad/Modules/DuoRelay/README.md) provides two GPIO-controlled changeover relays. It documents the relay drivers, intentionally mirrored terminals, released current limits, 250 VAC routing constraints, 8 mm SELV clearance rule, mechanical integration requirements, and bring-up procedure.
+- [AnalogInput HalfSize](../hardware/kicad/Modules/AnalogInput/README.md) connects one 4–20 mA pressure probe to an ADS1115. It documents the 150 ohm burden and input protection, mandatory I2C address-jumper selection, firmware input-range requirements, and bring-up procedure.
