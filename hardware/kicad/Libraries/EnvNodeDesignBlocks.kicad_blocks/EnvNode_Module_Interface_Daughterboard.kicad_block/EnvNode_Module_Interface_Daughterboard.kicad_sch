@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "5f51946f-4841-4f0e-a181-95ff4527e6f4")
+	(uuid "86e585b6-3de6-4f95-a21e-fd84a6d91b3c")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Connector_Generic:Conn_02x04_Odd_Even"
@@ -530,7 +530,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x04_P2.54mm_Vertical"
+		(property "Footprint" "EnvNode-Footprints:PinSocket_2x04_P2.54mm_Vertical_Bottom"
 			(at 66.04 102.87 0)
 			(hide yes)
 			(show_name no)
@@ -628,7 +628,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x04_P2.54mm_Vertical"
+		(property "Footprint" "EnvNode-Footprints:PinSocket_2x04_P2.54mm_Vertical_Bottom"
 			(at 97.79 102.87 0)
 			(hide yes)
 			(show_name no)

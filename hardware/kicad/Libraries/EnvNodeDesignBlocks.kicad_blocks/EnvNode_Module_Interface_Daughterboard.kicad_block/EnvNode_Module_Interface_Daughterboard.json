@@ -1,5 +1,5 @@
 {
-"description": "EnvNode dautghterboard-side module interface with two bottom-mounted keyed 2×4 connectors, standardized pin assignment and 25.40 mm pin-1 spacing. Includes the optional parallel interconnection routing between both connectors except GND.\nconnector 2x4 2.54mm 25.4mm",
-"keywords": "EnvNode module interface daughterboard ",
+"description": "EnvNode daughterboard-side module interface with two bottom-mounted 2×4 connectors, standardized pin assignment, 25.40 mm horizontal spacing, and no vertical offset. Includes parallel interconnect routing between both connectors except GND, which is completed by a copper zone on the module PCB.",
+"keywords": "EnvNode module interface daughterboard connector 2x4 2.54mm 25.4mm bottom",
 "fields": {}
 }

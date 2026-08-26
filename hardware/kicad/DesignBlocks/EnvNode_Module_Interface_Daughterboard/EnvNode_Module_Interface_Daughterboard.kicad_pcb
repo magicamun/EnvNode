@@ -452,7 +452,7 @@
 	(footprint "EnvNode-Footprints:PinSocket_2x04_P2.54mm_Vertical_Bottom"
 		(layer "B.Cu")
 		(uuid "a5ad8ac8-3135-4820-b761-2a712a52b5ea")
-		(at 125.17 62.18 180)
+		(at 125.17 62.17 180)
 		(descr "Through hole straight socket strip, 2x04, 2.54mm pitch, double rows (from Kicad 4.0.7), script generated")
 		(tags "Through hole socket strip THT 2x04 2.54mm double row")
 		(property "Reference" "J2"
@@ -823,84 +823,124 @@
 		(uuid "20a52997-14fe-436f-bdd1-ef99f9ea5cb0")
 	)
 	(segment
-		(start 149.41 63.33)
-		(end 126.32 63.33)
-		(width 0.2)
+		(start 126.44 63.45)
+		(end 147.94 63.45)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/24V")
-		(uuid "4d4a02d8-5c1d-4949-97fe-35cefe91e51c")
+		(uuid "162b46fc-5f49-40aa-b153-07c8de5603cc")
 	)
 	(segment
-		(start 126.32 63.33)
-		(end 125.17 62.18)
-		(width 0.2)
+		(start 125.17 62.18)
+		(end 126.44 63.45)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/24V")
-		(uuid "aefb7aec-4157-42f6-8b12-34bf2ad256ce")
+		(uuid "8f957ed0-08d1-4c30-bd80-c9dd92358162")
 	)
 	(segment
-		(start 150.57 62.17)
-		(end 149.41 63.33)
-		(width 0.2)
+		(start 147.94 63.45)
+		(end 149.22 62.17)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/24V")
-		(uuid "bfdd481a-1cf6-4ece-8b3d-b9baf0202873")
+		(uuid "d4ab6311-06e5-49d8-9813-c69650a0fe09")
 	)
 	(segment
-		(start 149.745686 63.56)
-		(end 148.585686 64.72)
-		(width 0.2)
+		(start 149.22 62.17)
+		(end 150.57 62.17)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/24V")
+		(uuid "ea36d5b6-7e7b-47f9-a6bc-da2f64476058")
+	)
+	(segment
+		(start 149.59 63.46)
+		(end 148.33 64.72)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/3V3")
-		(uuid "003c8b3b-0cc0-4f67-8da6-253e704f713e")
+		(uuid "183b4383-7708-4d10-a2b5-1bd07630ccc6")
+	)
+	(segment
+		(start 151.86 63.46)
+		(end 149.59 63.46)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/3V3")
+		(uuid "4f70ed5f-6fcf-4063-8237-5aba9da55dfd")
+	)
+	(segment
+		(start 148.33 64.72)
+		(end 127.71 64.72)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/3V3")
+		(uuid "7de93003-14cd-422f-a24e-b885d8df8f13")
 	)
 	(segment
 		(start 153.11 64.71)
-		(end 151.96 63.56)
-		(width 0.2)
+		(end 151.86 63.46)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/3V3")
-		(uuid "68831de7-b0ea-47d7-adb3-1deaef367dac")
+		(uuid "c8f7e4c5-9ad9-4aea-875a-1bace808fe69")
 	)
 	(segment
-		(start 151.96 63.56)
-		(end 149.745686 63.56)
-		(width 0.2)
-		(layer "B.Cu")
-		(net "/3V3")
-		(uuid "e039634c-3f90-4948-8611-ca6acd05a0f8")
-	)
-	(segment
-		(start 148.585686 64.72)
-		(end 127.71 64.72)
-		(width 0.2)
-		(layer "B.Cu")
-		(net "/3V3")
-		(uuid "fc1146ef-dee4-4a48-a08f-19b26d9fa546")
-	)
-	(segment
-		(start 126.55 66.1)
-		(end 149.18 66.1)
-		(width 0.2)
-		(layer "B.Cu")
-		(net "/5V")
-		(uuid "25fc41ee-85c9-4d1f-837e-c3a408cf8530")
-	)
-	(segment
-		(start 149.18 66.1)
+		(start 150.42858 64.71)
 		(end 150.57 64.71)
-		(width 0.2)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/5V")
-		(uuid "ccccd795-9db6-4b6b-a7bd-4a0544e10919")
+		(uuid "3521980d-b48c-4724-911e-0e3342699021")
+	)
+	(segment
+		(start 126.39 65.94)
+		(end 126.4 65.94)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/5V")
+		(uuid "6c14f8f3-e55b-4876-9ff8-6adb742b55ff")
+	)
+	(segment
+		(start 126.46 66)
+		(end 149.13858 66)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/5V")
+		(uuid "6d3be3b7-4302-41e0-b177-1e0fe2c28eb3")
+	)
+	(segment
+		(start 126.4 65.94)
+		(end 126.46 66)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/5V")
+		(uuid "74459c1a-9a4b-4b86-a0bf-b54d6319a41c")
+	)
+	(segment
+		(start 149.13858 66)
+		(end 150.42858 64.71)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/5V")
+		(uuid "79370e78-36df-45fb-a9c8-488a4e0bf79c")
+	)
+	(segment
+		(start 150.57 64.71)
+		(end 149.89 65.39)
+		(width 0.4)
+		(layer "B.Cu")
+		(net "/5V")
+		(uuid "8de5ac5a-ae97-42c0-a103-4452e2b74c8d")
 	)
 	(segment
 		(start 125.17 64.72)
-		(end 126.55 66.1)
-		(width 0.2)
+		(end 126.39 65.94)
+		(width 0.4)
 		(layer "B.Cu")
 		(net "/5V")
-		(uuid "cd3d5e50-fc66-4257-8cce-fc27aae9d1d8")
+		(uuid "d0ae9105-5921-4718-8c2a-e73ed8689807")
 	)
 	(segment
 		(start 148.585686 67.26)
@@ -1023,22 +1063,24 @@
 		(uuid "fdf5f8f9-0d8b-4028-95a0-044476252cce")
 	)
 	(group ""
-		(uuid "48f27ae6-fbe0-406f-a5dd-92cadeb711e4")
+		(uuid "e8737c22-d598-4321-8405-b775d5d5a41b")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Interface_Daughterboard")
-		(members "003c8b3b-0cc0-4f67-8da6-253e704f713e" "20a52997-14fe-436f-bdd1-ef99f9ea5cb0"
-			"25fc41ee-85c9-4d1f-837e-c3a408cf8530" "27b103ff-75e2-4b95-bd9b-b2b5fb7b0bcc"
-			"2e85fa91-8c85-413a-9c90-b0922fc3903b" "311a5afa-0adf-4ce5-af4e-7cec1efb5213"
-			"325fefb4-229a-46ed-a001-fe03ed8c92be" "35f0d4e1-5149-4e61-b9af-0e3323bdb0ee"
+		(members "162b46fc-5f49-40aa-b153-07c8de5603cc" "183b4383-7708-4d10-a2b5-1bd07630ccc6"
+			"27b103ff-75e2-4b95-bd9b-b2b5fb7b0bcc" "2e85fa91-8c85-413a-9c90-b0922fc3903b"
+			"311a5afa-0adf-4ce5-af4e-7cec1efb5213" "325fefb4-229a-46ed-a001-fe03ed8c92be"
+			"3521980d-b48c-4724-911e-0e3342699021" "35f0d4e1-5149-4e61-b9af-0e3323bdb0ee"
 			"3b0c9218-94d9-4412-8646-fb64b718ca47" "403aaa93-570c-41b4-9827-5634da065eff"
-			"4d4a02d8-5c1d-4949-97fe-35cefe91e51c" "5977dff8-2807-4060-a16a-2497edaa406c"
+			"4f70ed5f-6fcf-4063-8237-5aba9da55dfd" "5977dff8-2807-4060-a16a-2497edaa406c"
 			"5ea8b983-cb4a-4d04-b60f-8b2faee96f4a" "606a5fd7-cd9d-45b4-a23e-1dbd1075a541"
-			"68831de7-b0ea-47d7-adb3-1deaef367dac" "779ad242-7e2d-4d10-a574-9f3f6ecafa9b"
-			"8e0ae5a5-0e10-40ef-9955-1efe452e64a0" "91f851c4-1807-4809-9693-9c5c8d87613e"
-			"a5ad8ac8-3135-4820-b761-2a712a52b5ea" "aefb7aec-4157-42f6-8b12-34bf2ad256ce"
-			"bfdd481a-1cf6-4ece-8b3d-b9baf0202873" "c6593a78-d2fd-4ab5-984c-de106519d3c5"
-			"ccccd795-9db6-4b6b-a7bd-4a0544e10919" "cd3d5e50-fc66-4257-8cce-fc27aae9d1d8"
-			"dda50c7f-b302-4664-add9-b7aa22e9df28" "e039634c-3f90-4948-8611-ca6acd05a0f8"
-			"fc1146ef-dee4-4a48-a08f-19b26d9fa546" "fdf5f8f9-0d8b-4028-95a0-044476252cce"
+			"6c14f8f3-e55b-4876-9ff8-6adb742b55ff" "6d3be3b7-4302-41e0-b177-1e0fe2c28eb3"
+			"74459c1a-9a4b-4b86-a0bf-b54d6319a41c" "779ad242-7e2d-4d10-a574-9f3f6ecafa9b"
+			"79370e78-36df-45fb-a9c8-488a4e0bf79c" "7de93003-14cd-422f-a24e-b885d8df8f13"
+			"8de5ac5a-ae97-42c0-a103-4452e2b74c8d" "8e0ae5a5-0e10-40ef-9955-1efe452e64a0"
+			"8f957ed0-08d1-4c30-bd80-c9dd92358162" "91f851c4-1807-4809-9693-9c5c8d87613e"
+			"a5ad8ac8-3135-4820-b761-2a712a52b5ea" "c6593a78-d2fd-4ab5-984c-de106519d3c5"
+			"c8f7e4c5-9ad9-4aea-875a-1bace808fe69" "d0ae9105-5921-4718-8c2a-e73ed8689807"
+			"d4ab6311-06e5-49d8-9813-c69650a0fe09" "dda50c7f-b302-4664-add9-b7aa22e9df28"
+			"ea36d5b6-7e7b-47f9-a6bc-da2f64476058" "fdf5f8f9-0d8b-4028-95a0-044476252cce"
 		)
 	)
 	(embedded_fonts no)

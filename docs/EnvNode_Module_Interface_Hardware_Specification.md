@@ -1,7 +1,7 @@
 # EnvNode Module Interface – Hardware Specification
 
 **Status:** Draft  
-**Revision:** 0.2
+**Revision:** 0.3
 
 ## 1. Purpose and Scope
 
@@ -118,11 +118,32 @@ X = 25.40 mm
 Y = 0.00 mm
 ```
 
-The overall module PCB dimensions, outline, mounting-hole pattern, and connector-to-board-edge positions are not standardized.
+The overall module PCB dimensions, outline, mounting-hole pattern, and connector-to-board-edge positions are not standardized by the electrical interface. Reusable HalfSize and FullSize reference templates may define project-specific module outlines without changing the connector interface itself.
 
 The module-side receptacles are mounted on the bottom side of the module PCB. Their footprints shall account for the mirrored bottom-side geometry while retaining the standardized assembled pin positions. The EnvNode bottom-mounted receptacle footprint uses pre-mirrored pad locations for this purpose.
 
 The initial mechanical exploration will include a representative two-relay module with flyback diodes and associated components. Its purpose is to determine practical connector geometry and packaging constraints; its dimensions are not defined by this revision.
+
+### 5.1 Daughterboard Reference Design Block
+
+The KiCad reference implementation for the module side is:
+
+`EnvNodeDesignBlocks:EnvNode_Module_Interface_Daughterboard`
+
+Its editable source is located in `hardware/kicad/DesignBlocks/EnvNode_Module_Interface_Daughterboard/`; the published copy is stored in the project design-block library below `hardware/kicad/Libraries/EnvNodeDesignBlocks.kicad_blocks/`.
+
+The reference block provides:
+
+- two bottom-mounted `PinSocket_2x04_P2.54mm_Vertical_Bottom` footprints;
+- identical J1 and J2 pin assignments;
+- 25.40 mm horizontal connector spacing with no vertical offset;
+- parallel routing of `24V`, `3V3`, and `5V` using 0.40 mm tracks;
+- parallel routing of `SDA`, `SCL`, `GPIO1`, and `GPIO2` using 0.20 mm tracks; and
+- GND connectivity intended to be completed by a copper zone on the module PCB.
+
+These track widths are a reference-layout baseline, not an interface current rating. Each completed module must still be checked for its actual current, copper thickness, temperature rise, protection, and connector limits.
+
+Detailed usage and maintenance instructions are provided in `hardware/kicad/DesignBlocks/EnvNode_Module_Interface_Daughterboard/README.md`.
 
 ## 6. Open Points for Future Revisions
 
@@ -140,4 +161,4 @@ The following items remain intentionally open:
 
 ## 7. Revision Status
 
-Revision 0.2 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, and the Mainboard Revision 0.2 identification EEPROM. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
+Revision 0.3 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, and the validated daughterboard reference design block. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
