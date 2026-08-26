@@ -13,4 +13,5 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 
 ## Module Templates
 
-The HalfSize and FullSize EmptyModule projects under `hardware/kicad/Modules/` are reusable starting points for module development. Their detailed documentation and formal reference status will be added after both templates have been updated from the validated daughterboard design block and have passed their final ERC, DRC, and geometry checks.
+- [EmptyModule FullSize](../hardware/kicad/Modules/EmptyModule_FullSize/README.md) is the validated 38 mm x 64 mm starting point for full-size daughterboards.
+- `EmptyModule_HalfSize` remains provisional until it has been updated from the validated daughterboard design block and has passed its final ERC, DRC, and geometry checks.
