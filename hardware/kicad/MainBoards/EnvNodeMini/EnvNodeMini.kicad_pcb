@@ -1579,7 +1579,7 @@
 				)
 			)
 		)
-		(property "Value" "STPS3L60S"
+		(property "Value" "B360B-13-F"
 			(at 0 3 0)
 			(layer "F.Fab")
 			(uuid "144e091e-0406-4e0b-b54b-574cb7afc392")
