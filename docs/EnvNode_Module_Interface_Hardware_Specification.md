@@ -1,7 +1,7 @@
 # EnvNode Module Interface – Hardware Specification
 
 **Status:** Draft  
-**Revision:** 0.5
+**Revision:** 0.6
 
 ## 1. Purpose and Scope
 
@@ -153,6 +153,16 @@ Detailed usage and maintenance instructions are provided in `hardware/kicad/Desi
 
 The FullSize and HalfSize dimensions are project reference geometries and do not change the electrical interface requirements. Detailed geometry, derivation, validation, and design-block update instructions are provided in the `README.md` file of each template directory.
 
+### 5.3 DuoRelay Reference Implementation
+
+`hardware/kicad/Modules/DuoRelay/` is the first validated functional module derived from the FullSize template. It provides two independently driven 5 V changeover relays using `GPIO1` and `GPIO2`.
+
+DuoRelay demonstrates module-owned safe GPIO defaults, relay flyback handling, deliberate separation between SELV and contact circuitry, and a project-specific custom DRC rule. Its contact nets use 1.5 mm F.Cu tracks and maintain 8 mm clearance to all non-contact copper. The GND zone is restricted to the control-side region.
+
+The released current limits of 3 A per channel for resistive loads and the provisional 2 A limit for inductive loads apply only to DuoRelay Revision 0.1 with at least 35 micrometers of external copper. They are not limits of the generic EnvNode Module Interface.
+
+Detailed pinout, circuitry, terminal order, current limits, DRC rule, safety constraints, and bring-up instructions are provided in `hardware/kicad/Modules/DuoRelay/README.md`.
+
 ## 6. Open Points for Future Revisions
 
 The following items remain intentionally open:
@@ -169,4 +179,4 @@ The following items remain intentionally open:
 
 ## 7. Revision Status
 
-Revision 0.5 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, and the FullSize and HalfSize project templates. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
+Revision 0.6 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, the FullSize and HalfSize project templates, and the DuoRelay reference implementation. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
