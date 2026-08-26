@@ -4579,7 +4579,7 @@
 			(uuid "4b05d475-d780-4fc1-b249-69de5579c847")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "U4")
 					(unit 1)
@@ -4657,7 +4657,7 @@
 			(uuid "6c22439c-f341-456b-a006-6734e315be50")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR04")
 					(unit 1)
@@ -4742,7 +4742,7 @@
 			(uuid "0010dbda-ae56-4095-b39d-648d46c11975")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR01")
 					(unit 1)
@@ -4834,7 +4834,7 @@
 			(uuid "0fd4bbd0-3104-49a0-aabe-874879be0186")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "I2C0_1")
 					(unit 1)
@@ -4919,7 +4919,7 @@
 			(uuid "58842659-1f32-4f7a-acf4-a0efef04f707")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "U3")
 					(unit 1)
@@ -5005,7 +5005,7 @@
 			(uuid "034eb49c-3f6d-482b-bc93-9b8e434c9f5f")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "I2C0_2")
 					(unit 1)
@@ -5047,7 +5047,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm"
+		(property "Footprint" "Capacitor_SMD:CP_Elec_6.3x7.7"
 			(at 93.6752 167.64 0)
 			(hide yes)
 			(show_name no)
@@ -5087,7 +5087,7 @@
 			(uuid "4ed13f4c-fc50-468e-a131-fdb6cb532643")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "C1")
 					(unit 1)
@@ -5169,7 +5169,7 @@
 			(uuid "207afb3b-336f-4bb9-bb54-d635750ebbc4")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "C2")
 					(unit 1)
@@ -5249,7 +5249,7 @@
 			(uuid "68b5116e-0c8e-415c-aa86-a024949ab586")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "F1")
 					(unit 1)
@@ -5329,7 +5329,7 @@
 			(uuid "c8a39a55-5665-495a-9c42-f8a7494ee222")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "R1")
 					(unit 1)
@@ -5411,7 +5411,7 @@
 			(uuid "1a3e788a-12eb-43a0-a757-247073d2afa0")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "D2")
 					(unit 1)
@@ -5490,7 +5490,7 @@
 			(uuid "b836178d-7198-4b34-a03c-1681a71b27df")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR08")
 					(unit 1)
@@ -5570,7 +5570,7 @@
 			(uuid "92cdf079-2dd3-4c3a-b8d4-a0b795e9270d")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "D1")
 					(unit 1)
@@ -5648,7 +5648,7 @@
 			(uuid "6e98d5e7-7982-469d-8301-db2ca8937714")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR03")
 					(unit 1)
@@ -5732,7 +5732,7 @@
 			(uuid "f682d16c-229b-4d74-ae01-c69c3e0970a1")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR06")
 					(unit 1)
@@ -5810,7 +5810,7 @@
 			(uuid "001b664b-d6d8-47f4-8887-09fe92de4586")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR05")
 					(unit 1)
@@ -5889,7 +5889,7 @@
 			(uuid "654cb9e8-dbee-47c7-b67e-3a87b69b4e8b")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR09")
 					(unit 1)
@@ -5967,7 +5967,7 @@
 			(uuid "9254c3ac-251e-48bf-8424-6df191b09714")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#FLG01")
 					(unit 1)
@@ -6053,7 +6053,7 @@
 					(unit 1)
 				)
 			)
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "J3")
 					(unit 1)
@@ -6133,7 +6133,7 @@
 			(uuid "3b93a437-fb21-4677-bf6a-4181d23b08a2")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "JP2")
 					(unit 1)
@@ -6211,7 +6211,7 @@
 			(uuid "6aa3d4b2-bd41-4877-a894-d6392e7a1443")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#FLG02")
 					(unit 1)
@@ -6291,7 +6291,7 @@
 			(uuid "789735e6-8fbf-4ac4-bacc-7a65f6f1681e")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "R2")
 					(unit 1)
@@ -6385,7 +6385,7 @@
 			(uuid "8dff85a6-696d-416c-9a1d-9447f1a89747")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "U2")
 					(unit 1)
@@ -6471,7 +6471,7 @@
 			(uuid "4ca07d6e-6654-4825-a4c6-d16cb0ce1071")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "JP1")
 					(unit 1)
@@ -6661,7 +6661,7 @@
 			(uuid "5fe11b13-ec65-47d2-bcfb-0ba7e18aa10f")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "U1")
 					(unit 1)
@@ -6746,7 +6746,7 @@
 			(uuid "3827e1fb-ee10-4615-aba7-8c0ac8df95cb")
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(reference "#PWR02")
 					(unit 1)
@@ -6898,7 +6898,7 @@
 			)
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(page "2")
 				)
@@ -7024,7 +7024,7 @@
 			)
 		)
 		(instances
-			(project "EnvNodeMIni"
+			(project "EnvNodeMini"
 				(path "/bc65ad1a-48cb-4693-9eab-33a13bb66b0b"
 					(page "3")
 				)
