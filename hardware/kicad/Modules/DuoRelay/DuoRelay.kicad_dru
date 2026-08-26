@@ -1,0 +1,7 @@
+(version 1)
+
+(rule "250VAC to SELV clearance"
+    (severity error)
+    (condition "(A.hasNetclass('250V') && !B.hasNetclass('250V')) || (B.hasNetclass('250V') && !A.hasNetclass('250V'))")
+    (constraint clearance (min 8mm))
+)
