@@ -1,0 +1,5 @@
+{
+"description": "14-pin EnvNode mainboard module connector providing dual ground, 3.3 V and 5 V power, two I2C buses, two slot-specific AUX GPIO signals, and one SPI bus.",
+"keywords": "EnvNode, module connector, mainboard, 14-pin, 2x7, I2C, SPI, AUX GPIO, 3V3, 5V",
+"fields": {}
+}
