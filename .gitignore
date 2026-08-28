@@ -6,6 +6,7 @@ firmware/.vscode/
 .DS_Store
 
 # KiCad backups / autosave
+**/*.kicad_prl
 hardware/kicad/*/*-backups/
 hardware/kicad/*/*.kicad_prl
 hardware/kicad/*/_autosave-*
