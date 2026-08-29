@@ -1,4 +1,8 @@
-# EnvNode Daughterboard Module Interface Design Block
+# Legacy EnvNode Daughterboard Module Interface Design Block
+
+> **Obsolete Revision 0.1 reference:** This directory describes the former two-connector 2 x 4 interface, including a 24 V rail. It must not be used for new Revision 0.2 modules.
+>
+> Current module projects must use `EnvNode_Module_Connector_Daughterboard_SMD` or `EnvNode_Module_Connector_Daughterboard_THT` and the 2 x 7 pin assignment in `docs/EnvNode_Module_Interface_Hardware_Specification.md`.
 
 ## Purpose
 

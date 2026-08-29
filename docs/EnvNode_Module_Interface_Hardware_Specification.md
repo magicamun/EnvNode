@@ -1,190 +1,141 @@
 # EnvNode Module Interface – Hardware Specification
 
-**Status:** Draft  
-**Revision:** 0.6
+**Status:** Implemented design baseline
+
+**Revision:** 0.7
+
+**Applies to:** Mainboard Revision 0.2 and later
 
 ## 1. Purpose and Scope
 
-The EnvNode Module Interface defines a generic internal electrical and mechanical interface for EnvNode expansion modules. It is an EnvNode-wide interface and is not specific to RainControl, cistern control, or any other individual application.
+The EnvNode Module Interface is the internal electrical and mechanical interface between an EnvNode mainboard and a plug-in module. It supports I²C, SPI, two slot-specific auxiliary GPIOs, and the 3.3 V and 5 V system rails.
 
-Potential modules include:
+The interface deliberately does **not** carry 24 V. A module that requires 24 V must generate it locally from 5 V or receive it through a separate, application-specific connection.
 
-- analog input modules, for example for 4–20 mA sensors;
-- relay and actuator modules;
-- power modules, for example a 5 V to 24 V converter; and
-- future I²C- or GPIO-based modules.
+Backward compatibility with the earlier Revision 0.1 two-connector interface is not a requirement.
 
-This revision records the agreed interface principles. Items that still require electrical or mechanical evaluation are explicitly listed as open points and are not specified prematurely.
+## 2. Connector and Pin Assignment
 
-## 2. Interface Architecture
+Each physical module slot uses one 2 × 7 connector on a 2.54 mm pitch with odd/even pin numbering.
 
-An expansion module connects through two mechanically separated connectors designated **C1** and **C2**.
-
-The two connectors used on a given board shall:
-
-- use a keyed 2 × 4 contact arrangement on a 2.54 mm pitch;
-- be mechanically identical;
-- have the same orientation;
-- use exactly the same standardized physical pin assignment.
-
-On a mainboard, C1 and C2 shall be fully connected in parallel. A module shall preserve the standardized physical pin assignment on both connectors, but may leave unused interface pins electrically unconnected. Interface pins shall not be repurposed.
-
-A module may connect a required power or signal net through either connector or through both connectors. Power and ground should be connected through both connectors where this is beneficial for current capacity or connection integrity.
-
-The second connector is intended to provide additional mechanical support, particularly for larger modules or modules subject to wiring forces, such as relay boards with terminal blocks.
-
-The exact connector part or connector family has not yet been selected. A keyed shrouded header and matching receptacle or cable connector is one possible implementation.
-
-## 3. Electrical Interface
-
-The interface assigns the following eight nets to the physical connector pins:
-
-| Pin | Net | Function |
+| Pin | Interface net | Function |
 | ---: | --- | --- |
-| 1 | `GND` | Common ground reference |
-| 2 | `24V` | 24 V power rail |
-| 3 | `3V3` | 3.3 V power rail |
-| 4 | `5V` | 5 V power rail |
-| 5 | `SDA` | I²C serial data |
-| 6 | `SCL` | I²C serial clock |
-| 7 | `GPIO1` | General-purpose signal |
-| 8 | `GPIO2` | General-purpose signal |
+| 1 | `GND` | Ground |
+| 2 | `+3V3_SYS` | 3.3 V system rail |
+| 3 | `GND` | Ground |
+| 4 | `+5V` | 5 V system rail |
+| 5 | `I2C0_SDA` | System I²C data |
+| 6 | `I2C0_SCL` | System I²C clock |
+| 7 | `I2C1_SDA` | Secondary I²C data |
+| 8 | `I2C1_SCL` | Secondary I²C clock |
+| 9 | `AUX_GPIO1` | First slot-specific GPIO |
+| 10 | `AUX_GPIO2` | Second slot-specific GPIO |
+| 11 | `SPI_MOSI` | Shared SPI controller-to-module data |
+| 12 | `SPI_MISO` | Shared SPI module-to-controller data |
+| 13 | `SPI_SCK` | Shared SPI clock |
+| 14 | `SPI_CS` | Slot-specific SPI chip select |
 
-The same pin assignment applies to C1 and C2 and to both sides of the interface. The connector positions do not provide independent power or signal channels.
+The generic names `AUX_GPIO1`, `AUX_GPIO2`, and `SPI_CS` describe the connector contract. A mainboard maps them to distinct resources for each slot.
 
-In the common plan view of an assembled mainboard and module, pin 1 is located at the upper-right corner of each 2 × 4 connector. The mating mainboard header and bottom-mounted module receptacle shall place corresponding pin numbers at identical assembled XY positions.
+Unused pins may remain electrically unconnected on a module but must not be repurposed.
 
-### 3.1 System I²C Bus
+## 3. Mainboard Revision 0.2 Mapping
 
-On all ESP32-based EnvNode mainboard variants, the mandatory system I²C bus shall use the following GPIOs:
+The ESP32 Core Dual Power design fixes the shared buses as follows:
 
-| Signal | ESP32 GPIO |
-| --- | --- |
-| `SDA` | GPIO21 |
-| `SCL` | GPIO22 |
+| Interface signal | ESP32 GPIO |
+| --- | ---: |
+| `I2C0_SDA` | GPIO21 |
+| `I2C0_SCL` | GPIO22 |
+| `I2C1_SDA` | GPIO25 |
+| `I2C1_SCL` | GPIO26 |
+| `SPI_MOSI` | GPIO23 |
+| `SPI_MISO` | GPIO19 |
+| `SPI_SCK` | GPIO18 |
+| Slot A `SPI_CS` | GPIO5 / core net `CS` |
 
-GPIO21 and GPIO22 are reserved for the system I²C bus and form part of the EnvNode hardware ABI. Variant-specific hardware, including future 868 MHz radio implementations, shall not use these GPIOs for other functions.
+EnvNode Mini implements two slots:
 
-Mainboard-internal infrastructure devices, including the board identification EEPROM, shall use this system I²C bus.
+| Slot | Pin 9 | Pin 10 | Pin 14 |
+| --- | --- | --- | --- |
+| A | `AUX1` | `AUX2` | `CS` |
+| B | `AUX3` | `AUX4` | `AUX6` used as the second chip select |
 
-The Full Mainboard additionally assigns GPIO25 (`SDA`) and GPIO26 (`SCL`) to its second I²C bus. These GPIOs are intended to remain available for the same purpose on a future 868 MHz mainboard variant.
+MOSI, MISO, and SCK are shared between slots. Each populated SPI module requires its own chip-select signal. On the two-slot Mini this consumes the core `CS` signal for Slot A and `AUX6` for Slot B.
 
-### 3.2 Mainboard Identification
+## 4. Power
 
-Starting with Mainboard Revision 0.2, EnvNode mainboards shall provide a non-volatile board identification device on the system I²C bus.
+The mainboard supplies `+5V` and `+3V3_SYS` to each slot. Modules are consumers of these rails unless a future module and mainboard specification explicitly defines another power-flow direction and the required protection.
 
-The board identification device is a Microchip `24AA025E48` EEPROM with a factory-programmed EUI-48 identifier. It shall be connected as follows:
+`+3V3_SYS` is the already ORed system rail. A module must not connect another uncoordinated 3.3 V source to it.
 
-| Property | Assignment |
-| --- | --- |
-| I²C bus | System I²C bus |
-| `SDA` | GPIO21 |
-| `SCL` | GPIO22 |
-| I²C address | `0x50` |
-| `A0` | GND |
-| `A1` | GND |
-| Supply | 3.3 V |
+The connector specification does not itself define an allowable current. Every module must be checked against the selected connector, copper thickness, trace widths, thermal conditions, mainboard supply budget, and expected simultaneous load.
 
-The EEPROM stores an EnvNode board identifier that maps to the same board definitions used by the EnvNode runtime firmware and the board provisioning firmware. The factory-programmed EUI-48 provides a unique physical identifier for each mainboard.
+## 5. Mechanical Definition
 
-Mainboard Revision 0.1 does not contain a board identification EEPROM and shall be treated as a legacy board by the firmware.
+The reference daughterboards are 38.00 mm wide. Their connector axis is centered across the board width and is 6.35 mm from the top board edge.
 
-These mainboard-specific requirements are included in this document while only one EnvNode mainboard family exists. They shall be moved into a dedicated mainboard hardware specification when another mainboard is derived.
+| Template | PCB size | Support-hole axis from top |
+| --- | --- | ---: |
+| HalfSize | 38.00 mm × 32.00 mm | 27.00 mm |
+| FullSize | 38.00 mm × 64.00 mm | 27.00 mm and 59.00 mm |
 
-## 4. Power-Rail Ownership
+Support holes use 2.7 mm drill geometry for common M2.5 hardware. The installed spacer height must match the mated connector stack height.
 
-The `24V`, `5V`, and `3V3` nets are shared power rails that form part of the module interface. Depending on the EnvNode mainboard and installed modules, a rail may be supplied by either a mainboard or a module, and other participants may consume power from it.
+The module connector is mounted on the module's bottom side. SMD and THT reference implementations exist; their pad numbering must produce the same assembled pin-to-pin mapping as the mainboard socket.
 
-For each power rail, **exactly one active source is permitted in a complete assembled system**. Multiple active sources on the same rail are not permitted unless a future revision explicitly defines a safe power-sharing or isolation mechanism.
+## 6. KiCad Reference Implementations
 
-System integration shall therefore establish rail ownership before a mainboard and its modules are combined.
+Current source design blocks:
 
-Example configurations include:
+- `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_MainBoard/`
+- `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_SMD/`
+- `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_THT/`
 
-- A standard 5 V-powered EnvNode may provide `5V` and `3V3`. An optional power module may generate and source `24V` from `5V` when a 24 V rail is required.
-- A Control/Cistern mainboard may be powered from 24 V, source `24V` onto the interface, and generate the `5V` and `3V3` rails locally.
+Current empty module templates:
 
-These examples illustrate possible rail ownership; they do not define mandatory power architectures for all EnvNode products.
+- `hardware/kicad/Modules/EmptyHalf_SMD/`
+- `hardware/kicad/Modules/EmptyHalf_THT/`
+- `hardware/kicad/Modules/EmptyFull_SMD/`
+- `hardware/kicad/Modules/EmptyFull_THT/`
 
-## 5. Mechanical Scope
+The source project and the separately published schematic and PCB portions in `hardware/kicad/Libraries/EnvNodeDesignBlocks.kicad_blocks/` must be kept synchronized. Updating a schematic from a design block does not automatically replace an already placed PCB layout.
 
-The EnvNode Module Interface standardizes the connector-based mechanical relationship between a mainboard and a module. It does not standardize the overall module PCB size, outline, or shape.
+## 7. Module Identification and Generic Fallback
 
-The pin-1 coordinates of C1 and C2 shall have a horizontal center-to-center spacing of **25.40 mm** with no vertical offset. Both connectors shall have the same orientation. Connector spacing is therefore defined as:
+A module may later contain a module-specific identification EEPROM, but such an EEPROM is not mandatory in this revision. DuoRelay intentionally has none.
 
-```text
-C1 pin 1 to C2 pin 1:
-X = 25.40 mm
-Y = 0.00 mm
-```
+If the firmware finds no valid module-specific identity, it must not infer a module type from the PCB or automatically activate a device-specific driver. The slot remains in generic mode:
 
-The overall module PCB dimensions, outline, mounting-hole pattern, and connector-to-board-edge positions are not standardized by the electrical interface. Reusable HalfSize and FullSize reference templates may define project-specific module outlines without changing the connector interface itself.
+- both I²C buses remain available as ordinary buses; and
+- the two `AUX_GPIO` signals remain ordinary configurable GPIO ports.
 
-The module-side receptacles are mounted on the bottom side of the module PCB. Their footprints shall account for the mirrored bottom-side geometry while retaining the standardized assembled pin positions. The EnvNode bottom-mounted receptacle footprint uses pre-mirrored pad locations for this purpose.
+SPI operation likewise requires explicit configuration because the absence of a module identity provides no information about an attached SPI device or its protocol.
 
-The initial mechanical exploration will include a representative two-relay module with flyback diodes and associated components. Its purpose is to determine practical connector geometry and packaging constraints; its dimensions are not defined by this revision.
+The mainboard identity EEPROM is independent of optional module identification. Mainboard Revision 0.2 uses the `24AA025E48` at I²C address `0x50` on `I2C0`; its record is defined in `docs/BoardIdentityRecord.md`.
 
-### 5.1 Daughterboard Reference Design Block
+## 8. DuoRelay Reference Module
 
-The KiCad reference implementation for the module side is:
+`hardware/kicad/Modules/DuoRelay/` is the first module ported to the Revision 0.2 interface. It is a FullSize THT module with two independently controlled 5 V changeover relays:
 
-`EnvNodeDesignBlocks:EnvNode_Module_Interface_Daughterboard`
+- connector pin 9 / `AUX_GPIO1` drives relay channel 1;
+- connector pin 10 / `AUX_GPIO2` drives relay channel 2;
+- each channel uses a BC817 low-side driver, 1 kΩ base resistor, 100 kΩ pull-down, and 1N4148W flyback diode; and
+- the SPI and I²C pins are unused by the present hardware.
 
-Its editable source is located in `hardware/kicad/DesignBlocks/EnvNode_Module_Interface_Daughterboard/`; the published copy is stored in the project design-block library below `hardware/kicad/Libraries/EnvNodeDesignBlocks.kicad_blocks/`.
+The relay-contact routing uses 1.0 mm traces. The 250 VAC contact region is kept at least 8 mm from all SELV copper on both copper layers, including the GND zone. This project-specific layout decision is not a blanket safety certification; enclosure, terminals, fusing, pollution degree, material group, overvoltage category, load type, and applicable product standards still belong to the completed product assessment.
 
-The reference block provides:
+## 9. Open Points
 
-- two bottom-mounted `PinSocket_2x04_P2.54mm_Vertical_Bottom` footprints;
-- identical J1 and J2 pin assignments;
-- 25.40 mm horizontal connector spacing with no vertical offset;
-- parallel routing of `24V`, `3V3`, and `5V` using 0.40 mm tracks;
-- parallel routing of `SDA`, `SCL`, `GPIO1`, and `GPIO2` using 0.20 mm tracks; and
-- GND connectivity intended to be completed by a copper zone on the module PCB.
+The following remain intentionally open:
 
-These track widths are a reference-layout baseline, not an interface current rating. Each completed module must still be checked for its actual current, copper thickness, temperature rise, protection, and connector limits.
+1. Exact production connector part numbers and qualified mated stack height.
+2. Per-rail current limits and a complete mainboard/module power budget.
+3. I²C pull-up ownership, bus capacitance limits, and supported clock rates.
+4. Electrical protection requirements for modules exposed to external wiring.
+5. The format, address allocation, and discovery procedure for a future module-identification EEPROM.
+6. Firmware implementation of the generic unidentified-module mode.
 
-Detailed usage and maintenance instructions are provided in `hardware/kicad/DesignBlocks/EnvNode_Module_Interface_Daughterboard/README.md`.
+## 10. Revision Status
 
-### 5.2 FullSize and HalfSize Reference Templates
-
-`hardware/kicad/Modules/EmptyModule_FullSize/` is the validated project starting point for full-size EnvNode daughterboards. It applies the daughterboard reference design block to a 38.00 mm x 64.00 mm PCB outline and completes GND with a copper zone.
-
-`hardware/kicad/Modules/EmptyModule_HalfSize/` is the corresponding starting point for compact daughterboards. It uses the same schematic, connector geometry, linked design block, and routing with a 38.00 mm x 32.00 mm PCB outline and a correspondingly reduced GND zone.
-
-The FullSize and HalfSize dimensions are project reference geometries and do not change the electrical interface requirements. Detailed geometry, derivation, validation, and design-block update instructions are provided in the `README.md` file of each template directory.
-
-### 5.3 DuoRelay Reference Implementation
-
-`hardware/kicad/Modules/DuoRelay/` is the first validated functional module derived from the FullSize template. It provides two independently driven 5 V changeover relays using `GPIO1` and `GPIO2`.
-
-DuoRelay demonstrates module-owned safe GPIO defaults, relay flyback handling, deliberate separation between SELV and contact circuitry, and a project-specific custom DRC rule. Its contact nets use 1.5 mm F.Cu tracks and maintain 8 mm clearance to all non-contact copper. The GND zone is restricted to the control-side region.
-
-The released current limits of 3 A per channel for resistive loads and the provisional 2 A limit for inductive loads apply only to DuoRelay Revision 0.1 with at least 35 micrometers of external copper. They are not limits of the generic EnvNode Module Interface.
-
-Detailed pinout, circuitry, terminal order, current limits, DRC rule, safety constraints, and bring-up instructions are provided in `hardware/kicad/Modules/DuoRelay/README.md`.
-
-### 5.4 AnalogInput Reference Implementation
-
-`hardware/kicad/Modules/AnalogInput/` is a validated functional module derived from the HalfSize template. It connects one externally supplied 4–20 mA pressure probe to an ADS1115 on the system I²C bus.
-
-The module uses the interface `24V` rail for the loop supply and `3V3` for the ADC and input clamp. A precision 150 ohm burden resistor converts the loop current into approximately 0.6–3.0 V. The ADS1115 address is selected through four open solder jumpers; exactly one address jumper must be closed during assembly.
-
-The AnalogInput implementation does not change the generic EnvNode Module Interface. Its probe characteristics, ADC range, calibration, component tolerances, and power budget are module-specific requirements documented in `hardware/kicad/Modules/AnalogInput/README.md`.
-
-## 6. Open Points for Future Revisions
-
-The following items remain intentionally open:
-
-1. Exact connector family and part numbers.
-2. Mated connector stack height and permitted tolerance.
-3. Current limits for each power rail, each connector contact, and the interface as a whole.
-4. GPIO voltage levels, direction rules, drive capability, default states, and permitted alternate functions.
-5. Required protection, including reverse-current, overvoltage, overcurrent, transient, and ESD protection.
-6. Required behavior when one or more power rails are absent or unpowered.
-7. I²C pull-up ownership, permitted pull-up values, bus voltage, bus capacitance, speed, and wiring or topology requirements beyond the fixed system-bus GPIO assignment and board-EEPROM address defined above.
-8. PCB-edge placement, allowable board overhang, component keep-out areas, mating clearance, and enclosure constraints.
-9. Any required module identification, capability declaration, or rail-source indication mechanism.
-
-## 7. Revision Status
-
-Revision 0.6 is a design draft. It establishes the shared interface concept, connector duplication, physical pin assignment, 25.40 mm connector spacing, mainboard-versus-module connectivity rules, the single-source-per-rail rule, the mandatory system I²C GPIO assignment, the Mainboard Revision 0.2 identification EEPROM, the validated daughterboard reference design block, the FullSize and HalfSize project templates, and the DuoRelay and AnalogInput reference implementations. It is not yet sufficient for interchangeability without project-specific agreement on the remaining open electrical and mechanical points above.
+Revision 0.7 replaces the obsolete two-connector 2 × 4 definition with the implemented single-connector 2 × 7 interface. It fixes the pin assignment, records that 24 V is not present, documents the two-slot EnvNode Mini mapping and shared-SPI chip-select rule, defines the HalfSize and FullSize reference geometry, and records the generic firmware behavior for modules without an identification EEPROM.
