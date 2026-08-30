@@ -651,7 +651,7 @@
 		)
 		(uuid "1c8503ad-4197-4a29-80f8-4015167ca355")
 	)
-	(label "GND"
+	(label "EEPROM_A0"
 		(at 127 67.31 180)
 		(effects
 			(font
@@ -1020,7 +1020,7 @@
 		)
 	)
 	(group ""
-		(uuid "5df9f9b6-1f6a-4384-b085-cd5f8dca98c7")
+		(uuid "0457afa5-5ef3-4943-86c6-2f41c8c3191a")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
 		(members "04de4948-7696-4b1d-820c-c8671aa15d66" "06b12ad7-6d3d-4214-8a76-79eee3a52335"
 			"1a63e1ee-657f-4641-b216-968f1972addb" "1c8503ad-4197-4a29-80f8-4015167ca355"

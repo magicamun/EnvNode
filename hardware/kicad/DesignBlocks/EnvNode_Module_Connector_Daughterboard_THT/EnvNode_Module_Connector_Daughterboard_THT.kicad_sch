@@ -632,7 +632,7 @@
 		)
 		(uuid "e810eb5b-0248-45d6-9a0a-9d0e7d665879")
 	)
-	(label "GND"
+	(label "EEPROM_A0"
 		(at 133.35 78.74 180)
 		(effects
 			(font
@@ -760,7 +760,7 @@
 			(uuid "e02bc921-802f-4de7-b729-bb5a9a5be637")
 		)
 		(instances
-			(project "EnvNode_Module_Connector_Daughterboard"
+			(project "EnvNode_Module_Connector_Daughterboard_THT"
 				(path "/c5396464-9268-46b7-8c9d-311f11b910b2"
 					(reference "J1")
 					(unit 1)
@@ -769,8 +769,8 @@
 		)
 	)
 	(group ""
-		(uuid "e4ccbada-0374-4cda-8b84-2b634203c9ea")
-		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard")
+		(uuid "30c60110-bfb7-4a74-a557-d50998d9cd5b")
+		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard_THT")
 		(members "3c8eca52-1060-4503-a42f-73e14fda9d58" "4322fffe-9b1c-4c6e-a7f6-9911cc681bdd"
 			"53fad361-67e5-40b1-a142-3121c8661d3f" "546415f7-d30d-4841-ae52-4b136d7aaaeb"
 			"63af24e1-fbe0-4e51-88bc-4565ce403c9f" "6f800ec8-a444-41a1-b34f-e3bfd911e974"

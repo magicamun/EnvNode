@@ -597,7 +597,7 @@
 			(at -2.7 5.08)
 			(size 1 3.1)
 			(layers "B.Cu" "B.Mask" "B.Paste")
-			(net "/GND")
+			(net "/EEPROM_A0")
 			(pinfunction "Pin_3_3")
 			(pintype "passive")
 			(thermal_bridge_angle 45)
@@ -727,7 +727,7 @@
 		)
 	)
 	(group ""
-		(uuid "aecc6977-9bc4-41fd-8c66-14481038b06a")
+		(uuid "1131413d-24d8-424b-8257-39534e82cc08")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard_SMD")
 		(members "cacd4b9c-4600-4420-9b43-c80e372d68d0")
 	)

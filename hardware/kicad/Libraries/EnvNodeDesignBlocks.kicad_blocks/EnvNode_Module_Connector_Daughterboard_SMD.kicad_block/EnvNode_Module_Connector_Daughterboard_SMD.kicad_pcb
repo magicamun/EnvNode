@@ -97,7 +97,7 @@
 			(at 0 10.16 90)
 			(unlocked yes)
 			(layer "B.SilkS")
-			(uuid "71506df4-2eb3-49d8-a5fd-75dc28545a91")
+			(uuid "70c4539f-4fc4-4147-ac87-0b86e9fa32b7")
 			(effects
 				(font
 					(size 1 1)
@@ -110,7 +110,7 @@
 			(at 0 -10.16 90)
 			(unlocked yes)
 			(layer "B.Fab")
-			(uuid "e4a78317-7191-43ae-a126-b5bd1b95c0f6")
+			(uuid "b7db884b-d76f-41ff-979f-c6fa8ea446a3")
 			(effects
 				(font
 					(size 1 1)
@@ -124,7 +124,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "5fb3c288-4494-4ba2-aca4-ce750652d4f3")
+			(uuid "0f147e89-373f-492f-bb83-d7b6610e7b4a")
 			(effects
 				(font
 					(size 1 1)
@@ -138,7 +138,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e86296f2-7842-402f-a34d-960c79de7f65")
+			(uuid "af9e8b05-0be2-4ad6-be47-a8d949de061f")
 			(effects
 				(font
 					(size 1 1)
@@ -591,7 +591,7 @@
 			(at -2.7 5.08)
 			(size 1 3.1)
 			(layers "B.Cu" "B.Mask" "B.Paste")
-			(net "/GND")
+			(net "/EEPROM_A0")
 			(pinfunction "Pin_3_3")
 			(pintype "passive")
 			(thermal_bridge_angle 45)

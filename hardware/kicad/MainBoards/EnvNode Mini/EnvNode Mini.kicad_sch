@@ -2737,6 +2737,30 @@
 			)
 		)
 	)
+	(global_label "GND"
+		(shape input)
+		(at 240.03 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "20a05a3d-6cab-496a-84e7-811b3def590f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 233.1743 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
 	(global_label "+5V"
 		(shape input)
 		(at 240.03 39.37 180)
@@ -3686,6 +3710,30 @@
 		(uuid "e4f72921-e5be-408e-b8b6-8052c765b39b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 81.0767 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "+3V3_SYS"
+		(shape input)
+		(at 240.03 118.11 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e6a3c9d3-2ef2-4303-bd19-0f3a995626db")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 227.4896 118.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6620,6 +6668,16 @@
 				(justify left)
 			)
 		)
+		(pin "h_EEPROM_A0" input
+			(at 240.03 118.11 180)
+			(uuid "9abaf726-870c-4b1f-839e-25b675ac3a79")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
@@ -6789,6 +6847,16 @@
 		(pin "h_SPI_SCK" input
 			(at 240.03 64.77 180)
 			(uuid "525c519b-6431-46f3-b6ad-fc3740a64920")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "h_EEPROM_A0" input
+			(at 240.03 69.85 180)
+			(uuid "4042cf39-43c7-4447-81f1-d68f59b2a564")
 			(effects
 				(font
 					(size 1.27 1.27)

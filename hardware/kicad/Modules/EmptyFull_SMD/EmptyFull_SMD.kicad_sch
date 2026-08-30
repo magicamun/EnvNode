@@ -612,7 +612,7 @@
 		)
 	)
 	(label "SPI_MOSI"
-		(at 119.38 81.28 180)
+		(at 116.84 81.28 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -622,7 +622,7 @@
 		(uuid "3c8eca52-1060-4503-a42f-73e14fda9d58")
 	)
 	(label "GND"
-		(at 119.38 68.58 180)
+		(at 116.84 68.58 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -632,7 +632,7 @@
 		(uuid "4322fffe-9b1c-4c6e-a7f6-9911cc681bdd")
 	)
 	(label "I2C0_SDA"
-		(at 119.38 73.66 180)
+		(at 116.84 73.66 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -642,7 +642,7 @@
 		(uuid "53fad361-67e5-40b1-a142-3121c8661d3f")
 	)
 	(label "SPI_SCK"
-		(at 119.38 83.82 180)
+		(at 116.84 83.82 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -652,7 +652,7 @@
 		(uuid "63af24e1-fbe0-4e51-88bc-4565ce403c9f")
 	)
 	(label "AUX_GPIO1"
-		(at 119.38 78.74 180)
+		(at 116.84 78.74 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -662,7 +662,7 @@
 		(uuid "6f800ec8-a444-41a1-b34f-e3bfd911e974")
 	)
 	(label "I2C0_SCL"
-		(at 132.08 73.66 0)
+		(at 129.54 73.66 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -672,7 +672,7 @@
 		(uuid "718c0e63-f5a3-46ff-b6ed-01af8fd4e4b7")
 	)
 	(label "I2C1_SDA"
-		(at 119.38 76.2 180)
+		(at 116.84 76.2 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -682,7 +682,7 @@
 		(uuid "89e5f695-c4d9-47f2-a594-3a28964f3664")
 	)
 	(label "+3V3_SYS"
-		(at 132.08 68.58 0)
+		(at 129.54 68.58 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -692,7 +692,7 @@
 		(uuid "8c79775d-c05d-407c-88ed-be2cbfa0da8d")
 	)
 	(label "I2C1_SCL"
-		(at 132.08 76.2 0)
+		(at 129.54 76.2 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -702,7 +702,7 @@
 		(uuid "aa3348bb-ec60-41a5-8187-f80ae48ed56e")
 	)
 	(label "AUX_GPIO2"
-		(at 132.08 78.74 0)
+		(at 129.54 78.74 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -712,7 +712,7 @@
 		(uuid "dcef0e73-0019-4504-b75f-607768bbaded")
 	)
 	(label "SPI_CS"
-		(at 132.08 83.82 0)
+		(at 129.54 83.82 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -722,7 +722,7 @@
 		(uuid "dde2c18d-63b9-46f0-8ae7-f87f4215c9df")
 	)
 	(label "+5V"
-		(at 132.08 71.12 0)
+		(at 129.54 71.12 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -731,8 +731,8 @@
 		)
 		(uuid "e810eb5b-0248-45d6-9a0a-9d0e7d665879")
 	)
-	(label "GND"
-		(at 119.38 71.12 180)
+	(label "EEPROM_A0"
+		(at 116.84 71.12 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -742,7 +742,7 @@
 		(uuid "fae7b5c0-19b1-478c-98ba-867c5333c169")
 	)
 	(label "SPI_MISO"
-		(at 132.08 81.28 0)
+		(at 129.54 81.28 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -753,7 +753,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_02x07_Odd_Even")
-		(at 124.46 76.2 0)
+		(at 121.92 76.2 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -764,7 +764,7 @@
 		(fields_autoplaced yes)
 		(uuid "546415f7-d30d-4841-ae52-4b136d7aaaeb")
 		(property "Reference" "J1"
-			(at 125.73 62.23 0)
+			(at 123.19 62.23 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -774,7 +774,7 @@
 			)
 		)
 		(property "Value" "Conn_02x07_Odd_Even"
-			(at 125.73 64.77 0)
+			(at 123.19 64.77 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -784,7 +784,7 @@
 			)
 		)
 		(property "Footprint" "EnvNode-Footprints:J_Wurth_WR-PHD_61031421121"
-			(at 124.46 76.2 0)
+			(at 121.92 76.2 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -795,7 +795,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 124.46 76.2 0)
+			(at 121.92 76.2 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -806,7 +806,7 @@
 			)
 		)
 		(property "Description" "Generic connector, double row, 02x07, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 124.46 76.2 0)
+			(at 121.92 76.2 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1026,7 +1026,7 @@
 		)
 	)
 	(group "EnvNode_Module_Connector_Daughterboard_SMD"
-		(uuid "3e6da25f-a4a8-4a17-8a38-fc4fb211fc6c")
+		(uuid "dea137d2-9fe4-40dc-80c6-4bddf10ffe4c")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard_SMD")
 		(members "3c8eca52-1060-4503-a42f-73e14fda9d58" "4322fffe-9b1c-4c6e-a7f6-9911cc681bdd"
 			"53fad361-67e5-40b1-a142-3121c8661d3f" "546415f7-d30d-4841-ae52-4b136d7aaaeb"

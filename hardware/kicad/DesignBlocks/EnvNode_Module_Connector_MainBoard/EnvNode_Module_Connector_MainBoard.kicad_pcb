@@ -486,7 +486,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net "/GND")
+			(net "/EEPROM_A0")
 			(pinfunction "Pin_3_3")
 			(pintype "passive")
 			(uuid "0fe56541-9de2-424a-8603-b62a757f0b59")
@@ -750,7 +750,7 @@
 		)
 		(fill no)
 		(layer "F.SilkS")
-		(uuid "8258fd66-5dd3-400e-9e40-db5427132ab2")
+		(uuid "a01ba7fa-0453-4dfe-9d4c-dd9c660d9653")
 	)
 	(gr_line
 		(start 102.67 78.156)
@@ -807,10 +807,10 @@
 		(uuid "3c176215-885a-484d-89b0-286fdf51c5f7")
 	)
 	(group ""
-		(uuid "251fc085-9872-46ec-9161-d943d869b6a0")
+		(uuid "3a4d4769-be7c-4808-86f8-d7d31a884d07")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
 		(members "3d12ae97-286f-49e8-97b4-923e045e6b7a" "71937e0a-9185-4d01-a96b-ebca32d1c178"
-			"8258fd66-5dd3-400e-9e40-db5427132ab2" "c8da8d0c-a157-4134-a757-dc1587499183"
+			"a01ba7fa-0453-4dfe-9d4c-dd9c660d9653" "c8da8d0c-a157-4134-a757-dc1587499183"
 		)
 	)
 	(embedded_fonts no)

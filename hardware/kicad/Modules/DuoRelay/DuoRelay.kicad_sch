@@ -1786,30 +1786,6 @@
 		(color 0 0 0 0)
 		(uuid "e42f4992-eb66-4ffb-90db-01a4b0154caa")
 	)
-	(no_connect
-		(at 118.11 76.2)
-		(uuid "430442be-f0d6-4b20-b8d2-07651f3663fe")
-	)
-	(no_connect
-		(at 118.11 71.12)
-		(uuid "57da07b3-2b4b-45c3-8306-5eb13bc6cb00")
-	)
-	(no_connect
-		(at 130.81 76.2)
-		(uuid "82f9a018-9b75-46f5-8639-7b813be65dac")
-	)
-	(no_connect
-		(at 130.81 78.74)
-		(uuid "8b8edb4f-b411-4c7e-90b4-05fa2ce3155f")
-	)
-	(no_connect
-		(at 130.81 71.12)
-		(uuid "d6dba980-d3cf-442e-9d2a-9adb6e45a3df")
-	)
-	(no_connect
-		(at 118.11 78.74)
-		(uuid "da2baaa6-43c8-4a2e-a96e-158acfb41204")
-	)
 	(wire
 		(pts
 			(xy 113.03 125.73) (xy 113.03 130.81)
@@ -2490,7 +2466,7 @@
 		)
 		(uuid "eecb1788-9bc9-4e63-b5a5-6ab6e0eac663")
 	)
-	(label "GND"
+	(label "EEPROM_A0"
 		(at 118.11 66.04 180)
 		(effects
 			(font
@@ -3283,7 +3259,7 @@
 			(uuid "e02bc921-802f-4de7-b729-bb5a9a5be637")
 		)
 		(instances
-			(project "EnvNode_Module_Connector_Daughterboard"
+			(project "EnvNode_Module_Connector_Daughterboard_THT"
 				(path "/c5396464-9268-46b7-8c9d-311f11b910b2"
 					(reference "J1")
 					(unit 1)
@@ -3889,7 +3865,7 @@
 		)
 	)
 	(group "EnvNode_Module_Connector_Daughterboard_THT"
-		(uuid "af789854-1837-4154-b355-9d3c4bf845e0")
+		(uuid "85829c90-fd27-4843-a31d-19b93af5f13f")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard_THT")
 		(members "3c8eca52-1060-4503-a42f-73e14fda9d58" "4322fffe-9b1c-4c6e-a7f6-9911cc681bdd"
 			"53fad361-67e5-40b1-a142-3121c8661d3f" "546415f7-d30d-4841-ae52-4b136d7aaaeb"

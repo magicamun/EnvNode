@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "4786de6a-3189-4171-a351-404cb93a8d6b")
+	(uuid "4168aa5f-663c-4d13-a56b-10c70aebdc57")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Connector_Generic:Conn_02x07_Odd_Even"
@@ -632,7 +632,7 @@
 		)
 		(uuid "e810eb5b-0248-45d6-9a0a-9d0e7d665879")
 	)
-	(label "GND"
+	(label "EEPROM_A0"
 		(at 133.35 78.74 180)
 		(effects
 			(font

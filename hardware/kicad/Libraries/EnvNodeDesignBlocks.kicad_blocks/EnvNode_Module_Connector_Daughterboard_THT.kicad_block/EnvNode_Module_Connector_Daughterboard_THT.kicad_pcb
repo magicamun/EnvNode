@@ -93,11 +93,35 @@
 		(at 142 74.96 180)
 		(descr "Through hole straight pin header, 2x07, 2.54mm pitch, double rows")
 		(tags "Through hole pin header THT 2x07 2.54mm double row")
+		(property "Reference" "J1"
+			(at 1.27 2.38 0)
+			(layer "B.SilkS")
+			(uuid "2b325f98-e547-43ee-bca3-22a52b6c9df2")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
+		(property "Value" "Conn_02x07_Odd_Even"
+			(at 1.27 -17.62 0)
+			(layer "B.Fab")
+			(uuid "89709506-704b-432f-ad7d-7c8dca06e6f5")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
 		(property "Datasheet" ""
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "937e6245-fb31-41df-a71f-e64cdb0ac0bd")
+			(uuid "01d9b904-2753-4eb0-bbd1-bb15be4db9c1")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -109,7 +133,7 @@
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "3f1a4c81-79af-4d76-946e-5ba2ed2cc471")
+			(uuid "8b1fda69-55a4-4b05-9789-11f470cc83e2")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -130,34 +154,10 @@
 				(justify mirror)
 			)
 		)
-		(property "Reference" "J1"
-			(at 1.27 2.38 0)
-			(layer "B.SilkS")
-			(uuid "7f99139b-09d5-46a0-94c5-371788d82d83")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-				(justify mirror)
-			)
-		)
-		(property "Value" "Conn_02x07_Odd_Even"
-			(at 1.27 -17.62 0)
-			(layer "B.Fab")
-			(uuid "c28351ce-9a5f-425c-ab4c-622eabfbca9c")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-				(justify mirror)
-			)
-		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/546415f7-d30d-4841-ae52-4b136d7aaaeb")
 		(sheetname "/")
-		(sheetfile "EnvNode_Module_Connector_Daughterboard.kicad_sch")
+		(sheetfile "EnvNode_Module_Connector_Daughterboard_THT.kicad_sch")
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -341,7 +341,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net "/GND")
+			(net "/EEPROM_A0")
 			(pinfunction "Pin_3_3")
 			(pintype "passive")
 			(uuid "a6ccea61-dae9-4544-843a-d6970b073d27")

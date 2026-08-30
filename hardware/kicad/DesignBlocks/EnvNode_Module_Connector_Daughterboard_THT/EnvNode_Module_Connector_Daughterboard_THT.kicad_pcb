@@ -157,7 +157,7 @@
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/546415f7-d30d-4841-ae52-4b136d7aaaeb")
 		(sheetname "/")
-		(sheetfile "EnvNode_Module_Connector_Daughterboard.kicad_sch")
+		(sheetfile "EnvNode_Module_Connector_Daughterboard_THT.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -347,7 +347,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net "/GND")
+			(net "/EEPROM_A0")
 			(pinfunction "Pin_3_3")
 			(pintype "passive")
 			(uuid "a6ccea61-dae9-4544-843a-d6970b073d27")
@@ -487,8 +487,8 @@
 		)
 	)
 	(group ""
-		(uuid "e4ccbada-0374-4cda-8b84-2b634203c9ea")
-		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard")
+		(uuid "30c60110-bfb7-4a74-a557-d50998d9cd5b")
+		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard_THT")
 		(members "8b7f6c95-da1f-4892-a15d-40780c8e1f28")
 	)
 	(embedded_fonts no)
