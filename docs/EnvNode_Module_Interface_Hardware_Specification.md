@@ -2,7 +2,7 @@
 
 **Status:** Implemented design baseline
 
-**Revision:** 0.8
+**Revision:** 0.9
 
 **Applies to:** Mainboard Revision 0.2 and later
 
@@ -62,6 +62,15 @@ EnvNode Mini implements two slots:
 | B | `+3V3_SYS` | `AUX3` | `AUX4` | `AUX6` used as the second chip select |
 
 MOSI, MISO, and SCK are shared between slots. Each populated SPI module requires its own chip-select signal. On the two-slot Mini this consumes the core `CS` signal for Slot A and `AUX6` for Slot B.
+
+EnvNode Mini additionally exposes both I²C buses for direct cable connection:
+
+| Connector | Bus | Pin 1 | Pin 2 | Pin 3 | Pin 4 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `J4` | `I2C0` | GND | `+3V3_SYS` | SDA | SCL |
+| `J5` | `I2C1` | GND | `+3V3_SYS` | SDA | SCL |
+
+Both connectors use the horizontal JST-SH `SM04B-SRSS-TB` footprint with 1.00 mm pitch. Each bus has a dedicated pair of 4.7 kΩ pull-up resistors. Four normally open solder jumpers connect the pull-ups individually to `+3V3_SYS`; closing both jumpers for a bus makes EnvNode Mini the pull-up owner for that bus. They must remain open if the assembled bus already has an effective pull-up pair.
 
 ## 4. Power
 
@@ -137,7 +146,8 @@ The mainboard identity EEPROM is independent of optional module identification. 
 
 - connector pin 9 / `AUX_GPIO1` drives relay channel 1;
 - connector pin 10 / `AUX_GPIO2` drives relay channel 2;
-- each channel uses a BC817 low-side driver, 1 kΩ base resistor, 100 kΩ pull-down, and 1N4148W flyback diode; and
+- each channel uses a BC817 low-side driver, 1 kΩ base resistor, 100 kΩ pull-down, and 1N4148W flyback diode;
+- each channel has an LED and 1.5 kΩ series resistor from `+5V` to the transistor collector, so the LED lights when that relay is driven;
 - `I2C0` connects the optional module-identification EEPROM; and
 - the remaining SPI and I²C pins are unused by the present functional hardware.
 
@@ -149,11 +159,11 @@ The following remain intentionally open:
 
 1. Exact production connector part numbers and qualified mated stack height.
 2. Per-rail current limits and a complete mainboard/module power budget.
-3. Ownership and placement of the single pull-up pair per I²C bus, plus bus capacitance limits and supported clock rates.
+3. Bus capacitance limits, supported clock rates, and the required pull-up jumper configuration for each complete system assembly.
 4. Electrical protection requirements for modules exposed to external wiring.
 5. The byte-level module-identity record format and the module-directory schema.
 6. Firmware implementation of `I2C0` module discovery and the generic unidentified-module mode.
 
 ## 10. Revision Status
 
-Revision 0.8 assigns connector pin 3 to `EEPROM_A0`, reserves module-identification addresses `0x52` and `0x53` on `I2C0`, documents identification EEPROMs as optional but recommended, records the implemented Empty-template and DuoRelay reference circuits, and distinguishes the implemented hardware convention from the not-yet-implemented firmware discovery and module directory.
+Revision 0.9 adds the EnvNode Mini JST-SH I²C access and configurable mainboard pull-ups, records the DuoRelay channel-status LEDs, and retains the Revision 0.8 module-identification convention and generic firmware fallback.

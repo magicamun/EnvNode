@@ -22,7 +22,7 @@
 | 10 | `AUX_GPIO2` | Relay channel 2 control |
 | 11–14 | SPI | Not used |
 
-Each channel uses a BC817 low-side driver with a 1 kΩ base resistor, a 100 kΩ pull-down for a defined off state, and a 1N4148W flyback diode. The relays are Finder `34.51.7.005.0010` parts with 5 V coils.
+Each channel uses a BC817 low-side driver with a 1 kΩ base resistor, a 100 kΩ pull-down for a defined off state, and a 1N4148W flyback diode. An LED with a 1.5 kΩ series resistor is connected from `+5V` to each transistor collector and lights while the corresponding relay is driven. The indication confirms the electrical drive state, not the mechanical position of the relay contacts. The relays are Finder `34.51.7.005.0010` parts with 5 V coils.
 
 ## Module Identification
 
@@ -55,6 +55,6 @@ At the time of the Revision 0.2 port:
 
 - schematic ERC reports no errors; its nine warnings comprise six intentionally unused connector nets and three same-name local/global label warnings for `+3V3_SYS`, `I2C0_SDA`, and `I2C0_SCL`;
 - PCB DRC reports no violations, unconnected pads, or footprint errors; and
-- connector placement, board outline, support-hole positions, power routing, relay drivers, and contact separation were checked against the source design.
+- connector placement, board outline, support-hole positions, power routing, relay drivers, status LEDs, and contact separation were checked against the source design.
 
 ERC and DRC must be repeated after every schematic, footprint, routing, zone, or rule change.

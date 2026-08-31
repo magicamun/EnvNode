@@ -13,6 +13,10 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_SMD/` contains the bottom-mounted SMD module connector block.
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_THT/` contains the bottom-mounted THT module connector block.
 
+## Mainboard Implementation
+
+`hardware/kicad/MainBoards/EnvNode Mini/` implements two Revision 0.2 module slots. It also exposes `I2C0` and `I2C1` on separate 4-pin JST-SH connectors using the pin order GND, `+3V3_SYS`, SDA, SCL. Each bus has one 4.7 kΩ pull-up pair that can be connected to `+3V3_SYS` through individual, normally open solder jumpers. The jumpers allow the mainboard to assume pull-up ownership without forcing a second effective pull-up pair when another part of the assembled system already provides one.
+
 ## Module Templates
 
 - `hardware/kicad/Modules/FullSize/Empty-SMD` and `Empty-THT` are the validated 38 mm x 64 mm starting points for full-size daughterboards.
@@ -22,7 +26,7 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 
 ## Module Implementations
 
-- [DuoRelay](../hardware/kicad/Modules/FullSize/DuoRelay/README.md) provides two `AUX_GPIO`-controlled 5 V changeover relays and an optional identification EEPROM on a FullSize THT board.
+- [DuoRelay](../hardware/kicad/Modules/FullSize/DuoRelay/README.md) provides two `AUX_GPIO`-controlled 5 V changeover relays, one status LED per channel, and an optional identification EEPROM on a FullSize THT board.
 - The Revision 0.1 AnalogInput module has not yet been ported. Its former dependency on interface-provided 24 V is incompatible with the Revision 0.2 connector; a replacement must generate 24 V locally from 5 V or use a separate supply connection.
 
 ## Firmware Contract Without Module Identity
