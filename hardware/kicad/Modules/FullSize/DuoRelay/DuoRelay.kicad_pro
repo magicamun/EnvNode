@@ -39,9 +39,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 1.0,
-          "height": 1.7,
-          "width": 1.7
+          "drill": 0.0,
+          "height": 1.8,
+          "width": 1.325
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -488,7 +488,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "EmptyHalf_THT.kicad_pro",
+    "filename": "DuoRelay.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -511,6 +511,28 @@
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
+      },
+      {
+        "clearance": 0.3,
+        "name": "250VAC",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 1.0,
+        "tuning_profile": "",
+        "via_diameter": 0.6
+      },
+      {
+        "clearance": 0.2,
+        "microvia_diameter": 0.3,
+        "name": "POWER",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.4,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3
       }
     ],
     "meta": {
@@ -518,7 +540,28 @@
     },
     "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": []
+    "netclass_patterns": [
+      {
+        "netclass": "250VAC",
+        "pattern": "/NO*"
+      },
+      {
+        "netclass": "250VAC",
+        "pattern": "/NC*"
+      },
+      {
+        "netclass": "250VAC",
+        "pattern": "/COM*"
+      },
+      {
+        "netclass": "POWER",
+        "pattern": "/+5V*"
+      },
+      {
+        "netclass": "POWER",
+        "pattern": "/+3V*"
+      }
+    ]
   },
   "pcbnew": {
     "last_paths": {
@@ -656,18 +699,18 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "EmptyHalf_THT.kicad_sch",
-        "name": "EmptyHalf_THT",
+        "filename": "DuoRelay.kicad_sch",
+        "name": "DuoRelay",
         "uuid": "d4f5e987-f509-4ce4-9428-d20b1343f07d"
       }
     ],
-    "used_designators": "H1-2,J1",
+    "used_designators": "U1,#FLG1-2,R1-4,C1,#PWR11-12,Q1-2,D1-2,K1-2,H1-2,J1,J3-4",
     "variants": []
   },
   "sheets": [
     [
       "d4f5e987-f509-4ce4-9428-d20b1343f07d",
-      "EmptyHalf_THT"
+      "DuoRelay"
     ]
   ],
   "text_variables": {},
