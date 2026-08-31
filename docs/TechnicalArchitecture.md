@@ -164,9 +164,12 @@ GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO
 
 The active typed `BoardProfile` is the single immutable description of physical board
 resources. `BoardCapabilities` derives its lookup and compatibility validation from that
-profile; it does not own a second pin map. The profile is selected at the narrow build-time
-boundary through an explicit PlatformIO build flag. Firmware Build Identity and physical
-Board Identity remain separate models.
+profile; it does not own a second pin map. The profile is selected once during boot by the
+`BoardIdentityResolver` and remains frozen for that boot. A valid, supported EEPROM identity
+selects the matching profile. If the identity record is absent, unreadable, blank, malformed,
+or fails its integrity check, an explicitly configured build-time development fallback may
+be used. A valid but unsupported identity does not fall back and prevents normal runtime
+operation. Firmware Build Identity and physical Board Identity remain separate models.
 
 The current `EnvNode Mainboard` profile is hardware revision 0.2. It exposes I2C0 on
 SDA GPIO21 / SCL GPIO22 and I2C1 on SDA GPIO25 / SCL GPIO26. Generic digital resources are
@@ -176,10 +179,9 @@ analog-input-only EnvNode resources. I²C pins are described only by the bus def
 are therefore never offered as generic GPIO resources.
 
 Future EnvNode 868 and EnvNode Nano builds can provide different immutable profiles without
-changing hardware consumers. Profile selection is build-time-only today; a future hardware
-identity source such as ID pins or EEPROM may select the same typed profile API without
-affecting consumers. Runtime selection, automatic detection and SPI definitions remain
-outside the current architecture.
+changing hardware consumers, regardless of whether a profile originates from EEPROM identity
+or the explicit development fallback. Live profile replacement, automatic module detection,
+and SPI module definitions remain outside the current architecture.
 
 `I2CBusManager` owns initialization and access to the physical `TwoWire` instances described
 by the active profile. Its explicit diagnostic scan probes only normal usable 7-bit addresses

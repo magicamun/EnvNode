@@ -149,7 +149,7 @@ The following remain intentionally open:
 
 1. Exact production connector part numbers and qualified mated stack height.
 2. Per-rail current limits and a complete mainboard/module power budget.
-3. I²C pull-up ownership, bus capacitance limits, and supported clock rates.
+3. Ownership and placement of the single pull-up pair per I²C bus, plus bus capacitance limits and supported clock rates.
 4. Electrical protection requirements for modules exposed to external wiring.
 5. The byte-level module-identity record format and the module-directory schema.
 6. Firmware implementation of `I2C0` module discovery and the generic unidentified-module mode.

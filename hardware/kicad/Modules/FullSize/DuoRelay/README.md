@@ -53,7 +53,7 @@ The spacing and relay ratings do not by themselves certify the finished product 
 
 At the time of the Revision 0.2 port:
 
-- schematic ERC reports no errors; the remaining warnings refer only to intentionally unused connector nets;
+- schematic ERC reports no errors; its nine warnings comprise six intentionally unused connector nets and three same-name local/global label warnings for `+3V3_SYS`, `I2C0_SDA`, and `I2C0_SCL`;
 - PCB DRC reports no violations, unconnected pads, or footprint errors; and
 - connector placement, board outline, support-hole positions, power routing, relay drivers, and contact separation were checked against the source design.
 
