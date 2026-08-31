@@ -15,15 +15,18 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 
 ## Module Templates
 
-- `EmptyFull_SMD` and `EmptyFull_THT` are the validated 38 mm x 64 mm starting points for full-size daughterboards.
-- `EmptyHalf_SMD` and `EmptyHalf_THT` are the corresponding 38 mm x 32 mm starting points for compact daughterboards.
+- `hardware/kicad/Modules/FullSize/Empty-SMD` and `Empty-THT` are the validated 38 mm x 64 mm starting points for full-size daughterboards.
+- `hardware/kicad/Modules/HalfSize/Empty-SMD` and `Empty-THT` are the corresponding 38 mm x 32 mm starting points for compact daughterboards.
 - All four templates place the connector axis 6.35 mm from the top edge and use M2.5 support-hole geometry.
+- All four templates include the reference module-identification EEPROM circuit on the bottom side.
 
 ## Module Implementations
 
-- [DuoRelay](../hardware/kicad/Modules/DuoRelay/README.md) provides two `AUX_GPIO`-controlled 5 V changeover relays on a FullSize THT board. The present module has no identification EEPROM and therefore uses the generic firmware fallback until explicitly configured.
+- [DuoRelay](../hardware/kicad/Modules/FullSize/DuoRelay/README.md) provides two `AUX_GPIO`-controlled 5 V changeover relays and an optional identification EEPROM on a FullSize THT board.
 - The Revision 0.1 AnalogInput module has not yet been ported. Its former dependency on interface-provided 24 V is incompatible with the Revision 0.2 connector; a replacement must generate 24 V locally from 5 V or use a separate supply connection.
 
 ## Firmware Contract Without Module Identity
 
 Module identification is optional in the present hardware revision. If no valid module-specific EEPROM record is found, firmware must keep both I2C buses and the two slot-specific `AUX_GPIO` signals available as ordinary configurable interfaces. It must not guess a module type or start a module-specific driver automatically. SPI devices require explicit configuration as well.
+
+When fitted, a module-identification EEPROM should use `I2C0` at the slot-defined address `0x52` or `0x53`. This is a hardware convention, not an electrical requirement. Automatic `I2C0` discovery and the module directory required to translate an identity into drivers, capabilities, and UI behavior are not yet implemented.

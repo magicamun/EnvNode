@@ -12,10 +12,12 @@
 
 | Connector pin | Net | DuoRelay use |
 | ---: | --- | --- |
-| 1, 3 | `GND` | Control-side ground |
-| 2 | `+3V3_SYS` | Not used |
+| 1 | `GND` | Control-side ground |
+| 2 | `+3V3_SYS` | Identification EEPROM supply and fixed `A1` level |
+| 3 | `EEPROM_A0` | Slot-defined identification EEPROM address bit |
 | 4 | `+5V` | Relay-coil supply |
-| 5–8 | I²C buses | Not used |
+| 5–6 | `I2C0` | Optional identification EEPROM |
+| 7–8 | `I2C1` | Not used |
 | 9 | `AUX_GPIO1` | Relay channel 1 control |
 | 10 | `AUX_GPIO2` | Relay channel 2 control |
 | 11–14 | SPI | Not used |
@@ -24,7 +26,15 @@ Each channel uses a BC817 low-side driver with a 1 kΩ base resistor, a 100 kΩ 
 
 ## Module Identification
 
-This revision has no module-identification EEPROM. Firmware must therefore treat the slot as unidentified and must not automatically start a DuoRelay-specific driver. The relay GPIOs are ordinary configurable `AUX_GPIO` ports until the user explicitly assigns their function.
+The board provides an optional `24AA025E-OT` module-identification EEPROM and a local 100 nF decoupling capacitor on the bottom side. The EEPROM follows the EnvNode discovery convention:
+
+- SDA and SCL use `I2C0`;
+- `A1` is tied to `+3V3_SYS`;
+- `A0` uses connector pin 3 / `EEPROM_A0`;
+- Slot A therefore selects `0x52`; and
+- Slot B selects `0x53`.
+
+The EEPROM is not required for the relay hardware to operate, but fitting and provisioning it is good practice. Future firmware can use the identity to offer the correct relay controls in the UI and exclude incompatible functions. Automatic discovery and the required module directory are not yet implemented. Without a valid identity, firmware must treat the relay GPIOs as ordinary configurable `AUX_GPIO` ports and must not automatically start a DuoRelay-specific driver.
 
 ## Mechanical Geometry
 

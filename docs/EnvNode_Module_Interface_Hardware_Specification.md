@@ -2,7 +2,7 @@
 
 **Status:** Implemented design baseline
 
-**Revision:** 0.7
+**Revision:** 0.8
 
 **Applies to:** Mainboard Revision 0.2 and later
 
@@ -22,7 +22,7 @@ Each physical module slot uses one 2 × 7 connector on a 2.54 mm pitch with odd/
 | ---: | --- | --- |
 | 1 | `GND` | Ground |
 | 2 | `+3V3_SYS` | 3.3 V system rail |
-| 3 | `GND` | Ground |
+| 3 | `EEPROM_A0` | Slot-defined module-identification EEPROM address bit |
 | 4 | `+5V` | 5 V system rail |
 | 5 | `I2C0_SDA` | System I²C data |
 | 6 | `I2C0_SCL` | System I²C clock |
@@ -56,10 +56,10 @@ The ESP32 Core Dual Power design fixes the shared buses as follows:
 
 EnvNode Mini implements two slots:
 
-| Slot | Pin 9 | Pin 10 | Pin 14 |
-| --- | --- | --- | --- |
-| A | `AUX1` | `AUX2` | `CS` |
-| B | `AUX3` | `AUX4` | `AUX6` used as the second chip select |
+| Slot | Pin 3 / `EEPROM_A0` | Pin 9 | Pin 10 | Pin 14 |
+| --- | --- | --- | --- | --- |
+| A | `GND` | `AUX1` | `AUX2` | `CS` |
+| B | `+3V3_SYS` | `AUX3` | `AUX4` | `AUX6` used as the second chip select |
 
 MOSI, MISO, and SCK are shared between slots. Each populated SPI module requires its own chip-select signal. On the two-slot Mini this consumes the core `CS` signal for Slot A and `AUX6` for Slot B.
 
@@ -94,16 +94,33 @@ Current source design blocks:
 
 Current empty module templates:
 
-- `hardware/kicad/Modules/EmptyHalf_SMD/`
-- `hardware/kicad/Modules/EmptyHalf_THT/`
-- `hardware/kicad/Modules/EmptyFull_SMD/`
-- `hardware/kicad/Modules/EmptyFull_THT/`
+- `hardware/kicad/Modules/FullSize/Empty-SMD/`
+- `hardware/kicad/Modules/FullSize/Empty-THT/`
+- `hardware/kicad/Modules/HalfSize/Empty-SMD/`
+- `hardware/kicad/Modules/HalfSize/Empty-THT/`
 
 The source project and the separately published schematic and PCB portions in `hardware/kicad/Libraries/EnvNodeDesignBlocks.kicad_blocks/` must be kept synchronized. Updating a schematic from a design block does not automatically replace an already placed PCB layout.
 
 ## 7. Module Identification and Generic Fallback
 
-A module may later contain a module-specific identification EEPROM, but such an EEPROM is not mandatory in this revision. DuoRelay intentionally has none.
+A module-identification EEPROM is optional, but fitting one is good practice for modules with a defined hardware identity. It allows future firmware to identify the installed module, offer suitable functions in the UI, and suppress functions that are incompatible with the detected hardware. The Empty templates and DuoRelay provide the reference implementation.
+
+A conforming module-identification EEPROM should use `I2C0`. This is a discovery convention rather than an electrical limitation: both I²C buses remain available at the connector, but future automatic module discovery will scan only `I2C0`. The firmware scan and the module directory that maps stored identities to drivers, capabilities, and UI behavior are not yet implemented.
+
+The reference EEPROM uses two address bits. Its module-side wiring is:
+
+- `A1` tied to `+3V3_SYS`;
+- `A0` connected to connector pin 3 / `EEPROM_A0`; and
+- a 100 nF decoupling capacitor placed close to the EEPROM supply pins.
+
+The mainboard supplies the slot-dependent `A0` level, producing the reserved `I2C0` discovery addresses:
+
+| Slot | A1 | A0 | EEPROM address |
+| --- | ---: | ---: | ---: |
+| A | 1 | 0 | `0x52` |
+| B | 1 | 1 | `0x53` |
+
+The addresses `0x52` and `0x53` on `I2C0` are reserved for module-identification EEPROMs. Other module devices should not use these addresses on `I2C0`.
 
 If the firmware finds no valid module-specific identity, it must not infer a module type from the PCB or automatically activate a device-specific driver. The slot remains in generic mode:
 
@@ -116,12 +133,13 @@ The mainboard identity EEPROM is independent of optional module identification. 
 
 ## 8. DuoRelay Reference Module
 
-`hardware/kicad/Modules/DuoRelay/` is the first module ported to the Revision 0.2 interface. It is a FullSize THT module with two independently controlled 5 V changeover relays:
+`hardware/kicad/Modules/FullSize/DuoRelay/` is the first functional module ported to the Revision 0.2 interface. It is a FullSize THT module with an optional identification EEPROM and two independently controlled 5 V changeover relays:
 
 - connector pin 9 / `AUX_GPIO1` drives relay channel 1;
 - connector pin 10 / `AUX_GPIO2` drives relay channel 2;
 - each channel uses a BC817 low-side driver, 1 kΩ base resistor, 100 kΩ pull-down, and 1N4148W flyback diode; and
-- the SPI and I²C pins are unused by the present hardware.
+- `I2C0` connects the optional module-identification EEPROM; and
+- the remaining SPI and I²C pins are unused by the present functional hardware.
 
 The relay-contact routing uses 1.0 mm traces. The 250 VAC contact region is kept at least 8 mm from all SELV copper on both copper layers, including the GND zone. This project-specific layout decision is not a blanket safety certification; enclosure, terminals, fusing, pollution degree, material group, overvoltage category, load type, and applicable product standards still belong to the completed product assessment.
 
@@ -133,9 +151,9 @@ The following remain intentionally open:
 2. Per-rail current limits and a complete mainboard/module power budget.
 3. I²C pull-up ownership, bus capacitance limits, and supported clock rates.
 4. Electrical protection requirements for modules exposed to external wiring.
-5. The format, address allocation, and discovery procedure for a future module-identification EEPROM.
-6. Firmware implementation of the generic unidentified-module mode.
+5. The byte-level module-identity record format and the module-directory schema.
+6. Firmware implementation of `I2C0` module discovery and the generic unidentified-module mode.
 
 ## 10. Revision Status
 
-Revision 0.7 replaces the obsolete two-connector 2 × 4 definition with the implemented single-connector 2 × 7 interface. It fixes the pin assignment, records that 24 V is not present, documents the two-slot EnvNode Mini mapping and shared-SPI chip-select rule, defines the HalfSize and FullSize reference geometry, and records the generic firmware behavior for modules without an identification EEPROM.
+Revision 0.8 assigns connector pin 3 to `EEPROM_A0`, reserves module-identification addresses `0x52` and `0x53` on `I2C0`, documents identification EEPROMs as optional but recommended, records the implemented Empty-template and DuoRelay reference circuits, and distinguishes the implemented hardware convention from the not-yet-implemented firmware discovery and module directory.
