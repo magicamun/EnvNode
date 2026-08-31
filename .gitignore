@@ -7,6 +7,9 @@ firmware/.vscode/
 
 # KiCad backups / autosave
 **/*.kicad_prl
+**/*-backups/
+**/_autosave-*
+**/*.lck
 hardware/kicad/*/*-backups/
 hardware/kicad/*/*.kicad_prl
 hardware/kicad/*/_autosave-*
