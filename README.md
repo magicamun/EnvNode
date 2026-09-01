@@ -206,8 +206,10 @@ Implemented
 Current hardware-validation focus
 
 - provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.2
-- physically verify the existing Mainboard revision 0.1 before using it as the basis for Modules
-- integrate and calibrate the first concrete ADC backend and pressure probe on real hardware
+- complete the Revision 0.2 article list and assembly data
+- assemble and bring up the AnalogHydroPressure module, including its local 5 V to 24 V supply
+- integrate and calibrate the ADS1115-based 4–20 mA pressure input on real hardware
+- operate at least the Rain Detector heater path before releasing Revision 0.2 for production
 
 Deliberately future
 
@@ -215,7 +217,7 @@ Deliberately future
 - multi-input, Boolean/contact and event-driven Controllers
 - richer manual-versus-Controller arbitration
 - Controller and generic Actuator Home Assistant discovery
-- a dedicated Board Identity provisioning firmware, if operational use requires it
+- a dedicated provisioning station for preparing Mainboards, Modules, and other supported boards
 
 ---
 
@@ -230,6 +232,7 @@ Project documentation is intentionally separated by responsibility.
 | TechnicalArchitecture.md | Technical architecture |
 | ActuatorModel.md | Actuator capabilities and Controller interaction |
 | MQTT.md | Current MQTT protocol boundaries and topics |
+| Hardware.md | Hardware entry point, module templates, and implemented boards |
 | ADRs | Architectural decisions |
 
 ---

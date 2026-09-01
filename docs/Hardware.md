@@ -27,7 +27,9 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 ## Module Implementations
 
 - [DuoRelay](../hardware/kicad/Modules/FullSize/DuoRelay/README.md) provides two `AUX_GPIO`-controlled 5 V changeover relays, one status LED per channel, and an optional identification EEPROM on a FullSize THT board.
-- The Revision 0.1 AnalogInput module has not yet been ported. Its former dependency on interface-provided 24 V is incompatible with the Revision 0.2 connector; a replacement must generate 24 V locally from 5 V or use a separate supply connection.
+- [AnalogHydroPressure](../hardware/kicad/Modules/FullSize/AnalogHydroPressure/README.md) is the Revision 0.2 successor to the legacy AnalogInput module. It retains the ADS1115-based 4–20 mA measurement path and generates the probe supply locally from `+5V` with an LT8330 boost converter.
+
+The current Revision 0.2 hardware is a development baseline. Production release is gated by a complete article list and assembly data, physical bring-up of the relevant boards, and successful operation of at least the Rain Detector heater path.
 
 ## Firmware Contract Without Module Identity
 
