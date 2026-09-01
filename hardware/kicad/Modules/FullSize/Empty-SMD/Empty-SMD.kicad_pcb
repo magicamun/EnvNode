@@ -1147,7 +1147,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "24AA025E-OT"
+		(property "Value" "24AA025E64T-I/OT"
 			(at 0 -2.4 0)
 			(layer "B.Fab")
 			(uuid "791ebb06-9d58-4ccd-89b8-29d5542eb694")

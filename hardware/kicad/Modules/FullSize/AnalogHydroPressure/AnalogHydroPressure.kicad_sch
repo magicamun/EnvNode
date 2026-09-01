@@ -1898,7 +1898,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "24AA025E-OT"
+		(property "Value" "24AA025E64T-I/OT"
 			(at 176.1333 59.69 0)
 			(show_name no)
 			(do_not_autoplace no)

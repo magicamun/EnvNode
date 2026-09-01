@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "c9a7bd72-9ea3-46a2-bca6-92a35ffcfc32")
+	(uuid "beff77f5-77fc-403f-a8a0-dfae64427d25")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Device:C"
@@ -3743,7 +3743,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "24AA025E-OT"
+		(property "Value" "24AA025E64T-I/OT"
 			(at 204.0733 82.55 0)
 			(show_name no)
 			(do_not_autoplace no)
