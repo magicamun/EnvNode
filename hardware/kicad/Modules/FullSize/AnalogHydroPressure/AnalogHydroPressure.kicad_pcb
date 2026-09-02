@@ -87,9 +87,9 @@
 			(subtractmaskfromsilk no)
 			(outputformat 1)
 			(mirror no)
-			(drillshape 1)
+			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "Gerber")
 		)
 	)
 	(footprint "MountingHole:MountingHole_2.7mm_M2.5_DIN965"
