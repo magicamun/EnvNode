@@ -2771,7 +2771,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "4ce79114-d60c-43ad-be47-1d8e9289e52a")
 		(property "Reference" "J3"
@@ -2794,7 +2794,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
 			(at 123.19 146.05 0)
 			(hide yes)
 			(show_name no)
@@ -4419,7 +4419,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "d586313d-6704-4235-87ae-74dc9706959f")
 		(property "Reference" "J4"
@@ -4442,7 +4442,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
 			(at 49.53 144.78 0)
 			(hide yes)
 			(show_name no)
