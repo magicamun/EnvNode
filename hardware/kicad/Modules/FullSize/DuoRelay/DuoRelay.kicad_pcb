@@ -126,9 +126,9 @@
 			(subtractmaskfromsilk no)
 			(outputformat 1)
 			(mirror no)
-			(drillshape 1)
+			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "Gerber")
 		)
 	)
 	(footprint "MountingHole:MountingHole_2.7mm_M2.5_DIN965"
@@ -5384,6 +5384,32 @@
 				(bold yes)
 			)
 			(justify bottom)
+		)
+	)
+	(gr_text "NO COM NC"
+		(at 119.112142 83.58 0)
+		(layer "F.SilkS")
+		(uuid "7c2c3f0f-82ac-49ed-947f-ddc9bb1a5f49")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "NC COM NO"
+		(at 140.567142 83.58 0)
+		(layer "F.SilkS")
+		(uuid "10451df2-de88-458e-ad2a-60c3d3f32853")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify left bottom)
 		)
 	)
 	(segment
