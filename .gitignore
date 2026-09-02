@@ -10,11 +10,12 @@ firmware/.vscode/
 **/*-backups/
 **/_autosave-*
 **/*.lck
+**/Gerber/*
 hardware/kicad/*/*-backups/
 hardware/kicad/*/*.kicad_prl
 hardware/kicad/*/_autosave-*
 hardware/kicad/*/*.lck
-hardware/kicad/*/*/Gerber/*
+hardware/kicad/*/*/*/Gerber/*
 hardware/kicad/*/*/*-backups/
 hardware/kicad/*/*/*.kicad_prl
 hardware/kicad/*/*/_autosave-*
