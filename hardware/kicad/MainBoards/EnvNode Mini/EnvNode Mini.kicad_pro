@@ -40,7 +40,7 @@
         "other_text_upright": false,
         "pads": {
           "drill": 0.0,
-          "height": 1.55,
+          "height": 1.15,
           "width": 0.6
         },
         "silk_line_width": 0.1,
@@ -60,7 +60,7 @@
           "hatch_smoothing_level": 0,
           "hatch_smoothing_value": 0.1,
           "hatch_thickness": 1.0,
-          "min_clearance": 0.5,
+          "min_clearance": 0.2,
           "min_island_area": 10.0,
           "min_thickness": 0.25,
           "pad_connection": 1,
@@ -76,7 +76,24 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "hole_clearance|138040000|99165000|88ba5e41-c5b0-4c77-8dce-e380d162bc3b|4821fd9a-71b1-4d11-85da-c38e5655291a",
+          ""
+        ],
+        [
+          "hole_clearance|138040000|99165000|f2e38fe1-c122-4164-b365-c5dd2dd009c0|4821fd9a-71b1-4d11-85da-c38e5655291a",
+          ""
+        ],
+        [
+          "hole_clearance|144140000|99165000|6b6cda94-47af-4caa-920f-003a7b984c3c|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
+          ""
+        ],
+        [
+          "hole_clearance|144140000|99165000|de722716-2851-41a9-9168-406d14ca28eb|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
+          ""
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -565,7 +582,7 @@
     "last_paths": {
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "Gerber",
       "specctra_dsn": "",
       "step": "",
       "vrml": ""
@@ -702,7 +719,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "JP_I2C1_SDA1,JP_I2C1_SCL1,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-4,R1-4,JP1-4,I2C0_1-2,#FLG1-4,#PWR1-4,#PWR9-13,D1-2,C5-8,U1-2,J2-4",
+    "used_designators": "JP_I2C1_SDA1,JP_I2C1_SCL1,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-4,R1-6,JP1-4,I2C0_1-2,#FLG1-4,#PWR1-4,#PWR9-16,D1-2,C5-8,U1-2,J2-4,J6",
     "variants": []
   },
   "sheets": [
