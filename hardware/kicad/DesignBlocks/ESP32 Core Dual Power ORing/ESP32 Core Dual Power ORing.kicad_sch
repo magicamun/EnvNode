@@ -2247,6 +2247,30 @@
 			)
 		)
 	)
+	(global_label "+3V3_SYS"
+		(shape input)
+		(at 217.17 72.39 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7e96d66a-97a3-49e2-bede-bb76c3655775")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.17 59.8496 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
 	(global_label "AUX3"
 		(shape input)
 		(at 90.17 85.09 180)
@@ -3137,6 +3161,88 @@
 	)
 	(symbol
 		(lib_id "Device:C")
+		(at 217.17 76.2 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "25ee2df4-468e-4988-aabf-d4a52a74f9d7")
+		(property "Reference" "C3"
+			(at 220.98 74.9299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 220.98 77.4699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
+			(at 218.135 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 217.17 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 217.17 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a7a4fbe3-5a35-41ec-8582-0d994fcf708b")
+		)
+		(pin "2"
+			(uuid "17f52dd2-bc42-4e06-9130-6034f2cbd2fe")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "C3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
 		(at 52.07 52.07 0)
 		(unit 1)
 		(body_style 1)
@@ -3693,6 +3799,85 @@
 			(project "ESP32 Core Dual Power ORing"
 				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
 					(reference "D1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 217.17 80.01 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2")
+		(property "Reference" "#PWR010"
+			(at 217.17 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 219.71 81.2799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 217.17 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 217.17 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 217.17 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9e2d3425-0d56-4200-a963-5c0ec26da637")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "#PWR010")
 					(unit 1)
 				)
 			)
@@ -4341,191 +4526,6 @@
 			"f7e9205a-ea8d-4b95-8b85-5337ce80f25b" "fd643251-eefb-4347-b681-f5a2c5c74d6e"
 			"fd76295d-5ea1-4712-9dec-449a1ddf685c" "fdb6e1fe-5aaa-4025-a132-2666759297c2"
 			"ff08bfdf-d720-423b-9e3b-109e61cd0e23"
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 217.17 82.55 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "25ee2df4-468e-4988-aabf-d4a52a74f9d7")
-		(property "Reference" "C3"
-			(at 220.98 81.2799 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100nF"
-			(at 220.98 83.8199 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
-			(at 218.135 86.36 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 217.17 82.55 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 217.17 82.55 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "a7a4fbe3-5a35-41ec-8582-0d994fcf708b")
-		)
-		(pin "2"
-			(uuid "17f52dd2-bc42-4e06-9130-6034f2cbd2fe")
-		)
-		(instances
-			(project "ESP32 Core Dual Power ORing"
-				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
-					(reference "C3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 217.17 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2")
-		(property "Reference" "#PWR010"
-			(at 223.52 86.36 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 220.98 86.3599 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 217.17 86.36 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 217.17 86.36 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 217.17 86.36 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "9e2d3425-0d56-4200-a963-5c0ec26da637")
-		)
-		(instances
-			(project "ESP32 Core Dual Power ORing"
-				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
-					(reference "#PWR010")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(global_label "+3V3_SYS"
-		(shape input)
-		(at 217.17 78.74 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "7e96d66a-97a3-49e2-bede-bb76c3655775")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 217.17 66.1996 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
 		)
 	)
 	(sheet_instances
