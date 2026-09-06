@@ -1,6 +1,6 @@
 # EnvNode DuoRelay
 
-`DuoRelay` is a FullSize THT daughterboard for the EnvNode Revision 0.2 module interface. It provides two independently controlled 5 V electromechanical changeover relays.
+`DuoRelay` is a FullSize THT daughterboard for the EnvNode Revision 0.3 module interface. It provides two independently controlled 5 V electromechanical changeover relays.
 
 ## Project Files
 
@@ -50,6 +50,8 @@ The relay-contact nets are routed on F.Cu with 1.0 mm tracks. The design keeps a
 The spacing and relay ratings do not by themselves certify the finished product for mains use. Terminal ratings, enclosure, touch protection, fusing, load type, pollution degree, material group, overvoltage category, manufacturing tolerances, and the applicable product standard must be assessed for the final application.
 
 ## Validation
+
+Revision 0.3 aligns the bottom-side identification EEPROM, its decoupling capacitor, vias, and connector routing with the FullSize THT module template.
 
 At the time of the Revision 0.2 port:
 

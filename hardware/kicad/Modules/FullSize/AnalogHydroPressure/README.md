@@ -1,6 +1,6 @@
 # EnvNode AnalogHydroPressure
 
-`AnalogHydroPressure` is a FullSize daughterboard for a two-wire 4–20 mA hydrostatic pressure probe. It is the Revision 0.2 successor to the legacy `AnalogInput` module.
+`AnalogHydroPressure` is a FullSize daughterboard for a two-wire 4–20 mA hydrostatic pressure probe. It is the Revision 0.3 successor to the legacy `AnalogInput` module.
 
 ## Project Files
 
@@ -46,6 +46,8 @@ The project-level `sym-lib-table` maps the symbol library. The footprint library
 
 ## Validation and Release Status
 
+Revision 0.3 aligns the bottom-side identification EEPROM, its decoupling capacitor, vias, and connector routing with the FullSize THT module template.
+
 At the documented design checkpoint, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
 
-The article list, orderable manufacturer part numbers, qualified alternatives, and assembly information remain to be completed before Revision 0.2 production release.
+The article list, orderable manufacturer part numbers, qualified alternatives, and assembly information remain to be completed before Revision 0.3 production release.
