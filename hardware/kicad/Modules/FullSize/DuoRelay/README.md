@@ -26,7 +26,7 @@ Each channel uses a BC817 low-side driver with a 1 kΩ base resistor, a 100 kΩ 
 
 ## Module Identification
 
-The board provides an optional `24AA025E-OT` module-identification EEPROM and a local 100 nF decoupling capacitor on the bottom side. The EEPROM follows the EnvNode discovery convention:
+The board provides an optional `24LC32` module-identification EEPROM and a local 100 nF decoupling capacitor on the bottom side. The EEPROM follows the EnvNode discovery convention:
 
 - SDA and SCL use `I2C0`;
 - `A1` is tied to `+3V3_SYS`;
