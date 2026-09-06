@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "beff77f5-77fc-403f-a8a0-dfae64427d25")
+	(uuid "813491d1-03af-44d7-91f9-765ce8b8b447")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Device:C"
@@ -503,7 +503,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Memory_EEPROM:24AA025E-OT"
+		(symbol "Memory_EEPROM:24LC32"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -519,7 +519,7 @@
 					)
 				)
 			)
-			(property "Value" "24AA025E-OT"
+			(property "Value" "24LC32"
 				(at 1.27 6.35 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -530,7 +530,7 @@
 					(justify left)
 				)
 			)
-			(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
+			(property "Footprint" ""
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -541,7 +541,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/2-Kbit-I2C-Serial-EEPROMs-+EUI-48-or-EUI-64-Node-20002124.pdf"
+			(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21072G.pdf"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -552,7 +552,7 @@
 					)
 				)
 			)
-			(property "Description" "I2C Serial EEPROM with EUI-48 or EUI-64, 2Kb, SOT-23-6"
+			(property "Description" "I2C Serial EEPROM, 32Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -563,7 +563,7 @@
 					)
 				)
 			)
-			(property "ki_keywords" "Microchip"
+			(property "ki_keywords" "I2C Serial EEPROM"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -574,7 +574,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "SOT?23*"
+			(property "ki_fp_filters" "DIP*W7.62mm* SOIC*3.9x4.9mm* TSSOP*4.4x3mm*P0.65mm* DFN*3x2mm*P0.5mm*"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -585,7 +585,7 @@
 					)
 				)
 			)
-			(symbol "24AA025E-OT_1_1"
+			(symbol "24LC32_1_1"
 				(rectangle
 					(start -7.62 5.08)
 					(end 7.62 -5.08)
@@ -598,9 +598,9 @@
 					)
 				)
 				(pin input line
-					(at 10.16 0 180)
+					(at -10.16 2.54 0)
 					(length 2.54)
-					(name "SCL"
+					(name "A0"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -608,42 +608,6 @@
 						)
 					)
 					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 -7.62 90)
-					(length 2.54)
-					(name "V_{SS}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 10.16 2.54 180)
-					(length 2.54)
-					(name "SDA"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -661,7 +625,7 @@
 							)
 						)
 					)
-					(number "4"
+					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -670,9 +634,45 @@
 					)
 				)
 				(pin input line
-					(at -10.16 2.54 0)
+					(at -10.16 -2.54 0)
 					(length 2.54)
-					(name "A0"
+					(name "A2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "SDA"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -687,10 +687,10 @@
 						)
 					)
 				)
-				(pin power_in line
-					(at 0 7.62 270)
+				(pin input line
+					(at 10.16 0 180)
 					(length 2.54)
-					(name "V_{CC}"
+					(name "SCL"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -698,6 +698,42 @@
 						)
 					)
 					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "WP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 7.62 270)
+					(length 2.54)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2675,6 +2711,106 @@
 		)
 	)
 	(symbol
+		(lib_id "Memory_EEPROM:24LC32")
+		(at 201.93 90.17 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0950f9ef-fcef-43da-b5fa-d9f9e04646bb")
+		(property "Reference" "U3"
+			(at 204.0733 80.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "24LC32"
+			(at 204.0733 82.55 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 201.93 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21072G.pdf"
+			(at 201.93 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "I2C Serial EEPROM, 32Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8"
+			(at 201.93 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3fb2697a-7812-48b8-927b-e9f03677ff4c")
+		)
+		(pin "8"
+			(uuid "8925845a-3328-40ac-abd2-4e420fbaa9a1")
+		)
+		(pin "4"
+			(uuid "0a0ed548-4a13-4ede-9bf2-03ea74e8baff")
+		)
+		(pin "7"
+			(uuid "b7009688-975a-47dc-8937-5bb8eae4025b")
+		)
+		(pin "6"
+			(uuid "b9401c0c-c8ee-4052-a5d2-865ebca1606a")
+		)
+		(pin "5"
+			(uuid "dd15e9e7-74d4-4463-a94d-e459667e2857")
+		)
+		(pin "3"
+			(uuid "1564108e-f35d-44be-8c9c-a4efb2512884")
+		)
+		(pin "2"
+			(uuid "379df665-9851-4a16-905d-eba1eac014df")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "U3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 58.42 48.26 0)
 		(unit 1)
@@ -3563,6 +3699,85 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 212.09 92.71 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "971d596a-f403-4783-a6fd-0a18e923b96d")
+		(property "Reference" "#PWR09"
+			(at 218.44 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 215.9 92.7099 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 212.09 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 212.09 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 212.09 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "89d8d262-9922-40ee-a992-1c8dff1d0352")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "#PWR09")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 104.14 58.42 90)
 		(unit 1)
@@ -3642,6 +3857,85 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 191.77 92.71 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9f8848f8-03c5-4d8f-951b-2995a9cfec29")
+		(property "Reference" "#PWR08"
+			(at 185.42 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 187.96 92.7099 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 191.77 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 191.77 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 191.77 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "104cbe73-e126-4b99-8917-7d46385895a0")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "#PWR08")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 104.14 53.34 90)
 		(unit 1)
@@ -3715,106 +4009,6 @@
 			(project "ESP32 Core Dual Power ORing"
 				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
 					(reference "#FLG01")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Memory_EEPROM:24AA025E-OT")
-		(at 201.93 90.17 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "d78e010d-50f5-4222-9837-54ab76de24fa")
-		(property "Reference" "U2"
-			(at 204.0733 80.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "24AA025E64T-I/OT"
-			(at 204.0733 82.55 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
-			(at 201.93 90.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/2-Kbit-I2C-Serial-EEPROMs-+EUI-48-or-EUI-64-Node-20002124.pdf"
-			(at 201.93 90.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "I2C Serial EEPROM with EUI-48 or EUI-64, 2Kb, SOT-23-6"
-			(at 201.93 90.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "6"
-			(uuid "66521ff6-1074-4444-b4fb-acebf8864031")
-		)
-		(pin "5"
-			(uuid "35a9147c-82d5-436e-92d6-74589eff0a20")
-		)
-		(pin "1"
-			(uuid "c9c2ef9a-070d-4b86-9e6e-7056af337839")
-		)
-		(pin "4"
-			(uuid "951b8f4c-20d7-4436-9cf7-9767a87abcf9")
-		)
-		(pin "2"
-			(uuid "35e2eba1-0edb-40b5-a3aa-6021343f8a00")
-		)
-		(pin "3"
-			(uuid "8dff85a6-696d-416c-9a1d-9447f1a89747")
-		)
-		(instances
-			(project "ESP32 Core Dual Power ORing"
-				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
-					(reference "U2")
-					(unit 1)
-				)
-			)
-			(project "DB ESP32 Core 5V"
-				(path "/fc6f75c7-5c8c-4297-9927-6bc99e112cd0"
-					(reference "U2")
 					(unit 1)
 				)
 			)
@@ -4105,5 +4299,190 @@
 		(uuid "797f7578-e2cb-40fe-8eb1-c618c5b0d868")
 		(lib_id "EnvNodeDesignBlocks:ESP32 Core Dual Power ORing")
 		(members "60c08c24-a57d-4701-b1b7-aab28638ed1c")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 217.17 82.55 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1587c917-1dc1-4d9a-b508-46384d4696f2")
+		(property "Reference" "C3"
+			(at 220.98 81.2799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 220.98 83.8199 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
+			(at 218.135 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 217.17 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 217.17 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e5fd51b8-cf30-4dc3-a63c-6d8e7a89a0a7")
+		)
+		(pin "2"
+			(uuid "ee8e1f7a-e726-4097-8d0d-36ef618b4988")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "C3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 217.17 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d480bc9e-f60e-4f6d-960f-3cf1819dfda3")
+		(property "Reference" "#PWR010"
+			(at 223.52 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 220.98 86.3599 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 217.17 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 217.17 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 217.17 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "023648d2-d323-40f9-901c-d2a89ac5e0fc")
+		)
+		(instances
+			(project "ESP32 Core Dual Power ORing"
+				(path "/3de4bfc3-a84f-41bd-88e2-1213dd6daa5d"
+					(reference "#PWR010")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "+3V3_SYS"
+		(shape input)
+		(at 217.17 78.74 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "b80a2923-d084-437f-8b86-d4a5b281d593")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.17 66.1996 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 	)
 )

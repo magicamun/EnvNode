@@ -1,5 +1,5 @@
 {
-"description": "ESP32 DevKitC 38-pin core with automatic dual-power ORing between the external 3.3 V regulator and the DevKit USB-derived 3.3 V supply. Provides two I2C buses, one SPI bus, eight dedicated AUX GPIO signals, four ADC inputs, and a 24AA025E EUI-48 EEPROM for EnvNode mainboard designs.",
-"keywords": "ESP32, ESP32-DevKitC, 38-pin, dual power, USB power, external 5V, 3V3 ORing, SS14, I2C, SPI, AUX GPIO, ADC, EEPROM, EUI-48, EnvNode",
+"description": "ESP32 DevKitC 38-pin core with automatic dual-power ORing between the external 3.3 V regulator and the DevKit USB-derived 3.3 V supply. Provides two I2C buses, one SPI bus, eight dedicated AUX GPIO signals, four ADC inputs, and a 24LC32 identity EEPROM with local 100 nF decoupling for EnvNode mainboard designs.",
+"keywords": "ESP32, ESP32-DevKitC, 38-pin, dual power, USB power, external 5V, 3V3 ORing, SS14, I2C, SPI, AUX GPIO, ADC, EEPROM, 24LC32, EnvNode",
 "fields": {}
 }

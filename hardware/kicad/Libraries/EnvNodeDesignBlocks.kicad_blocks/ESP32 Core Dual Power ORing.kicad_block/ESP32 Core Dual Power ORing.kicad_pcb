@@ -96,7 +96,7 @@
 		(property "Reference" "D2"
 			(at 0 -2.5 0)
 			(layer "F.SilkS")
-			(uuid "ec75210e-2d45-4711-af13-560f2ce097a6")
+			(uuid "3b45ad75-66f5-4046-898c-003ef23bd641")
 			(effects
 				(font
 					(size 1 1)
@@ -107,7 +107,7 @@
 		(property "Value" "SS14"
 			(at 0 2.6 0)
 			(layer "F.Fab")
-			(uuid "4d30dfd2-f309-44a2-b405-eb843afa1217")
+			(uuid "13362273-e916-4752-bcab-20cc60a74d2d")
 			(effects
 				(font
 					(size 1 1)
@@ -120,7 +120,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "176bad82-f09d-41f2-93f0-2c3e0ff821db")
+			(uuid "a1dbf1a7-aefd-4680-ad02-0bd9e57ecb98")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -133,7 +133,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "5c782e97-a79b-48fa-be43-57a32aa3c343")
+			(uuid "6adce27f-66d3-4ffb-9c7f-c7d553eb92a8")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -145,12 +145,6 @@
 		(path "/4d0e448c-3652-42c0-a6d7-6b11242f95bc")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -376,7 +370,7 @@
 		(property "Reference" "U3"
 			(at 0 -3.4 0)
 			(layer "F.SilkS")
-			(uuid "522e9092-6090-4239-aa19-c52ed5f7d518")
+			(uuid "68bdb42a-7ab5-431e-b3cd-39d6139a8f6b")
 			(effects
 				(font
 					(size 1 1)
@@ -387,7 +381,7 @@
 		(property "Value" "24LC32"
 			(at 0 3.4 0)
 			(layer "F.Fab")
-			(uuid "2183f2a8-d62d-4947-8d5a-0071b14d073a")
+			(uuid "a5e5b271-0c29-4008-97cd-2835954e3a25")
 			(effects
 				(font
 					(size 1 1)
@@ -399,7 +393,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "167e3eda-ca63-48fa-9a87-ffc27707ee61")
+			(uuid "cadf82eb-e33b-4969-bb2c-0b623d8c16ab")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -410,7 +404,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "5b107c5b-1275-4db9-b2d1-cc7625e9a85a")
+			(uuid "d4e5f097-5b5d-49aa-b682-961a339abac7")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -433,12 +427,6 @@
 		(path "/0950f9ef-fcef-43da-b5fa-d9f9e04646bb")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "3" "8" "4" "5" "6" "7")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -758,7 +746,7 @@
 		(property "Reference" "D1"
 			(at 0 -2.5 90)
 			(layer "F.SilkS")
-			(uuid "770f4e0b-f199-4fb4-af01-a1c77433db49")
+			(uuid "96eef8c8-3b14-4895-a1d2-52a64f847eea")
 			(effects
 				(font
 					(size 1 1)
@@ -769,7 +757,7 @@
 		(property "Value" "SS14"
 			(at 0 2.6 90)
 			(layer "F.Fab")
-			(uuid "07f7638e-b6eb-4877-bcda-12d9f9f0befb")
+			(uuid "ef8ea7f7-0a01-4308-b2e1-b9252c5a1944")
 			(effects
 				(font
 					(size 1 1)
@@ -782,7 +770,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "8e63ded4-1b71-4f07-8400-9a4f2b5d3761")
+			(uuid "830585fc-721f-4d6f-9604-bb9adf6e4278")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -795,7 +783,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "90d2f9ba-a4d3-4885-ad49-101bd29896dd")
+			(uuid "0a63e5a3-e4c0-42e9-aff0-3e466ff11c0d")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -807,12 +795,6 @@
 		(path "/82546c9f-4cf5-43f9-95b6-c329903b6a47")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -1038,7 +1020,7 @@
 		(property "Reference" "U1"
 			(at 12.7 -2.1 0)
 			(layer "F.SilkS")
-			(uuid "a73afdb6-2748-44e8-b68f-75a669103d6c")
+			(uuid "defe45c7-a012-4f9f-b93d-0809c84b0908")
 			(effects
 				(font
 					(size 1 1)
@@ -1049,7 +1031,7 @@
 		(property "Value" "ESP32-DevKitC"
 			(at 12.7 24.13 90)
 			(layer "F.SilkS")
-			(uuid "60429910-a6c7-4320-8a82-632f732da05d")
+			(uuid "64e49b3d-df10-40f9-b564-ec7af8063afb")
 			(effects
 				(font
 					(size 1 1)
@@ -1061,7 +1043,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "a1005ac6-9ba2-4d88-a327-331a1e4742f9")
+			(uuid "a4c2ff8e-4477-432e-bb46-5c06d54666a5")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1072,7 +1054,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "0ad9e234-fc9f-4241-ab15-56aef8a5bc7a")
+			(uuid "40928619-c101-46a8-aaee-8567f99df8aa")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1082,15 +1064,6 @@
 		(path "/eafa4701-3097-4475-950e-e83ca2db56cd")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "2" "7" "8" "13" "15" "12" "23" "5" "6" "3" "4" "19" "38" "14"
-					"32" "1" "35" "34" "25" "24" "26" "29" "30" "31" "33" "36" "37" "9"
-					"10" "11" "20" "21" "22" "16" "17" "18" "27" "28"
-				)
-			)
-		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -2187,7 +2160,7 @@
 		(property "Reference" "C1"
 			(at 0 -1.85 90)
 			(layer "F.SilkS")
-			(uuid "63e21f0a-fe6b-4b78-8079-c52c49a8d181")
+			(uuid "45749422-c1a8-4c32-a2ff-66c260fab879")
 			(effects
 				(font
 					(size 1 1)
@@ -2198,7 +2171,7 @@
 		(property "Value" "100nF"
 			(at 0 1.85 90)
 			(layer "F.Fab")
-			(uuid "1fdc3190-100e-4498-b21d-cc1c269ddd4b")
+			(uuid "75363b2e-635b-4095-8208-869fd568fe68")
 			(effects
 				(font
 					(size 1 1)
@@ -2210,7 +2183,7 @@
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "57c118bd-bd1e-4380-aec1-dbd1676ba5e3")
+			(uuid "52b37479-02f8-4d2b-ab0f-72ab6b99cf78")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2221,7 +2194,7 @@
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "e8463190-38f0-413f-9307-aacca237df5f")
+			(uuid "1cdd6c26-ae0c-4385-a8cf-3adc4aa20a14")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2244,12 +2217,6 @@
 		(path "/459c1f37-2c33-489a-8a88-4228d2a69baf")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -2345,7 +2312,7 @@
 		(property "Reference" "C2"
 			(at 0 -3.7 0)
 			(layer "F.SilkS")
-			(uuid "d1ef302b-7b69-4584-80af-036e9be4bd26")
+			(uuid "d6734f51-a898-424a-b4b1-d6c9e3797db7")
 			(effects
 				(font
 					(size 1 1)
@@ -2356,7 +2323,7 @@
 		(property "Value" "10uF"
 			(at 0 3.7 0)
 			(layer "F.Fab")
-			(uuid "1b77b5e1-41a7-480c-838a-e6870cc1dff3")
+			(uuid "693a3267-772f-4880-b28d-1015c8c2752b")
 			(effects
 				(font
 					(size 1 1)
@@ -2368,7 +2335,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "451b70e6-0eec-4803-a926-7598782844d4")
+			(uuid "b1b8f1bf-3d7c-41c0-a581-105bf0af2531")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2379,7 +2346,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "67895b6d-8966-41df-bcb4-00425243039f")
+			(uuid "19d3ef36-170e-44cb-85c5-5726a639bced")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2402,12 +2369,6 @@
 		(path "/54d525db-e082-4e8d-8e3a-df1507e2c1c4")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -2856,6 +2817,30 @@
 		(uuid "2db9e568-1b3e-44e5-a1bc-52eb6443b44e")
 	)
 	(segment
+		(start 229.7575 80.0925)
+		(end 227.856259 81.993741)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "I2C0_SDA")
+		(uuid "22fa1f00-6f61-49c7-bd04-cb7d98db8aa7")
+	)
+	(segment
+		(start 231.515 80.0925)
+		(end 229.7575 80.0925)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "I2C0_SDA")
+		(uuid "41f533f0-8bda-4c95-b0a6-b3298074d7fb")
+	)
+	(segment
+		(start 227.856259 81.993741)
+		(end 222.352706 81.993741)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "I2C0_SDA")
+		(uuid "b297a62e-a5ec-4f9a-bd4b-e7bc591aeca2")
+	)
+	(segment
 		(start 228.76 75.11)
 		(end 228.023741 74.373741)
 		(width 0.2)
@@ -2895,58 +2880,17 @@
 		(net "I2C0_SCL")
 		(uuid "a2d0ca58-da91-46c1-9683-954b9b6b19bf")
 	)
-	(segment
-		(start 229.7575 80.0925)
-		(end 227.856259 81.993741)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "I2C0_SDA")
-		(uuid "22fa1f00-6f61-49c7-bd04-cb7d98db8aa7")
-	)
-	(segment
-		(start 231.515 80.0925)
-		(end 229.7575 80.0925)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "I2C0_SDA")
-		(uuid "41f533f0-8bda-4c95-b0a6-b3298074d7fb")
-	)
-	(segment
-		(start 227.856259 81.993741)
-		(end 222.352706 81.993741)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "I2C0_SDA")
-		(uuid "b297a62e-a5ec-4f9a-bd4b-e7bc591aeca2")
-	)
-	(group ""
-		(uuid "99a7feda-0230-413a-9e7f-e1b20434b42f")
-		(lib_id "EnvNodeDesignBlocks:ESP32 Core Dual Power ORing")
-		(members "03044a93-e572-405e-8451-31c5de8456a0" "22fa1f00-6f61-49c7-bd04-cb7d98db8aa7"
-			"2db9e568-1b3e-44e5-a1bc-52eb6443b44e" "2f944301-0968-47ac-8858-10bc613d2dc5"
-			"3a6a89d8-3f3e-4031-a595-8703f545c961" "41f533f0-8bda-4c95-b0a6-b3298074d7fb"
-			"4964c117-c18c-48b6-8f7d-319d1ea7c878" "5b1428eb-0bd1-4caa-aa61-44494c087c59"
-			"64417791-c4ca-4af7-8bf9-aa0928513777" "66cce79a-4bfc-4913-ad00-f6bdbe0b138c"
-			"70e0759d-a42e-4a1e-934c-eaa5e8d77eb1" "7884c9de-41bc-497b-8f57-36d84f7ba39c"
-			"87f8975e-2d1b-4d0d-9473-ffbffbb1b254" "906605b4-3e52-4cd7-9935-d4bd84fe79fa"
-			"952dbd5a-a8b5-4513-a073-2b46ea2e8326" "a2d0ca58-da91-46c1-9683-954b9b6b19bf"
-			"b297a62e-a5ec-4f9a-bd4b-e7bc591aeca2" "be3278c6-d81c-4f3c-a94d-993c873b6da6"
-			"d339221a-1791-45fe-819e-5d12eb834057" "d6463d19-86c1-4027-9fb8-239c62094e05"
-			"dc186229-dbf9-45dd-a908-af95ce3ea041" "de3b910c-4d78-4ed4-b00f-2dc802278c13"
-			"ecb6d293-0203-4a45-a40f-c0339998514c"
-		)
-	)
 	(embedded_fonts no)
 	(footprint "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
 		(layer "F.Cu")
-		(uuid "4cb8c4f4-f102-440a-bcfd-05c06d541042")
+		(uuid "9fb1ba89-f760-4529-bebd-549510f4cadc")
 		(at 234.5 75)
 		(descr "Capacitor SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC-7351 nominal with elongated pad for handsoldering. (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor handsolder")
 		(property "Reference" "C3"
 			(at 0 -1.85 90)
 			(layer "F.SilkS")
-			(uuid "837d8d09-6da0-45ba-8abb-8cf8d1e74af4")
+			(uuid "577211f2-03ae-4d2c-9a1f-15fc2b046c35")
 			(effects
 				(font
 					(size 1 1)
@@ -2957,7 +2901,7 @@
 		(property "Value" "100nF"
 			(at 0 1.85 90)
 			(layer "F.Fab")
-			(uuid "90131911-3821-4c37-9a5f-c08d00b482d6")
+			(uuid "8b3369b2-0662-4f55-8103-84c1eacdf4ca")
 			(effects
 				(font
 					(size 1 1)
@@ -2969,7 +2913,7 @@
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "cd6ab819-e538-4542-a86b-7e755baba813")
+			(uuid "e8c06f05-7c64-4ce0-a5e7-d514eb3c222d")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2980,7 +2924,7 @@
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "6e7a8d49-565f-4b91-9e3e-847677651baa")
+			(uuid "007347b0-8188-415c-a618-165a51bdc032")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2991,7 +2935,7 @@
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)
-			(uuid "1284352c-0471-43fd-9dbf-62f1c149986a")
+			(uuid "353baa48-a8ab-43e2-8462-814eb85a0bac")
 			(effects
 				(font
 					(size 1 1)
@@ -3000,15 +2944,9 @@
 			)
 		)
 		(property ki_fp_filters "C_*")
-		(path "/25ee2df4-468e-4988-aabf-d4a52a74f9d7")
+		(path "/1587c917-1dc1-4d9a-b508-46384d4696f2")
 		(sheetname "/")
 		(sheetfile "ESP32 Core Dual Power ORing.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -3019,7 +2957,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "8ee25875-33fd-48b3-8b22-41e64d7cf0a0")
+			(uuid "09ddae2b-307e-42c2-a437-5d5800ee09e4")
 		)
 		(fp_line
 			(start -0.711252 0.91)
@@ -3029,7 +2967,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "7d72f754-d0cb-49fa-b211-ff624c71e9a1")
+			(uuid "45cef86a-c4bd-4ea2-9eb7-b9f7669423a2")
 		)
 		(fp_rect
 			(start -2.48 -1.15)
@@ -3040,7 +2978,7 @@
 			)
 			(fill no)
 			(layer "F.CrtYd")
-			(uuid "f77f90ee-e8c9-4d39-b589-076e9240cbc8")
+			(uuid "53c65202-6565-4dc6-a1d5-b78121bec9e0")
 		)
 		(fp_rect
 			(start -1.6 -0.8)
@@ -3051,12 +2989,12 @@
 			)
 			(fill no)
 			(layer "F.Fab")
-			(uuid "ee54bd78-0025-41e8-ac44-dfb0e59e538d")
+			(uuid "323fdbcd-bad9-4207-9407-ce9e02ac5705")
 		)
 		(fp_text user "${REFERENCE}"
 			(at 0 0 90)
 			(layer "F.Fab")
-			(uuid "a261759e-f7de-4646-90b8-944b8b8cb301")
+			(uuid "4ef254ce-0d94-4943-bae7-8877a623ef84")
 			(effects
 				(font
 					(size 0.8 0.8)
@@ -3071,7 +3009,7 @@
 			(roundrect_rratio 0.188679)
 			(net "+3V3_SYS")
 			(pintype "passive")
-			(uuid "84b928e9-89ba-429b-8589-5d8796f39b1d")
+			(uuid "4de38256-7a4d-459a-b376-c2212759b123")
 		)
 		(pad "2" smd roundrect
 			(at 1.5625 0 90)
@@ -3080,7 +3018,7 @@
 			(roundrect_rratio 0.188679)
 			(net "GND")
 			(pintype "passive")
-			(uuid "22b4ba61-0825-409f-837f-2b30c95856f6")
+			(uuid "a6689c91-1094-4b75-963a-8aa0badf394b")
 		)
 		(embedded_fonts no)
 		(model "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
@@ -3101,7 +3039,7 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net "+3V3_SYS")
-		(uuid "8a8ff321-e111-4e92-8921-38790b86526e")
+		(uuid "e97a224e-657f-4f62-b08e-70034b38a6b9")
 	)
 	(segment
 		(start 236.0625 75)
@@ -3109,7 +3047,7 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net "GND")
-		(uuid "823c25d9-c1c4-4bfd-9e7c-906ecbde2982")
+		(uuid "359cde3a-bdc8-47ee-8c07-9fafb67e3700")
 	)
 	(segment
 		(start 233 77.5525)
@@ -3117,6 +3055,6 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net "GND")
-		(uuid "f0b5c124-fbed-4d03-9163-f0c806a7417f")
+		(uuid "1d51edd1-6796-482d-871b-f5af60ed3539")
 	)
 )
