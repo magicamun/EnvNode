@@ -18,9 +18,10 @@ This document does not define an EEPROM driver, provisioning UI, authorization p
 implementation.
 
 The record starts at user-memory byte address `0x00` of the board identity EEPROM and occupies
-addresses `0x00` through `0x1F`. EEPROM addresses outside that range, including the
-factory-programmed EUI-48 area of the current `24AA025E48`, are not part of this record and must
-not be modified by a Board Identity writer.
+addresses `0x00` through `0x1F`. EEPROM addresses outside that range are not part of this record
+and must not be modified by a Board Identity writer. EnvNode Mini Revision 0.3 uses a `24LC32`;
+Revision 0.2 used a `24AA025E48` whose factory-programmed EUI-48 area was likewise outside this
+record.
 
 ## 2. Version 1 byte layout
 

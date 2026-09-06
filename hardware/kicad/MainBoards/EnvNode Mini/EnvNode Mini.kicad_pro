@@ -40,8 +40,8 @@
         "other_text_upright": false,
         "pads": {
           "drill": 0.0,
-          "height": 1.15,
-          "width": 0.6
+          "height": 0.6,
+          "width": 1.95
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -91,6 +91,14 @@
         ],
         [
           "hole_clearance|144140000|99165000|de722716-2851-41a9-9168-406d14ca28eb|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
+          ""
+        ],
+        [
+          "silk_overlap|173800000|50520000|806a60c7-1ac8-4b14-aab2-de251c8a208b|9c0bd09d-b513-4a83-b0da-404ad1377365",
+          ""
+        ],
+        [
+          "silk_overlap|173800000|55640000|9a55e489-428a-4740-bac1-760e3f9a4f05|9c0bd09d-b513-4a83-b0da-404ad1377365",
           ""
         ]
       ],
@@ -719,7 +727,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "JP_I2C1_SDA1,JP_I2C1_SCL1,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-4,R1-6,JP1-4,I2C0_1-2,#FLG1-4,#PWR1-4,#PWR9-16,D1-2,C5-8,U1-2,J2-4,J6",
+    "used_designators": "JP_I2C1_SDA1,JP_I2C1_SCL1,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-5,R1-6,JP1-4,I2C0_1-2,#FLG1-8,#PWR1-4,#PWR9-25,D1-4,C5-8,U1-2,U4,J2-4,J6",
     "variants": []
   },
   "sheets": [

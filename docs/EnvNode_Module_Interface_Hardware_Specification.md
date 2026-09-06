@@ -138,7 +138,7 @@ If the firmware finds no valid module-specific identity, it must not infer a mod
 
 SPI operation likewise requires explicit configuration because the absence of a module identity provides no information about an attached SPI device or its protocol.
 
-The mainboard identity EEPROM is independent of optional module identification. Mainboard Revision 0.2 uses the `24AA025E48` at I²C address `0x50` on `I2C0`; its record is defined in `docs/BoardIdentityRecord.md`.
+The mainboard identity EEPROM is independent of optional module identification. Mainboard Revision 0.3 uses a `24LC32` at I²C address `0x50` on `I2C0`; `A0` through `A2` and `WP` are tied to GND. Its record is defined in `docs/BoardIdentityRecord.md`. Revision 0.2 used a `24AA025E48` at the same bus address.
 
 ## 8. DuoRelay Reference Module
 
