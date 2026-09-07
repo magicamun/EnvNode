@@ -405,8 +405,8 @@ Implemented:
 
 Current hardware-validation focus:
 
-- Board Identity EEPROM provisioning and boot selection on a physical Mainboard revision 0.2
-- physical verification of the existing Mainboard revision 0.1 as the basis for Module development
+- Board Identity EEPROM provisioning and boot selection on a physical Mainboard revision 0.3
+- physical bring-up and production validation of the current Mainboard and Module revision 0.3 designs
 - integration and calibration of a concrete ADC backend and pressure probe on real hardware
 
 Future firmware extensions:

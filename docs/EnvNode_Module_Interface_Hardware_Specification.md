@@ -39,7 +39,7 @@ The generic names `AUX_GPIO1`, `AUX_GPIO2`, and `SPI_CS` describe the connector 
 
 Unused pins may remain electrically unconnected on a module but must not be repurposed.
 
-## 3. Mainboard Revision 0.2 Mapping
+## 3. Mainboard Mapping for Revision 0.2 and Later
 
 The ESP32 Core Dual Power design fixes the shared buses as follows:
 
@@ -142,7 +142,7 @@ The mainboard identity EEPROM is independent of optional module identification. 
 
 ## 8. DuoRelay Reference Module
 
-`hardware/kicad/Modules/FullSize/DuoRelay/` is the first functional module ported to the Revision 0.2 interface. It is a FullSize THT module with an optional identification EEPROM and two independently controlled 5 V changeover relays:
+`hardware/kicad/Modules/FullSize/DuoRelay/` is a Revision 0.3 FullSize THT module using the connector interface introduced with Revision 0.2. It has an optional identification EEPROM and two independently controlled 5 V changeover relays:
 
 - connector pin 9 / `AUX_GPIO1` drives relay channel 1;
 - connector pin 10 / `AUX_GPIO2` drives relay channel 2;

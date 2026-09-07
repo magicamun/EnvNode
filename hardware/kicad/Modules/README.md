@@ -1,6 +1,6 @@
-# EnvNode Revision 0.2 Modules
+# EnvNode Revision 0.3 Modules
 
-This directory contains the current module templates and functional daughterboards for the EnvNode Revision 0.2 module interface.
+This directory contains the current module templates and functional daughterboards for the EnvNode Revision 0.3 module interface. The electrical connector contract was introduced with Revision 0.2 and is retained by the current Revision 0.3 designs.
 
 ## Functional Modules
 
@@ -20,4 +20,4 @@ New modules must follow the [module-interface hardware specification](../../../d
 
 ## Release Status
 
-Revision 0.2 is not yet released for production. Release requires a complete article list and assembly information, physical bring-up of the relevant boards, and successful operation of at least the Rain Detector heater path. A later provisioning station is intended to prepare Mainboards, Modules, and other supported boards with their identities and required initial data.
+Revision 0.3 is not yet released for production. Release requires a complete article list and assembly information, physical bring-up of the relevant boards, and successful operation of at least the Rain Detector heater path. A later provisioning station is intended to prepare Mainboards, Modules, and other supported boards with their identities and required initial data.
