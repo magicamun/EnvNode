@@ -2343,7 +2343,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "5e3cd41d-a63b-4a50-bea8-37c92b2e0fd3")
 		(property "Reference" "J2"
