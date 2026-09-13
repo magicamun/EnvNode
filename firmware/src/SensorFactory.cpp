@@ -58,14 +58,19 @@ ISensor* SensorFactory::create(
         return nullptr;
     }
     if ((slot.implementation == SensorImplementation::BME280
-            || slot.implementation == SensorImplementation::SHT4x)
+            || slot.implementation == SensorImplementation::SHT4x
+            || slot.implementation == SensorImplementation::SHTC3)
         && (slot.hardware.kind != HardwareResourceKind::I2C
             || (slot.implementation == SensorImplementation::BME280
-                ? slot.implementationConfiguration.bme280.i2c.bus
-                : slot.implementationConfiguration.sht4x.i2c.bus) != slot.hardware.i2c.bus
+                    ? slot.implementationConfiguration.bme280.i2c.bus
+                    : slot.implementation == SensorImplementation::SHT4x
+                        ? slot.implementationConfiguration.sht4x.i2c.bus
+                        : slot.implementationConfiguration.shtc3.i2c.bus) != slot.hardware.i2c.bus
             || (slot.implementation == SensorImplementation::BME280
-                ? slot.implementationConfiguration.bme280.i2c.address
-                : slot.implementationConfiguration.sht4x.i2c.address) != slot.hardware.i2c.address)) {
+                    ? slot.implementationConfiguration.bme280.i2c.address
+                    : slot.implementation == SensorImplementation::SHT4x
+                        ? slot.implementationConfiguration.sht4x.i2c.address
+                        : slot.implementationConfiguration.shtc3.i2c.address) != slot.hardware.i2c.address)) {
         result = SensorFactoryResult::InvalidResource;
         return nullptr;
     }
@@ -107,6 +112,11 @@ ISensor* SensorFactory::create(
                 slot.slotId, slot.implementationConfiguration.sht4x.i2c,
                 i2cBusManager_, logger_);
             break;
+        case SensorImplementation::SHTC3:
+            sensor = new (target) SHTC3Sensor(
+                slot.slotId, slot.implementationConfiguration.shtc3.i2c,
+                i2cBusManager_, logger_);
+            break;
         case SensorImplementation::None:
         default:
             result = SensorFactoryResult::UnknownImplementation;
@@ -140,6 +150,9 @@ void SensorFactory::destroy(size_t storageIndex) {
             break;
         case SensorImplementation::SHT4x:
             static_cast<SHT4xSensor*>(target)->~SHT4xSensor();
+            break;
+        case SensorImplementation::SHTC3:
+            static_cast<SHTC3Sensor*>(target)->~SHTC3Sensor();
             break;
         case SensorImplementation::None:
         default:

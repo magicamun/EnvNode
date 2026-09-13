@@ -508,6 +508,10 @@ Examples:
         I2C bus
         address
 
+    SHTC3Configuration
+        I2C bus
+        fixed address 0x70
+
     BMP390Configuration
         I2C bus
         address
@@ -535,6 +539,10 @@ AM2302:
 SHT4x:
 
     default I2C address = 0x44
+
+SHTC3:
+
+    fixed I2C address = 0x70
 
 Defaults assist configuration but do not override explicit user settings.
 

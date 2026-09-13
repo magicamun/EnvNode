@@ -112,6 +112,7 @@ void ConfigurationService::initializeSensorDefaults() {
         slot.implementationConfiguration.am2302 = AM2302Configuration();
         slot.implementationConfiguration.bme280 = BME280Configuration();
         slot.implementationConfiguration.sht4x = SHT4xConfiguration();
+        slot.implementationConfiguration.shtc3 = SHTC3Configuration();
         slot.implementationConfiguration.rainGauge = RainGaugeConfiguration();
     }
 
@@ -263,7 +264,8 @@ void ConfigurationService::loadSensorSlots() {
             || loaded[index].implementation == SensorImplementation::RainGauge) {
             loaded[index].hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
         } else if (loaded[index].implementation == SensorImplementation::BME280
-            || loaded[index].implementation == SensorImplementation::SHT4x) {
+            || loaded[index].implementation == SensorImplementation::SHT4x
+            || loaded[index].implementation == SensorImplementation::SHTC3) {
             loaded[index].hardware = HardwareResourceAssignment::i2cResource(
                 I2CResource(i2cBus, i2cAddress));
         } else {
@@ -273,6 +275,8 @@ void ConfigurationService::loadSensorSlots() {
         loaded[index].implementationConfiguration.bme280 = BME280Configuration(
             I2CResource(i2cBus, i2cAddress));
         loaded[index].implementationConfiguration.sht4x = SHT4xConfiguration(
+            I2CResource(i2cBus, i2cAddress));
+        loaded[index].implementationConfiguration.shtc3 = SHTC3Configuration(
             I2CResource(i2cBus, i2cAddress));
         loaded[index].implementationConfiguration.rainGauge = RainGaugeConfiguration(
             GpioResource(gpio),
@@ -781,6 +785,12 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
             && slot.implementationConfiguration.sht4x.i2c.bus == slot.hardware.i2c.bus
             && slot.implementationConfiguration.sht4x.i2c.address == slot.hardware.i2c.address
             && slot.hardware.i2c.address == 0x44;
+    }
+    if (slot.implementation == SensorImplementation::SHTC3) {
+        return slot.hardware.kind == HardwareResourceKind::I2C
+            && slot.implementationConfiguration.shtc3.i2c.bus == slot.hardware.i2c.bus
+            && slot.implementationConfiguration.shtc3.i2c.address == slot.hardware.i2c.address
+            && slot.hardware.i2c.address == 0x70;
     }
     return true;
 }

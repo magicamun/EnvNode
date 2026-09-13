@@ -108,6 +108,7 @@ Examples:
 
 - AM2302
 - SHT4x
+- SHTC3
 - BMP390
 - Rain Gauge
 - Pressure Probe

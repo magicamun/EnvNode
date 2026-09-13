@@ -37,6 +37,14 @@ struct SHT4xConfiguration {
     I2CResource i2c;
 };
 
+struct SHTC3Configuration {
+    explicit SHTC3Configuration(I2CResource i2cResource = I2CResource(I2CBus::I2C0, 0x70))
+        : i2c(i2cResource) {
+    }
+
+    I2CResource i2c;
+};
+
 struct RainGaugeConfiguration {
     RainGaugeConfiguration(
         GpioResource inputGpio = GpioResource(),
@@ -59,6 +67,7 @@ struct SensorImplementationConfiguration {
     AM2302Configuration am2302;
     BME280Configuration bme280;
     SHT4xConfiguration sht4x;
+    SHTC3Configuration shtc3;
     RainGaugeConfiguration rainGauge;
 };
 
