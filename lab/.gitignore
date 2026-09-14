@@ -1,3 +1,10 @@
 *
 !.gitignore
 !README.md
+!RainDetector-PCNT/
+!RainDetector-PCNT/platformio.ini
+!RainDetector-PCNT/README.md
+!RainDetector-PCNT/include/
+!RainDetector-PCNT/include/LabConfig.h
+!RainDetector-PCNT/src/
+!RainDetector-PCNT/src/main.cpp

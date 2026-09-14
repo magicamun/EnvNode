@@ -1,0 +1,7 @@
+(version 1)
+
+# The two intentional capacitor electrodes use a 0.10 mm sensing gap.
+# All other copper retains the project/netclass clearances.
+(rule "Rain sensing electrode gap"
+  (condition "A.Reference == 'C1' && B.Reference == 'C1'")
+  (constraint clearance (min 0.10mm)))
