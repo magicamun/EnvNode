@@ -268,7 +268,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Connector:Conn_01x04_Socket"
+		(symbol "Connector_Generic:Conn_02x02_Odd_Even"
 			(pin_names
 				(offset 1.016)
 				(hide yes)
@@ -279,7 +279,7 @@
 			(in_pos_files yes)
 			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "J"
-				(at 0 5.08 0)
+				(at 1.27 2.54 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -288,8 +288,8 @@
 					)
 				)
 			)
-			(property "Value" "Conn_01x04_Socket"
-				(at 0 -7.62 0)
+			(property "Value" "Conn_02x02_Odd_Even"
+				(at 1.27 -5.08 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -320,21 +320,11 @@
 					)
 				)
 			)
-			(property "Description" "Generic connector, single row, 01x04, script generated"
+			(property "Description" "Generic connector, double row, 02x02, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -352,7 +342,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(property "ki_fp_filters" "Connector*:*_2x??_*"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -363,11 +353,21 @@
 					)
 				)
 			)
-			(symbol "Conn_01x04_Socket_1_1"
-				(polyline
-					(pts
-						(xy -1.27 2.54) (xy -0.508 2.54)
+			(symbol "Conn_02x02_Odd_Even_1_1"
+				(rectangle
+					(start -1.27 1.27)
+					(end 3.81 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
 					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 0.127)
+					(end 0 -0.127)
 					(stroke
 						(width 0.1524)
 						(type default)
@@ -376,10 +376,9 @@
 						(type none)
 					)
 				)
-				(polyline
-					(pts
-						(xy -1.27 0) (xy -0.508 0)
-					)
+				(rectangle
+					(start -1.27 -2.413)
+					(end 0 -2.667)
 					(stroke
 						(width 0.1524)
 						(type default)
@@ -388,10 +387,9 @@
 						(type none)
 					)
 				)
-				(polyline
-					(pts
-						(xy -1.27 -2.54) (xy -0.508 -2.54)
-					)
+				(rectangle
+					(start 3.81 0.127)
+					(end 2.54 -0.127)
 					(stroke
 						(width 0.1524)
 						(type default)
@@ -400,58 +398,9 @@
 						(type none)
 					)
 				)
-				(polyline
-					(pts
-						(xy -1.27 -5.08) (xy -0.508 -5.08)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 0 2.032)
-					(mid -0.5058 2.54)
-					(end 0 3.048)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 0 -0.508)
-					(mid -0.5058 0)
-					(end 0 0.508)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 0 -3.048)
-					(mid -0.5058 -2.54)
-					(end 0 -2.032)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 0 -5.588)
-					(mid -0.5058 -5.08)
-					(end 0 -4.572)
+				(rectangle
+					(start 3.81 -2.413)
+					(end 2.54 -2.667)
 					(stroke
 						(width 0.1524)
 						(type default)
@@ -461,7 +410,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 2.54 0)
+					(at -5.08 0 0)
 					(length 3.81)
 					(name "Pin_1"
 						(effects
@@ -479,7 +428,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 0 0)
+					(at 7.62 0 180)
 					(length 3.81)
 					(name "Pin_2"
 						(effects
@@ -515,7 +464,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -5.08 0)
+					(at 7.62 -2.54 180)
 					(length 3.81)
 					(name "Pin_4"
 						(effects
@@ -2004,24 +1953,24 @@
 		(uuid "e72869e7-0308-4017-a465-62f55de0ace5")
 	)
 	(no_connect
-		(at 38.1 39.37)
-		(uuid "231debbf-7d78-42ce-b0f5-42572e87de31")
+		(at 33.02 29.21)
+		(uuid "0b95e1e2-d163-4208-a2c8-0ca6b1259493")
+	)
+	(no_connect
+		(at 66.04 29.21)
+		(uuid "6aef1bb0-8f6f-4a2c-801d-e684a8122069")
 	)
 	(no_connect
 		(at 53.34 101.6)
 		(uuid "7c864655-3840-4a54-8849-7753cac523b6")
 	)
 	(no_connect
-		(at 81.28 39.37)
-		(uuid "b7942ffa-f708-44e1-96f8-4c63b23e70d3")
+		(at 78.74 26.67)
+		(uuid "98422ebd-5897-40af-acff-72d29a87ba01")
 	)
 	(no_connect
-		(at 38.1 41.91)
-		(uuid "e170f845-45af-43cb-b526-d626d16e097a")
-	)
-	(no_connect
-		(at 81.28 41.91)
-		(uuid "f9cecd50-9ffa-446b-a66e-7bda2a7a6107")
+		(at 45.72 26.67)
+		(uuid "e50d9595-f379-4644-aa85-46fc4dadb921")
 	)
 	(wire
 		(pts
@@ -2187,17 +2136,17 @@
 	)
 	(global_label "HEATER-"
 		(shape input)
-		(at 81.28 44.45 180)
+		(at 78.74 29.21 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right)
+			(justify left)
 		)
 		(uuid "6f8eb4d6-5558-430a-89bb-6ddb06315cf1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 69.7677 44.45 0)
+			(at 90.2523 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2205,13 +2154,13 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
 	)
 	(global_label "SENSE"
 		(shape input)
-		(at 81.28 36.83 180)
+		(at 66.04 26.67 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2221,7 +2170,7 @@
 		)
 		(uuid "b7df2c38-8b48-4eb2-9bcb-8ed491d759c1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 72.2473 36.83 0)
+			(at 57.0073 26.67 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2379,94 +2328,6 @@
 			(project "RainDetectorController"
 				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
 					(reference "#PWR05")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Conn_01x04_Socket")
-		(at 43.18 39.37 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0bf5a39a-02b1-4f4e-9fef-8ea8a4f14743")
-		(property "Reference" "J1"
-			(at 44.45 39.3699 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "Conn_01x04_Socket"
-			(at 44.45 41.9099 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical"
-			(at 43.18 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 43.18 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Generic connector, single row, 01x04, script generated"
-			(at 43.18 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "4"
-			(uuid "2dba764f-0c30-4a47-bc5a-ea3daa54dba8")
-		)
-		(pin "3"
-			(uuid "49aae62e-ee1c-4dc1-aacb-0860376eb647")
-		)
-		(pin "2"
-			(uuid "540c0c4c-770a-40b7-baaf-9020823e046d")
-		)
-		(pin "1"
-			(uuid "6913a4de-17cd-41e2-a158-7ef3d9051869")
-		)
-		(instances
-			(project "RainDetectorController"
-				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
-					(reference "J1")
 					(unit 1)
 				)
 			)
@@ -3368,6 +3229,92 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector_Generic:Conn_02x02_Odd_Even")
+		(at 38.1 26.67 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "72cb3aaa-012d-42c7-9772-0ec995e721e8")
+		(property "Reference" "J1"
+			(at 39.37 20.32 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_02x02_Odd_Even"
+			(at 39.37 22.86 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x02_P2.54mm_Vertical"
+			(at 38.1 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 38.1 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, double row, 02x02, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 38.1 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "588fe93e-4c74-48b8-afdb-ea6066530964")
+		)
+		(pin "4"
+			(uuid "379760b3-bc58-4b34-b5e7-353808604c8d")
+		)
+		(pin "3"
+			(uuid "f5e646a2-28d5-4b9e-91dd-637035c639bf")
+		)
+		(pin "2"
+			(uuid "8480b1d9-15b1-4c1b-b4ef-111baf9b2690")
+		)
+		(instances
+			(project "RainDetectorController"
+				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
+					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+3V3")
 		(at 43.18 106.68 90)
 		(unit 1)
@@ -3677,94 +3624,6 @@
 			(project "RainDetectorController"
 				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
 					(reference "#FLG02")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Conn_01x04_Socket")
-		(at 86.36 39.37 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "8ae95499-8a11-49be-9711-eb7829eab9a4")
-		(property "Reference" "J2"
-			(at 87.63 39.3699 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "Conn_01x04_Socket"
-			(at 87.63 41.9099 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical"
-			(at 86.36 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 86.36 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Generic connector, single row, 01x04, script generated"
-			(at 86.36 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "4"
-			(uuid "c730d7d6-1dab-48be-aa91-0c4447f216d8")
-		)
-		(pin "3"
-			(uuid "ee07c407-cf8c-4f99-8b76-b11faeeba8a7")
-		)
-		(pin "2"
-			(uuid "6cde847a-3961-47c7-b372-aedfa96e1abf")
-		)
-		(pin "1"
-			(uuid "da157a23-2c07-45fc-bd4f-b2326c66070b")
-		)
-		(instances
-			(project "RainDetectorController"
-				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
-					(reference "J2")
 					(unit 1)
 				)
 			)
@@ -4639,7 +4498,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 38.1 44.45 270)
+		(at 45.72 29.21 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4650,7 +4509,7 @@
 		(fields_autoplaced yes)
 		(uuid "cd670819-6ec8-424f-b7db-64e06d56a7a6")
 		(property "Reference" "#PWR015"
-			(at 31.75 44.45 0)
+			(at 52.07 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4661,7 +4520,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 34.29 44.4499 90)
+			(at 49.53 29.2099 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4672,7 +4531,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 38.1 44.45 0)
+			(at 45.72 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4683,7 +4542,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 38.1 44.45 0)
+			(at 45.72 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4694,7 +4553,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 38.1 44.45 0)
+			(at 45.72 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4882,7 +4741,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 38.1 36.83 90)
+		(at 33.02 26.67 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4893,7 +4752,7 @@
 		(fields_autoplaced yes)
 		(uuid "d7780f9d-ddbd-4117-b274-e227b06b3b30")
 		(property "Reference" "#PWR017"
-			(at 41.91 36.83 0)
+			(at 36.83 26.67 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4904,7 +4763,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 34.29 36.8299 90)
+			(at 29.21 26.6699 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4915,7 +4774,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 38.1 36.83 0)
+			(at 33.02 26.67 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4926,7 +4785,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 38.1 36.83 0)
+			(at 33.02 26.67 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4937,7 +4796,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 38.1 36.83 0)
+			(at 33.02 26.67 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5190,6 +5049,92 @@
 			(project "RainDetectorController"
 				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
 					(reference "#PWR04")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_02x02_Odd_Even")
+		(at 71.12 26.67 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e308ebdd-d863-4919-bccb-109fd5a0b3f7")
+		(property "Reference" "J2"
+			(at 72.39 20.32 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_02x02_Odd_Even"
+			(at 72.39 22.86 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x02_P2.54mm_Vertical"
+			(at 71.12 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 71.12 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, double row, 02x02, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 71.12 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3adefc67-5605-4f96-bdee-0027f5ddaf74")
+		)
+		(pin "4"
+			(uuid "abfd0d49-63ac-41b6-bd03-8c4da1868cad")
+		)
+		(pin "3"
+			(uuid "5fd58b81-cbec-4c45-9c0b-5a10dcace12c")
+		)
+		(pin "2"
+			(uuid "1e00bd20-63c1-4b30-8ed9-d914c45ac7c0")
+		)
+		(instances
+			(project "RainDetectorController"
+				(path "/003db691-998b-489a-8e0b-06c48a6b6d50"
+					(reference "J2")
 					(unit 1)
 				)
 			)
