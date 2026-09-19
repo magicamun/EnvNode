@@ -171,7 +171,7 @@ or fails its integrity check, an explicitly configured build-time development fa
 be used. A valid but unsupported identity does not fall back and prevents normal runtime
 operation. Firmware Build Identity and physical Board Identity remain separate models.
 
-The current `EnvNode Mainboard` profile is hardware revision 0.2. It exposes I2C0 on
+The current `EnvNode Mainboard` profile is hardware revision 0.3. It exposes I2C0 on
 SDA GPIO21 / SCL GPIO22 and I2C1 on SDA GPIO25 / SCL GPIO26. Generic digital resources are
 GPIO4, GPIO13, GPIO14, GPIO15, GPIO16, GPIO17, GPIO18, GPIO19, GPIO23, GPIO32 and GPIO33.
 GPIO32 and GPIO33 additionally support analog input; GPIO34, GPIO35, GPIO36 and GPIO39 are
@@ -180,8 +180,11 @@ are therefore never offered as generic GPIO resources.
 
 Future EnvNode 868 and EnvNode Nano builds can provide different immutable profiles without
 changing hardware consumers, regardless of whether a profile originates from EEPROM identity
-or the explicit development fallback. Live profile replacement, automatic module detection,
-and SPI module definitions remain outside the current architecture.
+or the explicit development fallback. Module identification scans the two reserved `I2C0`
+addresses independently. A registry resolves valid identity records to declarative module
+profiles, and compatibility validation compares their connector-resource requirements with
+the selected board profile's slot mapping. This stage is diagnostic only: driver creation,
+live profile replacement, and SPI module definitions remain outside the current architecture.
 
 `I2CBusManager` owns initialization and access to the physical `TwoWire` instances described
 by the active profile. Its explicit diagnostic scan probes only normal usable 7-bit addresses
@@ -2553,6 +2556,8 @@ Implemented
 - MQTT Measurement publishing and Sensor Home Assistant discovery
 - EEPROM-backed Board Identity codec, storage, boot-time resolution and development fallback
 - Board Identity diagnostics and confirmed Web provisioning with readback verification
+- independent Module Identity discovery for both slots, immutable module profiles and
+  board/slot compatibility validation without automatic driver activation
 - fixed Actuator slots, registry and stable ActuatorId
 - unified Sensor/Actuator hardware capability and occupancy validation
 - OnOff capability and GPIO On/Off implementation
@@ -2577,8 +2582,8 @@ Implemented
 
 Current hardware-validation focus
 
-- provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.2
-- physically verify the existing Mainboard revision 0.1 before basing Module hardware on it
+- provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.3
+- physically bring up and validate the current Mainboard and Module revision 0.3 designs
 - integrate and calibrate a concrete ADC backend and the pressure probe on real hardware
 
 Deliberately future or not implemented

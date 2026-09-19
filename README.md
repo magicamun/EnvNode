@@ -189,6 +189,8 @@ Implemented
 - Sensor Home Assistant discovery
 - EEPROM-backed Board Identity, boot-time profile resolution and development fallback
 - Board Identity diagnostics and confirmed Web provisioning with readback verification
+- independent Module Identity discovery for both slots, immutable module profiles and
+  board/slot compatibility diagnostics without automatic driver activation
 - fixed Actuator slots and unified hardware validation
 - OnOff capability and GPIO On/Off Actuator
 - Level capability and GPIO PWM Actuator
@@ -205,11 +207,11 @@ Implemented
 
 Current hardware-validation focus
 
-- provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.2
-- complete the Revision 0.2 article list and assembly data
+- provision and boot from the Board Identity EEPROM on a physical Mainboard revision 0.3
+- complete the Revision 0.3 article list and assembly data
 - assemble and bring up the AnalogHydroPressure module, including its local 5 V to 24 V supply
 - integrate and calibrate the ADS1115-based 4–20 mA pressure input on real hardware
-- operate at least the Rain Detector heater path before releasing Revision 0.2 for production
+- operate at least the Rain Detector heater path before releasing Revision 0.3 for production
 
 Deliberately future
 

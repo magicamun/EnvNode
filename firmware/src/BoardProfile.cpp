@@ -28,6 +28,11 @@ const BoardI2CBusCapability EnvNodeMainboardI2CBuses[] = {
     {I2CBus::I2C1, GpioResource(25), GpioResource(26)},
 };
 
+const BoardModuleSlotCapability EnvNodeMainboardModuleSlots[] = {
+    {ModuleSlot::A, 0x52, GpioResource(4), GpioResource(13), GpioResource(5), true},
+    {ModuleSlot::B, 0x53, GpioResource(14), GpioResource(16), GpioResource(27), true},
+};
+
 const BoardProfile EnvNodeMainboardProfile = {
     BoardProfileId::EnvNodeMainboard,
     "EnvNode Mainboard",
@@ -36,6 +41,8 @@ const BoardProfile EnvNodeMainboardProfile = {
     sizeof(EnvNodeMainboardGpios) / sizeof(EnvNodeMainboardGpios[0]),
     EnvNodeMainboardI2CBuses,
     sizeof(EnvNodeMainboardI2CBuses) / sizeof(EnvNodeMainboardI2CBuses[0]),
+    EnvNodeMainboardModuleSlots,
+    sizeof(EnvNodeMainboardModuleSlots) / sizeof(EnvNodeMainboardModuleSlots[0]),
 };
 
 const BoardProfile* const BoardProfiles[] = {
@@ -90,6 +97,23 @@ bool selectCurrentBoardProfile(BoardProfileId id) {
     selectedProfile = profile;
     selectionFrozen = true;
     return true;
+}
+
+const BoardModuleSlotCapability* boardModuleSlot(
+    const BoardProfile& board,
+    ModuleSlot slot) {
+    for (size_t index = 0; index < board.moduleSlotCount; ++index) {
+        if (board.moduleSlots[index].slot == slot) return &board.moduleSlots[index];
+    }
+    return nullptr;
+}
+
+const char* moduleSlotName(ModuleSlot slot) {
+    switch (slot) {
+        case ModuleSlot::A: return "A";
+        case ModuleSlot::B: return "B";
+        default: return "unknown";
+    }
 }
 
 } // namespace EnvNode

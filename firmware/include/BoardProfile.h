@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "HardwareResources.h"
+#include "ModuleSlot.h"
 
 namespace EnvNode {
 
@@ -16,6 +17,15 @@ struct BoardRevision {
     uint8_t minor;
 };
 
+struct BoardModuleSlotCapability {
+    ModuleSlot slot;
+    uint8_t identityEepromAddress;
+    GpioResource auxGpio1;
+    GpioResource auxGpio2;
+    GpioResource spiChipSelect;
+    bool fiveVoltSupplyAvailable;
+};
+
 struct BoardProfile {
     BoardProfileId id;
     const char* displayName;
@@ -24,6 +34,8 @@ struct BoardProfile {
     size_t gpioCount;
     const BoardI2CBusCapability* i2cBuses;
     size_t i2cBusCount;
+    const BoardModuleSlotCapability* moduleSlots;
+    size_t moduleSlotCount;
 };
 
 const BoardProfile& currentBoardProfile();
@@ -32,5 +44,8 @@ size_t boardProfileCount();
 const BoardProfile* boardProfileAt(size_t index);
 BoardProfileId buildFallbackBoardProfileId();
 bool selectCurrentBoardProfile(BoardProfileId id);
+const BoardModuleSlotCapability* boardModuleSlot(
+    const BoardProfile& board,
+    ModuleSlot slot);
 
 } // namespace EnvNode

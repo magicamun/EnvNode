@@ -112,9 +112,9 @@ The source project and the separately published schematic and PCB portions in `h
 
 ## 7. Module Identification and Generic Fallback
 
-A module-identification EEPROM is optional, but fitting one is good practice for modules with a defined hardware identity. It allows future firmware to identify the installed module, offer suitable functions in the UI, and suppress functions that are incompatible with the detected hardware. The Empty templates and DuoRelay provide the reference implementation.
+A module-identification EEPROM is optional, but fitting one is good practice for modules with a defined hardware identity. Current firmware uses it to identify installed modules and validate their compatibility with the selected board and slot. Offering suitable functions in the UI and activating module-specific drivers remain future steps. The Empty templates and DuoRelay provide the reference implementation.
 
-A conforming module-identification EEPROM should use `I2C0`. This is a discovery convention rather than an electrical limitation: both I²C buses remain available at the connector, but future automatic module discovery will scan only `I2C0`. The firmware scan and the module directory that maps stored identities to drivers, capabilities, and UI behavior are not yet implemented.
+A conforming module-identification EEPROM should use `I2C0`. This is a discovery convention rather than an electrical limitation: both I²C buses remain available at the connector, but automatic module discovery scans only the reserved identity EEPROM addresses on `I2C0`. The stored record is defined in [`ModuleIdentityRecord.md`](ModuleIdentityRecord.md). The firmware module-profile registry maps supported identities to stable module types, capabilities, and connector-resource requirements. Discovery and compatibility validation do not yet activate device drivers or UI functions.
 
 The reference EEPROM uses two address bits. Its module-side wiring is:
 
@@ -129,7 +129,7 @@ The mainboard supplies the slot-dependent `A0` level, producing the reserved `I2
 | A | 1 | 0 | `0x52` |
 | B | 1 | 1 | `0x53` |
 
-The addresses `0x52` and `0x53` on `I2C0` are reserved for module-identification EEPROMs. Other module devices should not use these addresses on `I2C0`.
+The addresses `0x52` and `0x53` on `I2C0` are reserved for module-identification EEPROMs. Other module devices should not use these addresses on `I2C0`. The selected board profile maps each logical slot to its EEPROM address, AUX GPIOs, SPI chip select, and available 5 V supply. After discovery, firmware checks the detected module profile's declared requirements against this mapping. An incompatible module is reported diagnostically and must not be activated.
 
 If the firmware finds no valid module-specific identity, it must not infer a module type from the PCB or automatically activate a device-specific driver. The slot remains in generic mode:
 
@@ -161,8 +161,8 @@ The following remain intentionally open:
 2. Per-rail current limits and a complete mainboard/module power budget.
 3. Bus capacitance limits, supported clock rates, and the required pull-up jumper configuration for each complete system assembly.
 4. Electrical protection requirements for modules exposed to external wiring.
-5. The byte-level module-identity record format and the module-directory schema.
-6. Firmware implementation of `I2C0` module discovery and the generic unidentified-module mode.
+5. Mapping compatible module profiles to concrete drivers and configurable runtime instances.
+6. Integration of discovery and compatibility results with the diagnostics UI and provisioning workflow.
 
 ## 10. Revision Status
 

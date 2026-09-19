@@ -38,6 +38,8 @@
 #include "SystemLogTimeProvider.h"
 #include "IdentityEeprom24LC32.h"
 #include "BoardIdentityResolver.h"
+#include "ModuleDiscoveryService.h"
+#include "ModuleCompatibility.h"
 
 using namespace EnvNode;
 
@@ -54,6 +56,14 @@ static BoardIdentityStore boardIdentityStore(boardIdentityEeprom);
 static BoardIdentityResolver boardIdentityResolver(
     boardIdentityStore, buildFallbackBoardProfileId());
 static BoardProvisioningService boardProvisioningService(boardIdentityStore);
+static IdentityEeprom24LC32 slotAModuleEeprom(
+    i2cBusManager, ModuleDiscoveryService::SlotAEepromAddress);
+static IdentityEeprom24LC32 slotBModuleEeprom(
+    i2cBusManager, ModuleDiscoveryService::SlotBEepromAddress);
+static ModuleIdentityStore slotAModuleIdentityStore(slotAModuleEeprom);
+static ModuleIdentityStore slotBModuleIdentityStore(slotBModuleEeprom);
+static ModuleDiscoveryService moduleDiscoveryService(
+    slotAModuleIdentityStore, slotBModuleIdentityStore);
 static ConfigurationService configurationService;
 static WiFiService wifiService(logger, configurationService);
 static TimeService timeService(logger, configurationService, wifiService);
@@ -121,6 +131,34 @@ void setup() {
     }
 
     i2cBusManager.begin();
+    moduleDiscoveryService.scan();
+    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(index);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService.result(slot);
+        if (module == nullptr) {
+            logger.errorf("Module discovery returned no result for slot=%s",
+                moduleSlotName(slot));
+            continue;
+        }
+        const ModuleCompatibilityResult compatibility = evaluateModuleCompatibility(
+            currentBoardProfile(), slot, module->profile);
+        if (module->identified()) {
+            logger.infof(
+                "Module slot=%s address=0x%02X status=%s profile=%u type=%s revision=%u.%u serial=%lu compatibility=%s",
+                moduleSlotName(slot), module->eepromAddress,
+                moduleIdentityStatusName(module->status),
+                static_cast<unsigned int>(module->identity.profileId),
+                module->profile == nullptr ? "unknown" : module->profile->stableId,
+                module->identity.revision.major, module->identity.revision.minor,
+                static_cast<unsigned long>(module->identity.serialNumber),
+                moduleCompatibilityStatusName(compatibility.status));
+        } else {
+            logger.infof(
+                "Module slot=%s address=0x%02X status=%s generic=true",
+                moduleSlotName(slot), module->eepromAddress,
+                moduleIdentityStatusName(module->status));
+        }
+    }
     configurationService.loadConfiguration();
     size_t activeSensorCount = 0;
     const char* sensorFailureReason = nullptr;
