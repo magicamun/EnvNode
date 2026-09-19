@@ -21,6 +21,7 @@
 #include "I2CBusManager.h"
 #include "BoardIdentityResolver.h"
 #include "BoardProvisioningService.h"
+#include "ModuleProvisioningService.h"
 
 namespace EnvNode {
 
@@ -43,7 +44,9 @@ public:
         OTAService& otaService,
         I2CBusManager& i2cBusManager,
         const BoardIdentityResolution& boardIdentityResolution,
-        BoardProvisioningService& boardProvisioningService);
+        BoardProvisioningService& boardProvisioningService,
+        ModuleDiscoveryService& moduleDiscoveryService,
+        ModuleProvisioningService& moduleProvisioningService);
 
     void begin() override;
     void loop() override;
@@ -90,6 +93,7 @@ private:
     void handleUnitsSave();
     void handleDeviceSave();
     void handleBoardProvisioning();
+    void handleModuleProvisioning();
     void handleRestart();
     void handleFactoryReset();
     void handleNotFound();
@@ -130,6 +134,8 @@ private:
     I2CBusManager& i2cBusManager_;
     const BoardIdentityResolution& boardIdentityResolution_;
     BoardProvisioningService& boardProvisioningService_;
+    ModuleDiscoveryService& moduleDiscoveryService_;
+    ModuleProvisioningService& moduleProvisioningService_;
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

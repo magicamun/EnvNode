@@ -393,7 +393,9 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     IDiscoveryPublisher& discoveryPublisher, RuntimeManager& runtimeManager, OTAService& otaService,
     I2CBusManager& i2cBusManager,
     const BoardIdentityResolution& boardIdentityResolution,
-    BoardProvisioningService& boardProvisioningService)
+    BoardProvisioningService& boardProvisioningService,
+    ModuleDiscoveryService& moduleDiscoveryService,
+    ModuleProvisioningService& moduleProvisioningService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
@@ -403,7 +405,9 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
       i2cBusManager_(i2cBusManager),
       boardIdentityResolution_(boardIdentityResolution),
-      boardProvisioningService_(boardProvisioningService) {}
+      boardProvisioningService_(boardProvisioningService),
+      moduleDiscoveryService_(moduleDiscoveryService),
+      moduleProvisioningService_(moduleProvisioningService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -438,6 +442,8 @@ void WebService::begin() {
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
     server_.on("/device/board-identity/write", HTTP_POST,
         [this]() { handleBoardProvisioning(); });
+    server_.on("/device/module-identity/write", HTTP_POST,
+        [this]() { handleModuleProvisioning(); });
     server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
     server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
     server_.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
@@ -721,6 +727,49 @@ void WebService::handleDevice() {
         c += "<div class='notice'>The EEPROM Board Identity is valid, but its board serial number is unassigned.</div>";
     }
     c += "</section>";
+    c += "<section class='card'><h2>Module Identity</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>EEPROM</th><th>Status</th><th>Module</th><th>Revision</th><th>Serial number</th></tr></thead><tbody>";
+    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(index);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
+        if (module == nullptr) continue;
+        const String moduleName = module->profile == nullptr
+            ? (module->identified()
+                ? String("Unknown profile ") + String(encodeModuleProfileId(module->identity.profileId))
+                : String("—"))
+            : escapeHtml(module->profile->displayName);
+        const String revision = module->identified()
+            ? String(module->identity.revision.major) + "." + String(module->identity.revision.minor)
+            : String("—");
+        const String moduleSerial = module->identified()
+            ? (module->identity.serialNumber == 0
+                ? String("Unassigned")
+                : localeFormatter_.formatNumber(module->identity.serialNumber, 0))
+            : String("—");
+        c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
+        if (module->eepromAddress < 0x10) c += "0";
+        c += String(module->eepromAddress, HEX) + "</td><td>";
+        c += moduleIdentityStatusName(module->status);
+        c += "</td><td>" + moduleName + "</td><td>" + revision;
+        c += "</td><td>" + moduleSerial + "</td></tr>";
+    }
+    c += "</tbody></table></div></section>";
+    c += "<section class='card'><h2>Provision Module Identity</h2>";
+    c += "<div class='notice'><strong>Legacy EMID v1</strong><p>This writes and verifies the current fixed identity record. It is a provisioning and migration format, not the final self-describing module descriptor.</p></div>";
+    c += "<form method='post' action='/device/module-identity/write' onsubmit='return confirm(\"Write and verify this Module Identity in the selected slot?\")'>";
+    c += "<label>Module slot<select name='moduleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>";
+    c += "<label>Module profile<select name='moduleProfile' required>";
+    for (size_t index = 0; index < ModuleProfileRegistry::count(); ++index) {
+        const ModuleProfile* profile = ModuleProfileRegistry::at(index);
+        if (profile == nullptr) continue;
+        c += "<option value='" + escapeHtml(profile->stableId) + "'>";
+        c += escapeHtml(profile->displayName) + " " + String(profile->revision.major);
+        c += "." + String(profile->revision.minor) + "</option>";
+    }
+    c += "</select></label>";
+    c += "<label>Module serial number<input type='number' name='moduleSerialNumber' min='0' max='4294967295' required value='0'></label>";
+    c += "<p class='help'>Serial number 0 explicitly means unassigned. The profile revision is supplied by the firmware's legacy profile catalog.</p>";
+    c += "<label class='choice'><input type='checkbox' name='confirmModuleProvisioning' value='1' required>I understand that this writes manufacturing identity data to the selected module.</label>";
+    c += "<div class='actions'><button class='danger' type='submit'>Write Module Identity</button></div></form></section>";
     c += "<section class='card'><h2>Provision Board Identity</h2>";
     c += "<div class='notice'><strong>Advanced operation</strong><p>This writes permanent physical-board identity data. The active BoardProfile will not change until the device is restarted.</p></div>";
     c += "<form method='post' action='/device/board-identity/write' onsubmit='return confirm(\"Write and verify this Board Identity? The active profile changes only after restart.\")'>";
@@ -1629,6 +1678,79 @@ void WebService::handleBoardProvisioning() {
             break;
     }
     sendResult("Board provisioning failed", "/device", message, false);
+}
+
+void WebService::handleModuleProvisioning() {
+    const String slotText = server_.arg("moduleSlot");
+    ModuleSlot slot = ModuleSlot::A;
+    const bool slotValid = slotText == "A" || slotText == "B";
+    if (slotText == "B") slot = ModuleSlot::B;
+
+    const ModuleProfile* profile = ModuleProfileRegistry::findByStableId(
+        server_.arg("moduleProfile").c_str());
+    const String serialText = server_.arg("moduleSerialNumber");
+    char* end = nullptr;
+    const unsigned long long parsedSerial = strtoull(serialText.c_str(), &end, 10);
+    const bool serialValid = !serialText.isEmpty()
+        && end != serialText.c_str()
+        && *end == '\0'
+        && parsedSerial <= UINT32_MAX;
+    if (!slotValid || profile == nullptr || !serialValid) {
+        sendResult("Module provisioning failed", "/device",
+            "The selected module slot, profile, or serial number is invalid.", false);
+        return;
+    }
+
+    const ModuleIdentity requested = {
+        profile->id,
+        profile->revision,
+        static_cast<uint32_t>(parsedSerial),
+    };
+    const bool confirmed = server_.hasArg("confirmModuleProvisioning")
+        && server_.arg("confirmModuleProvisioning") == "1";
+    const ModuleProvisioningResult result =
+        moduleProvisioningService_.provision(slot, requested, confirmed);
+    logger_.infof(
+        "Module provisioning result=%s slot=%s profile=%u revision=%u.%u serial=%lu",
+        moduleProvisioningStatusName(result.status), moduleSlotName(slot),
+        static_cast<unsigned int>(requested.profileId), requested.revision.major,
+        requested.revision.minor,
+        static_cast<unsigned long>(requested.serialNumber));
+
+    if (result.status == ModuleProvisioningStatus::Success) {
+        sendResult("Module Identity provisioned", "/device",
+            "The legacy EMID v1 record was written, verified, and rediscovered. No restart is required.",
+            true);
+        return;
+    }
+
+    const char* message = "Module Identity could not be written and verified.";
+    switch (result.status) {
+        case ModuleProvisioningStatus::ConfirmationRequired:
+            message = "Explicit confirmation is required. No EEPROM data was written.";
+            break;
+        case ModuleProvisioningStatus::InvalidSlot:
+            message = "The selected module slot is invalid. No EEPROM data was written.";
+            break;
+        case ModuleProvisioningStatus::InvalidIdentity:
+            message = "The requested legacy Module Identity is not supported. No EEPROM data was written.";
+            break;
+        case ModuleProvisioningStatus::WriteFailed:
+            message = "The selected module EEPROM did not accept the write. Check that the module is installed in the selected slot.";
+            break;
+        case ModuleProvisioningStatus::ReadbackFailed:
+            message = "The module EEPROM write could not be read back. Provisioning was not accepted as successful.";
+            break;
+        case ModuleProvisioningStatus::ReadbackInvalid:
+            message = "The module EEPROM readback failed record validation. Provisioning was not accepted as successful.";
+            break;
+        case ModuleProvisioningStatus::ReadbackMismatch:
+            message = "The module EEPROM readback did not exactly match the requested identity. Provisioning was not accepted as successful.";
+            break;
+        default:
+            break;
+    }
+    sendResult("Module provisioning failed", "/device", message, false);
 }
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();
