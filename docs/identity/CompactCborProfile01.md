@@ -1,6 +1,14 @@
 # Compact CBOR Profile 0.1 — Candidate
 
-**Status:** Candidate for measurement; not yet an accepted EEPROM format
+**Status:** Dual-bank storage framing accepted; compact CBOR mapping remains provisional
+
+The following decisions were accepted on 2026-09-19:
+
+- two complete 2048-byte banks in the 4 KiB EEPROM;
+- CRC integrity without a cryptographic signature in format version 0.1;
+- explicit migration from legacy ENID/EMID v1;
+- the first migrated descriptor is written and verified in bank B so bank A remains untouched;
+- migration is never performed automatically.
 
 This profile maps the JSON authoring model to deterministic CBOR. It separates immutable type
 description from mutable instance, manufacturing and calibration data. It does not change the
@@ -66,7 +74,7 @@ format intended to evolve. The compact representation also makes a simpler layou
 | DuoRelay 0.3 | 598 B | 1450 B |
 | AnalogHydroPressure 0.3 | 911 B | 1137 B |
 
-**Current recommendation:** use the two complete 2048-byte banks. It has fewer recovery states,
+**Accepted layout:** use the two complete 2048-byte banks. It has fewer recovery states,
 keeps every valid bank self-contained and gives the Mini materially more useful headroom. The
 cost is rewriting the complete descriptor when manufacturing or calibration data changes. Those
 are provisioning operations rather than high-frequency runtime writes, so this is currently the
@@ -99,11 +107,12 @@ CRC and payload CRC are valid.
 - Freeze the complete numeric key and interoperable vocabulary tables.
 - Confirm that manufacturing and calibration writes are sufficiently infrequent to rewrite one
   complete inactive bank per accepted update.
-- Define authenticity and user-approval policy; CRC detects corruption but not malicious data.
+- Define a possible future signed envelope version. Version 0.1 deliberately uses CRC and an
+  explicitly confirmed local provisioning operation, not cryptographic authenticity.
 - Confirm whether documentation text belongs in both redundant descriptor banks or may be
   shortened without violating the self-description requirement.
-- Specify migration from legacy ENID/EMID version 1 without overwriting it until a new descriptor
-  has been verified.
+- Specify the later user-facing migration operation. Its storage order is already fixed: write and
+  verify bank B first, preserve legacy bank A until a subsequent successful descriptor update.
 
 Measurements are generated with:
 
