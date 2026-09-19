@@ -42,6 +42,7 @@
 #include "ModuleCompatibility.h"
 #include "ModuleProvisioningService.h"
 #include "HardwareDescriptorStore.h"
+#include "ModuleDescriptorProvisioningService.h"
 
 using namespace EnvNode;
 
@@ -71,6 +72,9 @@ static ModuleDiscoveryService moduleDiscoveryService(
     slotAHardwareDescriptorStore, slotBHardwareDescriptorStore);
 static ModuleProvisioningService moduleProvisioningService(
     slotAModuleIdentityStore, slotBModuleIdentityStore, moduleDiscoveryService);
+static ModuleDescriptorProvisioningService moduleDescriptorProvisioningService(
+    slotAHardwareDescriptorStore, slotBHardwareDescriptorStore,
+    moduleDiscoveryService);
 static ConfigurationService configurationService;
 static WiFiService wifiService(logger, configurationService);
 static TimeService timeService(logger, configurationService, wifiService);
@@ -114,7 +118,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     sensorManager,
     actuatorRuntime);
 static OTAService otaService(logger, runtimeManager);
-static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleProvisioningService);
+static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleProvisioningService, moduleDescriptorProvisioningService);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
 static bool normalRuntimeStarted = false;
 

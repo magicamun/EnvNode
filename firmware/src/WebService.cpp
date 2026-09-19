@@ -20,6 +20,7 @@
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
 #include "ElapsedTimeFormatter.h"
+#include "DuoRelayDescriptor.h"
 
 namespace EnvNode {
 namespace {
@@ -51,6 +52,32 @@ String descriptorText(const DescriptorTextView& view) {
     result.reserve(view.size);
     for (size_t index = 0; index < view.size; ++index) result += view.data[index];
     return result;
+}
+
+int hexDigit(char value) {
+    if (value >= '0' && value <= '9') return value - '0';
+    if (value >= 'a' && value <= 'f') return value - 'a' + 10;
+    if (value >= 'A' && value <= 'F') return value - 'A' + 10;
+    return -1;
+}
+
+bool parseInstanceUuid(const String& text, uint8_t (&output)[16]) {
+    if (text.length() != 36 || text[8] != '-' || text[13] != '-'
+        || text[18] != '-' || text[23] != '-') return false;
+    size_t outputIndex = 0;
+    bool nonZero = false;
+    for (size_t index = 0; index < text.length();) {
+        if (text[index] == '-') { ++index; continue; }
+        if (index + 1 >= text.length() || outputIndex >= sizeof(output)) return false;
+        const int high = hexDigit(text[index]);
+        const int low = hexDigit(text[index + 1]);
+        if (high < 0 || low < 0) return false;
+        output[outputIndex] = static_cast<uint8_t>((high << 4) | low);
+        nonZero = nonZero || output[outputIndex] != 0;
+        ++outputIndex;
+        index += 2;
+    }
+    return outputIndex == sizeof(output) && nonZero;
 }
 
 const char* sensorStateName(SensorState state) {
@@ -402,7 +429,8 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     const BoardIdentityResolution& boardIdentityResolution,
     BoardProvisioningService& boardProvisioningService,
     ModuleDiscoveryService& moduleDiscoveryService,
-    ModuleProvisioningService& moduleProvisioningService)
+    ModuleProvisioningService& moduleProvisioningService,
+    ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService)
     : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
@@ -414,7 +442,8 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       boardIdentityResolution_(boardIdentityResolution),
       boardProvisioningService_(boardProvisioningService),
       moduleDiscoveryService_(moduleDiscoveryService),
-      moduleProvisioningService_(moduleProvisioningService) {}
+      moduleProvisioningService_(moduleProvisioningService),
+      moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService) {}
 
 void WebService::begin() {
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
@@ -451,6 +480,8 @@ void WebService::begin() {
         [this]() { handleBoardProvisioning(); });
     server_.on("/device/module-identity/write", HTTP_POST,
         [this]() { handleModuleProvisioning(); });
+    server_.on("/device/module-descriptor/write", HTTP_POST,
+        [this]() { handleModuleDescriptorProvisioning(); });
     server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
     server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
     server_.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
@@ -773,6 +804,18 @@ void WebService::handleDevice() {
         c += "</td><td>" + moduleSerial + "</td></tr>";
     }
     c += "</tbody></table></div></section>";
+    c += "<section class='card'><h2>Provision Module Descriptor</h2>";
+    c += "<div class='notice'><strong>ENHD descriptor 0.1</strong><p>This creates the deterministic DuoRelay 0.3 CBOR descriptor, validates it against the active board and firmware, writes it atomically, reads it back, and reruns discovery. The first descriptor is written to Bank B so an existing legacy EMID record in Bank A remains intact.</p></div>";
+    c += "<form method='post' action='/device/module-descriptor/write' onsubmit='return confirm(\"Write and verify the DuoRelay descriptor in the selected slot?\")'>";
+    c += "<label>Module slot<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>";
+    c += "<label>Descriptor template<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>";
+    c += "<label>Instance UUID<input name='descriptorInstanceId' maxlength='36' pattern='[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}' placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' required></label>";
+    c += "<p class='help'>Use a persistent, unique UUID for this physical module. The all-zero placeholder is rejected.</p>";
+    c += "<label>Serial number (optional)<input name='descriptorSerialNumber' maxlength='64'></label>";
+    c += "<label>Production batch (optional)<input name='descriptorProductionBatch' maxlength='64'></label>";
+    c += "<label>Production date (optional)<input type='date' name='descriptorProductionDate'></label>";
+    c += "<label class='choice'><input type='checkbox' name='confirmModuleDescriptorProvisioning' value='1' required>I understand that this writes a self-describing hardware descriptor to the selected module EEPROM.</label>";
+    c += "<div class='actions'><button class='danger' type='submit'>Write DuoRelay Descriptor</button></div></form></section>";
     c += "<section class='card'><h2>Provision Module Identity</h2>";
     c += "<div class='notice'><strong>Legacy EMID v1</strong><p>This writes and verifies the current fixed identity record. It is a provisioning and migration format, not the final self-describing module descriptor.</p></div>";
     c += "<form method='post' action='/device/module-identity/write' onsubmit='return confirm(\"Write and verify this Module Identity in the selected slot?\")'>";
@@ -1779,6 +1822,100 @@ void WebService::handleModuleProvisioning() {
             break;
     }
     sendResult("Module provisioning failed", "/device", message, false);
+}
+
+void WebService::handleModuleDescriptorProvisioning() {
+    const String slotText = server_.arg("descriptorModuleSlot");
+    ModuleSlot slot = ModuleSlot::A;
+    const bool slotValid = slotText == "A" || slotText == "B";
+    if (slotText == "B") slot = ModuleSlot::B;
+    const bool templateValid =
+        server_.arg("descriptorTemplate") == "duo-relay-0.3";
+
+    DuoRelayDescriptorManufacturingData manufacturing;
+    const bool uuidValid = parseInstanceUuid(
+        server_.arg("descriptorInstanceId"), manufacturing.instanceId);
+    const String serialNumber = server_.arg("descriptorSerialNumber");
+    const String productionBatch = server_.arg("descriptorProductionBatch");
+    const String productionDate = server_.arg("descriptorProductionDate");
+    const bool manufacturingValid = serialNumber.length() <= 64
+        && productionBatch.length() <= 64
+        && productionDate.length() <= 10;
+    if (!slotValid || !templateValid || !uuidValid || !manufacturingValid) {
+        sendResult("Module descriptor provisioning failed", "/device",
+            "The slot, descriptor template, instance UUID, or manufacturing data is invalid. No EEPROM data was written.",
+            false);
+        return;
+    }
+    manufacturing.serialNumber = serialNumber.c_str();
+    manufacturing.productionBatch = productionBatch.c_str();
+    manufacturing.productionDate = productionDate.c_str();
+    size_t payloadSize = 0;
+    const CompactCborStatus encodeStatus = DuoRelayDescriptor::encode(
+        manufacturing, moduleDescriptorPayload_,
+        sizeof(moduleDescriptorPayload_), payloadSize);
+    if (encodeStatus != CompactCborStatus::Success) {
+        logger_.errorf("DuoRelay descriptor encoding failed status=%s",
+            compactCborStatusName(encodeStatus));
+        sendResult("Module descriptor provisioning failed", "/device",
+            "The DuoRelay descriptor could not be encoded. No EEPROM data was written.",
+            false);
+        return;
+    }
+
+    const bool confirmed = server_.hasArg("confirmModuleDescriptorProvisioning")
+        && server_.arg("confirmModuleDescriptorProvisioning") == "1";
+    const ModuleDescriptorProvisioningResult result =
+        moduleDescriptorProvisioningService_.provision(
+            slot, moduleDescriptorPayload_, payloadSize, confirmed);
+    logger_.infof(
+        "Module descriptor provisioning result=%s slot=%s bytes=%u bank=%u generation=%lu decode=%s compatibility=%s",
+        moduleDescriptorProvisioningStatusName(result.status), moduleSlotName(slot),
+        static_cast<unsigned int>(payloadSize),
+        static_cast<unsigned int>(result.bank),
+        static_cast<unsigned long>(result.generation),
+        hardwareDescriptorDecodeStatusName(result.decodeStatus),
+        hardwareDescriptorCompatibilityStatusName(result.compatibilityStatus));
+
+    if (result.status == ModuleDescriptorProvisioningStatus::Success) {
+        const char* bank = result.bank == HardwareDescriptorBank::B ? "B" : "A";
+        String message = "The DuoRelay descriptor was encoded, validated, written to Bank ";
+        message += bank;
+        message += ", verified, and rediscovered. No restart is required.";
+        sendResult("Module descriptor provisioned", "/device", message.c_str(), true);
+        return;
+    }
+
+    const char* message = "The module descriptor could not be written and verified.";
+    switch (result.status) {
+        case ModuleDescriptorProvisioningStatus::ConfirmationRequired:
+            message = "Explicit confirmation is required. No EEPROM data was written.";
+            break;
+        case ModuleDescriptorProvisioningStatus::InvalidSlot:
+            message = "The selected module slot is invalid. No EEPROM data was written.";
+            break;
+        case ModuleDescriptorProvisioningStatus::InvalidDescriptor:
+            message = "The generated descriptor failed semantic validation. No EEPROM data was written.";
+            break;
+        case ModuleDescriptorProvisioningStatus::IncompatibleDescriptor:
+            message = "The descriptor is not compatible with the active board, firmware, drivers, capabilities, or slot resources. No EEPROM data was written.";
+            break;
+        case ModuleDescriptorProvisioningStatus::StorageUnavailable:
+            message = "The selected module EEPROM is unavailable. Check that the module is installed in the selected slot.";
+            break;
+        case ModuleDescriptorProvisioningStatus::WriteFailed:
+            message = "The selected module EEPROM did not accept the descriptor write.";
+            break;
+        case ModuleDescriptorProvisioningStatus::VerificationFailed:
+            message = "The descriptor write failed atomic-bank readback verification.";
+            break;
+        case ModuleDescriptorProvisioningStatus::RediscoveryFailed:
+            message = "The descriptor was written and verified, but semantic rediscovery did not succeed. Inspect diagnostics before retrying.";
+            break;
+        default:
+            break;
+    }
+    sendResult("Module descriptor provisioning failed", "/device", message, false);
 }
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();

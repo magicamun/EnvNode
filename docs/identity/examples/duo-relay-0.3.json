@@ -19,7 +19,7 @@
   "description": {
     "name": "EnvNode DuoRelay",
     "summary": "Two independently controlled 5 V electromechanical changeover relays.",
-    "documentationUrl": "https://example.invalid/envnode/modules/duo-relay/0.3"
+    "documentationUrl": "https://github.com/magicamun/EnvNode/tree/main/hardware/kicad/Modules/FullSize/DuoRelay"
   },
   "hardware": {
     "interface": "org.envnode.interface.module-2x7",
@@ -45,8 +45,7 @@
       { "path": "/identity/typeId", "statement": "The namespaced type ID is proposed." },
       { "path": "/identity/instanceId", "statement": "All-zero UUID is a manufacturing placeholder." },
       { "path": "/compatibility", "statement": "Driver, platform, safety-profile and capability IDs are proposed contracts." },
-      { "path": "/compatibility/minimumFirmwareVersion", "statement": "0.5.0 is the current firmware version, not a validated minimum." },
-      { "path": "/description/documentationUrl", "statement": "Placeholder URL." }
+      { "path": "/compatibility/minimumFirmwareVersion", "statement": "0.5.0 is the first firmware version implementing semantic DuoRelay descriptor validation and provisioning." }
     ],
     "openQuestions": [
       { "path": "/hardware/requirements/2", "statement": "Maximum and simultaneous relay-coil current requirements are not encoded because a qualified value was not found." },

@@ -22,6 +22,8 @@
 #include "BoardIdentityResolver.h"
 #include "BoardProvisioningService.h"
 #include "ModuleProvisioningService.h"
+#include "ModuleDescriptorProvisioningService.h"
+#include "DuoRelayDescriptor.h"
 
 namespace EnvNode {
 
@@ -46,7 +48,8 @@ public:
         const BoardIdentityResolution& boardIdentityResolution,
         BoardProvisioningService& boardProvisioningService,
         ModuleDiscoveryService& moduleDiscoveryService,
-        ModuleProvisioningService& moduleProvisioningService);
+        ModuleProvisioningService& moduleProvisioningService,
+        ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService);
 
     void begin() override;
     void loop() override;
@@ -94,6 +97,7 @@ private:
     void handleDeviceSave();
     void handleBoardProvisioning();
     void handleModuleProvisioning();
+    void handleModuleDescriptorProvisioning();
     void handleRestart();
     void handleFactoryReset();
     void handleNotFound();
@@ -136,6 +140,8 @@ private:
     BoardProvisioningService& boardProvisioningService_;
     ModuleDiscoveryService& moduleDiscoveryService_;
     ModuleProvisioningService& moduleProvisioningService_;
+    ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
+    uint8_t moduleDescriptorPayload_[DuoRelayDescriptor::MaximumEncodedSize] = {};
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

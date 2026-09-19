@@ -83,13 +83,11 @@ void ModuleDiscoveryService::scan() {
         const ModuleIdentityReadResult readResult = stores_[index]->read();
         results_[index].status = readResult.status;
         results_[index].identity = readResult.identity;
-        results_[index].profile = results_[index].identified()
-            ? ModuleProfileRegistry::find(
-                readResult.identity.profileId, readResult.identity.revision)
-            : nullptr;
         if (readResult.status == ModuleIdentityStatus::Valid
             || readResult.status == ModuleIdentityStatus::UnassignedSerial) {
             results_[index].source = ModuleDiscoverySource::LegacyEmidV1;
+            results_[index].profile = ModuleProfileRegistry::find(
+                readResult.identity.profileId, readResult.identity.revision);
         }
     }
 }
