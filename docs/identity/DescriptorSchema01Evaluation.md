@@ -112,3 +112,11 @@ next decisions are:
 4. allocation and atomicity for descriptor, manufacturing and calibration data;
 5. authenticity and user-approval policy; and
 6. representation of hardware assembly options such as the ADS1115 address jumper.
+
+## Follow-up compact-profile measurement
+
+[`CompactCborProfile01.md`](CompactCborProfile01.md) evaluates a schema-driven deterministic CBOR
+mapping with numeric field keys, compact known vocabulary and binary UUIDs. With a 32-byte
+envelope, the complete examples measure 1742 bytes for EnvNode Mini, 598 bytes for DuoRelay and
+911 bytes for AnalogHydroPressure. This makes two complete 2048-byte banks viable in the 4 KiB
+EEPROM and is currently preferred over separately banked static and mutable records.
