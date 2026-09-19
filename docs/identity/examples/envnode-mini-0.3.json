@@ -1,0 +1,80 @@
+{
+  "$schema": "../descriptor-schema-0.1.json",
+  "schemaVersion": "0.1",
+  "objectKind": "board",
+  "identity": {
+    "typeId": "org.envnode.board.mini",
+    "instanceId": "00000000-0000-0000-0000-000000000000",
+    "manufacturer": "org.envnode",
+    "hardwareRevision": { "major": 0, "minor": 3 },
+    "legacyProfileId": 0
+  },
+  "compatibility": {
+    "minimumFirmwareVersion": "0.5.0",
+    "platform": { "id": "org.envnode.platform.esp32-devkitc", "apiVersion": 1 },
+    "safetyProfile": { "id": "org.envnode.safety.esp32-devkitc", "apiVersion": 1 },
+    "drivers": [],
+    "capabilities": ["board.module-slots", "bus.i2c", "bus.spi", "gpio.digital", "gpio.analog-input"]
+  },
+  "description": {
+    "name": "EnvNode Mini",
+    "summary": "Compact ESP32 EnvNode mainboard with two module slots and two I2C buses.",
+    "documentationUrl": "https://example.invalid/envnode/boards/mini/0.3"
+  },
+  "hardware": {
+    "resources": [
+      { "id": "gpio.4", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:4" },
+      { "id": "gpio.5", "kind": "gpio", "capabilities": ["digital-input", "digital-output"], "platformBinding": "gpio:5" },
+      { "id": "gpio.13", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:13" },
+      { "id": "gpio.14", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:14" },
+      { "id": "gpio.15", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:15" },
+      { "id": "gpio.16", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:16" },
+      { "id": "gpio.17", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:17" },
+      { "id": "gpio.18", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:18" },
+      { "id": "gpio.19", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:19" },
+      { "id": "gpio.21", "kind": "gpio", "capabilities": ["digital-input", "digital-output"], "platformBinding": "gpio:21" },
+      { "id": "gpio.22", "kind": "gpio", "capabilities": ["digital-input", "digital-output"], "platformBinding": "gpio:22" },
+      { "id": "gpio.23", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup"], "platformBinding": "gpio:23" },
+      { "id": "gpio.25", "kind": "gpio", "capabilities": ["digital-input", "digital-output"], "platformBinding": "gpio:25" },
+      { "id": "gpio.26", "kind": "gpio", "capabilities": ["digital-input", "digital-output"], "platformBinding": "gpio:26" },
+      { "id": "gpio.27", "kind": "gpio", "capabilities": ["digital-input", "digital-output"], "platformBinding": "gpio:27" },
+      { "id": "gpio.32", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup", "analog-input"], "platformBinding": "gpio:32" },
+      { "id": "gpio.33", "kind": "gpio", "capabilities": ["digital-input", "digital-output", "interrupt", "internal-pullup", "analog-input"], "platformBinding": "gpio:33" },
+      { "id": "gpio.34", "kind": "gpio", "capabilities": ["analog-input"], "platformBinding": "gpio:34" },
+      { "id": "gpio.35", "kind": "gpio", "capabilities": ["analog-input"], "platformBinding": "gpio:35" },
+      { "id": "gpio.36", "kind": "gpio", "capabilities": ["analog-input"], "platformBinding": "gpio:36" },
+      { "id": "gpio.39", "kind": "gpio", "capabilities": ["analog-input"], "platformBinding": "gpio:39" },
+      { "id": "i2c.0", "kind": "i2c", "capabilities": ["controller"], "properties": { "sda": "gpio.21", "scl": "gpio.22" } },
+      { "id": "i2c.1", "kind": "i2c", "capabilities": ["controller"], "properties": { "sda": "gpio.25", "scl": "gpio.26" } },
+      { "id": "spi.0", "kind": "spi", "capabilities": ["controller"], "properties": { "mosi": "gpio.23", "miso": "gpio.19", "sck": "gpio.18" } },
+      { "id": "power.3v3", "kind": "power", "capabilities": ["supply"], "voltageMillivolts": 3300 },
+      { "id": "power.5v", "kind": "power", "capabilities": ["supply"], "voltageMillivolts": 5000 }
+    ],
+    "slots": [
+      { "id": "slot.a", "interface": "org.envnode.interface.module-2x7", "identityAddress": 82, "bindings": { "I2C0": "i2c.0", "I2C1": "i2c.1", "SPI": "spi.0", "SPI_CS": "gpio.5", "AUX_GPIO1": "gpio.4", "AUX_GPIO2": "gpio.13", "+3V3": "power.3v3", "+5V": "power.5v" } },
+      { "id": "slot.b", "interface": "org.envnode.interface.module-2x7", "identityAddress": 83, "bindings": { "I2C0": "i2c.0", "I2C1": "i2c.1", "SPI": "spi.0", "SPI_CS": "gpio.27", "AUX_GPIO1": "gpio.14", "AUX_GPIO2": "gpio.16", "+3V3": "power.3v3", "+5V": "power.5v" } }
+    ]
+  },
+  "manufacturing": { "serialNumber": null, "productionBatch": null, "productionDate": null },
+  "calibration": [],
+  "assessment": {
+    "evidence": [
+      { "path": "/identity/hardwareRevision", "statement": "KiCad README and Board Identity documentation identify Revision 0.3." },
+      { "path": "/hardware/slots", "statement": "Slot resources and EEPROM addresses are documented in the module-interface specification and current BoardProfile." },
+      { "path": "/hardware/resources", "statement": "I2C and SPI bindings are documented; general GPIO capabilities reproduce the current firmware BoardProfile and slot bindings reproduce its current slot map." }
+    ],
+    "assumptions": [
+      { "path": "/identity/typeId", "statement": "The namespaced type ID is proposed and has not been assigned previously." },
+      { "path": "/identity/instanceId", "statement": "All-zero UUID is a placeholder and is not a valid production identity." },
+      { "path": "/compatibility", "statement": "Platform, safety-profile and capability contract IDs are proposed schema examples." },
+      { "path": "/compatibility/minimumFirmwareVersion", "statement": "0.5.0 is the current firmware version, not a validated minimum." },
+      { "path": "/description/documentationUrl", "statement": "Placeholder URL; no canonical public documentation URL was found." },
+      { "path": "/hardware/resources/*/capabilities", "statement": "Capabilities for slot-only GPIO5/GPIO27 and dedicated bus GPIO21/GPIO22/GPIO25/GPIO26 are draft values and need an approved platform safety profile." }
+    ],
+    "openQuestions": [
+      { "path": "/hardware/resources", "statement": "The example includes the current firmware profile's general GPIO set, but the future descriptor policy for exposing resources not routed through module slots remains to be agreed." },
+      { "path": "/hardware/resources/power", "statement": "Per-rail current budgets and simultaneous-load limits are not documented." },
+      { "path": "/compatibility/safetyProfile", "statement": "Trust, signature and board-descriptor safety validation policy remains undecided." }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "../descriptor-schema-0.1.json",
+  "schemaVersion": "0.1",
+  "objectKind": "module",
+  "identity": {
+    "typeId": "org.envnode.module.duo-relay",
+    "instanceId": "00000000-0000-0000-0000-000000000000",
+    "manufacturer": "org.envnode",
+    "hardwareRevision": { "major": 0, "minor": 3 },
+    "legacyProfileId": 1
+  },
+  "compatibility": {
+    "minimumFirmwareVersion": "0.5.0",
+    "platform": { "id": "org.envnode.platform.any", "apiVersion": 1 },
+    "safetyProfile": { "id": "org.envnode.safety.module-interface", "apiVersion": 1 },
+    "drivers": [{ "id": "org.envnode.driver.gpio-on-off", "apiVersion": 1 }],
+    "capabilities": ["actuator.on-off"]
+  },
+  "description": {
+    "name": "EnvNode DuoRelay",
+    "summary": "Two independently controlled 5 V electromechanical changeover relays.",
+    "documentationUrl": "https://example.invalid/envnode/modules/duo-relay/0.3"
+  },
+  "hardware": {
+    "interface": "org.envnode.interface.module-2x7",
+    "requirements": [
+      { "id": "relay1-control", "resource": "AUX_GPIO1", "kind": "gpio", "capabilities": ["digital-output"] },
+      { "id": "relay2-control", "resource": "AUX_GPIO2", "kind": "gpio", "capabilities": ["digital-output"] },
+      { "id": "relay-supply", "resource": "+5V", "kind": "power", "capabilities": ["supply"], "properties": { "nominalMillivolts": 5000 } }
+    ],
+    "devices": [
+      { "id": "relay.1", "kind": "actuator", "driver": { "id": "org.envnode.driver.gpio-on-off", "apiVersion": 1 }, "bindings": { "output": "relay1-control" }, "parameters": { "activeLevel": "high", "safeLevel": "low" }, "capabilities": ["actuator.on-off"] },
+      { "id": "relay.2", "kind": "actuator", "driver": { "id": "org.envnode.driver.gpio-on-off", "apiVersion": 1 }, "bindings": { "output": "relay2-control" }, "parameters": { "activeLevel": "high", "safeLevel": "low" }, "capabilities": ["actuator.on-off"] }
+    ]
+  },
+  "manufacturing": { "serialNumber": null, "productionBatch": null, "productionDate": null },
+  "calibration": [],
+  "assessment": {
+    "evidence": [
+      { "path": "/hardware/requirements", "statement": "DuoRelay documentation confirms AUX_GPIO1, AUX_GPIO2 and +5 V use." },
+      { "path": "/hardware/devices", "statement": "Two independent channels, active-high transistor drive and pull-down-defined off state are documented." },
+      { "path": "/identity/hardwareRevision", "statement": "The module README identifies Revision 0.3." }
+    ],
+    "assumptions": [
+      { "path": "/identity/typeId", "statement": "The namespaced type ID is proposed." },
+      { "path": "/identity/instanceId", "statement": "All-zero UUID is a manufacturing placeholder." },
+      { "path": "/compatibility", "statement": "Driver, platform, safety-profile and capability IDs are proposed contracts." },
+      { "path": "/compatibility/minimumFirmwareVersion", "statement": "0.5.0 is the current firmware version, not a validated minimum." },
+      { "path": "/description/documentationUrl", "statement": "Placeholder URL." }
+    ],
+    "openQuestions": [
+      { "path": "/hardware/requirements/2", "statement": "Maximum and simultaneous relay-coil current requirements are not encoded because a qualified value was not found." },
+      { "path": "/hardware/devices", "statement": "Contact ratings and mains-safety properties should not be inferred as system certification from the relay component rating." }
+    ]
+  }
+}

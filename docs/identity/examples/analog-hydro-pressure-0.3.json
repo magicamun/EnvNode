@@ -1,0 +1,65 @@
+{
+  "$schema": "../descriptor-schema-0.1.json",
+  "schemaVersion": "0.1",
+  "objectKind": "module",
+  "identity": {
+    "typeId": "org.envnode.module.analog-hydro-pressure",
+    "instanceId": "00000000-0000-0000-0000-000000000000",
+    "manufacturer": "org.envnode",
+    "hardwareRevision": { "major": 0, "minor": 3 },
+    "legacyProfileId": 2
+  },
+  "compatibility": {
+    "minimumFirmwareVersion": "0.5.0",
+    "platform": { "id": "org.envnode.platform.any", "apiVersion": 1 },
+    "safetyProfile": { "id": "org.envnode.safety.module-interface", "apiVersion": 1 },
+    "drivers": [
+      { "id": "org.envnode.driver.ads1115", "apiVersion": 1 },
+      { "id": "org.envnode.sensor.linear-analog-pressure", "apiVersion": 1 }
+    ],
+    "capabilities": ["sensor.pressure", "input.current-loop-4-20ma", "supply.local-24v"]
+  },
+  "description": {
+    "name": "EnvNode AnalogHydroPressure",
+    "summary": "ADS1115-based input for a two-wire 4-20 mA hydrostatic pressure probe with local 24 V boost supply.",
+    "documentationUrl": "https://example.invalid/envnode/modules/analog-hydro-pressure/0.3"
+  },
+  "hardware": {
+    "interface": "org.envnode.interface.module-2x7",
+    "requirements": [
+      { "id": "adc-bus", "resource": "I2C0", "kind": "i2c", "capabilities": ["controller"], "properties": { "address": 72 } },
+      { "id": "module-supply", "resource": "+5V", "kind": "power", "capabilities": ["supply"], "properties": { "nominalMillivolts": 5000 } }
+    ],
+    "devices": [
+      { "id": "adc", "kind": "infrastructure", "driver": { "id": "org.envnode.driver.ads1115", "apiVersion": 1 }, "bindings": { "bus": "adc-bus" }, "parameters": { "address": 72, "channel": 0 } },
+      { "id": "pressure", "kind": "sensor", "driver": { "id": "org.envnode.sensor.linear-analog-pressure", "apiVersion": 1 }, "bindings": { "input": "adc" }, "parameters": { "burdenResistanceOhms": 150.0, "nominalCurrentMinimumMilliamperes": 4.0, "nominalCurrentMaximumMilliamperes": 20.0 }, "measurements": ["pressure"] }
+    ]
+  },
+  "manufacturing": { "serialNumber": null, "productionBatch": null, "productionDate": null },
+  "calibration": [
+    { "target": "pressure", "schema": { "id": "org.envnode.calibration.linear-two-point", "apiVersion": 1 }, "values": { "status": "unassigned" } }
+  ],
+  "assessment": {
+    "evidence": [
+      { "path": "/identity/hardwareRevision", "statement": "The module README identifies Revision 0.3." },
+      { "path": "/hardware/requirements", "statement": "Documentation confirms ADS1115 on I2C0 and LT8330 conversion from +5 V to a local 24 V probe rail." },
+      { "path": "/hardware/devices/1/parameters/burdenResistanceOhms", "statement": "The documented burden resistor is 150 ohm, 0.1 percent." },
+      { "path": "/hardware/devices/1/parameters", "statement": "The documented nominal probe loop range is 4-20 mA." }
+    ],
+    "assumptions": [
+      { "path": "/identity/typeId", "statement": "The namespaced type ID is proposed." },
+      { "path": "/identity/instanceId", "statement": "All-zero UUID is a manufacturing placeholder." },
+      { "path": "/compatibility", "statement": "Driver, platform, safety-profile and capability IDs are proposed; the ADS1115 driver is not currently implemented." },
+      { "path": "/compatibility/minimumFirmwareVersion", "statement": "0.5.0 is the current firmware version, not a validated minimum." },
+      { "path": "/hardware/requirements/0/properties/address", "statement": "0x48 is selected only for this example; hardware supports 0x48 through 0x4B and the populated jumper state is not documented." },
+      { "path": "/hardware/devices/0/parameters/channel", "statement": "ADS1115 channel 0 is a provisional assumption; the schematic connection still needs explicit net-level confirmation." },
+      { "path": "/calibration/0", "statement": "The calibration contract and unassigned representation are proposed." },
+      { "path": "/description/documentationUrl", "statement": "Placeholder URL." }
+    ],
+    "openQuestions": [
+      { "path": "/hardware/requirements/1", "statement": "Qualified 5 V input current and 24 V output-current limits are not documented." },
+      { "path": "/hardware/devices/1", "statement": "Probe pressure range, engineering-unit mapping and real calibration values are installation dependent and not yet available." },
+      { "path": "/hardware/devices/0/parameters", "statement": "ADS1115 gain, sample rate and input topology are not yet fixed by the firmware architecture." }
+    ]
+  }
+}

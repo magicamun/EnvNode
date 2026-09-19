@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://envnode.org/schemas/hardware-descriptor/0.1",
+  "title": "EnvNode self-describing hardware descriptor",
+  "description": "Draft schema 0.1. The assessment member is authoring metadata and is excluded from the EEPROM payload.",
+  "type": "object",
+  "required": ["schemaVersion", "objectKind", "identity", "compatibility", "description", "hardware", "manufacturing", "calibration", "assessment"],
+  "properties": {
+    "$schema": { "type": "string", "format": "uri-reference" },
+    "schemaVersion": { "const": "0.1" },
+    "objectKind": { "enum": ["board", "module"] },
+    "identity": { "$ref": "#/$defs/identity" },
+    "compatibility": { "$ref": "#/$defs/compatibility" },
+    "description": { "$ref": "#/$defs/description" },
+    "hardware": {
+      "oneOf": [
+        { "$ref": "#/$defs/boardHardware" },
+        { "$ref": "#/$defs/moduleHardware" }
+      ]
+    },
+    "manufacturing": { "$ref": "#/$defs/manufacturing" },
+    "calibration": { "$ref": "#/$defs/calibration" },
+    "assessment": { "$ref": "#/$defs/assessment" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "objectKind": { "const": "board" } } },
+      "then": { "properties": { "hardware": { "$ref": "#/$defs/boardHardware" } } },
+      "else": { "properties": { "hardware": { "$ref": "#/$defs/moduleHardware" } } }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "identifier": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+    "instanceId": { "type": "string", "format": "uuid" },
+    "revision": {
+      "type": "object",
+      "required": ["major", "minor"],
+      "properties": { "major": { "type": "integer", "minimum": 0, "maximum": 255 }, "minor": { "type": "integer", "minimum": 0, "maximum": 255 } },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": ["typeId", "instanceId", "manufacturer", "hardwareRevision"],
+      "properties": {
+        "typeId": { "$ref": "#/$defs/identifier" },
+        "instanceId": { "$ref": "#/$defs/instanceId" },
+        "manufacturer": { "$ref": "#/$defs/identifier" },
+        "hardwareRevision": { "$ref": "#/$defs/revision" },
+        "legacyProfileId": { "type": "integer", "minimum": 0, "maximum": 65535 }
+      },
+      "additionalProperties": false
+    },
+    "contract": {
+      "type": "object",
+      "required": ["id", "apiVersion"],
+      "properties": { "id": { "$ref": "#/$defs/identifier" }, "apiVersion": { "type": "integer", "minimum": 1, "maximum": 65535 } },
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "required": ["minimumFirmwareVersion", "platform", "safetyProfile", "drivers", "capabilities"],
+      "properties": {
+        "minimumFirmwareVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "platform": { "$ref": "#/$defs/contract" },
+        "safetyProfile": { "$ref": "#/$defs/contract" },
+        "drivers": { "type": "array", "items": { "$ref": "#/$defs/contract" }, "uniqueItems": true },
+        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "description": {
+      "type": "object",
+      "required": ["name", "summary", "documentationUrl"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "documentationUrl": { "type": "string", "format": "uri", "maxLength": 512 }
+      },
+      "additionalProperties": false
+    },
+    "resource": {
+      "type": "object",
+      "required": ["id", "kind", "capabilities"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "kind": { "enum": ["gpio", "i2c", "spi", "power"] },
+        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true },
+        "platformBinding": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "voltageMillivolts": { "type": "integer", "minimum": 0 },
+        "properties": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "slot": {
+      "type": "object",
+      "required": ["id", "interface", "identityAddress", "bindings"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "interface": { "$ref": "#/$defs/identifier" },
+        "identityAddress": { "type": "integer", "minimum": 8, "maximum": 119 },
+        "bindings": { "type": "object", "additionalProperties": { "$ref": "#/$defs/identifier" } }
+      },
+      "additionalProperties": false
+    },
+    "boardHardware": {
+      "type": "object",
+      "required": ["resources", "slots"],
+      "properties": {
+        "resources": { "type": "array", "items": { "$ref": "#/$defs/resource" }, "minItems": 1 },
+        "slots": { "type": "array", "items": { "$ref": "#/$defs/slot" } }
+      },
+      "additionalProperties": false
+    },
+    "requirement": {
+      "type": "object",
+      "required": ["id", "resource", "kind", "capabilities"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "resource": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "kind": { "enum": ["gpio", "i2c", "spi", "power"] },
+        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true },
+        "properties": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "device": {
+      "type": "object",
+      "required": ["id", "kind", "driver", "bindings"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "kind": { "enum": ["sensor", "actuator", "infrastructure"] },
+        "driver": { "$ref": "#/$defs/contract" },
+        "bindings": { "type": "object", "additionalProperties": { "$ref": "#/$defs/identifier" } },
+        "parameters": { "type": "object" },
+        "measurements": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true },
+        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "moduleHardware": {
+      "type": "object",
+      "required": ["interface", "requirements", "devices"],
+      "properties": {
+        "interface": { "$ref": "#/$defs/identifier" },
+        "requirements": { "type": "array", "items": { "$ref": "#/$defs/requirement" }, "minItems": 1 },
+        "devices": { "type": "array", "items": { "$ref": "#/$defs/device" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    "manufacturing": {
+      "type": "object",
+      "required": ["serialNumber", "productionBatch", "productionDate"],
+      "properties": {
+        "serialNumber": { "type": ["string", "null"], "maxLength": 64 },
+        "productionBatch": { "type": ["string", "null"], "maxLength": 64 },
+        "productionDate": { "type": ["string", "null"], "format": "date" }
+      },
+      "additionalProperties": false
+    },
+    "calibrationEntry": {
+      "type": "object",
+      "required": ["target", "schema", "values"],
+      "properties": {
+        "target": { "$ref": "#/$defs/identifier" },
+        "schema": { "$ref": "#/$defs/contract" },
+        "values": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "calibration": { "type": "array", "items": { "$ref": "#/$defs/calibrationEntry" } },
+    "finding": {
+      "type": "object",
+      "required": ["path", "statement"],
+      "properties": { "path": { "type": "string" }, "statement": { "type": "string" } },
+      "additionalProperties": false
+    },
+    "assessment": {
+      "type": "object",
+      "description": "Authoring-only evidence and uncertainty annotations; omitted from EEPROM encoding.",
+      "required": ["evidence", "assumptions", "openQuestions"],
+      "properties": {
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "assumptions": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "openQuestions": { "type": "array", "items": { "$ref": "#/$defs/finding" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}
