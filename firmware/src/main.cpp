@@ -41,6 +41,7 @@
 #include "ModuleDiscoveryService.h"
 #include "ModuleCompatibility.h"
 #include "ModuleProvisioningService.h"
+#include "HardwareDescriptorStore.h"
 
 using namespace EnvNode;
 
@@ -63,8 +64,11 @@ static IdentityEeprom24LC32 slotBModuleEeprom(
     i2cBusManager, ModuleDiscoveryService::SlotBEepromAddress);
 static ModuleIdentityStore slotAModuleIdentityStore(slotAModuleEeprom);
 static ModuleIdentityStore slotBModuleIdentityStore(slotBModuleEeprom);
+static HardwareDescriptorStore slotAHardwareDescriptorStore(slotAModuleEeprom);
+static HardwareDescriptorStore slotBHardwareDescriptorStore(slotBModuleEeprom);
 static ModuleDiscoveryService moduleDiscoveryService(
-    slotAModuleIdentityStore, slotBModuleIdentityStore);
+    slotAModuleIdentityStore, slotBModuleIdentityStore,
+    slotAHardwareDescriptorStore, slotBHardwareDescriptorStore);
 static ModuleProvisioningService moduleProvisioningService(
     slotAModuleIdentityStore, slotBModuleIdentityStore, moduleDiscoveryService);
 static ConfigurationService configurationService;
@@ -143,12 +147,25 @@ void setup() {
                 moduleSlotName(slot));
             continue;
         }
-        const ModuleCompatibilityResult compatibility = evaluateModuleCompatibility(
-            currentBoardProfile(), slot, module->profile);
-        if (module->identified()) {
+        if (module->source == ModuleDiscoverySource::Descriptor) {
             logger.infof(
-                "Module slot=%s address=0x%02X status=%s profile=%u type=%s revision=%u.%u serial=%lu compatibility=%s",
+                "Module slot=%s address=0x%02X source=%s store=%s descriptor=%s type=%.*s name=%.*s compatibility=%s",
                 moduleSlotName(slot), module->eepromAddress,
+                moduleDiscoverySourceName(module->source),
+                hardwareDescriptorStoreStatusName(module->descriptorStoreStatus),
+                hardwareDescriptorDecodeStatusName(module->descriptorStatus),
+                static_cast<int>(module->descriptorTypeId.size),
+                module->descriptorTypeId.data == nullptr ? "" : module->descriptorTypeId.data,
+                static_cast<int>(module->descriptorName.size),
+                module->descriptorName.data == nullptr ? "" : module->descriptorName.data,
+                hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility));
+        } else if (module->identified()) {
+            const ModuleCompatibilityResult compatibility = evaluateModuleCompatibility(
+                currentBoardProfile(), slot, module->profile);
+            logger.infof(
+                "Module slot=%s address=0x%02X source=%s status=%s profile=%u type=%s revision=%u.%u serial=%lu compatibility=%s",
+                moduleSlotName(slot), module->eepromAddress,
+                moduleDiscoverySourceName(module->source),
                 moduleIdentityStatusName(module->status),
                 static_cast<unsigned int>(module->identity.profileId),
                 module->profile == nullptr ? "unknown" : module->profile->stableId,
@@ -157,8 +174,9 @@ void setup() {
                 moduleCompatibilityStatusName(compatibility.status));
         } else {
             logger.infof(
-                "Module slot=%s address=0x%02X status=%s generic=true",
+                "Module slot=%s address=0x%02X source=%s status=%s generic=true",
                 moduleSlotName(slot), module->eepromAddress,
+                moduleDiscoverySourceName(module->source),
                 moduleIdentityStatusName(module->status));
         }
     }

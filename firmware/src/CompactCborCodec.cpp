@@ -366,6 +366,12 @@ bool CompactCborReader::skip() {
     return skipValue(0);
 }
 
+bool CompactCborReader::peekMajorType(uint8_t& majorType) const {
+    if (status_ != CompactCborStatus::Success || offset_ >= size_) return false;
+    majorType = input_[offset_] >> 5;
+    return true;
+}
+
 CompactCborStatus CompactCborReader::status() const {
     return status_;
 }

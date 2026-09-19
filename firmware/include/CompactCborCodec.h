@@ -60,6 +60,7 @@ public:
     bool readNull();
     bool readDouble(double& value);
     bool skip();
+    bool peekMajorType(uint8_t& majorType) const;
 
     CompactCborStatus status() const;
     size_t consumed() const;

@@ -46,6 +46,13 @@ String badge(const char* text, const char* style) {
     return "<span class='badge " + String(style) + "'>" + text + "</span>";
 }
 
+String descriptorText(const DescriptorTextView& view) {
+    String result;
+    result.reserve(view.size);
+    for (size_t index = 0; index < view.size; ++index) result += view.data[index];
+    return result;
+}
+
 const char* sensorStateName(SensorState state) {
     switch (state) {
         case SensorState::Initializing: return "Initializing";
@@ -727,20 +734,29 @@ void WebService::handleDevice() {
         c += "<div class='notice'>The EEPROM Board Identity is valid, but its board serial number is unassigned.</div>";
     }
     c += "</section>";
-    c += "<section class='card'><h2>Module Identity</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>EEPROM</th><th>Status</th><th>Module</th><th>Revision</th><th>Serial number</th></tr></thead><tbody>";
+    c += "<section class='card'><h2>Module Identity</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>EEPROM</th><th>Source</th><th>Status</th><th>Module</th><th>Revision</th><th>Serial number</th></tr></thead><tbody>";
     for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
         const ModuleSlot slot = static_cast<ModuleSlot>(index);
         const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
         if (module == nullptr) continue;
-        const String moduleName = module->profile == nullptr
+        const bool descriptor = module->source == ModuleDiscoverySource::Descriptor;
+        const String moduleName = descriptor
+            ? escapeHtml(descriptorText(module->descriptorName.empty()
+                ? module->descriptorTypeId : module->descriptorName))
+            : module->profile == nullptr
             ? (module->identified()
                 ? String("Unknown profile ") + String(encodeModuleProfileId(module->identity.profileId))
                 : String("—"))
             : escapeHtml(module->profile->displayName);
-        const String revision = module->identified()
+        const String revision = descriptor && module->identified()
+            ? String(module->descriptorRevision.major) + "." + String(module->descriptorRevision.minor)
+            : module->identified()
             ? String(module->identity.revision.major) + "." + String(module->identity.revision.minor)
             : String("—");
-        const String moduleSerial = module->identified()
+        const String moduleSerial = descriptor
+            ? (module->descriptorSerialNumber.empty()
+                ? String("Unassigned") : escapeHtml(descriptorText(module->descriptorSerialNumber)))
+            : module->identified()
             ? (module->identity.serialNumber == 0
                 ? String("Unassigned")
                 : localeFormatter_.formatNumber(module->identity.serialNumber, 0))
@@ -748,7 +764,11 @@ void WebService::handleDevice() {
         c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
         if (module->eepromAddress < 0x10) c += "0";
         c += String(module->eepromAddress, HEX) + "</td><td>";
-        c += moduleIdentityStatusName(module->status);
+        c += moduleDiscoverySourceName(module->source);
+        c += "</td><td>";
+        c += descriptor
+            ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
+            : moduleIdentityStatusName(module->status);
         c += "</td><td>" + moduleName + "</td><td>" + revision;
         c += "</td><td>" + moduleSerial + "</td></tr>";
     }
@@ -1698,6 +1718,14 @@ void WebService::handleModuleProvisioning() {
     if (!slotValid || profile == nullptr || !serialValid) {
         sendResult("Module provisioning failed", "/device",
             "The selected module slot, profile, or serial number is invalid.", false);
+        return;
+    }
+    const ModuleDiscoveryResult* currentModule = moduleDiscoveryService_.result(slot);
+    if (currentModule != nullptr
+        && currentModule->source == ModuleDiscoverySource::Descriptor) {
+        sendResult("Module provisioning failed", "/device",
+            "This slot already contains an ENHD descriptor. Legacy EMID provisioning is disabled to protect the descriptor banks.",
+            false);
         return;
     }
 

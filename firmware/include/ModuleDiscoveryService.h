@@ -3,8 +3,17 @@
 #include "ModuleIdentityStore.h"
 #include "ModuleProfile.h"
 #include "ModuleSlot.h"
+#include "HardwareDescriptorCodec.h"
+#include "HardwareDescriptorCompatibility.h"
+#include "HardwareDescriptorStore.h"
 
 namespace EnvNode {
+
+enum class ModuleDiscoverySource : uint8_t {
+    None,
+    Descriptor,
+    LegacyEmidV1,
+};
 
 struct ModuleDiscoveryResult {
     ModuleDiscoveryResult(
@@ -18,6 +27,17 @@ struct ModuleDiscoveryResult {
     ModuleIdentityStatus status = ModuleIdentityStatus::StorageUnavailable;
     ModuleIdentity identity = {};
     const ModuleProfile* profile = nullptr;
+    ModuleDiscoverySource source = ModuleDiscoverySource::None;
+    HardwareDescriptorStoreStatus descriptorStoreStatus =
+        HardwareDescriptorStoreStatus::NotProvisioned;
+    HardwareDescriptorDecodeStatus descriptorStatus =
+        HardwareDescriptorDecodeStatus::InvalidCbor;
+    HardwareDescriptorCompatibilityStatus descriptorCompatibility =
+        HardwareDescriptorCompatibilityStatus::UnsupportedPlatform;
+    DescriptorTextView descriptorTypeId = {};
+    DescriptorTextView descriptorName = {};
+    DescriptorHardwareRevision descriptorRevision = {};
+    DescriptorTextView descriptorSerialNumber = {};
 
     bool identified() const;
 };
@@ -33,15 +53,24 @@ public:
     ModuleDiscoveryService(
         ModuleIdentityStore& slotAStore,
         ModuleIdentityStore& slotBStore);
+    ModuleDiscoveryService(
+        ModuleIdentityStore& slotAStore,
+        ModuleIdentityStore& slotBStore,
+        HardwareDescriptorStore& slotADescriptorStore,
+        HardwareDescriptorStore& slotBDescriptorStore);
 
     void scan();
     const ModuleDiscoveryResult* result(ModuleSlot slot) const;
 
 private:
     ModuleIdentityStore* stores_[SlotCount];
+    HardwareDescriptorStore* descriptorStores_[SlotCount] = {};
+    uint8_t descriptorPayloads_[SlotCount][HardwareDescriptorStore::MaximumPayloadSize] = {};
+    HardwareDescriptor descriptorScratch_ = {};
     ModuleDiscoveryResult results_[SlotCount];
 };
 
 const char* moduleIdentityStatusName(ModuleIdentityStatus status);
+const char* moduleDiscoverySourceName(ModuleDiscoverySource source);
 
 } // namespace EnvNode
