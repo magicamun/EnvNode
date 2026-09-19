@@ -29,9 +29,9 @@ meaning of schema 0.1 and contains no executable code.
 - Unknown product type IDs are accepted. Unknown required platform, safety, driver or capability
   contracts remain a compatibility failure rather than a format failure.
 
-The exact key and vocabulary tables currently live in
-`tools/measure_descriptor_encoding.py`. They must move into a normative generated specification
-before firmware implementation.
+The normative assignments are defined in
+[`DescriptorCborVocabulary01.md`](DescriptorCborVocabulary01.md). The measurement tool and
+firmware vocabulary header must remain consistent with that document.
 
 ## Measured layouts
 
@@ -104,7 +104,6 @@ CRC and payload CRC are valid.
 
 ## Open points before acceptance
 
-- Freeze the complete numeric key and interoperable vocabulary tables.
 - Confirm that manufacturing and calibration writes are sufficiently infrequent to rewrite one
   complete inactive bank per accepted update.
 - Define a possible future signed envelope version. Version 0.1 deliberately uses CRC and an
