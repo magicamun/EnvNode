@@ -21,7 +21,7 @@ public:
         std::memset(bytes, 0xFF, sizeof(bytes));
     }
 
-    bool read(uint8_t address, uint8_t* data, size_t size) override {
+    bool read(uint16_t address, uint8_t* data, size_t size) override {
         ++readCount;
         if (failRead || static_cast<size_t>(address) + size > sizeof(bytes)) {
             return false;
@@ -33,7 +33,7 @@ public:
         return true;
     }
 
-    bool write(uint8_t address, const uint8_t* data, size_t size) override {
+    bool write(uint16_t address, const uint8_t* data, size_t size) override {
         ++writeCount;
         if (failWriteNumber == writeCount
             || static_cast<size_t>(address) + size > sizeof(bytes)) {
@@ -57,7 +57,7 @@ public:
 
 const BoardIdentity MainboardIdentity = {
     BoardProfileId::EnvNodeMainboard,
-    {0, 2},
+    {0, 3},
     12,
 };
 

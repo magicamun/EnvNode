@@ -21,14 +21,14 @@ public:
         std::memset(bytes, 0xFF, sizeof(bytes));
     }
 
-    bool read(uint8_t address, uint8_t* data, size_t size) override {
+    bool read(uint16_t address, uint8_t* data, size_t size) override {
         ++reads;
         if (unavailable) return false;
         std::memcpy(data, bytes + address, size);
         return true;
     }
 
-    bool write(uint8_t address, const uint8_t* data, size_t size) override {
+    bool write(uint16_t address, const uint8_t* data, size_t size) override {
         std::memcpy(bytes + address, data, size);
         return true;
     }
@@ -52,7 +52,7 @@ BoardIdentityResolution resolve(MemoryStorage& storage) {
 
 void test_valid_eeprom_identity_wins() {
     MemoryStorage storage;
-    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 2}, 12});
+    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
     const BoardIdentityResolution result = resolve(storage);
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentitySource::EEPROM),
@@ -63,7 +63,7 @@ void test_valid_eeprom_identity_wins() {
 
 void test_unassigned_serial_remains_usable_eeprom_identity() {
     MemoryStorage storage;
-    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 2}, 0});
+    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 0});
     const BoardIdentityResolution result = resolve(storage);
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityStatus::UnassignedSerial),
@@ -96,7 +96,7 @@ void test_blank_unavailable_and_corrupt_records_use_visible_fallback() {
         static_cast<int>(result.recordStatus));
 
     MemoryStorage corrupt;
-    corrupt.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 2}, 12});
+    corrupt.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
     corrupt.bytes[10] ^= 1;
     result = resolve(corrupt);
     TEST_ASSERT_EQUAL_INT(
@@ -109,7 +109,7 @@ void test_blank_unavailable_and_corrupt_records_use_visible_fallback() {
 
 void test_unknown_profile_and_unsupported_revision_never_fall_back() {
     MemoryStorage unknown;
-    unknown.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 2}, 12});
+    unknown.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
     unknown.bytes[6] = 1;
     const uint32_t unknownCrc = BoardIdentityCodec::calculateCrc32(unknown.bytes, 28);
     for (size_t index = 0; index < 4; ++index) {
@@ -125,7 +125,7 @@ void test_unknown_profile_and_unsupported_revision_never_fall_back() {
     TEST_ASSERT_FALSE(result.normalRuntimeAllowed);
 
     MemoryStorage unsupported;
-    unsupported.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 2}, 12});
+    unsupported.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
     unsupported.bytes[9] = 1;
     const uint32_t revisionCrc = BoardIdentityCodec::calculateCrc32(unsupported.bytes, 28);
     for (size_t index = 0; index < 4; ++index) {
@@ -143,7 +143,7 @@ void test_resolution_is_read_and_frozen_once() {
     BoardIdentityStore store(storage);
     BoardIdentityResolver resolver(store, BoardProfileId::EnvNodeMainboard);
     const BoardIdentityResolution& first = resolver.resolve();
-    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 2}, 12});
+    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
     const BoardIdentityResolution& second = resolver.resolve();
     TEST_ASSERT_EQUAL_UINT32(1, storage.reads);
     TEST_ASSERT_EQUAL_INT(

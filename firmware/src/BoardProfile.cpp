@@ -31,7 +31,7 @@ const BoardI2CBusCapability EnvNodeMainboardI2CBuses[] = {
 const BoardProfile EnvNodeMainboardProfile = {
     BoardProfileId::EnvNodeMainboard,
     "EnvNode Mainboard",
-    {0, 2},
+    {0, 3},
     EnvNodeMainboardGpios,
     sizeof(EnvNodeMainboardGpios) / sizeof(EnvNodeMainboardGpios[0]),
     EnvNodeMainboardI2CBuses,

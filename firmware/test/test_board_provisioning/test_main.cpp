@@ -18,12 +18,12 @@ namespace {
 class MemoryStorage : public IBoardIdentityStorage {
 public:
     MemoryStorage() { std::memset(bytes, 0xFF, sizeof(bytes)); }
-    bool read(uint8_t address, uint8_t* data, size_t size) override {
+    bool read(uint16_t address, uint8_t* data, size_t size) override {
         if (failRead) return false;
         std::memcpy(data, bytes + address, size);
         return true;
     }
-    bool write(uint8_t address, const uint8_t* data, size_t size) override {
+    bool write(uint16_t address, const uint8_t* data, size_t size) override {
         ++writes;
         if (failWrite) return false;
         std::memcpy(bytes + address, data, size);
@@ -35,7 +35,7 @@ public:
     bool failWrite = false;
 };
 
-const BoardIdentity Identity = {BoardProfileId::EnvNodeMainboard, {0, 2}, 12};
+const BoardIdentity Identity = {BoardProfileId::EnvNodeMainboard, {0, 3}, 12};
 
 } // namespace
 

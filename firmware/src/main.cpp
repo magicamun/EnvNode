@@ -36,7 +36,7 @@
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
 #include "SystemLogTimeProvider.h"
-#include "BoardIdentityEeprom24AA025E48.h"
+#include "IdentityEeprom24LC32.h"
 #include "BoardIdentityResolver.h"
 
 using namespace EnvNode;
@@ -49,7 +49,7 @@ static StructuredLogger logger(recentLogStore, logTimeProvider, serialLogSink);
 static ActuatorFactory actuatorFactory(logger);
 static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
 static I2CBusManager i2cBusManager(logger);
-static BoardIdentityEeprom24AA025E48 boardIdentityEeprom(i2cBusManager);
+static IdentityEeprom24LC32 boardIdentityEeprom(i2cBusManager, 0x50);
 static BoardIdentityStore boardIdentityStore(boardIdentityEeprom);
 static BoardIdentityResolver boardIdentityResolver(
     boardIdentityStore, buildFallbackBoardProfileId());

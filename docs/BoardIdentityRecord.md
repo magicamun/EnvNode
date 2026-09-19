@@ -155,9 +155,8 @@ specified redundant-slot or transactional scheme; it must not change this record
 
 ## 6. Complete example
 
-This example identifies the current EnvNode Mainboard PCB revision 0.2 with serial number 12. The
-repository's KiCad schematic and PCB both declare revision 0.2, and the hardware specification
-states that the EEPROM is present starting with that revision.
+This example identifies the current EnvNode Mainboard PCB revision 0.3 with serial number 12.
+The repository's KiCad schematic and PCB declare revision 0.3 and use a `24LC32` EEPROM.
 
 | Field | Value | Encoded bytes |
 | --- | --- | --- |
@@ -165,23 +164,23 @@ states that the EEPROM is present starting with that revision.
 | Format version | 1 | `01` |
 | Record length | 32 | `20` |
 | `BoardProfileId` | 0 (`EnvNodeMainboard`) | `00 00` |
-| Revision | 0.2 | `00 02` |
+| Revision | 0.3 | `00 03` |
 | Serial | 12 | `0C 00 00 00` |
 | Reserved | fourteen zero bytes | `00` × 14 |
-| CRC-32/ISO-HDLC | `0xEBE632D6` | `D6 32 E6 EB` |
+| CRC-32/ISO-HDLC | `0x3C04B28E` | `8E B2 04 3C` |
 
 CRC input, bytes 0 through 27:
 
 ```text
-45 4E 49 44 01 20 00 00 00 02 0C 00 00 00
+45 4E 49 44 01 20 00 00 00 03 0C 00 00 00
 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 ```
 
 Complete 32-byte record:
 
 ```text
-45 4E 49 44 01 20 00 00 00 02 0C 00 00 00 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 D6 32 E6 EB
+45 4E 49 44 01 20 00 00 00 03 0C 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 8E B2 04 3C
 ```
 
 ## 7. Format evolution

@@ -30,7 +30,7 @@ BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
 
     switch (identity.profileId) {
         case BoardProfileId::EnvNodeMainboard:
-            if (identity.revision.major != 0 || identity.revision.minor != 2) {
+            if (identity.revision.major != 0 || identity.revision.minor != 3) {
                 return BoardIdentityStatus::UnsupportedRevision;
             }
             break;
