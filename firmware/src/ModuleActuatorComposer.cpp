@@ -89,6 +89,12 @@ size_t ModuleActuatorComposer::compose(
             AutomaticActuatorDefinition& definition = definitions_[count_++];
             definition = AutomaticActuatorDefinition{};
             definition.moduleSlot = slot;
+            definition.hasModuleInstanceId = module->descriptorHasInstanceId;
+            if (definition.hasModuleInstanceId) {
+                memcpy(definition.moduleInstanceFingerprint,
+                    module->descriptorInstanceId,
+                    sizeof(definition.moduleInstanceFingerprint));
+            }
             copyText(definition.deviceId, entry.id);
             snprintf(definition.name, sizeof(definition.name), "%s %s",
                 moduleSlotName(slot), definition.deviceId);

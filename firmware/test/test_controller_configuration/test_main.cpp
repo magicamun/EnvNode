@@ -321,6 +321,47 @@ void test_persistence_uses_stable_id_and_round_trips_blink_parameters() {
     TEST_ASSERT_EQUAL_UINT32(2500, loaded.implementationConfiguration.blink.offDurationMs);
 }
 
+void test_module_target_persists_without_current_runtime_actuator() {
+    Fixture fixture;
+    ControllerSlotConfiguration saved = fixture.blink();
+    BlinkControllerConfiguration& blink = saved.implementationConfiguration.blink;
+    blink.targetActuatorId = InvalidActuatorId;
+    uint8_t instanceId[16];
+    for (size_t index = 0; index < sizeof(instanceId); ++index) {
+        instanceId[index] = static_cast<uint8_t>(0xa0 + index);
+    }
+    setModuleActuatorInstanceId(saved.moduleTarget, instanceId);
+    setModuleActuatorDeviceId(saved.moduleTarget, "relay.2");
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(saved));
+
+    ConfigurationService loadedService;
+    loadedService.loadConfiguration();
+    const BlinkControllerConfiguration& loaded =
+        loadedService.getConfiguration().controllerSlots[0]
+            .implementationConfiguration.blink;
+    TEST_ASSERT_TRUE(validModuleActuatorReference(
+        loadedService.getConfiguration().controllerSlots[0].moduleTarget));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(saved.moduleTarget.deviceIdHash,
+        loadedService.getConfiguration().controllerSlots[0].moduleTarget.deviceIdHash, 4);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(saved.moduleTarget.moduleInstanceFingerprint,
+        loadedService.getConfiguration().controllerSlots[0].moduleTarget.moduleInstanceFingerprint, 12);
+}
+
+void test_enabled_controllers_exclusively_claim_same_module_device() {
+    Fixture fixture;
+    ControllerSlotConfiguration first = fixture.blink(1);
+    first.implementationConfiguration.blink.targetActuatorId = InvalidActuatorId;
+    memset(first.moduleTarget.moduleInstanceFingerprint, 0x5a,
+        sizeof(first.moduleTarget.moduleInstanceFingerprint));
+    setModuleActuatorDeviceId(first.moduleTarget, "relay.1");
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(first));
+
+    ControllerSlotConfiguration second = fixture.blink(2);
+    second.implementationConfiguration.blink.targetActuatorId = InvalidActuatorId;
+    second.moduleTarget = first.moduleTarget;
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(second));
+}
+
 void test_valid_threshold_accepts_numeric_state_source_and_on_off_target() {
     Fixture fixture;
     TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
@@ -677,6 +718,8 @@ int main(int, char**) {
     RUN_TEST(test_referenced_actuator_cannot_be_disabled_or_made_incompatible);
     RUN_TEST(test_disabled_controller_does_not_constrain_actuator_configuration);
     RUN_TEST(test_persistence_uses_stable_id_and_round_trips_blink_parameters);
+    RUN_TEST(test_module_target_persists_without_current_runtime_actuator);
+    RUN_TEST(test_enabled_controllers_exclusively_claim_same_module_device);
     RUN_TEST(test_valid_threshold_accepts_numeric_state_source_and_on_off_target);
     RUN_TEST(test_threshold_rejects_invalid_disabled_none_and_unsupported_sources);
     RUN_TEST(test_threshold_rejects_event_and_numeric_non_state_measurements);

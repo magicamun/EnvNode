@@ -6,6 +6,16 @@
 
 namespace EnvNode {
 namespace {
+IOnOffActuator* resolveTarget(
+    IOnOffActuatorResolver& resolver,
+    const ThresholdControllerConfiguration& configuration,
+    const ModuleActuatorReference& moduleTarget) {
+    return validModuleActuatorReference(moduleTarget)
+        ? resolver.onOffActuator(moduleTarget)
+        : resolver.onOffActuator(configuration.targetActuatorId);
+}
+}
+namespace {
 
 const char* decisionName(ThresholdDecision decision) {
     switch (decision) {
@@ -20,6 +30,7 @@ const char* decisionName(ThresholdDecision decision) {
 
 ThresholdController::ThresholdController(
     const ThresholdControllerConfiguration& configuration,
+    const ModuleActuatorReference& moduleTarget,
     IMeasurementResolver& measurementResolver,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
@@ -27,6 +38,7 @@ ThresholdController::ThresholdController(
     ControllerId controllerId,
     const String& controllerName)
     : configuration_(configuration)
+    , moduleTarget_(moduleTarget)
     , measurementResolver_(measurementResolver)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
@@ -110,7 +122,7 @@ ControllerOperationResult ThresholdController::stop() {
     decision_ = ThresholdDecision::Unknown;
     outputApplicationPending_ = false;
     IOnOffActuator* actuator =
-        actuatorResolver_.onOffActuator(configuration_.targetActuatorId);
+        resolveTarget(actuatorResolver_, configuration_, moduleTarget_);
     if (actuator == nullptr) {
         targetAvailable_ = false;
         return ControllerOperationResult::TargetUnavailable;
@@ -147,7 +159,8 @@ bool ThresholdController::configurationValid() const {
     return isValidSensorId(configuration_.source.sensorId)
         && metadata.expectedValueKind == ValueKind::FloatingPoint
         && metadata.semantics == MeasurementSemantics::State
-        && isValidActuatorId(configuration_.targetActuatorId)
+        && (validModuleActuatorReference(moduleTarget_)
+            || isValidActuatorId(configuration_.targetActuatorId))
         && std::isfinite(configuration_.onThreshold)
         && std::isfinite(configuration_.offThreshold)
         && validThresholdOrdering(configuration_.direction,
@@ -230,7 +243,7 @@ void ThresholdController::evaluateValue(float value) {
 
 ControllerOperationResult ThresholdController::applyPendingDecision() {
     IOnOffActuator* actuator =
-        actuatorResolver_.onOffActuator(configuration_.targetActuatorId);
+        resolveTarget(actuatorResolver_, configuration_, moduleTarget_);
     if (actuator == nullptr) {
         targetAvailable_ = false;
         if (!targetUnavailabilityLogged_) {

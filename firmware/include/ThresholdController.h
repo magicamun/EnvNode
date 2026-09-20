@@ -19,12 +19,24 @@ class ThresholdController : public IController {
 public:
     ThresholdController(
         const ThresholdControllerConfiguration& configuration,
+        const ModuleActuatorReference& moduleTarget,
         IMeasurementResolver& measurementResolver,
         IOnOffActuatorResolver& actuatorResolver,
         IMonotonicClock& monotonicClock,
         ILogger& logger,
         ControllerId controllerId = InvalidControllerId,
         const String& controllerName = String());
+    ThresholdController(
+        const ThresholdControllerConfiguration& configuration,
+        IMeasurementResolver& measurementResolver,
+        IOnOffActuatorResolver& actuatorResolver,
+        IMonotonicClock& monotonicClock,
+        ILogger& logger,
+        ControllerId controllerId = InvalidControllerId,
+        const String& controllerName = String())
+        : ThresholdController(configuration, ModuleActuatorReference{},
+            measurementResolver, actuatorResolver, monotonicClock, logger,
+            controllerId, controllerName) {}
 
     ControllerOperationResult begin() override;
     ControllerOperationResult service() override;
@@ -52,6 +64,7 @@ private:
     ControllerOperationResult applyPendingDecision();
 
     ThresholdControllerConfiguration configuration_;
+    ModuleActuatorReference moduleTarget_;
     IMeasurementResolver& measurementResolver_;
     IOnOffActuatorResolver& actuatorResolver_;
     IMonotonicClock& monotonicClock_;

@@ -487,6 +487,36 @@ void test_descriptor_actuator_uses_first_empty_runtime_slot() {
         static_cast<int>(automaticInfo.origin));
 }
 
+void test_descriptor_actuator_resolves_by_module_uuid_and_device_id() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    AutomaticActuatorDefinition automatic;
+    automatic.moduleSlot = ModuleSlot::B;
+    automatic.hasModuleInstanceId = true;
+    for (size_t index = 0; index < sizeof(automatic.moduleInstanceFingerprint); ++index) {
+        automatic.moduleInstanceFingerprint[index] = static_cast<uint8_t>(index + 1);
+    }
+    strcpy(automatic.deviceId, "relay.2");
+    strcpy(automatic.name, "B relay.2");
+    automatic.implementation = ActuatorImplementation::GpioOnOff;
+    automatic.hardware = HardwareResourceAssignment::gpioResource(GpioResource(17));
+    TEST_ASSERT_TRUE(runtime.configureAutomaticActuators(&automatic, 1));
+    runtime.initialize(slots);
+
+    ModuleActuatorReference reference;
+    setModuleActuatorInstanceId(reference, automatic.moduleInstanceFingerprint);
+    setModuleActuatorDeviceId(reference, "relay.2");
+    TEST_ASSERT_NOT_NULL(runtime.onOffActuator(reference));
+    setModuleActuatorDeviceId(reference, "relay.1");
+    TEST_ASSERT_NULL(runtime.onOffActuator(reference));
+    reference.moduleInstanceFingerprint[0] ^= 0xff;
+    setModuleActuatorDeviceId(reference, "relay.2");
+    TEST_ASSERT_NULL(runtime.onOffActuator(reference));
+}
+
 void test_serial_logger_preserves_messages_longer_than_old_buffer() {
     RecentLogStore store;
     TestLogTimeProvider timeProvider;
@@ -663,6 +693,7 @@ int main(int, char**) {
     RUN_TEST(test_capability_lookup_exposes_on_off_interface);
     RUN_TEST(test_descriptor_actuator_replaces_saved_actuator_on_same_gpio);
     RUN_TEST(test_descriptor_actuator_uses_first_empty_runtime_slot);
+    RUN_TEST(test_descriptor_actuator_resolves_by_module_uuid_and_device_id);
     RUN_TEST(test_serial_logger_preserves_messages_longer_than_old_buffer);
     RUN_TEST(test_serial_logger_println_writes_exact_text_bytes);
     RUN_TEST(test_serial_logger_printf_uses_one_explicit_length_write);

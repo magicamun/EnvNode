@@ -210,6 +210,7 @@ bool ActuatorRuntime::constructComposition(
             const AutomaticActuatorDefinition& origin = *origins[slotIndex];
             entry.info.origin = ActuatorRuntimeOrigin::ModuleDescriptor;
             entry.info.moduleSlot = origin.moduleSlot;
+            entry.automaticOrigin = origins[slotIndex];
             strncpy(entry.info.descriptorDeviceId,
                 origin.deviceId, MaxActuatorSlotNameLength);
             entry.info.descriptorDeviceId[MaxActuatorSlotNameLength] = '\0';
@@ -288,11 +289,38 @@ bool ActuatorRuntime::runtimeInfo(size_t index, ActuatorRuntimeInfo& info) const
     return true;
 }
 
+bool ActuatorRuntime::moduleReference(
+    ActuatorId id, ModuleActuatorReference& reference) const {
+    const RuntimeEntry* entry = findEntry(id);
+    if (entry == nullptr || entry->automaticOrigin == nullptr
+        || !entry->automaticOrigin->hasModuleInstanceId) return false;
+    reference = ModuleActuatorReference{};
+    setModuleActuatorInstanceId(reference,
+        entry->automaticOrigin->moduleInstanceFingerprint);
+    setModuleActuatorDeviceId(reference, entry->automaticOrigin->deviceId);
+    return validModuleActuatorReference(reference);
+}
+
 IOnOffActuator* ActuatorRuntime::onOffActuator(ActuatorId id) {
     RuntimeEntry* entry = findEntry(id);
     return entry != nullptr && entry->info.available
         && hasActuatorCapability(entry->info.capabilities, ActuatorCapability::OnOff)
         ? entry->onOff : nullptr;
+}
+
+IOnOffActuator* ActuatorRuntime::onOffActuator(
+    const ModuleActuatorReference& reference) {
+    if (!validModuleActuatorReference(reference)) return nullptr;
+    for (size_t index = 0; index < runtimeCount_; ++index) {
+        RuntimeEntry& entry = entries_[index];
+        ModuleActuatorReference runtimeReference;
+        if (!moduleReference(entry.info.id, runtimeReference)
+            || !sameModuleActuatorReference(runtimeReference, reference)) continue;
+        return entry.info.available
+            && hasActuatorCapability(entry.info.capabilities, ActuatorCapability::OnOff)
+            ? entry.onOff : nullptr;
+    }
+    return nullptr;
 }
 
 const IOnOffActuator* ActuatorRuntime::onOffActuator(ActuatorId id) const {

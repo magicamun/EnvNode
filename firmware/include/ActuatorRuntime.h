@@ -15,6 +15,8 @@ enum class ActuatorRuntimeOrigin : uint8_t {
 
 struct AutomaticActuatorDefinition {
     ModuleSlot moduleSlot = ModuleSlot::A;
+    uint8_t moduleInstanceFingerprint[8] = {};
+    bool hasModuleInstanceId = false;
     char deviceId[MaxActuatorSlotNameLength + 1] = {};
     char name[MaxActuatorSlotNameLength + 1] = {};
     ActuatorImplementation implementation = ActuatorImplementation::None;
@@ -49,7 +51,10 @@ public:
     size_t runtimeCount() const;
     size_t availableCount() const;
     bool runtimeInfo(size_t index, ActuatorRuntimeInfo& info) const;
+    bool moduleReference(ActuatorId id, ModuleActuatorReference& reference) const;
     IOnOffActuator* onOffActuator(ActuatorId id) override;
+    IOnOffActuator* onOffActuator(
+        const ModuleActuatorReference& reference) override;
     const IOnOffActuator* onOffActuator(ActuatorId id) const;
     ILevelActuator* levelActuator(ActuatorId id);
     const ILevelActuator* levelActuator(ActuatorId id) const;
@@ -59,6 +64,7 @@ private:
         ActuatorRuntimeInfo info;
         IOnOffActuator* onOff = nullptr;
         ILevelActuator* level = nullptr;
+        const AutomaticActuatorDefinition* automaticOrigin = nullptr;
     };
 
     RuntimeEntry* findEntry(ActuatorId id);

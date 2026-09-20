@@ -3,15 +3,27 @@
 #include <climits>
 
 namespace EnvNode {
+namespace {
+IOnOffActuator* resolveTarget(
+    IOnOffActuatorResolver& resolver,
+    const BlinkControllerConfiguration& configuration,
+    const ModuleActuatorReference& moduleTarget) {
+    return validModuleActuatorReference(moduleTarget)
+        ? resolver.onOffActuator(moduleTarget)
+        : resolver.onOffActuator(configuration.targetActuatorId);
+}
+}
 
 BlinkController::BlinkController(
     const BlinkControllerConfiguration& configuration,
+    const ModuleActuatorReference& moduleTarget,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
     ILogger& logger,
     ControllerId controllerId,
     const String& controllerName)
     : configuration_(configuration)
+    , moduleTarget_(moduleTarget)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
     , logger_(logger)
@@ -20,7 +32,8 @@ BlinkController::BlinkController(
 }
 
 ControllerOperationResult BlinkController::begin() {
-    if (!isValidActuatorId(configuration_.targetActuatorId)
+    if ((!validModuleActuatorReference(moduleTarget_)
+            && !isValidActuatorId(configuration_.targetActuatorId))
         || configuration_.onDurationMs == 0
         || configuration_.onDurationMs > INT32_MAX
         || configuration_.offDurationMs == 0
@@ -54,7 +67,7 @@ ControllerOperationResult BlinkController::stop() {
     phase_ = BlinkPhase::Stopped;
     nextTransitionMs_ = 0;
     IOnOffActuator* actuator =
-        actuatorResolver_.onOffActuator(configuration_.targetActuatorId);
+        resolveTarget(actuatorResolver_, configuration_, moduleTarget_);
     if (actuator == nullptr) {
         targetAvailable_ = false;
         return ControllerOperationResult::TargetUnavailable;
@@ -78,7 +91,7 @@ ControllerOperationResult BlinkController::command(
     OnOffState state,
     BlinkPhase successfulPhase) {
     IOnOffActuator* actuator =
-        actuatorResolver_.onOffActuator(configuration_.targetActuatorId);
+        resolveTarget(actuatorResolver_, configuration_, moduleTarget_);
     if (actuator == nullptr) {
         targetAvailable_ = false;
         phase_ = BlinkPhase::WaitingForTarget;

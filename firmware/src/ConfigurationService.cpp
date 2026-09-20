@@ -7,6 +7,7 @@
 #include "ControllerImplementationRegistry.h"
 #include "HardwareResources.h"
 #include <cmath>
+#include <cstring>
 
 namespace EnvNode {
 
@@ -58,6 +59,52 @@ String actuatorKey(ActuatorId slotId, const char* field) {
 
 String controllerKey(ControllerId slotId, const char* field) {
     return "c" + String(slotId) + "_" + field;
+}
+
+String bytesHex(const uint8_t* value, size_t length) {
+    static const char Hex[] = "0123456789abcdef";
+    String result;
+    result.reserve(length * 2);
+    for (size_t index = 0; index < length; ++index) {
+        result += Hex[value[index] >> 4];
+        result += Hex[value[index] & 0x0f];
+    }
+    return result;
+}
+
+bool parseHex(const String& text, uint8_t* value, size_t length) {
+    if (text.length() != length * 2) return false;
+    for (size_t index = 0; index < length; ++index) {
+        const char high = text[index * 2];
+        const char low = text[index * 2 + 1];
+        const auto digit = [](char c) -> int {
+            if (c >= '0' && c <= '9') return c - '0';
+            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+            return -1;
+        };
+        const int h = digit(high);
+        const int l = digit(low);
+        if (h < 0 || l < 0) return false;
+        value[index] = static_cast<uint8_t>((h << 4) | l);
+    }
+    return true;
+}
+
+void loadModuleTarget(
+    Preferences& preferences, ControllerId id, const char* prefix,
+    ModuleActuatorReference& target) {
+    target = ModuleActuatorReference{};
+    const String kindKey = controllerKey(id, (String(prefix) + "kind").c_str());
+    if (preferences.getUInt(kindKey.c_str(), 0) != 1) return;
+    const String uuid = preferences.getString(
+        controllerKey(id, (String(prefix) + "uuid").c_str()).c_str(), "");
+    const String deviceHash = preferences.getString(
+        controllerKey(id, (String(prefix) + "dev").c_str()).c_str(), "");
+    if (!parseHex(uuid, target.moduleInstanceFingerprint,
+            sizeof(target.moduleInstanceFingerprint))
+        || !parseHex(deviceHash, target.deviceIdHash,
+            sizeof(target.deviceIdHash))) return;
 }
 }
 
@@ -353,6 +400,7 @@ void ConfigurationService::loadControllerSlots() {
         loaded[index].implementationConfiguration.blink.targetActuatorId =
             static_cast<ActuatorId>(preferences_.getUInt(
                 controllerKey(expectedId, "act").c_str(), InvalidActuatorId));
+        loadModuleTarget(preferences_, expectedId, "m", loaded[index].moduleTarget);
         loaded[index].implementationConfiguration.blink.onDurationMs = preferences_.getUInt(
             controllerKey(expectedId, "onms").c_str(), 1000);
         loaded[index].implementationConfiguration.blink.offDurationMs = preferences_.getUInt(
@@ -903,6 +951,9 @@ bool ConfigurationService::validateControllerSlot(
         return false;
     }
 
+    const ModuleActuatorReference* moduleTarget =
+        configuredControllerModuleTarget(slot);
+    if (moduleTarget != nullptr) return true;
     ActuatorId targetActuatorId = InvalidActuatorId;
     if (!configuredControllerTargetActuatorId(slot, targetActuatorId)) return false;
     if (!isValidActuatorId(targetActuatorId)
@@ -942,6 +993,19 @@ bool ConfigurationService::validateControllerSlots(
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         const ControllerSlotConfiguration& slot = controllerSlots[index];
         if (!slot.enabled || slot.implementation == ControllerImplementation::None) {
+            continue;
+        }
+        const ModuleActuatorReference* moduleTarget =
+            configuredControllerModuleTarget(slot);
+        if (moduleTarget != nullptr) {
+            for (size_t previous = 0; previous < index; ++previous) {
+                const ControllerSlotConfiguration& other = controllerSlots[previous];
+                if (!other.enabled) continue;
+                const ModuleActuatorReference* otherTarget =
+                    configuredControllerModuleTarget(other);
+                if (otherTarget != nullptr
+                    && sameModuleActuatorReference(*moduleTarget, *otherTarget)) return false;
+            }
             continue;
         }
         ActuatorId targetActuatorId = InvalidActuatorId;
@@ -1056,11 +1120,24 @@ bool ConfigurationService::persistControllerSlot(
     const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
     const ThresholdControllerConfiguration& threshold =
         slot.implementationConfiguration.threshold;
+    const auto persistModuleTarget = [this, id](
+        const char* prefix, const ModuleActuatorReference& target) {
+        const bool configured = validModuleActuatorReference(target);
+        return persistUInt(controllerKey(id, (String(prefix) + "kind").c_str()).c_str(),
+                configured ? 1 : 0)
+            && persistString(controllerKey(id, (String(prefix) + "uuid").c_str()).c_str(),
+                configured ? bytesHex(target.moduleInstanceFingerprint,
+                    sizeof(target.moduleInstanceFingerprint)) : String())
+            && persistString(controllerKey(id, (String(prefix) + "dev").c_str()).c_str(),
+                configured ? bytesHex(target.deviceIdHash,
+                    sizeof(target.deviceIdHash)) : String());
+    };
     return persistUInt(controllerKey(id, "id").c_str(), id)
         && persistUInt(controllerKey(id, "en").c_str(), slot.enabled ? 1 : 0)
         && persistString(controllerKey(id, "name").c_str(), slot.name)
         && persistString(controllerKey(id, "impl").c_str(), metadata->stableId)
         && persistUInt(controllerKey(id, "act").c_str(), blink.targetActuatorId)
+        && persistModuleTarget("m", slot.moduleTarget)
         && persistUInt(controllerKey(id, "onms").c_str(), blink.onDurationMs)
         && persistUInt(controllerKey(id, "offms").c_str(), blink.offDurationMs)
         && persistUInt(controllerKey(id, "src").c_str(), threshold.source.sensorId)

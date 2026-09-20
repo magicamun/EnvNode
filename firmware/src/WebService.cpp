@@ -12,6 +12,7 @@
 #include <climits>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include "FirmwareVersion.h"
 #include "FirmwareBuildInfo.h"
 #include "UnitConverter.h"
@@ -1048,6 +1049,20 @@ void WebService::handleControllers() {
             slot.implementationConfiguration.blink;
         const ThresholdControllerConfiguration& threshold =
             slot.implementationConfiguration.threshold;
+        String moduleTargetName;
+        if (validModuleActuatorReference(slot.moduleTarget)) {
+            for (size_t actuatorIndex = 0;
+                 actuatorIndex < actuatorRuntime_.runtimeCount(); ++actuatorIndex) {
+                ActuatorRuntimeInfo actuatorInfo;
+                ModuleActuatorReference reference;
+                if (actuatorRuntime_.runtimeInfo(actuatorIndex, actuatorInfo)
+                    && actuatorRuntime_.moduleReference(actuatorInfo.id, reference)
+                    && sameModuleActuatorReference(slot.moduleTarget, reference)) {
+                    moduleTargetName = actuatorInfo.name;
+                    break;
+                }
+            }
+        }
         const bool expectsRuntime = slot.enabled
             && slot.implementation != ControllerImplementation::None;
         bool runtimeMatches = expectsRuntime == hasRuntime;
@@ -1077,8 +1092,15 @@ void WebService::handleControllers() {
             metadata == nullptr ? "Invalid" : metadata->displayType) + "</span>";
         c += "</td><td class='controller-route'>";
         if (slot.implementation == ControllerImplementation::Blink) {
-            c += "Target: Actuator " + String(blink.targetActuatorId);
-            if (isValidActuatorId(blink.targetActuatorId)
+            if (validModuleActuatorReference(slot.moduleTarget)) {
+                c += "Target: Module actuator · "
+                    + (moduleTargetName.isEmpty()
+                        ? String("currently unavailable") : escapeHtml(moduleTargetName));
+            } else {
+                c += "Target: Actuator " + String(blink.targetActuatorId);
+            }
+            if (!validModuleActuatorReference(slot.moduleTarget)
+                && isValidActuatorId(blink.targetActuatorId)
                 && blink.targetActuatorId <= MaxActuatorSlotCount) {
                 c += " · " + escapeHtml(configuration.actuatorSlots[
                     blink.targetActuatorId - 1].name);
@@ -1096,8 +1118,15 @@ void WebService::handleControllers() {
             c += "<br>Measurement: ";
             c += escapeHtml(measurementTypeMetadata(
                 threshold.source.measurementType).displayName);
-            c += "<br>Target: Actuator " + String(threshold.targetActuatorId);
-            if (isValidActuatorId(threshold.targetActuatorId)
+            if (validModuleActuatorReference(slot.moduleTarget)) {
+                c += "<br>Target: Module actuator · "
+                    + (moduleTargetName.isEmpty()
+                        ? String("currently unavailable") : escapeHtml(moduleTargetName));
+            } else {
+                c += "<br>Target: Actuator " + String(threshold.targetActuatorId);
+            }
+            if (!validModuleActuatorReference(slot.moduleTarget)
+                && isValidActuatorId(threshold.targetActuatorId)
                 && threshold.targetActuatorId <= MaxActuatorSlotCount) {
                 c += " · " + escapeHtml(configuration.actuatorSlots[
                     threshold.targetActuatorId - 1].name);
@@ -1390,6 +1419,7 @@ void WebService::handleControllerEdit() {
     }
     String blinkTargetOptions;
     String thresholdTargetOptions;
+    bool moduleTargetListed = false;
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
         const ActuatorSlotConfiguration& actuator = configuration.actuatorSlots[index];
         if (isControllerTargetClaimedByOtherEnabledSlot(
@@ -1423,6 +1453,40 @@ void WebService::handleControllerEdit() {
             thresholdTargetOptions += ">Actuator Slot " + String(actuator.slotId)
                 + " · " + escapeHtml(actuator.name) + "</option>";
         }
+    }
+    for (size_t runtimeIndex = 0; runtimeIndex < actuatorRuntime_.runtimeCount();
+         ++runtimeIndex) {
+        ActuatorRuntimeInfo runtime;
+        ModuleActuatorReference reference;
+        if (!actuatorRuntime_.runtimeInfo(runtimeIndex, runtime)
+            || runtime.origin != ActuatorRuntimeOrigin::ModuleDescriptor
+            || !actuatorRuntime_.moduleReference(runtime.id, reference)
+            || !hasActuatorCapability(runtime.capabilities, ActuatorCapability::OnOff)) {
+            continue;
+        }
+        const String value = "m:" + String(runtime.id);
+        const String label = "Module " + String(moduleSlotName(runtime.moduleSlot))
+            + " · " + String(runtime.name);
+        blinkTargetOptions += "<option value='" + value + "'";
+        if (sameModuleActuatorReference(
+                slot.moduleTarget, reference)) {
+            blinkTargetOptions += " selected";
+            moduleTargetListed = true;
+        }
+        blinkTargetOptions += ">" + escapeHtml(label) + "</option>";
+        thresholdTargetOptions += "<option value='" + value + "'";
+        if (sameModuleActuatorReference(
+                slot.moduleTarget, reference)) {
+            thresholdTargetOptions += " selected";
+            moduleTargetListed = true;
+        }
+        thresholdTargetOptions += ">" + escapeHtml(label) + "</option>";
+    }
+    if (validModuleActuatorReference(slot.moduleTarget) && !moduleTargetListed) {
+        const String unavailable =
+            "<option value='m:current' selected>Configured module actuator (currently unavailable)</option>";
+        blinkTargetOptions += unavailable;
+        thresholdTargetOptions += unavailable;
     }
     if (blinkTargetOptions.isEmpty()) {
         blinkTargetOptions = "<option value='0'>No compatible On/Off actuator configured</option>";
@@ -2114,7 +2178,13 @@ void WebService::handleControllerSave() {
         slot.name = server_.arg("name");
         slot.implementation = metadata->implementation;
         if (slot.implementation == ControllerImplementation::Blink) {
-            const long target = server_.arg("targetActuator").toInt();
+            const String targetText = server_.arg("targetActuator");
+            const bool moduleTarget = targetText.startsWith("m:");
+            const bool currentModuleTarget = targetText == "m:current"
+                && validModuleActuatorReference(slot.moduleTarget);
+            const long target = currentModuleTarget
+                ? slot.implementationConfiguration.blink.targetActuatorId : moduleTarget
+                ? targetText.substring(2).toInt() : targetText.toInt();
             uint32_t onDuration = 0;
             uint32_t offDuration = 0;
             if (target < 1 || target > static_cast<long>(MaxActuatorSlotCount)
@@ -2124,19 +2194,63 @@ void WebService::handleControllerSave() {
             } else {
                 slot.implementationConfiguration.blink.targetActuatorId =
                     static_cast<ActuatorId>(target);
+                if (!currentModuleTarget) slot.moduleTarget = ModuleActuatorReference{};
+                if (moduleTarget && !currentModuleTarget) {
+                    ActuatorRuntimeInfo runtime;
+                    bool found = false;
+                    for (size_t index = 0; index < actuatorRuntime_.runtimeCount(); ++index) {
+                        if (actuatorRuntime_.runtimeInfo(index, runtime)
+                            && runtime.id == target
+                            && runtime.origin == ActuatorRuntimeOrigin::ModuleDescriptor
+                            && actuatorRuntime_.moduleReference(
+                                runtime.id, slot.moduleTarget)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) ok = false;
+                }
                 slot.implementationConfiguration.blink.onDurationMs = onDuration;
                 slot.implementationConfiguration.blink.offDurationMs = offDuration;
             }
         } else if (slot.implementation == ControllerImplementation::Threshold) {
+            const String targetText = server_.arg("thresholdTargetActuator");
+            const bool moduleTarget = targetText.startsWith("m:");
+            const bool currentModuleTarget = targetText == "m:current"
+                && validModuleActuatorReference(slot.moduleTarget);
+            const String parsedTarget = currentModuleTarget
+                ? String(slot.implementationConfiguration.threshold.targetActuatorId)
+                : moduleTarget
+                ? targetText.substring(2) : targetText;
             ok = applyThresholdControllerWebFields(
                 server_.arg("thresholdSourceSensor"),
                 server_.arg("thresholdMeasurement"),
-                server_.arg("thresholdTargetActuator"),
+                parsedTarget,
                 server_.arg("onThreshold"),
                 server_.arg("offThreshold"),
                 server_.arg("thresholdDirection"),
                 server_.arg("maxMeasurementAge"),
                 slot);
+            if (ok) {
+                ThresholdControllerConfiguration& threshold =
+                    slot.implementationConfiguration.threshold;
+                if (!currentModuleTarget) slot.moduleTarget = ModuleActuatorReference{};
+                if (moduleTarget && !currentModuleTarget) {
+                    ActuatorRuntimeInfo runtime;
+                    bool found = false;
+                    for (size_t index = 0; index < actuatorRuntime_.runtimeCount(); ++index) {
+                        if (actuatorRuntime_.runtimeInfo(index, runtime)
+                            && runtime.id == threshold.targetActuatorId
+                            && runtime.origin == ActuatorRuntimeOrigin::ModuleDescriptor
+                            && actuatorRuntime_.moduleReference(
+                                runtime.id, slot.moduleTarget)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) ok = false;
+                }
+            }
         }
     }
     if (ok) ok = configurationService_.setControllerSlotConfiguration(slot);

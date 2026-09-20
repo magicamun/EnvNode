@@ -19,11 +19,21 @@ class BlinkController : public IController {
 public:
     BlinkController(
         const BlinkControllerConfiguration& configuration,
+        const ModuleActuatorReference& moduleTarget,
         IOnOffActuatorResolver& actuatorResolver,
         IMonotonicClock& monotonicClock,
         ILogger& logger,
         ControllerId controllerId = InvalidControllerId,
         const String& controllerName = String());
+    BlinkController(
+        const BlinkControllerConfiguration& configuration,
+        IOnOffActuatorResolver& actuatorResolver,
+        IMonotonicClock& monotonicClock,
+        ILogger& logger,
+        ControllerId controllerId = InvalidControllerId,
+        const String& controllerName = String())
+        : BlinkController(configuration, ModuleActuatorReference{}, actuatorResolver,
+            monotonicClock, logger, controllerId, controllerName) {}
 
     ControllerOperationResult begin() override;
     ControllerOperationResult service() override;
@@ -40,6 +50,7 @@ private:
     ControllerOperationResult startCycle();
 
     BlinkControllerConfiguration configuration_;
+    ModuleActuatorReference moduleTarget_;
     IOnOffActuatorResolver& actuatorResolver_;
     IMonotonicClock& monotonicClock_;
     ILogger& logger_;

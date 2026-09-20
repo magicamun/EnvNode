@@ -46,14 +46,15 @@ ControllerFactoryInstance ControllerFactory::create(
     void* target = &storage_[storageIndex];
     if (slot.implementation == ControllerImplementation::Blink) {
         const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
-        if (!isValidActuatorId(blink.targetActuatorId)
+        if ((!validModuleActuatorReference(slot.moduleTarget)
+                && !isValidActuatorId(blink.targetActuatorId))
             || blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
             || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
             result = ControllerFactoryResult::InvalidConfiguration;
             return instance;
         }
         instance.blink = new (target) BlinkController(
-            blink, actuatorResolver_, monotonicClock_, logger_,
+            blink, slot.moduleTarget, actuatorResolver_, monotonicClock_, logger_,
             slot.slotId, slot.name);
         instance.controller = instance.blink;
         constructed_[storageIndex] = ControllerImplementation::Blink;
@@ -65,7 +66,8 @@ ControllerFactoryInstance ControllerFactory::create(
         if (!isValidSensorId(threshold.source.sensorId)
             || measurementMetadata.expectedValueKind != ValueKind::FloatingPoint
             || measurementMetadata.semantics != MeasurementSemantics::State
-            || !isValidActuatorId(threshold.targetActuatorId)
+            || (!validModuleActuatorReference(slot.moduleTarget)
+                && !isValidActuatorId(threshold.targetActuatorId))
             || !std::isfinite(threshold.onThreshold)
             || !std::isfinite(threshold.offThreshold)
             || !validThresholdOrdering(threshold.direction,
@@ -76,7 +78,7 @@ ControllerFactoryInstance ControllerFactory::create(
             return instance;
         }
         instance.threshold = new (target) ThresholdController(
-            threshold,
+            threshold, slot.moduleTarget,
             measurementResolver_, actuatorResolver_, monotonicClock_, logger_,
             slot.slotId, slot.name);
         instance.controller = instance.threshold;

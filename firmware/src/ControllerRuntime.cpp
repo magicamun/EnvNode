@@ -139,7 +139,8 @@ bool ControllerRuntime::validateComposition(
         if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
                 slot.implementationConfiguration.blink;
-            if (!isValidActuatorId(blink.targetActuatorId)
+            if ((!validModuleActuatorReference(slot.moduleTarget)
+                    && !isValidActuatorId(blink.targetActuatorId))
                 || blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
                 || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
                 return false;
@@ -152,7 +153,8 @@ bool ControllerRuntime::validateComposition(
             if (!isValidSensorId(threshold.source.sensorId)
                 || metadata.expectedValueKind != ValueKind::FloatingPoint
                 || metadata.semantics != MeasurementSemantics::State
-                || !isValidActuatorId(threshold.targetActuatorId)
+                || (!validModuleActuatorReference(slot.moduleTarget)
+                    && !isValidActuatorId(threshold.targetActuatorId))
                 || !std::isfinite(threshold.onThreshold)
                 || !std::isfinite(threshold.offThreshold)
                 || !validThresholdOrdering(threshold.direction,
