@@ -23,6 +23,7 @@
 #include "BoardProvisioningService.h"
 #include "ModuleDescriptorProvisioningService.h"
 #include "DuoRelayDescriptor.h"
+#include "ModuleDeviceInventory.h"
 
 namespace EnvNode {
 
@@ -138,6 +139,7 @@ private:
     ModuleDiscoveryService& moduleDiscoveryService_;
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
     uint8_t moduleDescriptorPayload_[DuoRelayDescriptor::MaximumEncodedSize] = {};
+    ModuleDeviceInventoryEntry moduleDeviceInventory_[MaximumDescriptorDevices] = {};
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

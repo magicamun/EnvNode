@@ -1,5 +1,7 @@
 #include "ModuleDiscoveryService.h"
 
+#include <new>
+
 namespace EnvNode {
 namespace {
 
@@ -41,7 +43,10 @@ void ModuleDiscoveryService::scan() {
         results_[index].descriptorSerialNumber = {};
         results_[index].descriptorProductionBatch = {};
         results_[index].descriptorProductionDate = {};
-        results_[index].descriptor = {};
+        // HardwareDescriptor is intentionally large; reset its persistent
+        // storage directly instead of creating a task-stack temporary.
+        results_[index].descriptor.~HardwareDescriptor();
+        new (&results_[index].descriptor) HardwareDescriptor();
         const HardwareDescriptorReadResult descriptorRead =
             descriptorStores_[index]->read(
                 descriptorPayloads_[index], sizeof(descriptorPayloads_[index]));

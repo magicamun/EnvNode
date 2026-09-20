@@ -23,7 +23,6 @@
 #include "ElapsedTimeFormatter.h"
 #include "DuoRelayDescriptor.h"
 #include "InstanceUuid.h"
-#include "ModuleDeviceInventory.h"
 
 namespace EnvNode {
 namespace {
@@ -800,16 +799,15 @@ void WebService::handleDevice() {
             || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
             continue;
         }
-        ModuleDeviceInventoryEntry entries[MaximumDescriptorDevices];
         size_t entryCount = 0;
         if (!deriveModuleDeviceInventory(
                 module->descriptor, currentBoardProfile(), slot,
-                entries, MaximumDescriptorDevices, entryCount)) {
+                moduleDeviceInventory_, MaximumDescriptorDevices, entryCount)) {
             continue;
         }
         for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
             hasModuleDevices = true;
-            const ModuleDeviceInventoryEntry& entry = entries[entryIndex];
+            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory_[entryIndex];
             String bindingText;
             String resourceText;
             for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {

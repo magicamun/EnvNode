@@ -1,6 +1,7 @@
 #include "HardwareDescriptorCodec.h"
 
 #include <cstring>
+#include <new>
 
 namespace EnvNode {
 namespace {
@@ -36,7 +37,10 @@ public:
     HardwareDescriptorDecodeStatus parse(
         HardwareDescriptorObjectKind expectedKind,
         HardwareDescriptor& descriptor) {
-        descriptor = {};
+        // Reconstruct in place to avoid a multi-kilobyte aggregate temporary
+        // on the ESP32 task stack.
+        descriptor.~HardwareDescriptor();
+        new (&descriptor) HardwareDescriptor();
         size_t pairs = 0;
         if (!reader_.enterMap(pairs)) return invalidCbor();
         uint64_t seen = 0;

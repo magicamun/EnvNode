@@ -1,5 +1,7 @@
 #include "ModuleDeviceInventory.h"
 
+#include <new>
+
 namespace EnvNode {
 namespace {
 
@@ -76,7 +78,8 @@ bool deriveModuleDeviceInventory(
     for (size_t index = 0; index < descriptor.deviceCount; ++index) {
         const DescriptorDevice& device = descriptor.devices[index];
         ModuleDeviceInventoryEntry& entry = entries[index];
-        entry = {};
+        entry.~ModuleDeviceInventoryEntry();
+        new (&entry) ModuleDeviceInventoryEntry();
         entry.slot = slotId;
         entry.id = device.id;
         entry.kind = device.kind;
