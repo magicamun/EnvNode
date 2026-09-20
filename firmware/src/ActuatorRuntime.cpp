@@ -1,6 +1,7 @@
 #include "ActuatorRuntime.h"
 
 #include <cstring>
+#include <new>
 
 namespace EnvNode {
 
@@ -9,23 +10,49 @@ ActuatorRuntime::ActuatorRuntime(ActuatorFactory& factory, ILogger& logger)
     , inactiveFactory_(&secondaryFactory_)
     , secondaryFactory_(logger)
     , logger_(logger) {
+    automaticActuators_ = new (std::nothrow)
+        AutomaticActuatorDefinition[MaxActuatorSlotCount];
+    effectiveSlots_ = new (std::nothrow)
+        ActuatorSlotConfiguration[MaxActuatorSlotCount];
 }
 
 ActuatorRuntime::~ActuatorRuntime() {
     shutdownComposition(entries_, runtimeCount_);
     activeFactory_->destroyAll();
     inactiveFactory_->destroyAll();
+    delete[] automaticActuators_;
+    delete[] effectiveSlots_;
+}
+
+bool ActuatorRuntime::configureAutomaticActuators(
+    const AutomaticActuatorDefinition* definitions,
+    size_t count) {
+    if (initialized_ || automaticActuators_ == nullptr
+        || count > MaxActuatorSlotCount
+        || (definitions == nullptr && count != 0)) {
+        return false;
+    }
+    automaticActuatorCount_ = count;
+    for (size_t index = 0; index < count; ++index) {
+        automaticActuators_[index] = definitions[index];
+    }
+    return true;
 }
 
 void ActuatorRuntime::initialize(const ActuatorSlotConfiguration* slots) {
     if (initialized_ || slots == nullptr) return;
     initialized_ = true;
-    constructComposition(*activeFactory_, slots, entries_, runtimeCount_);
+    if (!composeEffectiveSlots(slots)) {
+        logger_.error("Actuator runtime initialization rejected: invalid effective composition");
+        return;
+    }
+    constructComposition(*activeFactory_, effectiveSlots_, effectiveOrigins_, entries_, runtimeCount_);
     initializeComposition(entries_, runtimeCount_, availableCount_);
 }
 
 bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
-    if (!initialized_ || !validateComposition(slots)) {
+    if (!initialized_ || !composeEffectiveSlots(slots)
+        || !validateComposition(effectiveSlots_)) {
         logger_.error("Actuator runtime rebuild rejected: invalid composition");
         return false;
     }
@@ -34,7 +61,7 @@ bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
     RuntimeEntry stagedEntries[MaxActuatorSlotCount];
     size_t stagedRuntimeCount = 0;
     if (!constructComposition(
-            *inactiveFactory_, slots, stagedEntries, stagedRuntimeCount)) {
+            *inactiveFactory_, effectiveSlots_, effectiveOrigins_, stagedEntries, stagedRuntimeCount)) {
         inactiveFactory_->destroyAll();
         logger_.error("Actuator runtime rebuild failed during staging");
         return false;
@@ -71,6 +98,65 @@ bool ActuatorRuntime::rebuild(const ActuatorSlotConfiguration* slots) {
     return true;
 }
 
+bool ActuatorRuntime::composeEffectiveSlots(const ActuatorSlotConfiguration* slots) {
+    if (slots == nullptr || effectiveSlots_ == nullptr
+        || automaticActuators_ == nullptr) return false;
+    for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+        effectiveSlots_[index] = slots[index];
+        effectiveOrigins_[index] = nullptr;
+    }
+
+    for (size_t automaticIndex = 0;
+         automaticIndex < automaticActuatorCount_;
+         ++automaticIndex) {
+        const AutomaticActuatorDefinition& automatic =
+            automaticActuators_[automaticIndex];
+        for (size_t previous = 0; previous < automaticIndex; ++previous) {
+            if (exclusiveHardwareResourceConflict(
+                    automaticActuators_[previous].hardware, automatic.hardware)) {
+                logger_.errorf("Duplicate module actuator resource for device %s",
+                    automatic.deviceId);
+                return false;
+            }
+        }
+        size_t target = MaxActuatorSlotCount;
+        for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
+            const ActuatorSlotConfiguration& slot = effectiveSlots_[slotIndex];
+            if (slot.enabled && slot.implementation != ActuatorImplementation::None
+                && exclusiveHardwareResourceConflict(slot.hardware, automatic.hardware)) {
+                target = slotIndex;
+                break;
+            }
+        }
+        if (target == MaxActuatorSlotCount) {
+            for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
+                if (effectiveSlots_[slotIndex].implementation == ActuatorImplementation::None) {
+                    target = slotIndex;
+                    break;
+                }
+            }
+        }
+        if (target == MaxActuatorSlotCount) {
+            logger_.errorf("No runtime slot available for module actuator %s",
+                automatic.deviceId);
+            return false;
+        }
+
+        ActuatorSlotConfiguration& effective = effectiveSlots_[target];
+        effective.enabled = true;
+        effective.name = automatic.name;
+        effective.implementation = automatic.implementation;
+        effective.hardware = automatic.hardware;
+        effectiveOrigins_[target] = &automaticActuators_[automaticIndex];
+        logger_.infof(
+            "Module actuator slot=%s device=%s assigned runtime actuator=%u GPIO=%u",
+            moduleSlotName(automatic.moduleSlot), automatic.deviceId,
+            static_cast<unsigned int>(effective.slotId),
+            static_cast<unsigned int>(effective.hardware.gpio.number));
+    }
+    return true;
+}
+
 bool ActuatorRuntime::validateComposition(const ActuatorSlotConfiguration* slots) const {
     if (slots == nullptr) return false;
     HardwareResourceClaim claims[MaxActuatorSlotCount];
@@ -104,6 +190,7 @@ bool ActuatorRuntime::validateComposition(const ActuatorSlotConfiguration* slots
 bool ActuatorRuntime::constructComposition(
     ActuatorFactory& factory,
     const ActuatorSlotConfiguration* slots,
+    const AutomaticActuatorDefinition* const* origins,
     RuntimeEntry* entries,
     size_t& runtimeCount) const {
     runtimeCount = 0;
@@ -119,6 +206,14 @@ bool ActuatorRuntime::constructComposition(
         entry.info.name[MaxActuatorSlotNameLength] = '\0';
         entry.info.implementation = slot.implementation;
         entry.info.hardware = slot.hardware;
+        if (origins != nullptr && origins[slotIndex] != nullptr) {
+            const AutomaticActuatorDefinition& origin = *origins[slotIndex];
+            entry.info.origin = ActuatorRuntimeOrigin::ModuleDescriptor;
+            entry.info.moduleSlot = origin.moduleSlot;
+            strncpy(entry.info.descriptorDeviceId,
+                origin.deviceId, MaxActuatorSlotNameLength);
+            entry.info.descriptorDeviceId[MaxActuatorSlotNameLength] = '\0';
+        }
         const ActuatorImplementationMetadata* metadata =
             ActuatorImplementationRegistry::find(slot.implementation);
         if (metadata != nullptr) entry.info.capabilities = metadata->capabilities;

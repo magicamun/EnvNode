@@ -4,8 +4,22 @@
 
 #include "ActuatorFactory.h"
 #include "IOnOffActuatorResolver.h"
+#include "ModuleSlot.h"
 
 namespace EnvNode {
+
+enum class ActuatorRuntimeOrigin : uint8_t {
+    SavedConfiguration,
+    ModuleDescriptor,
+};
+
+struct AutomaticActuatorDefinition {
+    ModuleSlot moduleSlot = ModuleSlot::A;
+    char deviceId[MaxActuatorSlotNameLength + 1] = {};
+    char name[MaxActuatorSlotNameLength + 1] = {};
+    ActuatorImplementation implementation = ActuatorImplementation::None;
+    HardwareResourceAssignment hardware;
+};
 
 struct ActuatorRuntimeInfo {
     ActuatorId id = InvalidActuatorId;
@@ -17,6 +31,9 @@ struct ActuatorRuntimeInfo {
     bool initializationAttempted = false;
     ActuatorOperationResult initializationResult = ActuatorOperationResult::NotInitialized;
     bool available = false;
+    ActuatorRuntimeOrigin origin = ActuatorRuntimeOrigin::SavedConfiguration;
+    ModuleSlot moduleSlot = ModuleSlot::A;
+    char descriptorDeviceId[MaxActuatorSlotNameLength + 1] = {};
 };
 
 class ActuatorRuntime : public IOnOffActuatorResolver {
@@ -24,6 +41,9 @@ public:
     ActuatorRuntime(ActuatorFactory& factory, ILogger& logger);
     ~ActuatorRuntime();
 
+    bool configureAutomaticActuators(
+        const AutomaticActuatorDefinition* definitions,
+        size_t count);
     void initialize(const ActuatorSlotConfiguration* slots);
     bool rebuild(const ActuatorSlotConfiguration* slots);
     size_t runtimeCount() const;
@@ -47,8 +67,10 @@ private:
     bool constructComposition(
         ActuatorFactory& factory,
         const ActuatorSlotConfiguration* slots,
+        const AutomaticActuatorDefinition* const* origins,
         RuntimeEntry* entries,
         size_t& runtimeCount) const;
+    bool composeEffectiveSlots(const ActuatorSlotConfiguration* slots);
     bool initializeComposition(
         RuntimeEntry* entries,
         size_t runtimeCount,
@@ -60,6 +82,10 @@ private:
     ActuatorFactory secondaryFactory_;
     ILogger& logger_;
     RuntimeEntry entries_[MaxActuatorSlotCount];
+    AutomaticActuatorDefinition* automaticActuators_ = nullptr;
+    const AutomaticActuatorDefinition* effectiveOrigins_[MaxActuatorSlotCount] = {};
+    ActuatorSlotConfiguration* effectiveSlots_ = nullptr;
+    size_t automaticActuatorCount_ = 0;
     size_t runtimeCount_ = 0;
     size_t availableCount_ = 0;
     bool initialized_ = false;

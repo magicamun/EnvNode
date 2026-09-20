@@ -959,10 +959,12 @@ void WebService::handleActuators() {
         }
         const bool expectsRuntime = slot.enabled
             && slot.implementation != ActuatorImplementation::None;
-        const bool runtimeMatches = expectsRuntime == hasRuntime
+        const bool descriptorRuntime = hasRuntime
+            && runtime.origin == ActuatorRuntimeOrigin::ModuleDescriptor;
+        const bool runtimeMatches = descriptorRuntime || (expectsRuntime == hasRuntime
             && (!hasRuntime || (runtime.implementation == slot.implementation
                 && String(runtime.name) == slot.name
-                && sameHardwareAssignment(runtime.hardware, slot.hardware)));
+                && sameHardwareAssignment(runtime.hardware, slot.hardware))));
         IOnOffActuator* onOff = actuatorRuntime_.onOffActuator(slot.slotId);
         ILevelActuator* level = actuatorRuntime_.levelActuator(slot.slotId);
 
@@ -976,6 +978,12 @@ void WebService::handleActuators() {
         if (hasRuntime) {
             c += escapeHtml(runtime.name) + " / "
                 + configuredHardwareAssignment(runtime.hardware);
+            if (descriptorRuntime) {
+                c += "<br>" + badge("Module descriptor", "good")
+                    + "<span class='secondary'>Slot "
+                    + escapeHtml(moduleSlotName(runtime.moduleSlot)) + " / "
+                    + escapeHtml(runtime.descriptorDeviceId) + "</span>";
+            }
         } else {
             c += "No runtime Actuator";
         }

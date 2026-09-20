@@ -430,6 +430,63 @@ void test_capability_lookup_exposes_on_off_interface() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(capability->state()));
 }
 
+void test_descriptor_actuator_replaces_saved_actuator_on_same_gpio() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    configureGpioOnOffSlot(slots[4], "Saved relay", 16);
+    AutomaticActuatorDefinition automatic;
+    automatic.moduleSlot = ModuleSlot::A;
+    strcpy(automatic.deviceId, "relay.1");
+    strcpy(automatic.name, "A relay.1");
+    automatic.implementation = ActuatorImplementation::GpioOnOff;
+    automatic.hardware = HardwareResourceAssignment::gpioResource(GpioResource(16));
+
+    TEST_ASSERT_TRUE(runtime.configureAutomaticActuators(&automatic, 1));
+    runtime.initialize(slots);
+
+    TEST_ASSERT_EQUAL_UINT32(1, runtime.runtimeCount());
+    TEST_ASSERT_NOT_NULL(runtime.onOffActuator(5));
+    ActuatorRuntimeInfo info;
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(0, info));
+    TEST_ASSERT_EQUAL_UINT8(5, info.id);
+    TEST_ASSERT_EQUAL_STRING("A relay.1", info.name);
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ActuatorRuntimeOrigin::ModuleDescriptor),
+        static_cast<int>(info.origin));
+    TEST_ASSERT_EQUAL_STRING("relay.1", info.descriptorDeviceId);
+}
+
+void test_descriptor_actuator_uses_first_empty_runtime_slot() {
+    TestLogger logger;
+    ActuatorFactory factory(logger);
+    ActuatorRuntime runtime(factory, logger);
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount];
+    initializeActuatorSlots(slots);
+    configureGpioOnOffSlot(slots[0], "Saved relay", 16);
+    AutomaticActuatorDefinition automatic;
+    automatic.moduleSlot = ModuleSlot::B;
+    strcpy(automatic.deviceId, "relay.2");
+    strcpy(automatic.name, "B relay.2");
+    automatic.implementation = ActuatorImplementation::GpioOnOff;
+    automatic.hardware = HardwareResourceAssignment::gpioResource(GpioResource(17));
+
+    TEST_ASSERT_TRUE(runtime.configureAutomaticActuators(&automatic, 1));
+    runtime.initialize(slots);
+
+    TEST_ASSERT_EQUAL_UINT32(2, runtime.runtimeCount());
+    TEST_ASSERT_NOT_NULL(runtime.onOffActuator(1));
+    TEST_ASSERT_NOT_NULL(runtime.onOffActuator(2));
+    ActuatorRuntimeInfo automaticInfo;
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(1, automaticInfo));
+    TEST_ASSERT_EQUAL_UINT8(2, automaticInfo.id);
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ActuatorRuntimeOrigin::ModuleDescriptor),
+        static_cast<int>(automaticInfo.origin));
+}
+
 void test_serial_logger_preserves_messages_longer_than_old_buffer() {
     RecentLogStore store;
     TestLogTimeProvider timeProvider;
@@ -604,6 +661,8 @@ int main(int, char**) {
     RUN_TEST(test_disabled_and_none_slots_do_not_create_runtime_actuators);
     RUN_TEST(test_invalid_hardware_is_unavailable_without_blocking_valid_slot);
     RUN_TEST(test_capability_lookup_exposes_on_off_interface);
+    RUN_TEST(test_descriptor_actuator_replaces_saved_actuator_on_same_gpio);
+    RUN_TEST(test_descriptor_actuator_uses_first_empty_runtime_slot);
     RUN_TEST(test_serial_logger_preserves_messages_longer_than_old_buffer);
     RUN_TEST(test_serial_logger_println_writes_exact_text_bytes);
     RUN_TEST(test_serial_logger_printf_uses_one_explicit_length_write);

@@ -41,6 +41,7 @@
 #include "ModuleDiscoveryService.h"
 #include "HardwareDescriptorStore.h"
 #include "ModuleDescriptorProvisioningService.h"
+#include "ModuleActuatorComposer.h"
 
 using namespace EnvNode;
 
@@ -68,6 +69,7 @@ static ModuleDiscoveryService moduleDiscoveryService(
 static ModuleDescriptorProvisioningService moduleDescriptorProvisioningService(
     slotAHardwareDescriptorStore, slotBHardwareDescriptorStore,
     moduleDiscoveryService);
+static ModuleActuatorComposer moduleActuatorComposer;
 static ConfigurationService configurationService;
 static WiFiService wifiService(logger, configurationService);
 static TimeService timeService(logger, configurationService, wifiService);
@@ -165,6 +167,13 @@ void setup() {
         }
     }
     configurationService.loadConfiguration();
+    const Configuration& configuration = configurationService.getConfiguration();
+    moduleActuatorComposer.compose(
+        moduleDiscoveryService, currentBoardProfile(), configuration.sensorSlots);
+    if (!actuatorRuntime.configureAutomaticActuators(
+            moduleActuatorComposer.definitions(), moduleActuatorComposer.count())) {
+        logger.error("Automatic module actuator configuration failed");
+    }
     size_t activeSensorCount = 0;
     const char* sensorFailureReason = nullptr;
     const bool sensorsInitialized = sensorRuntime.initialize(

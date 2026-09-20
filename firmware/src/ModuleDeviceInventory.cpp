@@ -129,7 +129,7 @@ bool deriveModuleDeviceInventory(
         } else if (!resourcesResolved) {
             // Keep the more specific resolution status assigned above.
         } else if (!device.hasActiveLevel || !device.hasSafeLevel
-            || device.activeLevelHigh == device.safeLevelHigh) {
+            || !device.activeLevelHigh || device.safeLevelHigh) {
             entry.status = ModuleDeviceInventoryStatus::InvalidParameters;
         } else {
             entry.status = ModuleDeviceInventoryStatus::Ready;
