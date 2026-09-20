@@ -36,6 +36,7 @@ struct ModuleDiscoveryResult {
     DescriptorTextView descriptorSerialNumber = {};
     DescriptorTextView descriptorProductionBatch = {};
     DescriptorTextView descriptorProductionDate = {};
+    HardwareDescriptor descriptor = {};
 
     bool identified() const;
 };

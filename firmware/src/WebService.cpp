@@ -23,6 +23,7 @@
 #include "ElapsedTimeFormatter.h"
 #include "DuoRelayDescriptor.h"
 #include "InstanceUuid.h"
+#include "ModuleDeviceInventory.h"
 
 namespace EnvNode {
 namespace {
@@ -790,6 +791,71 @@ void WebService::handleDevice() {
         c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
     }
     c += "</tbody></table></div></section>";
+    c += "<section class='card'><h2>Discovered Module Devices</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>Device</th><th>Kind</th><th>Driver</th><th>Capability</th><th>Binding</th><th>Board resource</th><th>Parameters</th><th>Status</th></tr></thead><tbody>";
+    bool hasModuleDevices = false;
+    for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
+        if (module == nullptr || !module->identified()
+            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
+            continue;
+        }
+        ModuleDeviceInventoryEntry entries[MaximumDescriptorDevices];
+        size_t entryCount = 0;
+        if (!deriveModuleDeviceInventory(
+                module->descriptor, currentBoardProfile(), slot,
+                entries, MaximumDescriptorDevices, entryCount)) {
+            continue;
+        }
+        for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
+            hasModuleDevices = true;
+            const ModuleDeviceInventoryEntry& entry = entries[entryIndex];
+            String bindingText;
+            String resourceText;
+            for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {
+                const ModuleDeviceBindingResolution& binding = entry.bindings[bindingIndex];
+                if (bindingIndex > 0) { bindingText += "<br>"; resourceText += "<br>"; }
+                bindingText += escapeHtml(descriptorText(binding.name));
+                bindingText += " → ";
+                bindingText += escapeHtml(descriptorText(binding.logicalResource.empty()
+                    ? binding.target : binding.logicalResource));
+                if (!binding.resolved) resourceText += "—";
+                else if (binding.kind == HardwareDescriptorResourceKind::Gpio) {
+                    resourceText += "GPIO";
+                    resourceText += String(binding.gpio.number);
+                } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
+                    resourceText += i2cBusName(binding.i2cBus);
+                } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
+                    resourceText += "+5V";
+                } else resourceText += "Resolved";
+            }
+            String parameters = "—";
+            if (entry.hasActiveLevel || entry.hasSafeLevel) {
+                parameters = "active=";
+                parameters += entry.hasActiveLevel
+                    ? (entry.activeLevelHigh ? "high" : "low") : "—";
+                parameters += ", safe=";
+                parameters += entry.hasSafeLevel
+                    ? (entry.safeLevelHigh ? "high" : "low") : "—";
+            }
+            const String capability = entry.capabilities.contains(
+                HardwareDescriptorCapabilityCode::ActuatorOnOff)
+                ? String("actuator.on-off") : String("—");
+            c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
+            c += escapeHtml(descriptorText(entry.id));
+            c += "</td><td>" + String(moduleDeviceKindName(entry.kind));
+            c += "</td><td>" + String(moduleDeviceDriverName(entry.driver));
+            c += " v" + String(entry.driver.apiVersion);
+            c += "</td><td>" + capability + "</td><td>" + bindingText;
+            c += "</td><td>" + resourceText + "</td><td>" + parameters;
+            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
+            c += "</td></tr>";
+        }
+    }
+    if (!hasModuleDevices) {
+        c += "<tr><td colspan='9'>No compatible descriptor-defined devices discovered.</td></tr>";
+    }
+    c += "</tbody></table></div><p class='help'>This is a read-only inventory derived from module descriptors and logical slot resources. It does not modify the saved sensor or actuator configuration.</p></section>";
     c += "<section class='card'><h2>Provision Module Descriptor</h2>";
     c += "<div class='notice'><strong>ENHD descriptor 0.1</strong><p>This creates the deterministic DuoRelay 0.3 CBOR descriptor, validates it against the active board and firmware, writes it atomically, reads it back, and reruns discovery.</p></div>";
     c += "<form method='post' action='/device/module-descriptor/write' onsubmit='return confirm(\"Write and verify the DuoRelay descriptor in the selected slot?\")'>";

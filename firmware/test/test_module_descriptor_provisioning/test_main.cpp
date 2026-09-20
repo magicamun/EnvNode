@@ -6,6 +6,7 @@
 #include "DuoRelayDescriptor.h"
 #include "HardwareDescriptorCodec.h"
 #include "InstanceUuid.h"
+#include "ModuleDeviceInventory.h"
 #include "ModuleDescriptorProvisioningService.h"
 
 using namespace EnvNode;
@@ -89,6 +90,22 @@ void test_duo_relay_template_is_deterministic_valid_and_compatible() {
     TEST_ASSERT_TRUE(descriptor.serialNumber.equals("DR-0001"));
     TEST_ASSERT_EQUAL_UINT32(3, descriptor.requirementCount);
     TEST_ASSERT_EQUAL_UINT32(2, descriptor.deviceCount);
+    ModuleDeviceInventoryEntry inventory[MaximumDescriptorDevices];
+    size_t inventoryCount = 0;
+    TEST_ASSERT_TRUE(deriveModuleDeviceInventory(
+        descriptor, currentBoardProfile(), ModuleSlot::A,
+        inventory, MaximumDescriptorDevices, inventoryCount));
+    TEST_ASSERT_EQUAL_UINT32(2, inventoryCount);
+    TEST_ASSERT_TRUE(inventory[0].id.equals("relay.1"));
+    TEST_ASSERT_TRUE(inventory[1].id.equals("relay.2"));
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ModuleDeviceInventoryStatus::Ready),
+        static_cast<int>(inventory[0].status));
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ModuleDeviceInventoryStatus::Ready),
+        static_cast<int>(inventory[1].status));
+    TEST_ASSERT_EQUAL_UINT8(4, inventory[0].bindings[0].gpio.number);
+    TEST_ASSERT_EQUAL_UINT8(13, inventory[1].bindings[0].gpio.number);
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(HardwareDescriptorCompatibilityStatus::Compatible),
         static_cast<int>(evaluateModuleDescriptorCompatibility(

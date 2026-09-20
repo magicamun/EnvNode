@@ -113,6 +113,10 @@ struct DescriptorDevice {
     DescriptorIdentifier measurements[MaximumDescriptorMeasurements] = {};
     size_t measurementCount = 0;
     DescriptorCapabilitySet capabilities = {};
+    bool hasActiveLevel = false;
+    bool activeLevelHigh = false;
+    bool hasSafeLevel = false;
+    bool safeLevelHigh = false;
 };
 
 struct DescriptorCalibrationEntry {

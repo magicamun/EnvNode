@@ -424,12 +424,39 @@ private:
                 if (readUnsigned(value, 2)) device.kind = static_cast<HardwareDescriptorDeviceKind>(value);
             } else if (key == static_cast<uint8_t>(Key::Driver)) parseContract(device.driver);
             else if (key == static_cast<uint8_t>(Key::Bindings)) parseBindings(device.bindings, MaximumDescriptorBindings, device.bindingCount);
+            else if (key == static_cast<uint8_t>(Key::Parameters)) parseDeviceParameters(device);
             else if (key == static_cast<uint8_t>(Key::Measurements)) parseIdentifierArray(device.measurements, device.measurementCount);
             else if (key == static_cast<uint8_t>(Key::Capabilities)) parseCapabilitySet(device.capabilities);
             else skip();
         }
         const uint64_t required = bit(Key::Id) | bit(Key::Kind) | bit(Key::Driver) | bit(Key::Bindings);
         if (ok() && (seen & required) != required) status_ = HardwareDescriptorDecodeStatus::MissingRequiredField;
+    }
+
+    void parseDeviceParameters(DescriptorDevice& device) {
+        size_t pairs = 0;
+        if (!reader_.enterMap(pairs)) { invalidCbor(); return; }
+        for (size_t index = 0; index < pairs && ok(); ++index) {
+            DescriptorTextView name;
+            if (!readText(name)) return;
+            if (!name.equals("activeLevel") && !name.equals("safeLevel")) {
+                skip();
+                continue;
+            }
+            DescriptorTextView value;
+            if (!readText(value)) return;
+            if (!value.equals("high") && !value.equals("low")) {
+                status_ = HardwareDescriptorDecodeStatus::InvalidValue;
+                return;
+            }
+            if (name.equals("activeLevel")) {
+                device.hasActiveLevel = true;
+                device.activeLevelHigh = value.equals("high");
+            } else {
+                device.hasSafeLevel = true;
+                device.safeLevelHigh = value.equals("high");
+            }
+        }
     }
 
     void parseHardware(HardwareDescriptor& descriptor) {

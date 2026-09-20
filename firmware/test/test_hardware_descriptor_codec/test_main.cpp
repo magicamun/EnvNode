@@ -6,6 +6,7 @@
 #include "HardwareDescriptorCodec.h"
 #include "HardwareDescriptorCompatibility.h"
 #include "ModuleDiscoveryService.h"
+#include "ModuleDeviceInventory.h"
 
 using namespace EnvNode;
 
@@ -102,7 +103,7 @@ size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = 
     key(writer, HardwareDescriptorKey::Resource); writer.writeText("AUX_GPIO1");
     key(writer, HardwareDescriptorKey::Devices);
     writer.beginArray(1);
-    writer.beginMap(6);
+    writer.beginMap(7);
     key(writer, HardwareDescriptorKey::Capabilities);
     writer.beginArray(1); writer.writeUnsigned(static_cast<uint8_t>(HardwareDescriptorCapabilityCode::ActuatorOnOff));
     key(writer, HardwareDescriptorKey::Id); writer.writeText("relay.1");
@@ -110,6 +111,10 @@ size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = 
     key(writer, HardwareDescriptorKey::Bindings);
     writer.beginMap(1); writer.writeText("output"); writer.writeText("relay-control");
     key(writer, HardwareDescriptorKey::Driver); contract(writer, static_cast<uint8_t>(HardwareDescriptorDriverCode::GpioOnOff));
+    key(writer, HardwareDescriptorKey::Parameters);
+    writer.beginMap(2);
+    writer.writeText("safeLevel"); writer.writeText("low");
+    writer.writeText("activeLevel"); writer.writeText("high");
     key(writer, HardwareDescriptorKey::Measurements); writer.beginArray(0);
     key(writer, HardwareDescriptorKey::Manufacturing);
     writer.beginMap(3);
@@ -182,8 +187,41 @@ void test_unknown_module_type_decodes_without_registry() {
     TEST_ASSERT_TRUE(descriptor.devices[0].id.equals("relay.1"));
     TEST_ASSERT_EQUAL_UINT32(1, descriptor.devices[0].bindingCount);
     TEST_ASSERT_TRUE(descriptor.devices[0].bindings[0].target.equals("relay-control"));
+    TEST_ASSERT_TRUE(descriptor.devices[0].hasActiveLevel);
+    TEST_ASSERT_TRUE(descriptor.devices[0].activeLevelHigh);
+    TEST_ASSERT_TRUE(descriptor.devices[0].hasSafeLevel);
+    TEST_ASSERT_FALSE(descriptor.devices[0].safeLevelHigh);
     TEST_ASSERT_EQUAL_UINT32(2, descriptor.compatibility.capabilityCount);
     TEST_ASSERT_FALSE(descriptor.compatibility.capabilities[1].coded);
+}
+
+void test_generic_inventory_resolves_unknown_product_by_slot_contract() {
+    uint8_t payload[1024];
+    const size_t size = buildModule(payload, sizeof(payload));
+    HardwareDescriptor descriptor;
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(HardwareDescriptorDecodeStatus::Valid),
+        static_cast<int>(HardwareDescriptorCodec::decode(
+            payload, size, HardwareDescriptorObjectKind::Module, descriptor)));
+
+    ModuleDeviceInventoryEntry entries[MaximumDescriptorDevices];
+    size_t count = 0;
+    TEST_ASSERT_TRUE(deriveModuleDeviceInventory(
+        descriptor, currentBoardProfile(), ModuleSlot::A,
+        entries, MaximumDescriptorDevices, count));
+    TEST_ASSERT_EQUAL_UINT32(1, count);
+    TEST_ASSERT_TRUE(entries[0].id.equals("relay.1"));
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ModuleDeviceInventoryStatus::Ready),
+        static_cast<int>(entries[0].status));
+    TEST_ASSERT_EQUAL_UINT32(1, entries[0].bindingCount);
+    TEST_ASSERT_TRUE(entries[0].bindings[0].logicalResource.equals("AUX_GPIO1"));
+    TEST_ASSERT_EQUAL_UINT8(4, entries[0].bindings[0].gpio.number);
+
+    TEST_ASSERT_TRUE(deriveModuleDeviceInventory(
+        descriptor, currentBoardProfile(), ModuleSlot::B,
+        entries, MaximumDescriptorDevices, count));
+    TEST_ASSERT_EQUAL_UINT8(14, entries[0].bindings[0].gpio.number);
 }
 
 void test_board_resources_decode_independently_of_known_product_id() {
@@ -299,6 +337,8 @@ void test_discovery_prefers_descriptor_and_reports_semantic_compatibility() {
         static_cast<int>(HardwareDescriptorDecodeStatus::Valid),
         static_cast<int>(result->descriptorStatus));
     TEST_ASSERT_TRUE(result->descriptorTypeId.equals("com.example.unknown-module"));
+    TEST_ASSERT_EQUAL_UINT32(1, result->descriptor.deviceCount);
+    TEST_ASSERT_TRUE(result->descriptor.devices[0].id.equals("relay.1"));
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(HardwareDescriptorCompatibilityStatus::MissingCapability),
         static_cast<int>(result->descriptorCompatibility));
@@ -307,6 +347,7 @@ void test_discovery_prefers_descriptor_and_reports_semantic_compatibility() {
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_unknown_module_type_decodes_without_registry);
+    RUN_TEST(test_generic_inventory_resolves_unknown_product_by_slot_contract);
     RUN_TEST(test_board_resources_decode_independently_of_known_product_id);
     RUN_TEST(test_missing_required_field_is_rejected);
     RUN_TEST(test_expected_object_kind_is_enforced);

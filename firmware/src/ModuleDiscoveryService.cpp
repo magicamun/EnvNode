@@ -41,6 +41,7 @@ void ModuleDiscoveryService::scan() {
         results_[index].descriptorSerialNumber = {};
         results_[index].descriptorProductionBatch = {};
         results_[index].descriptorProductionDate = {};
+        results_[index].descriptor = {};
         const HardwareDescriptorReadResult descriptorRead =
             descriptorStores_[index]->read(
                 descriptorPayloads_[index], sizeof(descriptorPayloads_[index]));
@@ -62,6 +63,7 @@ void ModuleDiscoveryService::scan() {
                 results_[index].descriptorSerialNumber = descriptorScratch_.serialNumber;
                 results_[index].descriptorProductionBatch = descriptorScratch_.productionBatch;
                 results_[index].descriptorProductionDate = descriptorScratch_.productionDate;
+                results_[index].descriptor = descriptorScratch_;
                 results_[index].descriptorCompatibility =
                     evaluateModuleDescriptorCompatibility(
                         descriptorScratch_, currentFirmwareDescriptorVersion(),
