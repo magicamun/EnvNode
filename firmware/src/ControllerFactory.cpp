@@ -68,7 +68,8 @@ ControllerFactoryInstance ControllerFactory::create(
             || !isValidActuatorId(threshold.targetActuatorId)
             || !std::isfinite(threshold.onThreshold)
             || !std::isfinite(threshold.offThreshold)
-            || threshold.offThreshold >= threshold.onThreshold
+            || !validThresholdOrdering(threshold.direction,
+                threshold.onThreshold, threshold.offThreshold)
             || threshold.maxMeasurementAgeMs == 0
             || threshold.maxMeasurementAgeMs > INT32_MAX) {
             result = ControllerFactoryResult::InvalidConfiguration;

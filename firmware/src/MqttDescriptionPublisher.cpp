@@ -62,6 +62,7 @@ uint32_t controllerSignature(const ControllerSlotConfiguration& slot) {
             hashValue(hash, threshold.targetActuatorId);
             hashValue(hash, threshold.onThreshold);
             hashValue(hash, threshold.offThreshold);
+            hashValue(hash, threshold.direction);
             hashValue(hash, threshold.maxMeasurementAgeMs);
             break;
         }

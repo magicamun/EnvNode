@@ -155,7 +155,8 @@ bool ControllerRuntime::validateComposition(
                 || !isValidActuatorId(threshold.targetActuatorId)
                 || !std::isfinite(threshold.onThreshold)
                 || !std::isfinite(threshold.offThreshold)
-                || threshold.offThreshold >= threshold.onThreshold
+                || !validThresholdOrdering(threshold.direction,
+                    threshold.onThreshold, threshold.offThreshold)
                 || threshold.maxMeasurementAgeMs == 0
                 || threshold.maxMeasurementAgeMs > INT32_MAX) {
                 return false;
@@ -196,6 +197,7 @@ bool ControllerRuntime::constructComposition(
             entry.info.sourceMeasurementType = threshold.source.measurementType;
             entry.info.onThreshold = threshold.onThreshold;
             entry.info.offThreshold = threshold.offThreshold;
+            entry.info.thresholdDirection = threshold.direction;
             entry.info.maxMeasurementAgeMs = threshold.maxMeasurementAgeMs;
         }
         const ControllerFactoryInstance instance = factory.create(

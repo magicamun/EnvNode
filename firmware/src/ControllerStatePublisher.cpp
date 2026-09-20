@@ -209,6 +209,10 @@ bool ControllerStatePublisher::parameterValue(
             value = String(threshold.maxMeasurementAgeMs);
             return true;
         }
+        if (parameter == ControllerParameter::ThresholdDirection) {
+            value = thresholdDirectionStableName(threshold.direction);
+            return true;
+        }
     }
     return false;
 }

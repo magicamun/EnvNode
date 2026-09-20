@@ -444,7 +444,7 @@ void test_threshold_status_and_parameters_are_retained_and_unchanged_status_is_s
     Fixture fixture;
     fixture.useThreshold();
     fixture.publisher.loop();
-    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_UINT32(5, fixture.mqtt.messages.size());
     const PublishedMessage* status = lastMessageForTopic(fixture.mqtt,
         "envnode/Weather_Station/controller/1/status");
     TEST_ASSERT_NOT_NULL(status);
@@ -458,17 +458,21 @@ void test_threshold_status_and_parameters_are_retained_and_unchanged_status_is_s
         "envnode/Weather_Station/controller/1/parameter/off_threshold");
     const PublishedMessage* age = lastMessageForTopic(fixture.mqtt,
         "envnode/Weather_Station/controller/1/parameter/max_measurement_age_ms");
+    const PublishedMessage* direction = lastMessageForTopic(fixture.mqtt,
+        "envnode/Weather_Station/controller/1/parameter/threshold_direction");
     TEST_ASSERT_NOT_NULL(on);
     TEST_ASSERT_NOT_NULL(off);
     TEST_ASSERT_NOT_NULL(age);
+    TEST_ASSERT_NOT_NULL(direction);
     TEST_ASSERT_EQUAL_STRING("70", on->payload.c_str());
     TEST_ASSERT_EQUAL_STRING("65", off->payload.c_str());
     TEST_ASSERT_EQUAL_STRING("15000", age->payload.c_str());
+    TEST_ASSERT_EQUAL_STRING("on_above", direction->payload.c_str());
     TEST_ASSERT_TRUE(on->retained);
     TEST_ASSERT_TRUE(off->retained);
     TEST_ASSERT_TRUE(age->retained);
     fixture.publisher.loop();
-    TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_UINT32(5, fixture.mqtt.messages.size());
 }
 
 void test_threshold_status_tracks_decision_stale_target_and_stop_start() {
@@ -574,7 +578,7 @@ void test_threshold_reconnect_republishes_without_rebuild_or_feedback() {
     fixture.adapter.loop();
     fixture.publisher.loop();
     TEST_ASSERT_EQUAL_UINT32(4, fixture.mqtt.subscriptions.size());
-    TEST_ASSERT_EQUAL_UINT32(8, fixture.mqtt.messages.size());
+    TEST_ASSERT_EQUAL_UINT32(10, fixture.mqtt.messages.size());
     TEST_ASSERT_EQUAL_UINT32(0, fixture.configuration.controllerSetCount);
     TEST_ASSERT_EQUAL_UINT32(revision, fixture.runtime.compositionRevision());
 }

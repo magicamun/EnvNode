@@ -29,6 +29,15 @@ bool applyThresholdControllerWebFields(
     const String& targetActuator,
     const String& onThreshold,
     const String& offThreshold,
+    const String& thresholdDirection,
+    const String& maxMeasurementAge,
+    ControllerSlotConfiguration& slot);
+bool applyThresholdControllerWebFields(
+    const String& sourceSensor,
+    const String& measurementType,
+    const String& targetActuator,
+    const String& onThreshold,
+    const String& offThreshold,
     const String& maxMeasurementAge,
     ControllerSlotConfiguration& slot);
 

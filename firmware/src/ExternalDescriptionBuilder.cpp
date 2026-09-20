@@ -51,6 +51,7 @@ const char* parameterUnit(
     const ControllerParameterDescriptor& descriptor,
     MeasurementType sourceType) {
     if (descriptor.unit == ControllerParameterUnit::Milliseconds) return "ms";
+    if (descriptor.unit == ControllerParameterUnit::None) return "";
     const PresentationUnit unit = measurementTypeMetadata(sourceType).canonicalUnit;
     return UnitConverter::stableKey(unit);
 }
@@ -75,6 +76,9 @@ void appendParameterValue(
             break;
         case ControllerParameter::OffThreshold:
             appendJsonFloat(output, threshold.offThreshold);
+            break;
+        case ControllerParameter::ThresholdDirection:
+            appendJsonString(output, thresholdDirectionStableName(threshold.direction));
             break;
         case ControllerParameter::MaxMeasurementAgeMs:
             appendJsonUnsigned(output, threshold.maxMeasurementAgeMs);

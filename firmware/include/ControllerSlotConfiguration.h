@@ -16,6 +16,27 @@ struct BlinkControllerConfiguration {
     uint32_t offDurationMs = 1000;
 };
 
+enum class ThresholdDirection : uint8_t { OnAbove = 0, OnBelow = 1 };
+
+inline const char* thresholdDirectionStableName(ThresholdDirection value) {
+    return value == ThresholdDirection::OnBelow ? "on_below" : "on_above";
+}
+
+inline const char* thresholdOnComparisonSymbol(ThresholdDirection direction) {
+    return direction == ThresholdDirection::OnBelow ? "≤" : "≥";
+}
+
+inline const char* thresholdOffComparisonSymbol(ThresholdDirection direction) {
+    return direction == ThresholdDirection::OnBelow ? "≥" : "≤";
+}
+
+inline bool validThresholdOrdering(
+    ThresholdDirection direction, float onThreshold, float offThreshold) {
+    return direction == ThresholdDirection::OnAbove
+        ? onThreshold > offThreshold
+        : direction == ThresholdDirection::OnBelow && onThreshold < offThreshold;
+}
+
 struct ThresholdControllerConfiguration {
     MeasurementSourceReference source;
     ActuatorId targetActuatorId = InvalidActuatorId;
@@ -23,6 +44,7 @@ struct ThresholdControllerConfiguration {
     // hysteresis band do not imply Off until an On or Off decision has existed.
     float onThreshold = 70.0F;
     float offThreshold = 65.0F;
+    ThresholdDirection direction = ThresholdDirection::OnAbove;
     uint32_t maxMeasurementAgeMs = 15000;
 };
 

@@ -23,6 +23,9 @@ const ControllerParameterDescriptor ThresholdParameters[] = {
         ControllerParameterValueType::FloatingPoint,
         ControllerParameterUnit::SourceMeasurementCanonical,
         true, false, 0, false, 0},
+    {ControllerParameter::ThresholdDirection, "threshold_direction", "Threshold direction",
+        ControllerParameterValueType::String,
+        ControllerParameterUnit::None, true, false, 0, false, 0},
     {ControllerParameter::MaxMeasurementAgeMs, "max_measurement_age_ms",
         "Maximum Measurement age", ControllerParameterValueType::UnsignedInteger,
         ControllerParameterUnit::Milliseconds, true, true, 1, true, INT32_MAX},
@@ -40,6 +43,7 @@ const char* controllerParameterValueTypeStableName(
     switch (valueType) {
         case ControllerParameterValueType::UnsignedInteger: return "uint32";
         case ControllerParameterValueType::FloatingPoint: return "float";
+        case ControllerParameterValueType::String: return "string";
         default: return nullptr;
     }
 }

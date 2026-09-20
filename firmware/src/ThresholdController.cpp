@@ -150,7 +150,8 @@ bool ThresholdController::configurationValid() const {
         && isValidActuatorId(configuration_.targetActuatorId)
         && std::isfinite(configuration_.onThreshold)
         && std::isfinite(configuration_.offThreshold)
-        && configuration_.offThreshold < configuration_.onThreshold
+        && validThresholdOrdering(configuration_.direction,
+            configuration_.onThreshold, configuration_.offThreshold)
         && configuration_.maxMeasurementAgeMs > 0
         && configuration_.maxMeasurementAgeMs <= INT32_MAX;
 }
@@ -187,10 +188,12 @@ void ThresholdController::updateSourceAvailability(SourceStatus status) {
 void ThresholdController::evaluateValue(float value) {
     const ThresholdDecision previous = decision_;
     ThresholdDecision next = decision_;
-    if (value >= configuration_.onThreshold) {
-        next = ThresholdDecision::On;
-    } else if (value <= configuration_.offThreshold) {
-        next = ThresholdDecision::Off;
+    if (configuration_.direction == ThresholdDirection::OnAbove) {
+        if (value >= configuration_.onThreshold) next = ThresholdDecision::On;
+        else if (value <= configuration_.offThreshold) next = ThresholdDecision::Off;
+    } else {
+        if (value <= configuration_.onThreshold) next = ThresholdDecision::On;
+        else if (value >= configuration_.offThreshold) next = ThresholdDecision::Off;
     }
     const MeasurementTypeMetadata& metadata =
         measurementTypeMetadata(configuration_.source.measurementType);

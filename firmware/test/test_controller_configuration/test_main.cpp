@@ -101,6 +101,17 @@ void test_threshold_registry_uses_stable_id_and_on_off_requirement() {
         ControllerImplementationRegistry::find(ControllerImplementation::Blink)->stableId);
 }
 
+void test_threshold_direction_exposes_matching_comparison_symbols() {
+    TEST_ASSERT_EQUAL_STRING("≥",
+        thresholdOnComparisonSymbol(ThresholdDirection::OnAbove));
+    TEST_ASSERT_EQUAL_STRING("≤",
+        thresholdOffComparisonSymbol(ThresholdDirection::OnAbove));
+    TEST_ASSERT_EQUAL_STRING("≤",
+        thresholdOnComparisonSymbol(ThresholdDirection::OnBelow));
+    TEST_ASSERT_EQUAL_STRING("≥",
+        thresholdOffComparisonSymbol(ThresholdDirection::OnBelow));
+}
+
 void test_default_controller_slots_are_disabled_and_stably_identified() {
     Fixture fixture;
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
@@ -468,8 +479,9 @@ void test_threshold_persistence_round_trips_stable_source_and_parameters() {
     TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(
         fixture.enabledActuator()));
     ControllerSlotConfiguration saved = fixture.threshold();
-    saved.implementationConfiguration.threshold.onThreshold = 23.5F;
-    saved.implementationConfiguration.threshold.offThreshold = 21.25F;
+    saved.implementationConfiguration.threshold.onThreshold = 21.25F;
+    saved.implementationConfiguration.threshold.offThreshold = 23.5F;
+    saved.implementationConfiguration.threshold.direction = ThresholdDirection::OnBelow;
     saved.implementationConfiguration.threshold.maxMeasurementAgeMs = 30000;
     TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(saved));
     TEST_ASSERT_EQUAL_STRING("threshold", Preferences::storedString("c1_impl").c_str());
@@ -488,8 +500,10 @@ void test_threshold_persistence_round_trips_stable_source_and_parameters() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
         static_cast<int>(threshold.source.measurementType));
     TEST_ASSERT_EQUAL_UINT16(1, threshold.targetActuatorId);
-    TEST_ASSERT_FLOAT_WITHIN(0.001F, 23.5F, threshold.onThreshold);
-    TEST_ASSERT_FLOAT_WITHIN(0.001F, 21.25F, threshold.offThreshold);
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 21.25F, threshold.onThreshold);
+    TEST_ASSERT_FLOAT_WITHIN(0.001F, 23.5F, threshold.offThreshold);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdDirection::OnBelow),
+        static_cast<int>(threshold.direction));
     TEST_ASSERT_EQUAL_UINT32(30000, threshold.maxMeasurementAgeMs);
 }
 
@@ -647,6 +661,7 @@ int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_controller_registry_uses_stable_ids_and_on_off_requirement);
     RUN_TEST(test_threshold_registry_uses_stable_id_and_on_off_requirement);
+    RUN_TEST(test_threshold_direction_exposes_matching_comparison_symbols);
     RUN_TEST(test_default_controller_slots_are_disabled_and_stably_identified);
     RUN_TEST(test_valid_blink_targets_enabled_on_off_actuator);
     RUN_TEST(test_on_off_controller_accepts_level_actuator_and_persistence_round_trips);

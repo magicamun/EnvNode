@@ -1065,6 +1065,7 @@ void WebService::handleControllers() {
                     && runtime.targetActuatorId == threshold.targetActuatorId
                     && runtime.onThreshold == threshold.onThreshold
                     && runtime.offThreshold == threshold.offThreshold
+                    && runtime.thresholdDirection == threshold.direction
                     && runtime.maxMeasurementAgeMs == threshold.maxMeasurementAgeMs;
             }
         }
@@ -1083,6 +1084,9 @@ void WebService::handleControllers() {
                     blink.targetActuatorId - 1].name);
             }
         } else if (slot.implementation == ControllerImplementation::Threshold) {
+            c += String(threshold.direction == ThresholdDirection::OnAbove
+                ? "On above / Off below" : "On below / Off above");
+            c += "<br>";
             c += "Source: Sensor " + String(threshold.source.sensorId);
             if (isValidSensorId(threshold.source.sensorId)
                 && threshold.source.sensorId <= MaxSensorSlotCount) {
@@ -1108,8 +1112,10 @@ void WebService::handleControllers() {
             const char* unit = UnitConverter::symbol(
                 measurementTypeMetadata(threshold.source.measurementType).canonicalUnit);
             if (unit == nullptr) unit = "";
-            c += "On ≥ " + String(threshold.onThreshold, 4) + " " + unit;
-            c += "<br>Off ≤ " + String(threshold.offThreshold, 4) + " " + unit;
+            c += "On " + String(thresholdOnComparisonSymbol(threshold.direction))
+                + " " + String(threshold.onThreshold, 4) + " " + unit;
+            c += "<br>Off " + String(thresholdOffComparisonSymbol(threshold.direction))
+                + " " + String(threshold.offThreshold, 4) + " " + unit;
             c += "<br>Max age " + String(threshold.maxMeasurementAgeMs) + " ms";
         } else {
             c += "—";
@@ -1491,6 +1497,11 @@ void WebService::handleControllerEdit() {
     c += "<p class='help'>Threshold values use the canonical Measurement unit: <span id='thresholdUnit'></span>.</p>";
     c += "<label>Target On/Off actuator<select name='thresholdTargetActuator'>"
         + thresholdTargetOptions + "</select></label>";
+    c += "<label>Switching direction<select name='thresholdDirection'><option value='on_above'"
+        + String(threshold.direction == ThresholdDirection::OnAbove ? " selected" : "")
+        + ">On at or above the On threshold</option><option value='on_below'"
+        + String(threshold.direction == ThresholdDirection::OnBelow ? " selected" : "")
+        + ">On at or below the On threshold</option></select></label>";
     c += "<label>On threshold<input type='number' step='any' name='onThreshold' value='"
         + String(threshold.onThreshold, 6) + "'></label>";
     c += "<label>Off threshold<input type='number' step='any' name='offThreshold' value='"
@@ -2123,6 +2134,7 @@ void WebService::handleControllerSave() {
                 server_.arg("thresholdTargetActuator"),
                 server_.arg("onThreshold"),
                 server_.arg("offThreshold"),
+                server_.arg("thresholdDirection"),
                 server_.arg("maxMeasurementAge"),
                 slot);
         }

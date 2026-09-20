@@ -12,6 +12,7 @@ enum class ControllerParameter : uint8_t {
     OffDurationMs,
     OnThreshold,
     OffThreshold,
+    ThresholdDirection,
     MaxMeasurementAgeMs,
     Count,
 };
@@ -19,11 +20,13 @@ enum class ControllerParameter : uint8_t {
 enum class ControllerParameterValueType : uint8_t {
     UnsignedInteger,
     FloatingPoint,
+    String,
 };
 
 enum class ControllerParameterUnit : uint8_t {
     Milliseconds,
     SourceMeasurementCanonical,
+    None,
 };
 
 struct ControllerParameterDescriptor {

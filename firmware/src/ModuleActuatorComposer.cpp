@@ -41,11 +41,20 @@ void copyText(char* target, const DescriptorTextView& source) {
 
 } // namespace
 
+ModuleActuatorComposer::~ModuleActuatorComposer() {
+    delete[] definitions_;
+}
+
 size_t ModuleActuatorComposer::compose(
     const ModuleDiscoveryService& discovery,
     const BoardProfile& board,
     const SensorSlotConfiguration* sensors) {
     count_ = 0;
+    if (definitions_ == nullptr) {
+        definitions_ = new (std::nothrow)
+            AutomaticActuatorDefinition[MaxActuatorSlotCount];
+    }
+    if (definitions_ == nullptr) return 0;
     ModuleDeviceInventoryEntry* inventory =
         new (std::nothrow) ModuleDeviceInventoryEntry[MaximumDescriptorDevices];
     if (inventory == nullptr) return 0;

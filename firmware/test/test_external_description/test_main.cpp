@@ -51,10 +51,11 @@ void test_parameter_metadata_is_neutral_stable_and_typed() {
     const ControllerParameterDescriptor* threshold =
         controllerParameterDescriptors(ControllerImplementation::Threshold, count);
     TEST_ASSERT_NOT_NULL(threshold);
-    TEST_ASSERT_EQUAL_UINT32(3, count);
+    TEST_ASSERT_EQUAL_UINT32(4, count);
     TEST_ASSERT_EQUAL_STRING("on_threshold", threshold[0].stableName);
     TEST_ASSERT_EQUAL_STRING("off_threshold", threshold[1].stableName);
-    TEST_ASSERT_EQUAL_STRING("max_measurement_age_ms", threshold[2].stableName);
+    TEST_ASSERT_EQUAL_STRING("threshold_direction", threshold[2].stableName);
+    TEST_ASSERT_EQUAL_STRING("max_measurement_age_ms", threshold[3].stableName);
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(ControllerParameterValueType::FloatingPoint),
         static_cast<int>(threshold[0].valueType));
@@ -63,10 +64,10 @@ void test_parameter_metadata_is_neutral_stable_and_typed() {
         static_cast<int>(threshold[0].unit));
     TEST_ASSERT_FALSE(threshold[0].hasMinimum);
     TEST_ASSERT_FALSE(threshold[0].hasMaximum);
-    TEST_ASSERT_TRUE(threshold[2].hasMinimum);
-    TEST_ASSERT_TRUE(threshold[2].hasMaximum);
+    TEST_ASSERT_TRUE(threshold[3].hasMinimum);
+    TEST_ASSERT_TRUE(threshold[3].hasMaximum);
     TEST_ASSERT_EQUAL_STRING("uint32",
-        controllerParameterValueTypeStableName(threshold[2].valueType));
+        controllerParameterValueTypeStableName(threshold[3].valueType));
     TEST_ASSERT_EQUAL_STRING("float",
         controllerParameterValueTypeStableName(threshold[0].valueType));
 }

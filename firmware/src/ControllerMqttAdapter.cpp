@@ -156,10 +156,31 @@ void ControllerMqttAdapter::handleParameter(
     } else if (candidate.implementation == ControllerImplementation::Threshold
         && (parameter == ControllerParameter::OnThreshold
             || parameter == ControllerParameter::OffThreshold
+            || parameter == ControllerParameter::ThresholdDirection
             || parameter == ControllerParameter::MaxMeasurementAgeMs)) {
         ThresholdControllerConfiguration& threshold =
             candidate.implementationConfiguration.threshold;
-        if (parameter == ControllerParameter::MaxMeasurementAgeMs) {
+        if (parameter == ControllerParameter::ThresholdDirection) {
+            ThresholdDirection requested;
+            if (payload != nullptr && length == 8
+                && memcmp(payload, "on_above", 8) == 0) {
+                requested = ThresholdDirection::OnAbove;
+                acceptedValue = "on_above";
+            } else if (payload != nullptr && length == 8
+                && memcmp(payload, "on_below", 8) == 0) {
+                requested = ThresholdDirection::OnBelow;
+                acceptedValue = "on_below";
+            } else {
+                logger_.warnf("MQTT Controller %u parameter rejected: expected on_above or on_below",
+                    static_cast<unsigned int>(id));
+                return;
+            }
+            if (requested == threshold.direction) return;
+            threshold.direction = requested;
+            const float previousOn = threshold.onThreshold;
+            threshold.onThreshold = threshold.offThreshold;
+            threshold.offThreshold = previousOn;
+        } else if (parameter == ControllerParameter::MaxMeasurementAgeMs) {
             uint32_t age = 0;
             if (!parseUnsignedInteger(payload, length, age)) {
                 logger_.warnf("MQTT Controller %u parameter rejected: invalid unsigned integer",

@@ -370,6 +370,9 @@ void ConfigurationService::loadControllerSlots() {
             controllerKey(expectedId, "on").c_str(), 70.0F);
         threshold.offThreshold = preferences_.getFloat(
             controllerKey(expectedId, "off").c_str(), 65.0F);
+        threshold.direction = preferences_.getUInt(
+            controllerKey(expectedId, "tdir").c_str(), 0) == 1
+            ? ThresholdDirection::OnBelow : ThresholdDirection::OnAbove;
         threshold.maxMeasurementAgeMs = preferences_.getUInt(
             controllerKey(expectedId, "age").c_str(), 15000);
     }
@@ -859,7 +862,8 @@ bool ConfigurationService::validateControllerSlot(
             slot.implementationConfiguration.threshold;
         if (!std::isfinite(threshold.onThreshold)
             || !std::isfinite(threshold.offThreshold)
-            || threshold.offThreshold >= threshold.onThreshold
+            || !validThresholdOrdering(threshold.direction,
+                threshold.onThreshold, threshold.offThreshold)
             || threshold.maxMeasurementAgeMs == 0
             || threshold.maxMeasurementAgeMs > INT32_MAX) {
             return false;
@@ -1065,6 +1069,8 @@ bool ConfigurationService::persistControllerSlot(
         && persistUInt(controllerKey(id, "tact").c_str(), threshold.targetActuatorId)
         && persistFloat(controllerKey(id, "on").c_str(), threshold.onThreshold)
         && persistFloat(controllerKey(id, "off").c_str(), threshold.offThreshold)
+        && persistUInt(controllerKey(id, "tdir").c_str(),
+            static_cast<uint32_t>(threshold.direction))
         && persistUInt(controllerKey(id, "age").c_str(),
             threshold.maxMeasurementAgeMs);
 }

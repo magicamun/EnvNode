@@ -127,6 +127,7 @@ bool applyThresholdControllerWebFields(
     const String& targetActuator,
     const String& onThreshold,
     const String& offThreshold,
+    const String& thresholdDirection,
     const String& maxMeasurementAge,
     ControllerSlotConfiguration& slot) {
     uint32_t sourceId = 0;
@@ -140,7 +141,8 @@ bool applyThresholdControllerWebFields(
         || !parseUnsignedId(targetActuator, MaxActuatorSlotCount, targetId)
         || !parseFiniteFloat(onThreshold, on)
         || !parseFiniteFloat(offThreshold, off)
-        || !parseUnsignedId(maxMeasurementAge, INT32_MAX, maximumAge)) {
+        || !parseUnsignedId(maxMeasurementAge, INT32_MAX, maximumAge)
+        || (thresholdDirection != "on_above" && thresholdDirection != "on_below")) {
         return false;
     }
     ThresholdControllerConfiguration& threshold =
@@ -150,8 +152,23 @@ bool applyThresholdControllerWebFields(
     threshold.targetActuatorId = static_cast<ActuatorId>(targetId);
     threshold.onThreshold = on;
     threshold.offThreshold = off;
+    threshold.direction = thresholdDirection == "on_below"
+        ? ThresholdDirection::OnBelow : ThresholdDirection::OnAbove;
     threshold.maxMeasurementAgeMs = maximumAge;
     return true;
+}
+
+bool applyThresholdControllerWebFields(
+    const String& sourceSensor,
+    const String& measurementType,
+    const String& targetActuator,
+    const String& onThreshold,
+    const String& offThreshold,
+    const String& maxMeasurementAge,
+    ControllerSlotConfiguration& slot) {
+    return applyThresholdControllerWebFields(
+        sourceSensor, measurementType, targetActuator,
+        onThreshold, offThreshold, "on_above", maxMeasurementAge, slot);
 }
 
 } // namespace EnvNode

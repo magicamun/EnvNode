@@ -9,6 +9,7 @@ namespace EnvNode {
 
 class ModuleActuatorComposer {
 public:
+    ~ModuleActuatorComposer();
     size_t compose(
         const ModuleDiscoveryService& discovery,
         const BoardProfile& board,
@@ -18,7 +19,7 @@ public:
     size_t count() const;
 
 private:
-    AutomaticActuatorDefinition definitions_[MaxActuatorSlotCount];
+    AutomaticActuatorDefinition* definitions_ = nullptr;
     size_t count_ = 0;
 };
 

@@ -289,6 +289,35 @@ void test_hysteresis_processes_revisions_without_repeating_commands() {
     TEST_ASSERT_EQUAL_UINT32(7, controller.lastProcessedRevision());
 }
 
+void test_inverse_hysteresis_switches_on_below_and_off_above() {
+    TestLogger logger;
+    TestClock clock;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    TestMeasurementResolver measurements;
+    ThresholdControllerConfiguration configuration = thresholdConfiguration();
+    configuration.direction = ThresholdDirection::OnBelow;
+    configuration.onThreshold = 20.0F;
+    configuration.offThreshold = 25.0F;
+    setSnapshot(measurements, 20.0F, 0, 1);
+    ThresholdController controller(
+        configuration, measurements, actuators, clock, logger);
+
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerOperationResult::Completed),
+        static_cast<int>(controller.begin()));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On),
+        static_cast<int>(actuator.current));
+    setSnapshot(measurements, 22.0F, 0, 2);
+    controller.service();
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    setSnapshot(measurements, 25.0F, 0, 3);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off),
+        static_cast<int>(actuator.current));
+    TEST_ASSERT_EQUAL_UINT32(2, actuator.setCount);
+}
+
 void test_freshness_boundary_wraparound_and_stale_input_do_not_force_off() {
     TestLogger logger;
     TestClock clock;
@@ -708,6 +737,7 @@ int main(int, char**) {
     RUN_TEST(test_begin_handles_missing_stale_invalid_and_initial_in_band_input);
     RUN_TEST(test_begin_commands_on_or_off_at_thresholds_and_accepts_quality_labels);
     RUN_TEST(test_hysteresis_processes_revisions_without_repeating_commands);
+    RUN_TEST(test_inverse_hysteresis_switches_on_below_and_off_above);
     RUN_TEST(test_freshness_boundary_wraparound_and_stale_input_do_not_force_off);
     RUN_TEST(test_incompatible_and_invalid_snapshots_are_processed_without_decision);
     RUN_TEST(test_pending_output_retries_without_measurement_and_resolves_replacement);

@@ -17,6 +17,7 @@ struct ControllerRuntimeInfo {
     MeasurementType sourceMeasurementType = MeasurementType::Unknown;
     float onThreshold = 0.0F;
     float offThreshold = 0.0F;
+    ThresholdDirection thresholdDirection = ThresholdDirection::OnAbove;
     uint32_t maxMeasurementAgeMs = 0;
     bool sourceAvailable = false;
     bool hasLatestSnapshot = false;
