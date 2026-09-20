@@ -126,8 +126,6 @@ struct HardwareDescriptor {
     uint8_t instanceId[16] = {};
     DescriptorTextView manufacturer = {};
     DescriptorHardwareRevision hardwareRevision = {};
-    bool hasLegacyProfileId = false;
-    uint16_t legacyProfileId = 0;
     DescriptorCompatibility compatibility = {};
     DescriptorTextView name = {};
     DescriptorTextView summary = {};

@@ -6,7 +6,6 @@
 #include "DuoRelayDescriptor.h"
 #include "HardwareDescriptorCodec.h"
 #include "ModuleDescriptorProvisioningService.h"
-#include "ModuleIdentityStore.h"
 
 using namespace EnvNode;
 
@@ -60,12 +59,9 @@ size_t buildDuoRelay(uint8_t* output, size_t capacity) {
 struct Fixture {
     MemoryStorage slotAStorage;
     MemoryStorage slotBStorage;
-    ModuleIdentityStore slotALegacy{slotAStorage};
-    ModuleIdentityStore slotBLegacy{slotBStorage};
     HardwareDescriptorStore slotADescriptor{slotAStorage};
     HardwareDescriptorStore slotBDescriptor{slotBStorage};
-    ModuleDiscoveryService discovery{
-        slotALegacy, slotBLegacy, slotADescriptor, slotBDescriptor};
+    ModuleDiscoveryService discovery{slotADescriptor, slotBDescriptor};
     ModuleDescriptorProvisioningService provisioning{
         slotADescriptor, slotBDescriptor, discovery};
 };
@@ -110,15 +106,8 @@ void test_confirmation_is_required_before_descriptor_write() {
     TEST_ASSERT_EQUAL_UINT32(0, fixture.slotAStorage.writeCalls);
 }
 
-void test_first_descriptor_write_preserves_legacy_and_is_rediscovered() {
+void test_first_descriptor_write_uses_bank_b_and_is_rediscovered() {
     Fixture fixture;
-    const ModuleIdentity legacy = {ModuleProfileId::DuoRelay, {0, 3}, 42};
-    TEST_ASSERT_EQUAL_INT(
-        static_cast<int>(ModuleIdentityWriteStatus::Success),
-        static_cast<int>(fixture.slotALegacy.write(legacy)));
-    uint8_t legacyBytes[ModuleIdentityCodec::EncodedSize];
-    std::memcpy(legacyBytes, fixture.slotAStorage.bytes, sizeof(legacyBytes));
-
     uint8_t payload[1024];
     const size_t size = buildDuoRelay(payload, sizeof(payload));
     const ModuleDescriptorProvisioningResult result = fixture.provisioning.provision(
@@ -129,8 +118,6 @@ void test_first_descriptor_write_preserves_legacy_and_is_rediscovered() {
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(HardwareDescriptorBank::B), static_cast<int>(result.bank));
     TEST_ASSERT_EQUAL_UINT32(1, result.generation);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(
-        legacyBytes, fixture.slotAStorage.bytes, sizeof(legacyBytes));
     const ModuleDiscoveryResult* discovered = fixture.discovery.result(ModuleSlot::A);
     TEST_ASSERT_NOT_NULL(discovered);
     TEST_ASSERT_EQUAL_INT(
@@ -206,7 +193,7 @@ int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_duo_relay_template_is_deterministic_valid_and_compatible);
     RUN_TEST(test_confirmation_is_required_before_descriptor_write);
-    RUN_TEST(test_first_descriptor_write_preserves_legacy_and_is_rediscovered);
+    RUN_TEST(test_first_descriptor_write_uses_bank_b_and_is_rediscovered);
     RUN_TEST(test_unavailable_slot_is_not_reported_as_invalid_descriptor);
     RUN_TEST(test_invalid_descriptor_is_rejected_before_write);
     RUN_TEST(test_unassigned_instance_uuid_is_rejected_before_write);

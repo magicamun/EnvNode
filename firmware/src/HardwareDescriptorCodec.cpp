@@ -215,13 +215,7 @@ private:
                 else std::memcpy(descriptor.instanceId, bytes, size);
             } else if (key == static_cast<uint8_t>(Key::Manufacturer)) readText(descriptor.manufacturer);
             else if (key == static_cast<uint8_t>(Key::HardwareRevision)) parseRevision(descriptor.hardwareRevision);
-            else if (key == static_cast<uint8_t>(Key::LegacyProfileId)) {
-                uint64_t value = 0;
-                if (readUnsigned(value, UINT16_MAX)) {
-                    descriptor.hasLegacyProfileId = true;
-                    descriptor.legacyProfileId = static_cast<uint16_t>(value);
-                }
-            } else skip();
+            else skip();
         }
         const uint64_t required = bit(Key::TypeId) | bit(Key::InstanceId)
             | bit(Key::Manufacturer) | bit(Key::HardwareRevision);

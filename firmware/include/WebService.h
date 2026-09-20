@@ -21,7 +21,6 @@
 #include "I2CBusManager.h"
 #include "BoardIdentityResolver.h"
 #include "BoardProvisioningService.h"
-#include "ModuleProvisioningService.h"
 #include "ModuleDescriptorProvisioningService.h"
 #include "DuoRelayDescriptor.h"
 
@@ -48,7 +47,6 @@ public:
         const BoardIdentityResolution& boardIdentityResolution,
         BoardProvisioningService& boardProvisioningService,
         ModuleDiscoveryService& moduleDiscoveryService,
-        ModuleProvisioningService& moduleProvisioningService,
         ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService);
 
     void begin() override;
@@ -96,7 +94,6 @@ private:
     void handleUnitsSave();
     void handleDeviceSave();
     void handleBoardProvisioning();
-    void handleModuleProvisioning();
     void handleModuleDescriptorProvisioning();
     void handleRestart();
     void handleFactoryReset();
@@ -139,7 +136,6 @@ private:
     const BoardIdentityResolution& boardIdentityResolution_;
     BoardProvisioningService& boardProvisioningService_;
     ModuleDiscoveryService& moduleDiscoveryService_;
-    ModuleProvisioningService& moduleProvisioningService_;
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
     uint8_t moduleDescriptorPayload_[DuoRelayDescriptor::MaximumEncodedSize] = {};
     WebServer server_{80};

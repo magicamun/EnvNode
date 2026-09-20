@@ -6,7 +6,7 @@ The following decisions were accepted on 2026-09-19:
 
 - two complete 2048-byte banks in the 4 KiB EEPROM;
 - CRC integrity without a cryptographic signature in format version 0.1;
-- explicit migration from legacy ENID/EMID v1;
+- atomic descriptor updates in the 4 KiB identity EEPROM;
 - the first migrated descriptor is written and verified in bank B so bank A remains untouched;
 - migration is never performed automatically.
 
@@ -110,8 +110,8 @@ CRC and payload CRC are valid.
   explicitly confirmed local provisioning operation, not cryptographic authenticity.
 - Confirm whether documentation text belongs in both redundant descriptor banks or may be
   shortened without violating the self-description requirement.
-- Specify the later user-facing migration operation. Its storage order is already fixed: write and
-  verify bank B first, preserve legacy bank A until a subsequent successful descriptor update.
+- Keep the user-facing provisioning operation explicit. Its storage order is fixed: write and
+  verify bank B first, then alternate complete descriptor updates between banks A and B.
 
 Measurements are generated with:
 

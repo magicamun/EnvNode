@@ -114,7 +114,7 @@ The source project and the separately published schematic and PCB portions in `h
 
 A module-identification EEPROM is optional, but fitting one is good practice for modules with a defined hardware identity. Current firmware uses it to identify installed modules and validate their compatibility with the selected board and slot. Offering suitable functions in the UI and activating module-specific drivers remain future steps. The Empty templates and DuoRelay provide the reference implementation.
 
-A conforming module-identification EEPROM should use `I2C0`. This is a discovery convention rather than an electrical limitation: both I²C buses remain available at the connector, but automatic module discovery scans only the reserved identity EEPROM addresses on `I2C0`. The stored record is defined in [`ModuleIdentityRecord.md`](ModuleIdentityRecord.md). The firmware module-profile registry maps supported identities to stable module types, capabilities, and connector-resource requirements. Discovery and compatibility validation do not yet activate device drivers or UI functions.
+A conforming module-identification EEPROM should use `I2C0`. This is a discovery convention rather than an electrical limitation: both I²C buses remain available at the connector, but automatic module discovery scans only the reserved identity EEPROM addresses on `I2C0`. Modules store a self-describing ENHD schema-0.1 descriptor. Discovery validates its declared platform, safety profile, drivers, capabilities and logical connector-resource requirements without relying on a product registry. Descriptor-based device activation remains a separate runtime step.
 
 The reference EEPROM uses two address bits. Its module-side wiring is:
 

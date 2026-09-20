@@ -39,8 +39,6 @@
 #include "IdentityEeprom24LC32.h"
 #include "BoardIdentityResolver.h"
 #include "ModuleDiscoveryService.h"
-#include "ModuleCompatibility.h"
-#include "ModuleProvisioningService.h"
 #include "HardwareDescriptorStore.h"
 #include "ModuleDescriptorProvisioningService.h"
 
@@ -63,15 +61,10 @@ static IdentityEeprom24LC32 slotAModuleEeprom(
     i2cBusManager, ModuleDiscoveryService::SlotAEepromAddress);
 static IdentityEeprom24LC32 slotBModuleEeprom(
     i2cBusManager, ModuleDiscoveryService::SlotBEepromAddress);
-static ModuleIdentityStore slotAModuleIdentityStore(slotAModuleEeprom);
-static ModuleIdentityStore slotBModuleIdentityStore(slotBModuleEeprom);
 static HardwareDescriptorStore slotAHardwareDescriptorStore(slotAModuleEeprom);
 static HardwareDescriptorStore slotBHardwareDescriptorStore(slotBModuleEeprom);
 static ModuleDiscoveryService moduleDiscoveryService(
-    slotAModuleIdentityStore, slotBModuleIdentityStore,
     slotAHardwareDescriptorStore, slotBHardwareDescriptorStore);
-static ModuleProvisioningService moduleProvisioningService(
-    slotAModuleIdentityStore, slotBModuleIdentityStore, moduleDiscoveryService);
 static ModuleDescriptorProvisioningService moduleDescriptorProvisioningService(
     slotAHardwareDescriptorStore, slotBHardwareDescriptorStore,
     moduleDiscoveryService);
@@ -118,7 +111,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     sensorManager,
     actuatorRuntime);
 static OTAService otaService(logger, runtimeManager);
-static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleProvisioningService, moduleDescriptorProvisioningService);
+static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleDescriptorProvisioningService);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
 static bool normalRuntimeStarted = false;
 
@@ -163,25 +156,12 @@ void setup() {
                 static_cast<int>(module->descriptorName.size),
                 module->descriptorName.data == nullptr ? "" : module->descriptorName.data,
                 hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility));
-        } else if (module->identified()) {
-            const ModuleCompatibilityResult compatibility = evaluateModuleCompatibility(
-                currentBoardProfile(), slot, module->profile);
-            logger.infof(
-                "Module slot=%s address=0x%02X source=%s status=%s profile=%u type=%s revision=%u.%u serial=%lu compatibility=%s",
-                moduleSlotName(slot), module->eepromAddress,
-                moduleDiscoverySourceName(module->source),
-                moduleIdentityStatusName(module->status),
-                static_cast<unsigned int>(module->identity.profileId),
-                module->profile == nullptr ? "unknown" : module->profile->stableId,
-                module->identity.revision.major, module->identity.revision.minor,
-                static_cast<unsigned long>(module->identity.serialNumber),
-                moduleCompatibilityStatusName(compatibility.status));
         } else {
             logger.infof(
-                "Module slot=%s address=0x%02X source=%s status=%s generic=true",
+                "Module slot=%s address=0x%02X source=%s store=%s",
                 moduleSlotName(slot), module->eepromAddress,
                 moduleDiscoverySourceName(module->source),
-                moduleIdentityStatusName(module->status));
+                hardwareDescriptorStoreStatusName(module->descriptorStoreStatus));
         }
     }
     configurationService.loadConfiguration();

@@ -27,7 +27,7 @@ Field keys are globally unique within schema 0.1.
 | 9 | `instanceId` | 32 | `identityAddress` |
 | 10 | `manufacturer` | 33 | `bindings` |
 | 11 | `hardwareRevision` | 34 | `requirements` |
-| 12 | `legacyProfileId` | 35 | `devices` |
+| 12 | Reserved | 35 | `devices` |
 | 13 | `major` | 36 | `resource` |
 | 14 | `minor` | 37 | `driver` |
 | 15 | `minimumFirmwareVersion` | 38 | `parameters` |

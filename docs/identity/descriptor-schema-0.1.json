@@ -46,8 +46,7 @@
         "typeId": { "$ref": "#/$defs/identifier" },
         "instanceId": { "$ref": "#/$defs/instanceId" },
         "manufacturer": { "$ref": "#/$defs/identifier" },
-        "hardwareRevision": { "$ref": "#/$defs/revision" },
-        "legacyProfileId": { "type": "integer", "minimum": 0, "maximum": 65535 }
+        "hardwareRevision": { "$ref": "#/$defs/revision" }
       },
       "additionalProperties": false
     },

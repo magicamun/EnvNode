@@ -6,8 +6,7 @@
     "typeId": "org.envnode.module.duo-relay",
     "instanceId": "00000000-0000-0000-0000-000000000000",
     "manufacturer": "org.envnode",
-    "hardwareRevision": { "major": 0, "minor": 3 },
-    "legacyProfileId": 1
+    "hardwareRevision": { "major": 0, "minor": 3 }
   },
   "compatibility": {
     "minimumFirmwareVersion": "0.5.0",

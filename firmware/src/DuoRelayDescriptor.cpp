@@ -76,7 +76,7 @@ CompactCborStatus DuoRelayDescriptor::encode(
     writer.beginArray(2); writer.writeUnsigned(0); writer.writeUnsigned(1);
     key(writer, Key::ObjectKind); writer.writeUnsigned(1);
     key(writer, Key::Identity);
-    writer.beginMap(5);
+    writer.beginMap(4);
     key(writer, Key::TypeId); writer.writeText("org.envnode.module.duo-relay");
     key(writer, Key::InstanceId);
     writer.writeByteString(manufacturing.instanceId, sizeof(manufacturing.instanceId));
@@ -85,7 +85,6 @@ CompactCborStatus DuoRelayDescriptor::encode(
     writer.beginMap(2);
     key(writer, Key::Major); writer.writeUnsigned(0);
     key(writer, Key::Minor); writer.writeUnsigned(3);
-    key(writer, Key::LegacyProfileId); writer.writeUnsigned(1);
 
     key(writer, Key::Compatibility);
     writer.beginMap(5);

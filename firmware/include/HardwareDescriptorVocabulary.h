@@ -17,7 +17,6 @@ enum class HardwareDescriptorKey : uint8_t {
     InstanceId = 9,
     Manufacturer = 10,
     HardwareRevision = 11,
-    LegacyProfileId = 12,
     Major = 13,
     Minor = 14,
     MinimumFirmwareVersion = 15,

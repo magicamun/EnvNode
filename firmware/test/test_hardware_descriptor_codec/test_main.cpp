@@ -60,7 +60,7 @@ size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = 
     key(writer, HardwareDescriptorKey::ObjectKind);
     writer.writeUnsigned(static_cast<uint8_t>(HardwareDescriptorObjectKind::Module));
     key(writer, HardwareDescriptorKey::Identity);
-    writer.beginMap(includeManufacturer ? 5 : 4);
+    writer.beginMap(includeManufacturer ? 4 : 3);
     key(writer, HardwareDescriptorKey::TypeId); writer.writeText("com.example.unknown-module");
     key(writer, HardwareDescriptorKey::InstanceId);
     const uint8_t uuid[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
@@ -72,7 +72,6 @@ size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = 
     writer.beginMap(2);
     key(writer, HardwareDescriptorKey::Major); writer.writeUnsigned(0);
     key(writer, HardwareDescriptorKey::Minor); writer.writeUnsigned(3);
-    key(writer, HardwareDescriptorKey::LegacyProfileId); writer.writeUnsigned(77);
     key(writer, HardwareDescriptorKey::Compatibility);
     writer.beginMap(5);
     key(writer, HardwareDescriptorKey::MinimumFirmwareVersion); version(writer, 0, 5, 0);
@@ -174,7 +173,6 @@ void test_unknown_module_type_decodes_without_registry() {
     TEST_ASSERT_TRUE(descriptor.manufacturer.equals("com.example"));
     TEST_ASSERT_EQUAL_UINT8(0, descriptor.hardwareRevision.major);
     TEST_ASSERT_EQUAL_UINT8(3, descriptor.hardwareRevision.minor);
-    TEST_ASSERT_EQUAL_UINT16(77, descriptor.legacyProfileId);
     TEST_ASSERT_EQUAL_UINT32(1, descriptor.requirementCount);
     TEST_ASSERT_TRUE(descriptor.requirements[0].resource.equals("AUX_GPIO1"));
     TEST_ASSERT_TRUE(descriptor.requirements[0].capabilities.contains(
@@ -282,8 +280,6 @@ void test_required_unknown_capability_and_newer_firmware_are_incompatible() {
 void test_discovery_prefers_descriptor_and_reports_semantic_compatibility() {
     MemoryStorage slotAStorage;
     MemoryStorage slotBStorage;
-    ModuleIdentityStore slotALegacy(slotAStorage);
-    ModuleIdentityStore slotBLegacy(slotBStorage);
     HardwareDescriptorStore slotADescriptor(slotAStorage);
     HardwareDescriptorStore slotBDescriptor(slotBStorage);
     uint8_t payload[1024];
@@ -292,8 +288,7 @@ void test_discovery_prefers_descriptor_and_reports_semantic_compatibility() {
         static_cast<int>(HardwareDescriptorStoreStatus::Valid),
         static_cast<int>(slotADescriptor.write(
             HardwareDescriptorObjectKind::Module, payload, size).status));
-    ModuleDiscoveryService discovery(
-        slotALegacy, slotBLegacy, slotADescriptor, slotBDescriptor);
+    ModuleDiscoveryService discovery(slotADescriptor, slotBDescriptor);
     discovery.scan();
     const ModuleDiscoveryResult* result = discovery.result(ModuleSlot::A);
     TEST_ASSERT_NOT_NULL(result);
@@ -309,28 +304,6 @@ void test_discovery_prefers_descriptor_and_reports_semantic_compatibility() {
         static_cast<int>(result->descriptorCompatibility));
 }
 
-void test_discovery_falls_back_to_legacy_only_when_descriptor_is_absent() {
-    MemoryStorage slotAStorage;
-    MemoryStorage slotBStorage;
-    ModuleIdentityStore slotALegacy(slotAStorage);
-    ModuleIdentityStore slotBLegacy(slotBStorage);
-    HardwareDescriptorStore slotADescriptor(slotAStorage);
-    HardwareDescriptorStore slotBDescriptor(slotBStorage);
-    const ModuleIdentity legacy = {ModuleProfileId::DuoRelay, {0, 3}, 9};
-    TEST_ASSERT_EQUAL_INT(
-        static_cast<int>(ModuleIdentityWriteStatus::Success),
-        static_cast<int>(slotALegacy.write(legacy)));
-    ModuleDiscoveryService discovery(
-        slotALegacy, slotBLegacy, slotADescriptor, slotBDescriptor);
-    discovery.scan();
-    const ModuleDiscoveryResult* result = discovery.result(ModuleSlot::A);
-    TEST_ASSERT_NOT_NULL(result);
-    TEST_ASSERT_EQUAL_INT(
-        static_cast<int>(ModuleDiscoverySource::LegacyEmidV1),
-        static_cast<int>(result->source));
-    TEST_ASSERT_EQUAL_UINT32(9, result->identity.serialNumber);
-}
-
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_unknown_module_type_decodes_without_registry);
@@ -342,6 +315,5 @@ int main(int, char**) {
     RUN_TEST(test_unknown_product_is_compatible_when_contracts_and_resources_are_supported);
     RUN_TEST(test_required_unknown_capability_and_newer_firmware_are_incompatible);
     RUN_TEST(test_discovery_prefers_descriptor_and_reports_semantic_compatibility);
-    RUN_TEST(test_discovery_falls_back_to_legacy_only_when_descriptor_is_absent);
     return UNITY_END();
 }

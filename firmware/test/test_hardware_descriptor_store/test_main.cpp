@@ -122,10 +122,8 @@ void test_blank_storage_is_not_provisioned() {
         static_cast<int>(result.status));
 }
 
-void test_first_write_uses_bank_b_and_preserves_legacy_record() {
+void test_first_write_uses_bank_b() {
     MemoryStorage storage;
-    const uint8_t legacy[4] = {'E', 'M', 'I', 'D'};
-    std::memcpy(storage.bytes, legacy, sizeof(legacy));
     HardwareDescriptorStore store(storage);
 
     const HardwareDescriptorWriteResult write = store.write(
@@ -136,7 +134,6 @@ void test_first_write_uses_bank_b_and_preserves_legacy_record() {
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(HardwareDescriptorBank::B), static_cast<int>(write.bank));
     TEST_ASSERT_EQUAL_UINT32(1, write.generation);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(legacy, storage.bytes, sizeof(legacy));
     assertPayloadEquals(
         store, PayloadOne, sizeof(PayloadOne), HardwareDescriptorBank::B, 1);
 }
@@ -239,7 +236,7 @@ int main(int, char**) {
     RUN_TEST(test_incremental_crc_matches_existing_one_shot_crc);
     RUN_TEST(test_envelope_round_trips_and_rejects_corruption);
     RUN_TEST(test_blank_storage_is_not_provisioned);
-    RUN_TEST(test_first_write_uses_bank_b_and_preserves_legacy_record);
+    RUN_TEST(test_first_write_uses_bank_b);
     RUN_TEST(test_successive_writes_alternate_banks_and_generations);
     RUN_TEST(test_corrupt_newest_bank_falls_back_to_previous_valid_bank);
     RUN_TEST(test_generation_selection_is_wrap_safe);
