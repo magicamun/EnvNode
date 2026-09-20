@@ -79,6 +79,9 @@ void WiFiService::startConnection() {
     logger_.debugf("SSID length: %u", network.wifiSSID.length());
     logger_.debugf("Password length: %u", network.wifiPassword.length());
     logger_.debugf("Hostname: '%s'", network.hostname.c_str());
+    logger_.infof("WiFi target SSID='%s' length=%u",
+        network.wifiSSID.c_str(),
+        static_cast<unsigned int>(network.wifiSSID.length()));
 
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(network.hostname.c_str());
@@ -154,7 +157,52 @@ void WiFiService::updateConnectedState() {
     }
 
     if (millis() - connectionStartTimeMs_ >= ConnectionTimeoutMs) {
+        logNetworkScanDiagnostics();
         startSetupAccessPoint();
+    }
+}
+
+void WiFiService::logNetworkScanDiagnostics() {
+    const String configuredSsid =
+        configurationService_.getConfiguration().network.wifiSSID;
+    logger_.warnf(
+        "WiFi connection timeout; scanning for target SSID='%s' length=%u",
+        configuredSsid.c_str(),
+        static_cast<unsigned int>(configuredSsid.length()));
+
+    // Stop the timed-out association attempt before starting a foreground scan.
+    // Keep the SDK's stored AP data untouched; EnvNode owns credentials in NVS.
+    WiFi.disconnect(false, false);
+    const int16_t networkCount = WiFi.scanNetworks(false, true);
+    if (networkCount < 0) {
+        logger_.errorf("WiFi diagnostic scan failed: result=%d",
+            static_cast<int>(networkCount));
+        return;
+    }
+
+    bool exactMatch = false;
+    logger_.infof("WiFi diagnostic scan found %d networks",
+        static_cast<int>(networkCount));
+    for (int16_t index = 0; index < networkCount; ++index) {
+        const String discoveredSsid = WiFi.SSID(index);
+        const bool matches = discoveredSsid == configuredSsid;
+        exactMatch = exactMatch || matches;
+        logger_.infof(
+            "WiFi scan SSID='%s' length=%u channel=%d RSSI=%d%s",
+            discoveredSsid.c_str(),
+            static_cast<unsigned int>(discoveredSsid.length()),
+            static_cast<int>(WiFi.channel(index)),
+            static_cast<int>(WiFi.RSSI(index)),
+            matches ? " target=exact-match" : "");
+    }
+    WiFi.scanDelete();
+
+    if (!exactMatch) {
+        logger_.error(
+            "Configured WiFi SSID was not found exactly in the 2.4 GHz scan");
+    } else {
+        logger_.warn(
+            "Configured WiFi SSID is visible; connection failed after discovery");
     }
 }
 

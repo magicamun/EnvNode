@@ -36,6 +36,7 @@ private:
     void logStateTransition(State nextState);
     void updateConnectedState();
     void updateReconnectingState();
+    void logNetworkScanDiagnostics();
 
     ILogger& logger_;
     IConfigurationService& configurationService_;

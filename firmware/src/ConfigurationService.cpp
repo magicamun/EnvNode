@@ -186,7 +186,9 @@ void ConfigurationService::loadFromPreferences() {
     configuration_.network.subnetMask = preferences_.getString(KeySubnetMask, "");
     configuration_.network.gateway = preferences_.getString(KeyGateway, "");
     configuration_.network.dns1 = preferences_.getString(KeyDns1, "");
-    configuration_.network.dns2 = preferences_.getString(KeyDns2, "");
+    if (preferences_.isKey(KeyDns2)) {
+        configuration_.network.dns2 = preferences_.getString(KeyDns2, "");
+    }
     if (preferences_.isKey(KeyMqttServer)) {
         configuration_.mqtt.server = preferences_.getString(KeyMqttServer, configuration_.mqtt.server);
     }
