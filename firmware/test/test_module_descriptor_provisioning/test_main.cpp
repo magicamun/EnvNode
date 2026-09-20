@@ -139,6 +139,27 @@ void test_first_descriptor_write_preserves_legacy_and_is_rediscovered() {
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(HardwareDescriptorCompatibilityStatus::Compatible),
         static_cast<int>(discovered->descriptorCompatibility));
+    TEST_ASSERT_TRUE(discovered->descriptorHasInstanceId);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(
+        InstanceId, discovered->descriptorInstanceId, sizeof(InstanceId));
+    TEST_ASSERT_TRUE(discovered->descriptorSerialNumber.equals("DR-0001"));
+    TEST_ASSERT_TRUE(discovered->descriptorProductionBatch.equals("2026-09"));
+    TEST_ASSERT_TRUE(discovered->descriptorProductionDate.equals("2026-09-19"));
+}
+
+void test_unavailable_slot_is_not_reported_as_invalid_descriptor() {
+    Fixture fixture;
+    fixture.slotAStorage.failReads = true;
+    fixture.discovery.scan();
+    const ModuleDiscoveryResult* discovered = fixture.discovery.result(ModuleSlot::A);
+    TEST_ASSERT_NOT_NULL(discovered);
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(ModuleDiscoverySource::None),
+        static_cast<int>(discovered->source));
+    TEST_ASSERT_EQUAL_INT(
+        static_cast<int>(HardwareDescriptorStoreStatus::StorageUnavailable),
+        static_cast<int>(discovered->descriptorStoreStatus));
+    TEST_ASSERT_FALSE(discovered->identified());
 }
 
 void test_invalid_descriptor_is_rejected_before_write() {
@@ -186,6 +207,7 @@ int main(int, char**) {
     RUN_TEST(test_duo_relay_template_is_deterministic_valid_and_compatible);
     RUN_TEST(test_confirmation_is_required_before_descriptor_write);
     RUN_TEST(test_first_descriptor_write_preserves_legacy_and_is_rediscovered);
+    RUN_TEST(test_unavailable_slot_is_not_reported_as_invalid_descriptor);
     RUN_TEST(test_invalid_descriptor_is_rejected_before_write);
     RUN_TEST(test_unassigned_instance_uuid_is_rejected_before_write);
     RUN_TEST(test_storage_failure_is_reported);

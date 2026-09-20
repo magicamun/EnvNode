@@ -37,7 +37,11 @@ struct ModuleDiscoveryResult {
     DescriptorTextView descriptorTypeId = {};
     DescriptorTextView descriptorName = {};
     DescriptorHardwareRevision descriptorRevision = {};
+    uint8_t descriptorInstanceId[16] = {};
+    bool descriptorHasInstanceId = false;
     DescriptorTextView descriptorSerialNumber = {};
+    DescriptorTextView descriptorProductionBatch = {};
+    DescriptorTextView descriptorProductionDate = {};
 
     bool identified() const;
 };

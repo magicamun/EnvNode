@@ -54,6 +54,18 @@ String descriptorText(const DescriptorTextView& view) {
     return result;
 }
 
+String descriptorUuid(const uint8_t (&value)[16]) {
+    static const char Hex[] = "0123456789abcdef";
+    String result;
+    result.reserve(36);
+    for (size_t index = 0; index < sizeof(value); ++index) {
+        if (index == 4 || index == 6 || index == 8 || index == 10) result += '-';
+        result += Hex[value[index] >> 4];
+        result += Hex[value[index] & 0x0F];
+    }
+    return result;
+}
+
 int hexDigit(char value) {
     if (value >= '0' && value <= '9') return value - '0';
     if (value >= 'a' && value <= 'f') return value - 'a' + 10;
@@ -765,7 +777,7 @@ void WebService::handleDevice() {
         c += "<div class='notice'>The EEPROM Board Identity is valid, but its board serial number is unassigned.</div>";
     }
     c += "</section>";
-    c += "<section class='card'><h2>Module Identity</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>EEPROM</th><th>Source</th><th>Status</th><th>Module</th><th>Revision</th><th>Serial number</th></tr></thead><tbody>";
+    c += "<section class='card'><h2>Module Identity</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>EEPROM</th><th>Source</th><th>Status</th><th>Module</th><th>Revision</th><th>Instance UUID</th><th>Serial number</th><th>Production batch</th><th>Production date</th></tr></thead><tbody>";
     for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
         const ModuleSlot slot = static_cast<ModuleSlot>(index);
         const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
@@ -792,16 +804,30 @@ void WebService::handleDevice() {
                 ? String("Unassigned")
                 : localeFormatter_.formatNumber(module->identity.serialNumber, 0))
             : String("—");
+        const String instanceId = descriptor && module->descriptorHasInstanceId
+            ? descriptorUuid(module->descriptorInstanceId) : String("—");
+        const String productionBatch = descriptor
+            && !module->descriptorProductionBatch.empty()
+            ? escapeHtml(descriptorText(module->descriptorProductionBatch)) : String("—");
+        const String productionDate = descriptor
+            && !module->descriptorProductionDate.empty()
+            ? escapeHtml(descriptorText(module->descriptorProductionDate)) : String("—");
+        const char* status = descriptor
+            ? (module->descriptorStoreStatus == HardwareDescriptorStoreStatus::Valid
+                ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
+                : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus))
+            : (module->descriptorStoreStatus == HardwareDescriptorStoreStatus::StorageUnavailable
+                ? hardwareDescriptorStoreStatusName(module->descriptorStoreStatus)
+                : moduleIdentityStatusName(module->status));
         c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
         if (module->eepromAddress < 0x10) c += "0";
         c += String(module->eepromAddress, HEX) + "</td><td>";
         c += moduleDiscoverySourceName(module->source);
         c += "</td><td>";
-        c += descriptor
-            ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
-            : moduleIdentityStatusName(module->status);
+        c += status;
         c += "</td><td>" + moduleName + "</td><td>" + revision;
-        c += "</td><td>" + moduleSerial + "</td></tr>";
+        c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
+        c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
     }
     c += "</tbody></table></div></section>";
     c += "<section class='card'><h2>Provision Module Descriptor</h2>";
