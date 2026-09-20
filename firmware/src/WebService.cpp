@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_netif.h>
+#include <esp_system.h>
 #include <climits>
 #include <cmath>
 #include <cstdlib>
@@ -21,6 +22,7 @@
 #include "ControllerWebSupport.h"
 #include "ElapsedTimeFormatter.h"
 #include "DuoRelayDescriptor.h"
+#include "InstanceUuid.h"
 
 namespace EnvNode {
 namespace {
@@ -64,32 +66,6 @@ String descriptorUuid(const uint8_t (&value)[16]) {
         result += Hex[value[index] & 0x0F];
     }
     return result;
-}
-
-int hexDigit(char value) {
-    if (value >= '0' && value <= '9') return value - '0';
-    if (value >= 'a' && value <= 'f') return value - 'a' + 10;
-    if (value >= 'A' && value <= 'F') return value - 'A' + 10;
-    return -1;
-}
-
-bool parseInstanceUuid(const String& text, uint8_t (&output)[16]) {
-    if (text.length() != 36 || text[8] != '-' || text[13] != '-'
-        || text[18] != '-' || text[23] != '-') return false;
-    size_t outputIndex = 0;
-    bool nonZero = false;
-    for (size_t index = 0; index < text.length();) {
-        if (text[index] == '-') { ++index; continue; }
-        if (index + 1 >= text.length() || outputIndex >= sizeof(output)) return false;
-        const int high = hexDigit(text[index]);
-        const int low = hexDigit(text[index + 1]);
-        if (high < 0 || low < 0) return false;
-        output[outputIndex] = static_cast<uint8_t>((high << 4) | low);
-        nonZero = nonZero || output[outputIndex] != 0;
-        ++outputIndex;
-        index += 2;
-    }
-    return outputIndex == sizeof(output) && nonZero;
 }
 
 const char* sensorStateName(SensorState state) {
@@ -819,8 +795,7 @@ void WebService::handleDevice() {
     c += "<form method='post' action='/device/module-descriptor/write' onsubmit='return confirm(\"Write and verify the DuoRelay descriptor in the selected slot?\")'>";
     c += "<label>Module slot<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>";
     c += "<label>Descriptor template<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>";
-    c += "<label>Instance UUID<input name='descriptorInstanceId' maxlength='36' pattern='[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}' placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' required></label>";
-    c += "<p class='help'>Use a persistent, unique UUID for this physical module. The all-zero placeholder is rejected.</p>";
+    c += "<p class='help'>A persistent UUID version 4 is generated automatically by the firmware for this physical module.</p>";
     c += "<label>Serial number (optional)<input name='descriptorSerialNumber' maxlength='64'></label>";
     c += "<label>Production batch (optional)<input name='descriptorProductionBatch' maxlength='64'></label>";
     c += "<label>Production date (optional)<input type='date' name='descriptorProductionDate'></label>";
@@ -1745,20 +1720,20 @@ void WebService::handleModuleDescriptorProvisioning() {
         server_.arg("descriptorTemplate") == "duo-relay-0.3";
 
     DuoRelayDescriptorManufacturingData manufacturing;
-    const bool uuidValid = parseInstanceUuid(
-        server_.arg("descriptorInstanceId"), manufacturing.instanceId);
     const String serialNumber = server_.arg("descriptorSerialNumber");
     const String productionBatch = server_.arg("descriptorProductionBatch");
     const String productionDate = server_.arg("descriptorProductionDate");
     const bool manufacturingValid = serialNumber.length() <= 64
         && productionBatch.length() <= 64
         && productionDate.length() <= 10;
-    if (!slotValid || !templateValid || !uuidValid || !manufacturingValid) {
+    if (!slotValid || !templateValid || !manufacturingValid) {
         sendResult("Module descriptor provisioning failed", "/device",
-            "The slot, descriptor template, instance UUID, or manufacturing data is invalid. No EEPROM data was written.",
+            "The slot, descriptor template, or manufacturing data is invalid. No EEPROM data was written.",
             false);
         return;
     }
+    esp_fill_random(manufacturing.instanceId, sizeof(manufacturing.instanceId));
+    InstanceUuid::makeVersion4(manufacturing.instanceId);
     manufacturing.serialNumber = serialNumber.c_str();
     manufacturing.productionBatch = productionBatch.c_str();
     manufacturing.productionDate = productionDate.c_str();
@@ -1781,8 +1756,9 @@ void WebService::handleModuleDescriptorProvisioning() {
         moduleDescriptorProvisioningService_.provision(
             slot, moduleDescriptorPayload_, payloadSize, confirmed);
     logger_.infof(
-        "Module descriptor provisioning result=%s slot=%s bytes=%u bank=%u generation=%lu decode=%s compatibility=%s",
+        "Module descriptor provisioning result=%s slot=%s uuid=%s bytes=%u bank=%u generation=%lu decode=%s compatibility=%s",
         moduleDescriptorProvisioningStatusName(result.status), moduleSlotName(slot),
+        descriptorUuid(manufacturing.instanceId).c_str(),
         static_cast<unsigned int>(payloadSize),
         static_cast<unsigned int>(result.bank),
         static_cast<unsigned long>(result.generation),
@@ -1793,7 +1769,9 @@ void WebService::handleModuleDescriptorProvisioning() {
         const char* bank = result.bank == HardwareDescriptorBank::B ? "B" : "A";
         String message = "The DuoRelay descriptor was encoded, validated, written to Bank ";
         message += bank;
-        message += ", verified, and rediscovered. No restart is required.";
+        message += ", verified, and rediscovered with instance UUID ";
+        message += descriptorUuid(manufacturing.instanceId);
+        message += ". No restart is required.";
         sendResult("Module descriptor provisioned", "/device", message.c_str(), true);
         return;
     }

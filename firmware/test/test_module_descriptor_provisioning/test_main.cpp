@@ -5,6 +5,7 @@
 
 #include "DuoRelayDescriptor.h"
 #include "HardwareDescriptorCodec.h"
+#include "InstanceUuid.h"
 #include "ModuleDescriptorProvisioningService.h"
 
 using namespace EnvNode;
@@ -92,6 +93,21 @@ void test_duo_relay_template_is_deterministic_valid_and_compatible() {
         static_cast<int>(HardwareDescriptorCompatibilityStatus::Compatible),
         static_cast<int>(evaluateModuleDescriptorCompatibility(
             descriptor, {0, 5, 0}, currentBoardProfile(), ModuleSlot::A).status));
+}
+
+void test_instance_uuid_is_rfc_9562_version_4() {
+    uint8_t uuid[InstanceUuid::Size] = {
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0xF6, 0x77,
+        0x7F, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF,
+    };
+    InstanceUuid::makeVersion4(uuid);
+    const uint8_t expected[InstanceUuid::Size] = {
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x46, 0x77,
+        0xBF, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF,
+    };
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, uuid, sizeof(uuid));
+    TEST_ASSERT_EQUAL_HEX8(0x40, uuid[6] & 0xF0);
+    TEST_ASSERT_EQUAL_HEX8(0x80, uuid[8] & 0xC0);
 }
 
 void test_confirmation_is_required_before_descriptor_write() {
@@ -192,6 +208,7 @@ void test_storage_failure_is_reported() {
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_duo_relay_template_is_deterministic_valid_and_compatible);
+    RUN_TEST(test_instance_uuid_is_rfc_9562_version_4);
     RUN_TEST(test_confirmation_is_required_before_descriptor_write);
     RUN_TEST(test_first_descriptor_write_uses_bank_b_and_is_rediscovered);
     RUN_TEST(test_unavailable_slot_is_not_reported_as_invalid_descriptor);
