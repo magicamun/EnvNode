@@ -1,5 +1,5 @@
 {
-"description": "PCB template for the BOX4U 5U210900 enclosure: 130 x 68 mm board outline with 3 mm corner radius, four 4.5 mm NPTH mounting holes on a 121.5 x 58 mm pattern, and 9 mm mounting keepouts.",
+"description": "Schematic and PCB template for the BOX4U 5U210900 enclosure: H1-H4 plus a 130 x 68 mm board outline with 3 mm corner radius, four 4.5 mm NPTH mounting holes on a 121.5 x 58 mm pattern, and 9 mm mounting keepouts.",
 "keywords": "BOX4U 5U210900 enclosure housing PCB outline mounting holes self-tapping 4mm 130x68 EnvNode",
 "fields": {}
 }

@@ -2,6 +2,8 @@
 
 KiCad board template for mounting a PCB in the base of the BOX4U 5U210900 enclosure.
 
+The design block contains both the schematic representation and the PCB geometry. `H1` through `H4` are non-electrical mounting-hole symbols, excluded from BOM and position files, and linked to the matching project footprint.
+
 ## Geometry
 
 - Board outline: 130 mm x 68 mm, corner radius 3 mm
