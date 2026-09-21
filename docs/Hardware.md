@@ -16,7 +16,7 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 
 ## Mainboard Implementation
 
-[`hardware/kicad/MainBoards/EnvNode Mini/`](../hardware/kicad/MainBoards/EnvNode%20Mini/README.md) implements two Revision 0.3 module slots. It also exposes `I2C0` and `I2C1` on separate 4-pin JST-SH connectors using the pin order GND, `+3V3_SYS`, SDA, SCL. Each bus has one 4.7 kΩ pull-up pair that can be connected to `+3V3_SYS` through individual, normally open solder jumpers. The jumpers allow the mainboard to assume pull-up ownership without forcing a second effective pull-up pair when another part of the assembled system already provides one. The mainboard identity is stored in a `24LC32` EEPROM on `I2C0` at address `0x50`.
+[`hardware/kicad/MainBoards/EnvNode Mini/`](../hardware/kicad/MainBoards/EnvNode%20Mini/README.md) is at Revision 0.6 and implements two module slots. It exposes two top-entry 4-pin JST-SH connectors for each of `I2C0` and `I2C1`, using the pin order GND, `+3V3_SYS`, SDA, SCL. Each bus has one 4.7 kΩ pull-up pair that can be connected to `+3V3_SYS` through individual, normally open solder jumpers. The mainboard identity is stored in a `24LC32` EEPROM on `I2C0` at address `0x50`. Input protection, 5 V conversion, and 3.3 V source ORing are supplied by the castellated [`ORing Power`](../hardware/kicad/DesignBlocks/ORing%20Power/README.md) module.
 
 ## Module Templates
 

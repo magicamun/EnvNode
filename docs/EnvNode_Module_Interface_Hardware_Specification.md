@@ -67,10 +67,10 @@ EnvNode Mini additionally exposes both I²C buses for direct cable connection:
 
 | Connector | Bus | Pin 1 | Pin 2 | Pin 3 | Pin 4 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `J4` | `I2C0` | GND | `+3V3_SYS` | SDA | SCL |
-| `J5` | `I2C1` | GND | `+3V3_SYS` | SDA | SCL |
+| `J4`, `J5` | `I2C0` | GND | `+3V3_SYS` | SDA | SCL |
+| `J6`, `J7` | `I2C1` | GND | `+3V3_SYS` | SDA | SCL |
 
-Both connectors use the horizontal JST-SH `SM04B-SRSS-TB` footprint with 1.00 mm pitch. Each bus has a dedicated pair of 4.7 kΩ pull-up resistors. Four normally open solder jumpers connect the pull-ups individually to `+3V3_SYS`; closing both jumpers for a bus makes EnvNode Mini the pull-up owner for that bus. They must remain open if the assembled bus already has an effective pull-up pair.
+All four connectors use the top-entry JST-SH `BM04B-SRSS-TB` footprint with 1.00 mm pitch. Each bus has a dedicated pair of 4.7 kΩ pull-up resistors. Four normally open solder jumpers connect the pull-ups individually to `+3V3_SYS`; closing both jumpers for a bus makes EnvNode Mini the pull-up owner for that bus. They must remain open if the assembled bus already has an effective pull-up pair.
 
 ## 4. Power
 
@@ -138,7 +138,7 @@ If the firmware finds no valid module-specific identity, it must not infer a mod
 
 SPI operation likewise requires explicit configuration because the absence of a module identity provides no information about an attached SPI device or its protocol.
 
-The mainboard identity EEPROM is independent of optional module identification. Mainboard Revision 0.3 uses a `24LC32` at I²C address `0x50` on `I2C0`; `A0` through `A2` and `WP` are tied to GND. Its record is defined in `docs/BoardIdentityRecord.md`. Revision 0.2 used a `24AA025E48` at the same bus address.
+The mainboard identity EEPROM is independent of optional module identification. Mainboard Revision 0.6 uses a `24LC32` at I²C address `0x50` on `I2C0`; `A0` through `A2` and `WP` are tied to GND. Its record is defined in `docs/BoardIdentityRecord.md`. Revision 0.2 used a `24AA025E48` at the same bus address.
 
 ## 8. DuoRelay Reference Module
 
