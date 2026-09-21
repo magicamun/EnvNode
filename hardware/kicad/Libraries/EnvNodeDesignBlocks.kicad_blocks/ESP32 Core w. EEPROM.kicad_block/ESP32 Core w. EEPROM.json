@@ -1,0 +1,5 @@
+{
+"description": "ESP32 core design block for EnvNode mainboards, containing the ESP32-DevKitC interface, I²C EEPROM and local supply decoupling. Power-source selection and ORing circuitry are intentionally handled by a separate module.",
+"keywords": "ESP32 ESP32-DevKitC EnvNode core mainboard MCU microcontroller I2C EEPROM configuration storage decoupling capacitor 3V3 GPIO design block",
+"fields": {}
+}
