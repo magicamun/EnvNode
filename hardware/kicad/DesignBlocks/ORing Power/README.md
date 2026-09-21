@@ -9,6 +9,7 @@ The ORing Power module is a 39 mm x 15 mm castellated daughterboard for EnvNode 
 - Mainboard symbol: `EnvNode-Symbols:ORingPower_Module`
 - Module footprint: `EnvNode-Footprints:ORingPower_Module_Castellated`
 - Mainboard carrier footprint: `EnvNode-Footprints:ORingPower_Carrier`
+- Assembly and bring-up guide: `Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf`
 
 The symbol defaults to the carrier footprint. The ORing Power PCB itself overrides that assignment with the module-side castellated footprint.
 
