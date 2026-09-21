@@ -1,0 +1,5 @@
+{
+"description": "Dual-power ORing between an external 5V and the DevKit USB-derived 3.3 V supply, generating 3.3V System-Voltage",
+"keywords": "",
+"fields": {}
+}

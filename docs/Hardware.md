@@ -12,6 +12,7 @@ This page is the entry point for the EnvNode hardware documentation and KiCad re
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_MainBoard/` contains the mainboard-side 2 x 7 connector block.
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_SMD/` contains the bottom-mounted SMD module connector block.
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_THT/` contains the bottom-mounted THT module connector block.
+- [`hardware/kicad/DesignBlocks/ORing Power/`](../hardware/kicad/DesignBlocks/ORing%20Power/README.md) contains the castellated 5 V input, 3.3 V regulator, and dual-source 3.3 V ORing module together with its mainboard integration contract.
 
 ## Mainboard Implementation
 
