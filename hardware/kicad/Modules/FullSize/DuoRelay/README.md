@@ -34,7 +34,7 @@ The board provides an optional `24LC32` module-identification EEPROM and a local
 - Slot A therefore selects `0x52`; and
 - Slot B selects `0x53`.
 
-The EEPROM is not required for the relay hardware to operate, but fitting and provisioning it is good practice. Future firmware can use the identity to offer the correct relay controls in the UI and exclude incompatible functions. Automatic discovery and the required module directory are not yet implemented. Without a valid identity, firmware must treat the relay GPIOs as ordinary configurable `AUX_GPIO` ports and must not automatically start a DuoRelay-specific driver.
+The EEPROM is not required for the relay hardware to operate, but fitting and provisioning it is good practice. Firmware discovers the reserved module EEPROM addresses independently for both slots, resolves supported records through the module-profile registry, and reports board/slot compatibility diagnostically. Discovery does not yet create a DuoRelay-specific driver or UI controls automatically. Without a valid identity, firmware treats the relay GPIOs as ordinary configurable `AUX_GPIO` ports and must not automatically start a DuoRelay-specific driver.
 
 ## Mechanical Geometry
 
