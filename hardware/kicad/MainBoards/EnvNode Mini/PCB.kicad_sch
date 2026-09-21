@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "b28115d4-39ec-4380-8360-abd7d3f8188b")
+	(uuid "27396136-44a3-4b2b-b45c-3971e9f22c31")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Mechanical:MountingHole"
@@ -107,7 +107,7 @@
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 127 88.9 0)
+		(at 146.05 95.25 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -117,8 +117,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "19c47de5-0a93-40cb-bd83-f3618e053454")
-		(property "Reference" "H3"
-			(at 129.54 87.6299 0)
+		(property "Reference" "H8"
+			(at 148.59 93.9799 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -129,7 +129,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 129.54 90.1699 0)
+			(at 148.59 96.5199 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -140,7 +140,7 @@
 			)
 		)
 		(property "Footprint" "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm"
-			(at 127 88.9 0)
+			(at 146.05 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -151,7 +151,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 127 88.9 0)
+			(at 146.05 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -162,7 +162,7 @@
 			)
 		)
 		(property "Description" "BOX4U mounting hole: NPTH 4.5 mm for 4 mm self-tapping screw"
-			(at 127 88.9 0)
+			(at 146.05 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -179,11 +179,17 @@
 					(unit 1)
 				)
 			)
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/b5fd6d73-aa5b-4f44-9fa4-96bd08cd097d"
+					(reference "H8")
+					(unit 1)
+				)
+			)
 		)
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 127 63.5 0)
+		(at 146.05 69.85 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -193,8 +199,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "41841eb0-bd6a-44e8-9bd2-e3d455bf7d30")
-		(property "Reference" "H2"
-			(at 129.54 62.2299 0)
+		(property "Reference" "H7"
+			(at 148.59 68.5799 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -205,7 +211,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 129.54 64.7699 0)
+			(at 148.59 71.1199 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -216,7 +222,7 @@
 			)
 		)
 		(property "Footprint" "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm"
-			(at 127 63.5 0)
+			(at 146.05 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -227,7 +233,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 127 63.5 0)
+			(at 146.05 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -238,7 +244,7 @@
 			)
 		)
 		(property "Description" "BOX4U mounting hole: NPTH 4.5 mm for 4 mm self-tapping screw"
-			(at 127 63.5 0)
+			(at 146.05 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -255,11 +261,17 @@
 					(unit 1)
 				)
 			)
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/b5fd6d73-aa5b-4f44-9fa4-96bd08cd097d"
+					(reference "H7")
+					(unit 1)
+				)
+			)
 		)
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 76.2 63.5 0)
+		(at 95.25 69.85 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -269,8 +281,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8c10209e-677b-48af-b82c-12a960c32134")
-		(property "Reference" "H1"
-			(at 78.74 62.2299 0)
+		(property "Reference" "H5"
+			(at 97.79 68.5799 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -281,7 +293,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 78.74 64.7699 0)
+			(at 97.79 71.1199 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -292,7 +304,7 @@
 			)
 		)
 		(property "Footprint" "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm"
-			(at 76.2 63.5 0)
+			(at 95.25 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -303,7 +315,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 76.2 63.5 0)
+			(at 95.25 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -314,7 +326,7 @@
 			)
 		)
 		(property "Description" "BOX4U mounting hole: NPTH 4.5 mm for 4 mm self-tapping screw"
-			(at 76.2 63.5 0)
+			(at 95.25 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -331,11 +343,17 @@
 					(unit 1)
 				)
 			)
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/b5fd6d73-aa5b-4f44-9fa4-96bd08cd097d"
+					(reference "H5")
+					(unit 1)
+				)
+			)
 		)
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 76.2 88.9 0)
+		(at 95.25 95.25 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -345,8 +363,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d70d6959-eb9c-4897-876f-77e77489979f")
-		(property "Reference" "H4"
-			(at 78.74 87.6299 0)
+		(property "Reference" "H6"
+			(at 97.79 93.9799 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -357,7 +375,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 78.74 90.1699 0)
+			(at 97.79 96.5199 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -368,7 +386,7 @@
 			)
 		)
 		(property "Footprint" "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm"
-			(at 76.2 88.9 0)
+			(at 95.25 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -379,7 +397,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 76.2 88.9 0)
+			(at 95.25 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -390,7 +408,7 @@
 			)
 		)
 		(property "Description" "BOX4U mounting hole: NPTH 4.5 mm for 4 mm self-tapping screw"
-			(at 76.2 88.9 0)
+			(at 95.25 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -407,6 +425,19 @@
 					(unit 1)
 				)
 			)
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/b5fd6d73-aa5b-4f44-9fa4-96bd08cd097d"
+					(reference "H6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(group "BOX4U-5U210900"
+		(uuid "7f756cf1-1b6b-46b1-9459-a7e1c5147db4")
+		(lib_id "EnvNodeDesignBlocks:BOX4U-5U210900")
+		(members "19c47de5-0a93-40cb-bd83-f3618e053454" "41841eb0-bd6a-44e8-9bd2-e3d455bf7d30"
+			"8c10209e-677b-48af-b82c-12a960c32134" "d70d6959-eb9c-4897-876f-77e77489979f"
 		)
 	)
 )

@@ -39,9 +39,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.0,
-          "height": 0.6,
-          "width": 1.95
+          "drill": 1.0,
+          "height": 1.7,
+          "width": 1.7
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -78,27 +78,75 @@
       ],
       "drc_exclusions": [
         [
-          "hole_clearance|138040000|99165000|88ba5e41-c5b0-4c77-8dce-e380d162bc3b|4821fd9a-71b1-4d11-85da-c38e5655291a",
+          "courtyards_overlap|117643794|121029000|5ca41076-67c2-4359-b2eb-5edcf5f1605f|895cbf70-7f59-4610-aa4a-cc81a8e9b921",
+          "Capacitor fits below ESP32"
+        ],
+        [
+          "courtyards_overlap|125177000|82604500|75ad32de-3af3-47ad-b4dd-06e92cf29f68|895cbf70-7f59-4610-aa4a-cc81a8e9b921",
+          "EEPROM fits below ESP32"
+        ],
+        [
+          "silk_edge_clearance|118402120|72120425|c873bf01-5ff0-44aa-9ce1-8117c60efd05|b54b53e6-2317-4dcb-95e0-0730e4bdbb8a",
           ""
         ],
         [
-          "hole_clearance|138040000|99165000|f2e38fe1-c122-4164-b365-c5dd2dd009c0|4821fd9a-71b1-4d11-85da-c38e5655291a",
+          "silk_edge_clearance|136385320|72120425|c873bf01-5ff0-44aa-9ce1-8117c60efd05|db3f7d00-90eb-4823-a362-3a4fabdf881e",
           ""
         ],
         [
-          "hole_clearance|144140000|99165000|6b6cda94-47af-4caa-920f-003a7b984c3c|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
+          "silk_over_copper|107696000|127874000|f81481a7-bfd2-494c-9a02-0d3593703a6f|379c60c5-e9d2-4745-a93e-911a5c5a046c",
           ""
         ],
         [
-          "hole_clearance|144140000|99165000|de722716-2851-41a9-9168-406d14ca28eb|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
+          "silk_over_copper|107696000|131294000|f81481a7-bfd2-494c-9a02-0d3593703a6f|c36a4ffc-d0c8-4b51-abf3-e4d92b027af8",
           ""
         ],
         [
-          "silk_overlap|173800000|50520000|806a60c7-1ac8-4b14-aab2-de251c8a208b|9c0bd09d-b513-4a83-b0da-404ad1377365",
+          "silk_over_copper|109372000|132740410|a396a93f-78bd-4a8a-8035-43acc7f9a5f0|c36a4ffc-d0c8-4b51-abf3-e4d92b027af8",
           ""
         ],
         [
-          "silk_overlap|173800000|55640000|9a55e489-428a-4740-bac1-760e3f9a4f05|9c0bd09d-b513-4a83-b0da-404ad1377365",
+          "silk_over_copper|147048000|129414000|f7327738-08ec-488d-bd03-59a8d7d21088|5f9511f1-65d0-4791-91d0-b2358ac2201b",
+          ""
+        ],
+        [
+          "silk_over_copper|147048000|133164000|f7327738-08ec-488d-bd03-59a8d7d21088|b2526864-2891-4552-a9fb-e476e39131f2",
+          ""
+        ],
+        [
+          "silk_over_copper|147048000|136390000|f7327738-08ec-488d-bd03-59a8d7d21088|0ed7b57d-46d9-45a1-bdd2-d26194e3f75c",
+          ""
+        ],
+        [
+          "silk_over_copper|185048000|84495000|f7327738-08ec-488d-bd03-59a8d7d21088|cb272a16-936a-49c7-a6de-ae295e24ae96",
+          ""
+        ],
+        [
+          "silk_over_copper|185048000|97972000|f7327738-08ec-488d-bd03-59a8d7d21088|e1b06e8f-22dc-4095-b648-73085305f76c",
+          ""
+        ],
+        [
+          "silk_over_copper|69696000|85795000|f81481a7-bfd2-494c-9a02-0d3593703a6f|dffabe10-18f3-435e-b442-978b662fa6cf",
+          ""
+        ],
+        [
+          "silk_over_copper|69696000|99272000|f81481a7-bfd2-494c-9a02-0d3593703a6f|3a86c17a-5b19-4e73-9d20-98b916c7dfb6",
+          ""
+        ],
+        [
+          "silk_overlap|185048000|100932000|7dc824df-b3aa-4ffa-b267-9baf952d43b7|f7327738-08ec-488d-bd03-59a8d7d21088",
+          ""
+        ],
+        [
+          "silk_overlap|185048000|87455000|83da0fe6-90c7-4f62-b3ec-5ed4386fc3c0|f7327738-08ec-488d-bd03-59a8d7d21088",
+          ""
+        ],
+        [
+          "silk_overlap|69696000|100932000|993bac9a-71b3-48e0-80e2-801ecf24f407|f81481a7-bfd2-494c-9a02-0d3593703a6f",
+          ""
+        ],
+        [
+          "silk_overlap|69696000|87455000|71985118-b989-4f19-945a-9a14ab827661|f81481a7-bfd2-494c-9a02-0d3593703a6f",
           ""
         ]
       ],
@@ -560,7 +608,7 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.6,
+        "track_width": 0.8,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3
@@ -727,7 +775,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "JP_I2C1_SDA1,JP_I2C1_SCL1,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-8,R1-6,JP1-4,I2C0_1-2,#FLG1-8,#PWR1-4,#PWR9-25,D1-4,C5-8,U1-2,U4,J2-4,J6",
+    "used_designators": "NT1-2,J1-4,J6-8,U1-5,C1,C5-12,D1-4,#PWR1-28,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
     "variants": []
   },
   "sheets": [
@@ -742,6 +790,18 @@
     [
       "7bd2a797-1ced-478c-b7d8-a8f5d3cfea9a",
       "Module Slot B"
+    ],
+    [
+      "58c5c7a7-de73-4602-8652-83d350ff8bac",
+      "ESP32Core"
+    ],
+    [
+      "b5fd6d73-aa5b-4f44-9fa4-96bd08cd097d",
+      "PCB"
+    ],
+    [
+      "0c9cd894-ae71-4b36-baa6-f16d44b376f3",
+      "Power"
     ]
   ],
   "text_variables": {},

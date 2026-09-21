@@ -658,13 +658,18 @@
       {
         "filename": "BOX4U-5U210900.kicad_sch",
         "name": "BOX4U-5U210900",
-        "uuid": "00000000-0000-0000-0000-000000000000"
+        "uuid": "23fc823c-9a98-4c93-a80e-354672461955"
       }
     ],
     "used_designators": "",
     "variants": []
   },
-  "sheets": [],
+  "sheets": [
+    [
+      "23fc823c-9a98-4c93-a80e-354672461955",
+      "BOX4U-5U210900"
+    ]
+  ],
   "text_variables": {},
   "tuning_profiles": {
     "meta": {

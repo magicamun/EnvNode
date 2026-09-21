@@ -759,7 +759,6 @@
 			(width 0.1)
 			(type default)
 		)
-		(locked yes)
 		(layer "Dwgs.User")
 		(uuid "67193d0d-d818-42d1-8f83-51dff62f488d")
 	)
@@ -770,7 +769,6 @@
 			(width 0.1)
 			(type solid)
 		)
-		(locked yes)
 		(layer "Dwgs.User")
 		(uuid "065115a1-0167-4401-a1e7-f452a42e930f")
 	)
@@ -781,7 +779,6 @@
 			(width 0.05)
 			(type solid)
 		)
-		(locked yes)
 		(layer "Dwgs.User")
 		(uuid "da40bff9-b72e-400a-8d34-0a5aceec44d1")
 	)
@@ -802,7 +799,6 @@
 			(width 0.1)
 			(type solid)
 		)
-		(locked yes)
 		(layer "Dwgs.User")
 		(uuid "3c176215-885a-484d-89b0-286fdf51c5f7")
 	)
@@ -811,6 +807,14 @@
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
 		(members "3d12ae97-286f-49e8-97b4-923e045e6b7a" "71937e0a-9185-4d01-a96b-ebca32d1c178"
 			"a01ba7fa-0453-4dfe-9d4c-dd9c660d9653" "c8da8d0c-a157-4134-a757-dc1587499183"
+		)
+	)
+	(group ""
+		(uuid "402dce57-2ead-405a-841a-c7f61870fb6a")
+		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
+		(members "065115a1-0167-4401-a1e7-f452a42e930f" "3a4d4769-be7c-4808-86f8-d7d31a884d07"
+			"3c176215-885a-484d-89b0-286fdf51c5f7" "67193d0d-d818-42d1-8f83-51dff62f488d"
+			"c34f466f-e607-4e89-9966-cd60d21c6e88" "da40bff9-b72e-400a-8d34-0a5aceec44d1"
 		)
 	)
 	(embedded_fonts no)

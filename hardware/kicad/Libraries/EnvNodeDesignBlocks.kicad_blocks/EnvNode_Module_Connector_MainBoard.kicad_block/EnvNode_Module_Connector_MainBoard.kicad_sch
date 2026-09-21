@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "658894c2-231d-4242-8dda-3bd010aea422")
+	(uuid "804bcbf2-7d21-40f1-b39a-46f3d419b0a7")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Connector_Generic:Conn_02x07_Odd_Even"
@@ -610,146 +610,290 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "power:GND"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#PWR"
+				(at 0 -6.35 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "GND"
+				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "GND_0_1"
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "GND_1_1"
+				(pin power_in line
+					(at 0 0 270)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 	)
-	(label "+3V3_SYS"
+	(global_label "+5V"
+		(shape input)
+		(at 139.7 67.31 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "49cd311d-727d-44d6-b349-fa1bb51122d6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 146.5557 67.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "+3V3_SYS"
+		(shape input)
 		(at 139.7 64.77 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify left)
 		)
-		(uuid "04de4948-7696-4b1d-820c-c8671aa15d66")
-	)
-	(label "I2C0_SCL"
-		(at 139.7 69.85 0)
-		(effects
-			(font
-				(size 1.27 1.27)
+		(uuid "52a8dd32-4038-46cf-8a5b-3f976dc139f0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.2404 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
-			(justify left bottom)
 		)
-		(uuid "06b12ad7-6d3d-4214-8a76-79eee3a52335")
 	)
-	(label "GND"
-		(at 127 64.77 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "1a63e1ee-657f-4641-b216-968f1972addb")
-	)
-	(label "SPI_CS"
+	(hierarchical_label "SPI_CS"
+		(shape input)
 		(at 139.7 80.01 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify left)
 		)
-		(uuid "1c8503ad-4197-4a29-80f8-4015167ca355")
+		(uuid "10a3e04d-2cb3-4a20-b6d3-e54593adda3d")
 	)
-	(label "EEPROM_A0"
+	(hierarchical_label "EEPROM_A0"
+		(shape input)
 		(at 127 67.31 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify right)
 		)
-		(uuid "2cc13674-d5ef-4130-9452-7ad8ba50443e")
+		(uuid "35d10dc8-902b-42be-912a-d6a3bb5485a2")
 	)
-	(label "SPI_MOSI"
-		(at 127 77.47 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "5aa22f4e-3061-4607-a7f7-ff6d6bde7611")
-	)
-	(label "AUX_GPIO1"
-		(at 127 74.93 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6c3b9fd2-854c-4552-a187-852b3246494d")
-	)
-	(label "+5V"
-		(at 139.7 67.31 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "8aa84467-3a5d-47eb-973b-c2076883c7b0")
-	)
-	(label "I2C0_SDA"
-		(at 127 69.85 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "97e46592-e731-446e-98ed-88e46fef8256")
-	)
-	(label "AUX_GPIO2"
-		(at 139.7 74.93 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9de15aee-ed1b-4908-9b91-47d66a70e5de")
-	)
-	(label "I2C1_SDA"
+	(hierarchical_label "I2C1_SDA"
+		(shape input)
 		(at 127 72.39 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify right)
 		)
-		(uuid "b2dd19d3-81bf-4989-ad11-060290be6813")
+		(uuid "364c6104-80e5-4194-9a58-ac5f315c71ea")
 	)
-	(label "SPI_MISO"
+	(hierarchical_label "AUX_GPIO2"
+		(shape input)
+		(at 139.7 74.93 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "59a6c92c-bee8-4da6-8e1c-b85208bbf6dc")
+	)
+	(hierarchical_label "SPI_MOSI"
+		(shape input)
+		(at 127 77.47 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "81b9e1a9-4bf5-4b8e-96a3-3026afe81009")
+	)
+	(hierarchical_label "SPI_MISO"
+		(shape input)
 		(at 139.7 77.47 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify left)
 		)
-		(uuid "cade3d6a-fc0b-4d19-9031-8092e1e01c78")
+		(uuid "920f360f-6e87-4b50-9808-891e06de1644")
 	)
-	(label "SPI_SCK"
+	(hierarchical_label "I2C0_SDA"
+		(shape input)
+		(at 139.7 69.85 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "94f40b83-6157-434e-94a1-77474b7c4ba8")
+	)
+	(hierarchical_label "SPI_SCK"
+		(shape input)
 		(at 127 80.01 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify right)
 		)
-		(uuid "cbcd65a4-c9f7-4ace-9331-58d7aa4e573f")
+		(uuid "c2975ee9-1e7f-4a1f-834f-b91691c6bd6b")
 	)
-	(label "I2C1_SCL"
+	(hierarchical_label "I2C0_SCL"
+		(shape input)
+		(at 127 69.85 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d4b5cfae-4c38-4711-a704-c319c7024a4c")
+	)
+	(hierarchical_label "AUX_GPIO1"
+		(shape input)
+		(at 127 74.93 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d9715f58-7cfe-4729-9aff-7b7bffac0519")
+	)
+	(hierarchical_label "I2C1_SCL"
+		(shape input)
 		(at 139.7 72.39 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify left)
 		)
-		(uuid "ea09d783-d15c-4045-8297-facdbe84b388")
+		(uuid "f917a690-8051-4e04-ac7c-ef3207bdf994")
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
@@ -1014,6 +1158,85 @@
 			(project "EnvNode_Module_Connector_MainBoard"
 				(path "/accfb789-267f-4ccf-9ad3-e1adf3d4042c"
 					(reference "H1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 127 64.77 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b9f75ff1-0a0c-42ab-9382-8e2ac2097468")
+		(property "Reference" "#PWR01"
+			(at 120.65 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 123.19 64.7699 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 127 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 127 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 127 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9047936c-1226-402f-8ebf-923edfb43c41")
+		)
+		(instances
+			(project "EnvNode_Module_Connector_MainBoard"
+				(path "/accfb789-267f-4ccf-9ad3-e1adf3d4042c"
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)
