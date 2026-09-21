@@ -1,5 +1,0 @@
-{
-"description": "External 5 V power input with LM3940 3.3 V linear regulator. Provides the +5V rail and the isolated +3V3_EXT source for connection to the downstream 3.3 V power ORing stage.",
-"keywords": "5V power input, 3.3V regulator, LM3940, external supply, power supply, LDO, 3V3_EXT, EnvNode",
-"fields": {}
-}
