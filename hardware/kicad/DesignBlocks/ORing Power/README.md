@@ -50,7 +50,7 @@ The castellated-hole geometry must be confirmed with the PCB manufacturer before
 | --- | --- | --- |
 | J3 | USB-C 5 V input | GCT `USB4125-GF-A-0190`; KiCad six-pin power-only footprint |
 | R1, R2 | USB-C Rd | 5.1 kΩ each, one resistor per CC pin |
-| J1 | Alternate 5 V input | JST-PH, two-pin, vertical |
+| J1 | Alternate 5 V input | JST `B2B-PH-SM4-TB`, two-pin, vertical SMD; KiCad footprint `JST_PH_B2B-PH-SM4-TB_1x02-1MP_P2.00mm_Vertical` |
 | U1 | 3.3 V regulator | `LM3940IMP-3.3/NOPB`, SOT-223 |
 | D1, D2 | 3.3 V source ORing | SS14, SMA |
 | C1, C5 | Local bypass | 100 nF, 1206 |
