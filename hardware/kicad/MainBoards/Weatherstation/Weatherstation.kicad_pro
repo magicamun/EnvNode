@@ -39,8 +39,8 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.75,
-          "height": 1.75,
+          "drill": 0.8,
+          "height": 2.0,
           "width": 1.2
         },
         "silk_line_width": 0.1,
@@ -78,27 +78,15 @@
       ],
       "drc_exclusions": [
         [
-          "courtyards_overlap|89320000|60462500|2eb45622-aa39-49c6-8302-67979713e52a|48f26080-734c-4f83-9936-f6bfd1c3789d",
-          "beneath U1"
-        ],
-        [
-          "courtyards_overlap|89600000|64490000|2eb45622-aa39-49c6-8302-67979713e52a|8b856e11-17f9-40c2-8e54-5c8d585bd0ee",
-          "beneath U1"
-        ],
-        [
-          "hole_clearance|75090000|134027262|88ba5e41-c5b0-4c77-8dce-e380d162bc3b|4821fd9a-71b1-4d11-85da-c38e5655291a",
+          "courtyards_overlap|82219794|105329259|3c3c0250-5e72-493b-9d97-e5c819bc0044|3d8bba24-c985-4370-8e74-f50ddf2a8f43",
           ""
         ],
         [
-          "hole_clearance|75090000|134027262|f2e38fe1-c122-4164-b365-c5dd2dd009c0|4821fd9a-71b1-4d11-85da-c38e5655291a",
+          "courtyards_overlap|89753000|66904759|3bcf8c92-b0ea-415e-94e8-18a6551f92c5|3d8bba24-c985-4370-8e74-f50ddf2a8f43",
           ""
         ],
         [
-          "hole_clearance|81190000|134027262|6b6cda94-47af-4caa-920f-003a7b984c3c|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
-          ""
-        ],
-        [
-          "hole_clearance|81190000|134027262|de722716-2851-41a9-9168-406d14ca28eb|1b3f4b31-9c8a-40bc-a1ef-c625e1eadc3e",
+          "silk_over_copper|73795000|135414410|2e540bae-0b76-49c3-ad47-fe06d73a362f|a9a805c1-79cf-4c58-a9cf-e4f253ac2b4c",
           ""
         ]
       ],
@@ -727,7 +715,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "J2-4,J6,U1-2,U4,C5-8,D1-2,#PWR1-4,#PWR9-70,#FLG1-4,I2C0_1-4,JP1-8,H1-6,R1-10,JP_I2C0_SCL1,JP_I2C0_SDA1,I2C1_1-4,JP_I2C1_SCL1,JP_I2C1_SDA1,GPIO4-5,GPIO13-19,GPIO32-36,GPIO39-40,ADC3-7",
+    "used_designators": "J1-7,U1-7,C1,C5-17,D1-6,#PWR1-70,#FLG1-12,I2C0_1-4,JP1-8,H1-10,R1-10,JP_I2C0_SCL1,JP_I2C0_SDA1,I2C1_1-4,JP_I2C1_SCL1,JP_I2C1_SDA1,GPIO1-6,GPIO13-19,GPIO32-36,GPIO39-40,ADC1-7",
     "variants": []
   },
   "sheets": [
@@ -737,7 +725,11 @@
     ],
     [
       "a050e99e-b00d-4afc-833b-44ff53194a3e",
-      "Module Slot 0"
+      "Module Slot A"
+    ],
+    [
+      "9b31db05-eafb-48ad-a1a1-f8bfed50e2e7",
+      "Power"
     ],
     [
       "52d09e00-3392-4a75-97d4-fe6c18a37b92",
@@ -746,6 +738,14 @@
     [
       "ab15ece5-0d10-4340-ba1c-d5be36570694",
       "QWIIC-Ports"
+    ],
+    [
+      "d7941a8f-aa54-444c-8576-3b2d5d436713",
+      "PCB"
+    ],
+    [
+      "0178cf39-3ed8-4f9c-a939-b4df62f92d57",
+      "ESP32"
     ]
   ],
   "text_variables": {},
