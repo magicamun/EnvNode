@@ -911,7 +911,7 @@
 		(uuid "f7f3c35e-bb2a-4629-a9dd-9c13014c93eb")
 	)
 	(no_connect
-		(at 135.89 134.62)
+		(at 144.78 134.62)
 		(uuid "15f3636b-8f28-48d0-8976-7ddb71c62f51")
 	)
 	(no_connect
@@ -927,7 +927,7 @@
 		(uuid "86884f67-2a76-4123-bd74-0d3a5614dea5")
 	)
 	(no_connect
-		(at 133.35 134.62)
+		(at 142.24 134.62)
 		(uuid "c3219eca-52a7-4852-8436-31cea36faa99")
 	)
 	(no_connect
@@ -3816,13 +3816,13 @@
 			)
 		)
 		(pin "GPIO4" input
-			(at 151.13 74.93 0)
+			(at 142.24 134.62 270)
 			(uuid "3e2edb5c-39aa-4a15-9686-2fd58443a6f5")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
 		(pin "GPIO13" input
@@ -3836,7 +3836,7 @@
 			)
 		)
 		(pin "GPIO14" input
-			(at 92.71 74.93 180)
+			(at 92.71 77.47 180)
 			(uuid "901b16eb-2df0-4976-ae77-94f8b2e55019")
 			(effects
 				(font
@@ -3846,7 +3846,7 @@
 			)
 		)
 		(pin "GPIO16" input
-			(at 92.71 77.47 180)
+			(at 144.78 134.62 270)
 			(uuid "804b84fe-0efa-47d6-b4c3-df51e286e230")
 			(effects
 				(font
@@ -3876,7 +3876,7 @@
 			)
 		)
 		(pin "GPIO32" input
-			(at 135.89 134.62 270)
+			(at 92.71 74.93 180)
 			(uuid "656f10ae-caa2-4cae-9ae1-f180f2c9e964")
 			(effects
 				(font
@@ -3886,13 +3886,13 @@
 			)
 		)
 		(pin "GPIO33" input
-			(at 133.35 134.62 270)
+			(at 151.13 74.93 0)
 			(uuid "c4b5aee4-cc0e-4b21-a653-7b6e995b4eb3")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(pin "I2C0_SCL" input
