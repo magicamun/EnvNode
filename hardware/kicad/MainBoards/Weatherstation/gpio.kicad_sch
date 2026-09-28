@@ -1321,7 +1321,7 @@
 		)
 		(uuid "d4b6f2a4-7578-47ef-9082-78de7785fdc2")
 	)
-	(hierarchical_label "GPIO33"
+	(hierarchical_label "GPIO4"
 		(shape input)
 		(at 260.35 102.87 270)
 		(effects
@@ -1957,7 +1957,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e91f5cd7-47f5-4563-b6f9-d104a6fe637f")
-		(property "Reference" "GPIO33"
+		(property "Reference" "GPIO4"
 			(at 261.62 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2025,7 +2025,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO33")
+					(reference "GPIO4")
 					(unit 1)
 				)
 			)

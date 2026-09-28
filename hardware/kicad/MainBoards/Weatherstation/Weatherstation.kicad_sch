@@ -780,7 +780,7 @@
 			)
 		)
 	)
-	(global_label "GPIO33"
+	(global_label "GPIO4"
 		(shape input)
 		(at 190.5 143.51 180)
 		(fields_autoplaced yes)
@@ -792,7 +792,7 @@
 		)
 		(uuid "4abc7fc4-5cc4-46b3-9cd0-4bb005f1aafc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 180.6205 143.51 0)
+			(at 181.83 143.51 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1308,7 +1308,7 @@
 			)
 		)
 	)
-	(global_label "GPIO4"
+	(global_label "GPIO33"
 		(shape input)
 		(at 190.5 35.56 180)
 		(fields_autoplaced yes)
@@ -1320,7 +1320,7 @@
 		)
 		(uuid "ce7c5ee6-6319-40a3-91d6-80f3bf37bf6e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 181.83 35.56 0)
+			(at 180.6205 35.56 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2600,9 +2600,9 @@
 				(justify left)
 			)
 		)
-		(pin "GPIO33" input
-			(at 190.5 143.51 180)
-			(uuid "f51339a7-d96c-43c4-9aae-2a686e5d30e0")
+		(pin "GPIO14" input
+			(at 190.5 130.81 180)
+			(uuid "b1cbe7b3-c989-46e9-9828-fc6b3b54b410")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2610,9 +2610,9 @@
 				(justify left)
 			)
 		)
-		(pin "GPIO14" input
-			(at 190.5 130.81 180)
-			(uuid "b1cbe7b3-c989-46e9-9828-fc6b3b54b410")
+		(pin "GPIO4" input
+			(at 190.5 143.51 180)
+			(uuid "10ec3dd7-3bb7-4973-9dfc-6cc564c14a03")
 			(effects
 				(font
 					(size 1.27 1.27)
