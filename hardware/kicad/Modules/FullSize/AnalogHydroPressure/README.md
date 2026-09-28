@@ -52,3 +52,11 @@ Revision 0.4 uses the B260S1F-7 boost diode, selectable ADS1115 address jumpers,
 At the documented design checkpoint, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
 
 The Revision 0.4 article list and assembly/bring-up guide are available. Physical boost-converter validation, thermal and EMC verification, probe calibration, and production testing remain required before production release.
+
+## Connector review — 2026-09-28
+
+The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Both current mainboards wire these two pins oppositely. This is an unresolved compatibility issue; see the module-interface specification. I2C1 remains pin 7 SDA and pin 8 SCL.
+
+J1 pin 9 / AUX_GPIO1 drives LT8330 EN/UVLO and has a pull-down to GND. J1 pin 10 / AUX_GPIO2 is unused. The new mainboard ADC1 capability on pin 9 does not make this module pin a free analog input. A future SCT013 extension should relocate boost enable to AUX_GPIO2 before using AUX_GPIO1 for its conditioned analog signal. No SCT013 circuit or such relocation is implemented by this review.
+
+The review found no PCB DRC violations, unconnected pads, or schematic/PCB parity issues. Schematic ERC reports zero errors and ten warnings (unused labelled signals and duplicate local/global label names). These checks do not resolve the cross-board I2C0 mismatch.

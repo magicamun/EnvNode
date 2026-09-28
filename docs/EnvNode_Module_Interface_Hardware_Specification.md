@@ -2,7 +2,7 @@
 
 **Status:** Implemented design baseline
 
-**Revision:** 0.9
+**Revision:** 0.10
 
 **Applies to:** Mainboard Revision 0.2 and later
 
@@ -58,10 +58,18 @@ EnvNode Mini implements two slots:
 
 | Slot | Pin 3 / `EEPROM_A0` | Pin 9 | Pin 10 | Pin 14 |
 | --- | --- | --- | --- | --- |
-| A | `GND` | `AUX1` | `AUX2` | `CS` |
-| B | `+3V3_SYS` | `AUX3` | `AUX4` | `AUX6` used as the second chip select |
+| A | `GND` | GPIO33 / ADC1_CH5 | GPIO13 | GPIO5 / `CS` |
+| B | `+3V3_SYS` | GPIO32 / ADC1_CH4 | GPIO14 | GPIO27 |
 
-MOSI, MISO, and SCK are shared between slots. Each populated SPI module requires its own chip-select signal. On the two-slot Mini this consumes the core `CS` signal for Slot A and `AUX6` for Slot B.
+MOSI, MISO, and SCK are shared between slots. Each populated SPI module requires its own chip-select signal. On the two-slot Mini this consumes the core `CS` signal for Slot A and GPIO27 for Slot B.
+
+WeatherStation Slot A uses the same GPIO mapping as Mini Slot A. On these mainboards, pin 9 / AUX_GPIO1 supports digital input, digital output/PWM, or ADC1 analog input with Wi-Fi active. Pin 10 / AUX_GPIO2 remains digital input/output/PWM during Wi-Fi operation. Functions are alternatives, not simultaneous uses of one pin.
+
+### Compatibility issue found on 2026-09-28
+
+The current Mini and WeatherStation schematics and PCBs connect pin 5 to I2C0 SCL (GPIO22) and pin 6 to I2C0 SDA (GPIO21), opposite to the normative connector table above. AnalogHydroPressure follows that table: pin 5 SDA and pin 6 SCL. Therefore its I2C0 devices are not directly compatible with the current mainboard wiring. The hardware discrepancy remains unresolved; per-board ERC/DRC cannot detect this inter-board mismatch. Do not interpret clean per-board checks as module compatibility.
+
+AnalogHydroPressure currently uses pin 9 / AUX_GPIO1 for the LT8330 enable input and a pull-down resistor. Pin 10 / AUX_GPIO2 is unused. Before adding SCT013 analog acquisition on pin 9, move the digital boost-enable function to pin 10 in both schematic and PCB and update firmware. This is a proposed follow-up, not an implemented module change.
 
 EnvNode Mini additionally exposes both I²C buses for direct cable connection:
 
