@@ -1,0 +1,412 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "c0994c8f-ea2a-4bf2-87d5-2e4ca7bdf41f")
+	(paper "A4")
+	(lib_symbols)
+	(wire
+		(pts
+			(xy 128.27 113.03) (xy 146.05 113.03)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2917b735-69cb-4731-97c3-f47324e25c00")
+	)
+	(wire
+		(pts
+			(xy 128.27 107.95) (xy 146.05 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5503e908-07e3-442e-a252-5b1ec081e413")
+	)
+	(wire
+		(pts
+			(xy 128.27 102.87) (xy 146.05 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7ea765b4-e0be-49de-880d-10d8c27772db")
+	)
+	(wire
+		(pts
+			(xy 128.27 128.27) (xy 146.05 128.27)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f277524-1828-4194-aa55-20e3baa2cd9e")
+	)
+	(wire
+		(pts
+			(xy 128.27 118.11) (xy 146.05 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a08959ed-36f0-445d-8829-a319f2acdcee")
+	)
+	(wire
+		(pts
+			(xy 128.27 123.19) (xy 146.05 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c78a9170-9ee3-40a9-875e-76bfb5736c1d")
+	)
+	(wire
+		(pts
+			(xy 128.27 133.35) (xy 146.05 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce98dc88-d913-421a-9ebd-26ab1674ad50")
+	)
+	(sheet
+		(at 71.12 89.535)
+		(size 57.15 58.42)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "6a631997-fa6a-4006-bec8-468e789d5d48")
+		(property "Sheetname" "STM32"
+			(at 71.12 88.8234 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "STM32.kicad_sch"
+			(at 71.12 148.5396 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "RADIO_BUSY" input
+			(at 128.27 102.87 0)
+			(uuid "b1b0f281-8bdf-43a8-b20d-50c44ce9ae3a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RADIO_DIO1" input
+			(at 128.27 107.95 0)
+			(uuid "497d0ca6-8823-4e4a-8d1c-cbece3f44f7a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RADIO_MISO" input
+			(at 128.27 113.03 0)
+			(uuid "80fcb2fa-8729-4dee-a1d5-24b17c768ed6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RADIO_MOSI" output
+			(at 128.27 118.11 0)
+			(uuid "7c3fb212-608e-47e1-87a4-725e8272ec88")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RADIO_NRST" output
+			(at 128.27 123.19 0)
+			(uuid "6b5c8a55-971e-402f-824d-40609de7dbe9")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RADIO_NSS" output
+			(at 128.27 128.27 0)
+			(uuid "ec943a0f-6e69-47aa-92d9-80dfcdcc8f87")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RADIO_SCK" output
+			(at 128.27 133.35 0)
+			(uuid "ebe5106e-0d33-4344-a16c-bdfdf372161c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "USB_DM" bidirectional
+			(at 88.9 89.535 90)
+			(uuid "9ec87670-dc2c-4796-940d-b2e0c0a27883")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "USB_DP" bidirectional
+			(at 93.345 89.535 90)
+			(uuid "1fd5acda-876f-4ca0-9638-87ff329b1af6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "VDD_MCU" input
+			(at 99.695 89.535 90)
+			(uuid "e1914e59-6a8d-4d9f-be57-bda43e918f65")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "VDD_USB" input
+			(at 104.775 89.535 90)
+			(uuid "f060c8b1-7f20-40a9-ac32-b52966d4242d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "RemoteNode"
+				(path "/c0994c8f-ea2a-4bf2-87d5-2e4ca7bdf41f"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 71.12 41.275)
+		(size 128.27 31.115)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "d5fb0d92-4ae2-4f54-8698-f270a01352fd")
+		(property "Sheetname" "Power_USB"
+			(at 71.12 40.5634 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Power_USB.kicad_sch"
+			(at 71.12 72.9746 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "RemoteNode"
+				(path "/c0994c8f-ea2a-4bf2-87d5-2e4ca7bdf41f"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 146.05 90.17)
+		(size 53.34 57.15)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "f9d86c21-34c6-443b-b69c-f2f1f346c9ed")
+		(property "Sheetname" "Radio"
+			(at 146.05 89.4584 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Radio.kicad_sch"
+			(at 146.05 147.9046 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "RADIO_BUSY" output
+			(at 146.05 102.87 180)
+			(uuid "bf1e22dd-dcff-4188-855b-cd808b19f919")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RADIO_DIO1" output
+			(at 146.05 107.95 180)
+			(uuid "659167ff-8325-4c12-8dc4-7cf888e35d93")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RADIO_MISO" output
+			(at 146.05 113.03 180)
+			(uuid "2a927276-98bb-41d5-ae28-50a28155d257")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RADIO_MOSI" input
+			(at 146.05 118.11 180)
+			(uuid "c381f826-40af-4a35-ab80-37f758cd68a4")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RADIO_NRST" input
+			(at 146.05 123.19 180)
+			(uuid "39e75435-3980-4091-877e-73a23bfdcee8")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RADIO_NSS" input
+			(at 146.05 128.27 180)
+			(uuid "e118f8a6-65fb-4d9d-bc22-eb428d8da08b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RADIO_SCK" input
+			(at 146.05 133.35 180)
+			(uuid "c61a430c-b460-4025-ac03-9058a561e5cb")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "VDD_RADIO" input
+			(at 168.275 90.17 90)
+			(uuid "e17de78b-390b-410f-a57c-1957071c56fe")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "RemoteNode"
+				(path "/c0994c8f-ea2a-4bf2-87d5-2e4ca7bdf41f"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
