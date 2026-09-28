@@ -9,6 +9,7 @@
 - `AnalogHydroPressure.kicad_pcb`
 - `Analog.kicad_sch` — analog input and ADS1115
 - `24VBoost.kicad_sch` — local probe-supply generation
+- `Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.4.pdf` — assembly, configuration, and bring-up guide
 
 ## Functional Structure
 
@@ -46,8 +47,8 @@ The project-level `sym-lib-table` maps the symbol library. The footprint library
 
 ## Validation and Release Status
 
-Revision 0.3 aligns the bottom-side identification EEPROM, its decoupling capacitor, vias, and connector routing with the FullSize THT module template.
+Revision 0.4 uses the B260S1F-7 boost diode, selectable ADS1115 address jumpers, and an optional DNP measurement header for GND, `+24V`, `LOOP_RETURN`, and `AIN0`. The bottom-side identification EEPROM and its decoupling capacitor remain DNP in the current kit.
 
 At the documented design checkpoint, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
 
-The article list, orderable manufacturer part numbers, qualified alternatives, and assembly information remain to be completed before Revision 0.3 production release.
+The Revision 0.4 article list and assembly/bring-up guide are available. Physical boost-converter validation, thermal and EMC verification, probe calibration, and production testing remain required before production release.
