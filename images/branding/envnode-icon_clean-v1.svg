@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640" role="img" aria-labelledby="title description">
+  <title id="title">EnvNode</title>
+  <desc id="description">Tropfenförmiges EnvNode-Leiterbahn-Signet</desc>
+  <defs>
+    <linearGradient id="dropGradient" x1="72" y1="0" x2="490" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#080909"/><stop offset="0.48" stop-color="#101111"/><stop offset="0.53" stop-color="#c18d05"/><stop offset="1" stop-color="#f2c72f"/>
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0" y1="190" x2="0" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6d243"/><stop offset="0.5" stop-color="#d9a814"/><stop offset="1" stop-color="#b77d00"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(45 4)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M275 590 C266 552 239 535 197 511 C121 468 87 414 96 339 C104 266 159 206 275 93 C391 206 446 266 454 339 C463 414 429 468 353 511 C311 535 284 552 275 590Z" stroke="url(#dropGradient)" stroke-width="43"/>
+      <g stroke="url(#goldGradient)" stroke-width="25"><path d="M275 574 V414"/><path d="M275 414 V265"/><path d="M275 414 L169 349"/><path d="M275 414 L381 349"/></g>
+    </g>
+    <g fill="url(#goldGradient)" stroke="#9a6800" stroke-width="4"><circle cx="275" cy="414" r="44"/><circle cx="275" cy="234" r="38"/><circle cx="169" cy="349" r="35"/><circle cx="381" cy="349" r="35"/></g>
+    <g fill="#080909"><circle cx="275" cy="234" r="14"/><circle cx="169" cy="349" r="12"/><circle cx="381" cy="349" r="12"/></g>
+  </g>
+</svg>

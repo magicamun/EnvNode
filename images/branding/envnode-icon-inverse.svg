@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 512" role="img" aria-labelledby="title desc">
+  <title id="title">EnvNode inverse icon</title>
+  <desc id="desc">The EnvNode logo symbol for dark backgrounds.</desc>
+  <g fill="none" stroke-width="38" stroke-linecap="butt" stroke-linejoin="round">
+    <path stroke="#FFFFFF" d="M200 18C104 91 40 190 42 294c2 83 49 134 146 180"/>
+    <path stroke="#D6AA24" d="M200 18c96 73 160 172 158 276-2 83-49 134-146 180"/>
+  </g>
+  <g stroke="#D6AA24" stroke-linecap="butt" stroke-linejoin="round">
+    <path fill="none" stroke-width="24" d="M200 181v69M200 309v184M111 288l61 52c16 14 40 14 56 0l61-52"/>
+    <circle cx="200" cy="145" r="28" fill="none" stroke-width="22"/>
+    <circle cx="86" cy="275" r="25" fill="none" stroke-width="20"/>
+    <circle cx="314" cy="275" r="25" fill="none" stroke-width="20"/>
+    <circle cx="200" cy="286" r="40" fill="#D6AA24" stroke="none"/>
+  </g>
+</svg>
