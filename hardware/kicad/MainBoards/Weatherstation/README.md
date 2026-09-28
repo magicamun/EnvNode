@@ -1,6 +1,6 @@
 # EnvNode Weather
 
-`EnvNode Weather` is the EnvNode mainboard for a fixed weather-station installation. It combines an ESP32-DevKitC, one EnvNode module slot, two externally accessible I2C buses, and dedicated GPIO/ADC sensor connectors. This directory contains the KiCad design for hardware Revision 0.1.
+`EnvNode Weather` is the EnvNode mainboard for a fixed weather-station installation. It combines an ESP32-DevKitC, one EnvNode module slot, two externally accessible I2C buses, and dedicated GPIO/ADC sensor connectors. This directory contains the KiCad design for hardware Revision 0.2.
 
 ## Project Files
 
@@ -14,6 +14,12 @@
 - `SlotA.kicad_sch`
 
 KiCad lock, backup, autosave, and local preference files are working files and must not be committed.
+
+## Revision 0.2
+
+Revision 0.2 corrects module-slot I2C0 to pin 5 SDA and pin 6 SCL in both schematic and PCB. This matches the module-interface specification, Mini Revision 0.7, AnalogHydroPressure, and SX1262-Remote. Component positions and rotations, including the module connector and mounting holes, are unchanged.
+
+Final checks on 2026-09-28: schematic ERC has zero findings. PCB DRC with zone refill has zero unconnected pads, zero schematic/PCB parity issues, and no non-excluded violations. Three existing exclusions remain: two courtyard overlaps beneath the DevKit and one silkscreen-over-solder-mask warning at the power module.
 
 ## Revision 0.1
 
@@ -31,10 +37,10 @@ The PCB outline and enclosure holes use the `BOX4U-5U310700` geometry. H1 and H2
 
 Slot A uses GPIO33 (ADC1_CH5) on pin 9 / AUX_GPIO1 and GPIO13 on pin 10 / AUX_GPIO2. AUX_GPIO1 supports digital input, digital output/PWM, or analog input with Wi-Fi active. GPIO4 replaces GPIO33 on the separate JST-PH connector. GPIO32 remains on its separate connector; ADC1 through ADC4 remain GPIO34, GPIO35, GPIO36, and GPIO39. Firmware mappings must reflect the swap.
 
-The current slot wiring has I2C0 SCL on pin 5 and SDA on pin 6. This differs from the published interface and AnalogHydroPressure; see the interface specification compatibility note before attaching that module.
+Revision 0.2 connects I2C0 SDA to pin 5 and SCL to pin 6. The earlier reversed assignment is corrected.
 
 ## Validation
 
-Run schematic ERC, PCB DRC, and schematic-PCB parity checks after every schematic, footprint, routing, zone, or rule change. Revision 0.1 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, environmental, or manufacturing tests. The assembly and bring-up procedure is in `Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.1.pdf`.
+Run schematic ERC, PCB DRC, and schematic-PCB parity checks after every schematic, footprint, routing, zone, or rule change. Revision 0.2 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, environmental, or manufacturing tests. The existing Revision 0.1 assembly guide predates the Revision 0.2 pin correction; use the current schematic and pin assignment above. The earlier assembly and bring-up procedure is in `Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.1.pdf`.
 
 See the [hardware overview](../../../../docs/Hardware.md), [module-interface specification](../../../../docs/EnvNode_Module_Interface_Hardware_Specification.md), [ORing Power documentation](../../DesignBlocks/ORing%20Power/README.md), and [board identity record](../../../../docs/BoardIdentityRecord.md).

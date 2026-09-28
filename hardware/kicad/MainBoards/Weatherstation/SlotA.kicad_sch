@@ -728,7 +728,7 @@
 	)
 	(global_label "+5V"
 		(shape input)
-		(at 129.54 72.39 0)
+		(at 134.62 67.31 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -738,7 +738,7 @@
 		)
 		(uuid "49cd311d-727d-44d6-b349-fa1bb51122d6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 136.3957 72.39 0)
+			(at 141.4757 67.31 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -752,7 +752,7 @@
 	)
 	(global_label "+3V3_SYS"
 		(shape input)
-		(at 129.54 69.85 0)
+		(at 134.62 64.77 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -762,7 +762,7 @@
 		)
 		(uuid "52a8dd32-4038-46cf-8a5b-3f976dc139f0")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 142.0804 69.85 0)
+			(at 147.1604 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -776,7 +776,7 @@
 	)
 	(hierarchical_label "SPI_CS"
 		(shape input)
-		(at 129.54 85.09 0)
+		(at 134.62 80.01 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -787,7 +787,7 @@
 	)
 	(hierarchical_label "EEPROM_A0"
 		(shape input)
-		(at 116.84 72.39 180)
+		(at 121.92 67.31 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -798,7 +798,7 @@
 	)
 	(hierarchical_label "I2C1_SDA"
 		(shape input)
-		(at 116.84 77.47 180)
+		(at 121.92 72.39 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -809,7 +809,7 @@
 	)
 	(hierarchical_label "AUX_GPIO2"
 		(shape input)
-		(at 129.54 80.01 0)
+		(at 134.62 74.93 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -820,7 +820,7 @@
 	)
 	(hierarchical_label "SPI_MOSI"
 		(shape input)
-		(at 116.84 82.55 180)
+		(at 121.92 77.47 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -831,7 +831,7 @@
 	)
 	(hierarchical_label "SPI_MISO"
 		(shape input)
-		(at 129.54 82.55 0)
+		(at 134.62 77.47 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -840,9 +840,9 @@
 		)
 		(uuid "920f360f-6e87-4b50-9808-891e06de1644")
 	)
-	(hierarchical_label "I2C0_SDA"
+	(hierarchical_label "I2C0_SCL"
 		(shape input)
-		(at 129.54 74.93 0)
+		(at 134.62 69.85 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -853,7 +853,7 @@
 	)
 	(hierarchical_label "SPI_SCK"
 		(shape input)
-		(at 116.84 85.09 180)
+		(at 121.92 80.01 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -862,9 +862,9 @@
 		)
 		(uuid "c2975ee9-1e7f-4a1f-834f-b91691c6bd6b")
 	)
-	(hierarchical_label "I2C0_SCL"
+	(hierarchical_label "I2C0_SDA"
 		(shape input)
-		(at 116.84 74.93 180)
+		(at 121.92 69.85 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -875,7 +875,7 @@
 	)
 	(hierarchical_label "AUX_GPIO1"
 		(shape input)
-		(at 116.84 80.01 180)
+		(at 121.92 74.93 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -886,7 +886,7 @@
 	)
 	(hierarchical_label "I2C1_SCL"
 		(shape input)
-		(at 129.54 77.47 0)
+		(at 134.62 72.39 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -897,7 +897,7 @@
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 123.19 110.49 0)
+		(at 128.27 105.41 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -908,7 +908,7 @@
 		(fields_autoplaced yes)
 		(uuid "62650748-6aaf-44e1-baf2-07467dd7aeb6")
 		(property "Reference" "H2"
-			(at 125.73 109.2199 0)
+			(at 130.81 104.1399 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -919,7 +919,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 125.73 111.7599 0)
+			(at 130.81 106.6799 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -930,7 +930,7 @@
 			)
 		)
 		(property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5"
-			(at 123.19 110.49 0)
+			(at 128.27 105.41 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -941,7 +941,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 123.19 110.49 0)
+			(at 128.27 105.41 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -952,7 +952,7 @@
 			)
 		)
 		(property "Description" "Mounting Hole without connection"
-			(at 123.19 110.49 0)
+			(at 128.27 105.41 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -979,7 +979,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_02x07_Odd_Even")
-		(at 121.92 77.47 0)
+		(at 127 72.39 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -990,7 +990,7 @@
 		(fields_autoplaced yes)
 		(uuid "8200fe30-f733-44e9-9184-064f93666423")
 		(property "Reference" "J1"
-			(at 123.19 63.5 0)
+			(at 128.27 58.42 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1000,7 +1000,7 @@
 			)
 		)
 		(property "Value" "Conn_02x07_Odd_Even"
-			(at 123.19 66.04 0)
+			(at 128.27 60.96 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1010,7 +1010,7 @@
 			)
 		)
 		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x07_P2.54mm_Vertical"
-			(at 121.92 77.47 0)
+			(at 127 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1021,7 +1021,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 121.92 77.47 0)
+			(at 127 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1032,7 +1032,7 @@
 			)
 		)
 		(property "Description" "Generic connector, double row, 02x07, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 121.92 77.47 0)
+			(at 127 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1101,7 +1101,7 @@
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 123.19 99.06 0)
+		(at 128.27 93.98 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1112,7 +1112,7 @@
 		(fields_autoplaced yes)
 		(uuid "b3ec7a70-fff6-4c8c-9fc3-7aaa794fdf09")
 		(property "Reference" "H1"
-			(at 125.73 97.7899 0)
+			(at 130.81 92.7099 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1123,7 +1123,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 125.73 100.3299 0)
+			(at 130.81 95.2499 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1134,7 +1134,7 @@
 			)
 		)
 		(property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5"
-			(at 123.19 99.06 0)
+			(at 128.27 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1145,7 +1145,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 123.19 99.06 0)
+			(at 128.27 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1156,7 +1156,7 @@
 			)
 		)
 		(property "Description" "Mounting Hole without connection"
-			(at 123.19 99.06 0)
+			(at 128.27 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1183,7 +1183,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 116.84 69.85 270)
+		(at 121.92 64.77 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1194,7 +1194,7 @@
 		(fields_autoplaced yes)
 		(uuid "b9f75ff1-0a0c-42ab-9382-8e2ac2097468")
 		(property "Reference" "#PWR01"
-			(at 110.49 69.85 0)
+			(at 115.57 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1205,7 +1205,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 113.03 69.8499 90)
+			(at 118.11 64.7699 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1216,7 +1216,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 116.84 69.85 0)
+			(at 121.92 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1227,7 +1227,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 116.84 69.85 0)
+			(at 121.92 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1238,7 +1238,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 116.84 69.85 0)
+			(at 121.92 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1267,7 +1267,7 @@
 		)
 	)
 	(group "EnvNode_Module_Connector_MainBoard"
-		(uuid "3cd794f2-b8dd-4477-b6da-3ed6bf459470")
+		(uuid "05ff5d96-a63b-41c4-824b-9589b59c8776")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
 		(members "10a3e04d-2cb3-4a20-b6d3-e54593adda3d" "35d10dc8-902b-42be-912a-d6a3bb5485a2"
 			"364c6104-80e5-4194-9a58-ac5f315c71ea" "49cd311d-727d-44d6-b349-fa1bb51122d6"
