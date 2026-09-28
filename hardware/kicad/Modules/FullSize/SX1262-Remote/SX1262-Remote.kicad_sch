@@ -2672,6 +2672,16 @@
 		)
 		(uuid "01be6170-388e-4aa2-9f81-78bc99b121ca")
 	)
+	(label "GND"
+		(at 118.11 49.53 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "02175253-a2ad-4e8b-aaa2-1b92006e6084")
+	)
 	(label "DIO2_TXEN"
 		(at 113.03 139.7 0)
 		(effects
@@ -2722,15 +2732,15 @@
 		)
 		(uuid "19d1369d-e180-4d28-a6c6-fbd92e5a50d4")
 	)
-	(label "GND"
-		(at 118.11 49.53 180)
+	(label "I2C0_SDA"
+		(at 118.11 54.61 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "4322fffe-9b1c-4c6e-a7f6-9911cc681bdd")
+		(uuid "3a5103a5-3273-4991-aeed-597afe2f1a2d")
 	)
 	(label "SPI_MOSI"
 		(at 80.01 132.08 270)
@@ -2741,16 +2751,6 @@
 			(justify right bottom)
 		)
 		(uuid "5235601c-1bbd-43e0-9c5f-c5a7daea2952")
-	)
-	(label "I2C0_SDA"
-		(at 118.11 54.61 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "53fad361-67e5-40b1-a142-3121c8661d3f")
 	)
 	(label "I2C0_SCL"
 		(at 62.23 168.91 180)
@@ -3022,6 +3022,16 @@
 		)
 		(uuid "ee21314b-7783-4f69-9767-e646c6285c3b")
 	)
+	(label "EEPROM_A0"
+		(at 118.11 52.07 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ee7aaaba-e344-46ac-b225-0bbff1541e1f")
+	)
 	(label "I2C0_SCL"
 		(at 185.42 54.61 0)
 		(effects
@@ -3051,16 +3061,6 @@
 			(justify left bottom)
 		)
 		(uuid "f7ec2447-8760-493d-8404-99e5b3ba0ea5")
-	)
-	(label "EEPROM_A0"
-		(at 118.11 52.07 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "fae7b5c0-19b1-478c-98ba-867c5333c169")
 	)
 	(label "AUX_GPIO1"
 		(at 118.11 59.69 180)
@@ -5332,13 +5332,13 @@
 	(group "EnvNode_Module_Connector_Daughterboard_THT"
 		(uuid "2c76648c-526d-4017-9d9e-b60eca3c5045")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_Daughterboard_THT")
-		(members "0ef1fcdb-9b4a-4063-85bf-80f225b1ac56" "19d1369d-e180-4d28-a6c6-fbd92e5a50d4"
-			"4322fffe-9b1c-4c6e-a7f6-9911cc681bdd" "53fad361-67e5-40b1-a142-3121c8661d3f"
+		(members "02175253-a2ad-4e8b-aaa2-1b92006e6084" "0ef1fcdb-9b4a-4063-85bf-80f225b1ac56"
+			"19d1369d-e180-4d28-a6c6-fbd92e5a50d4" "3a5103a5-3273-4991-aeed-597afe2f1a2d"
 			"546415f7-d30d-4841-ae52-4b136d7aaaeb" "718c0e63-f5a3-46ff-b6ed-01af8fd4e4b7"
 			"89e5f695-c4d9-47f2-a594-3a28964f3664" "8c79775d-c05d-407c-88ed-be2cbfa0da8d"
 			"aa3348bb-ec60-41a5-8187-f80ae48ed56e" "cf2b7fb3-f348-40a1-bc2d-e319bc5282cd"
 			"e810eb5b-0248-45d6-9a0a-9d0e7d665879" "e94829b4-882c-4feb-913f-f06a151e665b"
-			"ee21314b-7783-4f69-9767-e646c6285c3b" "fae7b5c0-19b1-478c-98ba-867c5333c169"
+			"ee21314b-7783-4f69-9767-e646c6285c3b" "ee7aaaba-e344-46ac-b225-0bbff1541e1f"
 			"fd37aff2-7f52-4cdf-9ce7-4d9a42a2429e"
 		)
 	)
