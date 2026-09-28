@@ -69,7 +69,7 @@ WeatherStation Slot A uses the same GPIO mapping as Mini Slot A. On these mainbo
 
 Earlier Mini and WeatherStation revisions connected pin 5 to I2C0 SCL (GPIO22) and pin 6 to I2C0 SDA (GPIO21), opposite to the normative connector table above. This is corrected in the MainBoard connector design-block schematic and library copy, Mini Revision 0.7, and WeatherStation Revision 0.2. Both mainboards now connect pin 5 to SDA and pin 6 to SCL in schematic and PCB, matching AnalogHydroPressure and SX1262-Remote. The I2C0 mismatch is resolved for these revisions; earlier hardware retains its original wiring. Per-board ERC/DRC alone cannot detect an inter-board mismatch.
 
-AnalogHydroPressure currently uses pin 9 / AUX_GPIO1 for the LT8330 enable input and a pull-down resistor. Pin 10 / AUX_GPIO2 is unused. Before adding SCT013 analog acquisition on pin 9, move the digital boost-enable function to pin 10 in both schematic and PCB and update firmware. This is a proposed follow-up, not an implemented module change.
+AnalogHydroPressure Revision 0.5 uses pin 10 / AUX_GPIO2 for the LT8330 enable input and its R7 pull-down resistor in schematic and PCB. Pin 9 / AUX_GPIO1 is unused and available for a future conditioned SCT013 analog input. The SCT013 circuit is not implemented. Firmware must select AUX_GPIO2 for boost enable (GPIO13 in Mini/WeatherStation Slot A, GPIO14 in Mini Slot B); no firmware change is included in this hardware revision.
 
 EnvNode Mini additionally exposes both I²C buses for direct cable connection:
 

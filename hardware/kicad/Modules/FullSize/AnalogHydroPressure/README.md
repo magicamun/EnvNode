@@ -1,6 +1,6 @@
 # EnvNode AnalogHydroPressure
 
-`AnalogHydroPressure` is a FullSize daughterboard for a two-wire 4–20 mA hydrostatic pressure probe. It is the Revision 0.3 successor to the legacy `AnalogInput` module.
+`AnalogHydroPressure` is a FullSize daughterboard for a two-wire 4–20 mA hydrostatic pressure probe. The current hardware is Revision 0.5, succeeding the legacy `AnalogInput` module.
 
 ## Project Files
 
@@ -51,12 +51,12 @@ Revision 0.4 uses the B260S1F-7 boost diode, selectable ADS1115 address jumpers,
 
 At the documented design checkpoint, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
 
-The Revision 0.4 article list and assembly/bring-up guide are available. Physical boost-converter validation, thermal and EMC verification, probe calibration, and production testing remain required before production release.
+The Revision 0.4 article list and assembly/bring-up guide are available but predate the boost-enable reassignment. For Revision 0.5 use AUX_GPIO2 / connector pin 10 instead of AUX_GPIO1 / pin 9; the PDF has not been regenerated. Physical boost-converter validation, thermal and EMC verification, probe calibration, and production testing remain required before production release.
 
 ## Connector review — 2026-09-28
 
 The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Mini Revision 0.7 and WeatherStation Revision 0.2 both match this assignment in schematic and PCB; the earlier mainboard I2C0 mismatch is resolved for these revisions. I2C1 remains pin 7 SDA and pin 8 SCL.
 
-J1 pin 9 / AUX_GPIO1 drives LT8330 EN/UVLO and has a pull-down to GND. J1 pin 10 / AUX_GPIO2 is unused. The new mainboard ADC1 capability on pin 9 does not make this module pin a free analog input. A future SCT013 extension should relocate boost enable to AUX_GPIO2 before using AUX_GPIO1 for its conditioned analog signal. No SCT013 circuit or such relocation is implemented by this review.
+Revision 0.5 moves LT8330 EN/UVLO and its R7 pull-down to J1 pin 10 / AUX_GPIO2 in both schematic and PCB. J1 pin 9 / AUX_GPIO1 is now unused and available for a future conditioned SCT013 analog signal; no SCT013 circuit is implemented yet. Firmware must use AUX_GPIO2 for boost enable: GPIO13 on Mini Slot A and WeatherStation Slot A, GPIO14 on Mini Slot B. Firmware was not modified as part of this hardware revision.
 
-The review found no PCB DRC violations, unconnected pads, or schematic/PCB parity issues. Schematic ERC reports zero errors and ten warnings (unused labelled signals and duplicate local/global label names). The separate connector comparison confirms the corrected I2C0 assignment on Mini Revision 0.7 and WeatherStation Revision 0.2.
+The Revision 0.5 review on 2026-09-28, with zone refill, found no PCB DRC violations, unconnected pads, or schematic/PCB parity issues. Schematic ERC reports zero errors and ten warnings (unused labelled signals and duplicate local/global label names). The separate connector comparison confirms the corrected I2C0 assignment on Mini Revision 0.7 and WeatherStation Revision 0.2.

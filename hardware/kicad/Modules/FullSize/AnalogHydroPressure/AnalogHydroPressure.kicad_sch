@@ -1689,7 +1689,7 @@
 		)
 		(uuid "aa3348bb-ec60-41a5-8187-f80ae48ed56e")
 	)
-	(label "AUX_GPIO1"
+	(label "AUX_GPIO2"
 		(at 52.07 143.51 180)
 		(effects
 			(font
