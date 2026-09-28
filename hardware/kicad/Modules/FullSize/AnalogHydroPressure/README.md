@@ -55,8 +55,8 @@ The Revision 0.4 article list and assembly/bring-up guide are available. Physica
 
 ## Connector review — 2026-09-28
 
-The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Both current mainboards wire these two pins oppositely. This is an unresolved compatibility issue; see the module-interface specification. I2C1 remains pin 7 SDA and pin 8 SCL.
+The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Mini Revision 0.7 now matches this assignment. WeatherStation still wires these two pins oppositely and requires correction; see the module-interface specification. I2C1 remains pin 7 SDA and pin 8 SCL.
 
 J1 pin 9 / AUX_GPIO1 drives LT8330 EN/UVLO and has a pull-down to GND. J1 pin 10 / AUX_GPIO2 is unused. The new mainboard ADC1 capability on pin 9 does not make this module pin a free analog input. A future SCT013 extension should relocate boost enable to AUX_GPIO2 before using AUX_GPIO1 for its conditioned analog signal. No SCT013 circuit or such relocation is implemented by this review.
 
-The review found no PCB DRC violations, unconnected pads, or schematic/PCB parity issues. Schematic ERC reports zero errors and ten warnings (unused labelled signals and duplicate local/global label names). These checks do not resolve the cross-board I2C0 mismatch.
+The review found no PCB DRC violations, unconnected pads, or schematic/PCB parity issues. Schematic ERC reports zero errors and ten warnings (unused labelled signals and duplicate local/global label names). These checks do not resolve the remaining WeatherStation I2C0 mismatch.

@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "804bcbf2-7d21-40f1-b39a-46f3d419b0a7")
+	(uuid "9d59e968-b93c-4dd5-a23f-5360087875c2")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Connector_Generic:Conn_02x07_Odd_Even"
@@ -840,7 +840,7 @@
 		)
 		(uuid "920f360f-6e87-4b50-9808-891e06de1644")
 	)
-	(hierarchical_label "I2C0_SDA"
+	(hierarchical_label "I2C0_SCL"
 		(shape input)
 		(at 139.7 69.85 0)
 		(effects
@@ -862,7 +862,7 @@
 		)
 		(uuid "c2975ee9-1e7f-4a1f-834f-b91691c6bd6b")
 	)
-	(hierarchical_label "I2C0_SCL"
+	(hierarchical_label "I2C0_SDA"
 		(shape input)
 		(at 127 69.85 180)
 		(effects

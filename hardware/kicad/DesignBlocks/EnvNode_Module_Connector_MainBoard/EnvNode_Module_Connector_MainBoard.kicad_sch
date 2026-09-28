@@ -840,7 +840,7 @@
 		)
 		(uuid "920f360f-6e87-4b50-9808-891e06de1644")
 	)
-	(hierarchical_label "I2C0_SDA"
+	(hierarchical_label "I2C0_SCL"
 		(shape input)
 		(at 139.7 69.85 0)
 		(effects
@@ -862,7 +862,7 @@
 		)
 		(uuid "c2975ee9-1e7f-4a1f-834f-b91691c6bd6b")
 	)
-	(hierarchical_label "I2C0_SCL"
+	(hierarchical_label "I2C0_SDA"
 		(shape input)
 		(at 127 69.85 180)
 		(effects
@@ -1243,7 +1243,7 @@
 		)
 	)
 	(group ""
-		(uuid "a9d58e5c-fff9-4094-b3a1-fa097f071c61")
+		(uuid "67efd746-af7c-446b-b45a-a0703c080216")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
 		(members "10a3e04d-2cb3-4a20-b6d3-e54593adda3d" "35d10dc8-902b-42be-912a-d6a3bb5485a2"
 			"364c6104-80e5-4194-9a58-ac5f315c71ea" "49cd311d-727d-44d6-b349-fa1bb51122d6"

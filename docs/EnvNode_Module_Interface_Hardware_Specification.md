@@ -67,7 +67,7 @@ WeatherStation Slot A uses the same GPIO mapping as Mini Slot A. On these mainbo
 
 ### Compatibility issue found on 2026-09-28
 
-The current Mini and WeatherStation schematics and PCBs connect pin 5 to I2C0 SCL (GPIO22) and pin 6 to I2C0 SDA (GPIO21), opposite to the normative connector table above. AnalogHydroPressure follows that table: pin 5 SDA and pin 6 SCL. Therefore its I2C0 devices are not directly compatible with the current mainboard wiring. The hardware discrepancy remains unresolved; per-board ERC/DRC cannot detect this inter-board mismatch. Do not interpret clean per-board checks as module compatibility.
+The earlier Mini and current WeatherStation wiring connected pin 5 to I2C0 SCL (GPIO22) and pin 6 to I2C0 SDA (GPIO21), opposite to the normative connector table above. The MainBoard connector design-block schematic and library copy are now corrected. Mini Revision 0.7 corrects both slots in schematic and PCB to pin 5 SDA / pin 6 SCL, matching AnalogHydroPressure and SX1262-Remote. WeatherStation remains uncorrected as of this checkpoint. Per-board ERC/DRC cannot detect an inter-board mismatch.
 
 AnalogHydroPressure currently uses pin 9 / AUX_GPIO1 for the LT8330 enable input and a pull-down resistor. Pin 10 / AUX_GPIO2 is unused. Before adding SCT013 analog acquisition on pin 9, move the digital boost-enable function to pin 10 in both schematic and PCB and update firmware. This is a proposed follow-up, not an implemented module change.
 

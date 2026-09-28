@@ -726,33 +726,9 @@
 			(embedded_fonts no)
 		)
 	)
-	(global_label "+3V3_SYS"
-		(shape input)
-		(at 123.19 53.34 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "04175d54-7f8d-41fe-a0ab-811695aa31d5")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 135.7304 53.34 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
 	(global_label "+5V"
 		(shape input)
-		(at 123.19 55.88 0)
+		(at 123.19 39.37 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -760,9 +736,9 @@
 			)
 			(justify left)
 		)
-		(uuid "a063ee34-74c2-495f-8774-4321d429291b")
+		(uuid "7793794f-45d4-489f-842f-f56b16c7bd76")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 130.0457 55.88 0)
+			(at 130.0457 39.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -774,215 +750,154 @@
 			)
 		)
 	)
-	(hierarchical_label "AUX_GPIO2"
+	(global_label "+3V3_SYS"
 		(shape input)
-		(at 123.19 63.5 0)
+		(at 123.19 36.83 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left)
 		)
-		(uuid "54416b9e-7d95-45f8-a954-ca091fdf14e4")
-	)
-	(hierarchical_label "AUX_GPIO1"
-		(shape input)
-		(at 110.49 63.5 180)
-		(effects
-			(font
-				(size 1.27 1.27)
+		(uuid "b8aff9ac-5110-460f-be27-4dde46a8bce8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 135.7304 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
-			(justify right)
 		)
-		(uuid "5c2b98d0-e137-448c-915e-db1407c4ecb6")
-	)
-	(hierarchical_label "EEPROM_A0"
-		(shape input)
-		(at 110.49 55.88 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "6ec36e55-ed78-4295-a93c-351e19f41cbe")
-	)
-	(hierarchical_label "I2C0_SDA"
-		(shape input)
-		(at 123.19 58.42 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "767c10bc-c855-4454-8676-ab9630fb6be4")
-	)
-	(hierarchical_label "SPI_SCK"
-		(shape input)
-		(at 110.49 68.58 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "784842d5-3520-40d5-a89a-f21be253c791")
-	)
-	(hierarchical_label "I2C0_SCL"
-		(shape input)
-		(at 110.49 58.42 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "af1d2cd3-77db-45a5-8529-e7258a8c5ea4")
-	)
-	(hierarchical_label "I2C1_SCL"
-		(shape input)
-		(at 123.19 60.96 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "bc19f7d7-8d83-4b6d-8d02-ced134c0d0d4")
-	)
-	(hierarchical_label "SPI_MISO"
-		(shape input)
-		(at 123.19 66.04 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "c07c2f86-c91a-4dd3-9236-46e53c8ebb2a")
 	)
 	(hierarchical_label "SPI_CS"
 		(shape input)
-		(at 123.19 68.58 0)
+		(at 123.19 52.07 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left)
 		)
-		(uuid "c8642b62-897e-494d-ac2c-07f99e8e91c1")
+		(uuid "18646a4b-4821-4a36-affc-170a52a2c9e0")
+	)
+	(hierarchical_label "AUX_GPIO1"
+		(shape input)
+		(at 110.49 46.99 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "39a180aa-b89a-4968-a0b5-aea87179ec80")
+	)
+	(hierarchical_label "AUX_GPIO2"
+		(shape input)
+		(at 123.19 46.99 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4738199a-6903-40cb-9d04-214c3485150d")
+	)
+	(hierarchical_label "I2C0_SDA"
+		(shape input)
+		(at 110.49 41.91 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "6f33abc0-0092-4016-a618-841c47de37b4")
+	)
+	(hierarchical_label "I2C1_SCL"
+		(shape input)
+		(at 123.19 44.45 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a92eb93b-fb9e-41dd-bc15-8d962332d522")
+	)
+	(hierarchical_label "EEPROM_A0"
+		(shape input)
+		(at 110.49 39.37 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ab2f624a-64d1-49fb-8f5d-dd1f3489b673")
+	)
+	(hierarchical_label "SPI_SCK"
+		(shape input)
+		(at 110.49 52.07 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "c57a8053-e237-4e78-89a3-8bfd64650b5f")
+	)
+	(hierarchical_label "SPI_MISO"
+		(shape input)
+		(at 123.19 49.53 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "c820e2f2-36fc-412f-8803-864df4563681")
 	)
 	(hierarchical_label "SPI_MOSI"
 		(shape input)
-		(at 110.49 66.04 180)
+		(at 110.49 49.53 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right)
 		)
-		(uuid "e6cd38f1-d925-41be-9bfe-e02b9d2e803a")
+		(uuid "ddb76afd-f77c-4073-b9e0-dc642033d022")
+	)
+	(hierarchical_label "I2C0_SCL"
+		(shape input)
+		(at 123.19 41.91 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e7defb11-4fdd-404e-86dc-0aedd4331d60")
 	)
 	(hierarchical_label "I2C1_SDA"
 		(shape input)
-		(at 110.49 60.96 180)
+		(at 110.49 44.45 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right)
 		)
-		(uuid "f1ebeaac-4805-4330-9d0d-aac27803bbc5")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 110.49 53.34 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "2c47f4e7-1d11-413c-a22c-5bde6618bb7a")
-		(property "Reference" "#PWR08"
-			(at 104.14 53.34 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 106.68 53.3399 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 110.49 53.34 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 110.49 53.34 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 110.49 53.34 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "9047936c-1226-402f-8ebf-923edfb43c41")
-		)
-		(instances
-			(project "EnvNode_Module_Connector_MainBoard"
-				(path "/accfb789-267f-4ccf-9ad3-e1adf3d4042c"
-					(reference "#PWR01")
-					(unit 1)
-				)
-			)
-			(project "EnvNode Mini"
-				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/a050e99e-b00d-4afc-833b-44ff53194a3e"
-					(reference "#PWR08")
-					(unit 1)
-				)
-			)
-		)
+		(uuid "f7c99595-ceb7-4a8f-bd0b-f1baf04912f9")
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
-		(at 116.84 82.55 0)
+		(at 116.84 66.04 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -991,9 +906,9 @@
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "6f6c2335-9d26-42ff-9f4d-4378839d45e5")
+		(uuid "172524ce-c622-4c96-be90-a35191856dd7")
 		(property "Reference" "H1"
-			(at 119.38 81.2799 0)
+			(at 119.38 64.7699 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1004,7 +919,7 @@
 			)
 		)
 		(property "Value" "MountingHole"
-			(at 119.38 83.8199 0)
+			(at 119.38 67.3099 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1015,7 +930,7 @@
 			)
 		)
 		(property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5"
-			(at 116.84 82.55 0)
+			(at 116.84 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1026,7 +941,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 116.84 82.55 0)
+			(at 116.84 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1037,7 +952,7 @@
 			)
 		)
 		(property "Description" "Mounting Hole without connection"
-			(at 116.84 82.55 0)
+			(at 116.84 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1064,7 +979,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_02x07_Odd_Even")
-		(at 115.57 60.96 0)
+		(at 115.57 44.45 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1073,9 +988,9 @@
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "9f365ecb-cc11-4f30-945b-c6d034207c9f")
+		(uuid "22ffabca-0896-4f50-ad70-2a2fa0750ccb")
 		(property "Reference" "J1"
-			(at 116.84 46.99 0)
+			(at 116.84 30.48 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1085,7 +1000,7 @@
 			)
 		)
 		(property "Value" "Conn_02x07_Odd_Even"
-			(at 116.84 49.53 0)
+			(at 116.84 33.02 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1095,7 +1010,7 @@
 			)
 		)
 		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x07_P2.54mm_Vertical"
-			(at 115.57 60.96 0)
+			(at 115.57 44.45 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1106,7 +1021,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 115.57 60.96 0)
+			(at 115.57 44.45 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1117,7 +1032,7 @@
 			)
 		)
 		(property "Description" "Generic connector, double row, 02x07, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 115.57 60.96 0)
+			(at 115.57 44.45 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1185,41 +1100,41 @@
 		)
 	)
 	(symbol
-		(lib_id "Mechanical:MountingHole")
-		(at 116.84 93.98 0)
+		(lib_id "power:GND")
+		(at 110.49 36.83 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "c3c0f499-b3ce-4386-813e-119cb2664c65")
-		(property "Reference" "H2"
-			(at 119.38 92.7099 0)
+		(uuid "256cb797-64af-4817-b274-e276fe7283f6")
+		(property "Reference" "#PWR08"
+			(at 104.14 36.83 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Value" "MountingHole"
-			(at 119.38 95.2499 0)
+		(property "Value" "GND"
+			(at 106.68 36.8299 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
-		(property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5"
-			(at 116.84 93.98 0)
+		(property "Footprint" ""
+			(at 110.49 36.83 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1230,7 +1145,92 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 116.84 93.98 0)
+			(at 110.49 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 110.49 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9047936c-1226-402f-8ebf-923edfb43c41")
+		)
+		(instances
+			(project "EnvNode_Module_Connector_MainBoard"
+				(path "/accfb789-267f-4ccf-9ad3-e1adf3d4042c"
+					(reference "#PWR01")
+					(unit 1)
+				)
+			)
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/a050e99e-b00d-4afc-833b-44ff53194a3e"
+					(reference "#PWR08")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 116.84 77.47 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c75d244b-f9bf-43f7-ac00-85020d8fc893")
+		(property "Reference" "H2"
+			(at 119.38 76.1999 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 119.38 78.7399 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5"
+			(at 116.84 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 116.84 77.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1241,7 +1241,7 @@
 			)
 		)
 		(property "Description" "Mounting Hole without connection"
-			(at 116.84 93.98 0)
+			(at 116.84 77.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1267,17 +1267,17 @@
 		)
 	)
 	(group "EnvNode_Module_Connector_MainBoard"
-		(uuid "2dd7edf3-71bd-497e-b1a1-0af9a414398e")
+		(uuid "47543d39-a192-46cf-b0b0-9414fdf629a7")
 		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
-		(members "04175d54-7f8d-41fe-a0ab-811695aa31d5" "2c47f4e7-1d11-413c-a22c-5bde6618bb7a"
-			"54416b9e-7d95-45f8-a954-ca091fdf14e4" "5c2b98d0-e137-448c-915e-db1407c4ecb6"
-			"6ec36e55-ed78-4295-a93c-351e19f41cbe" "6f6c2335-9d26-42ff-9f4d-4378839d45e5"
-			"767c10bc-c855-4454-8676-ab9630fb6be4" "784842d5-3520-40d5-a89a-f21be253c791"
-			"9f365ecb-cc11-4f30-945b-c6d034207c9f" "a063ee34-74c2-495f-8774-4321d429291b"
-			"af1d2cd3-77db-45a5-8529-e7258a8c5ea4" "bc19f7d7-8d83-4b6d-8d02-ced134c0d0d4"
-			"c07c2f86-c91a-4dd3-9236-46e53c8ebb2a" "c3c0f499-b3ce-4386-813e-119cb2664c65"
-			"c8642b62-897e-494d-ac2c-07f99e8e91c1" "e6cd38f1-d925-41be-9bfe-e02b9d2e803a"
-			"f1ebeaac-4805-4330-9d0d-aac27803bbc5"
+		(members "172524ce-c622-4c96-be90-a35191856dd7" "18646a4b-4821-4a36-affc-170a52a2c9e0"
+			"22ffabca-0896-4f50-ad70-2a2fa0750ccb" "256cb797-64af-4817-b274-e276fe7283f6"
+			"39a180aa-b89a-4968-a0b5-aea87179ec80" "4738199a-6903-40cb-9d04-214c3485150d"
+			"6f33abc0-0092-4016-a618-841c47de37b4" "7793794f-45d4-489f-842f-f56b16c7bd76"
+			"a92eb93b-fb9e-41dd-bc15-8d962332d522" "ab2f624a-64d1-49fb-8f5d-dd1f3489b673"
+			"b8aff9ac-5110-460f-be27-4dde46a8bce8" "c57a8053-e237-4e78-89a3-8bfd64650b5f"
+			"c75d244b-f9bf-43f7-ac00-85020d8fc893" "c820e2f2-36fc-412f-8803-864df4563681"
+			"ddb76afd-f77c-4073-b9e0-dc642033d022" "e7defb11-4fdd-404e-86dc-0aedd4331d60"
+			"f7c99595-ceb7-4a8f-bd0b-f1baf04912f9"
 		)
 	)
 )
