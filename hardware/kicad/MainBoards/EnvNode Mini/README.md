@@ -1,6 +1,6 @@
 # EnvNode Mini
 
-`EnvNode Mini` is the compact EnvNode mainboard with two module slots, ESP32 processing, dual I²C access, and configurable I²C pull-ups. This directory contains the KiCad design for hardware Revision 0.7.
+`EnvNode Mini` is the compact EnvNode mainboard with two module slots, ESP32 processing, dual I²C access, configurable I²C pull-ups, and two direct ADC/GPIO inputs. This directory contains the KiCad design for hardware Revision 0.8.
 
 ## Project Files
 
@@ -12,8 +12,18 @@
 - `ESP32Core.kicad_sch`
 - `PCB.kicad_sch`
 - `Power.kicad_sch`
+- `ADC.kicad_sch`
+- `Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf`
 
 KiCad lock and local preference files are working files and must not be committed.
+
+## Revision 0.8
+
+Revision 0.8 adds two top-entry 4-pin JST-PH connectors. Connector `ADC1` exposes GPIO34 / ADC1_CH6 and connector `ADC2` exposes GPIO35 / ADC1_CH7. Their shared pin order is GND, `+5V`, signal, `+3V3_SYS`.
+
+GPIO34 and GPIO35 are input-only ESP32 pins without internal pull-up or pull-down resistors. They are not 5 V tolerant. The `+5V` connector pin is available only as sensor power; any signal returned to connector pin 3 must remain inside the ESP32 3.3 V input range. Firmware must not configure these resources as outputs.
+
+Final checks on 2026-09-29: ERC has zero findings. PCB DRC with zone refill has no active violations or unconnected pads, and schematic/PCB parity is clean. The report contains 18 documented exclusions for known courtyard and silkscreen interactions; none concerns copper clearance, connectivity, or the new ADC nets.
 
 ## Revision 0.7
 
@@ -42,6 +52,6 @@ Revision 0.7 slot wiring is I2C0 SDA on pin 5 and SCL on pin 6, matching AnalogH
 
 ## Validation
 
-Run schematic ERC and PCB DRC after every schematic, footprint, routing, zone, or rule change. Revision 0.7 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, or manufacturing tests. The existing Revision 0.6 assembly guide predates the Revision 0.7 pin correction; use the current schematic and pin assignment above. The earlier assembly and bring-up procedure is in `Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.6.pdf`.
+Run schematic ERC and PCB DRC after every schematic, footprint, routing, zone, or rule change. Revision 0.8 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, ESD, or manufacturing tests. The current assembly and bring-up procedure is in `Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf`.
 
 See the [hardware overview](../../../../docs/Hardware.md), [module-interface specification](../../../../docs/EnvNode_Module_Interface_Hardware_Specification.md), and [board identity record](../../../../docs/BoardIdentityRecord.md).

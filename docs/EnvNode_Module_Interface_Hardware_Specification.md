@@ -80,6 +80,15 @@ EnvNode Mini additionally exposes both I²C buses for direct cable connection:
 
 All four connectors use the top-entry JST-SH `BM04B-SRSS-TB` footprint with 1.00 mm pitch. Each bus has a dedicated pair of 4.7 kΩ pull-up resistors. Four normally open solder jumpers connect the pull-ups individually to `+3V3_SYS`; closing both jumpers for a bus makes EnvNode Mini the pull-up owner for that bus. They must remain open if the assembled bus already has an effective pull-up pair.
 
+EnvNode Mini Revision 0.8 additionally exposes two direct ADC/GPIO inputs through top-entry JST-PH `B4B-PH-K` connectors:
+
+| Connector | Pin 1 | Pin 2 | Pin 3 | Pin 4 | ESP32 resource |
+| --- | --- | --- | --- | --- | --- |
+| `ADC1` | GND | `+5V` | signal | `+3V3_SYS` | GPIO34 / ADC1_CH6 |
+| `ADC2` | GND | `+5V` | signal | `+3V3_SYS` | GPIO35 / ADC1_CH7 |
+
+GPIO34 and GPIO35 are input-only and provide no internal pull-up or pull-down resistors. They are not 5 V tolerant. The `+5V` pin is a sensor-supply output and does not define the allowable signal voltage; the signal on pin 3 must remain within the ESP32 3.3 V input range. Sensors may use either offered supply rail as appropriate, but must not connect `+5V` and `+3V3_SYS` together.
+
 ## 4. Power
 
 The mainboard supplies `+5V` and `+3V3_SYS` to each slot. Modules are consumers of these rails unless a future module and mainboard specification explicitly defines another power-flow direction and the required protection.

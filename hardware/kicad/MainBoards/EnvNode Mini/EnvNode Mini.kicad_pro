@@ -98,15 +98,7 @@
           ""
         ],
         [
-          "silk_over_copper|107696000|127874000|f81481a7-bfd2-494c-9a02-0d3593703a6f|379c60c5-e9d2-4745-a93e-911a5c5a046c",
-          ""
-        ],
-        [
           "silk_over_copper|107696000|131294000|7f170d9d-fc20-41de-83f7-e612dfedeb27|c36a4ffc-d0c8-4b51-abf3-e4d92b027af8",
-          ""
-        ],
-        [
-          "silk_over_copper|107696000|131294000|f81481a7-bfd2-494c-9a02-0d3593703a6f|c36a4ffc-d0c8-4b51-abf3-e4d92b027af8",
           ""
         ],
         [
@@ -138,15 +130,7 @@
           ""
         ],
         [
-          "silk_over_copper|69696000|85795000|f81481a7-bfd2-494c-9a02-0d3593703a6f|dffabe10-18f3-435e-b442-978b662fa6cf",
-          ""
-        ],
-        [
           "silk_over_copper|69696000|99272000|7f170d9d-fc20-41de-83f7-e612dfedeb27|3a86c17a-5b19-4e73-9d20-98b916c7dfb6",
-          ""
-        ],
-        [
-          "silk_over_copper|69696000|99272000|f81481a7-bfd2-494c-9a02-0d3593703a6f|3a86c17a-5b19-4e73-9d20-98b916c7dfb6",
           ""
         ],
         [
@@ -162,15 +146,7 @@
           ""
         ],
         [
-          "silk_overlap|69696000|100932000|993bac9a-71b3-48e0-80e2-801ecf24f407|f81481a7-bfd2-494c-9a02-0d3593703a6f",
-          ""
-        ],
-        [
           "silk_overlap|69696000|87455000|71985118-b989-4f19-945a-9a14ab827661|7f170d9d-fc20-41de-83f7-e612dfedeb27",
-          ""
-        ],
-        [
-          "silk_overlap|69696000|87455000|71985118-b989-4f19-945a-9a14ab827661|f81481a7-bfd2-494c-9a02-0d3593703a6f",
           ""
         ]
       ],
@@ -799,7 +775,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "NT1-2,J1-4,J6-8,U1-5,C1,C5-12,D1-4,#PWR1-28,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
+    "used_designators": "ADC1-2,D1-4,#PWR1-28,NT1-2,J1-4,J6-8,U1-5,C1,C5-12,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
     "variants": []
   },
   "sheets": [
@@ -826,6 +802,10 @@
     [
       "0c9cd894-ae71-4b36-baa6-f16d44b376f3",
       "Power"
+    ],
+    [
+      "d8b840bf-2e06-478c-966e-4dc6ef4f170a",
+      "ADC"
     ]
   ],
   "text_variables": {},

@@ -919,10 +919,6 @@
 		(uuid "2a85e9c8-1cae-44dc-9c87-29849c8562c9")
 	)
 	(no_connect
-		(at 92.71 119.38)
-		(uuid "4cf6d74e-96dd-4cde-ad59-586b26d610ea")
-	)
-	(no_connect
 		(at 92.71 127)
 		(uuid "86884f67-2a76-4123-bd74-0d3a5614dea5")
 	)
@@ -933,10 +929,6 @@
 	(no_connect
 		(at 92.71 123.19)
 		(uuid "ca0a92ee-2164-46d8-9d22-21675def42e2")
-	)
-	(no_connect
-		(at 92.71 115.57)
-		(uuid "d02d479a-0857-4c93-87f5-44325a89e230")
 	)
 	(wire
 		(pts
@@ -1037,6 +1029,16 @@
 			(type default)
 		)
 		(uuid "145be835-2331-4fee-a839-09850bbc8249")
+	)
+	(wire
+		(pts
+			(xy 129.54 134.62) (xy 129.54 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ac1b296-c7b3-4fda-9cef-3804354301d7")
 	)
 	(wire
 		(pts
@@ -1397,6 +1399,16 @@
 			(type default)
 		)
 		(uuid "94e045d1-5d71-4f8b-bf97-738938adbe80")
+	)
+	(wire
+		(pts
+			(xy 110.49 134.62) (xy 110.49 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9e9e49ee-f018-45eb-b56e-f5e3149b5649")
 	)
 	(wire
 		(pts
@@ -3766,7 +3778,7 @@
 			)
 		)
 		(pin "ADC1" input
-			(at 92.71 115.57 180)
+			(at 110.49 134.62 270)
 			(uuid "89b2b121-e582-43e8-82ed-b355126605cd")
 			(effects
 				(font
@@ -3776,7 +3788,7 @@
 			)
 		)
 		(pin "ADC2" input
-			(at 92.71 119.38 180)
+			(at 129.54 134.62 270)
 			(uuid "e10d1711-dd88-40bd-bccf-4b9f8fbcf1be")
 			(effects
 				(font
@@ -4327,6 +4339,72 @@
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
 					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 92.71 149.86)
+		(size 61.595 14.605)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "d8b840bf-2e06-478c-966e-4dc6ef4f170a")
+		(property "Sheetname" "ADC"
+			(at 92.71 149.1484 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "ADC.kicad_sch"
+			(at 92.71 165.0496 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "ADC1" input
+			(at 110.49 149.86 90)
+			(uuid "c03607e4-1470-4e27-bddc-565e10a72bed")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "ADC2" input
+			(at 129.54 149.86 90)
+			(uuid "0cbdecac-179c-4edd-b476-5021335a836e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(page "7")
 				)
 			)
 		)
