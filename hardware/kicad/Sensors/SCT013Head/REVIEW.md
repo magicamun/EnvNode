@@ -2,6 +2,35 @@
 
 Stand: 2026-09-29. Erster Entwurfsstand, noch keine Fertigungsfreigabe.
 
+## Nachprüfung nach Pin-Korrektur und Beschriftung
+
+Stand: 2026-09-29, einschließlich der während der Prüfung gespeicherten
+Footprint-Änderung im Schaltplan; Layout 06:47:21.
+Dieser Abschnitt ersetzt die untenstehenden Erstprüfungsbefunde, soweit geändert.
+
+- J1.3 (Tip) ist jetzt korrekt mit R1 verbunden, J1.1 (Sleeve) mit VBIAS;
+  Ring und Schaltkontakte sind unbeschaltet. Punkt 1 der Erstprüfung ist erledigt.
+- ERC: weiterhin 0 Fehler und 0 Warnungen.
+- DRC mit neu berechneten Kupferflächen und Schaltplanabgleich:
+  **1 offene Verbindung**, 5 aktive Warnungen, 3 bereits ausgeschlossene
+  Bestückungsdruck-Warnungen sowie 2 Schaltplan/Layout-Abweichungen.
+- **Offene Verbindung:** J1.1/VBIAS hängt auf einer isolierten Kupferinsel;
+  die Verbindung zur übrigen VBIAS-Fläche fehlt nach dem Umrouten.
+  Vor Fertigung eine durchgehende Verbindung herstellen und neu prüfen.
+- Kurzes offenes Leiterbahnende auf B.Cu bei (91,948; 57,557) mm,
+  Netz Net-(J1-Pin_3), Länge 0,153 mm: bereinigen.
+- Neue Pinbeschriftungen GND / +5V / ADC / 3.3V entsprechen der Portbelegung.
+  +5V kennzeichnet nur die Position im Pigtail, der Head nutzt Pin 2 nicht.
+  Alle vier Texte sind 0,5 mm hoch und unterschreiten die eingestellte
+  Mindesthöhe von 0,8 mm; Drucklesbarkeit vor Fertigung verbessern.
+- Punkt 2 der Erstprüfung ist im gespeicherten Stand noch offen: ADC1 besitzt
+  im Schaltplan inzwischen Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,
+  auf dem Board weiterhin Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical.
+  Auf dem Board ist DNP gesetzt, im Symbol nicht. Der erneute DRC-Abgleich
+  nach dieser Speicherung bestätigt weiterhin die beiden Abweichungen.
+- Top-/Bottom-Kupfer und Beschriftung erneut als SVG exportiert und visuell geprüft.
+- Schaltung und Routing bei dieser Nachprüfung unverändert belassen.
+
 ## Konzept und Umfang
 
 Kleine, von der verschraubten Lumberg-1503-09-Buchse getragene Platine,

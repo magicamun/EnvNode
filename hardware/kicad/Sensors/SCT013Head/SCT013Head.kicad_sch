@@ -1139,7 +1139,7 @@
 		(uuid "3acabfe6-2f84-4bf0-8f15-4b43e82d77f2")
 	)
 	(no_connect
-		(at 68.58 96.52)
+		(at 68.58 93.98)
 		(uuid "c4d287c6-6e12-46a2-91a2-13e7f9f46fe8")
 	)
 	(no_connect
@@ -1182,13 +1182,13 @@
 	)
 	(wire
 		(pts
-			(xy 85.09 93.98) (xy 85.09 100.33)
+			(xy 68.58 96.52) (xy 77.47 96.52)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "0e3afa6b-3af2-4d13-925a-79f8c05d2f69")
+		(uuid "1dc41bed-4637-459a-b205-45b8b3d82eb4")
 	)
 	(wire
 		(pts
@@ -1199,6 +1199,16 @@
 			(type default)
 		)
 		(uuid "48b82ad0-83b3-482d-90f8-b2c86453b7a5")
+	)
+	(wire
+		(pts
+			(xy 77.47 96.52) (xy 77.47 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "505685b5-90db-403e-9b23-fc65b8695e2b")
 	)
 	(wire
 		(pts
@@ -1252,13 +1262,13 @@
 	)
 	(wire
 		(pts
-			(xy 68.58 93.98) (xy 85.09 93.98)
+			(xy 77.47 100.33) (xy 85.09 100.33)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "911db5ff-e81b-4c5f-ba37-62aa850a896e")
+		(uuid "8b3a6f6b-e7f4-479a-80ef-b98b71dd0100")
 	)
 	(wire
 		(pts
@@ -1970,7 +1980,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_Wire:SolderWire-0.25sqmm_1x04_P4.2mm_D0.65mm_OD1.7mm"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
 			(at 142.24 60.96 0)
 			(hide yes)
 			(show_name no)
