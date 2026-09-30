@@ -1129,6 +1129,12 @@
 		(uuid "b6fb765d-2cea-4f7f-826c-24a10db9081b")
 	)
 	(junction
+		(at 129.54 100.33)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e6db346c-fb78-431e-b888-dc54084d77cf")
+	)
+	(junction
 		(at 105.41 100.33)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1192,6 +1198,26 @@
 	)
 	(wire
 		(pts
+			(xy 129.54 91.44) (xy 129.54 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "203bcfaf-8403-4b40-bcfe-6d5584dbd28b")
+	)
+	(wire
+		(pts
+			(xy 129.54 100.33) (xy 134.62 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2f6130a5-332f-4e3c-bf97-cb9c5ca135a4")
+	)
+	(wire
+		(pts
 			(xy 99.06 115.57) (xy 99.06 116.84)
 		)
 		(stroke
@@ -1212,7 +1238,7 @@
 	)
 	(wire
 		(pts
-			(xy 105.41 100.33) (xy 111.76 100.33)
+			(xy 105.41 100.33) (xy 129.54 100.33)
 		)
 		(stroke
 			(width 0)
@@ -1232,7 +1258,7 @@
 	)
 	(wire
 		(pts
-			(xy 105.41 91.44) (xy 110.49 91.44)
+			(xy 105.41 91.44) (xy 129.54 91.44)
 		)
 		(stroke
 			(width 0)
@@ -1331,7 +1357,7 @@
 		(uuid "fd5be247-f73d-4f32-bad2-a287f78072c2")
 	)
 	(label "VBIAS"
-		(at 110.49 91.44 0)
+		(at 119.38 91.44 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1438,7 +1464,7 @@
 	)
 	(global_label "ADC"
 		(shape input)
-		(at 111.76 100.33 0)
+		(at 134.62 100.33 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1448,7 +1474,7 @@
 		)
 		(uuid "e68fd0a8-ccce-4717-9c10-c71e75adcb9d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 118.3738 100.33 0)
+			(at 141.2338 100.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1803,7 +1829,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a518ce6c-a09a-47ec-9b05-98c6baedcc08")
-		(property "Reference" "#FLG01"
+		(property "Reference" "#FLG02"
 			(at 152.4 67.945 0)
 			(hide yes)
 			(show_name no)
@@ -1863,7 +1889,7 @@
 		(instances
 			(project "SCT013Head"
 				(path "/21b686d7-beef-4669-9055-5863613e214c"
-					(reference "#FLG01")
+					(reference "#FLG02")
 					(unit 1)
 				)
 			)
@@ -1881,7 +1907,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "aea675d4-ed20-4bc2-9729-5a291d7a41e5")
-		(property "Reference" "#FLG02"
+		(property "Reference" "#FLG01"
 			(at 97.155 116.84 0)
 			(hide yes)
 			(show_name no)
@@ -1942,7 +1968,7 @@
 		(instances
 			(project "SCT013Head"
 				(path "/21b686d7-beef-4669-9055-5863613e214c"
-					(reference "#FLG02")
+					(reference "#FLG01")
 					(unit 1)
 				)
 			)
@@ -2036,6 +2062,88 @@
 	)
 	(symbol
 		(lib_id "Device:R")
+		(at 129.54 96.52 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c45864fc-227d-4624-b71b-ab661ad9d019")
+		(property "Reference" "R4"
+			(at 132.08 95.2499 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "10k"
+			(at 132.08 97.7899 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
+			(at 131.318 96.52 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 129.54 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 129.54 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "528b506f-0c91-485a-95b3-e8c60448411e")
+		)
+		(pin "2"
+			(uuid "f2088bc1-789e-43f8-9dbd-57435b22272a")
+		)
+		(instances
+			(project "SCT013Head"
+				(path "/21b686d7-beef-4669-9055-5863613e214c"
+					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
 		(at 88.9 100.33 90)
 		(unit 1)
 		(body_style 1)
@@ -2056,7 +2164,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "10k"
 			(at 88.9 96.52 90)
 			(show_name no)
 			(do_not_autoplace no)

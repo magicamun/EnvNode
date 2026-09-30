@@ -2,6 +2,30 @@
 
 Stand: 2026-09-29. Erster Entwurfsstand, noch keine Fertigungsfreigabe.
 
+## Aktueller Stand: Eingangsteiler R1/R4, 2026-09-30
+
+Dieser Abschnitt ersetzt widersprechende ältere Prüfstände weiter unten.
+R1 = R4 = 10 kOhm halbieren den Wechselanteil relativ zu VBIAS.
+C1 = 10 nF liegt parallel zu R4; R2/R3 = 10 kOhm und C2 = 10 uF
+bilden weiterhin die Vorspannung. Umsetzung in Schaltplan und Layout geprüft.
+Tip/J1.3 führt über R1 zum ADC, Sleeve/J1.1 an VBIAS.
+
+ERC: 0 Meldungen. Export meldet separat eine Annotationswarnung.
+DRC nach Neuberechnung der Kupferflächen: 0 offene Verbindungen,
+keine Kupferabstandsfehler. Die frühere VBIAS-Unterbrechung und das offene
+Leiterbahnende sind behoben. PinHeader-Footprint und DNP sind angeglichen.
+Noch offen: Referenz ADC im Schema versus ADC1 im Layout (2 Abgleichmeldungen),
+1 aktive Drucküberlappung bei 3.3V und 9 ausgeschlossene Druckwarnungen.
+
+Die Auslegung mit 10k/10k wurde vom Nutzer ausdrücklich gewählt.
+Für 5 A / 1 V bei sinusförmigem Nennstrom: ADC ca. 0,943–2,357 V.
+Dies ist keine garantierte Überstromfestigkeit oder Schutzbeschaltung.
+
+Teileliste zum Commit unverändert vom Nutzer übernommen:
+ENK-00010, Position 60: R2,R3,R4, ENP-00018, Stückzahl 3 bestätigt.
+**BOM-Abweichung:** Position 50 führt R1 noch als ENP-00036 / 1 kOhm;
+Schaltplan und Layout verlangen jetzt 10 kOhm. Vor Bestückung korrigieren.
+
 ## Abschlussprüfung 2026-09-30
 
 Der zwischenzeitlich gespeicherte PCB-/Projektstand wurde erneut geprüft und
