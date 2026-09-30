@@ -2,6 +2,19 @@
 
 Stand: 2026-09-29. Erster Entwurfsstand, noch keine Fertigungsfreigabe.
 
+## Abschlussprüfung 2026-09-30
+
+Der zwischenzeitlich gespeicherte PCB-/Projektstand wurde erneut geprüft und
+als Entwurf gesichert. ERC: 0 Fehler und Warnungen. DRC mit neu berechneten
+Kupferflächen und Schaltplanabgleich bestätigt weiterhin die nachstehenden
+Befunde: 1 offene VBIAS-Verbindung an J1.1, 5 aktive Warnungen (kurzes offenes
+Leiterbahnende und vier 0,5-mm-Texte), 3 ausgeschlossene Randdruck-Warnungen
+sowie 2 Abweichungen bei ADC1 (PinHeader im Schema / PinSocket im Layout und DNP).
+Die gespeicherten Kupferflächen sehen teilweise verbunden aus; maßgeblich ist
+die Prüfung nach Neuberechnung. Dieser Stand ist nicht fertigungsbereit.
+Ober- und Unterseite wurden erneut visuell geprüft. Keine Änderungen am
+Routing durch die Prüfung. Die kompakte Platinenkontur bleibt erhalten.
+
 ## Nachprüfung nach Pin-Korrektur und Beschriftung
 
 Stand: 2026-09-29, einschließlich der während der Prüfung gespeicherten
