@@ -20,7 +20,7 @@ hardware/kicad/*/*/*-backups/
 hardware/kicad/*/*/*.kicad_prl
 hardware/kicad/*/*/_autosave-*
 hardware/kicad/*/*/*.lck
-
+hardware/Orders/*
 .pio/
 
 .vscode/ipch/
