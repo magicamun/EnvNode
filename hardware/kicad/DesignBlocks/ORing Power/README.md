@@ -82,3 +82,9 @@ Checked with KiCad 10 on 2026-09-21:
 - the editable source and published library block are synchronized.
 
 This validation covers design consistency, not physical manufacture. The first fabricated module still requires continuity, polarity, 5 V input, 3.3 V regulation, source handover, reverse-current, thermal, USB-C insertion, and castellated-solder-joint tests.
+
+## Documentation verification — 2026-10-05
+
+The Revision 0.1 assembly guide now carries current PCB, schematic, and parts-workbook hashes. The PCB has no formal title-block revision; 0.1 is the existing documentation designation. Compared with the previously documented PCB, only plot settings, an empty settings block, and serialization order changed; board geometry and circuitry are unchanged. The existing 3D reference view remains valid.
+
+The guide previously swapped the diode references in its functional description and tests: D1 connects `+3V3_EXT` to `+3V3_SYS`, while D2 connects `+3V3_DEVKIT` to `+3V3_SYS`. These references are corrected. PCB pad nets were checked against an exported schematic netlist and matched. This documentation check did not repeat full ERC/DRC or physical testing.

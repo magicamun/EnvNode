@@ -5,8 +5,8 @@ switch. Timing resistors are 10 kohms and 100 kohms; C1 is the 100 nF supply
 bypass. The 5 V heater path uses 0.8 mm tracks and must supply approximately
 417 mA for RainDetectorHead revision 0.1, in addition to other system loads.
 
-J1/J2 sockets are on B.Cu, facing the head; controller components are on F.Cu
-for access from the enclosure interior. The board is 54.12 x 44.12 mm.
+J1/J2 2x2 sockets are on B.Cu, facing the head; controller components are on F.Cu
+for access from the enclosure interior. The board is 62.12 x 44.12 mm.
 See `../RainDetectorHead/README.md` for the complete mating table.
 
 J3: 1 GND, 2 +5V, 3 HEATER_EN, 4 +3V3.
@@ -21,6 +21,8 @@ still need selection and verification.
 ```sh
 kicad-cli sch export bom --group-by Value,Footprint -o RainDetectorController.csv RainDetectorController.kicad_sch
 ```
+
+Current assembly guide: `Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf` (document date 2026-10-05).
 
 Historical reference/bring-up PDFs remain in `../Raindetector/Documentation/`.
 They are NOT revision 0.3 assembly guides. The old `../Raindetector/` project
@@ -45,3 +47,9 @@ PCNT and reports raw frequency over Serial. No heater automation is included.
 Final checks on 2026-09-14: both projects passed ERC and DRC with zero
 errors/warnings, zero unconnected items and zero schematic parity issues.
 The Head GND power flag and C1-only 0.10 mm clearance rule are included.
+
+## Documentation verification — 2026-10-05
+
+The current PCB outline is 62.12 x 44.12 mm and J1/J2 use 2x2 sockets. The BOM was regenerated to replace stale 1x4 entries. PCB pad nets and the exported schematic netlist match. On both current projects J2.1 is SENSE and J2.4 is HEATER-; verify mechanical contact alignment and mating height separately.
+
+The historical 2026-09-14 ERC/DRC results predate the connector/outline changes committed on 2026-09-15 (0d3a50b). This documentation update does not repeat full ERC/DRC or physical testing. The PDF includes current source hashes, assembly orientation, connector tables, separate frequency/heater bring-up, and a measurement record.

@@ -9,7 +9,7 @@
 - `AnalogHydroPressure.kicad_pcb`
 - `Analog.kicad_sch` — analog input and ADS1115
 - `24VBoost.kicad_sch` — local probe-supply generation
-- `Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.4.pdf` — assembly, configuration, and bring-up guide
+- `Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf` — assembly, configuration, and bring-up guide
 
 ## Functional Structure
 
@@ -49,9 +49,9 @@ The project-level `sym-lib-table` maps the symbol library. The footprint library
 
 Revision 0.4 uses the B260S1F-7 boost diode, selectable ADS1115 address jumpers, and an optional DNP measurement header for GND, `+24V`, `LOOP_RETURN`, and `AIN0`. The bottom-side identification EEPROM and its decoupling capacitor remain DNP in the current kit.
 
-At the documented design checkpoint, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
+At the historical design checkpoint on 2026-09-28, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
 
-The Revision 0.4 article list and assembly/bring-up guide are available but predate the boost-enable reassignment. For Revision 0.5 use AUX_GPIO2 / connector pin 10 instead of AUX_GPIO1 / pin 9; the PDF has not been regenerated. Physical boost-converter validation, thermal and EMC verification, probe calibration, and production testing remain required before production release.
+The Revision 0.5 assembly/bring-up guide documents AUX_GPIO2 / connector pin 10 for boost enable, including continuity checks, startup sequencing, updated PCB views, and source hashes. Revision 0.4 remains available as a historical guide; its article list predates the enable reassignment. Physical boost-converter validation, thermal and EMC verification, probe calibration, and production testing remain required before production release.
 
 ## Connector review — 2026-09-28
 
@@ -60,3 +60,7 @@ The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Mini Revision 0.7 
 Revision 0.5 moves LT8330 EN/UVLO and its R7 pull-down to J1 pin 10 / AUX_GPIO2 in both schematic and PCB. J1 pin 9 / AUX_GPIO1 is now unused and available for a future conditioned SCT013 analog signal; no SCT013 circuit is implemented yet. Firmware must use AUX_GPIO2 for boost enable: GPIO13 on Mini Slot A and WeatherStation Slot A, GPIO14 on Mini Slot B. Firmware was not modified as part of this hardware revision.
 
 The Revision 0.5 review on 2026-09-28, with zone refill, found no PCB DRC violations, unconnected pads, or schematic/PCB parity issues. Schematic ERC reports zero errors and ten warnings (unused labelled signals and duplicate local/global label names). The separate connector comparison confirms the corrected I2C0 assignment on Mini Revision 0.7 and WeatherStation Revision 0.2.
+
+## Documentation verification — 2026-10-05
+
+The Revision 0.5 guide was checked against an exported schematic netlist and PCB pad nets. J1.10, U4.4 (EN/UVLO), and R7.1 share AUX_GPIO2; J1.9 remains separate. The PCB views use the common ORing camera angles with preserved proportions. No new full ERC/DRC run or physical validation was performed during this documentation update.

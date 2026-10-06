@@ -16,15 +16,15 @@ The old `../Raindetector/` project is the earlier Stall.biz adapter prototype.
 |---|---|---|
 | J1.1 | HEATER+ | J1.1 |
 | J1.4 | GND / electrode 2 | J1.4 |
-| J2.1 | HEATER- | J2.4 |
-| J2.4 | SENSE / electrode 1 | J2.1 |
+| J2.1 | SENSE / electrode 1 | J2.1 |
+| J2.4 | HEATER- | J2.4 |
 | J1/J2 pins 2 and 3 | Unconnected, mechanical support | Unconnected |
 
 Both boards face B.Cu toward each other. The SMD header contact axes, not
 its alternating solder-pad centers, determine the mating positions.
-A 180-degree head rotation exchanges the heater terminals and electrodes;
-the passive elements remain functional. Equal measured baseline frequency
-in both orientations is not guaranteed because of parasitic capacitances.
+The current connectors are 2x2 SMD headers. The table lists electrical
+assignments from the current PCB, not a mechanical mating qualification.
+Verify contact alignment and orientation with the selected sockets before assembly.
 Confirm the actual header/socket mating height from the selected parts.
 
 ## Sensor and fabrication
@@ -51,3 +51,11 @@ clearance, mounting insulation and assembled spacing before manufacture.
 See `../RainDetectorController/README.md` for the shared validation commands.
 ERC/DRC are design checks, not hardware or environmental qualification.
 The assembled coated head has not yet been manufactured or tested.
+
+Documentation correction, 2026-10-05: J2.1 is SENSE and J2.4 is HEATER- in the current PCB; the previous table described the earlier connector arrangement. The current outline is 62.12 x 44.12 mm. Historical 2026-09-14 checks predate the connector/outline changes committed on 2026-09-15.
+
+## Assembly guide — 2026-10-06
+
+`Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf` documents the current 62.12 x 44.12 mm board, 2x2 SMD headers, heater assembly, controller contact mapping, fabrication requirements, and separate heater/sensor checks. It includes current source hashes and PCB views using the common ORing camera angles.
+
+The exported schematic netlist and PCB pad nets match. The heater was verified as five parallel strings of four 15-ohm resistors (R1-R4, R5-R8, R9-R12, R13-R16, R17-R20). No new full ERC/DRC or physical testing was performed for this documentation update.

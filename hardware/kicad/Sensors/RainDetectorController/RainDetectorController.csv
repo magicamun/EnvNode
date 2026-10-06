@@ -1,6 +1,6 @@
 "Refs","Value","Footprint","Qty","DNP"
 "C1","100nF","Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder","1",""
-"J1,J2","Conn_01x04_Socket","Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical","2",""
+"J1,J2","Conn_02x02_Odd_Even","Connector_PinSocket_2.54mm:PinSocket_2x02_P2.54mm_Vertical","2",""
 "J3","HEATER_CTRL","Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical","1","DNP"
 "J4","RAIN_SIGNAL","Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical","1","DNP"
 "Q1","AO3400A","Package_TO_SOT_SMD:SOT-23","1",""

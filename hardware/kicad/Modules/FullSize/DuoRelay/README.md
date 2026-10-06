@@ -7,6 +7,7 @@
 - `DuoRelay.kicad_pro`
 - `DuoRelay.kicad_sch`
 - `DuoRelay.kicad_pcb`
+- `Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf` — current assembly and bring-up guide; Revision 0.2 remains historical.
 
 ## Interface Use
 
@@ -26,7 +27,7 @@ Each channel uses a BC817 low-side driver with a 1 kΩ base resistor, a 100 kΩ 
 
 ## Module Identification
 
-The board provides an optional `24LC32` module-identification EEPROM and a local 100 nF decoupling capacitor on the bottom side. The EEPROM follows the EnvNode discovery convention:
+The board provides an optional `24LC32` (U2, SOIC-8; kit part ENP-00102 / `24LC32A-I/SN`) module-identification EEPROM and a local 100 nF decoupling capacitor on the bottom side. The EEPROM follows the EnvNode discovery convention:
 
 - SDA and SCL use `I2C0`;
 - `A1` is tied to `+3V3_SYS`;
@@ -60,3 +61,7 @@ At the time of the Revision 0.2 port:
 - connector placement, board outline, support-hole positions, power routing, relay drivers, status LEDs, and contact separation were checked against the source design.
 
 ERC and DRC must be repeated after every schematic, footprint, routing, zone, or rule change.
+
+## Documentation verification — 2026-10-05
+
+The Revision 0.3 guide updates the former U1 / SOT-23-6 EEPROM to U2 / SOIC-8 and retains the schematic DNP status for U2 and C1. All common component-pin nets in the exported schematic netlist and PCB were compared and matched, including relay contacts and EEPROM address wiring. Current PCB renders use the common ORing viewing angles. No new full ERC/DRC run or physical validation was performed; the historical Revision 0.2 validation above is not a release check for Revision 0.3.
