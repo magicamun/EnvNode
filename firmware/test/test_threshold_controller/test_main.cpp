@@ -10,6 +10,8 @@
 #include "ControllerRuntime.h"
 #include "MeasurementSnapshotCache.h"
 #include "ThresholdController.h"
+#include "ControllerPropertyReader.h"
+#include "PropertyWebView.h"
 
 using namespace EnvNode;
 
@@ -522,6 +524,11 @@ void test_factory_and_runtime_support_mixed_composition_and_live_rebuild() {
     configureThresholdSlot(slots[1], threshold);
     TEST_ASSERT_TRUE(runtime.initialize(slots));
     TEST_ASSERT_EQUAL_UINT32(2, runtime.runtimeCount());
+    TEST_ASSERT_NULL(runtime.reasonProvider(1));
+    TEST_ASSERT_NULL(runtime.reasonProvider(0));
+    TEST_ASSERT_NOT_NULL(runtime.reasonProvider(2));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OnThreshold),
+        static_cast<int>(runtime.reasonProvider(2)->reason()));
     ControllerRuntimeInfo info;
     TEST_ASSERT_TRUE(runtime.runtimeInfo(1, info));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(ControllerImplementation::Threshold),
@@ -539,6 +546,9 @@ void test_factory_and_runtime_support_mixed_composition_and_live_rebuild() {
     slots[1].implementationConfiguration.threshold.offThreshold = 75.0F;
     TEST_ASSERT_TRUE(runtime.rebuild(slots));
     TEST_ASSERT_TRUE(runtime.runtimeInfo(1, info));
+    TEST_ASSERT_NOT_NULL(runtime.reasonProvider(2));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OffThreshold),
+        static_cast<int>(runtime.reasonProvider(2)->reason()));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdDecision::Off),
         static_cast<int>(info.thresholdDecision));
     TEST_ASSERT_EQUAL_UINT32(2, runtime.runtimeCount());
@@ -732,6 +742,148 @@ void test_blink_phase_cycles_do_not_create_info_log_spam() {
     TEST_ASSERT_EQUAL_UINT32(0, logger.entries.size());
 }
 
+void test_reason_tracks_thresholds_hold_missing_invalid_stale_and_stop() {
+    TestLogger logger;
+    TestClock clock;
+    TestMeasurementResolver measurements;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    ThresholdController controller(thresholdConfiguration(), measurements, actuators, clock, logger);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::NotStarted), static_cast<int>(controller.reason()));
+    controller.begin();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::NoMeasurement), static_cast<int>(controller.reason()));
+    setSnapshot(measurements, 67, 0, 1);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::AwaitingThreshold), static_cast<int>(controller.reason()));
+    setSnapshot(measurements, 70, 0, 2);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OnThreshold), static_cast<int>(controller.reason()));
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    setSnapshot(measurements, 67, 0, 3);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::HysteresisHold), static_cast<int>(controller.reason()));
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::HysteresisHold), static_cast<int>(controller.reason()));
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    clock.now = 1001;
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::StaleMeasurement), static_cast<int>(controller.reason()));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdDecision::On), static_cast<int>(controller.decision()));
+    measurements.current = snapshot(0, 1001, 4, false);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::InvalidMeasurement), static_cast<int>(controller.reason()));
+    setSnapshot(measurements, 65, 1001, 5);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OffThreshold), static_cast<int>(controller.reason()));
+    TEST_ASSERT_EQUAL_UINT32(2, actuator.setCount);
+    controller.stop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::Stopped), static_cast<int>(controller.reason()));
+    controller.begin();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OffThreshold), static_cast<int>(controller.reason()));
+}
+
+void test_reason_inverse_direction_and_invalid_configuration() {
+    TestLogger logger;
+    TestClock clock;
+    TestMeasurementResolver measurements;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    auto config = thresholdConfiguration();
+    config.direction = ThresholdDirection::OnBelow;
+    config.onThreshold = 65;
+    config.offThreshold = 70;
+    ThresholdController controller(config, measurements, actuators, clock, logger);
+    setSnapshot(measurements, 65, 0, 1);
+    controller.begin();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OnThreshold), static_cast<int>(controller.reason()));
+    setSnapshot(measurements, 70, 0, 2);
+    controller.service();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::OffThreshold), static_cast<int>(controller.reason()));
+    config.maxMeasurementAgeMs = 0;
+    ThresholdController invalid(config, measurements, actuators, clock, logger);
+    invalid.begin();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdReason::InvalidConfiguration), static_cast<int>(invalid.reason()));
+}
+
+class TestReasonProvider : public IThresholdReasonProvider {
+public:
+    ThresholdReason current = ThresholdReason::NotStarted;
+    ThresholdReason reason() const override { return current; }
+};
+
+void test_enum_property_metadata_codes_and_type_safety() {
+    TestReasonProvider provider;
+    ControllerPropertyReader reader(3, provider);
+    const PropertyReference reference(PropertyComponentKind::Controller, 3, "reason");
+    PropertyDescription description;
+    TEST_ASSERT_TRUE(reader.describe(reference, description));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyValueKind::Enumeration), static_cast<int>(description.valueKind));
+    TEST_ASSERT_EQUAL_UINT32(10, description.enumOptionCount);
+    const char* codes[] = {"not_started", "stopped", "invalid_configuration", "no_measurement",
+        "invalid_measurement", "stale_measurement", "on_threshold", "off_threshold", "hysteresis_hold", "awaiting_threshold"};
+    for (size_t index = 0; index < description.enumOptionCount; ++index) {
+        provider.current = static_cast<ThresholdReason>(index);
+        PropertySnapshot value;
+        TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::Available), static_cast<int>(reader.read(reference, value)));
+        const PropertyEnumOption* option = nullptr;
+        TEST_ASSERT_TRUE(value.value.tryGetEnumeration(option));
+        TEST_ASSERT_EQUAL_STRING(codes[index], option->stableCode);
+        TEST_ASSERT_EQUAL_STRING(description.enumOptions[index].displayText, option->displayText);
+        float number = 0;
+        bool flag = false;
+        uint32_t integer = 0;
+        TEST_ASSERT_FALSE(value.value.tryGetFloatingPoint(number));
+        TEST_ASSERT_FALSE(value.value.tryGetBoolean(flag));
+        TEST_ASSERT_FALSE(value.value.tryGetUnsignedInteger(integer));
+        TEST_ASSERT_TRUE(value.valid);
+        TEST_ASSERT_FALSE(value.hasQuality);
+        TEST_ASSERT_FALSE(value.hasAcceptedMonotonicMs);
+        TEST_ASSERT_FALSE(value.hasTimestamp);
+        TEST_ASSERT_FALSE(value.hasRevision);
+    }
+    PropertyValue scalar(MeasurementValue::boolean(true));
+    const PropertyEnumOption* option = nullptr;
+    TEST_ASSERT_FALSE(scalar.tryGetEnumeration(option));
+    provider.current = static_cast<ThresholdReason>(255);
+    PropertySnapshot value;
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::NoValue), static_cast<int>(reader.read(reference, value)));
+    TEST_ASSERT_FALSE(value.valid);
+    const PropertyReference wrong[] = {{PropertyComponentKind::Sensor, 3, "reason"},
+        {PropertyComponentKind::Controller, 2, "reason"}, {PropertyComponentKind::Controller, 3, nullptr},
+        {PropertyComponentKind::Controller, 3, "Reason"}};
+    for (const auto& ref : wrong) {
+        TEST_ASSERT_FALSE(reader.describe(ref, description));
+        TEST_ASSERT_EQUAL_UINT32(0, description.enumOptionCount);
+        TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::UnknownReference), static_cast<int>(reader.read(ref, value)));
+    }
+}
+
+void test_controller_property_web_reads_real_evaluation_without_actuation() {
+    TestLogger logger;
+    TestClock clock;
+    TestMeasurementResolver measurements;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    ThresholdController controller(thresholdConfiguration(), measurements, actuators, clock, logger);
+    setSnapshot(measurements, 70, 0, 1);
+    controller.begin();
+    ControllerPropertyReader reader(3, controller);
+    const PropertyReference reference(PropertyComponentKind::Controller, 3, "reason");
+    String html = buildPropertyDiagnosticHtml(reader, reference, 100);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "controller / 3 / reason"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "On threshold reached (on_threshold)"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<dt>Age</dt><dd>Not available"));
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    setSnapshot(measurements, 67, 0, 2);
+    controller.service();
+    html = buildPropertyDiagnosticHtml(reader, reference, 100);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "hysteresis_hold"));
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_begin_handles_missing_stale_invalid_and_initial_in_band_input);
@@ -751,5 +903,9 @@ int main(int, char**) {
     RUN_TEST(test_source_loss_stale_and_recovery_log_once_per_transition);
     RUN_TEST(test_target_loss_and_retryable_operation_failure_are_suppressed_and_recover);
     RUN_TEST(test_blink_phase_cycles_do_not_create_info_log_spam);
+    RUN_TEST(test_reason_tracks_thresholds_hold_missing_invalid_stale_and_stop);
+    RUN_TEST(test_reason_inverse_direction_and_invalid_configuration);
+    RUN_TEST(test_enum_property_metadata_codes_and_type_safety);
+    RUN_TEST(test_controller_property_web_reads_real_evaluation_without_actuation);
     return UNITY_END();
 }

@@ -61,6 +61,10 @@ A completed Measurement includes, as applicable:
 
 Numeric Measurements use the canonical representation defined by their `MeasurementType`. Presentation units are external representation choices and never alter acquisition or physical meaning. Actuator state is not a Measurement merely because it can be observed externally.
 
+The read-only [local property view](LocalProperties.md) exposes Sensor state Measurements, logical On/Off Actuator output and Threshold Controller evaluation reasons through stable references. Sensor properties reuse the existing metadata and snapshot resolver; Actuator properties read the existing output capability.
+
+The shared `PropertyResolver` routes local references to the current Sensor, Actuator or Controller property reader. It stores no component bindings or duplicate values and resolves against the current runtime on each call. The Measurements page includes a one-source text preview using this resolver and a bounded, typed formatter. Preview parameters are URL inputs, not persistent display configuration.
+
 ## Actuator
 
 An Actuator applies requested physical output. It does not acquire Measurements, decide when it should operate, or know which external adapter issued a command.

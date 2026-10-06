@@ -1,6 +1,9 @@
 #include "WebService.h"
 #include "HtmlEscaping.h"
 #include "LogWebView.h"
+#include "PropertyWebView.h"
+#include "PropertyResolver.h"
+#include "PropertyPreviewWebView.h"
 #include "WebNavigation.h"
 #include "MqttTopic.h"
 #include "BoardProfile.h"
@@ -1301,6 +1304,96 @@ void WebService::handleMeasurements() {
     if (sensorManager_.sensorCount() == 0) {
         content += "<section class='card'><p>No active runtime Sensors.</p></section>";
     }
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_);
+    bool propertyShown = false;
+    for (size_t index = 0; index < sensorManager_.sensorCount() && !propertyShown; ++index) {
+        SensorRuntimeInfo runtime;
+        if (!sensorManager_.runtimeInfo(index, runtime)) continue;
+        for (uint8_t value = 1; value <= SupportedMeasurementTypeCount; ++value) {
+            const PropertyReference reference(PropertyComponentKind::Sensor, runtime.id,
+                measurementTypeStableId(static_cast<MeasurementType>(value)));
+            PropertyDescription description;
+            if (!properties.describe(reference, description)) continue;
+            content += buildPropertyDiagnosticHtml(properties, reference, millis());
+            propertyShown = true;
+            break;
+        }
+    }
+    if (!propertyShown) {
+        content += "<section class='card' id='property-diagnostic'><h2>Property diagnostic</h2>"
+            "<p>No active Sensor provides a state property.</p></section>";
+    }
+    bool actuatorPropertyShown = false;
+    for (size_t index = 0; index < actuatorRuntime_.runtimeCount(); ++index) {
+        ActuatorRuntimeInfo runtime;
+        if (!actuatorRuntime_.runtimeInfo(index, runtime)) continue;
+        const PropertyReference reference(PropertyComponentKind::Actuator, runtime.id, "state");
+        PropertyDescription description;
+        if (!properties.describe(reference, description)) continue;
+        content += buildPropertyDiagnosticHtml(properties, reference, millis());
+        actuatorPropertyShown = true;
+        break;
+    }
+    if (!actuatorPropertyShown) {
+        content += "<section class='card'><h2>Actuator Property diagnostic</h2>"
+            "<p>No available On/Off Actuator.</p></section>";
+    }
+    bool controllerPropertyShown = false;
+    for (size_t index = 0; index < controllerRuntime_.runtimeCount(); ++index) {
+        ControllerRuntimeInfo runtime;
+        if (!controllerRuntime_.runtimeInfo(index, runtime)) continue;
+        const PropertyReference reference(PropertyComponentKind::Controller, runtime.id, "reason");
+        PropertyDescription description;
+        if (!properties.describe(reference, description)) continue;
+        content += buildPropertyDiagnosticHtml(properties, reference, millis());
+        controllerPropertyShown = true;
+        break;
+    }
+    if (!controllerPropertyShown) {
+        content += "<section class='card'><h2>Controller Property diagnostic</h2>"
+            "<p>No Threshold Controller available.</p></section>";
+    }
+    const bool previewSubmitted = server_.hasArg("preview");
+    String previewSource = server_.hasArg("source") ? server_.arg("source") : String();
+    String previewFormat = server_.hasArg("format") ? server_.arg("format") : String();
+    String previewOptions;
+    bool previewSourceListed = false;
+    const auto addPreviewSource = [&](const PropertyReference& reference, const char* name) {
+        PropertyDescription description;
+        if (!properties.describe(reference, description)) return;
+        const String source = propertySourceText(reference);
+        if (!previewSubmitted && previewSource.isEmpty()) {
+            previewSource = source;
+            if (!server_.hasArg("format")) {
+                previewFormat = description.valueKind == PropertyValueKind::FloatingPoint ? "%.1f"
+                    : description.valueKind == PropertyValueKind::UnsignedInteger ? "%u" : "%s";
+            }
+        }
+        if (source == previewSource) previewSourceListed = true;
+        previewOptions += buildPropertySourceOption(reference, description, name, previewSource);
+    };
+    for (size_t index = 0; index < sensorManager_.sensorCount(); ++index) {
+        SensorRuntimeInfo runtime;
+        if (!sensorManager_.runtimeInfo(index, runtime)) continue;
+        for (uint8_t value = 1; value <= SupportedMeasurementTypeCount; ++value) {
+            addPreviewSource(PropertyReference(PropertyComponentKind::Sensor, runtime.id,
+                measurementTypeStableId(static_cast<MeasurementType>(value))), runtime.name);
+        }
+    }
+    for (size_t index = 0; index < actuatorRuntime_.runtimeCount(); ++index) {
+        ActuatorRuntimeInfo runtime;
+        if (actuatorRuntime_.runtimeInfo(index, runtime)) {
+            addPreviewSource(PropertyReference(PropertyComponentKind::Actuator, runtime.id, "state"), runtime.name);
+        }
+    }
+    for (size_t index = 0; index < controllerRuntime_.runtimeCount(); ++index) {
+        ControllerRuntimeInfo runtime;
+        if (controllerRuntime_.runtimeInfo(index, runtime)) {
+            addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "reason"), runtime.name);
+        }
+    }
+    content += buildPropertyPreviewHtml(properties, previewOptions, previewSource, previewFormat,
+        previewSubmitted, previewSourceListed);
     sendPage("Measurements", "/measurements", content);
 }
 

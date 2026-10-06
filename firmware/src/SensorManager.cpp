@@ -143,6 +143,11 @@ void SensorManager::loop() {
     }
 }
 
+const ISensor* SensorManager::sensor(SensorId id) const {
+    const SensorEntry* entry = findEntry(id);
+    return entry == nullptr ? nullptr : entry->sensor;
+}
+
 size_t SensorManager::sensorCount() const {
     return sensorCount_;
 }

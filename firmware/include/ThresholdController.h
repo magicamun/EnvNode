@@ -2,6 +2,7 @@
 
 #include "ControllerSlotConfiguration.h"
 #include "IController.h"
+#include "IThresholdReasonProvider.h"
 #include "IMeasurementResolver.h"
 #include "IMonotonicClock.h"
 #include "IOnOffActuatorResolver.h"
@@ -15,7 +16,7 @@ enum class ThresholdDecision : uint8_t {
     Off,
 };
 
-class ThresholdController : public IController {
+class ThresholdController : public IController, public IThresholdReasonProvider {
 public:
     ThresholdController(
         const ThresholdControllerConfiguration& configuration,
@@ -51,6 +52,7 @@ public:
     bool latestSnapshotStale() const;
     uint32_t latestSnapshotAgeMs() const;
     ThresholdDecision decision() const;
+    ThresholdReason reason() const override;
     bool targetAvailable() const;
     bool outputApplicationPending() const;
     bool hasProcessedRevision() const;
@@ -83,6 +85,7 @@ private:
     bool hasProcessedRevision_ = false;
     uint32_t lastProcessedRevision_ = 0;
     ThresholdDecision decision_ = ThresholdDecision::Unknown;
+    ThresholdReason reason_ = ThresholdReason::NotStarted;
     bool targetAvailable_ = false;
     bool outputApplicationPending_ = false;
     bool targetUnavailabilityLogged_ = false;

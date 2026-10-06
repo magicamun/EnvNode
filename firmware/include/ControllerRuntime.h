@@ -47,6 +47,8 @@ public:
     bool rebuild(const ControllerSlotConfiguration* slots);
     void loop();
     size_t runtimeCount() const;
+    // Borrowed read-only capability; valid only until runtime rebuild.
+    const IThresholdReasonProvider* reasonProvider(ControllerId id) const;
     uint32_t compositionRevision() const;
     bool runtimeInfo(size_t index, ControllerRuntimeInfo& info) const;
     ControllerOperationResult startController(ControllerId id);

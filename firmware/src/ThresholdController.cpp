@@ -48,7 +48,11 @@ ThresholdController::ThresholdController(
 }
 
 ControllerOperationResult ThresholdController::begin() {
-    if (!configurationValid()) return ControllerOperationResult::InvalidConfiguration;
+    if (!configurationValid()) {
+        reason_ = ThresholdReason::InvalidConfiguration;
+        return ControllerOperationResult::InvalidConfiguration;
+    }
+    reason_ = ThresholdReason::AwaitingThreshold;
     running_ = true;
     sourceAvailable_ = false;
     sourceAvailabilityKnown_ = false;
@@ -96,6 +100,8 @@ ControllerOperationResult ThresholdController::service() {
             && metadata.expectedValueKind == ValueKind::FloatingPoint
             && metadata.semantics == MeasurementSemantics::State;
         usable = compatible && !latestSnapshotStale_;
+        if (!compatible) reason_ = ThresholdReason::InvalidMeasurement;
+        else if (latestSnapshotStale_) reason_ = ThresholdReason::StaleMeasurement;
         sourceStatus = compatible && latestSnapshotStale_
             ? SourceStatus::Stale
             : usable ? SourceStatus::Available : SourceStatus::Unavailable;
@@ -105,6 +111,7 @@ ControllerOperationResult ThresholdController::service() {
             if (usable) evaluateValue(value);
         }
     } else {
+        reason_ = ThresholdReason::NoMeasurement;
         latestMeasurementValid_ = false;
         latestNumericValueAvailable_ = false;
         latestSnapshotStale_ = false;
@@ -118,6 +125,7 @@ ControllerOperationResult ThresholdController::service() {
 
 ControllerOperationResult ThresholdController::stop() {
     running_ = false;
+    reason_ = ThresholdReason::Stopped;
     sourceAvailable_ = false;
     decision_ = ThresholdDecision::Unknown;
     outputApplicationPending_ = false;
@@ -144,6 +152,7 @@ float ThresholdController::latestNumericValue() const { return latestNumericValu
 bool ThresholdController::latestSnapshotStale() const { return latestSnapshotStale_; }
 uint32_t ThresholdController::latestSnapshotAgeMs() const { return latestSnapshotAgeMs_; }
 ThresholdDecision ThresholdController::decision() const { return decision_; }
+ThresholdReason ThresholdController::reason() const { return reason_; }
 bool ThresholdController::targetAvailable() const { return targetAvailable_; }
 bool ThresholdController::outputApplicationPending() const {
     return outputApplicationPending_;
@@ -201,12 +210,19 @@ void ThresholdController::updateSourceAvailability(SourceStatus status) {
 void ThresholdController::evaluateValue(float value) {
     const ThresholdDecision previous = decision_;
     ThresholdDecision next = decision_;
-    if (configuration_.direction == ThresholdDirection::OnAbove) {
-        if (value >= configuration_.onThreshold) next = ThresholdDecision::On;
-        else if (value <= configuration_.offThreshold) next = ThresholdDecision::Off;
+    const bool onReached = configuration_.direction == ThresholdDirection::OnAbove
+        ? value >= configuration_.onThreshold : value <= configuration_.onThreshold;
+    const bool offReached = configuration_.direction == ThresholdDirection::OnAbove
+        ? value <= configuration_.offThreshold : value >= configuration_.offThreshold;
+    if (onReached) {
+        next = ThresholdDecision::On;
+        reason_ = ThresholdReason::OnThreshold;
+    } else if (offReached) {
+        next = ThresholdDecision::Off;
+        reason_ = ThresholdReason::OffThreshold;
     } else {
-        if (value <= configuration_.onThreshold) next = ThresholdDecision::On;
-        else if (value >= configuration_.offThreshold) next = ThresholdDecision::Off;
+        reason_ = decision_ == ThresholdDecision::Unknown
+            ? ThresholdReason::AwaitingThreshold : ThresholdReason::HysteresisHold;
     }
     const MeasurementTypeMetadata& metadata =
         measurementTypeMetadata(configuration_.source.measurementType);

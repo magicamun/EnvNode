@@ -93,6 +93,13 @@ void ControllerRuntime::loop() {
     }
 }
 
+const IThresholdReasonProvider* ControllerRuntime::reasonProvider(ControllerId id) const {
+    for (size_t index = 0; index < runtimeCount_; ++index) {
+        if (entries_[index].info.id == id) return entries_[index].threshold;
+    }
+    return nullptr;
+}
+
 size_t ControllerRuntime::runtimeCount() const { return runtimeCount_; }
 uint32_t ControllerRuntime::compositionRevision() const { return compositionRevision_; }
 
