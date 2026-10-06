@@ -48,6 +48,7 @@ public:
         size_t count);
     void initialize(const ActuatorSlotConfiguration* slots);
     bool rebuild(const ActuatorSlotConfiguration* slots);
+    bool moduleOwnsHardware(const HardwareResourceAssignment& hardware) const;
     size_t runtimeCount() const;
     size_t availableCount() const;
     bool runtimeInfo(size_t index, ActuatorRuntimeInfo& info) const;

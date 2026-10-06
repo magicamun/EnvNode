@@ -13,6 +13,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
+#include <new>
 #include "FirmwareVersion.h"
 #include "FirmwareBuildInfo.h"
 #include "UnitConverter.h"
@@ -27,6 +29,27 @@
 
 namespace EnvNode {
 namespace {
+
+String moduleActuatorToken(const ModuleActuatorReference& reference) {
+    String token;
+    const auto append = [&token](const uint8_t* bytes, size_t length) {
+        for (size_t index = 0; index < length; ++index) {
+            char hex[3];
+            snprintf(hex, sizeof(hex), "%02x", bytes[index]);
+            token += hex;
+        }
+    };
+    append(reference.moduleInstanceFingerprint, sizeof(reference.moduleInstanceFingerprint));
+    append(reference.deviceIdHash, sizeof(reference.deviceIdHash));
+    return token;
+}
+
+bool actuatorInfoById(const ActuatorRuntime& runtime, ActuatorId id, ActuatorRuntimeInfo& info) {
+    for (size_t index = 0; index < runtime.runtimeCount(); ++index) {
+        if (runtime.runtimeInfo(index, info) && info.id == id) return true;
+    }
+    return false;
+}
 
 const char SharedStyle[] PROGMEM = R"CSS(
 :root{--bg:#f3f6f8;--panel:#fff;--ink:#17212b;--muted:#637282;--line:#dbe3e8;--brand:#176b87;--brand2:#0f536a;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#123644;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#b8d0da;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#dbeaf0;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#1d5367;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.main.main-wide{max-width:none}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help,.secondary{color:var(--muted)}.help,.secondary{font-size:13px}.secondary{display:block;margin-top:4px}.grid,.summary-grid{display:grid;gap:16px;min-width:0;max-width:100%;margin-bottom:16px}.grid{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}.summary-grid.primary{grid-template-columns:repeat(4,minmax(0,1fr))}.summary-grid.domain{grid-template-columns:repeat(3,minmax(0,1fr))}.grid>.card,.summary-grid>.card{margin-bottom:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#e8edf0;max-width:100%;white-space:nowrap;overflow-wrap:normal}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #bfcbd2;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:nowrap}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.nowrap,.sensor-technical,.sensor-last-measurement,.sensor-actions{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.table-scroll,.scroll{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}.table-actions{display:flex;gap:8px;align-items:center;justify-content:center;margin:0}.table-actions.vertical{flex-direction:column}.table-actions form{margin:0}.table-actions button,.table-action{min-width:max-content;white-space:nowrap}.measurement-table{min-width:620px}.measurement-table .measurement-name{width:auto}.measurement-table .measurement-value{min-width:130px;white-space:nowrap}.measurement-table .measurement-quality{min-width:90px;white-space:nowrap}.measurement-table .measurement-time{min-width:175px;white-space:nowrap}.actuator-table{min-width:1120px}.actuator-table th{white-space:nowrap;overflow-wrap:normal}.actuator-table td{vertical-align:middle}.actuator-table .actuator-slot{width:58px;white-space:nowrap}.actuator-table .actuator-name{min-width:145px}.actuator-table .actuator-configured{min-width:130px}.actuator-table .actuator-hardware{min-width:90px;white-space:nowrap}.actuator-table .actuator-runtime{min-width:175px}.actuator-table .actuator-initialization{min-width:120px;white-space:nowrap}.actuator-table .actuator-state{min-width:68px;white-space:nowrap}.actuator-table .actuator-controls{min-width:90px;text-align:center}.actuator-table .actuator-configure{min-width:112px;text-align:center}.actuator-table .actuator-controls button{min-width:58px}.controller-table{min-width:1320px}.controller-table th{white-space:nowrap;overflow-wrap:normal}.controller-table td{vertical-align:middle}.controller-table .controller-slot{width:58px;white-space:nowrap}.controller-table .controller-name{min-width:190px}.controller-table .controller-name .secondary{white-space:nowrap}.controller-table .controller-route{min-width:290px}.controller-table .controller-policy{min-width:210px}.controller-table .controller-runtime{min-width:150px}.controller-table .controller-diagnostics{min-width:245px}.controller-table .controller-controls{min-width:120px;text-align:center}.controller-table .controller-controls .table-actions{align-items:stretch}.controller-table .controller-controls button,.controller-table .controller-controls .button{width:100%}.diagnostic-stack{line-height:1.55}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}@media(max-width:900px){.summary-grid.primary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}.summary-grid.domain{grid-template-columns:1fr}}@media(max-width:480px){.summary-grid.primary{grid-template-columns:1fr}}
@@ -55,6 +78,20 @@ String descriptorText(const DescriptorTextView& view) {
     result.reserve(view.size);
     for (size_t index = 0; index < view.size; ++index) result += view.data[index];
     return result;
+}
+
+String moduleActuatorLabel(const ModuleDiscoveryService& discovery,
+    const ModuleActuatorReference& reference) {
+    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
+        const auto* module = discovery.result(static_cast<ModuleSlot>(index));
+        if (module == nullptr || !module->identified() || !module->descriptorHasInstanceId
+            || memcmp(reference.moduleInstanceFingerprint, module->descriptorInstanceId,
+                sizeof(reference.moduleInstanceFingerprint)) != 0) continue;
+        return descriptorText(module->descriptorName.empty()
+            ? module->descriptorTypeId : module->descriptorName)
+            + " · Slot " + moduleSlotName(module->slot);
+    }
+    return "Module descriptor";
 }
 
 String descriptorUuid(const uint8_t (&value)[16]) {
@@ -792,6 +829,9 @@ void WebService::handleDevice() {
     }
     c += "</tbody></table></div></section>";
     c += "<section class='card'><h2>Discovered Module Devices</h2><div class='scroll'><table><thead><tr><th>Slot</th><th>Device</th><th>Kind</th><th>Driver</th><th>Capability</th><th>Binding</th><th>Board resource</th><th>Parameters</th><th>Status</th></tr></thead><tbody>";
+    // Keep the large inventory off both static DRAM and the HTTP task stack.
+    std::unique_ptr<ModuleDeviceInventoryEntry[]> moduleDeviceInventory(
+        new (std::nothrow) ModuleDeviceInventoryEntry[MaximumDescriptorDevices]);
     bool hasModuleDevices = false;
     for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
         const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
@@ -801,14 +841,14 @@ void WebService::handleDevice() {
             continue;
         }
         size_t entryCount = 0;
-        if (!deriveModuleDeviceInventory(
+        if (!moduleDeviceInventory || !deriveModuleDeviceInventory(
                 module->descriptor, currentBoardProfile(), slot,
-                moduleDeviceInventory_, MaximumDescriptorDevices, entryCount)) {
+                moduleDeviceInventory.get(), MaximumDescriptorDevices, entryCount)) {
             continue;
         }
         for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
             hasModuleDevices = true;
-            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory_[entryIndex];
+            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory[entryIndex];
             String bindingText;
             String resourceText;
             for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {
@@ -851,9 +891,12 @@ void WebService::handleDevice() {
             c += "</td></tr>";
         }
     }
-    if (!hasModuleDevices) {
+    if (!moduleDeviceInventory) {
+        c += "<tr><td colspan='9'>Insufficient memory to render module device inventory.</td></tr>";
+    } else if (!hasModuleDevices) {
         c += "<tr><td colspan='9'>No compatible descriptor-defined devices discovered.</td></tr>";
     }
+    moduleDeviceInventory.reset();
     c += "</tbody></table></div><p class='help'>This is a read-only inventory derived from module descriptors and logical slot resources. It does not modify the saved sensor or actuator configuration.</p></section>";
     c += "<section class='card'><h2>Provision Module Descriptor</h2>";
     c += "<div class='notice'><strong>ENHD descriptor 0.1</strong><p>This creates the deterministic DuoRelay 0.3 CBOR descriptor, validates it against the active board and firmware, writes it atomically, reads it back, and reruns discovery.</p></div>";
@@ -962,20 +1005,26 @@ void WebService::handleActuators() {
             && slot.implementation != ActuatorImplementation::None;
         const bool descriptorRuntime = hasRuntime
             && runtime.origin == ActuatorRuntimeOrigin::ModuleDescriptor;
-        const bool runtimeMatches = descriptorRuntime || (expectsRuntime == hasRuntime
+        const bool savedModule = validModuleActuatorReference(slot.moduleTarget);
+        const bool module = savedModule || descriptorRuntime;
+        ModuleActuatorReference moduleReference = slot.moduleTarget;
+        if (!savedModule && descriptorRuntime)
+            actuatorRuntime_.moduleReference(slot.slotId, moduleReference);
+        const bool runtimeMatches = (savedModule && !hasRuntime)
+            || (descriptorRuntime && !savedModule) || (expectsRuntime == hasRuntime
             && (!hasRuntime || (runtime.implementation == slot.implementation
                 && String(runtime.name) == slot.name
-                && sameHardwareAssignment(runtime.hardware, slot.hardware))));
+                && (savedModule || sameHardwareAssignment(runtime.hardware, slot.hardware)))));
         IOnOffActuator* onOff = actuatorRuntime_.onOffActuator(slot.slotId);
         ILevelActuator* level = actuatorRuntime_.levelActuator(slot.slotId);
 
         c += "<tr><td class='actuator-slot'>" + String(slot.slotId)
-            + "</td><td class='actuator-name'>" + escapeHtml(slot.name)
+            + "</td><td class='actuator-name'>" + escapeHtml(descriptorRuntime && !savedModule ? String(runtime.name) : slot.name)
             + "</td><td class='actuator-configured'>";
-        c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
-        c += "<br>" + escapeHtml(metadata == nullptr ? "Invalid" : metadata->displayType);
+        c += (descriptorRuntime && !savedModule ? true : slot.enabled) ? badge("Enabled", "good") : badge("Disabled", "warn");
+        c += "<br>" + escapeHtml(module ? "Module On/Off" : metadata == nullptr ? "Invalid" : metadata->displayType);
         c += "</td><td class='actuator-hardware'>"
-            + configuredHardwareAssignment(slot.hardware) + "</td><td class='actuator-runtime'>";
+            + (module ? escapeHtml(moduleActuatorLabel(moduleDiscoveryService_, moduleReference)) : configuredHardwareAssignment(slot.hardware)) + "</td><td class='actuator-runtime'>";
         if (hasRuntime) {
             c += escapeHtml(runtime.name) + " / "
                 + configuredHardwareAssignment(runtime.hardware);
@@ -986,7 +1035,7 @@ void WebService::handleActuators() {
                     + escapeHtml(runtime.descriptorDeviceId) + "</span>";
             }
         } else {
-            c += "No runtime Actuator";
+            c += savedModule ? "Module disabled or unavailable" : "No runtime Actuator";
         }
         if (!runtimeMatches) c += "<br>" + badge("Actuator apply required", "warn");
         c += "</td><td class='actuator-initialization'>";
@@ -1330,6 +1379,38 @@ void WebService::handleActuatorEdit() {
     }
     const ActuatorSlotConfiguration& slot =
         configurationService_.getConfiguration().actuatorSlots[requestedSlot - 1];
+    ActuatorRuntimeInfo runtime;
+    const bool hasRuntime = actuatorInfoById(actuatorRuntime_, slot.slotId, runtime);
+    ModuleActuatorReference reference = slot.moduleTarget;
+    const bool savedModule = validModuleActuatorReference(reference);
+    const bool module = savedModule || actuatorRuntime_.moduleReference(slot.slotId, reference);
+    if (module || (hasRuntime && runtime.origin == ActuatorRuntimeOrigin::ModuleDescriptor)) {
+        String c = "<section class='card'><h2>Configure Module On/Off Actuator</h2>";
+        c += "<p>" + escapeHtml(moduleActuatorLabel(moduleDiscoveryService_, reference)) + "</p>";
+        if (hasRuntime) {
+            c += "<p>Module " + escapeHtml(moduleSlotName(runtime.moduleSlot)) + " / "
+                + escapeHtml(runtime.descriptorDeviceId) + " · "
+                + configuredHardwareAssignment(runtime.hardware) + "</p>";
+        } else {
+            c += "<p>Module actuator is disabled or currently unavailable. Its saved identity is retained.</p>";
+        }
+        c += "<p class='help'>On/Off capability and hardware are defined by the module descriptor. Changes become active after Apply Actuator Changes.</p>";
+        if (module) {
+            c += "<form method='post' action='/actuators/save'><input type='hidden' name='slot' value='"
+                + String(slot.slotId) + "'><input type='hidden' name='module' value='"
+                + moduleActuatorToken(reference) + "'>";
+            c += "<label class='choice'><input type='checkbox' name='enabled' value='1'"
+                + String((savedModule ? slot.enabled : true) ? " checked" : "") + ">Enabled</label>";
+            c += "<label>Name<input name='name' required maxlength='" + String(MaxActuatorSlotNameLength)
+                + "' value='" + escapeHtml(savedModule ? slot.name : String(runtime.name)) + "'></label>";
+            c += "<div class='actions'><button type='submit'>Save Module Actuator</button><a class='button' href='/actuators'>Cancel</a></div></form>";
+        } else {
+            c += "<p>A module instance identity is required to save settings.</p>";
+        }
+        c += "</section>";
+        sendPage("Configure Module Actuator", "/actuators", c);
+        return;
+    }
     const ActuatorImplementationMetadata* selected =
         ActuatorImplementationRegistry::find(slot.implementation);
     String options;
@@ -1350,6 +1431,7 @@ void WebService::handleActuatorEdit() {
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
         if (gpio == nullptr
+            || actuatorRuntime_.moduleOwnsHardware(HardwareResourceAssignment::gpioResource(gpio->resource))
             || gpioAssignedToOtherEnabledSlot(
                 configuration, InvalidSensorId, slot.slotId, gpio->resource)) {
             continue;
@@ -1586,16 +1668,17 @@ void WebService::handleControllerEdit() {
 }
 
 void WebService::handleDiagnostics() {
-    renderDiagnostics(false);
+    renderDiagnostics();
 }
 
 void WebService::handleI2CScan() {
     logger_.info("I2C scan started");
-    renderDiagnostics(true);
+    i2cBusManager_.scanAll();
+    renderDiagnostics();
     logger_.info("I2C scan complete");
 }
 
-void WebService::renderDiagnostics(bool scanI2CBuses) {
+void WebService::renderDiagnostics() {
     String c;
     const BoardProfile& board = currentBoardProfile();
     c.reserve(1800 + sensorManager_.sensorCount() * 450);
@@ -1604,17 +1687,17 @@ void WebService::renderDiagnostics(bool scanI2CBuses) {
     if (board.i2cBusCount == 0) {
         c += "<p>No I²C buses available on this board.</p>";
     } else {
-        c += "<p class='help'>An explicit scan probes normal 7-bit addresses for acknowledgement without identifying or configuring devices.</p>";
+        c += "<p class='help'>Showing the latest scan, performed automatically at boot or refreshed manually. Scans probe normal 7-bit addresses for acknowledgement. Module descriptions come from the last EEPROM discovery; scanning does not reload descriptors.</p>";
         for (size_t index = 0; index < board.i2cBusCount; ++index) {
             const BoardI2CBusCapability& bus = board.i2cBuses[index];
             c += "<h3>" + String(i2cBusName(bus.bus)) + "</h3><p class='secondary'>SDA GPIO"
                 + String(bus.sda.number) + " · SCL GPIO" + String(bus.scl.number) + "</p>";
-            if (!scanI2CBuses) {
+            const I2CScanResult* cachedScan = i2cBusManager_.lastScan(bus.bus);
+            if (cachedScan == nullptr) {
                 c += "<p>Not scanned.</p>";
                 continue;
             }
-            I2CScanResult result(bus.bus);
-            i2cBusManager_.scan(bus.bus, result);
+            const I2CScanResult& result = *cachedScan;
             if (result.status == I2CScanStatus::BusUnavailable) {
                 c += "<div class='notice error'>Bus is not initialized.</div>";
                 continue;
@@ -1622,14 +1705,57 @@ void WebService::renderDiagnostics(bool scanI2CBuses) {
             if (result.addressCount == 0) {
                 c += "<p>No devices detected.</p>";
             } else {
-                c += "<p><strong>Detected addresses</strong><br>";
+                c += "<div class='table-scroll'><table><thead><tr><th>Address</th><th>Device / Module</th></tr></thead><tbody>";
                 for (size_t addressIndex = 0; addressIndex < result.addressCount; ++addressIndex) {
                     char addressText[5];
                     snprintf(addressText, sizeof(addressText), "0x%02X", result.addresses[addressIndex]);
-                    if (addressIndex != 0) c += " · ";
-                    c += "<code>" + String(addressText) + "</code>";
+                    c += "<tr><td><code>" + String(addressText) + "</code></td><td>";
+                    const ModuleDiscoveryResult* module = nullptr;
+                    // IdentityEeprom24LC32 uses the board's identity bus, I2C0.
+                    if (bus.bus == I2CBus::I2C0) {
+                        for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
+                            const auto* candidate = moduleDiscoveryService_.result(static_cast<ModuleSlot>(slotIndex));
+                            if (candidate != nullptr && candidate->eepromAddress == result.addresses[addressIndex]) {
+                                module = candidate;
+                                break;
+                            }
+                        }
+                    }
+                    if (bus.bus == I2CBus::I2C0 && result.addresses[addressIndex] == 0x50) {
+                        c += "Mainboard EEPROM";
+                        if (boardIdentityResolution_.source == BoardIdentitySource::EEPROM) {
+                            const BoardIdentity& identity = boardIdentityResolution_.identity;
+                            c += "<br>" + escapeHtml(board.displayName)
+                                + " · Revision " + String(identity.revision.major) + "."
+                                + String(identity.revision.minor);
+                        }
+                        c += "<span class='secondary'>Board identity: "
+                            + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus))
+                            + " · Source: " + boardIdentitySourceName(boardIdentityResolution_.source)
+                            + "</span>";
+                    } else if (module != nullptr) {
+                        c += "Module EEPROM · Slot " + escapeHtml(moduleSlotName(module->slot));
+                        if (module->identified()) {
+                            c += "<br>" + escapeHtml(descriptorText(module->descriptorName.empty()
+                                ? module->descriptorTypeId : module->descriptorName))
+                                + " · Revision " + String(module->descriptorRevision.major) + "."
+                                + String(module->descriptorRevision.minor);
+                            c += "<span class='secondary'>Descriptor: "
+                                + String(hardwareDescriptorDecodeStatusName(module->descriptorStatus))
+                                + " · " + hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility)
+                                + "</span>";
+                        } else {
+                            c += "<span class='secondary'>Descriptor: "
+                                + String(module->descriptorStoreStatus == HardwareDescriptorStoreStatus::Valid
+                                    ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
+                                    : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus)) + "</span>";
+                        }
+                    } else {
+                        c += "Unidentified I²C device";
+                    }
+                    c += "</td></tr>";
                 }
-                c += "</p>";
+                c += "</tbody></table></div>";
             }
             if (result.status == I2CScanStatus::CompleteWithProbeErrors) {
                 c += "<div class='notice error'>The scan encountered "
@@ -2060,6 +2186,28 @@ void WebService::handleSensorApply() {
 }
 void WebService::handleActuatorSave() {
     const long requestedSlot = server_.arg("slot").toInt();
+    if (requestedSlot >= 1 && requestedSlot <= static_cast<long>(MaxActuatorSlotCount)) {
+        ActuatorSlotConfiguration slot = configurationService_.getConfiguration().actuatorSlots[requestedSlot - 1];
+        ModuleActuatorReference reference = slot.moduleTarget;
+        ActuatorRuntimeInfo runtime;
+        const bool descriptorRuntime = actuatorInfoById(actuatorRuntime_, slot.slotId, runtime)
+            && runtime.origin == ActuatorRuntimeOrigin::ModuleDescriptor;
+        const bool module = validModuleActuatorReference(reference)
+            || actuatorRuntime_.moduleReference(slot.slotId, reference);
+        if (module || descriptorRuntime || server_.hasArg("module")) {
+            bool ok = module && server_.arg("module") == moduleActuatorToken(reference);
+            slot.moduleTarget = reference;
+            slot.name = server_.arg("name");
+            slot.enabled = server_.arg("enabled") == "1";
+            slot.implementation = ActuatorImplementation::GpioOnOff;
+            slot.hardware = HardwareResourceAssignment::none();
+            if (ok) ok = configurationService_.setActuatorSlotConfiguration(slot);
+            sendConfigurationResult(configurationSaveResult(ok, ConfigurationArea::Actuators),
+                "Module Actuator saved", "Module Actuator save failed", "/actuators",
+                "Invalid configuration or module identity changed. Reload the editor.");
+            return;
+        }
+    }
     const ActuatorImplementationMetadata* metadata =
         ActuatorImplementationRegistry::findByStableId(
             server_.arg("implementation").c_str());
@@ -2080,6 +2228,7 @@ void WebService::handleActuatorSave() {
                 GpioResource(static_cast<uint8_t>(gpio)));
         }
     }
+    if (ok && actuatorRuntime_.moduleOwnsHardware(slot.hardware)) ok = false;
     if (ok) ok = configurationService_.setActuatorSlotConfiguration(slot);
     sendConfigurationResult(
         configurationSaveResult(ok, ConfigurationArea::Actuators),

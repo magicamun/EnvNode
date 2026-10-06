@@ -117,7 +117,7 @@ private:
     const char* pendingActionMessage() const;
     void performExplicitRestart();
     bool administrationAvailable() const;
-    void renderDiagnostics(bool scanI2CBuses);
+    void renderDiagnostics();
 
     ILogger& logger_;
     IConfigurationService& configurationService_;
@@ -139,7 +139,6 @@ private:
     ModuleDiscoveryService& moduleDiscoveryService_;
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
     uint8_t moduleDescriptorPayload_[DuoRelayDescriptor::MaximumEncodedSize] = {};
-    ModuleDeviceInventoryEntry moduleDeviceInventory_[MaximumDescriptorDevices] = {};
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

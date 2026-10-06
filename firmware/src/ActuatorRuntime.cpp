@@ -39,6 +39,14 @@ bool ActuatorRuntime::configureAutomaticActuators(
     return true;
 }
 
+bool ActuatorRuntime::moduleOwnsHardware(const HardwareResourceAssignment& hardware) const {
+    for (size_t index = 0; index < automaticActuatorCount_; ++index) {
+        if (exclusiveHardwareResourceConflict(automaticActuators_[index].hardware, hardware))
+            return true;
+    }
+    return false;
+}
+
 void ActuatorRuntime::initialize(const ActuatorSlotConfiguration* slots) {
     if (initialized_ || slots == nullptr) return;
     initialized_ = true;
@@ -104,6 +112,11 @@ bool ActuatorRuntime::composeEffectiveSlots(const ActuatorSlotConfiguration* slo
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
         effectiveSlots_[index] = slots[index];
         effectiveOrigins_[index] = nullptr;
+        if (validModuleActuatorReference(slots[index].moduleTarget)) {
+            effectiveSlots_[index].enabled = false;
+            effectiveSlots_[index].implementation = ActuatorImplementation::None;
+            effectiveSlots_[index].hardware = HardwareResourceAssignment::none();
+        }
     }
 
     for (size_t automaticIndex = 0;
@@ -120,17 +133,45 @@ bool ActuatorRuntime::composeEffectiveSlots(const ActuatorSlotConfiguration* slo
             }
         }
         size_t target = MaxActuatorSlotCount;
+        ModuleActuatorReference reference;
+        if (automatic.hasModuleInstanceId) {
+            memcpy(reference.moduleInstanceFingerprint, automatic.moduleInstanceFingerprint, 8);
+            setModuleActuatorDeviceId(reference, automatic.deviceId);
+        }
+        bool configuredModule = false;
         for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
-            const ActuatorSlotConfiguration& slot = effectiveSlots_[slotIndex];
-            if (slot.enabled && slot.implementation != ActuatorImplementation::None
-                && exclusiveHardwareResourceConflict(slot.hardware, automatic.hardware)) {
+            if (sameModuleActuatorReference(slots[slotIndex].moduleTarget, reference)) {
                 target = slotIndex;
+                configuredModule = true;
                 break;
+            }
+        }
+        if (configuredModule) {
+            for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
+                if (index != target && slots[index].enabled
+                    && slots[index].implementation != ActuatorImplementation::None
+                    && exclusiveHardwareResourceConflict(slots[index].hardware, automatic.hardware)) {
+                    logger_.error("Manual actuator conflicts with configured module hardware");
+                    return false;
+                }
+            }
+            if (!slots[target].enabled) continue;
+        }
+        if (!configuredModule) {
+            for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
+                const ActuatorSlotConfiguration& slot = effectiveSlots_[slotIndex];
+                if (!validModuleActuatorReference(slots[slotIndex].moduleTarget)
+                    && slot.enabled && slot.implementation != ActuatorImplementation::None
+                    && exclusiveHardwareResourceConflict(slot.hardware, automatic.hardware)) {
+                    target = slotIndex;
+                    break;
+                }
             }
         }
         if (target == MaxActuatorSlotCount) {
             for (size_t slotIndex = 0; slotIndex < MaxActuatorSlotCount; ++slotIndex) {
-                if (effectiveSlots_[slotIndex].implementation == ActuatorImplementation::None) {
+                if (!validModuleActuatorReference(slots[slotIndex].moduleTarget)
+                    && effectiveSlots_[slotIndex].implementation == ActuatorImplementation::None) {
                     target = slotIndex;
                     break;
                 }
@@ -144,7 +185,7 @@ bool ActuatorRuntime::composeEffectiveSlots(const ActuatorSlotConfiguration* slo
 
         ActuatorSlotConfiguration& effective = effectiveSlots_[target];
         effective.enabled = true;
-        effective.name = automatic.name;
+        effective.name = configuredModule ? slots[target].name : String(automatic.name);
         effective.implementation = automatic.implementation;
         effective.hardware = automatic.hardware;
         effectiveOrigins_[target] = &automaticActuators_[automaticIndex];

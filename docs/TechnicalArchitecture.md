@@ -187,11 +187,15 @@ the selected board profile's slot mapping. This stage is diagnostic only: driver
 live profile replacement, and SPI module definitions remain outside the current architecture.
 
 `I2CBusManager` owns initialization and access to the physical `TwoWire` instances described
-by the active profile. Its explicit diagnostic scan probes only normal usable 7-bit addresses
-for acknowledgement on already-initialized buses. The Web Diagnostics page enumerates bus
-identity and SDA/SCL metadata from `BoardProfile`, invokes scans through `I2CBusManager`, and
-reports observed addresses without guessing device identity. Scanning is user-triggered,
-non-persistent and does not rebuild or pause Sensor runtime composition. Sensor servicing and
+by the active profile. Its diagnostic scan probes only normal usable 7-bit addresses
+for acknowledgement on already-initialized buses. Startup scans all board buses once after
+bus initialization and module discovery, before sensor runtime starts. Scan failures are
+reported without stopping startup. The manager caches the latest result per bus in RAM.
+The Web Diagnostics page displays these results and SDA/SCL metadata from `BoardProfile`;
+opening or reloading the page does not initiate another scan. A manual scan refreshes all
+board buses. Known EEPROM addresses are annotated using the resolved board identity and
+module discovery results. The cache is non-persistent and scanning does not rebuild or
+pause Sensor runtime composition. Sensor servicing and
 Web request handling are serialized by the cooperative application loop, so their I²C
 transactions cannot overlap in the current execution model.
 

@@ -36,10 +36,14 @@ public:
     TwoWire* wire(I2CBus bus);
     bool available(I2CBus bus) const;
     void scan(I2CBus bus, I2CScanResult& result);
+    void scanAll();
+    const I2CScanResult* lastScan(I2CBus bus) const;
 
 private:
     ILogger& logger_;
     bool initialized_[2] = {false, false};
+    I2CScanResult lastScans_[2];
+    bool scanned_[2] = {false, false};
 };
 
 } // namespace EnvNode

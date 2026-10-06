@@ -138,6 +138,7 @@ void setup() {
 
     i2cBusManager.begin();
     moduleDiscoveryService.scan();
+    i2cBusManager.scanAll();
     for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
         const ModuleSlot slot = static_cast<ModuleSlot>(index);
         const ModuleDiscoveryResult* module = moduleDiscoveryService.result(slot);

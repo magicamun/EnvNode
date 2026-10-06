@@ -108,3 +108,29 @@ One configured enabled Controller may target an Actuator. A second enabled Blink
 ## Contention
 
 Controller-versus-Controller contention is prevented by exclusive enabled-Controller target ownership. Manual Web or MQTT Actuator commands remain deliberately last-command-wins relative to the owner. A manual change may remain until Blink's next scheduled transition or Threshold's next decision transition; Controllers do not continuously reconcile actual output state. No priority, lease or manual-versus-Controller arbitration model is implemented.
+
+## Descriptor-backed actuator configuration
+
+A saved actuator slot may bind to a module instance and descriptor device using
+`ModuleActuatorReference`, shared with controller targets. In that case only the
+user name and enabled state are configurable. Implementation and GPIO are resolved
+from the descriptor at runtime; saved module slots contain no GPIO assignment.
+The binding survives reboot and moving the module to another connector. An absent
+or replaced module leaves the saved slot unavailable, without falling back to GPIO.
+Unconfigured descriptor actuators remain automatically enabled. Explicitly disabled
+module devices remain reserved and are not recreated in another runtime slot.
+The web editor distinguishes descriptor On/Off devices from manual GPIO/PWM slots.
+I2C diagnostics annotate EEPROM addresses using the existing discovery inventory;
+a bus scan itself does not identify devices or refresh descriptor discovery.
+The mainboard identity EEPROM at I2C0 / 0x50 is labeled separately, with its
+resolved board identity status and source; EEPROM-derived name and revision are
+shown only when the identity source is EEPROM.
+
+The web module inventory uses a temporary heap buffer while rendering the device
+page, avoiding a permanent static DRAM reservation and a large task-stack object.
+Allocation failure is reported in the inventory table.
+
+I2C bus scans run once during boot after bus initialization and module discovery.
+I2CBusManager keeps the latest result per bus in RAM. Diagnostics reads this
+snapshot without probing again; the manual scan replaces it for all board buses.
+Scan failures remain diagnostic and do not stop startup.

@@ -49,11 +49,32 @@ bool I2CBusManager::available(I2CBus bus) const {
     return index < 2 && initialized_[index];
 }
 
+void I2CBusManager::scanAll() {
+    const BoardProfile& board = currentBoardProfile();
+    for (size_t index = 0; index < board.i2cBusCount; ++index) {
+        I2CScanResult result;
+        scan(board.i2cBuses[index].bus, result);
+    }
+}
+
+const I2CScanResult* I2CBusManager::lastScan(I2CBus bus) const {
+    const size_t index = static_cast<size_t>(bus);
+    return index < 2 && scanned_[index] ? &lastScans_[index] : nullptr;
+}
+
 void I2CBusManager::scan(I2CBus bus, I2CScanResult& result) {
     result = I2CScanResult(bus);
+    const size_t busIndex = static_cast<size_t>(bus);
+    const auto saveResult = [this, busIndex, &result]() {
+        if (busIndex < 2) {
+            lastScans_[busIndex] = result;
+            scanned_[busIndex] = true;
+        }
+    };
     TwoWire* instance = wire(bus);
     if (instance == nullptr) {
         logger_.warnf("%s scan unavailable: bus is not initialized", i2cBusName(bus));
+        saveResult();
         return;
     }
 
@@ -70,6 +91,7 @@ void I2CBusManager::scan(I2CBus bus, I2CScanResult& result) {
     result.status = result.probeErrorCount == 0
         ? I2CScanStatus::Complete
         : I2CScanStatus::CompleteWithProbeErrors;
+    saveResult();
     if (result.probeErrorCount == 0) {
         logger_.infof("%s scan complete: %u devices", i2cBusName(bus),
             static_cast<unsigned int>(result.addressCount));

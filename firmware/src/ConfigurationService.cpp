@@ -198,6 +198,7 @@ void ConfigurationService::initializeActuatorDefaults() {
         slot.name = "Actuator Slot " + String(index + 1);
         slot.implementation = ActuatorImplementation::None;
         slot.hardware = HardwareResourceAssignment::none();
+        slot.moduleTarget = ModuleActuatorReference{};
     }
 }
 
@@ -367,6 +368,14 @@ void ConfigurationService::loadActuatorSlots() {
                 && metadata->interfaceKind == HardwareInterfaceKind::GPIO
             ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
             : HardwareResourceAssignment::none();
+        if (preferences_.getUInt(actuatorKey(expectedId, "mkind").c_str(), 0) == 1) {
+            if (!parseHex(preferences_.getString(actuatorKey(expectedId, "muuid").c_str(), ""),
+                    loaded[index].moduleTarget.moduleInstanceFingerprint, 8)
+                || !parseHex(preferences_.getString(actuatorKey(expectedId, "mdev").c_str(), ""),
+                    loaded[index].moduleTarget.deviceIdHash, 4)
+                || !validModuleActuatorReference(loaded[index].moduleTarget)) return;
+            loaded[index].hardware = HardwareResourceAssignment::none();
+        }
     }
 
     if (validateActuatorSlots(loaded)
@@ -861,6 +870,10 @@ bool ConfigurationService::validateActuatorSlot(
         || slot.name.isEmpty() || slot.name.length() > MaxActuatorSlotNameLength) {
         return false;
     }
+    if (validModuleActuatorReference(slot.moduleTarget)) {
+        return slot.implementation == ActuatorImplementation::GpioOnOff
+            && slot.hardware.kind == HardwareResourceKind::None;
+    }
     const ActuatorImplementationMetadata* metadata =
         ActuatorImplementationRegistry::find(slot.implementation);
     if (metadata == nullptr) return false;
@@ -878,6 +891,10 @@ bool ConfigurationService::validateActuatorSlots(
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
         if (slots[index].slotId != index + 1 || !validateActuatorSlot(slots[index])) {
             return false;
+        }
+        for (size_t other = 0; other < index; ++other) {
+            if (sameModuleActuatorReference(slots[index].moduleTarget, slots[other].moduleTarget))
+                return false;
         }
     }
     return true;
@@ -1090,6 +1107,12 @@ bool ConfigurationService::persistActuatorSlot(const ActuatorSlotConfiguration& 
         && persistUInt(actuatorKey(id, "en").c_str(), slot.enabled ? 1 : 0)
         && persistString(actuatorKey(id, "name").c_str(), slot.name)
         && persistString(actuatorKey(id, "impl").c_str(), metadata->stableId)
+        && persistUInt(actuatorKey(id, "mkind").c_str(),
+            validModuleActuatorReference(slot.moduleTarget) ? 1 : 0)
+        && persistString(actuatorKey(id, "muuid").c_str(),
+            bytesHex(slot.moduleTarget.moduleInstanceFingerprint, 8))
+        && persistString(actuatorKey(id, "mdev").c_str(),
+            bytesHex(slot.moduleTarget.deviceIdHash, 4))
         && persistUInt(actuatorKey(id, "gpio").c_str(),
             slot.hardware.kind == HardwareResourceKind::GPIO ? slot.hardware.gpio.number : 0);
 }

@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "ActuatorId.h"
+#include "ModuleActuatorReference.h"
 #include "ActuatorImplementationRegistry.h"
 #include "HardwareResources.h"
 
@@ -14,6 +15,7 @@ struct ActuatorSlotConfiguration {
     String name;
     ActuatorImplementation implementation = ActuatorImplementation::None;
     HardwareResourceAssignment hardware;
+    ModuleActuatorReference moduleTarget;
 };
 
 constexpr size_t MaxActuatorSlotCount = 16;
