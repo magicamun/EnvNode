@@ -10,8 +10,8 @@
 namespace EnvNode {
 
 PropertyResolver::PropertyResolver(const SensorManager& sensors, const IMeasurementResolver& measurements,
-    const ActuatorRuntime& actuators, const ControllerRuntime& controllers)
-    : sensors_(sensors), measurements_(measurements), actuators_(actuators), controllers_(controllers) {}
+    const ActuatorRuntime& actuators, const ControllerRuntime& controllers, const IPropertyReader* system)
+    : sensors_(sensors), measurements_(measurements), actuators_(actuators), controllers_(controllers), system_(system) {}
 
 bool PropertyResolver::describe(const PropertyReference& reference, PropertyDescription& result) const {
     result = PropertyDescription{};
@@ -24,13 +24,14 @@ bool PropertyResolver::describe(const PropertyReference& reference, PropertyDesc
         case PropertyComponentKind::Actuator: {
             const IOnOffActuator* actuator = actuators_.onOffActuator(reference.componentId);
             if (actuator == nullptr) return false;
-            return ActuatorPropertyReader(reference.componentId, *actuator).describe(reference, result);
+            return ActuatorPropertyReader(reference.componentId, *actuator, actuators_.levelActuator(reference.componentId)).describe(reference, result);
         }
         case PropertyComponentKind::Controller: {
             const IThresholdReasonProvider* provider = controllers_.reasonProvider(reference.componentId);
             if (provider == nullptr) return false;
             return ControllerPropertyReader(reference.componentId, *provider).describe(reference, result);
         }
+        case PropertyComponentKind::System: return system_ != nullptr && system_->describe(reference, result);
         default: return false;
     }
 }
@@ -46,13 +47,14 @@ PropertyReadResult PropertyResolver::read(const PropertyReference& reference, Pr
         case PropertyComponentKind::Actuator: {
             const IOnOffActuator* actuator = actuators_.onOffActuator(reference.componentId);
             if (actuator == nullptr) return PropertyReadResult::UnknownReference;
-            return ActuatorPropertyReader(reference.componentId, *actuator).read(reference, result);
+            return ActuatorPropertyReader(reference.componentId, *actuator, actuators_.levelActuator(reference.componentId)).read(reference, result);
         }
         case PropertyComponentKind::Controller: {
             const IThresholdReasonProvider* provider = controllers_.reasonProvider(reference.componentId);
             if (provider == nullptr) return PropertyReadResult::UnknownReference;
             return ControllerPropertyReader(reference.componentId, *provider).read(reference, result);
         }
+        case PropertyComponentKind::System: return system_ == nullptr ? PropertyReadResult::UnknownReference : system_->read(reference, result);
         default: return PropertyReadResult::UnknownReference;
     }
 }

@@ -10,7 +10,7 @@
 
 namespace EnvNode {
 
-enum class PropertyComponentKind : uint8_t { Unknown, Sensor, Actuator, Controller };
+enum class PropertyComponentKind : uint8_t { Unknown, Sensor, Actuator, Controller, System };
 
 struct PropertyReference {
     PropertyReference(PropertyComponentKind kind, uint16_t id, const char* key)

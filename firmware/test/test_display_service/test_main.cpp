@@ -24,10 +24,11 @@ struct Reader : IPropertyReader {
     bool available = true;
     bool valid = true;
     float value = 12.5F;
+    bool boolean = false;
     mutable unsigned reads = 0;
     bool describe(const PropertyReference&, PropertyDescription& description) const override {
         description = PropertyDescription{};
-        description.valueKind = PropertyValueKind::FloatingPoint;
+        description.valueKind = boolean ? PropertyValueKind::Boolean : PropertyValueKind::FloatingPoint;
         return true;
     }
     PropertyReadResult read(const PropertyReference&, PropertySnapshot& result) const override {
@@ -35,7 +36,7 @@ struct Reader : IPropertyReader {
         result = PropertySnapshot{};
         if (!available) return PropertyReadResult::NoValue;
         result.valid = valid;
-        result.value = MeasurementValue::floatingPoint(value);
+        result.value = boolean ? MeasurementValue::boolean(value != 0) : MeasurementValue::floatingPoint(value);
         return PropertyReadResult::Available;
     }
 };
@@ -126,8 +127,24 @@ void test_hardware_change_and_clock_wrap() {
     TEST_ASSERT_EQUAL_UINT32(1, f.display.ends);
     TEST_ASSERT_EQUAL_HEX8(0x3D, f.display.hardware.address);
 }
+void test_saved_translation_reaches_oled_and_updates_live() {
+    Fixture f; f.config.hardware.enabled = true; f.reader.boolean = true;
+    f.config.formats[1] = "Ventil: %s";
+    f.config.labels[1][0].trueText = "Zisterne";
+    f.config.labels[1][0].falseText = "Hauswasser";
+    f.service.loop();
+    TEST_ASSERT_EQUAL_STRING("Ventil: Zisterne", f.display.last.lines[1]);
+    f.reader.value = 0; f.clock.now = 1000; f.service.loop();
+    TEST_ASSERT_EQUAL_STRING("Ventil: Hauswasser", f.display.last.lines[1]);
+    f.config.labels[1][0].falseText = "Leitungswasser";
+    f.clock.now = 2000; f.service.loop();
+    TEST_ASSERT_EQUAL_STRING("Ventil: Leitungswasser", f.display.last.lines[1]);
+    TEST_ASSERT_EQUAL_UINT32(1, f.display.begins);
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_saved_translation_reaches_oled_and_updates_live);
     RUN_TEST(test_disabled_enable_refresh_and_live_edit);
     RUN_TEST(test_missing_display_retries_and_recovers);
     RUN_TEST(test_line_errors_clear_stale_text_and_recover);

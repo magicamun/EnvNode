@@ -14,7 +14,8 @@ class ControllerRuntime;
 class PropertyResolver : public IPropertyReader {
 public:
     PropertyResolver(const SensorManager& sensors, const IMeasurementResolver& measurements,
-        const ActuatorRuntime& actuators, const ControllerRuntime& controllers);
+        const ActuatorRuntime& actuators, const ControllerRuntime& controllers,
+        const IPropertyReader* system = nullptr);
 
     bool describe(const PropertyReference& reference, PropertyDescription& result) const override;
     PropertyReadResult read(const PropertyReference& reference, PropertySnapshot& result) const override;
@@ -24,6 +25,7 @@ private:
     const IMeasurementResolver& measurements_;
     const ActuatorRuntime& actuators_;
     const ControllerRuntime& controllers_;
+    const IPropertyReader* system_;
 };
 
 } // namespace EnvNode

@@ -63,7 +63,7 @@ Numeric Measurements use the canonical representation defined by their `Measurem
 
 The read-only [local property view](LocalProperties.md) exposes Sensor state Measurements, logical On/Off Actuator output and Threshold Controller evaluation reasons through stable references. Sensor properties reuse the existing metadata and snapshot resolver; Actuator properties read the existing output capability.
 
-The shared `PropertyResolver` routes local references to the current Sensor, Actuator or Controller property reader. It stores no component bindings or duplicate values and resolves against the current runtime on each call. The Measurements page includes a six-line text preview with up to four ordered sources per line using this resolver and a bounded, typed formatter. Preview parameters remain URL inputs until explicitly saved. DisplayConfiguration stores six format strings and their ordered source references through ConfigurationService as one versioned NVS record; it has no dependency on a physical display driver.
+The shared `PropertyResolver` routes local references to the current Sensor, Actuator or Controller property reader. It stores no component bindings or duplicate values and resolves against the current runtime on each call. The Display page includes a six-line text preview with up to four ordered sources per line using this resolver and a bounded, typed formatter. Preview parameters remain URL inputs until explicitly saved. DisplayConfiguration stores six format strings and their ordered source references through ConfigurationService as one versioned NVS record; it has no dependency on a physical display driver.
 
 ## Actuator
 
@@ -236,3 +236,17 @@ through ITextDisplay. Ssd1309TextDisplay implements that boundary using the exis
 I2CBusManager; Application schedules the display service after normal runtime work.
 DisplayPageFormatter is shared with the web preview. Display output does not
 publish MQTT state or change sensor, actor or controller decisions.
+
+Boolean display labels are optional presentation overrides per ordered source
+position, stored with DisplayConfiguration. PropertyTextFormatter applies them
+only when the actual typed source is Boolean. Empty labels use PropertyDescription
+fallbacks; enum and numeric values retain their existing rendering. Overrides do
+not mutate the property reader or affect MQTT, actuators or controller decisions.
+
+Text properties own their string payload. TimePropertyReader provides locale-aware
+System properties (component 1: date/time/datetime) through an optional system
+reader in PropertyResolver. ActuatorPropertyReader optionally binds ILevelActuator
+for an unsigned percentage property. Display-only enum overrides match stable
+PropertyEnumOption codes; empty/missing overrides use the original label.
+ConfigurationService migrates older display strings into a bounded version-4 blob
+when saved, preserving the single-record write boundary.

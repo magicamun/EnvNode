@@ -224,7 +224,7 @@ It does not store display configuration or drive display hardware.
 
 ## Six-line text preview
 
-Open **Measurements → Six-line text preview**. Each of the six rows has a
+Open **Display → Six-line text preview**. Each of the six rows has a
 format and up to four source fields with shared suggestions. Fill sources from
 left to right in placeholder order and click **Preview / refresh all lines**.
 Leave sources empty for literal text or an empty line. Values are resolved
@@ -269,9 +269,9 @@ lines remain visible; an error marker identifies the affected row. No new stalen
 Preview uses a read-only GET request. Source and format remain in the URL and can
 be bookmarked or refreshed. **Save on device** posts all six rows to `/display/save`;
 **Load saved settings** submits a separate GET form containing only `loadDisplay=1`,
-discards draft/URL edits and reloads the saved page even when already on Measurements.
+discards draft/URL edits and reloads the saved page even when already on Display.
 The response is marked `Cache-Control: no-store`. Without URL
-overrides, Measurements loads and renders the saved configuration. No reboot is needed. Form fields f0–f5 and s0_0–s5_3
+overrides, Display loads and renders the saved configuration. No reboot is needed. Form fields f0–f5 and s0_0–s5_3
 encode the six rows and four source positions per row. Existing single-line
 source/format URLs are loaded into the first row. Source strings have the syntax
 `category/ID/key`; the parser requires a known category, nonzero uint16 ID and
@@ -300,12 +300,15 @@ six-row positioning, blank rows, escaped literal text and per-row error isolatio
 
 `DisplayConfiguration` is independent of Web and the physical display driver.
 `ConfigurationService` stores the complete page in the existing `weather` NVS
-namespace under `display_page`, in one versioned string record. A successful
+namespace under `display_page4`, in one versioned NVS blob. Older `display_page` strings
+are read when no new blob exists. A successful
 write updates the in-memory configuration; a failed write leaves it unchanged.
-Version 2 stores enabled/bus/address followed by exactly 30 newline-delimited fields
-(six formats and four sources per format). Version 1 pages migrate with OLED output
-disabled, preserving every format and source. Validation forbids control characters
-in fields and bounds the complete record to 3114 bytes. Missing, malformed or
+Version 4 stores enabled/bus/address, six format/source/Boolean-label rows, then
+a bounded list of state translations keyed by row, source position and stable
+state code. Versions 1–3 are accepted and missing fields get their defaults.
+Version 1 leaves OLED output disabled; version 2 has no Boolean labels; version 3
+preserves Boolean labels and hardware settings. Saving writes the new blob. Validation forbids control characters
+in fields and bounds the complete record to 6144 bytes. Missing, malformed or
 unknown-version records leave the default unconfigured page. Factory reset
 clears it. An explicitly saved blank page remains blank, without an automatic
 source suggestion.
@@ -320,7 +323,7 @@ malformed records, invalid input and failed storage writes preserving the old pa
 
 ## OLED output
 
-Measurements offers **Display output**, **I2C bus** (with board-profile pins), and
+Display offers **Display output**, **I2C bus** (with board-profile pins), and
 **I2C address** (`0x3C` or `0x3D`). Choose Enabled and Save on device to apply
 without reboot. Preview alone does not change the running display. Defaults and
 migrated version-1 pages leave output disabled. Hardware settings are persisted
@@ -355,3 +358,93 @@ missing-display backoff/recovery, failed transfers, isolated row errors,
 bus/address changes, timer wrap, strict settings parsing and version-1 migration.
 The lab driver was confirmed on hardware by the user; production integration
 still requires a hardware check after flashing.
+
+## Boolean text overrides
+
+Each selected Boolean source in the six-line editor has an expandable **Boolean text (optional)**
+section with **True / On text** and **False / Off text**. For example, a `%s`
+placeholder for an actuator may display `Zisterne` for true and `Hauswasser` for
+false. Choose this mapping to match the actual valve wiring. The override belongs
+to this source position in this display row: two occurrences of the same property
+can use different labels. The underlying state, property metadata and MQTT output
+are unchanged. Numeric and enum sources ignore Boolean overrides.
+
+Each empty field independently falls back to the property's original text. Labels
+are limited to 16 UTF-8 bytes, with no control characters; umlauts use two bytes.
+The label length remains suited to the narrow OLED. Labels require a source. Literal `%` characters in labels are never parsed
+as printf directives. HTML is escaped in both inputs and preview output.
+
+Preview uses the edited labels without changing the OLED. Save on device persists
+and applies them at the next display refresh, without restarting the driver.
+Load saved settings restores both source references and labels.
+
+Large web pages are sent as header, content and footer with a combined Content-Length,
+without allocating a second complete page or a temporary concatenation of the body.
+The Boolean help text is shared across all source fields to keep the editor compact.
+
+## Display administration page
+
+`/display` is the dedicated Display navigation item. It contains OLED hardware
+settings, all six rows, preview, saving and loading. `/measurements` retains only
+measurements and property diagnostics. Old Measurements URLs with preview fields
+are still served by the Display handler; new forms target `/display`.
+
+Boolean translation controls are initially shown only when property metadata
+identifies the selected source as Boolean. Empty, unknown, numeric and enum
+sources hide them. Changing a source updates visibility immediately using typed
+metadata in the source inventory; without JavaScript, Preview refreshes it.
+Hidden values are preserved, so switching source types does not silently erase
+saved labels. Formatting continues to ignore Boolean labels for non-Boolean types.
+
+## Locale-aware time and date
+
+The Display source selector offers `system/1/date`, `system/1/time`, and
+`system/1/datetime`. These are typed Text properties and use `%s`. TimePropertyReader
+uses ITimeService's local civil time and the existing LocaleFormatter, respecting
+the configured timezone/DST and locale (German, British or US date/time styles).
+Until both synchronization and local time are valid it returns NoValue. A snapshot
+owns its text; later reads never invalidate an earlier snapshot's string.
+Combined date/time can exceed the OLED width; separate date and time rows remain
+available. Formatting does not read or alter the hardware clock configuration.
+
+## Actuator percentage
+
+`actuator/ID/level` is available when that actuator exposes ILevelActuator. It is
+an unsigned integer in percent, 0–100, rendered for example as `Level: %u%%`.
+It reports the commanded logical output, not measured mechanical valve position.
+Uninitialized output is NoValue; a pure On/Off relay does not advertise a level.
+The existing Boolean `state` property and MQTT behavior remain unchanged.
+
+## Controller state translations
+
+Selecting an enum source such as `controller/ID/reason` reveals **State text
+(optional)** with the source's named states. Enter an optional label for each
+state; empty fields keep the original text. Selection changes update these fields
+immediately. Time/text and numeric sources show neither Boolean nor state-label
+editors. The page supports up to 32 nonempty state translations, each up to 16
+UTF-8 bytes. Matching uses stable codes such as `hysteresis_hold`, never display
+text or a numeric enum index. Labels remain specific to a row/source position.
+They are literal text even when containing `%`; HTML is escaped. Preview and OLED
+use the same formatter. None of these labels changes a controller decision.
+
+The version-4 blob is capped at 6144 bytes and is written as one record before
+updating the in-memory configuration. Failed writes retain previous settings.
+An existing invalid new blob is not replaced by a stale old string on load.
+Factory reset clears both formats. Existing Boolean labels, source references and
+OLED connection settings survive migration.
+
+### Retained controller decision
+
+`controller/ID/decision` is an enum source for `%s`, with three stable codes:
+`unknown`, `on`, `off`. The Display page offers the existing per-source text
+translations for these three values (16 UTF-8 bytes each). For example, map the
+appropriate decisions to `Ausreichend` and `Niedrig`, according to the configured
+threshold direction. Empty translations use the default labels.
+
+The decision is retained through the hysteresis band. Before the first threshold
+crossing, after stop, or when the latest evaluation has missing, invalid or stale
+input, the displayed decision is `unknown`. Source recovery restores the retained
+decision, including within the hysteresis band. This presentation does not erase
+the internal decision or change output behavior. It describes the controller's
+logical decision, not successful valve movement. `reason` remains available for
+detailed diagnostics. No storage migration or MQTT change is required.

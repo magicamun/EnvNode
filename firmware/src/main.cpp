@@ -2,6 +2,7 @@
 #include "DisplayService.h"
 #include "Ssd1309TextDisplay.h"
 #include "PropertyResolver.h"
+#include "TimePropertyReader.h"
 #include "ConfigurationService.h"
 #include "SerialLogger.h"
 #include "WiFiService.h"
@@ -115,7 +116,8 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager,
     actuatorRuntime);
-static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime);
+static TimePropertyReader timeProperties(timeService, localeFormatter);
+static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties);
 static Ssd1309TextDisplay oled(i2cBusManager);
 static DisplayService displayService(configurationService.getConfiguration().display,
     displayProperties, oled, monotonicClock, logger);

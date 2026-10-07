@@ -5,6 +5,8 @@
 #include <string>
 #include "PropertyTextFormatter.h"
 #include "PropertyPreviewWebView.h"
+#include "WebNavigation.h"
+#include "DisplayPageFormatter.h"
 
 using namespace EnvNode;
 
@@ -305,16 +307,120 @@ void test_load_saved_submits_an_independent_form() {
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<div class='actions'><button"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<button type='submit' form='display-load'>Load saved settings</button>"));
     // Load must submit a separate form, without any draft fields or save action.
-    const char* load = strstr(html.c_str(), "</form><form id='display-load' method='get' action='/measurements#text-preview'>");
+    const char* load = strstr(html.c_str(), "</form><form id='display-load' method='get' action='/display#text-preview'>");
     TEST_ASSERT_NOT_NULL(load);
     TEST_ASSERT_NOT_NULL(strstr(load, "<input type='hidden' name='loadDisplay' value='1'></form>"));
     TEST_ASSERT_NULL(strstr(load, "name='f0'"));
     TEST_ASSERT_NULL(strstr(load, "name='s0_0'"));
-    TEST_ASSERT_NULL(strstr(html.c_str(), "<a href='/measurements#text-preview'>Load saved settings</a>"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "<a href='/display#text-preview'>Load saved settings</a>"));
+}
+
+void test_boolean_labels_are_positional_literal_and_optional() {
+    Reader reader;
+    reader.description.valueKind = PropertyValueKind::Boolean;
+    reader.description.trueText = "On"; reader.description.falseText = "Off";
+    reader.snapshot.value = MeasurementValue::boolean(true);
+    const PropertyReference refs[] = {Source, Source};
+    PropertyBooleanLabels labels[2];
+    labels[0].trueText = "Zisterne"; labels[0].falseText = "Hauswasser";
+    labels[1].trueText = "100% %n";
+    auto result = formatPropertyText(reader, refs, 2, "%s / %s", labels);
+    TEST_ASSERT_EQUAL_STRING("Zisterne / 100% %n", result.text);
+    reader.snapshot.value = MeasurementValue::boolean(false);
+    result = formatPropertyText(reader, refs, 2, "%s / %s", labels);
+    TEST_ASSERT_EQUAL_STRING("Hauswasser / Off", result.text);
+    labels[0].falseText = "";
+    result = formatPropertyText(reader, refs, 1, "%s", labels);
+    TEST_ASSERT_EQUAL_STRING("Off", result.text);
+    reader.description.valueKind = PropertyValueKind::FloatingPoint;
+    reader.snapshot.value = MeasurementValue::floatingPoint(1.5F);
+    result = formatPropertyText(reader, refs, 1, "%.1f", labels);
+    TEST_ASSERT_EQUAL_STRING("1.5", result.text);
+    static const PropertyEnumOption option{"hold", "Hold"};
+    reader.description.valueKind = PropertyValueKind::Enumeration;
+    reader.snapshot.value = PropertyValue::enumeration(option);
+    result = formatPropertyText(reader, refs, 1, "%s", labels);
+    TEST_ASSERT_EQUAL_STRING("Hold", result.text);
+}
+void test_translated_preview_escapes_html_and_rejects_invalid_labels() {
+    Reader reader;
+    reader.description.valueKind = PropertyValueKind::Boolean;
+    reader.snapshot.value = MeasurementValue::boolean(true);
+    PropertyPreviewPage page;
+    page.formats[0] = "Valve: %s"; page.sources[0][0] = "actuator/1/state";
+    page.labels[0][0].trueText = "<Tank>";
+    page.labels[0][0].falseText = "Hauswasser";
+    String html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Valve: &lt;Tank&gt;"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='true0_0' maxlength='16' value='&lt;Tank&gt;'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "Valve: <Tank>"));
+    page.labels[0][0].trueText = "Bad\nText";
+    html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Boolean text: maximum"));
+    page.sources[0][0] = "";
+    html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Boolean text requires a source"));
+}
+
+void test_display_navigation_routes_and_boolean_visibility() {
+    Reader reader;
+    PropertyPreviewPage page;
+    page.formats[0] = "%s"; page.sources[0][0] = "actuator/1/state";
+    page.labels[0][0].trueText = "Zisterne";
+    reader.description.valueKind = PropertyValueKind::Boolean;
+    String html = buildPropertyPagePreviewHtml(reader, "", page, false);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' open>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_1' hidden>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "action='/display#text-preview'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "/measurements"));
+    reader.description.valueKind = PropertyValueKind::FloatingPoint;
+    html = buildPropertyPagePreviewHtml(reader, "", page, false);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' hidden open>"));
+    reader.description.valueKind = PropertyValueKind::Enumeration;
+    html = buildPropertyPagePreviewHtml(reader, "", page, false);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' hidden open>"));
+    reader.known = false;
+    html = buildPropertyPagePreviewHtml(reader, "", page, false);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' hidden open>"));
+    reader.description.valueKind = PropertyValueKind::Boolean;
+    String option = buildPropertySourceOption(Source, reader.description, "Valve", "");
+    TEST_ASSERT_NOT_NULL(strstr(option.c_str(), "data-boolean='1'"));
+    reader.description.valueKind = PropertyValueKind::FloatingPoint;
+    option = buildPropertySourceOption(Source, reader.description, "Sensor", "");
+    TEST_ASSERT_NOT_NULL(strstr(option.c_str(), "data-boolean='0'"));
+    const String nav = buildWebNavigationHtml("/display");
+    TEST_ASSERT_NOT_NULL(strstr(nav.c_str(), "href='/display' class='active'>Display</a>"));
+    TEST_ASSERT_NOT_NULL(strstr(nav.c_str(), "href='/measurements' class=''>Measurements</a>"));
+}
+
+void test_controller_translation_uses_code_and_preserves_fallback() {
+    Reader reader;
+    static const PropertyEnumOption options[] = {{"hysteresis_hold","Holding"},{"on_threshold","On threshold"}};
+    reader.description.valueKind=PropertyValueKind::Enumeration;
+    reader.description.enumOptions=options; reader.description.enumOptionCount=2;
+    reader.snapshot.value=PropertyValue::enumeration(options[0]);
+    PropertyPreviewPage page; page.formats[0]="Status: %s"; page.sources[0][0]="controller/1/reason";
+    DisplayEnumTranslation entry; entry.line=0; entry.source=0; entry.code="hysteresis_hold"; entry.text="Halten %n";
+    page.enumTranslations.push_back(entry);
+    TEST_ASSERT_EQUAL_STRING("Status: Halten %n",formatDisplayLine(reader,page,0).value.text);
+    reader.snapshot.value=PropertyValue::enumeration(options[1]);
+    TEST_ASSERT_EQUAL_STRING("Status: On threshold",formatDisplayLine(reader,page,0).value.text);
+    String html=buildPropertyPagePreviewHtml(reader,"",page,true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"name='e0_0_hysteresis_hold' value='Halten %n'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"<details data-enum-source='s0_0'>"));
+    const String option=buildPropertySourceOption({PropertyComponentKind::Controller,1,"reason"},reader.description,"Controller","");
+    TEST_ASSERT_NOT_NULL(strstr(option.c_str(),"data-enum='"));
+    TEST_ASSERT_NOT_NULL(strstr(option.c_str(),"hysteresis_hold"));
+    reader.description.valueKind=PropertyValueKind::Text; reader.snapshot.value=PropertyValue::text("07.10.2026");
+    TEST_ASSERT_EQUAL_STRING("Status: 07.10.2026",formatDisplayLine(reader,page,0).value.text);
 }
 
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
+    RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
+    RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);
+    RUN_TEST(test_translated_preview_escapes_html_and_rejects_invalid_labels);
     RUN_TEST(test_load_saved_submits_an_independent_form);
     RUN_TEST(test_float_width_precision_alignment_and_literal_percent);
     RUN_TEST(test_integer_and_boolean_text);

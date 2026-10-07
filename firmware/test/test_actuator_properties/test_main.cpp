@@ -116,8 +116,36 @@ void test_web_displays_on_off_and_marks_age_unavailable() {
     TEST_ASSERT_EQUAL_UINT32(0, actuator.writes);
 }
 
+class LevelActuator : public ILevelActuator {
+public:
+    bool ready=true; unsigned writes=0; ActuatorLevel output;
+    ActuatorOperationResult begin() override { ++writes; return ActuatorOperationResult::Completed; }
+    ActuatorOperationResult shutdown() override { ++writes; return ActuatorOperationResult::Completed; }
+    ActuatorOperationResult setState(OnOffState) override { ++writes; return ActuatorOperationResult::Completed; }
+    ActuatorOperationResult setLevel(ActuatorLevel) override { ++writes; return ActuatorOperationResult::Completed; }
+    OnOffState state() const override { return output.percent() ? OnOffState::On : OnOffState::Off; }
+    bool initialized() const override { return ready; }
+    ActuatorLevel level() const override { return output; }
+};
+void test_level_is_read_only_percent_and_requires_capability() {
+    LevelActuator actuator; ActuatorPropertyReader reader(2,actuator,&actuator);
+    PropertyReference level(PropertyComponentKind::Actuator,2,"level");
+    PropertyDescription description; TEST_ASSERT_TRUE(reader.describe(level,description));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PresentationUnit::Percent),static_cast<int>(description.canonicalUnit));
+    for (uint8_t expected : {0,37,100}) {
+        ActuatorLevel::tryCreate(expected,actuator.output);
+        PropertySnapshot snapshot; TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::Available),static_cast<int>(reader.read(level,snapshot)));
+        uint32_t value=999; TEST_ASSERT_TRUE(snapshot.value.tryGetUnsignedInteger(value)); TEST_ASSERT_EQUAL_UINT32(expected,value);
+    }
+    TEST_ASSERT_EQUAL_UINT32(0,actuator.writes);
+    actuator.ready=false; PropertySnapshot snapshot;
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::NoValue),static_cast<int>(reader.read(level,snapshot)));
+    TestActuator relay; ActuatorPropertyReader relayReader(2,relay); TEST_ASSERT_FALSE(relayReader.describe(level,description));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_level_is_read_only_percent_and_requires_capability);
     RUN_TEST(test_reads_live_boolean_state_without_writing_or_inventing_metadata);
     RUN_TEST(test_uninitialized_output_has_no_value_and_clears_old_state);
     RUN_TEST(test_unknown_references_are_rejected_without_reading_output);

@@ -7,7 +7,8 @@ namespace EnvNode {
 String buildWebNavigationHtml(const char* activeRoute) {
     const char* routes[][2] = {
         {"/status", "Status"}, {"/sensors", "Sensors"},
-        {"/measurements", "Measurements"}, {"/actuators", "Actuators"},
+        {"/measurements", "Measurements"}, {"/display", "Display"},
+        {"/actuators", "Actuators"},
         {"/controllers", "Controllers"}, {"/network", "Network"},
         {"/mqtt", "MQTT"}, {"/time", "Locale & Time"}, {"/units", "Units"},
         {"/device", "Device"}, {"/diagnostics", "Diagnostics"},

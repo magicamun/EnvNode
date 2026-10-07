@@ -152,6 +152,7 @@ float ThresholdController::latestNumericValue() const { return latestNumericValu
 bool ThresholdController::latestSnapshotStale() const { return latestSnapshotStale_; }
 uint32_t ThresholdController::latestSnapshotAgeMs() const { return latestSnapshotAgeMs_; }
 ThresholdDecision ThresholdController::decision() const { return decision_; }
+bool ThresholdController::decisionCurrent() const { return running_ && sourceAvailable_; }
 ThresholdReason ThresholdController::reason() const { return reason_; }
 bool ThresholdController::targetAvailable() const { return targetAvailable_; }
 bool ThresholdController::outputApplicationPending() const {

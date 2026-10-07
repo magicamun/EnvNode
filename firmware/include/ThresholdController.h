@@ -10,12 +10,6 @@
 
 namespace EnvNode {
 
-enum class ThresholdDecision : uint8_t {
-    Unknown,
-    On,
-    Off,
-};
-
 class ThresholdController : public IController, public IThresholdReasonProvider {
 public:
     ThresholdController(
@@ -51,7 +45,8 @@ public:
     float latestNumericValue() const;
     bool latestSnapshotStale() const;
     uint32_t latestSnapshotAgeMs() const;
-    ThresholdDecision decision() const;
+    ThresholdDecision decision() const override;
+    bool decisionCurrent() const override;
     ThresholdReason reason() const override;
     bool targetAvailable() const;
     bool outputApplicationPending() const;

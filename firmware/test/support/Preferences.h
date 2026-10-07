@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <map>
 #include <string>
 
@@ -38,6 +39,18 @@ public:
         return value.length() + 1;
     }
 
+    size_t getBytesLength(const char* key) const { return getString(key).length(); }
+    size_t getBytes(const char* key, void* target, size_t length) const {
+        const String value = getString(key);
+        if (length < value.length()) return 0;
+        memcpy(target, value.c_str(), value.length());
+        return value.length();
+    }
+    size_t putBytes(const char* key, const void* bytes, size_t length) {
+        if (failStringWrites()) return 0;
+        values()[key] = std::string(static_cast<const char*>(bytes), length);
+        return length;
+    }
     size_t putUInt(const char* key, uint32_t value) {
         values()[key] = std::to_string(value);
         return sizeof(value);

@@ -15,6 +15,7 @@ bool parsePropertySource(const char* text, PropertySourceInput& result) {
     if (categoryLength == 6 && strncmp(text, "sensor", 6) == 0) parsed.kind = PropertyComponentKind::Sensor;
     else if (categoryLength == 8 && strncmp(text, "actuator", 8) == 0) parsed.kind = PropertyComponentKind::Actuator;
     else if (categoryLength == 10 && strncmp(text, "controller", 10) == 0) parsed.kind = PropertyComponentKind::Controller;
+    else if (categoryLength == 6 && strncmp(text, "system", 6) == 0) parsed.kind = PropertyComponentKind::System;
     else return false;
     const char* current = slash + 1;
     if (*current < '0' || *current > '9') return false;

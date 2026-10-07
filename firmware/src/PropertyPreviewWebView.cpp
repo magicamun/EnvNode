@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include "HtmlEscaping.h"
+#include "JsonWriter.h"
 #include "PropertyTextFormatter.h"
 #include "UnitConverter.h"
 
@@ -11,7 +12,8 @@ namespace EnvNode {
 String propertySourceText(const PropertyReference& reference) {
     const char* category = reference.componentKind == PropertyComponentKind::Sensor ? "sensor"
         : reference.componentKind == PropertyComponentKind::Actuator ? "actuator"
-        : reference.componentKind == PropertyComponentKind::Controller ? "controller" : "unknown";
+        : reference.componentKind == PropertyComponentKind::Controller ? "controller"
+        : reference.componentKind == PropertyComponentKind::System ? "system" : "unknown";
     return String(category) + "/" + String(static_cast<unsigned int>(reference.componentId))
         + "/" + reference.propertyKey;
 }
@@ -21,6 +23,17 @@ String buildPropertySourceOption(const PropertyReference& reference,
     const String source = propertySourceText(reference);
     String html("<option value='");
     html += escapeHtml(source).c_str();
+    html += "' data-boolean='";
+    html += description.valueKind == PropertyValueKind::Boolean ? "1" : "0";
+    html += "' data-enum='";
+    String choices("[");
+    if (description.valueKind == PropertyValueKind::Enumeration) for (size_t i = 0; i < description.enumOptionCount; ++i) {
+        if (i) choices += ',';
+        choices += '['; appendJsonString(choices, description.enumOptions[i].stableCode);
+        choices += ','; appendJsonString(choices, description.enumOptions[i].displayText); choices += ']';
+    }
+    choices += ']';
+    html += escapeHtml(choices).c_str();
     html += source == selectedSource ? "' selected>" : "'>";
     html += escapeHtml(source).c_str();
     html += " · ";
@@ -38,7 +51,7 @@ String buildPropertySourceOption(const PropertyReference& reference,
 String buildPropertyPreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
     const String& source, const String& format, bool submitted, bool sourceListed) {
     String html("<section class='card' id='text-preview'><h2>Text line preview</h2>");
-    html += "<form method='get' action='/measurements#text-preview'><label for='preview-source'>Source</label>";
+    html += "<form method='get' action='/display#text-preview'><label for='preview-source'>Source</label>";
     html += "<select id='preview-source' name='source' required>";
     if (!sourceListed) {
         html += "<option value='";
@@ -80,9 +93,10 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     const PropertyPreviewPage& page, bool submitted) {
     String html("<section class='card' id='text-preview'><h2>Six-line text preview</h2>");
     html += "<p>Each line has its own format and up to four sources, in placeholder order. Leave sources empty for plain text or an empty line.</p>";
+    html += "<p class='help'>Optional Boolean text applies to %s: empty keeps the default text. Maximum 16 UTF-8 bytes each (umlauts use two bytes). Other source types ignore these labels.</p>";
     html += "<datalist id='property-sources'>";
     html += optionsHtml.c_str();
-    html += "</datalist><form method='get' action='/measurements#text-preview'>";
+    html += "</datalist><form method='get' action='/display#text-preview'>";
     html += "<fieldset><legend>OLED SSD1309 · 128×64</legend><label>Display output<select name='displayEnabled'>";
     html += page.hardware.enabled ? "<option value='0'>Disabled</option><option value='1' selected>Enabled</option>"
         : "<option value='0' selected>Disabled</option><option value='1'>Enabled</option>";
@@ -129,11 +143,48 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
             html += "' maxlength='96' value='";
             if (page.sources[line][source].length() <= MaxPropertySourceLength) html += escapeHtml(page.sources[line][source]).c_str();
             html += "'>";
+            const auto& labels = page.labels[line][source];
+            PropertySourceInput selected;
+            PropertyDescription description;
+            const bool isBoolean = parsePropertySource(page.sources[line][source].c_str(), selected)
+                && reader.describe(selected.reference(), description)
+                && description.valueKind == PropertyValueKind::Boolean;
+            html += "<details data-boolean-source='";
+            html += field.c_str();
+            html += "'";
+            if (!isBoolean) html += " hidden";
+            if (!labels.trueText.isEmpty() || !labels.falseText.isEmpty()) html += " open";
+            html += ">";
+            html += "<summary>Boolean text (optional)</summary>";
+            const String suffix = number + "_" + String(static_cast<unsigned int>(source));
+            const auto labelInput = [&](const char* prefix, const char* title, const String& value) {
+                html += "<label>"; html += title;
+                html += "<input name='"; html += prefix; html += suffix.c_str();
+                html += "' maxlength='16' value='";
+                if (value.length() <= MaxDisplayBooleanLabelLength) html += escapeHtml(value).c_str();
+                html += "'></label>";
+            };
+            labelInput("true", "True / On text", labels.trueText);
+            labelInput("false", "False / Off text", labels.falseText);
+            html += "</details>";
+            html += "<details data-enum-source='"; html += field.c_str(); html += "'";
+            const bool isEnum = description.valueKind == PropertyValueKind::Enumeration;
+            if (!isEnum) html += " hidden";
+            html += "><summary>State text (optional)</summary><div data-enum-fields>";
+            if (isEnum) for (size_t index = 0; index < description.enumOptionCount; ++index) {
+                const auto& option = description.enumOptions[index];
+                html += "<label>"; html += escapeHtml(String(option.displayText)).c_str();
+                html += "<input maxlength='16' data-code='"; html += escapeHtml(String(option.stableCode)).c_str();
+                html += "' name='e"; html += suffix.c_str(); html += "_"; html += escapeHtml(String(option.stableCode)).c_str();
+                html += "' value='"; html += escapeHtml(String(displayEnumText(page, line, source, option.stableCode))).c_str();
+                html += "'></label>";
+            }
+            html += "</div><p class='help'>Empty keeps the original state text. Up to 32 translations per page, 16 UTF-8 bytes each.</p></details>";
         }
         html += "</fieldset>";
     }
-    html += "<div class='actions'><button type='submit' name='preview' value='1'>Preview / refresh all lines</button><button type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/measurements#text-preview'><input type='hidden' name='loadDisplay' value='1'></form>";
-    html += "<p class='help'>Use %f for decimals, %u for unsigned integers, %s for Boolean or enum text, and %% for a percent sign. Example: Level: %.0f l %.0f%% with two sources. Width up to 64; decimal places 0–6. Numbers use canonical units and a decimal point.</p>";
+    html += "<div class='actions'><button type='submit' name='preview' value='1'>Preview / refresh all lines</button><button type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'></form>";
+    html += "<p class='help'>Use %f for decimals, %u for unsigned integers (including actuator percent), %s for text, Boolean or enum text, and %% for a percent sign. Example: Level: %.0f l %.0f%% with two sources. Width up to 64; decimal places 0–6. Numbers use canonical units and a decimal point.</p>";
     html += "<p class='help'>This is a six-line text preview, not a pixel-accurate OLED simulation. Preview settings remain in this URL until you choose Save on device. Saved settings survive restart. Load saved settings discards the preview edits. Refresh reads all lines again.</p>";
     if (optionsHtml.isEmpty()) html += "<p>No sources available; plain text still works.</p>";
     if (submitted) {
@@ -159,6 +210,46 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
         html += escapeHtml(rendered).c_str();
         html += "</pre>";
     }
+    html += R"HTML(<script>
+(function () {
+    const options = document.getElementById('property-sources').options;
+    const types = new Map(Array.from(options, option => [option.value, option.dataset.boolean === '1']));
+    document.querySelectorAll('[data-boolean-source]').forEach(panel => {
+        const source = document.getElementById(panel.dataset.booleanSource);
+        const update = () => {
+            const parts = source.value.split('/');
+            if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
+            panel.hidden = types.get(parts.join('/')) !== true;
+        };
+        source.addEventListener('input', update);
+        source.addEventListener('change', update);
+    });
+    const states = new Map(Array.from(options, option => [option.value, JSON.parse(option.dataset.enum || '[]')]));
+    document.querySelectorAll('[data-enum-source]').forEach(panel => {
+        const source = document.getElementById(panel.dataset.enumSource);
+        const fields = panel.querySelector('[data-enum-fields]');
+        const values = new Map();
+        const update = () => {
+            fields.querySelectorAll('input').forEach(input => values.set(input.dataset.code, input.value));
+            const parts = source.value.split('/');
+            if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
+            const choices = states.get(parts.join('/')) || [];
+            panel.hidden = choices.length === 0;
+            if (!choices.length) return;
+            fields.replaceChildren();
+            choices.forEach(([code, text]) => {
+                const label = document.createElement('label'); label.textContent = text;
+                const input = document.createElement('input');
+                input.name = 'e' + source.id.slice(1) + '_' + code;
+                input.dataset.code = code; input.maxLength = 16; input.value = values.get(code) || '';
+                label.appendChild(input); fields.appendChild(label);
+            });
+        };
+        source.addEventListener('input', update);
+        source.addEventListener('change', update);
+    });
+})();
+</script>)HTML";
     html += "</section>";
     return html;
 }

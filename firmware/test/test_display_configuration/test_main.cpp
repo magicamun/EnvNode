@@ -45,7 +45,7 @@ void test_invalid_and_failed_writes_preserve_previous_page() {
     ConfigurationService service;
     service.loadConfiguration();
     TEST_ASSERT_TRUE(service.setDisplayConfiguration(example()));
-    const String stored = Preferences::storedString("display_page");
+    const String stored = Preferences::storedString("display_page4");
     auto page = example();
     page.formats[0] = "%n";
     TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
@@ -60,7 +60,7 @@ void test_invalid_and_failed_writes_preserve_previous_page() {
     page = example(); page.formats[0] = "Replacement";
     Preferences::failStringWrites() = true;
     TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
-    TEST_ASSERT_EQUAL_STRING(stored.c_str(), Preferences::storedString("display_page").c_str());
+    TEST_ASSERT_EQUAL_STRING(stored.c_str(), Preferences::storedString("display_page4").c_str());
     TEST_ASSERT_EQUAL_STRING("RainControl <test>", service.getConfiguration().display.formats[0].c_str());
 }
 void test_codec_rejects_corruption_and_preserves_destination() {
@@ -96,9 +96,12 @@ void test_empty_page_is_saved_intentionally_and_limits_roundtrip() {
     TEST_ASSERT_EQUAL_STRING(page.sources[5][3].c_str(), service.getConfiguration().display.sources[5][3].c_str());
 }
 void test_v1_migrates_without_enabling_hardware() {
-    String encoded;
-    TEST_ASSERT_TRUE(encodeDisplayConfiguration(example(), encoded));
-    const String legacy = (std::string("1\n") + std::string(encoded.c_str()).substr(9)).c_str();
+    String legacy("1\n");
+    const auto old = example();
+    for (size_t line = 0; line < DisplayLineCount; ++line) {
+        legacy += old.formats[line].c_str(); legacy += '\n';
+        for (const auto& source : old.sources[line]) { legacy += source.c_str(); legacy += '\n'; }
+    }
     Preferences().putString("display_page", legacy);
     ConfigurationService service;
     service.loadConfiguration();
@@ -133,8 +136,99 @@ void test_hardware_parameters_are_strict_and_atomic() {
     TEST_ASSERT_FALSE(validateDisplayConfiguration(page));
 }
 
+void test_v2_migration_and_v3_labels_survive_reload() {
+    String v2("2\n1\n1\n61\n");
+    const auto old = example();
+    for (size_t line = 0; line < DisplayLineCount; ++line) {
+        v2 += old.formats[line].c_str(); v2 += '\n';
+        for (const auto& source : old.sources[line]) { v2 += source.c_str(); v2 += '\n'; }
+    }
+    Preferences().putString("display_page", v2);
+    ConfigurationService service; service.loadConfiguration();
+    auto page = service.getConfiguration().display;
+    TEST_ASSERT_TRUE(page.hardware.enabled);
+    TEST_ASSERT_EQUAL_HEX8(0x3D, page.hardware.address);
+    TEST_ASSERT_TRUE(page.labels[5][0].trueText.isEmpty());
+    page.labels[5][0].trueText = "Zisterne"; page.labels[5][0].falseText = "Hauswasser";
+    TEST_ASSERT_TRUE(service.setDisplayConfiguration(page));
+    service.loadConfiguration();
+    TEST_ASSERT_EQUAL_STRING("Zisterne", service.getConfiguration().display.labels[5][0].trueText.c_str());
+    TEST_ASSERT_EQUAL_STRING("Hauswasser", service.getConfiguration().display.labels[5][0].falseText.c_str());
+    TEST_ASSERT_TRUE(service.getConfiguration().display.hardware.enabled);
+    page.labels[5][0].trueText = std::string(17, 'x').c_str();
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+    page.labels[5][0].trueText = "bad\nlabel";
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+    page.labels[5][0].trueText = "Zisterne"; page.sources[5][0] = "";
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+    service.loadConfiguration();
+    TEST_ASSERT_EQUAL_STRING("Zisterne", service.getConfiguration().display.labels[5][0].trueText.c_str());
+}
+void test_largest_page_still_fits_one_nvs_string() {
+    DisplayConfiguration page;
+    for (size_t line = 0; line < DisplayLineCount; ++line) {
+        page.formats[line] = (std::string(120, 'x') + "%s%s%s%s").c_str();
+        for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+            page.sources[line][source] = (std::string("controller/65535/") + std::string(64, 'k')).c_str();
+            page.labels[line][source].trueText = std::string(16, 't').c_str();
+            page.labels[line][source].falseText = std::string(16, 'f').c_str();
+        }
+    }
+    String encoded;
+    TEST_ASSERT_TRUE(encodeDisplayConfiguration(page, encoded));
+    TEST_ASSERT_TRUE(encoded.length() < 4000);
+    DisplayConfiguration decoded;
+    TEST_ASSERT_TRUE(decodeDisplayConfiguration(encoded, decoded));
+    TEST_ASSERT_EQUAL_STRING(page.labels[5][3].falseText.c_str(), decoded.labels[5][3].falseText.c_str());
+}
+
+void test_v3_migrates_and_blob_persists_large_enum_page_atomically() {
+    auto page=example(); String old("3\n1\n0\n60\n");
+    page.labels[5][0].trueText="Zisterne";
+    for (size_t line=0;line<DisplayLineCount;++line) {
+        old+=page.formats[line].c_str(); old+='\n';
+        for(size_t source=0;source<MaxPropertySourcesPerLine;++source) {
+            old+=page.sources[line][source].c_str(); old+='\n';
+            old+=page.labels[line][source].trueText.c_str(); old+='\n';
+            old+=page.labels[line][source].falseText.c_str(); old+='\n';
+        }
+    }
+    Preferences().putString("display_page",old);
+    ConfigurationService service; service.loadConfiguration();
+    TEST_ASSERT_TRUE(service.getConfiguration().display.hardware.enabled);
+    TEST_ASSERT_EQUAL_STRING("Zisterne",service.getConfiguration().display.labels[5][0].trueText.c_str());
+    page=service.getConfiguration().display;
+    for(size_t line=0;line<DisplayLineCount;++line) {
+        page.formats[line]=(std::string(120,'x')+"%s%s%s%s").c_str();
+        for(size_t source=0;source<MaxPropertySourcesPerLine;++source) {
+            page.sources[line][source]=(std::string("controller/65535/")+std::string(64,'k')).c_str();
+            page.labels[line][source].trueText=std::string(16,'t').c_str();
+            page.labels[line][source].falseText=std::string(16,'f').c_str();
+        }
+    }
+    for(size_t i=0;i<MaxDisplayEnumTranslations;++i) {
+        DisplayEnumTranslation entry; entry.code=(std::string("state_")+std::to_string(i)).c_str(); entry.text="Halten";
+        page.enumTranslations.push_back(entry);
+    }
+    TEST_ASSERT_TRUE(service.setDisplayConfiguration(page));
+    TEST_ASSERT_TRUE(Preferences().getBytesLength("display_page4")>4000);
+    service.loadConfiguration();
+    TEST_ASSERT_EQUAL_UINT32(MaxDisplayEnumTranslations,service.getConfiguration().display.enumTranslations.size());
+    TEST_ASSERT_EQUAL_STRING("Halten",service.getConfiguration().display.enumTranslations[0].text.c_str());
+    Preferences::failStringWrites()=true;
+    page.enumTranslations[0].text="Changed";
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+    TEST_ASSERT_EQUAL_STRING("Halten",service.getConfiguration().display.enumTranslations[0].text.c_str());
+    Preferences::failStringWrites()=false;
+    page.enumTranslations.push_back(page.enumTranslations[0]);
+    TEST_ASSERT_FALSE(validateDisplayConfiguration(page));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_v3_migrates_and_blob_persists_large_enum_page_atomically);
+    RUN_TEST(test_v2_migration_and_v3_labels_survive_reload);
+    RUN_TEST(test_largest_page_still_fits_one_nvs_string);
     RUN_TEST(test_v1_migrates_without_enabling_hardware);
     RUN_TEST(test_hardware_parameters_are_strict_and_atomic);
     RUN_TEST(test_persistence_reload_and_reset);

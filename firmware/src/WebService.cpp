@@ -3,6 +3,7 @@
 #include "LogWebView.h"
 #include "PropertyWebView.h"
 #include "PropertyResolver.h"
+#include "TimePropertyReader.h"
 #include "PropertyPreviewWebView.h"
 #include "WebNavigation.h"
 #include "MqttTopic.h"
@@ -479,6 +480,7 @@ void WebService::begin() {
     server_.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
     server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
+    server_.on("/display", HTTP_GET, [this]() { handleDisplay(); });
     server_.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
@@ -538,8 +540,19 @@ void WebService::sendPage(const char* title, const char* activeRoute, const Stri
         server_.send(503, "text/plain", "Administration unavailable while network is connecting");
         return;
     }
-    const String page = renderPage(title, activeRoute, content, wideContent);
-    server_.send(status, "text/html; charset=utf-8", page);
+    // Send the existing content without constructing a second full-page String.
+    // Large display forms otherwise need several simultaneous contiguous copies.
+    const String header = renderPageHeader(title, activeRoute, wideContent);
+    static const char footer[] = "</main></div></body></html>";
+    if (header.isEmpty() || content.isEmpty()) {
+        logger_.error("Web page rendering failed: empty header or content");
+        server_.send(503, "text/plain", "Page rendering failed. Please retry.");
+        return;
+    }
+    server_.setContentLength(header.length() + content.length() + sizeof(footer) - 1);
+    server_.send(status, "text/html; charset=utf-8", header);
+    server_.sendContent(content);
+    server_.sendContent(footer, sizeof(footer) - 1);
 }
 
 void WebService::sendResult(const char* title, const char* route, const char* message, bool success) {
@@ -638,11 +651,11 @@ String WebService::otaStatusHtml() const {
     return html;
 }
 
-String WebService::renderPage(const char* title, const char* active, const String& content,
+String WebService::renderPageHeader(const char* title, const char* active,
     bool wideContent) const {
     const Configuration& cfg = configurationService_.getConfiguration();
     String html;
-    html.reserve(content.length() + 1200);
+    if (!html.reserve(2048)) return String();
     html = "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>";
     html += escapeHtml(title);
     html += " · EnvNode</title><link rel='stylesheet' href='/style.css?build=";
@@ -659,7 +672,8 @@ String WebService::renderPage(const char* title, const char* active, const Strin
     html += escapeHtml(title);
     html += "</h1>";
     if (wifiService_.inSetupAccessPointMode()) html += "<p class='muted'>Setup access point mode</p>";
-    html += "</div></div>" + pendingRuntimeActionHtml() + content + "</main></div></body></html>";
+    html += "</div></div>";
+    html += pendingRuntimeActionHtml();
     return html;
 }
 
@@ -1263,13 +1277,36 @@ void WebService::handleControllers() {
     sendPage("Controllers", "/controllers", c, 200, true);
 }
 
+bool WebService::readDisplayEnumTranslations(DisplayConfiguration& page, const IPropertyReader& properties) {
+    page.enumTranslations.clear();
+    for (size_t line = 0; line < DisplayLineCount; ++line) for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+        PropertySourceInput parsed;
+        PropertyDescription description;
+        if (!parsePropertySource(page.sources[line][source].c_str(), parsed)
+            || !properties.describe(parsed.reference(), description)
+            || description.valueKind != PropertyValueKind::Enumeration) continue;
+        for (size_t index = 0; index < description.enumOptionCount; ++index) {
+            const auto& option = description.enumOptions[index];
+            const String field = "e" + String(static_cast<unsigned int>(line)) + "_"
+                + String(static_cast<unsigned int>(source)) + "_" + option.stableCode;
+            const String text = server_.arg(field);
+            if (text.isEmpty()) continue;
+            if (page.enumTranslations.size() == MaxDisplayEnumTranslations || !validateDisplayBooleanLabel(text)) return false;
+            DisplayEnumTranslation entry;
+            entry.line = line; entry.source = source; entry.code = option.stableCode; entry.text = text;
+            page.enumTranslations.push_back(entry);
+        }
+    }
+    return true;
+}
+
 void WebService::handleDisplaySave() {
     DisplayConfiguration candidate;
     candidate.hardware = configurationService_.getConfiguration().display.hardware;
     if (server_.hasArg("displayEnabled") || server_.hasArg("displayBus") || server_.hasArg("displayAddress")) {
         if (!parseTextDisplayConfiguration(server_.arg("displayEnabled"), server_.arg("displayBus"),
                 server_.arg("displayAddress"), candidate.hardware)) {
-            sendResult("Display save failed", "/measurements", "Invalid display enable, I2C bus or address.", false);
+            sendResult("Display save failed", "/display", "Invalid display enable, I2C bus or address.", false);
             return;
         }
     }
@@ -1277,32 +1314,43 @@ void WebService::handleDisplaySave() {
         const String number(static_cast<unsigned int>(line));
         const String formatField = "f" + number;
         if (!server_.hasArg(formatField)) {
-            sendResult("Display save failed", "/measurements", "Incomplete display page; previous settings retained.", false);
+            sendResult("Display save failed", "/display", "Incomplete display page; previous settings retained.", false);
             return;
         }
         candidate.formats[line] = server_.arg(formatField);
         for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
             const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
             if (!server_.hasArg(field)) {
-                sendResult("Display save failed", "/measurements", "Incomplete display page; previous settings retained.", false);
+                sendResult("Display save failed", "/display", "Incomplete display page; previous settings retained.", false);
                 return;
             }
             candidate.sources[line][source] = server_.arg(field);
+            const String suffix = number + "_" + String(static_cast<unsigned int>(source));
+            candidate.labels[line][source].trueText = server_.arg("true" + suffix);
+            candidate.labels[line][source].falseText = server_.arg("false" + suffix);
         }
     }
-    if (!validateDisplayConfiguration(candidate)) {
-        sendResult("Display save failed", "/measurements", "Invalid format or sources. Match each placeholder with a source, without gaps. Previous settings retained.", false);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_);
+    if (!readDisplayEnumTranslations(candidate, properties) || !validateDisplayConfiguration(candidate)) {
+        sendResult("Display save failed", "/display", "Invalid format, sources or Boolean text. Match placeholders and sources without gaps; labels require a source and allow at most 16 UTF-8 bytes without control characters. Previous settings retained.", false);
         return;
     }
     if (!configurationService_.setDisplayConfiguration(candidate)) {
-        sendResult("Display save failed", "/measurements", "Could not store display settings (storage failure or I2C address conflict); previous settings retained.", false);
+        sendResult("Display save failed", "/display", "Could not store display settings (storage failure or I2C address conflict); previous settings retained.", false);
         return;
     }
-    server_.sendHeader("Location", "/measurements#text-preview");
+    server_.sendHeader("Location", "/display#text-preview");
     server_.send(303);
 }
 
 void WebService::handleMeasurements() {
+    // Keep previously bookmarked preview URLs usable; ordinary Measurements
+    // requests contain no display editor or hardware controls.
+    if (server_.hasArg("preview") || server_.hasArg("f0") || server_.hasArg("source")
+        || server_.hasArg("format") || server_.hasArg("loadDisplay")) {
+        handleDisplay();
+        return;
+    }
     server_.sendHeader("Cache-Control", "no-store");
     String content;
     content.reserve(600 + sensorManager_.sensorCount() * 1200);
@@ -1345,7 +1393,8 @@ void WebService::handleMeasurements() {
     if (sensorManager_.sensorCount() == 0) {
         content += "<section class='card'><p>No active runtime Sensors.</p></section>";
     }
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_);
+    TimePropertyReader timeProperties(timeService_, localeFormatter_);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties);
     bool propertyShown = false;
     for (size_t index = 0; index < sensorManager_.sensorCount() && !propertyShown; ++index) {
         SensorRuntimeInfo runtime;
@@ -1394,6 +1443,15 @@ void WebService::handleMeasurements() {
         content += "<section class='card'><h2>Controller Property diagnostic</h2>"
             "<p>No Threshold Controller available.</p></section>";
     }
+    sendPage("Measurements", "/measurements", content);
+}
+
+void WebService::handleDisplay() {
+    server_.sendHeader("Cache-Control", "no-store");
+    String content;
+    const Configuration& configuration = configurationService_.getConfiguration();
+    TimePropertyReader timeProperties(timeService_, localeFormatter_);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
     const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");
     PropertyPreviewPage previewPage = configuration.display;
@@ -1408,8 +1466,15 @@ void WebService::handleMeasurements() {
         const String number(static_cast<unsigned int>(line));
         previewPage.formats[line] = server_.arg("f" + number);
         for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
-            previewPage.sources[line][source] = server_.arg("s" + number + "_" + String(static_cast<unsigned int>(source)));
+            const String suffix = number + "_" + String(static_cast<unsigned int>(source));
+            previewPage.sources[line][source] = server_.arg("s" + suffix);
+            previewPage.labels[line][source].trueText = server_.arg("true" + suffix);
+            previewPage.labels[line][source].falseText = server_.arg("false" + suffix);
         }
+    }
+    if (multiLineInput && !readDisplayEnumTranslations(previewPage, properties)) {
+        sendResult("Invalid state translations", "/display", "Use at most 32 state translations, each up to 16 UTF-8 bytes without control characters.", false);
+        return;
     }
     // Existing single-line bookmarks become line 1.
     if (!loadSavedDisplay && !multiLineInput && (server_.hasArg("source") || server_.hasArg("format"))) {
@@ -1444,16 +1509,21 @@ void WebService::handleMeasurements() {
         ActuatorRuntimeInfo runtime;
         if (actuatorRuntime_.runtimeInfo(index, runtime)) {
             addPreviewSource(PropertyReference(PropertyComponentKind::Actuator, runtime.id, "state"), runtime.name);
+            addPreviewSource(PropertyReference(PropertyComponentKind::Actuator, runtime.id, "level"), runtime.name);
         }
     }
     for (size_t index = 0; index < controllerRuntime_.runtimeCount(); ++index) {
         ControllerRuntimeInfo runtime;
         if (controllerRuntime_.runtimeInfo(index, runtime)) {
+            addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "decision"), runtime.name);
             addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "reason"), runtime.name);
         }
     }
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), "Date (locale)");
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), "Time (locale)");
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "datetime"), "Date and time (locale)");
     content += buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured);
-    sendPage("Measurements", "/measurements", content);
+    sendPage("Display", "/display", content);
 }
 
 void WebService::handleSensorEdit() {

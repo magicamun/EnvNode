@@ -15,6 +15,8 @@ String propertyValue(const PropertyDescription& description, const PropertySnaps
     if (snapshot.value.tryGetEnumeration(option)) {
         return String(option->displayText) + " (" + option->stableCode + ")";
     }
+    const char* text = nullptr;
+    if (snapshot.value.tryGetText(text)) return String(text);
     char buffer[64];
     float number = 0;
     bool flag = false;
@@ -45,7 +47,8 @@ String buildPropertyDiagnosticHtml(const IPropertyReader& reader,
     html += "<p><code>";
     html += reference.componentKind == PropertyComponentKind::Sensor ? "sensor"
         : reference.componentKind == PropertyComponentKind::Actuator ? "actuator"
-        : reference.componentKind == PropertyComponentKind::Controller ? "controller" : "unknown";
+        : reference.componentKind == PropertyComponentKind::Controller ? "controller"
+        : reference.componentKind == PropertyComponentKind::System ? "system" : "unknown";
     html += " / ";
     html += String(static_cast<unsigned int>(reference.componentId)).c_str();
     html += " / ";

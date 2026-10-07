@@ -59,7 +59,9 @@ private:
     void handleActuators();
     void handleControllers();
     void handleMeasurements();
+    void handleDisplay();
     void handleDisplaySave();
+    bool readDisplayEnumTranslations(DisplayConfiguration& page, const IPropertyReader& properties);
     void handleSensorEdit();
     void handleSensorSave();
     void handleSensorApply();
@@ -110,7 +112,7 @@ private:
         const char* failureTitle,
         const char* activeRoute,
         const char* failureMessage);
-    String renderPage(const char* title, const char* activeRoute, const String& content,
+    String renderPageHeader(const char* title, const char* activeRoute,
         bool wideContent = false) const;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;

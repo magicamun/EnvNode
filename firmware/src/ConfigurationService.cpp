@@ -275,14 +275,23 @@ void ConfigurationService::loadFromPreferences() {
     loadSensorSlots();
     loadActuatorSlots();
     loadControllerSlots();
-    if (preferences_.isKey("display_page")) {
-        DisplayConfiguration display;
-        if (decodeDisplayConfiguration(preferences_.getString("display_page"), display)) {
-            if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)) {
-                display.hardware.enabled = false; // Preserve sensor configuration and display text.
-            }
-            configuration_.display = display;
+    String displayRecord;
+    if (preferences_.isKey("display_page4")) {
+        const size_t length = preferences_.getBytesLength("display_page4");
+        if (length > 0 && length <= MaxDisplayEncodedLength) {
+            std::vector<char> bytes(length + 1, 0);
+            if (preferences_.getBytes("display_page4", bytes.data(), length) == length
+                && strlen(bytes.data()) == length) displayRecord = bytes.data();
         }
+    } else if (preferences_.isKey("display_page")) {
+        displayRecord = preferences_.getString("display_page");
+    }
+    DisplayConfiguration display;
+    if (decodeDisplayConfiguration(displayRecord, display)) {
+        if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)) {
+            display.hardware.enabled = false;
+        }
+        configuration_.display = display;
     }
 }
 
@@ -1211,8 +1220,9 @@ bool ConfigurationService::setControllerSlotConfiguration(
 bool ConfigurationService::setDisplayConfiguration(const DisplayConfiguration& display) {
     String encoded;
     if (!encodeDisplayConfiguration(display, encoded)
-        || !validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)
-        || !persistString("display_page", encoded)) return false;
+        || !validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)) return false;
+    ensurePreferencesStarted();
+    if (preferences_.putBytes("display_page4", encoded.c_str(), encoded.length()) != encoded.length()) return false;
     configuration_.display = display;
     configuration_.display.configured = true;
     return true;

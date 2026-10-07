@@ -67,14 +67,14 @@ PropertyTextResult failure(PropertyFormatStatus status) {
 bool accepts(char conversion, PropertyValueKind kind) {
     return (conversion == 'f' && kind == PropertyValueKind::FloatingPoint)
         || (conversion == 'u' && kind == PropertyValueKind::UnsignedInteger)
-        || (conversion == 's' && (kind == PropertyValueKind::Boolean || kind == PropertyValueKind::Enumeration));
+        || (conversion == 's' && (kind == PropertyValueKind::Boolean || kind == PropertyValueKind::Enumeration || kind == PropertyValueKind::Text));
 }
 
 } // namespace
 
 namespace {
 PropertyTextResult formatValue(const IPropertyReader& reader, const PropertyReference& reference,
-    const Conversion& conversion) {
+    const Conversion& conversion, const PropertyBooleanLabels* labels, const PropertyEnumLabels* enums) {
     PropertyDescription description;
     if (!reader.describe(reference, description)) return failure(PropertyFormatStatus::UnknownReference);
     if (!accepts(conversion.type, description.valueKind)) return failure(PropertyFormatStatus::TypeMismatch);
@@ -101,8 +101,20 @@ PropertyTextResult formatValue(const IPropertyReader& reader, const PropertyRefe
         bool flag = false;
         const PropertyEnumOption* option = nullptr;
         const char* text = nullptr;
-        if (snapshot.value.tryGetBoolean(flag)) text = flag ? description.trueText : description.falseText;
-        else if (snapshot.value.tryGetEnumeration(option)) text = option->displayText;
+        if (snapshot.value.tryGetBoolean(flag)) {
+            text = flag ? description.trueText : description.falseText;
+            const char* translated = labels == nullptr ? nullptr : (flag ? labels->trueText : labels->falseText);
+            if (translated != nullptr && translated[0] != '\0') text = translated;
+        }
+        else if (snapshot.value.tryGetEnumeration(option)) {
+            text = option->displayText;
+            if (enums != nullptr && enums->entries != nullptr) for (size_t i = 0; i < enums->count; ++i) {
+                const auto& entry = enums->entries[i];
+                if (entry.code != nullptr && entry.text != nullptr && entry.text[0]
+                    && strcmp(entry.code, option->stableCode) == 0) { text = entry.text; break; }
+            }
+        }
+        else snapshot.value.tryGetText(text);
         if (text == nullptr) return failure(PropertyFormatStatus::InvalidValue);
         size_t textLength = 0;
         while (textLength <= MaxPropertyTextLength && text[textLength] != '\0') {
@@ -132,7 +144,8 @@ bool validatePropertyFormat(const char* format, size_t sourceCount) {
 }
 
 PropertyTextResult formatPropertyText(const IPropertyReader& reader,
-    const PropertyReference* references, size_t referenceCount, const char* format) {
+    const PropertyReference* references, size_t referenceCount, const char* format,
+    const PropertyBooleanLabels* labels, const PropertyEnumLabels* enums) {
     if (format == nullptr) return failure(PropertyFormatStatus::InvalidFormat);
     size_t length = 0;
     while (length <= MaxPropertyFormatLength && format[length] != '\0') ++length;
@@ -148,7 +161,7 @@ PropertyTextResult formatPropertyText(const IPropertyReader& reader,
     size_t next = 0;
     for (size_t i = 0; i < length;) {
         if (next < count && i == conversions[next].start) {
-            const PropertyTextResult value = formatValue(reader, references[next], conversions[next]);
+            const PropertyTextResult value = formatValue(reader, references[next], conversions[next], labels == nullptr ? nullptr : &labels[next], enums == nullptr ? nullptr : &enums[next]);
             if (value.status != PropertyFormatStatus::Formatted) return failure(value.status);
             const size_t valueLength = strlen(value.text);
             if (used + valueLength > MaxPropertyTextLength) return failure(PropertyFormatStatus::OutputTooLong);

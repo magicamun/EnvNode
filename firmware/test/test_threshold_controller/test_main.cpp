@@ -811,6 +811,8 @@ class TestReasonProvider : public IThresholdReasonProvider {
 public:
     ThresholdReason current = ThresholdReason::NotStarted;
     ThresholdReason reason() const override { return current; }
+    ThresholdDecision decision() const override { return ThresholdDecision::Unknown; }
+    bool decisionCurrent() const override { return false; }
 };
 
 void test_enum_property_metadata_codes_and_type_safety() {
@@ -884,8 +886,62 @@ void test_controller_property_web_reads_real_evaluation_without_actuation() {
     TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
 }
 
+void test_decision_property_retains_hysteresis_and_masks_unusable_input() {
+    TestLogger logger;
+    TestClock clock;
+    TestMeasurementResolver measurements;
+    TestActuator actuator;
+    TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    ThresholdController controller(thresholdConfiguration(), measurements, actuators, clock, logger);
+    ControllerPropertyReader reader(3, controller);
+    const PropertyReference ref(PropertyComponentKind::Controller, 3, "decision");
+    PropertyDescription description;
+    TEST_ASSERT_TRUE(reader.describe(ref, description));
+    TEST_ASSERT_EQUAL_UINT32(3, description.enumOptionCount);
+    auto expect = [&](const char* code) {
+        const auto commands = actuator.setCount;
+        PropertySnapshot result;
+        TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::Available), static_cast<int>(reader.read(ref, result)));
+        const PropertyEnumOption* option = nullptr;
+        TEST_ASSERT_TRUE(result.valid);
+        TEST_ASSERT_TRUE(result.value.tryGetEnumeration(option));
+        TEST_ASSERT_EQUAL_STRING(code, option->stableCode);
+        TEST_ASSERT_EQUAL_UINT32(commands, actuator.setCount);
+    };
+    expect("unknown");
+    setSnapshot(measurements, 67, 0, 1);
+    controller.begin(); expect("unknown");
+    setSnapshot(measurements, 70, 0, 2);
+    controller.service(); expect("on");
+    setSnapshot(measurements, 67, 0, 3);
+    controller.service(); expect("on");
+    clock.now = 1001;
+    controller.service(); expect("unknown");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ThresholdDecision::On), static_cast<int>(controller.decision()));
+    setSnapshot(measurements, 67, 1001, 4);
+    controller.service(); expect("on");
+    measurements.available = false;
+    controller.service(); expect("unknown");
+    measurements.available = true;
+    controller.service(); expect("on");
+    measurements.current = snapshot(67, 1001, 5, false);
+    controller.service(); expect("unknown");
+    setSnapshot(measurements, 65, 1001, 6);
+    controller.service(); expect("off");
+    setSnapshot(measurements, 67, 1001, 7);
+    controller.service(); expect("off");
+    controller.stop(); expect("unknown");
+    controller.begin(); expect("unknown");
+    // Decision remains logical even when the actuator cannot apply it.
+    actuator.operationResult = ActuatorOperationResult::NotInitialized;
+    setSnapshot(measurements, 70, 1001, 8);
+    controller.service(); expect("on");
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_decision_property_retains_hysteresis_and_masks_unusable_input);
     RUN_TEST(test_begin_handles_missing_stale_invalid_and_initial_in_band_input);
     RUN_TEST(test_begin_commands_on_or_off_at_thresholds_and_accepts_quality_labels);
     RUN_TEST(test_hysteresis_processes_revisions_without_repeating_commands);
