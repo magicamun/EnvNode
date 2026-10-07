@@ -19,14 +19,14 @@ struct Conversion {
 
 bool digit(char c) { return c >= '0' && c <= '9'; }
 
-bool parse(const char* format, size_t length, Conversion& conversion) {
-    bool found = false;
+bool parse(const char* format, size_t length, Conversion* conversions, size_t& count) {
+    count = 0;
     for (size_t i = 0; i < length; ++i) {
         if (static_cast<unsigned char>(format[i]) < 32 || format[i] == 127) return false;
         if (format[i] != '%') continue;
         if (format[i + 1] == '%') { ++i; continue; }
-        if (found) return false;
-        found = true;
+        if (count == MaxPropertySourcesPerLine) return false;
+        Conversion& conversion = conversions[count++];
         conversion.start = i++;
         while (format[i] == '-' || format[i] == '0') {
             bool& flag = format[i] == '-' ? conversion.left : conversion.zero;
@@ -55,7 +55,7 @@ bool parse(const char* format, size_t length, Conversion& conversion) {
         if (conversion.zero && conversion.type == 's') return false;
         conversion.end = i + 1;
     }
-    return found;
+    return true;
 }
 
 PropertyTextResult failure(PropertyFormatStatus status) {
@@ -72,15 +72,9 @@ bool accepts(char conversion, PropertyValueKind kind) {
 
 } // namespace
 
-PropertyTextResult formatPropertyText(const IPropertyReader& reader,
-    const PropertyReference& reference, const char* format) {
-    if (format == nullptr) return failure(PropertyFormatStatus::InvalidFormat);
-    size_t length = 0;
-    while (length <= MaxPropertyFormatLength && format[length] != '\0') ++length;
-    if (length > MaxPropertyFormatLength) return failure(PropertyFormatStatus::FormatTooLong);
-    Conversion conversion;
-    if (!parse(format, length, conversion)) return failure(PropertyFormatStatus::InvalidFormat);
-
+namespace {
+PropertyTextResult formatValue(const IPropertyReader& reader, const PropertyReference& reference,
+    const Conversion& conversion) {
     PropertyDescription description;
     if (!reader.describe(reference, description)) return failure(PropertyFormatStatus::UnknownReference);
     if (!accepts(conversion.type, description.valueKind)) return failure(PropertyFormatStatus::TypeMismatch);
@@ -122,13 +116,45 @@ PropertyTextResult formatPropertyText(const IPropertyReader& reader,
     if (static_cast<size_t>(count) > MaxPropertyTextLength) return failure(PropertyFormatStatus::OutputTooLong);
 
     PropertyTextResult result;
+    memcpy(result.text, formatted, count + 1);
+    result.status = PropertyFormatStatus::Formatted;
+    return result;
+}
+} // namespace
+
+bool validatePropertyFormat(const char* format, size_t sourceCount) {
+    if (format == nullptr || sourceCount > MaxPropertySourcesPerLine) return false;
+    const size_t length = strlen(format);
+    if (length > MaxPropertyFormatLength) return false;
+    Conversion conversions[MaxPropertySourcesPerLine];
+    size_t count = 0;
+    return parse(format, length, conversions, count) && count == sourceCount;
+}
+
+PropertyTextResult formatPropertyText(const IPropertyReader& reader,
+    const PropertyReference* references, size_t referenceCount, const char* format) {
+    if (format == nullptr) return failure(PropertyFormatStatus::InvalidFormat);
+    size_t length = 0;
+    while (length <= MaxPropertyFormatLength && format[length] != '\0') ++length;
+    if (length > MaxPropertyFormatLength) return failure(PropertyFormatStatus::FormatTooLong);
+    Conversion conversions[MaxPropertySourcesPerLine];
+    size_t count = 0;
+    if (!parse(format, length, conversions, count)) return failure(PropertyFormatStatus::InvalidFormat);
+    if (referenceCount > MaxPropertySourcesPerLine || count != referenceCount
+        || (referenceCount > 0 && references == nullptr)) return failure(PropertyFormatStatus::SourceCountMismatch);
+
+    PropertyTextResult result;
     size_t used = 0;
+    size_t next = 0;
     for (size_t i = 0; i < length;) {
-        if (i == conversion.start) {
-            if (used + static_cast<size_t>(count) > MaxPropertyTextLength) return failure(PropertyFormatStatus::OutputTooLong);
-            memcpy(result.text + used, formatted, count);
-            used += count;
-            i = conversion.end;
+        if (next < count && i == conversions[next].start) {
+            const PropertyTextResult value = formatValue(reader, references[next], conversions[next]);
+            if (value.status != PropertyFormatStatus::Formatted) return failure(value.status);
+            const size_t valueLength = strlen(value.text);
+            if (used + valueLength > MaxPropertyTextLength) return failure(PropertyFormatStatus::OutputTooLong);
+            memcpy(result.text + used, value.text, valueLength);
+            used += valueLength;
+            i = conversions[next++].end;
         } else {
             if (used == MaxPropertyTextLength) return failure(PropertyFormatStatus::OutputTooLong);
             result.text[used++] = format[i++];
@@ -140,15 +166,23 @@ PropertyTextResult formatPropertyText(const IPropertyReader& reader,
     return result;
 }
 
+PropertyTextResult formatPropertyText(const IPropertyReader& reader,
+    const PropertyReference& reference, const char* format) {
+    PropertyTextResult result = formatPropertyText(reader, &reference, 1, format);
+    if (result.status == PropertyFormatStatus::SourceCountMismatch) result.status = PropertyFormatStatus::InvalidFormat;
+    return result;
+}
+
 const char* propertyFormatError(PropertyFormatStatus status) {
     switch (status) {
         case PropertyFormatStatus::Formatted: return "";
-        case PropertyFormatStatus::InvalidFormat: return "Use exactly one %f, %u or %s; %% prints a percent sign. Width: 0-64, decimal places for %f: 0-6. One line only.";
+        case PropertyFormatStatus::InvalidFormat: return "Use up to four %f, %u or %s placeholders; %% prints a percent sign. Width: 0-64, decimal places for %f: 0-6. One line only.";
         case PropertyFormatStatus::FormatTooLong: return "Format is too long (maximum 128 bytes).";
         case PropertyFormatStatus::TypeMismatch: return "Format does not match the source type: %f for decimals, %u for unsigned integers, %s for Boolean or enum text.";
         case PropertyFormatStatus::UnknownReference: return "Source is unknown or no longer available.";
         case PropertyFormatStatus::NoValue: return "No value available yet.";
         case PropertyFormatStatus::InvalidValue: return "The current source value is invalid.";
+        case PropertyFormatStatus::SourceCountMismatch: return "The number of sources must match the placeholders (maximum four). Literal text needs no sources.";
         case PropertyFormatStatus::OutputTooLong: return "Formatted line is too long (maximum 128 bytes).";
     }
     return "Unable to format this value.";

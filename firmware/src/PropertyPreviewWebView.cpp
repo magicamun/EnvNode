@@ -1,4 +1,5 @@
 #include "PropertyPreviewWebView.h"
+#include "DisplayPageFormatter.h"
 
 #include <cstring>
 #include "HtmlEscaping.h"
@@ -6,41 +7,6 @@
 #include "UnitConverter.h"
 
 namespace EnvNode {
-
-bool parsePropertySource(const char* text, PropertySourceInput& result) {
-    result = PropertySourceInput{};
-    if (text == nullptr) return false;
-    size_t length = 0;
-    while (length <= MaxPropertySourceLength && text[length]) ++length;
-    if (length > MaxPropertySourceLength) return false;
-    const char* slash = strchr(text, '/');
-    if (slash == nullptr) return false;
-    PropertySourceInput parsed;
-    const size_t categoryLength = slash - text;
-    if (categoryLength == 6 && strncmp(text, "sensor", 6) == 0) parsed.kind = PropertyComponentKind::Sensor;
-    else if (categoryLength == 8 && strncmp(text, "actuator", 8) == 0) parsed.kind = PropertyComponentKind::Actuator;
-    else if (categoryLength == 10 && strncmp(text, "controller", 10) == 0) parsed.kind = PropertyComponentKind::Controller;
-    else return false;
-    const char* current = slash + 1;
-    if (*current < '0' || *current > '9') return false;
-    uint32_t id = 0;
-    while (*current >= '0' && *current <= '9') {
-        id = id * 10 + *current++ - '0';
-        if (id > UINT16_MAX) return false;
-    }
-    if (id == 0 || *current++ != '/') return false;
-    const size_t keyLength = strlen(current);
-    if (keyLength == 0 || keyLength >= sizeof(parsed.key)) return false;
-    for (size_t i = 0; i < keyLength; ++i) {
-        const char c = current[i];
-        if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-            || (c >= '0' && c <= '9') || c == '_')) return false;
-    }
-    parsed.id = static_cast<uint16_t>(id);
-    memcpy(parsed.key, current, keyLength + 1);
-    result = parsed;
-    return true;
-}
 
 String propertySourceText(const PropertyReference& reference) {
     const char* category = reference.componentKind == PropertyComponentKind::Sensor ? "sensor"
@@ -105,6 +71,93 @@ String buildPropertyPreviewHtml(const IPropertyReader& reader, const String& opt
                 html += "</p>";
             }
         }
+    }
+    html += "</section>";
+    return html;
+}
+
+String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
+    const PropertyPreviewPage& page, bool submitted) {
+    String html("<section class='card' id='text-preview'><h2>Six-line text preview</h2>");
+    html += "<p>Each line has its own format and up to four sources, in placeholder order. Leave sources empty for plain text or an empty line.</p>";
+    html += "<datalist id='property-sources'>";
+    html += optionsHtml.c_str();
+    html += "</datalist><form method='get' action='/measurements#text-preview'>";
+    html += "<fieldset><legend>OLED SSD1309 · 128×64</legend><label>Display output<select name='displayEnabled'>";
+    html += page.hardware.enabled ? "<option value='0'>Disabled</option><option value='1' selected>Enabled</option>"
+        : "<option value='0' selected>Disabled</option><option value='1'>Enabled</option>";
+    html += "</select></label><label>I2C bus<select name='displayBus'>";
+    const auto& board = BoardCapabilities::current();
+    for (size_t index = 0; index < board.i2cBusCount(); ++index) {
+        const auto* bus = board.i2cBusAt(index);
+        html += "<option value='";
+        html += String(static_cast<unsigned int>(bus->bus)).c_str();
+        html += bus->bus == page.hardware.bus ? "' selected>" : "'>";
+        html += i2cBusName(bus->bus);
+        html += " (SDA "; html += String(static_cast<unsigned int>(bus->sda.number)).c_str();
+        html += ", SCL "; html += String(static_cast<unsigned int>(bus->scl.number)).c_str();
+        html += ")</option>";
+    }
+    html += "</select></label><label>I2C address<select name='displayAddress'>";
+    html += page.hardware.address == 0x3C
+        ? "<option value='60' selected>0x3C</option><option value='61'>0x3D</option>"
+        : "<option value='60'>0x3C</option><option value='61' selected>0x3D</option>";
+    html += "</select></label><p class='help'>Save on device applies output settings immediately. Refresh: 1 second. Six lines, 10-pixel spacing; long lines are clipped at the right edge. Connection errors are logged; retry: 10 seconds.</p></fieldset>";
+    for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
+        const String number(static_cast<unsigned int>(line));
+        html += "<fieldset><legend>Line ";
+        html += String(static_cast<unsigned int>(line + 1)).c_str();
+        html += "</legend><label for='f";
+        html += number.c_str();
+        html += "'>Format</label><input id='f";
+        html += number.c_str();
+        html += "' name='f";
+        html += number.c_str();
+        html += "' maxlength='128' value='";
+        if (page.formats[line].length() <= MaxPropertyFormatLength) html += escapeHtml(page.formats[line]).c_str();
+        html += "'>";
+        for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+            const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
+            html += "<label for='";
+            html += field.c_str();
+            html += "'>Source ";
+            html += String(static_cast<unsigned int>(source + 1)).c_str();
+            html += "</label><input list='property-sources' autocomplete='off' id='";
+            html += field.c_str();
+            html += "' name='";
+            html += field.c_str();
+            html += "' maxlength='96' value='";
+            if (page.sources[line][source].length() <= MaxPropertySourceLength) html += escapeHtml(page.sources[line][source]).c_str();
+            html += "'>";
+        }
+        html += "</fieldset>";
+    }
+    html += "<div class='actions'><button type='submit' name='preview' value='1'>Preview / refresh all lines</button><button type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/measurements#text-preview'><input type='hidden' name='loadDisplay' value='1'></form>";
+    html += "<p class='help'>Use %f for decimals, %u for unsigned integers, %s for Boolean or enum text, and %% for a percent sign. Example: Level: %.0f l %.0f%% with two sources. Width up to 64; decimal places 0–6. Numbers use canonical units and a decimal point.</p>";
+    html += "<p class='help'>This is a six-line text preview, not a pixel-accurate OLED simulation. Preview settings remain in this URL until you choose Save on device. Saved settings survive restart. Load saved settings discards the preview edits. Refresh reads all lines again.</p>";
+    if (optionsHtml.isEmpty()) html += "<p>No sources available; plain text still works.</p>";
+    if (submitted) {
+        // Render a complete page only after each row has been evaluated. A bad
+        // row gets an explicit marker; its previous or partial value is never reused.
+        String rendered;
+        for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
+            const DisplayLineResult lineResult = formatDisplayLine(reader, page, line);
+            const char* error = lineResult.error;
+            const PropertyTextResult& result = lineResult.value;
+            if (error != nullptr) {
+                rendered += "[Line ";
+                rendered += String(static_cast<unsigned int>(line + 1)).c_str();
+                rendered += ": ";
+                rendered += error;
+                rendered += "]";
+            } else {
+                rendered += result.text;
+            }
+            rendered += '\n';
+        }
+        html += "<h3>Display text</h3><pre style='white-space:pre;overflow-x:auto'>";
+        html += escapeHtml(rendered).c_str();
+        html += "</pre>";
     }
     html += "</section>";
     return html;

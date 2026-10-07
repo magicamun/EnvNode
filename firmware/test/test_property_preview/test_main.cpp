@@ -196,8 +196,126 @@ void test_web_does_not_read_before_submission_and_handles_empty_inventory() {
     TEST_ASSERT_NULL(strstr(html.c_str(), "<pre"));
 }
 
+class OrderedReader : public Reader {
+public:
+    bool describe(const PropertyReference& ref, PropertyDescription& result) const override {
+        if (ref.componentId == 99) return false;
+        result = description;
+        if (ref.componentId == 3) result.valueKind = PropertyValueKind::Boolean;
+        if (ref.componentId == 4) result.valueKind = PropertyValueKind::Enumeration;
+        return true;
+    }
+    PropertyReadResult read(const PropertyReference& ref, PropertySnapshot& result) const override {
+        ++reads;
+        result = snapshot;
+        if (ref.componentId == 2) result.value = MeasurementValue::floatingPoint(52);
+        if (ref.componentId == 3) result.value = MeasurementValue::boolean(true);
+        if (ref.componentId == 4) {
+            static const PropertyEnumOption option{"hold", "Hold"};
+            result.value = PropertyValue::enumeration(option);
+        }
+        return status;
+    }
+};
+
+void test_multiple_ordered_sources_and_mixed_types() {
+    OrderedReader reader;
+    const PropertyReference refs[] = {{PropertyComponentKind::Sensor, 1, "value"},
+        {PropertyComponentKind::Sensor, 2, "value"}, {PropertyComponentKind::Actuator, 3, "state"},
+        {PropertyComponentKind::Controller, 4, "reason"}};
+    auto result = formatPropertyText(reader, refs, 2, "Level: %.0f l %.0f%%");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::Formatted), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_STRING("Level: 21 l 52%", result.text);
+    result = formatPropertyText(reader, refs, 4, "%.2f / %.0f / %s / %s");
+    TEST_ASSERT_EQUAL_STRING("21.25 / 52 / True / Hold", result.text);
+    const PropertyReference reverse[] = {refs[1], refs[0]};
+    result = formatPropertyText(reader, reverse, 2, "%.0f %.2f");
+    TEST_ASSERT_EQUAL_STRING("52 21.25", result.text);
+}
+
+void test_literal_and_empty_lines_require_no_sources() {
+    Reader reader;
+    auto result = formatPropertyText(reader, nullptr, 0, "RainControl 100%%");
+    TEST_ASSERT_EQUAL_STRING("RainControl 100%", result.text);
+    result = formatPropertyText(reader, nullptr, 0, "");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::Formatted), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_STRING("", result.text);
+    result = formatPropertyText(reader, nullptr, 0, "%f");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::SourceCountMismatch), static_cast<int>(result.status));
+    result = formatPropertyText(reader, &Source, 1, "Literal");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::SourceCountMismatch), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_UINT32(0, reader.reads);
+}
+
+void test_multi_source_errors_clear_whole_line_and_bound_total_output() {
+    OrderedReader reader;
+    PropertyReference refs[] = {{PropertyComponentKind::Sensor, 1, "value"},
+        {PropertyComponentKind::Sensor, 99, "missing"}};
+    auto result = formatPropertyText(reader, refs, 2, "Value %.1f missing %.1f");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::UnknownReference), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_STRING("", result.text);
+    refs[1] = {PropertyComponentKind::Actuator, 3, "state"};
+    result = formatPropertyText(reader, refs, 2, "%f %f");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::TypeMismatch), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_STRING("", result.text);
+    refs[1] = refs[0];
+    result = formatPropertyText(reader, refs, 2, "%64f%64fX");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::OutputTooLong), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_STRING("", result.text);
+    result = formatPropertyText(reader, refs, 2, "%f%f%f%f%f");
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::InvalidFormat), static_cast<int>(result.status));
+}
+
+void test_six_line_page_preserves_layout_and_isolates_row_errors() {
+    OrderedReader reader;
+    PropertyPreviewPage page;
+    page.formats[0] = "RainControl";
+    page.formats[1] = "Level: %.0f l %.0f%%";
+    page.sources[1][0] = "sensor/1/value";
+    page.sources[1][1] = "sensor/2/value";
+    page.formats[2] = "%s";
+    page.sources[2][0] = "actuator/3/state";
+    page.formats[3] = "Reason: %s";
+    page.sources[3][0] = "controller/4/reason";
+    page.formats[5] = "<End>";
+    String html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "RainControl\nLevel: 21 l 52%\nTrue\nReason: Hold\n\n&lt;End&gt;\n"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='f5'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='s5_3'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "name='f6'"));
+    page.sources[1][1] = "sensor/99/value";
+    html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "[Line 2: Source is unknown"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "\nTrue\nReason: Hold\n"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "Level: 21 l"));
+    page.sources[1][0] = "";
+    html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Fill sources in order without gaps"));
+    const unsigned reads = reader.reads;
+    html = buildPropertyPagePreviewHtml(reader, "", page, false);
+    TEST_ASSERT_EQUAL_UINT32(reads, reader.reads);
+    TEST_ASSERT_NULL(strstr(html.c_str(), "<pre"));
+}
+
+void test_load_saved_submits_an_independent_form() {
+    OrderedReader reader;
+    PropertyPreviewPage page;
+    page.formats[0] = "Unsaved draft";
+    const String html = buildPropertyPagePreviewHtml(reader, "", page, false);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<div class='actions'><button"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<button type='submit' form='display-load'>Load saved settings</button>"));
+    // Load must submit a separate form, without any draft fields or save action.
+    const char* load = strstr(html.c_str(), "</form><form id='display-load' method='get' action='/measurements#text-preview'>");
+    TEST_ASSERT_NOT_NULL(load);
+    TEST_ASSERT_NOT_NULL(strstr(load, "<input type='hidden' name='loadDisplay' value='1'></form>"));
+    TEST_ASSERT_NULL(strstr(load, "name='f0'"));
+    TEST_ASSERT_NULL(strstr(load, "name='s0_0'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "<a href='/measurements#text-preview'>Load saved settings</a>"));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_load_saved_submits_an_independent_form);
     RUN_TEST(test_float_width_precision_alignment_and_literal_percent);
     RUN_TEST(test_integer_and_boolean_text);
     RUN_TEST(test_enum_uses_display_text_and_never_interprets_it_as_format);
@@ -208,5 +326,9 @@ int main(int, char**) {
     RUN_TEST(test_source_parser_requires_complete_bounded_reference);
     RUN_TEST(test_web_preview_keeps_selection_and_escapes_all_user_text);
     RUN_TEST(test_web_does_not_read_before_submission_and_handles_empty_inventory);
+    RUN_TEST(test_multiple_ordered_sources_and_mixed_types);
+    RUN_TEST(test_literal_and_empty_lines_require_no_sources);
+    RUN_TEST(test_multi_source_errors_clear_whole_line_and_bound_total_output);
+    RUN_TEST(test_six_line_page_preserves_layout_and_isolates_row_errors);
     return UNITY_END();
 }

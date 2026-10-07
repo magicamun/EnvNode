@@ -30,7 +30,10 @@ public:
         return found == values().end() ? fallback : std::stof(found->second);
     }
 
+    static bool& failStringWrites() { static bool fail = false; return fail; }
+
     size_t putString(const char* key, const String& value) {
+        if (failStringWrites()) return 0;
         values()[key] = value.c_str();
         return value.length() + 1;
     }

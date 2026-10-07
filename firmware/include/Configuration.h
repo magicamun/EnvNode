@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "MeasurementType.h"
+#include "DisplayConfiguration.h"
 #include "EnvNode/Locale.h"
 #include "SensorSlotConfiguration.h"
 #include "ActuatorSlotConfiguration.h"
@@ -65,6 +66,7 @@ struct PresentationConfiguration {
 };
 
 struct Configuration {
+    DisplayConfiguration display;
     DeviceConfiguration device;
     NetworkConfiguration network;
     MqttConfiguration mqtt;

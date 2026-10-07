@@ -63,7 +63,7 @@ Numeric Measurements use the canonical representation defined by their `Measurem
 
 The read-only [local property view](LocalProperties.md) exposes Sensor state Measurements, logical On/Off Actuator output and Threshold Controller evaluation reasons through stable references. Sensor properties reuse the existing metadata and snapshot resolver; Actuator properties read the existing output capability.
 
-The shared `PropertyResolver` routes local references to the current Sensor, Actuator or Controller property reader. It stores no component bindings or duplicate values and resolves against the current runtime on each call. The Measurements page includes a one-source text preview using this resolver and a bounded, typed formatter. Preview parameters are URL inputs, not persistent display configuration.
+The shared `PropertyResolver` routes local references to the current Sensor, Actuator or Controller property reader. It stores no component bindings or duplicate values and resolves against the current runtime on each call. The Measurements page includes a six-line text preview with up to four ordered sources per line using this resolver and a bounded, typed formatter. Preview parameters remain URL inputs until explicitly saved. DisplayConfiguration stores six format strings and their ordered source references through ConfigurationService as one versioned NVS record; it has no dependency on a physical display driver.
 
 ## Actuator
 
@@ -226,3 +226,13 @@ Controller infrastructure v1 is implemented, tested and physically verified for 
 - generic Actuator Home Assistant discovery
 - richer manual-versus-Controller arbitration
 - scripting/rule engine and generic command/event bus
+
+### Optional text display output
+
+DisplayConfiguration owns a six-line page plus optional SSD1309 I2C output
+settings. ConfigurationService validates and stores it as one versioned NVS record.
+DisplayService formats snapshots through IPropertyReader and writes complete pages
+through ITextDisplay. Ssd1309TextDisplay implements that boundary using the existing
+I2CBusManager; Application schedules the display service after normal runtime work.
+DisplayPageFormatter is shared with the web preview. Display output does not
+publish MQTT state or change sensor, actor or controller decisions.

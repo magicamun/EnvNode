@@ -88,6 +88,7 @@ public:
     bool setSensorSlotConfiguration(const SensorSlotConfiguration&) override { return false; }
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration&) override { return false; }
     bool setControllerSlotConfiguration(const ControllerSlotConfiguration&) override { return false; }
+    bool setDisplayConfiguration(const DisplayConfiguration&) override { return false; }
     bool resetToDefaults() override { return false; }
 };
 

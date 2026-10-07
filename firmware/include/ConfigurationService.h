@@ -28,6 +28,7 @@ public:
     bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) override;
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) override;
     bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) override;
+    bool setDisplayConfiguration(const DisplayConfiguration& display) override;
     bool resetToDefaults() override;
 
 private:
@@ -74,7 +75,8 @@ private:
         const ActuatorSlotConfiguration* actuatorSlots) const;
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,
-        const ActuatorSlotConfiguration* actuatorSlots) const;
+        const ActuatorSlotConfiguration* actuatorSlots,
+        const TextDisplayConfiguration* display = nullptr) const;
 
     Configuration configuration_;
     Preferences preferences_;

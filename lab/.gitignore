@@ -8,3 +8,10 @@
 !RainDetector-PCNT/include/LabConfig.h
 !RainDetector-PCNT/src/
 !RainDetector-PCNT/src/main.cpp
+!Display-SSD1309/
+!Display-SSD1309/platformio.ini
+!Display-SSD1309/README.md
+!Display-SSD1309/include/
+!Display-SSD1309/include/LabConfig.h
+!Display-SSD1309/src/
+!Display-SSD1309/src/main.cpp

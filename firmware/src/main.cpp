@@ -1,4 +1,7 @@
 #include "Application.h"
+#include "DisplayService.h"
+#include "Ssd1309TextDisplay.h"
+#include "PropertyResolver.h"
 #include "ConfigurationService.h"
 #include "SerialLogger.h"
 #include "WiFiService.h"
@@ -112,9 +115,13 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager,
     actuatorRuntime);
+static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime);
+static Ssd1309TextDisplay oled(i2cBusManager);
+static DisplayService displayService(configurationService.getConfiguration().display,
+    displayProperties, oled, monotonicClock, logger);
 static OTAService otaService(logger, runtimeManager);
 static WebService webService(logger, configurationService, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleDescriptorProvisioningService);
-static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher);
+static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher, displayService);
 static bool normalRuntimeStarted = false;
 
 void setup() {

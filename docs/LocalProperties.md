@@ -65,8 +65,8 @@ runtime. Calls follow the existing single-loop runtime model, with no new
 concurrency guarantees.
 
 The Measurements web page now includes a small Property diagnostic card.
-The single-line formatter is a preview tool; there is no LCD driver, persistent
-display configuration or MQTT change. Current pre-time-synchronization discard behavior remains:
+The text formatter is used for the preview and its saved display page; there is
+an optional SSD1309 OLED output and no MQTT change. Current pre-time-synchronization discard behavior remains:
 the view cannot supply values that the measurement pipeline has not stored.
 
 ## Validation
@@ -204,7 +204,7 @@ valid=false. The Actuator runtime only exposes available On/Off capabilities, so
 an unavailable or removed Actuator cannot be resolved. This matches the existing
 diagnostic selection. Numeric IDs retain their existing runtime/slot semantics;
 the resolver consumes typed references and does not persist identity. The preview
-form has its own bounded string-reference parser.
+and persistent display configuration share a bounded string-reference parser.
 
 `test_property_resolver` checks all three categories sharing the same numeric ID,
 type/metadata preservation, missing and invalid samples, unknown-reference reset,
@@ -219,14 +219,16 @@ const PropertyReference reference(PropertyComponentKind::Controller, 2, "reason"
 const PropertyReadResult status = properties.read(reference, snapshot);
 ```
 
-The resolver centralizes lookup for diagnostics and the single-line preview below.
+The resolver centralizes lookup for diagnostics and the six-line preview below.
 It does not store display configuration or drive display hardware.
 
-## Single-line text preview
+## Six-line text preview
 
-Open **Measurements → Text line preview**, select one of the available sources,
-enter a format and click **Preview / refresh**. The current value is resolved
-through PropertyResolver each time. The source list includes supported Sensor
+Open **Measurements → Six-line text preview**. Each of the six rows has a
+format and up to four source fields with shared suggestions. Fill sources from
+left to right in placeholder order and click **Preview / refresh all lines**.
+Leave sources empty for literal text or an empty line. Values are resolved
+through PropertyResolver on each submission. The source list includes supported Sensor
 state properties, available On/Off Actor states and Threshold Controller reasons.
 Source labels include the component name and canonical unit where applicable.
 
@@ -240,7 +242,11 @@ Examples:
 | Controller enum | `Reason: %s` | `Reason: On threshold reached` |
 | Unsigned integer | `Count: %u` | `Count: 42` |
 
-The formatter accepts exactly one conversion, plus literal text and `%%`.
+The formatter accepts zero to four ordered conversions, plus literal text and
+`%%`. The number of supplied sources must exactly match the number of conversions.
+For example, `Level: %.0f l %.0f%%` requires a volume source followed by a
+percentage source. Literal text such as `RainControl` and blank lines use zero
+sources. The previous one-reference formatter overload remains compatible.
 Supported conversions are `%f` (floating point), `%u` (unsigned integer), and
 `%s` (Boolean label or enum display text). Optional `-` left-aligns, optional
 `0` pads numbers with zeros; width is limited to 64. Float precision is 0–6,
@@ -253,15 +259,21 @@ formatter does not yet provide LCD font/glyph layout. Literal newlines and contr
 characters are rejected. Results are never silently truncated. Decimal formatting
 uses a point and canonical values: adding a unit string does not convert units.
 
-PropertyTextFormatter validates the entire format and its compatibility with
-the property before formatting. It invokes snprintf only with internal trusted
+PropertyTextFormatter validates the entire format and source count first, then
+checks each property type and value before formatting it. It invokes snprintf only with internal trusted
 format patterns, never with the submitted format string. Unknown sources, missing
 samples, invalid samples, type mismatches and output overflow produce explicit
-errors; no partial or previous result is shown. No new staleness policy is added.
+errors; no partial or previous result is shown for that line. The other five
+lines remain visible; an error marker identifies the affected row. No new staleness policy is added.
 
-The form is a read-only GET request. Source and format remain in the URL and can
-be bookmarked or refreshed; they are not saved in NVS. This is a preview tool,
-not yet persistent display configuration. Source strings have the syntax
+Preview uses a read-only GET request. Source and format remain in the URL and can
+be bookmarked or refreshed. **Save on device** posts all six rows to `/display/save`;
+**Load saved settings** submits a separate GET form containing only `loadDisplay=1`,
+discards draft/URL edits and reloads the saved page even when already on Measurements.
+The response is marked `Cache-Control: no-store`. Without URL
+overrides, Measurements loads and renders the saved configuration. No reboot is needed. Form fields f0–f5 and s0_0–s5_3
+encode the six rows and four source positions per row. Existing single-line
+source/format URLs are loaded into the first row. Source strings have the syntax
 `category/ID/key`; the parser requires a known category, nonzero uint16 ID and
 a bounded alphanumeric/underscore key. Runtime availability is checked separately
 by the resolver. HTML output escapes source names, inputs and formatted text.
@@ -271,3 +283,75 @@ syntax, type checks, non-finite and invalid values, missing/unknown sources,
 reference parsing, HTML escaping, preview updates and no reads before submission.
 The resolver integration test also formats real Sensor, Actor and Controller
 values through the same entry point used by the page.
+
+The six-row layout reflects a 128×64 OLED with 10-pixel baseline spacing. The
+web view preserves line breaks and spaces but does not claim pixel-accurate
+font metrics, clipping or wrapping. Physical output is handled by the optional OLED driver. All six rows are
+prepared during one request and emitted together. The single-loop runtime
+prevents component updates between row reads; there is no background sampling
+or output side effect in the formatter. A shared source datalist avoids repeating
+the complete source inventory in 24 selectors on the ESP32.
+
+Additional tests cover ordered mixed-type placeholders, swapped sources, zero
+sources, missing/extra sources, cumulative output overflow, second-source errors,
+six-row positioning, blank rows, escaped literal text and per-row error isolation.
+
+## Persistent display page
+
+`DisplayConfiguration` is independent of Web and the physical display driver.
+`ConfigurationService` stores the complete page in the existing `weather` NVS
+namespace under `display_page`, in one versioned string record. A successful
+write updates the in-memory configuration; a failed write leaves it unchanged.
+Version 2 stores enabled/bus/address followed by exactly 30 newline-delimited fields
+(six formats and four sources per format). Version 1 pages migrate with OLED output
+disabled, preserving every format and source. Validation forbids control characters
+in fields and bounds the complete record to 3114 bytes. Missing, malformed or
+unknown-version records leave the default unconfigured page. Factory reset
+clears it. An explicitly saved blank page remains blank, without an automatic
+source suggestion.
+
+Saving validates format syntax, limits, source syntax and placeholder counts.
+Sources must be contiguous from position 1. This deliberately permits references
+to currently unavailable components: current values and type compatibility are
+checked when rendering, with errors isolated per line. The optional OLED output uses this same saved page. MQTT remains unchanged.
+
+Native tests cover reload, reset, intentionally blank pages, boundary sizes,
+malformed records, invalid input and failed storage writes preserving the old page.
+
+## OLED output
+
+Measurements offers **Display output**, **I2C bus** (with board-profile pins), and
+**I2C address** (`0x3C` or `0x3D`). Choose Enabled and Save on device to apply
+without reboot. Preview alone does not change the running display. Defaults and
+migrated version-1 pages leave output disabled. Hardware settings are persisted
+atomically with the text page; conflicting I2C address claims are rejected. On
+load, a conflicting output is disabled while text and sensor configuration remain.
+
+`DisplayService` depends on `ITextDisplay`, `IPropertyReader` and a monotonic clock.
+`DisplayPageFormatter` evaluates each row for both web preview and physical output.
+The service uses the current saved configuration and updates once per second,
+with wrap-safe timing. It reinitializes on bus/address changes and powers down on
+disable. Unknown/missing/invalid values replace that row with `[Line N error]`;
+detailed errors are logged on transitions, with no per-second log flood.
+
+`Ssd1309TextDisplay` uses the lab-confirmed SSD1309 NONAME2 full-buffer setup,
+128×64 pixels, U8G2_R0, `u8g2_font_t0_11_tf`, and six 10-pixel baselines. UTF-8
+text is decoded; glyph coverage is limited to the chosen font. Long lines clip
+at the right edge; they do not wrap into the following row. U8g2 is pinned to
+2.36.12; `U8X8_WITH_USER_PTR` is enabled globally for consistent library/driver
+structure layout. The custom byte callback uses the already initialized `I2CBusManager`
+bus without restarting it or changing its pins/clock. Wire's timeout is temporarily
+bounded to 20 ms and restored after each operation. Transfers remain synchronous;
+at 100 kHz a full frame takes roughly a tenth of a second, not a hard real-time
+refresh guarantee.
+
+Missing displays or failed transfers are logged and retried after 10 seconds;
+there is no retry wait loop or reboot. The first failed transfer suppresses the
+remaining frame transactions. Reconnection initializes and redraws the display.
+A physically stuck shared bus can still affect other participants electrically.
+
+Native tests cover enable/disable, live text changes, one-second refresh,
+missing-display backoff/recovery, failed transfers, isolated row errors,
+bus/address changes, timer wrap, strict settings parsing and version-1 migration.
+The lab driver was confirmed on hardware by the user; production integration
+still requires a hardware check after flashing.

@@ -479,6 +479,7 @@ void WebService::begin() {
     server_.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
     server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
+    server_.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
     server_.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
@@ -1262,7 +1263,47 @@ void WebService::handleControllers() {
     sendPage("Controllers", "/controllers", c, 200, true);
 }
 
+void WebService::handleDisplaySave() {
+    DisplayConfiguration candidate;
+    candidate.hardware = configurationService_.getConfiguration().display.hardware;
+    if (server_.hasArg("displayEnabled") || server_.hasArg("displayBus") || server_.hasArg("displayAddress")) {
+        if (!parseTextDisplayConfiguration(server_.arg("displayEnabled"), server_.arg("displayBus"),
+                server_.arg("displayAddress"), candidate.hardware)) {
+            sendResult("Display save failed", "/measurements", "Invalid display enable, I2C bus or address.", false);
+            return;
+        }
+    }
+    for (size_t line = 0; line < DisplayLineCount; ++line) {
+        const String number(static_cast<unsigned int>(line));
+        const String formatField = "f" + number;
+        if (!server_.hasArg(formatField)) {
+            sendResult("Display save failed", "/measurements", "Incomplete display page; previous settings retained.", false);
+            return;
+        }
+        candidate.formats[line] = server_.arg(formatField);
+        for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+            const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
+            if (!server_.hasArg(field)) {
+                sendResult("Display save failed", "/measurements", "Incomplete display page; previous settings retained.", false);
+                return;
+            }
+            candidate.sources[line][source] = server_.arg(field);
+        }
+    }
+    if (!validateDisplayConfiguration(candidate)) {
+        sendResult("Display save failed", "/measurements", "Invalid format or sources. Match each placeholder with a source, without gaps. Previous settings retained.", false);
+        return;
+    }
+    if (!configurationService_.setDisplayConfiguration(candidate)) {
+        sendResult("Display save failed", "/measurements", "Could not store display settings (storage failure or I2C address conflict); previous settings retained.", false);
+        return;
+    }
+    server_.sendHeader("Location", "/measurements#text-preview");
+    server_.send(303);
+}
+
 void WebService::handleMeasurements() {
+    server_.sendHeader("Cache-Control", "no-store");
     String content;
     content.reserve(600 + sensorManager_.sensorCount() * 1200);
     content = "<p class='help'>Current runtime snapshots only. Measurements are not stored as history.</p>";
@@ -1353,24 +1394,43 @@ void WebService::handleMeasurements() {
         content += "<section class='card'><h2>Controller Property diagnostic</h2>"
             "<p>No Threshold Controller available.</p></section>";
     }
-    const bool previewSubmitted = server_.hasArg("preview");
-    String previewSource = server_.hasArg("source") ? server_.arg("source") : String();
-    String previewFormat = server_.hasArg("format") ? server_.arg("format") : String();
+    const bool loadSavedDisplay = server_.hasArg("loadDisplay");
+    const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");
+    PropertyPreviewPage previewPage = configuration.display;
+    const bool multiLineInput = !loadSavedDisplay && server_.hasArg("f0");
+    if (!loadSavedDisplay && server_.hasArg("displayEnabled")) {
+        if (!parseTextDisplayConfiguration(server_.arg("displayEnabled"), server_.arg("displayBus"),
+                server_.arg("displayAddress"), previewPage.hardware)) {
+            content += "<p role='alert'>Invalid display hardware selection; showing saved hardware settings.</p>";
+        }
+    }
+    if (multiLineInput) for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
+        const String number(static_cast<unsigned int>(line));
+        previewPage.formats[line] = server_.arg("f" + number);
+        for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+            previewPage.sources[line][source] = server_.arg("s" + number + "_" + String(static_cast<unsigned int>(source)));
+        }
+    }
+    // Existing single-line bookmarks become line 1.
+    if (!loadSavedDisplay && !multiLineInput && (server_.hasArg("source") || server_.hasArg("format"))) {
+        previewPage = PropertyPreviewPage{};
+        previewPage.sources[0][0] = server_.arg("source");
+        previewPage.formats[0] = server_.arg("format");
+    }
     String previewOptions;
-    bool previewSourceListed = false;
     const auto addPreviewSource = [&](const PropertyReference& reference, const char* name) {
         PropertyDescription description;
         if (!properties.describe(reference, description)) return;
         const String source = propertySourceText(reference);
-        if (!previewSubmitted && previewSource.isEmpty()) {
-            previewSource = source;
+        if (!loadSavedDisplay && !configuration.display.configured && !previewSubmitted && !multiLineInput && !server_.hasArg("source") && previewPage.sources[0][0].isEmpty()) {
+            previewPage.sources[0][0] = source;
             if (!server_.hasArg("format")) {
-                previewFormat = description.valueKind == PropertyValueKind::FloatingPoint ? "%.1f"
+                previewPage.formats[0] = description.valueKind == PropertyValueKind::FloatingPoint ? "%.1f"
                     : description.valueKind == PropertyValueKind::UnsignedInteger ? "%u" : "%s";
             }
         }
-        if (source == previewSource) previewSourceListed = true;
-        previewOptions += buildPropertySourceOption(reference, description, name, previewSource);
+        // One shared datalist avoids duplicating the whole inventory 24 times.
+        previewOptions += buildPropertySourceOption(reference, description, name, String());
     };
     for (size_t index = 0; index < sensorManager_.sensorCount(); ++index) {
         SensorRuntimeInfo runtime;
@@ -1392,8 +1452,7 @@ void WebService::handleMeasurements() {
             addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "reason"), runtime.name);
         }
     }
-    content += buildPropertyPreviewHtml(properties, previewOptions, previewSource, previewFormat,
-        previewSubmitted, previewSourceListed);
+    content += buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured);
     sendPage("Measurements", "/measurements", content);
 }
 

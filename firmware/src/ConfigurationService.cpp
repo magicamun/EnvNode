@@ -116,6 +116,7 @@ void ConfigurationService::ensurePreferencesStarted() {
 }
 
 void ConfigurationService::initializeDefaults() {
+    configuration_.display = DisplayConfiguration{};
     configuration_.device.name = "WeatherStation";
     configuration_.network.hostname = "WeatherStation";
     configuration_.network.wifiSSID = String();
@@ -274,6 +275,15 @@ void ConfigurationService::loadFromPreferences() {
     loadSensorSlots();
     loadActuatorSlots();
     loadControllerSlots();
+    if (preferences_.isKey("display_page")) {
+        DisplayConfiguration display;
+        if (decodeDisplayConfiguration(preferences_.getString("display_page"), display)) {
+            if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)) {
+                display.hardware.enabled = false; // Preserve sensor configuration and display text.
+            }
+            configuration_.display = display;
+        }
+    }
 }
 
 void ConfigurationService::loadSensorSlots() {
@@ -1039,8 +1049,9 @@ bool ConfigurationService::validateControllerSlots(
 
 bool ConfigurationService::validateHardwareOccupancy(
     const SensorSlotConfiguration* sensorSlots,
-    const ActuatorSlotConfiguration* actuatorSlots) const {
-    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount];
+    const ActuatorSlotConfiguration* actuatorSlots,
+    const TextDisplayConfiguration* display) const {
+    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount + 1];
     size_t claimIndex = 0;
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         claims[claimIndex].active = sensorSlots[index].enabled
@@ -1054,6 +1065,9 @@ bool ConfigurationService::validateHardwareOccupancy(
         claims[claimIndex].assignment = actuatorSlots[index].hardware;
         ++claimIndex;
     }
+    const auto& hardware = display == nullptr ? configuration_.display.hardware : *display;
+    claims[claimIndex++] = HardwareResourceClaim(hardware.enabled,
+        HardwareResourceAssignment::i2cResource(I2CResource(hardware.bus, hardware.address)));
     return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
 
@@ -1191,6 +1205,16 @@ bool ConfigurationService::setControllerSlotConfiguration(
         return false;
     }
     configuration_.controllerSlots[slot.slotId - 1] = slot;
+    return true;
+}
+
+bool ConfigurationService::setDisplayConfiguration(const DisplayConfiguration& display) {
+    String encoded;
+    if (!encodeDisplayConfiguration(display, encoded)
+        || !validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)
+        || !persistString("display_page", encoded)) return false;
+    configuration_.display = display;
+    configuration_.display.configured = true;
     return true;
 }
 

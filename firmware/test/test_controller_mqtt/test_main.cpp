@@ -101,6 +101,7 @@ public:
         configuration.controllerSlots[slot.slotId - 1] = slot;
         return true;
     }
+    bool setDisplayConfiguration(const DisplayConfiguration&) override { return false; }
     bool resetToDefaults() override { return false; }
 };
 

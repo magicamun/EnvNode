@@ -59,6 +59,7 @@ private:
     void handleActuators();
     void handleControllers();
     void handleMeasurements();
+    void handleDisplaySave();
     void handleSensorEdit();
     void handleSensorSave();
     void handleSensorApply();

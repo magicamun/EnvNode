@@ -30,6 +30,7 @@ public:
     virtual bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) = 0;
     virtual bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) = 0;
     virtual bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) = 0;
+    virtual bool setDisplayConfiguration(const DisplayConfiguration& display) = 0;
     virtual bool resetToDefaults() = 0;
 };
 
