@@ -95,9 +95,9 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     String html("<section class='card' id='text-preview'><h2>Six-line text preview</h2>");
     html += "<p>Each line has its own format and up to four sources, in placeholder order. Leave sources empty for plain text or an empty line.</p>";
     html += "<p class='help'>Optional Boolean text applies to %s: empty keeps the default text. Maximum 16 UTF-8 bytes each (umlauts use two bytes). Other source types ignore these labels.</p>";
-    html += "<datalist id='property-sources'>";
+    html += "<template id='property-sources'><select>";
     html += optionsHtml.c_str();
-    html += "</datalist><form method='get' action='/display#text-preview'>";
+    html += "</select></template><noscript><p>Enable JavaScript to choose display sources.</p></noscript><form method='get' action='/display#text-preview'>";
     html += "<fieldset><legend>OLED SSD1309 · 128×64</legend><label>Display output<select name='displayEnabled'>";
     html += page.hardware.enabled ? "<option value='0'>Disabled</option><option value='1' selected>Enabled</option>"
         : "<option value='0' selected>Disabled</option><option value='1'>Enabled</option>";
@@ -137,13 +137,20 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
             html += field.c_str();
             html += "'>Source ";
             html += String(static_cast<unsigned int>(source + 1)).c_str();
-            html += "</label><input list='property-sources' autocomplete='off' id='";
+            html += "</label><select data-property-source id='";
             html += field.c_str();
             html += "' name='";
             html += field.c_str();
-            html += "' maxlength='96' value='";
-            if (page.sources[line][source].length() <= MaxPropertySourceLength) html += escapeHtml(page.sources[line][source]).c_str();
-            html += "'>";
+            html += "'><option value=''>No source</option>";
+            if (!page.sources[line][source].isEmpty()
+                && page.sources[line][source].length() <= MaxPropertySourceLength) {
+                html += "<option selected value='";
+                html += escapeHtml(page.sources[line][source]).c_str();
+                html += "'>";
+                html += escapeHtml(page.sources[line][source]).c_str();
+                html += "</option>";
+            }
+            html += "</select>";
             const auto& labels = page.labels[line][source];
             PropertySourceInput selected;
             PropertyDescription description;
@@ -213,7 +220,18 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     }
     html += R"HTML(<script>
 (function () {
-    const options = document.getElementById('property-sources').options;
+    const options = document.getElementById('property-sources').content.querySelector('select').options;
+    document.querySelectorAll('[data-property-source]').forEach(source => {
+        const selected = source.value;
+        const parts = selected.split('/');
+        if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
+        const canonical = parts.join('/');
+        source.replaceChildren(new Option('No source', ''));
+        Array.from(options).forEach(option => source.appendChild(option.cloneNode(true)));
+        const available = Array.from(source.options).some(option => option.value === canonical);
+        if (!available) source.add(new Option('Unavailable: ' + selected, selected));
+        source.value = available ? canonical : selected;
+    });
     const types = new Map(Array.from(options, option => [option.value, option.dataset.boolean === '1']));
     document.querySelectorAll('[data-boolean-source]').forEach(panel => {
         const source = document.getElementById(panel.dataset.booleanSource);

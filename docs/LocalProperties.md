@@ -289,7 +289,7 @@ web view preserves line breaks and spaces but does not claim pixel-accurate
 font metrics, clipping or wrapping. Physical output is handled by the optional OLED driver. All six rows are
 prepared during one request and emitted together. The single-loop runtime
 prevents component updates between row reads; there is no background sampling
-or output side effect in the formatter. A shared source datalist avoids repeating
+or output side effect in the formatter. A shared source inventory populates native dropdowns in the browser and avoids repeating
 the complete source inventory in 24 selectors on the ESP32.
 
 Additional tests cover ordered mixed-type placeholders, swapped sources, zero
@@ -386,7 +386,7 @@ The Boolean help text is shared across all source fields to keep the editor comp
 
 `/display` is the dedicated Display navigation item. It contains OLED hardware
 settings, all six rows, preview, saving and loading. `/measurements` retains only
-measurements and property diagnostics. Old Measurements URLs with preview fields
+measurements only. Old Measurements URLs with preview fields
 are still served by the Display handler; new forms target `/display`.
 
 Boolean translation controls are initially shown only when property metadata
@@ -458,3 +458,13 @@ just like controller enum translations. The OLED picks up changes on its next
 normal refresh; use Preview/refresh to update the Web representation.
 Deleting the Value leaves the saved display reference intact and reports an
 unknown source until that line is reconfigured. Reading a Value never changes it.
+
+## Web interface cleanup
+
+Measurements now shows only measurement snapshots; the initial sample Property
+diagnostic cards have been removed. Display source fields are native dropdowns,
+with an explicit “No source” option. The browser populates them from one shared
+inventory to keep the device response small. JavaScript is required to change
+sources. Saved sources that are currently unavailable remain selected and are
+marked as unavailable, rather than silently replaced. Boolean and enum translation
+controls continue to follow the selected source type.

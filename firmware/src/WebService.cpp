@@ -1,7 +1,6 @@
 #include "WebService.h"
 #include "HtmlEscaping.h"
 #include "LogWebView.h"
-#include "PropertyWebView.h"
 #include "PropertyResolver.h"
 #include "TimePropertyReader.h"
 #include "ValuePropertyReader.h"
@@ -1427,57 +1426,6 @@ void WebService::handleMeasurements() {
     if (sensorManager_.sensorCount() == 0) {
         content += "<section class='card'><p>No active runtime Sensors.</p></section>";
     }
-    TimePropertyReader timeProperties(timeService_, localeFormatter_);
-    ValuePropertyReader valueProperties(valueRuntime_);
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
-    bool propertyShown = false;
-    for (size_t index = 0; index < sensorManager_.sensorCount() && !propertyShown; ++index) {
-        SensorRuntimeInfo runtime;
-        if (!sensorManager_.runtimeInfo(index, runtime)) continue;
-        for (uint8_t value = 1; value <= SupportedMeasurementTypeCount; ++value) {
-            const PropertyReference reference(PropertyComponentKind::Sensor, runtime.id,
-                measurementTypeStableId(static_cast<MeasurementType>(value)));
-            PropertyDescription description;
-            if (!properties.describe(reference, description)) continue;
-            content += buildPropertyDiagnosticHtml(properties, reference, millis());
-            propertyShown = true;
-            break;
-        }
-    }
-    if (!propertyShown) {
-        content += "<section class='card' id='property-diagnostic'><h2>Property diagnostic</h2>"
-            "<p>No active Sensor provides a state property.</p></section>";
-    }
-    bool actuatorPropertyShown = false;
-    for (size_t index = 0; index < actuatorRuntime_.runtimeCount(); ++index) {
-        ActuatorRuntimeInfo runtime;
-        if (!actuatorRuntime_.runtimeInfo(index, runtime)) continue;
-        const PropertyReference reference(PropertyComponentKind::Actuator, runtime.id, "state");
-        PropertyDescription description;
-        if (!properties.describe(reference, description)) continue;
-        content += buildPropertyDiagnosticHtml(properties, reference, millis());
-        actuatorPropertyShown = true;
-        break;
-    }
-    if (!actuatorPropertyShown) {
-        content += "<section class='card'><h2>Actuator Property diagnostic</h2>"
-            "<p>No available On/Off Actuator.</p></section>";
-    }
-    bool controllerPropertyShown = false;
-    for (size_t index = 0; index < controllerRuntime_.runtimeCount(); ++index) {
-        ControllerRuntimeInfo runtime;
-        if (!controllerRuntime_.runtimeInfo(index, runtime)) continue;
-        const PropertyReference reference(PropertyComponentKind::Controller, runtime.id, "reason");
-        PropertyDescription description;
-        if (!properties.describe(reference, description)) continue;
-        content += buildPropertyDiagnosticHtml(properties, reference, millis());
-        controllerPropertyShown = true;
-        break;
-    }
-    if (!controllerPropertyShown) {
-        content += "<section class='card'><h2>Controller Property diagnostic</h2>"
-            "<p>No Threshold Controller available.</p></section>";
-    }
     sendPage("Measurements", "/measurements", content);
 }
 
@@ -1530,7 +1478,7 @@ void WebService::handleDisplay() {
                     : description.valueKind == PropertyValueKind::UnsignedInteger ? "%u" : "%s";
             }
         }
-        // One shared datalist avoids duplicating the whole inventory 24 times.
+        // One shared source inventory avoids duplicating it 24 times in the response.
         previewOptions += buildPropertySourceOption(reference, description, name, String());
     };
     for (size_t index = 0; index < sensorManager_.sensorCount(); ++index) {
