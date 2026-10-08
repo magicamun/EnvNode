@@ -33,7 +33,7 @@ Final checks on 2026-09-28: ERC has zero findings; PCB DRC with zone refill has 
 
 ## Revision 0.6
 
-Revision 0.6 restructures the mainboard around reusable hierarchical design blocks. The 5 V input protection, regulator, and 3.3 V source ORing are provided by the castellated `ORing Power` module (`U2`) instead of being assembled directly on the mainboard. The ESP32 core contains the `24LC32` mainboard-identity EEPROM (`U1`) on `I2C0` at address `0x50` and its local 100 nF decoupling capacitor (`C1`).
+Revision 0.6 restructures the mainboard around reusable hierarchical design blocks. The 5 V input protection, regulator, and 3.3 V source ORing are provided by the castellated `ORing Power` module (`U2`) instead of being assembled directly on the mainboard. The ESP32 core contains the `24LC32` mainboard-identity EEPROM (`U1`) on `I2C0` at address `0x50` on the `+3V3_SYS` supply. C1 (100 nF) is connected between `+5V` and GND and decouples the 5 V supply. The identity EEPROM has no separate local decoupling capacitor; this arrangement is identical on EnvNode Mini and EnvNode Weather.
 
 The two module slots continue to implement the shared EnvNode module interface. Net ties set Slot A `EEPROM_A0` to GND and Slot B `EEPROM_A0` to `+3V3_SYS`, assigning the optional module EEPROM addresses `0x52` and `0x53`. Each I²C bus is available on two top-entry, four-pin JST-SH connectors. Individually configurable 4.7 kΩ pull-ups remain normally disconnected through solder jumpers.
 

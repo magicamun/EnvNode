@@ -1,0 +1,61 @@
+/* Shared shop/PDF palette: docs/HardwareDocumentationStyle.md. */
+:root, [data-md-color-scheme="default"] {
+  --envnode-gold: #9E6C00;
+  --envnode-accent: #CC9319;
+  --envnode-cover: #CA8E01;
+  --envnode-text: #262626;
+  --envnode-secondary: #595959;
+  --envnode-rule: #D6D6D6;
+  --envnode-neutral: #F5F5F5;
+  --envnode-info: #FAF4E6;
+  --envnode-white: #FFFFFF;
+  --md-primary-fg-color: var(--envnode-gold);
+  --md-primary-fg-color--light: var(--envnode-accent);
+  --md-primary-fg-color--dark: var(--envnode-gold);
+  --md-primary-bg-color: var(--envnode-white);
+  --md-primary-bg-color--light: var(--envnode-white);
+  --md-accent-fg-color: var(--envnode-gold);
+  --md-accent-fg-color--transparent: #FAF4E6;
+  --md-default-fg-color: var(--envnode-text);
+  --md-default-fg-color--light: var(--envnode-secondary);
+  --md-default-fg-color--lighter: var(--envnode-rule);
+  --md-default-fg-color--lightest: var(--envnode-neutral);
+  --md-default-bg-color: var(--envnode-white);
+  --md-typeset-color: var(--envnode-text);
+  --md-typeset-a-color: var(--envnode-gold);
+  --md-typeset-table-color: var(--envnode-rule);
+  --md-code-fg-color: var(--envnode-text);
+  --md-code-bg-color: var(--envnode-neutral);
+  --md-footer-bg-color: var(--envnode-neutral);
+  --md-footer-bg-color--dark: var(--envnode-neutral);
+  --md-footer-fg-color: var(--envnode-text);
+  --md-footer-fg-color--light: var(--envnode-secondary);
+  --md-footer-fg-color--lighter: var(--envnode-secondary);
+}
+.md-typeset :is(h1, h2, h3, h4, h5, h6) { color: var(--envnode-gold); }
+.md-header { border-bottom: 3px solid var(--envnode-cover); }
+.md-typeset table:not([class]) { border-color: var(--envnode-rule); }
+.md-typeset table:not([class]) th {
+  background: var(--envnode-info);
+  color: var(--envnode-gold);
+  border-bottom: 2px solid var(--envnode-accent);
+}
+.md-typeset table:not([class]) td { border-top-color: var(--envnode-rule); }
+.md-typeset table:not([class]) tbody tr:nth-child(even) { background: var(--envnode-neutral); }
+.md-typeset table:not([class]) tbody tr:hover { background: var(--envnode-info); }
+.md-typeset :is(.admonition.note, details.note, .admonition.info, details.info) {
+  border-color: var(--envnode-accent);
+}
+.md-typeset :is(.note, .info) > :is(.admonition-title, summary) {
+  background: var(--envnode-info);
+}
+.md-typeset :is(.note, .info) > :is(.admonition-title, summary)::before {
+  background-color: var(--envnode-gold);
+}
+.md-typeset .md-button { color: var(--envnode-gold); border-color: var(--envnode-gold); }
+.md-typeset .md-button:is(:hover, :focus) {
+  background: var(--envnode-gold);
+  border-color: var(--envnode-gold);
+  color: var(--envnode-white);
+}
+/* Preserve semantic warning/danger colors, matching the PDF style contract. */

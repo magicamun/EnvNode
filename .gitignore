@@ -32,3 +32,7 @@ hardware/Orders/*
 __pycache__/
 
 hardware/~$*.xls*
+
+# Local documentation environment and generated website
+.venv-docs/
+/site/

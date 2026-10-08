@@ -48,8 +48,9 @@ No PDF is generated for these boards without selecting it with the user.
 - RainDetector connector mating height, real heater behavior, coating and via
   water exclusion still need qualification. The Controller CSV was regenerated
   because it still listed the previous 1x4 sockets.
-- Weatherstation C1 is connected to +5V, not the EEPROM's 3.3-V rail; local
-  EEPROM decoupling requires electrical evaluation before production release.
+- On both EnvNode Mini and Weatherstation, C1 (100 nF) decouples +5V to GND.
+  The identity EEPROM is supplied from +3V3_SYS without a separate local
+  decoupling capacitor. This is the same arrangement on both mainboards.
 - SCT013Head REVIEW.md lists an R1 article-list mismatch and reference/DRC
   findings; inspect the current sources before carrying any historical finding
   into a new guide.

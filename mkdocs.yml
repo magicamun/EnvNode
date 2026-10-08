@@ -1,0 +1,42 @@
+site_name: EnvNode Dokumentation
+site_description: Modulare Hardware und Firmware für zuverlässige Umweltmessungen
+repo_url: https://github.com/magicamun/EnvNode
+repo_name: magicamun/EnvNode
+docs_dir: docs/site
+site_dir: site
+strict: true
+theme:
+  name: material
+  language: de
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+  palette:
+    scheme: default
+plugins:
+  - search:
+      lang: de
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - tables
+extra_css:
+  - assets/stylesheets/envnode.css
+hooks:
+  - tools/docs_assets.py
+nav:
+  - Start: index.md
+  - Grundlagen: concepts/index.md
+  - Mainboards:
+      - Übersicht: mainboards/index.md
+      - EnvNode Mini: mainboards/mini/index.md
+      - Weatherstation: mainboards/weatherstation/index.md
+      - ORing Power: mainboards/oring-power/index.md
+  - Module: modules/index.md
+  - I²C-Sensoren: sensors/index.md
+  - Firmware: firmware/index.md
+  - Bausätze und Aufbau: kits/index.md

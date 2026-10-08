@@ -24,7 +24,7 @@ Final checks on 2026-09-28: schematic ERC has zero findings. PCB DRC with zone r
 
 ## Revision 0.1
 
-Revision 0.1 uses reusable hierarchical design blocks for the board geometry, ESP32 core, power carrier, and module slot. The 5 V input protection, regulator, and 3.3 V source ORing are provided by the castellated `ORing Power` module (`U1`). The ESP32 core contains the `24LC32` mainboard-identity EEPROM (`U2`) on `I2C0` at address `0x50`. C1 is a 100 nF capacitor between `+5V` and GND in both the current schematic and PCB; the earlier documentation incorrectly described it as local 3.3 V EEPROM decoupling. Local U2 decoupling therefore remains an electrical review item before production release.
+Revision 0.1 uses reusable hierarchical design blocks for the board geometry, ESP32 core, power carrier, and module slot. The 5 V input protection, regulator, and 3.3 V source ORing are provided by the castellated `ORing Power` module (`U1`). The ESP32 core contains the `24LC32` mainboard-identity EEPROM (`U2`) on `I2C0` at address `0x50`. C1 (100 nF) is connected between `+5V` and GND and decouples the 5 V supply. The identity EEPROM is supplied from `+3V3_SYS` and has no separate local decoupling capacitor; this arrangement is identical on EnvNode Mini and EnvNode Weather.
 
 The module connector `J1` implements the shared EnvNode module interface. Connector pin 3 is tied to GND, assigning an optional module EEPROM in Slot A to address `0x52`.
 
