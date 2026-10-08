@@ -1,3 +1,4 @@
+#include "ControllerTargetIdentity.h"
 #include "WebService.h"
 #include "HtmlEscaping.h"
 #include "LogWebView.h"
@@ -1764,15 +1765,23 @@ void WebService::handleControllerEdit() {
     String blinkTargetOptions;
     String thresholdTargetOptions;
     bool moduleTargetListed = false;
+    const auto targetClaimed = [&](ActuatorId id, const ModuleActuatorReference* reference) {
+        ControllerSlotConfiguration target;
+        target.implementation = ControllerImplementation::Blink;
+        target.implementationConfiguration.blink.targetActuatorId = id;
+        if (reference) target.moduleTarget = *reference;
+        for (const auto& other : configuration.controllerSlots) {
+            if (other.enabled && other.slotId != slot.slotId && controllerTargetsSameActuator(
+                target, other, configuration.actuatorSlots, &actuatorRuntime_)) return true;
+        }
+        return false;
+    };
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
         const ActuatorSlotConfiguration& actuator = configuration.actuatorSlots[index];
-        if (isControllerTargetClaimedByOtherEnabledSlot(
-                configuration.controllerSlots,
-                MaxControllerSlotCount,
-                slot.slotId,
-                actuator.slotId)) {
-            continue;
-        }
+        ModuleActuatorReference moduleAlias;
+        // This slot is represented once below, with its module identity and user name.
+        if (actuatorRuntime_.moduleReference(actuator.slotId, moduleAlias)
+            || targetClaimed(actuator.slotId, nullptr)) continue;
         const ActuatorImplementationMetadata* metadata =
             ActuatorImplementationRegistry::find(actuator.implementation);
         if (metadata == nullptr
@@ -1808,19 +1817,26 @@ void WebService::handleControllerEdit() {
             || !hasActuatorCapability(runtime.capabilities, ActuatorCapability::OnOff)) {
             continue;
         }
-        const String value = "m:" + String(runtime.id);
-        const String label = "Module " + String(moduleSlotName(runtime.moduleSlot))
-            + " · " + String(runtime.name);
+        if (targetClaimed(runtime.id, &reference)) continue;
+        const auto& configured = configuration.actuatorSlots[runtime.id - 1];
+        const bool namedSlot = configured.implementation != ActuatorImplementation::None;
+        ActuatorId savedTarget = InvalidActuatorId;
+        configuredControllerTargetActuatorId(slot, savedTarget);
+        const bool savedNumeric = !validModuleActuatorReference(slot.moduleTarget) && savedTarget == runtime.id;
+        // Preserve an existing numeric reference; new choices use stable module identity.
+        const String value = savedNumeric ? String(runtime.id) : "m:" + String(runtime.id);
+        const String label = (namedSlot ? configured.name : String(runtime.name))
+            + " · Module " + String(moduleSlotName(runtime.moduleSlot)) + " · " + String(runtime.descriptorDeviceId);
         blinkTargetOptions += "<option value='" + value + "'";
         if (sameModuleActuatorReference(
-                slot.moduleTarget, reference)) {
+                slot.moduleTarget, reference) || savedNumeric) {
             blinkTargetOptions += " selected";
             moduleTargetListed = true;
         }
         blinkTargetOptions += ">" + escapeHtml(label) + "</option>";
         thresholdTargetOptions += "<option value='" + value + "'";
         if (sameModuleActuatorReference(
-                slot.moduleTarget, reference)) {
+                slot.moduleTarget, reference) || savedNumeric) {
             thresholdTargetOptions += " selected";
             moduleTargetListed = true;
         }

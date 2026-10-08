@@ -5,9 +5,11 @@
 #include "IConfigurationService.h"
 
 namespace EnvNode {
+class IOnOffActuatorResolver;
 
 class ConfigurationService : public IConfigurationService {
 public:
+    void setActuatorResolver(const IOnOffActuatorResolver* resolver) { actuatorResolver_ = resolver; }
     void loadConfiguration() override;
     const Configuration& getConfiguration() const override;
     Locale getLocale() const override;
@@ -82,6 +84,7 @@ private:
         const ActuatorSlotConfiguration* actuatorSlots,
         const DisplayConfiguration* display = nullptr) const;
 
+    const IOnOffActuatorResolver* actuatorResolver_ = nullptr;
     Configuration configuration_;
     Preferences preferences_;
     bool preferencesInitialized_ = false;

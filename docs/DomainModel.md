@@ -391,3 +391,14 @@ router adds a third optional handler without replacing Actuator/Controller route
 Application schedules the Value adapters after MQTT processing and before the
 Controller loop. There is no MQTT-to-Display dependency. See MQTT.md for topics,
 retention semantics and cleanup limitations.
+
+### Controller target aliases
+
+Controller targets are compared by module instance/device identity whenever a
+saved actuator slot or the active actuator resolver supplies that identity.
+Otherwise numeric slot identity applies. This common comparison is used for
+configuration validation, runtime composition and Web target availability.
+A module relay that also has an actuator slot appears once, with the configured
+user name and module slot/device. Existing numeric targets retain their numeric
+reference when edited; existing module references remain stable. No NVS migration
+is needed. Newly selected module outputs use their stable module reference.

@@ -10,6 +10,7 @@ class IOnOffActuatorResolver {
 public:
     virtual ~IOnOffActuatorResolver() = default;
     virtual IOnOffActuator* onOffActuator(ActuatorId id) = 0;
+    virtual bool moduleReference(ActuatorId, ModuleActuatorReference&) const { return false; }
     virtual IOnOffActuator* onOffActuator(
         const ModuleActuatorReference& reference) {
         (void)reference;

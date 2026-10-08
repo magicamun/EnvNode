@@ -1,3 +1,4 @@
+#include "ControllerTargetIdentity.h"
 #include "ControllerRuntime.h"
 
 #include <climits>
@@ -189,18 +190,12 @@ bool ControllerRuntime::validateComposition(
             return false;
         }
     }
-    // Every enabled output controller has exclusive ownership of its target.
+    // Resolve slot and module aliases before granting exclusive ownership.
     for (size_t i = 0; i < MaxControllerSlotCount; ++i) {
         if (!slots[i].enabled) continue;
-        ActuatorId a;
-        if (!configuredControllerTargetActuatorId(slots[i], a)) continue;
         for (size_t j = 0; j < i; ++j) {
-            if (!slots[j].enabled) continue;
-            ActuatorId b;
-            if (!configuredControllerTargetActuatorId(slots[j], b)) continue;
-            const auto* am = configuredControllerModuleTarget(slots[i]);
-            const auto* bm = configuredControllerModuleTarget(slots[j]);
-            if ((am && bm && sameModuleActuatorReference(*am, *bm)) || (!am && !bm && a == b)) return false;
+            if (slots[j].enabled && controllerTargetsSameActuator(slots[i], slots[j],
+                nullptr, &activeFactory_->actuatorResolver())) return false;
         }
     }
     return true;

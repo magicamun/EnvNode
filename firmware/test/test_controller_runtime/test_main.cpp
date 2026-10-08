@@ -59,6 +59,11 @@ public:
 
 class TestResolver : public IOnOffActuatorResolver {
 public:
+    ModuleActuatorReference alias;
+    bool moduleReference(ActuatorId id, ModuleActuatorReference& out) const override {
+        if (id != 1 || !validModuleActuatorReference(alias)) return false;
+        out = alias; return true;
+    }
     IOnOffActuator* targets[MaxActuatorSlotCount] = {};
     IOnOffActuator* onOffActuator(ActuatorId id) override {
         return isValidActuatorId(id) && id <= MaxActuatorSlotCount
@@ -511,8 +516,25 @@ void test_mqtt_state_publisher_observes_blink_driven_changes() {
     TEST_ASSERT_TRUE(mqtt.messages[1].retained);
 }
 
+void test_runtime_rejects_module_slot_alias_without_stopping_current_controller() {
+    TestLogger logger; TestClock clock; TestActuator actuator; TestResolver resolver;
+    resolver.targets[0] = &actuator;
+    for (auto& byte : resolver.alias.moduleInstanceFingerprint) byte = 0x5a;
+    setModuleActuatorDeviceId(resolver.alias, "relay.1");
+    MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements, resolver, clock, logger);
+    ControllerRuntime runtime(factory, logger);
+    ControllerSlotConfiguration slots[MaxControllerSlotCount]; initializeControllerSlots(slots);
+    configureBlinkSlot(slots[0], 1);
+    TEST_ASSERT_TRUE(runtime.initialize(slots));
+    const unsigned writes = actuator.setCount;
+    configureBlinkSlot(slots[1], 0); slots[1].moduleTarget = resolver.alias;
+    TEST_ASSERT_FALSE(runtime.rebuild(slots));
+    TEST_ASSERT_EQUAL_UINT32(1, runtime.runtimeCount());
+    TEST_ASSERT_EQUAL_UINT32(writes, actuator.setCount);
+}
 int main(int, char**) {
-    UNITY_BEGIN();
+    UNITY_BEGIN(); RUN_TEST(test_runtime_rejects_module_slot_alias_without_stopping_current_controller);
     RUN_TEST(test_blink_begin_and_deadline_transitions_are_non_blocking);
     RUN_TEST(test_blink_deadline_is_wrap_safe);
     RUN_TEST(test_unavailable_target_restarts_fresh_cycle_when_available);

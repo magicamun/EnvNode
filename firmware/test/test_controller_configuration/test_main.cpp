@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "ConfigurationService.h"
+#include "ControllerTargetIdentity.h"
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
 #include "SelectorWebView.h"
@@ -735,8 +736,45 @@ void test_selector_persistence_dependencies_and_exclusive_target() {
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Unknown input holds"));
 }
 
+void test_slot_and_module_alias_cannot_claim_same_output() {
+    Fixture fixture;
+    auto actuator = fixture.enabledActuator();
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(actuator));
+    struct Resolver : IOnOffActuatorResolver {
+        ModuleActuatorReference reference;
+        IOnOffActuator* onOffActuator(ActuatorId) override { return nullptr; }
+        bool moduleReference(ActuatorId id, ModuleActuatorReference& out) const override {
+            if (id != 1) return false;
+            out = reference; return true;
+        }
+    } resolver;
+    memset(resolver.reference.moduleInstanceFingerprint, 0x5a, 8);
+    setModuleActuatorDeviceId(resolver.reference, "relay.1");
+    fixture.service.setActuatorResolver(&resolver);
+    auto first = fixture.blink(1);
+    auto second = fixture.blink(2);
+    second.moduleTarget = resolver.reference;
+    second.implementationConfiguration.blink.targetActuatorId = InvalidActuatorId;
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(first));
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(second));
+    first.enabled = false;
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(first));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(second));
+    first.enabled = true;
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(first));
+    // Saved module-backed slots remain comparable even without runtime hardware.
+    ActuatorSlotConfiguration slots[MaxActuatorSlotCount]; slots[0] = actuator;
+    slots[0].moduleTarget = resolver.reference;
+    TEST_ASSERT_TRUE(controllerTargetsSameActuator(first, second, slots));
+    setModuleActuatorDeviceId(second.moduleTarget, "relay.2");
+    TEST_ASSERT_FALSE(controllerTargetsSameActuator(first, second, slots));
+    second.implementation = ControllerImplementation::Threshold;
+    second.implementationConfiguration.threshold.decisionOnly = true;
+    TEST_ASSERT_FALSE(controllerTargetsSameActuator(first, second, slots));
+}
+
 int main(int, char**) {
-    UNITY_BEGIN();
+    UNITY_BEGIN(); RUN_TEST(test_slot_and_module_alias_cannot_claim_same_output);
     RUN_TEST(test_selector_persistence_dependencies_and_exclusive_target);
     RUN_TEST(test_controller_registry_uses_stable_ids_and_on_off_requirement);
     RUN_TEST(test_threshold_registry_uses_stable_id_and_on_off_requirement);

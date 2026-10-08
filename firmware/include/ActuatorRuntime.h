@@ -52,7 +52,7 @@ public:
     size_t runtimeCount() const;
     size_t availableCount() const;
     bool runtimeInfo(size_t index, ActuatorRuntimeInfo& info) const;
-    bool moduleReference(ActuatorId id, ModuleActuatorReference& reference) const;
+    bool moduleReference(ActuatorId id, ModuleActuatorReference& reference) const override;
     IOnOffActuator* onOffActuator(ActuatorId id) override;
     IOnOffActuator* onOffActuator(
         const ModuleActuatorReference& reference) override;

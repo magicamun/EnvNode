@@ -134,6 +134,7 @@ static Application app(logger, configurationService, wifiService, webService, mq
 static bool normalRuntimeStarted = false;
 
 void setup() {
+    configurationService.setActuatorResolver(&actuatorRuntime);
     logger.begin(115200);
     delay(500);
     i2cBusManager.beginIdentityBus();

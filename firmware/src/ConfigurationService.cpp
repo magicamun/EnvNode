@@ -1,3 +1,4 @@
+#include "ControllerTargetIdentity.h"
 #include "ConfigurationService.h"
 #include <Arduino.h>
 #include <Preferences.h>
@@ -1059,35 +1060,12 @@ bool ConfigurationService::validateControllerSlots(
         if (!source.enabled || source.implementation != ControllerImplementation::Threshold
             || !source.implementationConfiguration.threshold.decisionOnly) return false;
     }
-    bool claimedTargets[MaxActuatorSlotCount + 1] = {};
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
-        const ControllerSlotConfiguration& slot = controllerSlots[index];
-        if (!slot.enabled || slot.implementation == ControllerImplementation::None
-            || (slot.implementation == ControllerImplementation::Threshold
-                && slot.implementationConfiguration.threshold.decisionOnly)) {
-            continue;
+        if (!controllerSlots[index].enabled) continue;
+        for (size_t other = 0; other < index; ++other) {
+            if (controllerSlots[other].enabled && controllerTargetsSameActuator(
+                controllerSlots[index], controllerSlots[other], actuatorSlots, actuatorResolver_)) return false;
         }
-        const ModuleActuatorReference* moduleTarget =
-            configuredControllerModuleTarget(slot);
-        if (moduleTarget != nullptr) {
-            for (size_t previous = 0; previous < index; ++previous) {
-                const ControllerSlotConfiguration& other = controllerSlots[previous];
-                if (!other.enabled) continue;
-                const ModuleActuatorReference* otherTarget =
-                    configuredControllerModuleTarget(other);
-                if (otherTarget != nullptr
-                    && sameModuleActuatorReference(*moduleTarget, *otherTarget)) return false;
-            }
-            continue;
-        }
-        ActuatorId targetActuatorId = InvalidActuatorId;
-        if (!configuredControllerTargetActuatorId(slot, targetActuatorId)
-            || !isValidActuatorId(targetActuatorId)
-            || targetActuatorId > MaxActuatorSlotCount
-            || claimedTargets[targetActuatorId]) {
-            return false;
-        }
-        claimedTargets[targetActuatorId] = true;
     }
     return true;
 }
