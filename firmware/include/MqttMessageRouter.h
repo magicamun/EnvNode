@@ -9,7 +9,7 @@ public:
     MqttMessageRouter(
         IMqttService& mqttService,
         IMqttMessageHandler& first,
-        IMqttMessageHandler& second);
+        IMqttMessageHandler& second, IMqttMessageHandler* third = nullptr);
 
     void begin();
     void handleMqttMessage(
@@ -21,6 +21,7 @@ private:
     IMqttService& mqttService_;
     IMqttMessageHandler& first_;
     IMqttMessageHandler& second_;
+    IMqttMessageHandler* third_;
 };
 
 } // namespace EnvNode

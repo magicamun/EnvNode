@@ -106,8 +106,10 @@ static RuntimeManager runtimeManager(
     logger, &sensorRuntime, &actuatorRuntime, &controllerRuntime);
 static ControllerMqttAdapter controllerMqttAdapter(
     logger, configurationService, mqttService, controllerRuntime, runtimeManager);
+static ValueMqttAdapter valueMqttAdapter(logger, configurationService, mqttService, valueRuntime);
+static ValueStatePublisher valueStatePublisher(logger, configurationService, mqttService, valueRuntime);
 static MqttMessageRouter mqttMessageRouter(
-    mqttService, actuatorMqttAdapter, controllerMqttAdapter);
+    mqttService, actuatorMqttAdapter, controllerMqttAdapter, &valueMqttAdapter);
 static ControllerStatePublisher controllerStatePublisher(
     logger, configurationService, mqttService, controllerRuntime);
 static MqttDescriptionPublisher mqttDescriptionPublisher(
@@ -126,7 +128,7 @@ static DisplayService displayService(configurationService.getConfiguration().dis
     displayProperties, oled, monotonicClock, logger);
 static OTAService otaService(logger, runtimeManager);
 static WebService webService(logger, configurationService, valueRuntime, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleDescriptorProvisioningService);
-static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher, displayService);
+static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher, displayService, valueMqttAdapter, valueStatePublisher);
 static bool normalRuntimeStarted = false;
 
 void setup() {

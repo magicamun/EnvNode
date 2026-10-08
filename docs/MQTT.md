@@ -10,7 +10,7 @@ Topics use:
 envnode/<topic-safe-device-name>/...
 ```
 
-`MqttService` owns broker transport. Specialized adapters translate between MQTT and Sensor, Actuator or Controller interfaces.
+`MqttService` owns broker transport. Specialized adapters translate between MQTT and Sensor, Actuator, Controller or Value interfaces.
 
 ## Sensor Measurements
 
@@ -161,3 +161,54 @@ Controller status describes behavior and decision. Actuator status describes act
 ## Home Assistant
 
 Sensor Home Assistant discovery is implemented. Controller and generic Actuator Home Assistant discovery are not implemented. Generic Actuator and Controller self-description uses the retained schema-1 topics documented above and is independent of Home Assistant discovery.
+
+## Configurable Values
+
+Values are defined in Web. MQTT changes only their current selection; it does not
+create/delete definitions or configure Selector wiring. Display configuration
+remains Web-only.
+
+| Topic | Payload | Retained |
+| --- | --- | --- |
+| `envnode/<device>/value/<ValueId>/cmd/state` | Exact option code, e.g. `auto`, `cistern`, `mains` | Send commands without retain |
+| `envnode/<device>/value/<ValueId>/status/state` | Current option code | Yes |
+| `envnode/<device>/value/<ValueId>/description` | JSON definition and topic links | Yes |
+
+`<device>` is the topic-safe configured device name, as for existing MQTT topics;
+it is not necessarily the network hostname. IDs are stable positive Value IDs.
+Commands contain 1..32 ASCII bytes (lowercase letters, digits, underscore), with no
+quotes, whitespace, newline or embedded NUL. Codes are case-sensitive; display
+labels are not commands. Unknown IDs/options and storage failures are rejected
+and logged without changing current state. The retained status is authoritative
+state, not a per-command acknowledgement.
+
+Both Web and MQTT use ValueRuntime::set. DefaultOnRestart changes remain in RAM;
+RestoreLastValue changes must be persisted successfully before changing live state.
+A Selector observes the new mode in the normal controller loop. Status publishing
+observes runtime independently of command source, so Web changes are also reported.
+After reconnect, the adapter resubscribes and the publisher resends current states
+and definitions. Subscription/publication failures are retried. A retained command
+would be replayed by the broker after subscription and treated as a new command;
+therefore publish commands without retain.
+
+Example description (topic device `RainControl`, Value 1):
+
+```json
+{"schema_version":1,"id":1,"name":"Wasserquelle","value_type":"enum","default":"auto","restart_policy":"default","command_topic":"envnode/RainControl/value/1/cmd/state","state_topic":"envnode/RainControl/value/1/status/state","options":[{"code":"auto","label":"Automatik"},{"code":"cistern","label":"Zisterne"},{"code":"mains","label":"Hauswasser"}]}
+```
+
+The alternative restart policy is `restore_last`. Definitions are republished after
+successful definition edits, and on reconnect. Deleted Values and changed device
+names clear their previously published state/description with empty retained
+messages, including retry after a failed cleanup. Tracking is bounded to eight
+Values and kept in RAM: broker records from deletions/renames followed by a reboot
+before cleanup may require manual removal. No Value-specific Home Assistant
+discovery or configuration commands are added in this step.
+
+Example commands (replace broker and topic device):
+
+```sh
+mosquitto_sub -h BROKER -t 'envnode/RainControl/value/+/status/state' -t 'envnode/RainControl/value/+/description' -v
+mosquitto_pub -h BROKER -t 'envnode/RainControl/value/1/cmd/state' -m cistern
+mosquitto_pub -h BROKER -t 'envnode/RainControl/value/1/cmd/state' -m auto
+```

@@ -4,7 +4,7 @@
 
 namespace EnvNode {
 
-Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher, MqttDescriptionPublisher& descriptionPublisher, DisplayService& displayService)
+Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher, MqttDescriptionPublisher& descriptionPublisher, DisplayService& displayService, ValueMqttAdapter& valueMqttAdapter, ValueStatePublisher& valueStatePublisher)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService)
@@ -22,7 +22,8 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
     , controllerMqttAdapter_(controllerMqttAdapter)
     , controllerStatePublisher_(controllerStatePublisher)
     , descriptionPublisher_(descriptionPublisher)
-    , displayService_(displayService) {
+    , displayService_(displayService)
+    , valueMqttAdapter_(valueMqttAdapter), valueStatePublisher_(valueStatePublisher) {
 }
 
 void Application::setup(bool configurationAlreadyLoaded) {
@@ -65,6 +66,8 @@ void Application::loop() {
     mqttService_.loop();
     actuatorMqttAdapter_.loop();
     controllerMqttAdapter_.loop();
+    valueMqttAdapter_.loop();
+    valueStatePublisher_.loop();
     controllerRuntime_.loop();
     actuatorStatePublisher_.loop();
     controllerStatePublisher_.loop();

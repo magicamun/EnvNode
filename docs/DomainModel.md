@@ -267,9 +267,9 @@ Only successful value changes increment the session revision. Calling begin
 starts a new session and resets revision to zero. Definitions are copied and
 validated before use; invalid definitions cannot accept writes.
 
-The model and NVS storage are implemented. Runtime composition and Web commands are implemented. MQTT commands for Values remain a subsequent integration step. The restart policy specifies behavior; EnumValue does not
-perform storage I/O. A later persistent command service must save successfully
-before acknowledging a persistent change. No installation-specific mode is
+The model and NVS storage are implemented. Runtime composition and Web commands are implemented. MQTT commands and retained state/description publication are implemented for Values. The restart policy specifies behavior; EnumValue does not
+perform storage I/O. ValueRuntime saves successfully before acknowledging a
+persistent change. No installation-specific mode is
 created automatically and no existing actuator ownership changes.
 
 Example definition (application configuration, not a built-in water mode):
@@ -300,8 +300,7 @@ leave the in-memory configuration untouched. Unknown IDs/codes and checkpoints
 for DefaultOnRestart are rejected. Re-saving the same checkpoint avoids a write.
 Missing or invalid records load as an empty collection; existing device settings
 remain intact. Factory reset removes Values together with other configuration.
-The storage API is not a live command API: ValueRuntime provides the live command API used by Web; MQTT wiring remains
-a subsequent step. No Value is created automatically on upgrade.
+The storage API is not a live command API: ValueRuntime provides the shared live command API used by Web and MQTT. No Value is created automatically on upgrade.
 
 ### Values Web page and runtime
 
@@ -317,7 +316,7 @@ load. Transient commands update RAM only. RestoreLastValue commands persist befo
 updating live state; failed writes preserve the old state. Definition edits apply
 immediately and restart only the edited Value from its compatible saved code or
 default; unrelated Values retain their live state. Invalid submissions retain the
-entered definition for correction. Values supply Selector mode inputs; they do not directly command actuators or expose MQTT commands. Their enum state is
+entered definition for correction. Values supply Selector mode inputs and accept Web/MQTT commands; they do not directly command actuators. Their enum state is
 available as `value/ID/state` to both display preview and physical display.
 
 Manual acceptance: open Values, choose Water source example, save, select Zisterne
@@ -374,9 +373,21 @@ logical command state, not mechanical valve feedback. Used mode options and sour
 Thresholds cannot be removed/disabled in saved configuration while an enabled
 Selector references them. Runtime STOP remains available for testing/operation.
 
-Selector status is included in existing Controller MQTT status publication; Value
-MQTT commands and chains of Selectors are not part of this step. Controller runtime
+Selector status is included in existing Controller MQTT status publication.
+Chains of Selectors are not supported; Value MQTT commands use the shared runtime.
+Controller runtime
 entries and staging are bounded, checked heap allocations, reducing ESP32 static
 DRAM and apply-call stack pressure. A staging allocation failure leaves the active
 composition intact. Runtime diagnostics use a compact mapping signature solely
 for the pending-apply indicator, never for control decisions.
+
+### Value MQTT integration
+
+ValueMqttAdapter validates transport input and delegates to ValueRuntime; it owns
+subscription retry/reconnect behavior. ValueStatePublisher independently observes
+live Values and publishes retained codes and enum descriptions. Definition revision
+changes trigger metadata updates without rebuilding JSON on every loop. The MQTT
+router adds a third optional handler without replacing Actuator/Controller routes.
+Application schedules the Value adapters after MQTT processing and before the
+Controller loop. There is no MQTT-to-Display dependency. See MQTT.md for topics,
+retention semantics and cleanup limitations.

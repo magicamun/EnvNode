@@ -13,6 +13,7 @@ bool ValueRuntime::valueCode(ValueId id, String& code) const {
     return true;
 }
 void ValueRuntime::begin() {
+    ++compositionRevision_;
     values_.clear();
     for (const auto& stored : configuration_.getConfiguration().values) {
         EnumValue value(stored.definition);
@@ -47,6 +48,7 @@ bool ValueRuntime::saveDefinition(const EnumValueConfiguration& definition, bool
         definitions.push_back(stored.definition.id == definition.id ? definition : stored.definition);
     if (create) definitions.push_back(definition);
     if (!configuration_.setEnumValueDefinitions(definitions)) return false;
+    ++compositionRevision_;
     for (const auto& stored : configuration_.getConfiguration().values) {
         if (stored.definition.id != definition.id) continue;
         EnumValue replacement(stored.definition);
@@ -65,6 +67,7 @@ bool ValueRuntime::remove(ValueId id) {
     for (const auto& stored : configuration_.getConfiguration().values)
         if (stored.definition.id != id) definitions.push_back(stored.definition);
     if (!configuration_.setEnumValueDefinitions(definitions)) return false;
+    ++compositionRevision_;
     for (auto it = values_.begin(); it != values_.end(); ++it)
         if (it->configuration().id == id) { values_.erase(it); break; }
     return true;
