@@ -4,8 +4,10 @@
 #include "PropertyWebView.h"
 #include "PropertyResolver.h"
 #include "TimePropertyReader.h"
+#include "ValuePropertyReader.h"
 #include "PropertyPreviewWebView.h"
 #include "WebNavigation.h"
+#include "ValueWebView.h"
 #include "MqttTopic.h"
 #include "BoardProfile.h"
 
@@ -27,6 +29,7 @@
 #include "ActuatorImplementationRegistry.h"
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
+#include "SelectorWebView.h"
 #include "ElapsedTimeFormatter.h"
 #include "DuoRelayDescriptor.h"
 #include "InstanceUuid.h"
@@ -448,7 +451,7 @@ String measurementTimeDisplay(
 
 } // namespace
 
-WebService::WebService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService,
+WebService::WebService(ILogger& logger, IConfigurationService& configurationService, ValueRuntime& valueRuntime, IWiFiService& wifiService,
     IMqttService& mqttService, ITimeService& timeService, LocaleFormatter& localeFormatter,
     SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime,
     ControllerRuntime& controllerRuntime,
@@ -460,7 +463,7 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
     BoardProvisioningService& boardProvisioningService,
     ModuleDiscoveryService& moduleDiscoveryService,
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService)
-    : logger_(logger), configurationService_(configurationService), wifiService_(wifiService),
+    : logger_(logger), configurationService_(configurationService), valueRuntime_(valueRuntime), wifiService_(wifiService),
       mqttService_(mqttService), timeService_(timeService), localeFormatter_(localeFormatter),
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
       controllerRuntime_(controllerRuntime),
@@ -474,6 +477,11 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService) {}
 
 void WebService::begin() {
+    server_.on("/values", HTTP_GET, [this]() { handleValues(); });
+    server_.on("/values/edit", HTTP_GET, [this]() { handleValueEdit(); });
+    server_.on("/values/save", HTTP_POST, [this]() { handleValueSave(); });
+    server_.on("/values/set", HTTP_POST, [this]() { handleValueSet(); });
+    server_.on("/values/delete", HTTP_POST, [this]() { handleValueDelete(); });
     server_.on("/", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
     server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
@@ -1148,10 +1156,18 @@ void WebService::handleControllers() {
                     && runtime.onThreshold == threshold.onThreshold
                     && runtime.offThreshold == threshold.offThreshold
                     && runtime.thresholdDirection == threshold.direction
-                    && runtime.maxMeasurementAgeMs == threshold.maxMeasurementAgeMs;
+                    && runtime.maxMeasurementAgeMs == threshold.maxMeasurementAgeMs
+                    && runtime.decisionOnly == threshold.decisionOnly;
             }
         }
 
+        if (runtimeMatches && hasRuntime && slot.implementation == ControllerImplementation::Selector) {
+            const auto& selector = slot.implementationConfiguration.selector;
+            runtimeMatches = runtime.modeValueId == selector.modeValueId
+                && runtime.automaticControllerId == selector.automaticControllerId
+                && runtime.targetActuatorId == selector.targetActuatorId
+                && runtime.selectorMapping == selectorMappingSignature(selector);
+        }
         c += "<tr><td class='controller-slot'>" + String(slot.slotId)
             + "</td><td class='controller-name'>" + escapeHtml(slot.name) + "<br>";
         c += slot.enabled ? badge("Enabled", "good") : badge("Disabled", "warn");
@@ -1185,19 +1201,26 @@ void WebService::handleControllers() {
             c += "<br>Measurement: ";
             c += escapeHtml(measurementTypeMetadata(
                 threshold.source.measurementType).displayName);
-            if (validModuleActuatorReference(slot.moduleTarget)) {
+            if (threshold.decisionOnly) {
+                c += "<br>Decision only · no actuator";
+            } else if (validModuleActuatorReference(slot.moduleTarget)) {
                 c += "<br>Target: Module actuator · "
                     + (moduleTargetName.isEmpty()
                         ? String("currently unavailable") : escapeHtml(moduleTargetName));
             } else {
                 c += "<br>Target: Actuator " + String(threshold.targetActuatorId);
             }
-            if (!validModuleActuatorReference(slot.moduleTarget)
+            if (!threshold.decisionOnly && !validModuleActuatorReference(slot.moduleTarget)
                 && isValidActuatorId(threshold.targetActuatorId)
                 && threshold.targetActuatorId <= MaxActuatorSlotCount) {
                 c += " · " + escapeHtml(configuration.actuatorSlots[
                     threshold.targetActuatorId - 1].name);
             }
+        } else if (slot.implementation == ControllerImplementation::Selector) {
+            const auto& selector = slot.implementationConfiguration.selector;
+            c += "Mode: Value " + String(selector.modeValueId) + "<br>Auto: Controller "
+                + String(selector.automaticControllerId) + "<br>Target: "
+                + (validModuleActuatorReference(slot.moduleTarget) ? String("Module actuator") : "Actuator " + String(selector.targetActuatorId));
         } else {
             c += "—";
         }
@@ -1213,6 +1236,10 @@ void WebService::handleControllers() {
             c += "<br>Off " + String(thresholdOffComparisonSymbol(threshold.direction))
                 + " " + String(threshold.offThreshold, 4) + " " + unit;
             c += "<br>Max age " + String(threshold.maxMeasurementAgeMs) + " ms";
+        } else if (slot.implementation == ControllerImplementation::Selector) {
+            const auto& selector = slot.implementationConfiguration.selector;
+            c += "Auto: " + escapeHtml(selector.automaticCode) + "<br>On: " + escapeHtml(selector.onCode)
+                + "<br>Off: " + escapeHtml(selector.offCode) + "<br>Unknown: hold";
         } else {
             c += "—";
         }
@@ -1253,10 +1280,16 @@ void WebService::handleControllers() {
                 : runtime.thresholdDecision == ThresholdDecision::On
                     ? badge("On", "good") : badge("Off", "warn");
             c += "<br>";
-            c += runtime.targetAvailable ? "Target available" : "Target unavailable";
+            c += runtime.decisionOnly ? "Decision only" : runtime.targetAvailable ? "Target available" : "Target unavailable";
             if (runtime.outputApplicationPending) {
                 c += "<br>" + badge("Output application pending", "warn");
             }
+            c += "<br>" + String(controllerOperationName(runtime.lastOperationResult));
+        } else if (runtime.implementation == ControllerImplementation::Selector) {
+            c += runtime.thresholdDecision == ThresholdDecision::Unknown ? "Holding output (no decision)"
+                : runtime.thresholdDecision == ThresholdDecision::On ? "Selected: On" : "Selected: Off";
+            c += runtime.targetAvailable ? "<br>Target available" : "<br>Target unavailable";
+            if (runtime.outputApplicationPending) c += "<br>Output application pending";
             c += "<br>" + String(controllerOperationName(runtime.lastOperationResult));
         } else {
             c += "Unsupported runtime implementation";
@@ -1330,7 +1363,8 @@ void WebService::handleDisplaySave() {
             candidate.labels[line][source].falseText = server_.arg("false" + suffix);
         }
     }
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_);
+    ValuePropertyReader valueProperties(valueRuntime_);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, nullptr, &valueProperties);
     if (!readDisplayEnumTranslations(candidate, properties) || !validateDisplayConfiguration(candidate)) {
         sendResult("Display save failed", "/display", "Invalid format, sources or Boolean text. Match placeholders and sources without gaps; labels require a source and allow at most 16 UTF-8 bytes without control characters. Previous settings retained.", false);
         return;
@@ -1394,7 +1428,8 @@ void WebService::handleMeasurements() {
         content += "<section class='card'><p>No active runtime Sensors.</p></section>";
     }
     TimePropertyReader timeProperties(timeService_, localeFormatter_);
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties);
+    ValuePropertyReader valueProperties(valueRuntime_);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
     bool propertyShown = false;
     for (size_t index = 0; index < sensorManager_.sensorCount() && !propertyShown; ++index) {
         SensorRuntimeInfo runtime;
@@ -1451,7 +1486,8 @@ void WebService::handleDisplay() {
     String content;
     const Configuration& configuration = configurationService_.getConfiguration();
     TimePropertyReader timeProperties(timeService_, localeFormatter_);
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties);
+    ValuePropertyReader valueProperties(valueRuntime_);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
     const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");
     PropertyPreviewPage previewPage = configuration.display;
@@ -1518,6 +1554,9 @@ void WebService::handleDisplay() {
             addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "decision"), runtime.name);
             addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "reason"), runtime.name);
         }
+    }
+    for (const auto& value : valueRuntime_.values()) {
+        addPreviewSource(PropertyReference(PropertyComponentKind::Value, value.configuration().id, "state"), value.configuration().name.c_str());
     }
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), "Date (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), "Time (locale)");
@@ -1863,7 +1902,9 @@ void WebService::handleControllerEdit() {
     c += "<label>Measurement<select id='thresholdMeasurement' name='thresholdMeasurement'>"
         + measurementOptions + "</select></label>";
     c += "<p class='help'>Threshold values use the canonical Measurement unit: <span id='thresholdUnit'></span>.</p>";
-    c += "<label>Target On/Off actuator<select name='thresholdTargetActuator'>"
+    c += "<label class='choice'><input id='thresholdDecisionOnly' type='checkbox' name='decisionOnly' value='1'"
+        + String(threshold.decisionOnly ? " checked" : "") + ">Decision only (no actuator control)</label>";
+    c += "<label id='thresholdTargetField'>Target On/Off actuator<select name='thresholdTargetActuator'>"
         + thresholdTargetOptions + "</select></label>";
     c += "<label>Switching direction<select name='thresholdDirection'><option value='on_above'"
         + String(threshold.direction == ThresholdDirection::OnAbove ? " selected" : "")
@@ -1876,16 +1917,34 @@ void WebService::handleControllerEdit() {
         + String(threshold.offThreshold, 6) + "'></label>";
     c += "<label>Maximum Measurement age (ms)<input type='number' min='1' max='2147483647' name='maxMeasurementAge' value='"
         + String(threshold.maxMeasurementAgeMs) + "'></label></div>";
+    String selectorTargets = thresholdTargetOptions;
+    selectorTargets.replace(" selected", "");
+    const String selectorTarget = validModuleActuatorReference(slot.moduleTarget)
+        ? String("m:current") : String(slot.implementationConfiguration.selector.targetActuatorId);
+    selectorTargets.replace("value='" + selectorTarget + "'", "value='" + selectorTarget + "' selected");
+    // Listed module targets use their current runtime ID.
+    if (validModuleActuatorReference(slot.moduleTarget)) {
+        for (size_t i = 0; i < actuatorRuntime_.runtimeCount(); ++i) {
+            ActuatorRuntimeInfo info; ModuleActuatorReference ref;
+            if (actuatorRuntime_.runtimeInfo(i, info) && actuatorRuntime_.moduleReference(info.id, ref)
+                && sameModuleActuatorReference(ref, slot.moduleTarget)) {
+                const String token = "value='m:" + String(info.id) + "'";
+                selectorTargets.replace(token, token + " selected");
+            }
+        }
+    }
+    c += buildSelectorFields(configuration, slot, selectorTargets);
     c += "<div class='actions'><button type='submit'>Save Slot</button><a class='button' href='/controllers'>Cancel</a></div></form></section>";
     if (selected != nullptr) {
         c += "<section class='card'><h2>Implementation metadata</h2><div class='kv'><span>Type</span><span>"
             + escapeHtml(selected->displayType) + "</span><span>Required actuator capability</span><span>"
-            + String(hasActuatorCapability(selected->requiredActuatorCapabilities,
+            + String(slot.implementation == ControllerImplementation::Threshold && threshold.decisionOnly
+                ? "None" : hasActuatorCapability(selected->requiredActuatorCapabilities,
                 ActuatorCapability::OnOff) ? "On/Off" : "None")
             + "</span><span>Description</span><span>" + escapeHtml(selected->description)
             + "</span></div></section>";
     }
-    c += "<script>const thresholdMeasurementCatalog=" + measurementCatalog + ";function thresholdMeasurements(rebuild){const s=document.getElementById('thresholdSourceSensor'),m=document.getElementById('thresholdMeasurement'),previous=m.value;if(rebuild){m.replaceChildren(new Option('Select a Measurement','unknown'));for(const x of thresholdMeasurementCatalog[s.value]||[]){const o=new Option(x.label,x.value);o.dataset.unit=x.unit;m.add(o)}if(Array.from(m.options).some(o=>o.value===previous))m.value=previous;else m.value='unknown'}const o=m.options[m.selectedIndex];document.getElementById('thresholdUnit').textContent=o?o.dataset.unit||'':''}function controllerFields(){const s=document.getElementById('controllerImplementation'),k=s.options[s.selectedIndex].dataset.kind;document.getElementById('blinkConfiguration').style.display=k==='blink'?'block':'none';document.getElementById('thresholdConfiguration').style.display=k==='threshold'?'block':'none';thresholdMeasurements(false)}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);document.getElementById('thresholdSourceSensor').addEventListener('change',()=>thresholdMeasurements(true));document.getElementById('thresholdMeasurement').addEventListener('change',()=>thresholdMeasurements(false));controllerFields();</script>";
+    c += "<script>const thresholdMeasurementCatalog=" + measurementCatalog + ";function thresholdMeasurements(rebuild){const s=document.getElementById('thresholdSourceSensor'),m=document.getElementById('thresholdMeasurement'),previous=m.value;if(rebuild){m.replaceChildren(new Option('Select a Measurement','unknown'));for(const x of thresholdMeasurementCatalog[s.value]||[]){const o=new Option(x.label,x.value);o.dataset.unit=x.unit;m.add(o)}if(Array.from(m.options).some(o=>o.value===previous))m.value=previous;else m.value='unknown'}const o=m.options[m.selectedIndex];document.getElementById('thresholdUnit').textContent=o?o.dataset.unit||'':''}function controllerFields(){const s=document.getElementById('controllerImplementation'),k=s.options[s.selectedIndex].dataset.kind;document.getElementById('blinkConfiguration').style.display=k==='blink'?'block':'none';document.getElementById('thresholdConfiguration').style.display=k==='threshold'?'block':'none';document.getElementById('selectorConfiguration').style.display=k==='selector'?'block':'none';document.getElementById('thresholdTargetField').style.display=document.getElementById('thresholdDecisionOnly').checked?'none':'block';thresholdMeasurements(false)}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);document.getElementById('thresholdSourceSensor').addEventListener('change',()=>thresholdMeasurements(true));document.getElementById('thresholdMeasurement').addEventListener('change',()=>thresholdMeasurements(false));document.getElementById('thresholdDecisionOnly').addEventListener('change',controllerFields);controllerFields();</script>";
     sendPage("Configure Controller Slot", "/controllers", c);
 }
 
@@ -2585,7 +2644,8 @@ void WebService::handleControllerSave() {
                 slot.implementationConfiguration.blink.offDurationMs = offDuration;
             }
         } else if (slot.implementation == ControllerImplementation::Threshold) {
-            const String targetText = server_.arg("thresholdTargetActuator");
+            const bool decisionOnly = server_.arg("decisionOnly") == "1";
+            const String targetText = decisionOnly ? String("1") : server_.arg("thresholdTargetActuator");
             const bool moduleTarget = targetText.startsWith("m:");
             const bool currentModuleTarget = targetText == "m:current"
                 && validModuleActuatorReference(slot.moduleTarget);
@@ -2605,6 +2665,8 @@ void WebService::handleControllerSave() {
             if (ok) {
                 ThresholdControllerConfiguration& threshold =
                     slot.implementationConfiguration.threshold;
+                threshold.decisionOnly = decisionOnly;
+                if (decisionOnly) threshold.targetActuatorId = InvalidActuatorId;
                 if (!currentModuleTarget) slot.moduleTarget = ModuleActuatorReference{};
                 if (moduleTarget && !currentModuleTarget) {
                     ActuatorRuntimeInfo runtime;
@@ -2624,13 +2686,14 @@ void WebService::handleControllerSave() {
             }
         }
     }
+    if (ok && slot.implementation == ControllerImplementation::Selector) ok = readSelectorConfiguration(slot);
     if (ok) ok = configurationService_.setControllerSlotConfiguration(slot);
     sendConfigurationResult(
         configurationSaveResult(ok, ConfigurationArea::Controllers),
         "Controller Slot saved",
         "Controller Slot save failed",
         "/controllers",
-        "Invalid Controller configuration. Check the source Measurement, target actuator, thresholds, and timing values.");
+        "Invalid Controller configuration. Select an unclaimed target. Selectors need an enabled decision-only Threshold and three distinct options from the selected Value. Check thresholds and timing values.");
 }
 void WebService::handleControllerApply() {
     if (runtimeManager_.pendingAction() != RuntimeAction::RestartControllerRuntime) {

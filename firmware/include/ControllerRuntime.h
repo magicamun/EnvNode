@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 
 #include "ControllerFactory.h"
 
@@ -19,6 +20,10 @@ struct ControllerRuntimeInfo {
     float offThreshold = 0.0F;
     ThresholdDirection thresholdDirection = ThresholdDirection::OnAbove;
     uint32_t maxMeasurementAgeMs = 0;
+    bool decisionOnly = false;
+    ValueId modeValueId = 0;
+    ControllerId automaticControllerId = 0;
+    uint32_t selectorMapping = 0;
     bool sourceAvailable = false;
     bool hasLatestSnapshot = false;
     bool latestMeasurementValid = false;
@@ -60,6 +65,7 @@ private:
         IController* controller = nullptr;
         BlinkController* blink = nullptr;
         ThresholdController* threshold = nullptr;
+        SelectorController* selector = nullptr;
     };
 
     bool validateComposition(const ControllerSlotConfiguration* slots) const;
@@ -77,7 +83,7 @@ private:
     ControllerFactory* inactiveFactory_;
     ControllerFactory secondaryFactory_;
     ILogger& logger_;
-    RuntimeEntry entries_[MaxControllerSlotCount];
+    std::unique_ptr<RuntimeEntry[]> entries_;
     size_t runtimeCount_ = 0;
     uint32_t compositionRevision_ = 0;
     bool initialized_ = false;

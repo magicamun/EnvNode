@@ -448,3 +448,13 @@ decision, including within the hysteresis band. This presentation does not erase
 the internal decision or change output behavior. It describes the controller's
 logical decision, not successful valve movement. `reason` remains available for
 detailed diagnostics. No storage migration or MQTT change is required.
+
+### Configurable Values as display sources
+
+Each live Value appears in the Display source list as `value/ID/state`, labelled
+with its configured name. Use `%s`, for example `Modus: %s`. The default output is
+the label of the selected option. Optional state translations use its stable code,
+just like controller enum translations. The OLED picks up changes on its next
+normal refresh; use Preview/refresh to update the Web representation.
+Deleting the Value leaves the saved display reference intact and reports an
+unknown source until that line is reconfigured. Reading a Value never changes it.

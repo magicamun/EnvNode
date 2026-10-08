@@ -57,6 +57,7 @@ uint32_t controllerSignature(const ControllerSlotConfiguration& slot) {
         case ControllerImplementation::Threshold: {
             const ThresholdControllerConfiguration& threshold =
                 slot.implementationConfiguration.threshold;
+            hashValue(hash, threshold.decisionOnly);
             hashValue(hash, threshold.source.sensorId);
             hashValue(hash, threshold.source.measurementType);
             hashValue(hash, threshold.targetActuatorId);
@@ -64,6 +65,14 @@ uint32_t controllerSignature(const ControllerSlotConfiguration& slot) {
             hashValue(hash, threshold.offThreshold);
             hashValue(hash, threshold.direction);
             hashValue(hash, threshold.maxMeasurementAgeMs);
+            break;
+        }
+        case ControllerImplementation::Selector: {
+            const auto& selector = slot.implementationConfiguration.selector;
+            hashValue(hash, selector.modeValueId);
+            hashValue(hash, selector.automaticControllerId);
+            hashValue(hash, selector.targetActuatorId);
+            hashValue(hash, selectorMappingSignature(selector));
             break;
         }
         case ControllerImplementation::None:

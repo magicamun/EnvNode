@@ -116,6 +116,7 @@ void ConfigurationService::ensurePreferencesStarted() {
 }
 
 void ConfigurationService::initializeDefaults() {
+    configuration_.values.clear();
     configuration_.display = DisplayConfiguration{};
     configuration_.device.name = "WeatherStation";
     configuration_.network.hostname = "WeatherStation";
@@ -212,6 +213,8 @@ void ConfigurationService::initializeControllerDefaults() {
         slot.implementation = ControllerImplementation::None;
         slot.implementationConfiguration.blink = BlinkControllerConfiguration{};
         slot.implementationConfiguration.threshold = ThresholdControllerConfiguration{};
+        slot.implementationConfiguration.selector = SelectorControllerConfiguration{};
+        slot.moduleTarget = ModuleActuatorReference{};
     }
 }
 
@@ -274,6 +277,7 @@ void ConfigurationService::loadFromPreferences() {
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
     loadSensorSlots();
     loadActuatorSlots();
+    loadValues();
     loadControllerSlots();
     String displayRecord;
     if (preferences_.isKey("display_page4")) {
@@ -449,6 +453,19 @@ void ConfigurationService::loadControllerSlots() {
         threshold.direction = preferences_.getUInt(
             controllerKey(expectedId, "tdir").c_str(), 0) == 1
             ? ThresholdDirection::OnBelow : ThresholdDirection::OnAbove;
+        threshold.decisionOnly = preferences_.getUInt(controllerKey(expectedId, "decOnly").c_str(), 0) != 0;
+        auto& selector = loaded[index].implementationConfiguration.selector;
+        if (preferences_.isKey(controllerKey(expectedId, "selmode").c_str())) {
+            selector.modeValueId = preferences_.getUInt(controllerKey(expectedId, "selmode").c_str(), 0);
+            selector.automaticControllerId = preferences_.getUInt(controllerKey(expectedId, "selsrc").c_str(), 0);
+            selector.targetActuatorId = preferences_.getUInt(controllerKey(expectedId, "selact").c_str(), 0);
+            selector.automaticCode = preferences_.isKey(controllerKey(expectedId, "selauto").c_str())
+                ? preferences_.getString(controllerKey(expectedId, "selauto").c_str(), "") : String();
+            selector.onCode = preferences_.isKey(controllerKey(expectedId, "selon").c_str())
+                ? preferences_.getString(controllerKey(expectedId, "selon").c_str(), "") : String();
+            selector.offCode = preferences_.isKey(controllerKey(expectedId, "seloff").c_str())
+                ? preferences_.getString(controllerKey(expectedId, "seloff").c_str(), "") : String();
+        }
         threshold.maxMeasurementAgeMs = preferences_.getUInt(
             controllerKey(expectedId, "age").c_str(), 15000);
     }
@@ -983,6 +1000,13 @@ bool ConfigurationService::validateControllerSlot(
             || measurementMetadata.semantics != MeasurementSemantics::State) {
             return false;
         }
+        if (threshold.decisionOnly) return true;
+    } else if (slot.implementation == ControllerImplementation::Selector) {
+        const auto& selector = slot.implementationConfiguration.selector;
+        bool valid = false;
+        for (const auto& value : configuration_.values)
+            if (validSelectorMapping(selector, value.definition)) valid = true;
+        if (!valid) return false;
     } else {
         return false;
     }
@@ -1025,10 +1049,21 @@ bool ConfigurationService::validateControllerSlots(
             return false;
         }
     }
+    for (size_t i = 0; i < MaxControllerSlotCount; ++i) {
+        const auto& slot = controllerSlots[i];
+        if (!slot.enabled || slot.implementation != ControllerImplementation::Selector) continue;
+        const auto sourceId = slot.implementationConfiguration.selector.automaticControllerId;
+        if (sourceId == 0 || sourceId > MaxControllerSlotCount || sourceId == slot.slotId) return false;
+        const auto& source = controllerSlots[sourceId - 1];
+        if (!source.enabled || source.implementation != ControllerImplementation::Threshold
+            || !source.implementationConfiguration.threshold.decisionOnly) return false;
+    }
     bool claimedTargets[MaxActuatorSlotCount + 1] = {};
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         const ControllerSlotConfiguration& slot = controllerSlots[index];
-        if (!slot.enabled || slot.implementation == ControllerImplementation::None) {
+        if (!slot.enabled || slot.implementation == ControllerImplementation::None
+            || (slot.implementation == ControllerImplementation::Threshold
+                && slot.implementationConfiguration.threshold.decisionOnly)) {
             continue;
         }
         const ModuleActuatorReference* moduleTarget =
@@ -1195,7 +1230,14 @@ bool ConfigurationService::persistControllerSlot(
         && persistUInt(controllerKey(id, "tdir").c_str(),
             static_cast<uint32_t>(threshold.direction))
         && persistUInt(controllerKey(id, "age").c_str(),
-            threshold.maxMeasurementAgeMs);
+            threshold.maxMeasurementAgeMs)
+        && persistUInt(controllerKey(id, "decOnly").c_str(), threshold.decisionOnly ? 1 : 0)
+        && persistUInt(controllerKey(id, "selmode").c_str(), slot.implementationConfiguration.selector.modeValueId)
+        && persistUInt(controllerKey(id, "selsrc").c_str(), slot.implementationConfiguration.selector.automaticControllerId)
+        && persistUInt(controllerKey(id, "selact").c_str(), slot.implementationConfiguration.selector.targetActuatorId)
+        && persistString(controllerKey(id, "selauto").c_str(), slot.implementationConfiguration.selector.automaticCode)
+        && persistString(controllerKey(id, "selon").c_str(), slot.implementationConfiguration.selector.onCode)
+        && persistString(controllerKey(id, "seloff").c_str(), slot.implementationConfiguration.selector.offCode);
 }
 
 bool ConfigurationService::setControllerSlotConfiguration(
@@ -1226,6 +1268,66 @@ bool ConfigurationService::setDisplayConfiguration(const DisplayConfiguration& d
     configuration_.display = display;
     configuration_.display.configured = true;
     return true;
+}
+
+void ConfigurationService::loadValues() {
+    if (!preferences_.isKey("enum_values1")) return;
+    const size_t length = preferences_.getBytesLength("enum_values1");
+    if (length == 0 || length > MaxValueRecordLength) return;
+    std::vector<char> bytes(length + 1, 0);
+    if (preferences_.getBytes("enum_values1", bytes.data(), length) != length
+        || strlen(bytes.data()) != length) return;
+    ValueConfiguration loaded;
+    if (decodeValueConfiguration(String(bytes.data()), loaded)) configuration_.values = loaded;
+}
+
+bool ConfigurationService::persistValues(const ValueConfiguration& values) {
+    String encoded;
+    if (!encodeValueConfiguration(values, encoded)) return false;
+    ensurePreferencesStarted();
+    if (preferences_.putBytes("enum_values1", encoded.c_str(), encoded.length()) != encoded.length()) return false;
+    configuration_.values = values;
+    return true;
+}
+
+bool ConfigurationService::setEnumValueDefinitions(const std::vector<EnumValueConfiguration>& definitions) {
+    if (definitions.size() > MaxEnumValueCount) return false;
+    ValueConfiguration candidate;
+    for (const auto& definition : definitions) {
+        if (!validEnumValueConfiguration(definition)) return false;
+        StoredEnumValue value;
+        value.definition = definition;
+        if (definition.restartPolicy == ValueRestartPolicy::RestoreLastValue) {
+            for (const auto& old : configuration_.values) {
+                if (old.definition.id != definition.id) continue;
+                for (const auto& option : definition.options)
+                    if (option.code == old.savedCode) value.savedCode = old.savedCode;
+            }
+        }
+        candidate.push_back(value);
+    }
+    // Enabled Selectors must retain all configured mode choices.
+    for (const auto& slot : configuration_.controllerSlots) {
+        if (!slot.enabled || slot.implementation != ControllerImplementation::Selector) continue;
+        bool found = false;
+        for (const auto& value : candidate)
+            if (validSelectorMapping(slot.implementationConfiguration.selector, value.definition)) found = true;
+        if (!found) return false;
+    }
+    return persistValues(candidate);
+}
+
+bool ConfigurationService::saveEnumValueCode(ValueId id, const String& code) {
+    if (code.length() == 0) return false;
+    ValueConfiguration candidate = configuration_.values;
+    for (auto& value : candidate) {
+        if (value.definition.id != id) continue;
+        if (value.definition.restartPolicy != ValueRestartPolicy::RestoreLastValue) return false;
+        if (value.savedCode == code) return true;
+        value.savedCode = code;
+        return persistValues(candidate);
+    }
+    return false;
 }
 
 bool ConfigurationService::resetToDefaults() {

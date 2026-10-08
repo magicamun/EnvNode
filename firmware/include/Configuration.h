@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "MeasurementType.h"
 #include "DisplayConfiguration.h"
+#include "ValueConfiguration.h"
 #include "EnvNode/Locale.h"
 #include "SensorSlotConfiguration.h"
 #include "ActuatorSlotConfiguration.h"
@@ -66,6 +67,7 @@ struct PresentationConfiguration {
 };
 
 struct Configuration {
+    ValueConfiguration values;
     DisplayConfiguration display;
     DeviceConfiguration device;
     NetworkConfiguration network;

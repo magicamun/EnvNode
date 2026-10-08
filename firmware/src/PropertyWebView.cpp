@@ -48,7 +48,8 @@ String buildPropertyDiagnosticHtml(const IPropertyReader& reader,
     html += reference.componentKind == PropertyComponentKind::Sensor ? "sensor"
         : reference.componentKind == PropertyComponentKind::Actuator ? "actuator"
         : reference.componentKind == PropertyComponentKind::Controller ? "controller"
-        : reference.componentKind == PropertyComponentKind::System ? "system" : "unknown";
+        : reference.componentKind == PropertyComponentKind::System ? "system"
+        : reference.componentKind == PropertyComponentKind::Value ? "value" : "unknown";
     html += " / ";
     html += String(static_cast<unsigned int>(reference.componentId)).c_str();
     html += " / ";

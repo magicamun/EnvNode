@@ -939,8 +939,104 @@ void test_decision_property_retains_hysteresis_and_masks_unusable_input() {
     controller.service(); expect("on");
 }
 
+class TestModes : public IEnumValueReader {
+public:
+    EnumValueConfiguration definition;
+    String code = "auto";
+    bool available = true;
+    TestModes() {
+        definition.id = 1; definition.name = "Mode"; definition.defaultCode = "auto";
+        definition.options = {{"auto", "Auto"}, {"cistern", "Zisterne"}, {"mains", "Hauswasser"}};
+    }
+    const EnumValueConfiguration* valueDefinition(ValueId id) const override { return id == 1 ? &definition : nullptr; }
+    bool valueCode(ValueId id, String& result) const override { result = code; return available && id == 1; }
+};
+void configureSelectorSlot(ControllerSlotConfiguration& slot, ControllerId source) {
+    slot.enabled = true; slot.name = "Selector"; slot.implementation = ControllerImplementation::Selector;
+    auto& c = slot.implementationConfiguration.selector;
+    c.modeValueId = 1; c.automaticControllerId = source; c.targetActuatorId = 1;
+    c.automaticCode = "auto"; c.onCode = "cistern"; c.offCode = "mains";
+}
+void test_selector_auto_manual_unknown_and_start_order() {
+    TestLogger logger; TestClock clock; TestModes modes;
+    TestMeasurementResolver measurements; TestActuator actuator; TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    actuator.current = OnOffState::On; // Initialized actuator state is held on unknown startup.
+    ControllerFactory factory(measurements, actuators, clock, logger, &modes);
+    ControllerRuntime runtime(factory, logger);
+    ControllerSlotConfiguration slots[MaxControllerSlotCount]; initializeControllerSlots(slots);
+    configureSelectorSlot(slots[0], 2); // Selector BEFORE its automatic source.
+    auto threshold = thresholdConfiguration(); threshold.decisionOnly = true; threshold.targetActuatorId = 0;
+    configureThresholdSlot(slots[1], threshold);
+    setSnapshot(measurements, 67, 0, 1);
+    TEST_ASSERT_TRUE(runtime.initialize(slots));
+    TEST_ASSERT_EQUAL_UINT32(0, actuator.setCount);
+    setSnapshot(measurements, 65, 0, 2); runtime.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(actuator.current));
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    modes.code = "cistern"; runtime.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On), static_cast<int>(actuator.current));
+    setSnapshot(measurements, 70, 0, 3); runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(2, actuator.setCount); // Background hysteresis never writes.
+    modes.code = "mains"; runtime.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(actuator.current));
+    modes.code = "auto"; runtime.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On), static_cast<int>(actuator.current));
+    clock.now = 1001; runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, actuator.setCount); // Stale -> hold.
+    runtime.stopController(2); runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, actuator.setCount); // Stopped automatic source -> hold.
+    modes.code = "mains"; runtime.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(actuator.current));
+    modes.available = false; runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(5, actuator.setCount);
+    runtime.stopController(1);
+    TEST_ASSERT_EQUAL_UINT32(5, actuator.setCount);
+}
+void test_selector_cancels_pending_commands_and_rebuild_rebinds_source() {
+    TestLogger logger; TestClock clock; TestModes modes;
+    TestMeasurementResolver measurements; TestActuator actuator; TestActuatorResolver actuators;
+    actuators.targets[0] = &actuator;
+    ControllerFactory factory(measurements, actuators, clock, logger, &modes);
+    ControllerRuntime runtime(factory, logger);
+    ControllerSlotConfiguration slots[MaxControllerSlotCount]; initializeControllerSlots(slots);
+    configureSelectorSlot(slots[0], 2);
+    auto threshold = thresholdConfiguration(); threshold.decisionOnly = true;
+    configureThresholdSlot(slots[1], threshold);
+    setSnapshot(measurements, 70, 0, 1);
+    actuator.operationResult = ActuatorOperationResult::NotInitialized;
+    TEST_ASSERT_TRUE(runtime.initialize(slots));
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    measurements.available = false; runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount); // Failed On is not retried while unknown.
+    modes.code = "unmapped"; runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(1, actuator.setCount);
+    modes.code = "cistern"; actuator.operationResult = ActuatorOperationResult::Completed;
+    runtime.loop(); TEST_ASSERT_EQUAL_UINT32(2, actuator.setCount);
+    modes.code = "auto";
+    setSnapshot(measurements, 65, 0, 2);
+    TEST_ASSERT_TRUE(runtime.rebuild(slots));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::Off), static_cast<int>(actuator.current));
+    TEST_ASSERT_EQUAL_UINT32(3, actuator.setCount);
+    setSnapshot(measurements, 70, 0, 3); runtime.loop();
+    TEST_ASSERT_EQUAL_UINT32(4, actuator.setCount);
+    TestActuator replacement; actuators.targets[0] = &replacement;
+    runtime.loop(); TEST_ASSERT_EQUAL_UINT32(1, replacement.setCount);
+    measurements.available = false;
+    TEST_ASSERT_TRUE(runtime.rebuild(slots));
+    TEST_ASSERT_EQUAL_UINT32(1, replacement.setCount); // Unknown during rebuild holds output too.
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(OnOffState::On), static_cast<int>(replacement.current));
+    auto invalid = slots[1]; slots[1].implementationConfiguration.threshold.decisionOnly = false;
+    TEST_ASSERT_FALSE(runtime.rebuild(slots));
+    slots[1] = invalid;
+    slots[0].implementationConfiguration.selector.automaticControllerId = 1;
+    TEST_ASSERT_FALSE(runtime.rebuild(slots));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_selector_auto_manual_unknown_and_start_order);
+    RUN_TEST(test_selector_cancels_pending_commands_and_rebuild_rebinds_source);
     RUN_TEST(test_decision_property_retains_hysteresis_and_masks_unusable_input);
     RUN_TEST(test_begin_handles_missing_stale_invalid_and_initial_in_band_input);
     RUN_TEST(test_begin_commands_on_or_off_at_thresholds_and_accepts_quality_labels);

@@ -2,6 +2,7 @@
 
 #include "MeasurementValue.h"
 #include <Arduino.h>
+#include <memory>
 
 namespace EnvNode {
 
@@ -21,7 +22,16 @@ struct PropertyEnumOption {
     const char* displayText;
 };
 
-// Reuse measurement scalar storage; enum metadata has static lifetime.
+// Static enums borrow metadata; configurable enums own their code and label.
+struct OwnedPropertyEnum {
+    String code;
+    String label;
+    PropertyEnumOption option;
+    OwnedPropertyEnum(const String& c, const String& l)
+        : code(c), label(l), option{code.c_str(), label.c_str()} {}
+    OwnedPropertyEnum(const OwnedPropertyEnum&) = delete;
+    OwnedPropertyEnum& operator=(const OwnedPropertyEnum&) = delete;
+};
 class PropertyValue {
 public:
     PropertyValue() = default;
@@ -29,6 +39,12 @@ public:
     static PropertyValue enumeration(const PropertyEnumOption& option) {
         PropertyValue result;
         result.enum_ = &option;
+        return result;
+    }
+    static PropertyValue enumeration(const String& code, const String& label) {
+        PropertyValue result;
+        result.ownedEnum_ = std::make_shared<OwnedPropertyEnum>(code, label);
+        result.enum_ = &result.ownedEnum_->option;
         return result;
     }
     static PropertyValue text(const String& text) {
@@ -59,6 +75,7 @@ private:
     String text_;
     bool hasText_ = false;
     const PropertyEnumOption* enum_ = nullptr;
+    std::shared_ptr<const OwnedPropertyEnum> ownedEnum_;
 };
 
 } // namespace EnvNode

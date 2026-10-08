@@ -10,8 +10,8 @@
 namespace EnvNode {
 
 PropertyResolver::PropertyResolver(const SensorManager& sensors, const IMeasurementResolver& measurements,
-    const ActuatorRuntime& actuators, const ControllerRuntime& controllers, const IPropertyReader* system)
-    : sensors_(sensors), measurements_(measurements), actuators_(actuators), controllers_(controllers), system_(system) {}
+    const ActuatorRuntime& actuators, const ControllerRuntime& controllers, const IPropertyReader* system, const IPropertyReader* values)
+    : sensors_(sensors), measurements_(measurements), actuators_(actuators), controllers_(controllers), system_(system), values_(values) {}
 
 bool PropertyResolver::describe(const PropertyReference& reference, PropertyDescription& result) const {
     result = PropertyDescription{};
@@ -31,6 +31,7 @@ bool PropertyResolver::describe(const PropertyReference& reference, PropertyDesc
             if (provider == nullptr) return false;
             return ControllerPropertyReader(reference.componentId, *provider).describe(reference, result);
         }
+        case PropertyComponentKind::Value: return values_ != nullptr && values_->describe(reference, result);
         case PropertyComponentKind::System: return system_ != nullptr && system_->describe(reference, result);
         default: return false;
     }
@@ -54,6 +55,7 @@ PropertyReadResult PropertyResolver::read(const PropertyReference& reference, Pr
             if (provider == nullptr) return PropertyReadResult::UnknownReference;
             return ControllerPropertyReader(reference.componentId, *provider).read(reference, result);
         }
+        case PropertyComponentKind::Value: return values_ == nullptr ? PropertyReadResult::UnknownReference : values_->read(reference, result);
         case PropertyComponentKind::System: return system_ == nullptr ? PropertyReadResult::UnknownReference : system_->read(reference, result);
         default: return PropertyReadResult::UnknownReference;
     }

@@ -89,6 +89,8 @@ public:
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration&) override { return false; }
     bool setControllerSlotConfiguration(const ControllerSlotConfiguration&) override { return false; }
     bool setDisplayConfiguration(const DisplayConfiguration&) override { return false; }
+    bool setEnumValueDefinitions(const std::vector<EnumValueConfiguration>&) override { return false; }
+    bool saveEnumValueCode(ValueId, const String&) override { return false; }
     bool resetToDefaults() override { return false; }
 };
 

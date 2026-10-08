@@ -23,6 +23,7 @@
 #include "BoardProvisioningService.h"
 #include "ModuleDescriptorProvisioningService.h"
 #include "DuoRelayDescriptor.h"
+#include "ValueRuntime.h"
 #include "ModuleDeviceInventory.h"
 
 namespace EnvNode {
@@ -32,6 +33,7 @@ public:
     WebService(
         ILogger& logger,
         IConfigurationService& configurationService,
+        ValueRuntime& valueRuntime,
         IWiFiService& wifiService,
         IMqttService& mqttService,
         ITimeService& timeService,
@@ -54,6 +56,11 @@ public:
     void loop() override;
 
 private:
+    void handleValues();
+    void handleValueEdit();
+    void handleValueSave();
+    void handleValueSet();
+    void handleValueDelete();
     void handleStatus();
     void handleSensors();
     void handleActuators();
@@ -74,6 +81,7 @@ private:
     void handleActuatorLevel();
     void handleControllerEdit();
     void handleControllerSave();
+    bool readSelectorConfiguration(ControllerSlotConfiguration& slot);
     void handleControllerApply();
     void handleControllerStart();
     void handleControllerStop();
@@ -124,6 +132,7 @@ private:
 
     ILogger& logger_;
     IConfigurationService& configurationService_;
+    ValueRuntime& valueRuntime_;
     IWiFiService& wifiService_;
     IMqttService& mqttService_;
     ITimeService& timeService_;

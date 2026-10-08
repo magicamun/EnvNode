@@ -10,11 +10,11 @@ ControllerFactory::ControllerFactory(
     IMeasurementResolver& measurementResolver,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
-    ILogger& logger)
+    ILogger& logger, const IEnumValueReader* values)
     : measurementResolver_(measurementResolver)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
-    , logger_(logger) {
+    , logger_(logger), values_(values) {
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         constructed_[index] = ControllerImplementation::None;
     }
@@ -66,7 +66,7 @@ ControllerFactoryInstance ControllerFactory::create(
         if (!isValidSensorId(threshold.source.sensorId)
             || measurementMetadata.expectedValueKind != ValueKind::FloatingPoint
             || measurementMetadata.semantics != MeasurementSemantics::State
-            || (!validModuleActuatorReference(slot.moduleTarget)
+            || (!threshold.decisionOnly && !validModuleActuatorReference(slot.moduleTarget)
                 && !isValidActuatorId(threshold.targetActuatorId))
             || !std::isfinite(threshold.onThreshold)
             || !std::isfinite(threshold.offThreshold)
@@ -83,6 +83,17 @@ ControllerFactoryInstance ControllerFactory::create(
             slot.slotId, slot.name);
         instance.controller = instance.threshold;
         constructed_[storageIndex] = ControllerImplementation::Threshold;
+    } else if (slot.implementation == ControllerImplementation::Selector) {
+        const auto& selector = slot.implementationConfiguration.selector;
+        const auto* definition = values_ ? values_->valueDefinition(selector.modeValueId) : nullptr;
+        if (!definition || !validSelectorMapping(selector, *definition)
+            || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(selector.targetActuatorId))) {
+            result = ControllerFactoryResult::InvalidConfiguration;
+            return instance;
+        }
+        instance.selector = new (target) SelectorController(selector, slot.moduleTarget, *values_, actuatorResolver_);
+        instance.controller = instance.selector;
+        constructed_[storageIndex] = ControllerImplementation::Selector;
     } else {
         result = ControllerFactoryResult::UnknownImplementation;
         return instance;
@@ -98,6 +109,9 @@ void ControllerFactory::destroy(size_t storageIndex) {
     } else if (constructed_[storageIndex] == ControllerImplementation::Threshold) {
         static_cast<ThresholdController*>(
             static_cast<void*>(&storage_[storageIndex]))->~ThresholdController();
+    }
+    if (constructed_[storageIndex] == ControllerImplementation::Selector) {
+        static_cast<SelectorController*>(static_cast<void*>(&storage_[storageIndex]))->~SelectorController();
     }
     constructed_[storageIndex] = ControllerImplementation::None;
 }

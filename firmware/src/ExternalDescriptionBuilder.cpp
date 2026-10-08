@@ -219,11 +219,22 @@ bool buildControllerDescription(
     appendJsonUnsigned(output, target);
     output += ',';
     appendJsonName(output, "required_capabilities");
-    appendCapabilities(output, metadata->requiredActuatorCapabilities);
+    appendCapabilities(output, slot.implementation == ControllerImplementation::Threshold
+        && slot.implementationConfiguration.threshold.decisionOnly
+        ? ActuatorCapability::None : metadata->requiredActuatorCapabilities);
     output += '}';
     output += ',';
     appendJsonName(output, "inputs");
     output += '[';
+    if (slot.implementation == ControllerImplementation::Selector) {
+        const auto& selector = slot.implementationConfiguration.selector;
+        output += "{\"value_id\":"; appendJsonUnsigned(output, selector.modeValueId);
+        output += ",\"automatic_controller_id\":"; appendJsonUnsigned(output, selector.automaticControllerId);
+        output += ",\"automatic_code\":"; appendJsonString(output, selector.automaticCode.c_str());
+        output += ",\"on_code\":"; appendJsonString(output, selector.onCode.c_str());
+        output += ",\"off_code\":"; appendJsonString(output, selector.offCode.c_str());
+        output += ",\"unknown_behavior\":\"hold\"}";
+    }
     if (slot.implementation == ControllerImplementation::Threshold) {
         const MeasurementSourceReference& source =
             slot.implementationConfiguration.threshold.source;

@@ -29,9 +29,13 @@ public:
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) override;
     bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) override;
     bool setDisplayConfiguration(const DisplayConfiguration& display) override;
+    bool setEnumValueDefinitions(const std::vector<EnumValueConfiguration>& definitions) override;
+    bool saveEnumValueCode(ValueId id, const String& code) override;
     bool resetToDefaults() override;
 
 private:
+    bool persistValues(const ValueConfiguration& values);
+    void loadValues();
     void initializeDefaults();
     void loadFromPreferences();
     void validateConfiguration();

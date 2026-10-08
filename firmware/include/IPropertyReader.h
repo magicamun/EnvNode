@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <ctime>
+#include <vector>
 
 #include "MeasurementQuality.h"
 #include "PropertyValue.h"
@@ -10,7 +11,7 @@
 
 namespace EnvNode {
 
-enum class PropertyComponentKind : uint8_t { Unknown, Sensor, Actuator, Controller, System };
+enum class PropertyComponentKind : uint8_t { Unknown, Sensor, Actuator, Controller, System, Value };
 
 struct PropertyReference {
     PropertyReference(PropertyComponentKind kind, uint16_t id, const char* key)
@@ -22,13 +23,21 @@ struct PropertyReference {
     const char* propertyKey;
 };
 
+// Optional owned metadata for configurable enums; options point into codes/labels.
+struct PropertyEnumMetadata {
+    std::vector<String> codes;
+    std::vector<String> labels;
+    std::vector<PropertyEnumOption> options;
+};
+
 struct PropertyDescription {
-    // Reader-provided strings have static storage duration.
+    // Names have static lifetime; enum options are static or owned by enumMetadata.
     const char* stableKey = "";
     const char* displayName = "";
     PropertyValueKind valueKind = PropertyValueKind::None;
     const PropertyEnumOption* enumOptions = nullptr;
     size_t enumOptionCount = 0;
+    std::shared_ptr<const PropertyEnumMetadata> enumMetadata;
     PresentationUnit canonicalUnit = PresentationUnit::None;
     const char* trueText = "True";
     const char* falseText = "False";

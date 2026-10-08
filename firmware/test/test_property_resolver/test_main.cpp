@@ -1,6 +1,8 @@
 #include <unity.h>
 #include <cstring>
 #include "PropertyResolver.h"
+#include "ConfigurationService.h"
+#include "ValuePropertyReader.h"
 #include "PropertyWebView.h"
 #include "PropertyTextFormatter.h"
 #include "SensorManager.h"
@@ -220,8 +222,31 @@ void test_same_resolver_survives_removal_and_replacement() {
     f.sensors.clear();
 }
 
+void test_routes_configurable_values_and_resolves_deletion_live() {
+    Fixture f;
+    Preferences().clear();
+    ConfigurationService cfg; cfg.loadConfiguration();
+    ValueRuntime runtime(cfg); runtime.begin();
+    EnumValueConfiguration definition; definition.id = 1; definition.name = "Mode";
+    definition.options = {{"auto", "Automatic"}, {"manual", "Manual"}}; definition.defaultCode = "auto";
+    TEST_ASSERT_TRUE(runtime.saveDefinition(definition, true));
+    ValuePropertyReader values(runtime);
+    PropertyResolver resolver(f.sensors, f.measurements, f.actuators, f.controllers, nullptr, &values);
+    const PropertyReference ref(PropertyComponentKind::Value, 1, "state");
+    PropertyDescription description; PropertySnapshot snapshot;
+    TEST_ASSERT_TRUE(resolver.describe(ref, description));
+    TEST_ASSERT_TRUE(resolver.read(ref, snapshot) == PropertyReadResult::Available);
+    const PropertyEnumOption* option = nullptr;
+    TEST_ASSERT_TRUE(snapshot.value.tryGetEnumeration(option));
+    TEST_ASSERT_EQUAL_STRING("auto", option->stableCode);
+    runtime.remove(1);
+    TEST_ASSERT_FALSE(resolver.describe(ref, description));
+    TEST_ASSERT_TRUE(resolver.read(ref, snapshot) == PropertyReadResult::UnknownReference);
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_routes_configurable_values_and_resolves_deletion_live);
     RUN_TEST(test_routes_all_categories_with_same_id_and_preserves_types);
     RUN_TEST(test_unknown_reference_resets_previous_output);
     RUN_TEST(test_same_resolver_survives_removal_and_replacement);

@@ -31,6 +31,8 @@ public:
     virtual bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) = 0;
     virtual bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) = 0;
     virtual bool setDisplayConfiguration(const DisplayConfiguration& display) = 0;
+    virtual bool setEnumValueDefinitions(const std::vector<EnumValueConfiguration>& definitions) = 0;
+    virtual bool saveEnumValueCode(ValueId id, const String& code) = 0;
     virtual bool resetToDefaults() = 0;
 };
 

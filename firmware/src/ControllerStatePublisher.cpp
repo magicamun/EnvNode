@@ -163,6 +163,14 @@ bool ControllerStatePublisher::sameStatus(
 }
 
 String ControllerStatePublisher::statusPayload(const ControllerRuntimeInfo& info) {
+    if (info.implementation == ControllerImplementation::Selector) {
+        return String("{\"running\":") + (info.running ? "true" : "false")
+            + ",\"decision\":\"" + decisionName(info.thresholdDecision)
+            + "\",\"holding\":" + (info.thresholdDecision == ThresholdDecision::Unknown ? "true" : "false")
+            + ",\"target_available\":" + (info.targetAvailable ? "true" : "false")
+            + ",\"output_pending\":" + (info.outputApplicationPending ? "true" : "false")
+            + ",\"last_result\":\"" + resultName(info.lastOperationResult) + "\"}";
+    }
     if (info.implementation == ControllerImplementation::Threshold) {
         return String("{\"running\":") + (info.running ? "true" : "false")
             + ",\"source_available\":" + (info.sourceAvailable ? "true" : "false")

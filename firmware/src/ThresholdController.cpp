@@ -129,6 +129,7 @@ ControllerOperationResult ThresholdController::stop() {
     sourceAvailable_ = false;
     decision_ = ThresholdDecision::Unknown;
     outputApplicationPending_ = false;
+    if (configuration_.decisionOnly) return ControllerOperationResult::Completed;
     IOnOffActuator* actuator =
         resolveTarget(actuatorResolver_, configuration_, moduleTarget_);
     if (actuator == nullptr) {
@@ -169,7 +170,7 @@ bool ThresholdController::configurationValid() const {
     return isValidSensorId(configuration_.source.sensorId)
         && metadata.expectedValueKind == ValueKind::FloatingPoint
         && metadata.semantics == MeasurementSemantics::State
-        && (validModuleActuatorReference(moduleTarget_)
+        && (configuration_.decisionOnly || validModuleActuatorReference(moduleTarget_)
             || isValidActuatorId(configuration_.targetActuatorId))
         && std::isfinite(configuration_.onThreshold)
         && std::isfinite(configuration_.offThreshold)
@@ -255,7 +256,7 @@ void ThresholdController::evaluateValue(float value) {
         static_cast<double>(triggeringThreshold),
         hasUnit ? " " : "", unit);
     decision_ = next;
-    outputApplicationPending_ = true;
+    outputApplicationPending_ = !configuration_.decisionOnly;
 }
 
 ControllerOperationResult ThresholdController::applyPendingDecision() {

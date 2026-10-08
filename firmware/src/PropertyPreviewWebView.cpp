@@ -13,7 +13,8 @@ String propertySourceText(const PropertyReference& reference) {
     const char* category = reference.componentKind == PropertyComponentKind::Sensor ? "sensor"
         : reference.componentKind == PropertyComponentKind::Actuator ? "actuator"
         : reference.componentKind == PropertyComponentKind::Controller ? "controller"
-        : reference.componentKind == PropertyComponentKind::System ? "system" : "unknown";
+        : reference.componentKind == PropertyComponentKind::System ? "system"
+        : reference.componentKind == PropertyComponentKind::Value ? "value" : "unknown";
     return String(category) + "/" + String(static_cast<unsigned int>(reference.componentId))
         + "/" + reference.propertyKey;
 }

@@ -250,3 +250,133 @@ for an unsigned percentage property. Display-only enum overrides match stable
 PropertyEnumOption codes; empty/missing overrides use the original label.
 ConfigurationService migrates older display strings into a bounded version-4 blob
 when saved, preserving the single-record write boundary.
+
+### Configurable Values: first model step
+
+A Value is named, typed local input supplied by an operator or external system.
+It is neither a sensor measurement nor an actuator. The first implementation is
+EnumValue: an owned definition with a nonzero ID, name, up to 16 options (stable
+code and label), a required default code and explicit restart policy. Codes are
+case-sensitive lowercase ASCII letters, digits and underscores, at most 32 bytes.
+Names and labels are 1..64 UTF-8 bytes without ASCII control characters.
+
+`DefaultOnRestart` starts from the configured default. `RestoreLastValue` accepts
+a previously saved code at begin; absent or obsolete saved codes fall back to the
+default with an explicit result. Unknown commands never change the current value.
+Only successful value changes increment the session revision. Calling begin
+starts a new session and resets revision to zero. Definitions are copied and
+validated before use; invalid definitions cannot accept writes.
+
+The model and NVS storage are implemented. Runtime composition and Web commands are implemented. MQTT commands for Values remain a subsequent integration step. The restart policy specifies behavior; EnumValue does not
+perform storage I/O. A later persistent command service must save successfully
+before acknowledging a persistent change. No installation-specific mode is
+created automatically and no existing actuator ownership changes.
+
+Example definition (application configuration, not a built-in water mode):
+
+```cpp
+EnumValueConfiguration config;
+config.id = 1;
+config.name = "Wasserquelle";
+config.options = {{"auto", "Automatik"}, {"cistern", "Zisterne"}, {"mains", "Hauswasser"}};
+config.defaultCode = "auto";
+config.restartPolicy = ValueRestartPolicy::DefaultOnRestart;
+EnumValue mode(config);
+mode.begin();
+mode.set("cistern"); // Changed; a future Web/MQTT adapter uses this same operation.
+```
+
+### Value storage
+
+ConfigurationService now stores up to eight EnumValue definitions under the
+versioned NVS blob `enum_values1` in the existing weather namespace. IDs must be
+unique and remain independent of ordering. Definition changes preserve a saved
+code only when the same ID still allows that code and uses RestoreLastValue.
+Switching to DefaultOnRestart, deleting a Value or removing its saved option
+clears that checkpoint; a later restart then uses the configured default.
+
+Definitions and restart checkpoints share one validated record. Failed writes
+leave the in-memory configuration untouched. Unknown IDs/codes and checkpoints
+for DefaultOnRestart are rejected. Re-saving the same checkpoint avoids a write.
+Missing or invalid records load as an empty collection; existing device settings
+remain intact. Factory reset removes Values together with other configuration.
+The storage API is not a live command API: ValueRuntime provides the live command API used by Web; MQTT wiring remains
+a subsequent step. No Value is created automatically on upgrade.
+
+### Values Web page and runtime
+
+`/values` lists current values and provides immediate POST commands. `/values/edit`
+creates or edits a definition; an optional water-source example pre-fills an
+unsaved form. No installation-specific Value is created automatically. The form
+supports names, up to 16 key/label pairs, a default key and restart policy. IDs are
+allocated from unused positive IDs and remain fixed when editing. Removing a
+Value is an explicit POST operation in its editor.
+
+ValueRuntime is composed independently of Web and initialized after configuration
+load. Transient commands update RAM only. RestoreLastValue commands persist before
+updating live state; failed writes preserve the old state. Definition edits apply
+immediately and restart only the edited Value from its compatible saved code or
+default; unrelated Values retain their live state. Invalid submissions retain the
+entered definition for correction. Values supply Selector mode inputs; they do not directly command actuators or expose MQTT commands. Their enum state is
+available as `value/ID/state` to both display preview and physical display.
+
+Manual acceptance: open Values, choose Water source example, save, select Zisterne
+and Set value. Reload to confirm the current value. With Use default, a reboot
+returns to Automatik. Edit to Restore last value, save, select Hauswasser, then
+reboot: Hauswasser should remain. Deleting the Value should survive reboot too.
+
+### Value display properties
+
+ValuePropertyReader resolves each read against ValueRuntime and exposes the enum
+state as `value/ID/state`. `%s` uses the configured option label; optional display
+translations override labels by stable code. The Display source inventory includes
+all live Values. Saving a display page preserves their enum translations. Switching
+a Value is picked up by the next normal OLED refresh; the Web preview updates on
+request. Deleted Values yield UnknownReference without keeping runtime pointers.
+Dynamic enum snapshots and descriptions own their metadata, including across
+copies, definition edits and deletions. Static enum properties retain their
+existing borrowed static metadata.
+
+### Selector controller
+
+A decision-only Threshold evaluates hysteresis without owning or writing an
+actuator, including during start/stop. Existing Threshold configurations retain
+direct output by default. A Selector maps an Enum Value's three configured codes
+to automatic Threshold decision, constant On and constant Off. Its automatic
+source must be an enabled decision-only Threshold, preventing cycles and double
+output ownership. Source Thresholds run before Selectors regardless of slot order.
+
+Unknown/stale/invalid/stopped automatic input or an unavailable/unmapped mode
+causes no actuator write and cancels pending output. On startup this preserves the
+actuator's initialized state. Manual On/Off ignores automatic input validity.
+Selector stop also holds the output. Valid decisions are reconciled against the
+logical actuator state; failed commands retry only while that decision is valid.
+The Selector alone owns its target. Mapping edits use the existing explicit
+Controller Save/Apply flow; Value commands take effect on the next runtime loop.
+
+Selector setup in Web:
+
+1. Edit the existing Threshold, enable **Decision only (no actuator control)**,
+   then Save Slot. Its numeric thresholds and direction still determine On/Off.
+2. Configure another enabled Controller Slot as **Selector**. Select the mode
+   Value and the decision-only Threshold. Map the automatic option, the option
+   that forces On, and the option that forces Off; choose the valve actuator.
+3. Save Slot and apply the Controller composition. No automatic migration changes
+   an existing installation's behavior before an explicit configuration/apply.
+4. Switch the Value on the Values page. Auto uses the current Threshold decision;
+   On/Off modes override it. Stop the Threshold while in Auto to verify hold,
+   then verify manual modes still work. Restart the Threshold to resume Auto.
+
+Existing direct Thresholds retain their established stop/rebuild behavior. Once
+configured as decision-only they never write an output. Selectors hold on stop,
+missing mode, unmapped mode, or unknown automatic decision. Actuator readback is
+logical command state, not mechanical valve feedback. Used mode options and source
+Thresholds cannot be removed/disabled in saved configuration while an enabled
+Selector references them. Runtime STOP remains available for testing/operation.
+
+Selector status is included in existing Controller MQTT status publication; Value
+MQTT commands and chains of Selectors are not part of this step. Controller runtime
+entries and staging are bounded, checked heap allocations, reducing ESP32 static
+DRAM and apply-call stack pressure. A staging allocation failure leaves the active
+composition intact. Runtime diagnostics use a compact mapping signature solely
+for the pending-apply indicator, never for control decisions.

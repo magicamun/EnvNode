@@ -1,12 +1,14 @@
 #include <unity.h>
 
 #include <climits>
+#include <cstring>
 #include <cmath>
 #include <limits>
 
 #include "ConfigurationService.h"
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
+#include "SelectorWebView.h"
 
 using namespace EnvNode;
 
@@ -698,8 +700,44 @@ void test_threshold_web_syntax_and_configuration_validation_reject_invalid_posts
     TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
 }
 
+void test_selector_persistence_dependencies_and_exclusive_target() {
+    Fixture f;
+    TEST_ASSERT_TRUE(f.service.setActuatorSlotConfiguration(f.enabledActuator()));
+    EnumValueConfiguration mode; mode.id = 1; mode.name = "Mode"; mode.defaultCode = "auto";
+    mode.options = {{"auto", "Auto"}, {"cistern", "Zisterne"}, {"mains", "Hauswasser"}};
+    TEST_ASSERT_TRUE(f.service.setEnumValueDefinitions({mode}));
+    auto source = f.threshold(2); source.implementationConfiguration.threshold.decisionOnly = true;
+    source.implementationConfiguration.threshold.targetActuatorId = 0;
+    TEST_ASSERT_TRUE(f.service.setControllerSlotConfiguration(source));
+    auto selector = f.service.getConfiguration().controllerSlots[0];
+    selector.enabled = true; selector.name = "Selection"; selector.implementation = ControllerImplementation::Selector;
+    auto& c = selector.implementationConfiguration.selector;
+    c.modeValueId = 1; c.automaticControllerId = 2; c.targetActuatorId = 1;
+    c.automaticCode = "auto"; c.onCode = "cistern"; c.offCode = "mains";
+    TEST_ASSERT_TRUE(f.service.setControllerSlotConfiguration(selector));
+    ConfigurationService reloaded; reloaded.loadConfiguration();
+    TEST_ASSERT_TRUE(reloaded.getConfiguration().controllerSlots[1].implementationConfiguration.threshold.decisionOnly);
+    TEST_ASSERT_EQUAL_STRING("cistern", reloaded.getConfiguration().controllerSlots[0].implementationConfiguration.selector.onCode.c_str());
+    TEST_ASSERT_FALSE(f.service.setControllerSlotConfiguration(f.blink(3)));
+    TEST_ASSERT_FALSE(f.service.setEnumValueDefinitions({}));
+    mode.options.pop_back(); TEST_ASSERT_FALSE(f.service.setEnumValueDefinitions({mode}));
+    source.enabled = false; TEST_ASSERT_FALSE(f.service.setControllerSlotConfiguration(source));
+    source.enabled = true; source.implementationConfiguration.threshold.decisionOnly = false;
+    source.implementationConfiguration.threshold.targetActuatorId = 1;
+    TEST_ASSERT_FALSE(f.service.setControllerSlotConfiguration(source));
+    c.onCode = "auto"; TEST_ASSERT_FALSE(f.service.setControllerSlotConfiguration(selector));
+    c.onCode = "cistern"; c.automaticControllerId = 1;
+    TEST_ASSERT_FALSE(f.service.setControllerSlotConfiguration(selector));
+    const auto& saved = f.service.getConfiguration().controllerSlots[0];
+    const String html = buildSelectorFields(f.service.getConfiguration(), saved, "<option value='1'>Valve</option>");
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "selectorMode"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "data-current='cistern'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Unknown input holds"));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_selector_persistence_dependencies_and_exclusive_target);
     RUN_TEST(test_controller_registry_uses_stable_ids_and_on_off_requirement);
     RUN_TEST(test_threshold_registry_uses_stable_id_and_on_off_requirement);
     RUN_TEST(test_threshold_direction_exposes_matching_comparison_symbols);
