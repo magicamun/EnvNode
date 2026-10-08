@@ -1,5 +1,6 @@
 #pragma once
 #include <U8g2lib.h>
+#include <memory>
 #include "ITextDisplay.h"
 #include "I2CBusManager.h"
 namespace EnvNode {
@@ -18,6 +19,7 @@ private:
     const char* phase_ = "idle";
     TwoWire* wire_ = nullptr;
     U8G2 display_;
+    std::unique_ptr<uint8_t[]> framebuffer_;
     uint8_t address_ = 0x3C;
     bool failed_ = false;
     bool ready_ = false;

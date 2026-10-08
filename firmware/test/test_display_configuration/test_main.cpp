@@ -236,6 +236,12 @@ void test_driver_type_roundtrip_and_legacy_default() {
     auto page = example(); String encoded;
     TEST_ASSERT_TRUE(encodeDisplayConfiguration(page, encoded));
     std::string legacy(encoded.c_str());
+    size_t start = 2;
+    start = legacy.find('\n', start) + 1;
+    start = legacy.find('\n', start) + 1;
+    size_t end = legacy.find('\n', start);
+    size_t length = std::stoul(legacy.substr(start, end - start));
+    legacy = legacy.substr(end + 1, length);
     legacy.replace(0, 4, "4\n");
     DisplayConfiguration decoded; decoded.hardware.type = TextDisplayType::Sh1106;
     TEST_ASSERT_TRUE(decodeDisplayConfiguration(legacy.c_str(), decoded));
@@ -249,8 +255,31 @@ void test_driver_type_roundtrip_and_legacy_default() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(TextDisplayType::Sh1106), static_cast<int>(type));
 }
 
+void test_two_pages_persist_and_bus_conflicts_are_rejected() {
+    ConfigurationService service; service.loadConfiguration();
+    auto page = example(); page.hardware.enabled = true;
+    page.secondHardware.enabled = true; page.secondHardware.bus = I2CBus::I2C1;
+    page.secondHardware.type = TextDisplayType::Sh1106;
+    page.secondPage.formats[0] = "Second page";
+    page.pageAssignment[0] = 1; page.pageAssignment[1] = 0;
+    TEST_ASSERT_TRUE(service.setDisplayConfiguration(page));
+    service.loadConfiguration();
+    const auto& saved = service.getConfiguration().display;
+    TEST_ASSERT_TRUE(saved.secondHardware.enabled);
+    TEST_ASSERT_EQUAL_STRING("Second page", saved.secondPage.formats[0].c_str());
+    TEST_ASSERT_EQUAL_INT(1, saved.pageAssignment[0]);
+    page.secondHardware.bus = page.hardware.bus;
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(I2CBus::I2C1), static_cast<int>(saved.secondHardware.bus));
+    page.secondHardware.address = 0x3D;
+    TEST_ASSERT_TRUE(service.setDisplayConfiguration(page));
+    page.pageAssignment[1] = 2;
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_two_pages_persist_and_bus_conflicts_are_rejected);
     RUN_TEST(test_driver_type_roundtrip_and_legacy_default);
     RUN_TEST(test_v3_migrates_and_blob_persists_large_enum_page_atomically);
     RUN_TEST(test_v2_migration_and_v3_labels_survive_reload);

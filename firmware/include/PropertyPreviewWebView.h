@@ -8,6 +8,8 @@
 
 namespace EnvNode {
 
+String buildDisplayTabs(size_t selected);
+String buildDisplayOutputsHtml(const DisplayConfiguration& configuration);
 String propertySourceText(const PropertyReference& reference);
 String buildPropertySourceOption(const PropertyReference& reference,
     const PropertyDescription& description, const char* componentName, const String& selectedSource);
@@ -19,6 +21,6 @@ constexpr size_t PropertyPreviewLineCount = DisplayLineCount;
 using PropertyPreviewPage = DisplayConfiguration;
 // optionsHtml contains escaped options produced by buildPropertySourceOption.
 String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
-    const PropertyPreviewPage& page, bool submitted);
+    const PropertyPreviewPage& page, bool submitted, size_t pageIndex = 0);
 
 } // namespace EnvNode

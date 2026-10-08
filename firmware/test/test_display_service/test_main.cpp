@@ -168,8 +168,30 @@ void test_bus_roundtrip_releases_old_target_even_after_frame_failure() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Ready), static_cast<int>(f.service.status()));
     TEST_ASSERT_EQUAL_STRING("RainControl", f.display.last.lines[0]);
 }
+void test_two_displays_render_independent_pages_and_recover_independently() {
+    Fixture f; Display second;
+    f.config.hardware.enabled = true;
+    f.config.secondHardware.enabled = true; f.config.secondHardware.bus = I2CBus::I2C1;
+    f.config.secondPage.formats[0] = "Second";
+    DisplayService service(f.config, f.reader, f.display, f.clock, f.log, &second);
+    second.beginOk = false; service.loop();
+    TEST_ASSERT_EQUAL_STRING("RainControl", f.display.last.lines[0]);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Unavailable), static_cast<int>(service.status(1)));
+    f.clock.now = 1000; service.loop();
+    TEST_ASSERT_EQUAL_UINT32(2, f.display.shows);
+    TEST_ASSERT_EQUAL_UINT32(1, second.begins);
+    second.beginOk = true; f.clock.now = 10000; service.loop();
+    TEST_ASSERT_EQUAL_STRING("Second", second.last.lines[0]);
+    f.config.pageAssignment[0] = 1; f.config.pageAssignment[1] = 0;
+    f.clock.now += 1000; service.loop();
+    TEST_ASSERT_EQUAL_STRING("Second", f.display.last.lines[0]);
+    TEST_ASSERT_EQUAL_STRING("RainControl", second.last.lines[0]);
+    f.config.secondHardware.enabled = false; f.clock.now += 1000; service.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Ready), static_cast<int>(service.status(0)));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Disabled), static_cast<int>(service.status(1)));
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
+    UNITY_BEGIN(); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
     RUN_TEST(test_saved_translation_reaches_oled_and_updates_live);
     RUN_TEST(test_disabled_enable_refresh_and_live_edit);
     RUN_TEST(test_missing_display_retries_and_recovers);

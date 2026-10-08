@@ -68,7 +68,9 @@ private:
     void handleMeasurements();
     void handleDisplay();
     void handleDisplaySave();
-    bool readDisplayEnumTranslations(DisplayConfiguration& page, const IPropertyReader& properties);
+    void handleDisplayOutputsSave();
+    bool readDisplayOutputs(DisplayConfiguration& configuration);
+    bool readDisplayEnumTranslations(DisplayPage& page, const IPropertyReader& properties);
     void handleSensorEdit();
     void handleSensorSave();
     void handleSensorApply();

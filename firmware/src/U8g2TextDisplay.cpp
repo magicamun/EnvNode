@@ -1,4 +1,5 @@
 #include "U8g2TextDisplay.h"
+#include <new>
 namespace EnvNode {
 namespace {
 // Bound a failed transaction without changing the shared bus configuration permanently.
@@ -51,15 +52,19 @@ bool U8g2TextDisplay::begin(const TextDisplayConfiguration& configuration) {
     // Start from the same zero state as a cold boot before rebinding the driver.
     *display_.getU8g2() = u8g2_t{};
     if (!configuration.enabled || !validateTextDisplayConfiguration(configuration)) return false;
+    if (!framebuffer_) framebuffer_.reset(new (std::nothrow) uint8_t[128 * 64 / 8]);
+    if (!framebuffer_) { logger_.warn("OLED framebuffer allocation failed"); return false; }
     switch (configuration.type) {
     case TextDisplayType::Ssd1309:
-        u8g2_Setup_ssd1309_i2c_128x64_noname2_f(display_.getU8g2(), U8G2_R0, transfer, u8x8_gpio_and_delay_arduino); break;
+        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_ssd1309_128x64_noname2, u8x8_cad_ssd13xx_i2c, transfer, u8x8_gpio_and_delay_arduino); break;
     case TextDisplayType::Ssd1306:
-        u8g2_Setup_ssd1306_i2c_128x64_noname_f(display_.getU8g2(), U8G2_R0, transfer, u8x8_gpio_and_delay_arduino); break;
+        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_ssd1306_128x64_noname, u8x8_cad_ssd13xx_fast_i2c, transfer, u8x8_gpio_and_delay_arduino); break;
     case TextDisplayType::Sh1106:
-        u8g2_Setup_sh1106_i2c_128x64_noname_f(display_.getU8g2(), U8G2_R0, transfer, u8x8_gpio_and_delay_arduino); break;
+        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_sh1106_128x64_noname, u8x8_cad_ssd13xx_fast_i2c, transfer, u8x8_gpio_and_delay_arduino); break;
     default: return false;
     }
+    // Use per-instance storage; the stock full-buffer setup shares a static buffer.
+    u8g2_SetupBuffer(display_.getU8g2(), framebuffer_.get(), 8, u8g2_ll_hvline_vertical_top_lsb, U8G2_R0);
     display_.setUserPtr(this);
     bus_ = configuration.bus;
     wire_ = buses_.wire(bus_);

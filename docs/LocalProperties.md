@@ -494,3 +494,30 @@ U8g2 context. Logs identify driver, bus and address, and report failed probe,
 initialization/wake, frame or sleep transfers with the Wire status code.
 An acknowledged transfer does not prove visible output or reset the physical
 controller; verify bus 0 → bus 1 → bus 0 on hardware without a power cycle.
+
+## Two displays and two pages
+
+Display configuration now has two independent outputs and two six-line pages.
+Each output selects driver, I2C bus, address, enabled state and Page 1 or Page 2.
+Both outputs may show the same page. The page editor links select the page to
+edit; save before switching pages. Page saves update only the selected page, preserving both output assignments
+and the other page. The separate Displays tab saves hardware and assignments only. Load saved settings stays on
+the currently edited page. Each display owns a 1024-byte framebuffer, refresh
+state and retry timer; a missing display does not stop the other output.
+
+Two enabled outputs cannot claim the same bus/address pair. The same address on
+different buses is allowed; sensor/actuator resource checks include both outputs.
+Both previous targets are released before initializing new ones, including when
+swapping bus assignments.
+
+Storage version 6 wraps two bounded version-5 page records and their assignments
+in one NVS blob (maximum 12400 bytes). Versions 1–5 migrate to Display 1 / Page 1;
+Display 2 is disabled, Page 2 is empty. Existing formats and translations remain.
+Hardware verification: configure the old SSD1309 on I2C0 with Page 1, the second
+display on I2C1 with Page 2, save different text, then verify reboot persistence
+and that disabling one output leaves the other running.
+
+The Display section opens on the Displays tab. Page 1 and Page 2 each provide
+their own content editor, preview, save and load controls. Hardware saves use
+`/display/outputs/save`; content saves use `/display/save` with a page selector.
+Each action copies the current configuration and replaces only its own fields.

@@ -309,7 +309,7 @@ void test_load_saved_submits_an_independent_form() {
     // Load must submit a separate form, without any draft fields or save action.
     const char* load = strstr(html.c_str(), "</form><form id='display-load' method='get' action='/display#text-preview'>");
     TEST_ASSERT_NOT_NULL(load);
-    TEST_ASSERT_NOT_NULL(strstr(load, "<input type='hidden' name='loadDisplay' value='1'></form>"));
+    TEST_ASSERT_NOT_NULL(strstr(load, "<input type='hidden' name='loadDisplay' value='1'><input type='hidden' name='page' value='1'></form>"));
     TEST_ASSERT_NULL(strstr(load, "name='f0'"));
     TEST_ASSERT_NULL(strstr(load, "name='s0_0'"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "<a href='/display#text-preview'>Load saved settings</a>"));
@@ -415,8 +415,31 @@ void test_controller_translation_uses_code_and_preserves_fallback() {
     TEST_ASSERT_EQUAL_STRING("Status: 07.10.2026",formatDisplayLine(reader,page,0).value.text);
 }
 
+void test_second_page_editor_preserves_assignment_and_load_target() {
+    Reader reader; PropertyPreviewPage page;
+    page.formats[0] = "First content"; page.secondPage.formats[0] = "Second content";
+    page.secondHardware.enabled = true; page.secondHardware.bus = I2CBus::I2C1;
+    String html = buildPropertyPagePreviewHtml(reader, "", page, true, 1);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='f0' maxlength='128' value='Second content'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "First content"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "name='displayEnabled2'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "name='displayPage2'>"));
+    const char* load = strstr(html.c_str(), "<form id='display-load'");
+    TEST_ASSERT_NOT_NULL(load);
+    TEST_ASSERT_NOT_NULL(strstr(load, "name='page' value='2'"));
+}
+void test_hardware_dialog_contains_no_page_content_fields() {
+    PropertyPreviewPage configuration;
+    configuration.formats[0] = "Saved content";
+    const String html = buildDisplayOutputsHtml(configuration);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "action='/display/outputs/save'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='displayPage2'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='displayEnabled'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "name='f0'"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "Saved content"));
+}
 int main(int, char**) {
-    UNITY_BEGIN();
+    UNITY_BEGIN(); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
     RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
     RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
     RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);

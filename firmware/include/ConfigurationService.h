@@ -80,7 +80,7 @@ private:
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots,
-        const TextDisplayConfiguration* display = nullptr) const;
+        const DisplayConfiguration* display = nullptr) const;
 
     Configuration configuration_;
     Preferences preferences_;

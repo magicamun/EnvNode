@@ -292,8 +292,9 @@ void ConfigurationService::loadFromPreferences() {
     }
     DisplayConfiguration display;
     if (decodeDisplayConfiguration(displayRecord, display)) {
-        if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)) {
+        if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display)) {
             display.hardware.enabled = false;
+            display.secondHardware.enabled = false;
         }
         configuration_.display = display;
     }
@@ -1094,8 +1095,8 @@ bool ConfigurationService::validateControllerSlots(
 bool ConfigurationService::validateHardwareOccupancy(
     const SensorSlotConfiguration* sensorSlots,
     const ActuatorSlotConfiguration* actuatorSlots,
-    const TextDisplayConfiguration* display) const {
-    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount + 1];
+    const DisplayConfiguration* display) const {
+    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount + 2];
     size_t claimIndex = 0;
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         claims[claimIndex].active = sensorSlots[index].enabled
@@ -1109,9 +1110,12 @@ bool ConfigurationService::validateHardwareOccupancy(
         claims[claimIndex].assignment = actuatorSlots[index].hardware;
         ++claimIndex;
     }
-    const auto& hardware = display == nullptr ? configuration_.display.hardware : *display;
-    claims[claimIndex++] = HardwareResourceClaim(hardware.enabled,
-        HardwareResourceAssignment::i2cResource(I2CResource(hardware.bus, hardware.address)));
+    const auto& displays = display == nullptr ? configuration_.display : *display;
+    for (size_t index = 0; index < 2; ++index) {
+        const auto& hardware = displays.output(index);
+        claims[claimIndex++] = HardwareResourceClaim(hardware.enabled,
+            HardwareResourceAssignment::i2cResource(I2CResource(hardware.bus, hardware.address)));
+    }
     return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
 
@@ -1262,7 +1266,7 @@ bool ConfigurationService::setControllerSlotConfiguration(
 bool ConfigurationService::setDisplayConfiguration(const DisplayConfiguration& display) {
     String encoded;
     if (!encodeDisplayConfiguration(display, encoded)
-        || !validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display.hardware)) return false;
+        || !validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display)) return false;
     ensurePreferencesStarted();
     if (preferences_.putBytes("display_page4", encoded.c_str(), encoded.length()) != encoded.length()) return false;
     configuration_.display = display;

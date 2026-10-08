@@ -6,5 +6,5 @@ struct DisplayLineResult {
     const char* error = nullptr;
 };
 DisplayLineResult formatDisplayLine(const IPropertyReader& reader,
-    const DisplayConfiguration& page, size_t line);
+    const DisplayPage& page, size_t line);
 }

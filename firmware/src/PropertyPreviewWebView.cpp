@@ -90,41 +90,79 @@ String buildPropertyPreviewHtml(const IPropertyReader& reader, const String& opt
     return html;
 }
 
+String buildDisplayTabs(size_t selected) {
+    String html("<nav class='actions' aria-label='Display configuration'>");
+    const char* titles[] = {"Displays", "Page 1", "Page 2"};
+    const char* urls[] = {"/display", "/display?page=1", "/display?page=2"};
+    for (size_t i = 0; i < 3; ++i) {
+        html += "<a class='button' href='"; html += urls[i];
+        html += i == selected ? "' aria-current='page' style='font-weight:700;text-decoration:underline'>" : "'>";
+        html += titles[i]; html += "</a>";
+    }
+    html += "</nav>";
+    return html;
+}
+
+String buildDisplayOutputsHtml(const DisplayConfiguration& page) {
+    String html("<section class='card'>");
+    html += buildDisplayTabs(0).c_str();
+    html += "<h2>Displays</h2><p class='help'>Configure hardware and assign pages here. Page contents are edited separately.</p><form method='post' action='/display/outputs/save'>";
+    for (size_t output = 0; output < 2; ++output) {
+        const auto& hardware = page.output(output);
+        const String suffix = output == 0 ? "" : "2";
+        html += "<fieldset><legend>Display "; html += String(static_cast<unsigned>(output + 1)).c_str(); html += "</legend><label>Display output<select name='displayEnabled"; html += suffix.c_str(); html += "'>";
+        html += hardware.enabled ? "<option value='0'>Disabled</option><option value='1' selected>Enabled</option>"
+            : "<option value='0' selected>Disabled</option><option value='1'>Enabled</option>";
+        html += "</select></label><label>Display type<select name='displayType"; html += suffix.c_str(); html += "'>";
+        for (unsigned int value = 0; value < 3; ++value) {
+            const auto type = static_cast<TextDisplayType>(value);
+            html += "<option value='"; html += String(value).c_str();
+            html += type == hardware.type ? "' selected>" : "'>";
+            html += textDisplayTypeName(type); html += "</option>";
+        }
+        html += "</select></label><label>I2C bus<select name='displayBus"; html += suffix.c_str(); html += "'>";
+        const auto& board = BoardCapabilities::current();
+        for (size_t index = 0; index < board.i2cBusCount(); ++index) {
+            const auto* bus = board.i2cBusAt(index);
+            html += "<option value='";
+            html += String(static_cast<unsigned int>(bus->bus)).c_str();
+            html += bus->bus == hardware.bus ? "' selected>" : "'>";
+            html += i2cBusName(bus->bus);
+            html += " (SDA "; html += String(static_cast<unsigned int>(bus->sda.number)).c_str();
+            html += ", SCL "; html += String(static_cast<unsigned int>(bus->scl.number)).c_str();
+            html += ")</option>";
+        }
+        html += "</select></label><label>I2C address<select name='displayAddress"; html += suffix.c_str(); html += "'>";
+        html += hardware.address == 0x3C
+            ? "<option value='60' selected>0x3C</option><option value='61'>0x3D</option>"
+            : "<option value='60'>0x3C</option><option value='61' selected>0x3D</option>";
+        html += "</select></label><p class='help'>Save on device applies output settings immediately. Refresh: 1 second. Six lines, 10-pixel spacing; long lines are clipped at the right edge. Connection errors are logged; retry: 10 seconds.</p>";
+        html += "<label>Page<select name='displayPage"; html += suffix.c_str(); html += "'>";
+        for (unsigned i = 0; i < 2; ++i) {
+            html += "<option value='"; html += String(i).c_str();
+            html += page.pageAssignment[output] == i ? "' selected>" : "'>";
+            html += "Page "; html += String(i + 1).c_str(); html += "</option>";
+        }
+        html += "</select></label>";
+        html += "</fieldset>";
+    }
+    html += "<div class='actions'><button type='submit'>Save on device</button><button type='submit' form='display-outputs-load'>Load saved settings</button></div></form><form id='display-outputs-load' method='get' action='/display'></form></section>";
+    return html;
+}
+
 String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
-    const PropertyPreviewPage& page, bool submitted) {
+    const PropertyPreviewPage& page, bool submitted, size_t pageIndex) {
+    const auto& contentPage = page.page(pageIndex);
     String html("<section class='card' id='text-preview'><h2>Six-line text preview</h2>");
+    html += buildDisplayTabs(pageIndex + 1).c_str();
+    html += "<h3>Page "; html += String(static_cast<unsigned>(pageIndex + 1)).c_str();
+    html += "</h3><p class='help'>Save edits before switching tabs. Only this page's content is saved here.</p>";
     html += "<p>Each line has its own format and up to four sources, in placeholder order. Leave sources empty for plain text or an empty line.</p>";
     html += "<p class='help'>Optional Boolean text applies to %s: empty keeps the default text. Maximum 16 UTF-8 bytes each (umlauts use two bytes). Other source types ignore these labels.</p>";
     html += "<template id='property-sources'><select>";
     html += optionsHtml.c_str();
     html += "</select></template><noscript><p>Enable JavaScript to choose display sources.</p></noscript><form method='get' action='/display#text-preview'>";
-    html += "<fieldset><legend>Display · Page 1</legend><label>Display output<select name='displayEnabled'>";
-    html += page.hardware.enabled ? "<option value='0'>Disabled</option><option value='1' selected>Enabled</option>"
-        : "<option value='0' selected>Disabled</option><option value='1'>Enabled</option>";
-    html += "</select></label><label>Display type<select name='displayType'>";
-    for (unsigned int value = 0; value < 3; ++value) {
-        const auto type = static_cast<TextDisplayType>(value);
-        html += "<option value='"; html += String(value).c_str();
-        html += type == page.hardware.type ? "' selected>" : "'>";
-        html += textDisplayTypeName(type); html += "</option>";
-    }
-    html += "</select></label><label>I2C bus<select name='displayBus'>";
-    const auto& board = BoardCapabilities::current();
-    for (size_t index = 0; index < board.i2cBusCount(); ++index) {
-        const auto* bus = board.i2cBusAt(index);
-        html += "<option value='";
-        html += String(static_cast<unsigned int>(bus->bus)).c_str();
-        html += bus->bus == page.hardware.bus ? "' selected>" : "'>";
-        html += i2cBusName(bus->bus);
-        html += " (SDA "; html += String(static_cast<unsigned int>(bus->sda.number)).c_str();
-        html += ", SCL "; html += String(static_cast<unsigned int>(bus->scl.number)).c_str();
-        html += ")</option>";
-    }
-    html += "</select></label><label>I2C address<select name='displayAddress'>";
-    html += page.hardware.address == 0x3C
-        ? "<option value='60' selected>0x3C</option><option value='61'>0x3D</option>"
-        : "<option value='60'>0x3C</option><option value='61' selected>0x3D</option>";
-    html += "</select></label><p class='help'>Save on device applies output settings immediately. Refresh: 1 second. Six lines, 10-pixel spacing; long lines are clipped at the right edge. Connection errors are logged; retry: 10 seconds.</p></fieldset>";
+    html += "<input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'>";
     for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
         html += "<fieldset><legend>Line ";
@@ -136,7 +174,7 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
         html += "' name='f";
         html += number.c_str();
         html += "' maxlength='128' value='";
-        if (page.formats[line].length() <= MaxPropertyFormatLength) html += escapeHtml(page.formats[line]).c_str();
+        if (contentPage.formats[line].length() <= MaxPropertyFormatLength) html += escapeHtml(contentPage.formats[line]).c_str();
         html += "'>";
         for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
             const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
@@ -149,19 +187,19 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
             html += "' name='";
             html += field.c_str();
             html += "'><option value=''>No source</option>";
-            if (!page.sources[line][source].isEmpty()
-                && page.sources[line][source].length() <= MaxPropertySourceLength) {
+            if (!contentPage.sources[line][source].isEmpty()
+                && contentPage.sources[line][source].length() <= MaxPropertySourceLength) {
                 html += "<option selected value='";
-                html += escapeHtml(page.sources[line][source]).c_str();
+                html += escapeHtml(contentPage.sources[line][source]).c_str();
                 html += "'>";
-                html += escapeHtml(page.sources[line][source]).c_str();
+                html += escapeHtml(contentPage.sources[line][source]).c_str();
                 html += "</option>";
             }
             html += "</select>";
-            const auto& labels = page.labels[line][source];
+            const auto& labels = contentPage.labels[line][source];
             PropertySourceInput selected;
             PropertyDescription description;
-            const bool isBoolean = parsePropertySource(page.sources[line][source].c_str(), selected)
+            const bool isBoolean = parsePropertySource(contentPage.sources[line][source].c_str(), selected)
                 && reader.describe(selected.reference(), description)
                 && description.valueKind == PropertyValueKind::Boolean;
             html += "<details data-boolean-source='";
@@ -191,14 +229,14 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
                 html += "<label>"; html += escapeHtml(String(option.displayText)).c_str();
                 html += "<input maxlength='16' data-code='"; html += escapeHtml(String(option.stableCode)).c_str();
                 html += "' name='e"; html += suffix.c_str(); html += "_"; html += escapeHtml(String(option.stableCode)).c_str();
-                html += "' value='"; html += escapeHtml(String(displayEnumText(page, line, source, option.stableCode))).c_str();
+                html += "' value='"; html += escapeHtml(String(displayEnumText(contentPage, line, source, option.stableCode))).c_str();
                 html += "'></label>";
             }
             html += "</div><p class='help'>Empty keeps the original state text. Up to 32 translations per page, 16 UTF-8 bytes each.</p></details>";
         }
         html += "</fieldset>";
     }
-    html += "<div class='actions'><button type='submit' name='preview' value='1'>Preview / refresh all lines</button><button type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'></form>";
+    html += "<div class='actions'><button type='submit' name='preview' value='1'>Preview / refresh all lines</button><button type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'><input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'></form>";
     html += "<p class='help'>Use %f for decimals, %u for unsigned integers (including actuator percent), %s for text, Boolean or enum text, and %% for a percent sign. Example: Level: %.0f l %.0f%% with two sources. Width up to 64; decimal places 0–6. Numbers use canonical units and a decimal point.</p>";
     html += "<p class='help'>This is a six-line text preview, not a pixel-accurate OLED simulation. Preview settings remain in this URL until you choose Save on device. Saved settings survive restart. Load saved settings discards the preview edits. Refresh reads all lines again.</p>";
     if (optionsHtml.isEmpty()) html += "<p>No sources available; plain text still works.</p>";
@@ -207,7 +245,7 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
         // row gets an explicit marker; its previous or partial value is never reused.
         String rendered;
         for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
-            const DisplayLineResult lineResult = formatDisplayLine(reader, page, line);
+            const DisplayLineResult lineResult = formatDisplayLine(reader, contentPage, line);
             const char* error = lineResult.error;
             const PropertyTextResult& result = lineResult.value;
             if (error != nullptr) {

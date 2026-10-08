@@ -2,7 +2,7 @@
 #include "PropertySourceInput.h"
 namespace EnvNode {
 DisplayLineResult formatDisplayLine(const IPropertyReader& reader,
-    const DisplayConfiguration& page, size_t line) {
+    const DisplayPage& page, size_t line) {
     DisplayLineResult result;
     if (line >= DisplayLineCount) { result.error = "Invalid line."; return result; }
     PropertySourceInput parsed[MaxPropertySourcesPerLine];

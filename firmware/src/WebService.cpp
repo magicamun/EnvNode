@@ -488,6 +488,7 @@ void WebService::begin() {
     server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
     server_.on("/display", HTTP_GET, [this]() { handleDisplay(); });
+    server_.on("/display/outputs/save", HTTP_POST, [this]() { handleDisplayOutputsSave(); });
     server_.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
@@ -1309,7 +1310,7 @@ void WebService::handleControllers() {
     sendPage("Controllers", "/controllers", c, 200, true);
 }
 
-bool WebService::readDisplayEnumTranslations(DisplayConfiguration& page, const IPropertyReader& properties) {
+bool WebService::readDisplayEnumTranslations(DisplayPage& page, const IPropertyReader& properties) {
     page.enumTranslations.clear();
     for (size_t line = 0; line < DisplayLineCount; ++line) for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
         PropertySourceInput parsed;
@@ -1332,20 +1333,58 @@ bool WebService::readDisplayEnumTranslations(DisplayConfiguration& page, const I
     return true;
 }
 
-void WebService::handleDisplaySave() {
-    DisplayConfiguration candidate;
-    candidate.hardware = configurationService_.getConfiguration().display.hardware;
-    if (server_.hasArg("displayEnabled") || server_.hasArg("displayBus") || server_.hasArg("displayAddress")) {
-        if (!parseTextDisplayConfiguration(server_.arg("displayEnabled"), server_.arg("displayBus"),
-                server_.arg("displayAddress"), candidate.hardware)) {
-            sendResult("Display save failed", "/display", "Invalid display enable, I2C bus or address.", false);
-            return;
+bool WebService::readDisplayOutputs(DisplayConfiguration& configuration) {
+    for (size_t index = 0; index < 2; ++index) {
+        const String suffix = index == 0 ? "" : "2";
+        auto& hardware = configuration.output(index);
+        if (server_.hasArg("displayEnabled" + suffix)) {
+            if (!parseTextDisplayConfiguration(server_.arg("displayEnabled" + suffix),
+                server_.arg("displayBus" + suffix), server_.arg("displayAddress" + suffix), hardware)) return false;
+        }
+        if (server_.hasArg("displayType" + suffix)
+            && !parseTextDisplayType(server_.arg("displayType" + suffix), hardware.type)) return false;
+        if (server_.hasArg("displayPage" + suffix)) {
+            const String value = server_.arg("displayPage" + suffix);
+            if (value != "0" && value != "1") return false;
+            configuration.pageAssignment[index] = value == "0" ? 0 : 1;
         }
     }
-    if (server_.hasArg("displayType") && !parseTextDisplayType(server_.arg("displayType"), candidate.hardware.type)) {
-        sendResult("Display save failed", "/display", "Invalid display type; previous settings retained.", false);
+    return true;
+}
+
+void WebService::handleDisplayOutputsSave() {
+    for (size_t index = 0; index < 2; ++index) {
+        const String suffix = index == 0 ? "" : "2";
+        const char* fields[] = {"displayEnabled", "displayType", "displayBus", "displayAddress", "displayPage"};
+        for (const char* field : fields) if (!server_.hasArg(String(field) + suffix)) {
+            sendResult("Display save failed", "/display", "Incomplete display settings; previous settings retained.", false); return;
+        }
+    }
+    std::unique_ptr<DisplayConfiguration> storage(new DisplayConfiguration(configurationService_.getConfiguration().display));
+    auto& candidate = *storage;
+    if (!readDisplayOutputs(candidate)) {
+        sendResult("Display save failed", "/display", "Invalid display type, bus, address or page.", false); return;
+    }
+    if (candidate.hardware.enabled && candidate.secondHardware.enabled
+        && candidate.hardware.bus == candidate.secondHardware.bus
+        && candidate.hardware.address == candidate.secondHardware.address) {
+        sendResult("Display save failed", "/display", "Both enabled displays use the same I2C bus and address. Choose a different bus or address; previous settings retained.", false);
         return;
     }
+    if (!configurationService_.setDisplayConfiguration(candidate)) {
+        sendResult("Display save failed", "/display", "Could not store display settings (storage failure or I2C address conflict); previous settings retained.", false); return;
+    }
+    server_.sendHeader("Location", "/display"); server_.send(303);
+}
+
+void WebService::handleDisplaySave() {
+    if (server_.hasArg("page") && server_.arg("page") != "1" && server_.arg("page") != "2") {
+        sendResult("Display save failed", "/display", "Invalid page.", false); return;
+    }
+    const size_t pageIndex = server_.arg("page") == "2" ? 1 : 0;
+    std::unique_ptr<DisplayConfiguration> storage(new DisplayConfiguration(configurationService_.getConfiguration().display));
+    auto& candidate = *storage;
+    auto& editedPage = candidate.page(pageIndex);
     for (size_t line = 0; line < DisplayLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
         const String formatField = "f" + number;
@@ -1353,22 +1392,22 @@ void WebService::handleDisplaySave() {
             sendResult("Display save failed", "/display", "Incomplete display page; previous settings retained.", false);
             return;
         }
-        candidate.formats[line] = server_.arg(formatField);
+        editedPage.formats[line] = server_.arg(formatField);
         for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
             const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
             if (!server_.hasArg(field)) {
                 sendResult("Display save failed", "/display", "Incomplete display page; previous settings retained.", false);
                 return;
             }
-            candidate.sources[line][source] = server_.arg(field);
+            editedPage.sources[line][source] = server_.arg(field);
             const String suffix = number + "_" + String(static_cast<unsigned int>(source));
-            candidate.labels[line][source].trueText = server_.arg("true" + suffix);
-            candidate.labels[line][source].falseText = server_.arg("false" + suffix);
+            editedPage.labels[line][source].trueText = server_.arg("true" + suffix);
+            editedPage.labels[line][source].falseText = server_.arg("false" + suffix);
         }
     }
     ValuePropertyReader valueProperties(valueRuntime_);
     PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, nullptr, &valueProperties);
-    if (!readDisplayEnumTranslations(candidate, properties) || !validateDisplayConfiguration(candidate)) {
+    if (!readDisplayEnumTranslations(editedPage, properties) || !validateDisplayConfiguration(candidate)) {
         sendResult("Display save failed", "/display", "Invalid format, sources or Boolean text. Match placeholders and sources without gaps; labels require a source and allow at most 16 UTF-8 bytes without control characters. Previous settings retained.", false);
         return;
     }
@@ -1376,7 +1415,7 @@ void WebService::handleDisplaySave() {
         sendResult("Display save failed", "/display", "Could not store display settings (storage failure or I2C address conflict); previous settings retained.", false);
         return;
     }
-    server_.sendHeader("Location", "/display#text-preview");
+    server_.sendHeader("Location", pageIndex == 0 ? "/display?page=1#text-preview" : "/display?page=2#text-preview");
     server_.send(303);
 }
 
@@ -1437,53 +1476,54 @@ void WebService::handleDisplay() {
     server_.sendHeader("Cache-Control", "no-store");
     String content;
     const Configuration& configuration = configurationService_.getConfiguration();
+    if (!server_.hasArg("page") && !server_.hasArg("f0") && !server_.hasArg("source")
+        && !server_.hasArg("format") && !server_.hasArg("preview") && !server_.hasArg("loadDisplay")) {
+        sendPage("Display", "/display", buildDisplayOutputsHtml(configuration.display));
+        return;
+    }
+
     SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity);
     ValuePropertyReader valueProperties(valueRuntime_);
     PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
     const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");
-    PropertyPreviewPage previewPage = configuration.display;
+    if (server_.hasArg("page") && server_.arg("page") != "1" && server_.arg("page") != "2") {
+        sendResult("Invalid page", "/display", "Choose Page 1 or Page 2.", false); return;
+    }
+    const size_t pageIndex = server_.arg("page") == "2" ? 1 : 0;
+    std::unique_ptr<DisplayConfiguration> storage(new DisplayConfiguration(configuration.display));
+    auto& previewPage = *storage;
+    auto& editedPage = previewPage.page(pageIndex);
     const bool multiLineInput = !loadSavedDisplay && server_.hasArg("f0");
-    if (!loadSavedDisplay && server_.hasArg("displayEnabled")) {
-        if (!parseTextDisplayConfiguration(server_.arg("displayEnabled"), server_.arg("displayBus"),
-                server_.arg("displayAddress"), previewPage.hardware)) {
-            content += "<p role='alert'>Invalid display hardware selection; showing saved hardware settings.</p>";
-        }
-    }
-    if (!loadSavedDisplay && server_.hasArg("displayType")
-        && !parseTextDisplayType(server_.arg("displayType"), previewPage.hardware.type)) {
-        sendResult("Invalid display type", "/display", "Choose a supported display type.", false);
-        return;
-    }
     if (multiLineInput) for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
-        previewPage.formats[line] = server_.arg("f" + number);
+        editedPage.formats[line] = server_.arg("f" + number);
         for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
             const String suffix = number + "_" + String(static_cast<unsigned int>(source));
-            previewPage.sources[line][source] = server_.arg("s" + suffix);
-            previewPage.labels[line][source].trueText = server_.arg("true" + suffix);
-            previewPage.labels[line][source].falseText = server_.arg("false" + suffix);
+            editedPage.sources[line][source] = server_.arg("s" + suffix);
+            editedPage.labels[line][source].trueText = server_.arg("true" + suffix);
+            editedPage.labels[line][source].falseText = server_.arg("false" + suffix);
         }
     }
-    if (multiLineInput && !readDisplayEnumTranslations(previewPage, properties)) {
+    if (multiLineInput && !readDisplayEnumTranslations(editedPage, properties)) {
         sendResult("Invalid state translations", "/display", "Use at most 32 state translations, each up to 16 UTF-8 bytes without control characters.", false);
         return;
     }
     // Existing single-line bookmarks become line 1.
     if (!loadSavedDisplay && !multiLineInput && (server_.hasArg("source") || server_.hasArg("format"))) {
-        previewPage = PropertyPreviewPage{};
-        previewPage.sources[0][0] = server_.arg("source");
-        previewPage.formats[0] = server_.arg("format");
+        editedPage = DisplayPage{};
+        editedPage.sources[0][0] = server_.arg("source");
+        editedPage.formats[0] = server_.arg("format");
     }
     String previewOptions;
     const auto addPreviewSource = [&](const PropertyReference& reference, const char* name) {
         PropertyDescription description;
         if (!properties.describe(reference, description)) return;
         const String source = propertySourceText(reference);
-        if (!loadSavedDisplay && !configuration.display.configured && !previewSubmitted && !multiLineInput && !server_.hasArg("source") && previewPage.sources[0][0].isEmpty()) {
-            previewPage.sources[0][0] = source;
+        if (!loadSavedDisplay && !configuration.display.configured && !previewSubmitted && !multiLineInput && !server_.hasArg("source") && editedPage.sources[0][0].isEmpty()) {
+            editedPage.sources[0][0] = source;
             if (!server_.hasArg("format")) {
-                previewPage.formats[0] = description.valueKind == PropertyValueKind::FloatingPoint ? "%.1f"
+                editedPage.formats[0] = description.valueKind == PropertyValueKind::FloatingPoint ? "%.1f"
                     : description.valueKind == PropertyValueKind::UnsignedInteger ? "%u" : "%s";
             }
         }
@@ -1522,7 +1562,7 @@ void WebService::handleDisplay() {
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), "Date (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), "Time (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "datetime"), "Date and time (locale)");
-    content += buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured);
+    content += buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured, pageIndex);
     sendPage("Display", "/display", content);
 }
 
