@@ -43,11 +43,12 @@ struct Reader : IPropertyReader {
 struct Display : ITextDisplay {
     bool beginOk = true, showOk = true;
     unsigned begins = 0, shows = 0, ends = 0;
+    std::string operations;
     TextDisplayFrame last;
     TextDisplayConfiguration hardware;
-    bool begin(const TextDisplayConfiguration& config) override { ++begins; hardware = config; return beginOk; }
+    bool begin(const TextDisplayConfiguration& config) override { operations += "B"; ++begins; hardware = config; return beginOk; }
     bool show(const TextDisplayFrame& frame) override { ++shows; last = frame; return showOk; }
-    void end() override { ++ends; }
+    void end() override { operations += "E"; ++ends; }
 };
 struct Fixture {
     DisplayConfiguration config;
@@ -142,8 +143,33 @@ void test_saved_translation_reaches_oled_and_updates_live() {
     TEST_ASSERT_EQUAL_UINT32(1, f.display.begins);
 }
 
+void test_driver_change_restarts_output_and_keeps_page() {
+    Fixture f; f.config.hardware.enabled = true; f.service.loop();
+    f.config.hardware.type = TextDisplayType::Sh1106; f.service.loop();
+    TEST_ASSERT_EQUAL_UINT32(2, f.display.begins);
+    TEST_ASSERT_EQUAL_UINT32(1, f.display.ends);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(TextDisplayType::Sh1106), static_cast<int>(f.display.hardware.type));
+    TEST_ASSERT_EQUAL_STRING("RainControl", f.display.last.lines[0]);
+}
+void test_bus_roundtrip_releases_old_target_even_after_frame_failure() {
+    Fixture f; f.config.hardware.enabled = true; f.service.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(I2CBus::I2C0), static_cast<int>(f.display.hardware.bus));
+    f.config.hardware.bus = I2CBus::I2C1;
+    f.config.hardware.type = TextDisplayType::Ssd1306;
+    f.service.loop();
+    TEST_ASSERT_EQUAL_STRING("BEB", f.display.operations.c_str());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(I2CBus::I2C1), static_cast<int>(f.display.hardware.bus));
+    f.clock.now += 1000; f.display.showOk = false; f.service.loop();
+    f.config.hardware.bus = I2CBus::I2C0;
+    f.config.hardware.type = TextDisplayType::Ssd1309;
+    f.display.showOk = true; f.service.loop();
+    TEST_ASSERT_EQUAL_STRING("BEBEB", f.display.operations.c_str());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(I2CBus::I2C0), static_cast<int>(f.display.hardware.bus));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Ready), static_cast<int>(f.service.status()));
+    TEST_ASSERT_EQUAL_STRING("RainControl", f.display.last.lines[0]);
+}
 int main(int, char**) {
-    UNITY_BEGIN();
+    UNITY_BEGIN(); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
     RUN_TEST(test_saved_translation_reaches_oled_and_updates_live);
     RUN_TEST(test_disabled_enable_refresh_and_live_edit);
     RUN_TEST(test_missing_display_retries_and_recovers);

@@ -8,8 +8,25 @@ namespace {
 constexpr size_t MaximumEncodedLength = MaxDisplayEncodedLength;
 }
 
+const char* textDisplayTypeName(TextDisplayType type) {
+    switch (type) {
+    case TextDisplayType::Ssd1309: return "SSD1309 · 128×64";
+    case TextDisplayType::Ssd1306: return "SSD1306 · 128×64";
+    case TextDisplayType::Sh1106: return "SH1106 · 128×64";
+    default: return nullptr;
+    }
+}
+bool parseTextDisplayType(const String& value, TextDisplayType& result) {
+    if (value == "0") result = TextDisplayType::Ssd1309;
+    else if (value == "1") result = TextDisplayType::Ssd1306;
+    else if (value == "2") result = TextDisplayType::Sh1106;
+    else return false;
+    return true;
+}
+
 bool validateTextDisplayConfiguration(const TextDisplayConfiguration& configuration) {
-    return BoardCapabilities::current().i2cBus(configuration.bus) != nullptr
+    return textDisplayTypeName(configuration.type) != nullptr
+        && BoardCapabilities::current().i2cBus(configuration.bus) != nullptr
         && (configuration.address == 0x3C || configuration.address == 0x3D);
 }
 
@@ -17,7 +34,7 @@ bool parseTextDisplayConfiguration(const String& enabled, const String& bus, con
     TextDisplayConfiguration& result) {
     if ((enabled != "0" && enabled != "1") || (bus != "0" && bus != "1")
         || (address != "60" && address != "61")) return false;
-    TextDisplayConfiguration candidate;
+    TextDisplayConfiguration candidate = result;
     candidate.enabled = enabled == "1";
     candidate.bus = bus == "0" ? I2CBus::I2C0 : I2CBus::I2C1;
     candidate.address = address == "60" ? 0x3C : 0x3D;
@@ -87,8 +104,9 @@ bool validateDisplayConfiguration(const DisplayConfiguration& configuration) {
 
 bool encodeDisplayConfiguration(const DisplayConfiguration& configuration, String& encoded) {
     if (!validateDisplayConfiguration(configuration)) return false;
-    // Version 3: hardware, then format and source/true/false triples for each row.
-    String result("4\n");
+    // Version 5 adds the driver type; older records default to SSD1309.
+    String result("5\n");
+    result += String(static_cast<unsigned int>(configuration.hardware.type)).c_str(); result += '\n';
     result += configuration.hardware.enabled ? "1\n" : "0\n";
     result += configuration.hardware.bus == I2CBus::I2C0 ? "0\n" : "1\n";
     result += configuration.hardware.address == 0x3C ? "60\n" : "61\n";
@@ -117,7 +135,8 @@ bool decodeDisplayConfiguration(const String& encoded, DisplayConfiguration& con
     if (encoded.length() > MaximumEncodedLength || strlen(encoded.c_str()) != encoded.length()) return false;
     const std::string input(encoded.c_str());
     const bool legacy = input.compare(0, 2, "1\n") == 0;
-    const bool enums = input.compare(0, 2, "4\n") == 0;
+    const bool typed = input.compare(0, 2, "5\n") == 0;
+    const bool enums = typed || input.compare(0, 2, "4\n") == 0;
     const bool translated = enums || input.compare(0, 2, "3\n") == 0;
     if (!legacy && !translated && input.compare(0, 2, "2\n") != 0) return false;
     size_t position = 2;
@@ -129,6 +148,10 @@ bool decodeDisplayConfiguration(const String& encoded, DisplayConfiguration& con
         position = end + 1;
         return true;
     };
+    if (typed) {
+        String type;
+        if (!field(type) || !parseTextDisplayType(type, candidate.hardware.type)) return false;
+    }
     if (!legacy) {
         String enabled, bus, address;
         if (!field(enabled) || !field(bus) || !field(address)

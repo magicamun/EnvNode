@@ -468,3 +468,29 @@ inventory to keep the device response small. JavaScript is required to change
 sources. Saved sources that are currently unavailable remain selected and are
 marked as unavailable, rather than silently replaced. Boolean and enum translation
 controls continue to follow the selected source type.
+
+## Firmware identity sources
+
+The Display source selection includes `system/1/version`, `system/1/build`,
+`system/1/git_commit` and `system/1/build_identity`. All four are read-only text
+properties formatted with `%s`, available before clock synchronization. They use
+the running firmware's generated build metadata. Example: `EnvNode %s` with
+`system/1/version`, or `Build %s` with `system/1/build`. These are system sources,
+not externally writable Values.
+
+## Selectable I2C display driver
+
+One logical display can use SSD1309 NONAME2, SSD1306 NONAME or SH1106 NONAME
+(128×64, U8g2 full framebuffer). Select the driver, bus and address together in
+the Display page; addresses 0x3C and 0x3D are supported. Page 1 remains the
+existing six-line content. Multiple logical displays/pages are a later step.
+Changing driver restarts display output; existing I2C resource validation applies.
+The version-5 display record preserves the page and driver; versions 1–4 load
+with SSD1309 as the default. Two physical compatible displays sharing one bus
+and address are treated as one mirrored output, not separately configurable.
+
+Display switching releases the previous bus target before setting up a fresh
+U8g2 context. Logs identify driver, bus and address, and report failed probe,
+initialization/wake, frame or sleep transfers with the Wire status code.
+An acknowledged transfer does not prove visible output or reset the physical
+controller; verify bus 0 → bus 1 → bus 0 on hardware without a power cycle.

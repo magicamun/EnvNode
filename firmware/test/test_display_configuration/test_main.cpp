@@ -224,8 +224,34 @@ void test_v3_migrates_and_blob_persists_large_enum_page_atomically() {
     TEST_ASSERT_FALSE(validateDisplayConfiguration(page));
 }
 
+void test_driver_type_roundtrip_and_legacy_default() {
+    ConfigurationService service; service.loadConfiguration();
+    for (unsigned int i = 0; i < 3; ++i) {
+        auto page = example(); page.hardware.type = static_cast<TextDisplayType>(i);
+        TEST_ASSERT_TRUE(service.setDisplayConfiguration(page));
+        service.loadConfiguration();
+        TEST_ASSERT_EQUAL_INT(i, static_cast<int>(service.getConfiguration().display.hardware.type));
+        TEST_ASSERT_EQUAL_STRING(page.formats[0].c_str(), service.getConfiguration().display.formats[0].c_str());
+    }
+    auto page = example(); String encoded;
+    TEST_ASSERT_TRUE(encodeDisplayConfiguration(page, encoded));
+    std::string legacy(encoded.c_str());
+    legacy.replace(0, 4, "4\n");
+    DisplayConfiguration decoded; decoded.hardware.type = TextDisplayType::Sh1106;
+    TEST_ASSERT_TRUE(decodeDisplayConfiguration(legacy.c_str(), decoded));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(TextDisplayType::Ssd1309), static_cast<int>(decoded.hardware.type));
+    std::string invalid(encoded.c_str()); invalid[2] = '9';
+    TEST_ASSERT_FALSE(decodeDisplayConfiguration(invalid.c_str(), decoded));
+    page.hardware.type = static_cast<TextDisplayType>(9);
+    TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
+    TextDisplayType type = TextDisplayType::Sh1106;
+    TEST_ASSERT_FALSE(parseTextDisplayType("garbage", type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(TextDisplayType::Sh1106), static_cast<int>(type));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_driver_type_roundtrip_and_legacy_default);
     RUN_TEST(test_v3_migrates_and_blob_persists_large_enum_page_atomically);
     RUN_TEST(test_v2_migration_and_v3_labels_survive_reload);
     RUN_TEST(test_largest_page_still_fits_one_nvs_string);

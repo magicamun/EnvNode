@@ -1,5 +1,6 @@
 #include <unity.h>
 #include "TimePropertyReader.h"
+#include "SystemPropertyReader.h"
 #include "ConfigurationService.h"
 #include "PropertyTextFormatter.h"
 using namespace EnvNode;
@@ -56,4 +57,17 @@ void test_time_is_unavailable_until_synchronized_and_local_time_valid() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::UnknownReference),static_cast<int>(reader.read({PropertyComponentKind::System,2,"date"},snapshot)));
     TEST_ASSERT_FALSE(snapshot.valid);
 }
-int main(int,char**) { UNITY_BEGIN(); RUN_TEST(test_locale_text_sources_and_owned_snapshots); RUN_TEST(test_time_is_unavailable_until_synchronized_and_local_time_valid); return UNITY_END(); }
+void test_build_sources_work_without_time_sync() {
+    ConfigurationService config; config.loadConfiguration(); LocaleFormatter locale(config);
+    Time time; time.synced = false;
+    SystemPropertyReader reader(time, locale, "0.5.0", "312", "abcdef0", "0.5.0+312.gabcdef0");
+    TEST_ASSERT_EQUAL_STRING("0.5.0", formatPropertyText(reader,{PropertyComponentKind::System,1,"version"},"%s").text);
+    TEST_ASSERT_EQUAL_STRING("312", formatPropertyText(reader,{PropertyComponentKind::System,1,"build"},"%s").text);
+    TEST_ASSERT_EQUAL_STRING("abcdef0", formatPropertyText(reader,{PropertyComponentKind::System,1,"git_commit"},"%s").text);
+    TEST_ASSERT_EQUAL_STRING("0.5.0+312.gabcdef0", formatPropertyText(reader,{PropertyComponentKind::System,1,"build_identity"},"%s").text);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::NoValue),static_cast<int>(formatPropertyText(reader,{PropertyComponentKind::System,1,"date"},"%s").status));
+    PropertyDescription description;
+    TEST_ASSERT_FALSE(reader.describe({PropertyComponentKind::System,2,"version"},description));
+    TEST_ASSERT_FALSE(reader.describe({PropertyComponentKind::System,1,"missing"},description));
+}
+int main(int,char**) { UNITY_BEGIN(); RUN_TEST(test_build_sources_work_without_time_sync); RUN_TEST(test_locale_text_sources_and_owned_snapshots); RUN_TEST(test_time_is_unavailable_until_synchronized_and_local_time_valid); return UNITY_END(); }

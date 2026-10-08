@@ -1,8 +1,9 @@
+#include "FirmwareBuildInfo.h"
 #include "Application.h"
 #include "DisplayService.h"
-#include "Ssd1309TextDisplay.h"
+#include "U8g2TextDisplay.h"
 #include "PropertyResolver.h"
-#include "TimePropertyReader.h"
+#include "SystemPropertyReader.h"
 #include "ValuePropertyReader.h"
 #include "ConfigurationService.h"
 #include "SerialLogger.h"
@@ -120,10 +121,10 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager,
     actuatorRuntime);
-static TimePropertyReader timeProperties(timeService, localeFormatter);
+static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity);
 static ValuePropertyReader valueProperties(valueRuntime);
 static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties);
-static Ssd1309TextDisplay oled(i2cBusManager);
+static U8g2TextDisplay oled(i2cBusManager, logger);
 static DisplayService displayService(configurationService.getConfiguration().display,
     displayProperties, oled, monotonicClock, logger);
 static OTAService otaService(logger, runtimeManager);

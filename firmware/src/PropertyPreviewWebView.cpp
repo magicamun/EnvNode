@@ -98,9 +98,16 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     html += "<template id='property-sources'><select>";
     html += optionsHtml.c_str();
     html += "</select></template><noscript><p>Enable JavaScript to choose display sources.</p></noscript><form method='get' action='/display#text-preview'>";
-    html += "<fieldset><legend>OLED SSD1309 · 128×64</legend><label>Display output<select name='displayEnabled'>";
+    html += "<fieldset><legend>Display · Page 1</legend><label>Display output<select name='displayEnabled'>";
     html += page.hardware.enabled ? "<option value='0'>Disabled</option><option value='1' selected>Enabled</option>"
         : "<option value='0' selected>Disabled</option><option value='1'>Enabled</option>";
+    html += "</select></label><label>Display type<select name='displayType'>";
+    for (unsigned int value = 0; value < 3; ++value) {
+        const auto type = static_cast<TextDisplayType>(value);
+        html += "<option value='"; html += String(value).c_str();
+        html += type == page.hardware.type ? "' selected>" : "'>";
+        html += textDisplayTypeName(type); html += "</option>";
+    }
     html += "</select></label><label>I2C bus<select name='displayBus'>";
     const auto& board = BoardCapabilities::current();
     for (size_t index = 0; index < board.i2cBusCount(); ++index) {

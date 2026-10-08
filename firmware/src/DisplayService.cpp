@@ -16,7 +16,11 @@ void DisplayService::setStatus(DisplayStatus status) {
 void DisplayService::loop() {
     const uint32_t now = clock_.nowMs();
     if (!haveConfiguration_ || !(active_ == configuration_.hardware)) {
-        if (haveConfiguration_) display_.end();
+        if (haveConfiguration_) {
+            logger_.infof("OLED release: %s, %s, address=0x%02X",
+                textDisplayTypeName(active_.type), i2cBusName(active_.bus), static_cast<unsigned>(active_.address));
+            display_.end();
+        }
         active_ = configuration_.hardware;
         haveConfiguration_ = true;
         attempted_ = false;
@@ -29,6 +33,8 @@ void DisplayService::loop() {
         if (attempted_ && static_cast<uint32_t>(now - lastAttempt_) < 10000) return;
         attempted_ = true;
         lastAttempt_ = now;
+        logger_.infof("OLED initialize: %s, %s, address=0x%02X",
+            textDisplayTypeName(active_.type), i2cBusName(active_.bus), static_cast<unsigned>(active_.address));
         if (!display_.begin(active_)) { setStatus(DisplayStatus::Unavailable); return; }
         setStatus(DisplayStatus::Ready);
         haveFrame_ = false;

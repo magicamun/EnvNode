@@ -2,7 +2,7 @@
 #include "HtmlEscaping.h"
 #include "LogWebView.h"
 #include "PropertyResolver.h"
-#include "TimePropertyReader.h"
+#include "SystemPropertyReader.h"
 #include "ValuePropertyReader.h"
 #include "PropertyPreviewWebView.h"
 #include "WebNavigation.h"
@@ -1342,6 +1342,10 @@ void WebService::handleDisplaySave() {
             return;
         }
     }
+    if (server_.hasArg("displayType") && !parseTextDisplayType(server_.arg("displayType"), candidate.hardware.type)) {
+        sendResult("Display save failed", "/display", "Invalid display type; previous settings retained.", false);
+        return;
+    }
     for (size_t line = 0; line < DisplayLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
         const String formatField = "f" + number;
@@ -1433,7 +1437,7 @@ void WebService::handleDisplay() {
     server_.sendHeader("Cache-Control", "no-store");
     String content;
     const Configuration& configuration = configurationService_.getConfiguration();
-    TimePropertyReader timeProperties(timeService_, localeFormatter_);
+    SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity);
     ValuePropertyReader valueProperties(valueRuntime_);
     PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
@@ -1445,6 +1449,11 @@ void WebService::handleDisplay() {
                 server_.arg("displayAddress"), previewPage.hardware)) {
             content += "<p role='alert'>Invalid display hardware selection; showing saved hardware settings.</p>";
         }
+    }
+    if (!loadSavedDisplay && server_.hasArg("displayType")
+        && !parseTextDisplayType(server_.arg("displayType"), previewPage.hardware.type)) {
+        sendResult("Invalid display type", "/display", "Choose a supported display type.", false);
+        return;
     }
     if (multiLineInput) for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
@@ -1506,6 +1515,10 @@ void WebService::handleDisplay() {
     for (const auto& value : valueRuntime_.values()) {
         addPreviewSource(PropertyReference(PropertyComponentKind::Value, value.configuration().id, "state"), value.configuration().name.c_str());
     }
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "version"), "Firmware version");
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "build"), "Build number");
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "git_commit"), "Git commit");
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "build_identity"), "Full build identity");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), "Date (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), "Time (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "datetime"), "Date and time (locale)");
