@@ -16,7 +16,7 @@ Messwerte werden über MQTT an externe Systeme weitergegeben, zum Beispiel Home 
 
 Die erste Fassung umfasst EnvNode Mini, Weatherstation, ORing Power,
 AnalogHydroPressure, DuoRelay, die Anbindung normaler I²C-Sensoren und die Firmware.
-Mini, Weatherstation und ORing Power besitzen ausgearbeitete Produktseiten.
+Mini, Weatherstation, ORing Power, DuoRelay und AnalogHydroPressure besitzen ausgearbeitete Produktseiten.
 Die weiteren Bereiche beginnen mit einer Übersicht und werden schrittweise ergänzt.
 
 Die vollständige Station befindet sich noch im Aufbau. Bereits nutzbare Komponenten

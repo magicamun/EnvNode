@@ -36,7 +36,10 @@ nav:
       - EnvNode Mini: mainboards/mini/index.md
       - Weatherstation: mainboards/weatherstation/index.md
       - ORing Power: mainboards/oring-power/index.md
-  - Module: modules/index.md
+  - Module:
+      - Übersicht: modules/index.md
+      - DuoRelay: modules/duo-relay/index.md
+      - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
   - I²C-Sensoren: sensors/index.md
   - Firmware: firmware/index.md
   - Bausätze und Aufbau: kits/index.md

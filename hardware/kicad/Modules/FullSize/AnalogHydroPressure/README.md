@@ -15,14 +15,12 @@
 
 The module has two hierarchical circuit sections:
 
-- The analog section converts the probe loop current across a 150 ohm, 0.1% burden resistor, filters and clamps the signal, and digitizes it with an `ADS1115IDGS` on `I2C0`.
+- The analog section converts the probe loop current across a 150 ohm, 0.1% burden resistor, filters and clamps the signal, and digitizes it with an `ADS1115IDGS` on the I2C bus selected by JP5 (SDA) and JP6 (SCL).
 - The boost section uses an `LT8330S6` to generate the local 24 V probe rail from the module interface's `+5V` supply.
 
 The ADS1115 address is selected with one of four solder jumpers for addresses `0x48` through `0x4B`. Exactly one address jumper must be closed before operation.
 
-The slide-switch positions allow the incoming 5 V supply path to be selected without changing the reusable connector design block. The schematic and PCB use:
-
-`EnvNode-Footprints:SW_Slide_CK_OS202011MS2QS1`
+JP5 (SDA) and JP6 (SCL) select the ADS1115 bus. Bridge pins 1-2 on both for I2C0, or pins 2-3 on both for I2C1. Both jumpers must select the same bus. Without both bridges the ADS1115 is disconnected from the bus. Never bridge all three pins or mix the bus selections. These jumpers do not select the 5 V supply. The optional identity EEPROM remains on I2C0.
 
 ## Local Libraries
 
@@ -41,7 +39,7 @@ The project-level `sym-lib-table` maps the symbol library. The footprint library
 1. Populate and inspect the 5 V input and LT8330 boost section.
 2. Power it from a current-limited 5 V supply before connecting a probe.
 3. Verify startup, switching waveform, output voltage, ripple, and component temperature under the intended load.
-4. Verify that exactly one ADS1115 address jumper is closed and that the ADC is detected on `I2C0`.
+4. Verify that exactly one ADS1115 address jumper is closed and that the ADC is detected on the I2C bus selected by JP5 (SDA) and JP6 (SCL).
 5. Apply known loop currents and verify approximately 0.6 V at 4 mA and 3.0 V at 20 mA across the nominal 150 ohm burden.
 6. Calibrate the complete measurement path with the intended pressure probe.
 
@@ -55,7 +53,7 @@ The Revision 0.5 assembly/bring-up guide documents AUX_GPIO2 / connector pin 10 
 
 ## Connector review — 2026-09-28
 
-The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Mini Revision 0.7 and WeatherStation Revision 0.2 both match this assignment in schematic and PCB; the earlier mainboard I2C0 mismatch is resolved for these revisions. I2C1 remains pin 7 SDA and pin 8 SCL.
+The module uses J1 pin 5 for I2C0 SDA and pin 6 for I2C0 SCL. Mini Revision 0.7 and WeatherStation Revision 0.2 both match this assignment in schematic and PCB; the earlier mainboard I2C0 mismatch is resolved for these revisions. I2C1 uses pin 7 SDA and pin 8 SCL and can be selected for the ADS1115 through JP5/JP6.
 
 Revision 0.5 moves LT8330 EN/UVLO and its R7 pull-down to J1 pin 10 / AUX_GPIO2 in both schematic and PCB. J1 pin 9 / AUX_GPIO1 is now unused and available for a future conditioned SCT013 analog signal; no SCT013 circuit is implemented yet. Firmware must use AUX_GPIO2 for boost enable: GPIO13 on Mini Slot A and WeatherStation Slot A, GPIO14 on Mini Slot B. Firmware was not modified as part of this hardware revision.
 

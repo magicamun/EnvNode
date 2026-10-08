@@ -9,6 +9,10 @@ DOWNLOADS = {
         "hardware/kicad/MainBoards/Weatherstation/Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf",
     "assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf":
         "hardware/kicad/DesignBlocks/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf",
+    "assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf":
+        "hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf",
+    "assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf":
+        "hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf",
 }
 
 def on_files(files, config, **kwargs):
