@@ -41,8 +41,8 @@ Vor einer Veröffentlichung auch die Downloads inhaltlich prüfen.
 Der aktive Workflow `.github/workflows/docs.yml` baut und veröffentlicht die Website
 bei relevanten Änderungen auf `main` oder nach manuellem Start in GitHub Actions.
 GitHub Pages verwendet als Quelle GitHub Actions.
-Die zunächst verwendete Adresse ist https://magicamun.github.io/EnvNode/.
-Die eigene Domain wird danach eingerichtet; dabei auch `site_url` aktualisieren.
+Die zunächst verwendete Adresse ist https://docs.envnode.de/.
+Die eigene Domain ist in GitHub Pages hinterlegt; `site_url` verwendet dieselbe Adresse.
 Es werden ausschließlich `docs/site/` und die ausgewählten Downloads veröffentlicht.
 
 ## Offizielle Dokumentation
@@ -58,3 +58,7 @@ Die aktuelle Revisionsangabe bleibt zur Zuordnung der Anleitung erhalten.
 Website, Shop und PDFs verwenden die Palette aus `HardwareDocumentationStyle.md`.
 Tabellen, Fließtext, Nebeninformationen und Informationsfelder folgen denselben
 Farbrollen; Warnungen behalten ihre semantischen Farben.
+
+Sensoren enthält die I²C-Treiberübersicht sowie ausdrücklich öffentliche WIP-Seiten
+für RainDetector und SCT013. Firmware- und Displayangaben folgen dem am
+9. Oktober 2026 geprüften Quellstand; Treiberlisten bei Änderungen abgleichen.

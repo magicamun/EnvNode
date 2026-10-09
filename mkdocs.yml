@@ -1,5 +1,5 @@
 site_name: EnvNode Dokumentation
-site_url: https://magicamun.github.io/EnvNode/
+site_url: https://docs.envnode.de/
 site_description: Modulare Hardware und Firmware für zuverlässige Umweltmessungen
 repo_url: https://github.com/magicamun/EnvNode
 repo_name: magicamun/EnvNode
@@ -42,7 +42,17 @@ nav:
       - Übersicht: modules/index.md
       - DuoRelay: modules/duo-relay/index.md
       - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
-  - I²C-Sensoren: sensors/index.md
-  - Firmware: firmware/index.md
+  - Sensoren:
+      - Übersicht: sensors/index.md
+      - I²C-Sensoren: sensors/i2c.md
+      - RainDetectorController und Head: sensors/rain-detector.md
+      - SCT013: sensors/sct013.md
+  - Displays: displays/index.md
+  - Firmware:
+      - Übersicht: firmware/index.md
+      - Bauen und Aufspielen: firmware/installation.md
+      - Einrichtung: firmware/configuration.md
+      - MQTT: firmware/mqtt.md
+      - Updates und Diagnose: firmware/maintenance.md
   - Bausätze und Aufbau: kits/index.md
   - Lizenz und Nutzung: license.md

@@ -1,20 +1,36 @@
 # Firmware
 
-Die gemeinsame ESP32-Firmware übernimmt Sensorabfrage, persistente Konfiguration,
-WLAN, MQTT, Diagnose und Updates. Sensoren, Aktoren und lokale Controller können
-passend zur angeschlossenen Hardware konfiguriert werden.
+Die ESP32-Firmware erfasst Messwerte, stellt Konfiguration und Diagnose bereit
+und verbindet EnvNode über MQTT mit externen Systemen.
+Sie trennt Sensoren, Aktoren, lokale Controller und Anzeige.
 
 ## Einstieg
 
-1. Verwende einen zur Hardware passenden Firmwarestand und prüfe das Boardprofil.
-2. Richte WLAN und die Gerätekonfiguration über die Weboberfläche ein.
-3. Konfiguriere den angeschlossenen Sensor mit Bus und Adresse.
-4. Prüfe Diagnose und Messwerte lokal.
-5. Trage den MQTT-Broker und gegebenenfalls Zugangsdaten ein; prüfe danach die
-   empfangenen Messwerte und den Gerätestatus.
+1. [Firmware bauen und aufspielen](installation.md).
+2. [Netzwerk, Sensoren und Aktoren konfigurieren](configuration.md).
+3. [MQTT und externe Integration prüfen](mqtt.md).
+4. [Updates und Fehlerdiagnose](maintenance.md).
 
-Die Firmware unterstützt unter anderem OTA-Updates, Sensor-Home-Assistant-Discovery
-und getrennte Sensor-, Aktor- und Controller-Konfiguration.
+## Funktionsumfang
 
-Konkrete Flash-Anleitung, Bildschirmbeispiele und MQTT-Beispieltopics werden in der
-nächsten Ausbaustufe anhand eines ausgewählten Firmwarestands ergänzt.
+| Bereich | Vorhandene Funktionen |
+| --- | --- |
+| Netzwerk | WLAN, Setup-Access-Point, Wiederverbindung, Hostname |
+| Konfiguration | Persistente Speicherung im ESP32-NVS |
+| Messung | Physische und simulierte Sensoren, typisierte Messwerte |
+| Aktoren | GPIO On/Off und PWM/Level |
+| Controller | Lokale Steuerung, darunter Blink, Threshold und Selector |
+| Anzeige | Zwei I²C-Displayausgänge und konfigurierbare Textseiten |
+| Integration | MQTT, Sensor-Home-Assistant-Discovery |
+| Wartung | Diagnose, Logs, Web-OTA und Factory Reset |
+
+Die [Sensorübersicht](../sensors/index.md) nennt die tatsächlich registrierten
+Treiber. Entwicklungs-Hardware ist nicht automatisch als Sensor integriert.
+Die Firmware übernimmt keine Wettervorhersage, langfristige Historie oder ETo-Berechnung.
+
+## Stand und Reproduzierbarkeit
+
+Diese Anleitung folgt dem Quellstand vom 9. Oktober 2026.
+Die Weboberfläche **Firmware** zeigt Version, Build-Identität, Git-Stand und
+Quellzustand des laufenden Geräts. Diese Angaben für Tests und Fehlerberichte notieren.
+Ein verfügbarer Treiber ist kein Nachweis einer vollständigen Hardwarequalifikation.

@@ -14,6 +14,10 @@ DOWNLOADS = {
         "hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf",
     "assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf":
         "hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf",
+    "assets/downloads/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf":
+        "hardware/kicad/Sensors/RainDetectorController/Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf",
+    "assets/downloads/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf":
+        "hardware/kicad/Sensors/RainDetectorHead/Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf",
 }
 
 def on_files(files, config, **kwargs):

@@ -54,7 +54,7 @@ Die 4,7-kΩ-Pull-ups sind über normalerweise offene Lötjumper einzeln zuschalt
 Prüfe vorhandene Pull-ups auf den Sensorboards und die Belegung aller Kabel.
 Auf I2C0 sind `0x50` für die Board Identity und `0x52` für die optionale Slot-A-Identity vorgesehen.
 
-[Sensoranbindung und Firmware-Konfiguration](../../sensors/index.md)
+[Sensoranbindung und Firmware-Konfiguration](../../sensors/i2c.md)
 
 ## Modulslot A
 

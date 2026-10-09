@@ -57,7 +57,7 @@ Pro Bus gibt es ein Paar 4,7-kΩ-Pull-ups. Sie sind normalerweise über offene
 Lötjumper getrennt. Prüfe vor dem Zuschalten, ob angeschlossene Sensorboards
 bereits Pull-ups enthalten. Steckerbelegung und Busadresse müssen ebenfalls stimmen.
 
-[Hinweise zur Sensoranbindung](../../sensors/index.md)
+[Hinweise zur Sensoranbindung](../../sensors/i2c.md)
 
 ## Modulslots
 
