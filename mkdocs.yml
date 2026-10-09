@@ -1,4 +1,5 @@
 site_name: EnvNode Dokumentation
+site_url: https://magicamun.github.io/EnvNode/
 site_description: Modulare Hardware und Firmware für zuverlässige Umweltmessungen
 repo_url: https://github.com/magicamun/EnvNode
 repo_name: magicamun/EnvNode

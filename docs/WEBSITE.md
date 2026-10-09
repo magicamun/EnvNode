@@ -38,11 +38,12 @@ Vor einer Veröffentlichung auch die Downloads inhaltlich prüfen.
 
 ## Veröffentlichung vorbereiten
 
-Die Vorlage `.github/workflow-templates/docs-pages.yml.disabled` ist absichtlich
-kein aktiver Workflow. Sie baut und verpackt die Website, enthält noch keinen
-Deploy-Schritt und hat keinen Push-Trigger. Erst nach Inhaltsprüfung richten wir
-GitHub Pages, den aktiven Workflow und danach `docs.envnode.de` ein.
-Die Vorlage allein veröffentlicht nichts. Es wurde keine Domain gesetzt.
+Der aktive Workflow `.github/workflows/docs.yml` baut und veröffentlicht die Website
+bei relevanten Änderungen auf `main` oder nach manuellem Start in GitHub Actions.
+GitHub Pages verwendet als Quelle GitHub Actions.
+Die zunächst verwendete Adresse ist https://magicamun.github.io/EnvNode/.
+Die eigene Domain wird danach eingerichtet; dabei auch `site_url` aktualisieren.
+Es werden ausschließlich `docs/site/` und die ausgewählten Downloads veröffentlicht.
 
 ## Offizielle Dokumentation
 
