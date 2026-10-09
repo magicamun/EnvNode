@@ -1,6 +1,6 @@
 # EnvNode
 
-EnvNode is an open-source ESP32-based embedded platform for reliable environmental measurements and seamless integration into modern home automation systems.
+EnvNode is an source-available ESP32-based embedded platform for reliable environmental measurements and seamless integration into modern home automation systems.
 
 WeatherStation is the first reference application built on the reusable EnvNode platform.
 
@@ -10,7 +10,7 @@ The firmware is responsible for acquiring reliable physical Measurements and pub
 
 Higher-level concepts such as weather interpretation, historical aggregation, evapotranspiration (ETo), irrigation logic and visualization intentionally remain outside the firmware.
 
-EnvNode is developed as a complete open-source product including:
+EnvNode is developed as a complete source-available product including:
 
 - firmware
 - hardware (KiCad)
@@ -70,8 +70,8 @@ Interpretation belongs to external systems.
 
 # Project Goals
 
-- fully open-source firmware
-- open hardware (KiCad)
+- source-available firmware with a commercial exploitation reservation
+- available hardware design sources (KiCad)
 - MQTT-based integration
 - browser-based configuration
 - OTA firmware updates
@@ -257,3 +257,13 @@ These responsibilities belong to higher software layers.
 # Project Status
 
 The Sensor, Actuator and Controller architecture is implemented and physically verified. Current open work concerns further capabilities, Controller implementations and external self-description rather than replacing these runtime boundaries.
+
+# License and permitted use
+
+EnvNode-owned materials are provided under the [EnvNode Use and Redistribution
+License, version 1.0](LICENSE). Private and internal business use, modifications,
+free redistribution, and paid fabrication or maintenance for the user's own use
+are permitted. Commercial product sales, licensing, rental, and standalone paid
+software hosting require separate permission. Third-party materials retain their
+respective licenses. This is a custom source-available license, not an
+OSI-approved open-source license. The German license text is authoritative.

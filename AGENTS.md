@@ -12,7 +12,7 @@ Whenever implementation convenience conflicts with these rules, the architecture
 
 # Project Mission
 
-EnvNode is an open-source ESP32-based weather sensor platform.
+EnvNode is a source-available ESP32-based weather sensor platform.
 
 Its purpose is to provide reliable physical measurements and expose them through a clean and transparent interface.
 
@@ -362,3 +362,10 @@ Whenever a design decision is unclear, ask:
 "Does this improve measurement quality, or is it interpretation?"
 
 If it is interpretation, it probably belongs outside the firmware.
+
+# License policy
+
+EnvNode-owned materials follow the root LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+Describe the project as source-available, not OSI open source. Preserve third-party
+licenses and notices. New standalone downloads and source files should carry an
+appropriate notice pointing to LICENSE; do not relicense third-party material.

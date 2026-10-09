@@ -1,0 +1,127 @@
+EnvNode-Lizenz für Nutzung und Weitergabe mit Verwertungsvorbehalt
+Version 1.0, 9. Oktober 2026
+Kennung: LicenseRef-EnvNode-Use-and-Redistribution-1.0
+
+Copyright (c) 2026 Lutz Thielemann, soweit er Rechteinhaber ist.
+
+1. Gegenstand und Geltungsbereich
+
+Diese Lizenz gilt für die eigenen, von den jeweiligen Rechteinhabern unter dieser
+Lizenz bereitgestellten Inhalte des EnvNode-Projekts: Software einschließlich
+Firmware und Werkzeuge, Hardware-Entwurfsdateien einschließlich Schaltplänen,
+PCB-Layouts und Fertigungsdaten sowie Dokumentation, PDFs und eigene Bilder.
+Sie gilt auch für entsprechende bearbeitete Fassungen, soweit darin geschützte
+Bestandteile des lizenzierten Materials enthalten sind.
+
+Fremde Bibliotheken, Herstellerunterlagen, übernommene Symbole, Footprints,
+Modelle und sonstige Drittinhalte behalten ihre eigenen Lizenzbedingungen.
+Eine ausdrücklich abweichende Lizenzkennzeichnung hat für den betreffenden
+Inhalt Vorrang. Es werden nur Rechte eingeräumt, über die der jeweilige
+Rechteinhaber tatsächlich verfügen kann.
+
+2. Erlaubte Nutzung
+
+Es wird ein unentgeltliches, einfaches, weltweites Nutzungsrecht für folgende
+Zwecke eingeräumt, solange die Bedingungen dieser Lizenz eingehalten werden:
+
+- Material ansehen, herunterladen, kopieren, untersuchen und bearbeiten;
+- Software bauen, installieren und betreiben;
+- Hardware für den eigenen Gebrauch herstellen oder herstellen lassen;
+- EnvNode privat, in Forschung und Bildung sowie innerhalb von Unternehmen,
+  öffentlichen Einrichtungen und anderen Organisationen einsetzen;
+- mit EnvNode gewonnene Messdaten für eigene oder geschäftliche Zwecke nutzen;
+- Originale und Bearbeitungen unentgeltlich weitergeben, auch öffentlich.
+
+Der Einsatz darf zum wirtschaftlichen Erfolg des Nutzers beitragen. Interne
+betriebliche Nutzung, Messungen im Rahmen des eigenen Geschäftsbetriebs und
+die wirtschaftliche Nutzung der gewonnenen Daten sind ausdrücklich erlaubt.
+Allein der Einsatz in einem gewerblichen Umfeld erfordert keine Sonderlizenz.
+
+3. Kommerzielle Verwertung mit Zustimmungsvorbehalt
+
+Ohne gesonderte vorherige Zustimmung der betroffenen Rechteinhaber sind nicht
+erlaubt:
+
+- das geschäftsmäßige entgeltliche Anbieten, Verkaufen, Vermieten oder
+  Lizenzieren des Materials, der darauf basierenden Platinen, Bausätze,
+  Geräte oder bearbeiteten Fassungen als eigenes oder fremdes Produkt;
+- die Integration geschützter EnvNode-Bestandteile in ein Produkt, das an
+  Dritte verkauft, vermietet oder gegen Lizenzgebühren bereitgestellt wird;
+- das entgeltliche Bereitstellen von EnvNode-Software als eigenständigem
+  Software- oder Hostingprodukt für Dritte.
+
+Dies gilt unabhängig davon, ob tatsächlich ein Gewinn erzielt wird oder ein
+Angebot als kostendeckend bezeichnet wird. Zulässige Dienstleistungen nach
+Abschnitt 4 bleiben davon unberührt. Allgemeine Ideen, technische Tatsachen
+und unabhängig entwickelte Lösungen werden durch diese Lizenz nicht exklusiv
+beansprucht. Die Bedingungen gelten im Umfang der tatsächlich bestehenden
+und hier lizenzierten Rechte.
+
+4. Erlaubte Fertigungs- und Serviceleistungen
+
+Ein Nutzer darf Dienstleister gegen Bezahlung mit Fertigung, Bestückung,
+Installation, Einrichtung, Reparatur oder Wartung für seinen zulässigen
+Eigengebrauch beauftragen. Der Dienstleister darf Arbeitszeit, Material,
+Fertigung und eine übliche Dienstleistungsmarge berechnen.
+
+Voraussetzung ist ein konkreter Auftrag für den Eigengebrauch des Kunden.
+Der Dienstleister darf EnvNode dabei nicht als eigenes Serienprodukt,
+Lagerprodukt oder standardisiertes Verkaufsangebot vertreiben. Er darf
+seine allgemeinen Fertigungs- und Serviceleistungen anbieten und EnvNode
+als unterstütztes Projekt nennen. Der Kunde erhält die Lizenzhinweise.
+
+Der gelegentliche private Verkauf eines bereits selbst genutzten Einzelgeräts
+ist erlaubt; Herstellung oder Beschaffung zum Weiterverkauf fällt nicht darunter.
+
+5. Bedingungen der Weitergabe
+
+Copyright- und Lizenzhinweise sowie vorhandene Hinweise auf Fremdrechte sind
+beizubehalten. Bei Weitergabe ist eine Kopie dieser Lizenz mitzugeben. Bei
+körperlicher Hardware genügt eine mitgelieferte Information, die auf diese
+Lizenz und das Projekt verweist.
+
+Bearbeitungen sind als solche zu kennzeichnen; der ursprüngliche Urheber darf
+nicht als Urheber fremder Änderungen dargestellt werden. Für weitergegebene
+Bearbeitungen, soweit sie geschützte EnvNode-Bestandteile enthalten, müssen
+die hier gewährten Nutzungen und der Verwertungsvorbehalt erhalten bleiben.
+Empfänger erhalten die Rechte an den ursprünglichen Bestandteilen unmittelbar
+von deren Rechteinhabern nach dieser Lizenz.
+
+6. Andere Rechte und gesonderte Vereinbarungen
+
+Gesetzliche Ausnahmen und zwingende Rechte bleiben unberührt. Diese Lizenz
+gewährt keine Markenrechte und keine ausdrückliche Patentlizenz. Eine Benennung
+des Projekts zu Herkunfts- und Kompatibilitätszwecken bleibt möglich, ohne eine
+Partnerschaft oder Freigabe durch die Rechteinhaber zu behaupten.
+
+Die Rechteinhaber bleiben frei, eigene Inhalte selbst kommerziell zu verwerten
+oder anderen gesonderte Rechte einzuräumen. Eine spätere kommerzielle Nutzung
+durch den Projektinhaber erweitert nicht automatisch die Rechte Dritter.
+Bereits wirksam gewährte Rechte an einer Fassung bleiben bei Einhaltung ihrer
+Lizenzbedingungen bestehen; neue Fassungen können andere Bedingungen erhalten.
+Für kommerzielle Produktangebote ist eine separate Vereinbarung erforderlich.
+Anfragen können über das EnvNode-Repository gestellt werden:
+https://github.com/magicamun/EnvNode
+
+7. Gewährleistung und Haftung
+
+Das Material wird als Entwicklungsprojekt im vorhandenen Zustand bereitgestellt.
+Eine Eignung für bestimmte Anwendungen, Fehlerfreiheit, Produktionsreife oder
+Konformität mit Sicherheits- und Produktvorschriften wird nicht zugesichert.
+Soweit gesetzlich zulässig, sind Gewährleistung und Haftung ausgeschlossen.
+Zwingende Haftung, insbesondere für Vorsatz, grobe Fahrlässigkeit sowie Schäden
+an Leben, Körper oder Gesundheit, bleibt unberührt.
+
+8. Verletzung der Bedingungen
+
+Nutzungen außerhalb dieser Erlaubnis benötigen eine gesonderte Zustimmung.
+Bei Verletzung wesentlicher Lizenzbedingungen entfallen die dadurch bedingten
+Nutzungsrechte. Für eine Wiederaufnahme nach Abstellung der Verletzung ist die
+Zustimmung des betroffenen Rechteinhabers einzuholen.
+
+9. Einordnung
+
+Dies ist eine projektspezifische Lizenz, keine OSI-anerkannte Open-Source-Lizenz
+und keine Creative-Commons- oder PolyForm-Lizenz. Die deutsche Fassung ist
+maßgeblich. Die Kennung LicenseRef bezeichnet diesen eigenen Lizenztext und
+keine Registrierung oder Anerkennung durch eine Lizenzorganisation.

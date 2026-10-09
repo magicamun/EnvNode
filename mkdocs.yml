@@ -5,6 +5,7 @@ repo_name: magicamun/EnvNode
 docs_dir: docs/site
 site_dir: site
 strict: true
+copyright: '© 2026 Lutz Thielemann · <a href="https://github.com/magicamun/EnvNode/blob/main/LICENSE">Lizenz und Nutzung</a>'
 theme:
   name: material
   language: de
@@ -43,3 +44,4 @@ nav:
   - I²C-Sensoren: sensors/index.md
   - Firmware: firmware/index.md
   - Bausätze und Aufbau: kits/index.md
+  - Lizenz und Nutzung: license.md

@@ -24,3 +24,5 @@ werden deshalb einzeln beschrieben und nach ihrer jeweiligen Revision eingeordne
 Weitere Entwicklungen werden erst nach Einzelfallprüfung aufgenommen.
 
 [Wie EnvNode aufgebaut ist](concepts/index.md)
+
+[Erlaubte Nutzung und Lizenzbedingungen](license.md)

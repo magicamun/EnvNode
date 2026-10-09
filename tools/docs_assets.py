@@ -3,6 +3,7 @@ from pathlib import Path
 from mkdocs.structure.files import File
 
 DOWNLOADS = {
+    "assets/downloads/EnvNode-LICENSE.txt": "LICENSE",
     "assets/downloads/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf":
         "hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf",
     "assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf":
