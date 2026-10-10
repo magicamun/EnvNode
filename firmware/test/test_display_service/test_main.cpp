@@ -1,6 +1,8 @@
 #include <unity.h>
 #include <cstring>
 #include "DisplayService.h"
+#include "OledCommandTransport.h"
+#include <vector>
 using namespace EnvNode;
 HardwareSerial Serial;
 void HardwareSerial::begin(unsigned long) {}
@@ -16,8 +18,9 @@ struct Clock : IMonotonicClock {
 };
 struct Log : ILogger {
     unsigned messages = 0;
+    std::string text;
     void begin(unsigned long) override {}
-    void println(const char*) override { ++messages; }
+    void println(const char* message) override { ++messages; text += message; text += "\n"; }
     void printf(const char*, ...) override { ++messages; }
 };
 struct Reader : IPropertyReader {
@@ -190,8 +193,61 @@ void test_two_displays_render_independent_pages_and_recover_independently() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Ready), static_cast<int>(service.status(0)));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Disabled), static_cast<int>(service.status(1)));
 }
+void test_ready_is_not_reported_when_first_or_recovery_frame_fails() {
+    Fixture f; f.config.hardware.enabled = true; f.display.showOk = false;
+    f.service.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Unavailable), static_cast<int>(f.service.status()));
+    TEST_ASSERT_EQUAL(std::string::npos, f.log.text.find("ready"));
+    f.clock.now = 10000; f.service.loop();
+    TEST_ASSERT_EQUAL_UINT32(2, f.display.begins);
+    TEST_ASSERT_EQUAL(std::string::npos, f.log.text.find("ready"));
+    f.clock.now = 20000; f.display.showOk = true; f.service.loop();
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DisplayStatus::Ready), static_cast<int>(f.service.status()));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, f.log.text.find("full frame transferred"));
+}
+struct PacketSink : IOledPacketSink {
+    std::vector<std::vector<uint8_t>> packets;
+    size_t failAt = 0;
+    bool sendOledPacket(const uint8_t* bytes, size_t length) override {
+        packets.emplace_back(bytes, bytes + length);
+        return packets.size() != failAt;
+    }
+};
+void test_oled_packets_keep_command_and_arguments_together_and_abort_on_failure() {
+    PacketSink sink; OledCommandTransport transport(sink);
+    TEST_ASSERT_TRUE(transport.command(0x20));
+    TEST_ASSERT_TRUE(transport.argument(0x02));
+    TEST_ASSERT_EQUAL_UINT32(0, sink.packets.size());
+    TEST_ASSERT_TRUE(transport.flush());
+    const uint8_t expected[] = {0x00, 0x20, 0x02};
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, sink.packets[0].data(), 3);
+    uint8_t frame[1024] = {};
+    sink.failAt = 4;
+    TEST_ASSERT_FALSE(transport.data(frame, sizeof(frame)));
+    TEST_ASSERT_EQUAL_UINT32(4, sink.packets.size());
+    TEST_ASSERT_FALSE(transport.command(0xAF));
+    TEST_ASSERT_EQUAL_UINT32(4, sink.packets.size());
+    transport.reset(); sink.failAt = 0;
+    TEST_ASSERT_TRUE(transport.data(frame, sizeof(frame)));
+    size_t recovered = 0;
+    for (size_t i = 4; i < sink.packets.size(); ++i) {
+        TEST_ASSERT_EQUAL_HEX8(0x40, sink.packets[i][0]);
+        TEST_ASSERT_LESS_OR_EQUAL_UINT32(25, sink.packets[i].size());
+        recovered += sink.packets[i].size() - 1;
+    }
+    TEST_ASSERT_EQUAL_UINT32(1024, recovered);
+}
+void test_oled_command_state_is_private_to_each_display() {
+    PacketSink a, b; OledCommandTransport first(a), second(b);
+    first.command(0xD3); second.command(0xA8);
+    first.argument(0x00); second.argument(0x3F);
+    first.flush(); second.flush();
+    const uint8_t offset[] = {0x00, 0xD3, 0x00}, multiplex[] = {0x00, 0xA8, 0x3F};
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(offset, a.packets[0].data(), 3);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(multiplex, b.packets[0].data(), 3);
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
+    UNITY_BEGIN(); RUN_TEST(test_ready_is_not_reported_when_first_or_recovery_frame_fails); RUN_TEST(test_oled_packets_keep_command_and_arguments_together_and_abort_on_failure); RUN_TEST(test_oled_command_state_is_private_to_each_display); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
     RUN_TEST(test_saved_translation_reaches_oled_and_updates_live);
     RUN_TEST(test_disabled_enable_refresh_and_live_edit);
     RUN_TEST(test_missing_display_retries_and_recovers);

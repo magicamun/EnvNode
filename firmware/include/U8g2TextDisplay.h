@@ -2,16 +2,19 @@
 #include <U8g2lib.h>
 #include <memory>
 #include "ITextDisplay.h"
+#include "OledCommandTransport.h"
 #include "I2CBusManager.h"
 namespace EnvNode {
-class U8g2TextDisplay : public ITextDisplay {
+class U8g2TextDisplay : public ITextDisplay, private IOledPacketSink {
 public:
     U8g2TextDisplay(I2CBusManager& buses, ILogger& logger);
     bool begin(const TextDisplayConfiguration& configuration) override;
     bool show(const TextDisplayFrame& frame) override;
     void end() override;
 private:
-    static uint8_t transfer(u8x8_t* context, uint8_t message, uint8_t count, void* data);
+    bool sendOledPacket(const uint8_t* bytes, size_t length) override;
+    static uint8_t commands(u8x8_t* context, uint8_t message, uint8_t count, void* data);
+    OledCommandTransport commands_{*this};
     void transferFailed(const char* reason, unsigned int code);
     I2CBusManager& buses_;
     ILogger& logger_;

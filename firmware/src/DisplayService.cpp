@@ -10,7 +10,7 @@ void DisplayService::setStatus(size_t index, DisplayStatus status) {
     auto& status_ = states_[index].status_;
     if (status_ == status) return;
     status_ = status;
-    if (status == DisplayStatus::Ready) logger_.infof("Display %u ready", static_cast<unsigned>(index + 1));
+    if (status == DisplayStatus::Ready) logger_.infof("Display %u ready (full frame transferred)", static_cast<unsigned>(index + 1));
     else if (status == DisplayStatus::Unavailable) logger_.warnf("Display %u unavailable; retry in 10 seconds", static_cast<unsigned>(index + 1));
     else logger_.infof("Display %u disabled", static_cast<unsigned>(index + 1));
 }
@@ -59,7 +59,6 @@ void DisplayService::render(size_t index) {
         logger_.infof("OLED initialize: %s, %s, address=0x%02X",
             textDisplayTypeName(active_.type), i2cBusName(active_.bus), static_cast<unsigned>(active_.address));
         if (!display_.begin(active_)) { setStatus(index, DisplayStatus::Unavailable); return; }
-        setStatus(index, DisplayStatus::Ready);
         haveFrame_ = false;
     }
     if (haveFrame_ && static_cast<uint32_t>(now - lastFrame_) < 1000) return;
@@ -82,6 +81,8 @@ void DisplayService::render(size_t index) {
     if (!display_.show(frame)) {
         lastAttempt_ = now;
         setStatus(index, DisplayStatus::Unavailable);
+    } else {
+        setStatus(index, DisplayStatus::Ready);
     }
 }
 }

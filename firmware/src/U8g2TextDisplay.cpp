@@ -19,35 +19,36 @@ void U8g2TextDisplay::transferFailed(const char* reason, unsigned int code) {
         phase_, i2cBusName(bus_), static_cast<unsigned>(address_), reason, code);
     failed_ = true;
 }
-uint8_t U8g2TextDisplay::transfer(u8x8_t* context, uint8_t message, uint8_t count, void* data) {
+bool U8g2TextDisplay::sendOledPacket(const uint8_t* bytes, size_t length) {
+    if (!wire_ || failed_) return false;
+    wire_->beginTransmission(address_);
+    const size_t written = wire_->write(bytes, length);
+    // Always finish the transaction, including short writes.
+    const uint8_t status = wire_->endTransmission();
+    if (written != length) transferFailed("short packet", static_cast<unsigned>(written));
+    else if (status != 0) transferFailed("I2C transmission", status);
+    return !failed_;
+}
+uint8_t U8g2TextDisplay::commands(u8x8_t* context, uint8_t message, uint8_t count, void* data) {
     auto* self = static_cast<U8g2TextDisplay*>(u8x8_GetUserPtr(context));
-    if (self == nullptr || self->wire_ == nullptr || self->failed_) return 0;
+    if (!self || !self->wire_ || self->failed_) return 0;
+    bool ok = true;
     switch (message) {
-    case U8X8_MSG_BYTE_INIT:
-    case U8X8_MSG_BYTE_SET_DC:
-        return 1; // I2CBusManager owns begin(), pins and clock.
-    case U8X8_MSG_BYTE_START_TRANSFER:
-        self->wire_->beginTransmission(self->address_);
-        return 1;
-    case U8X8_MSG_BYTE_SEND:
-        if (self->wire_->write(static_cast<const uint8_t*>(data), count) != count) {
-            self->wire_->endTransmission();
-            self->transferFailed("write buffer", count);
-        }
-        break;
-    case U8X8_MSG_BYTE_END_TRANSFER: {
-        const uint8_t status = self->wire_->endTransmission();
-        if (status != 0) self->transferFailed("I2C transmission", status);
-        break;
+    case U8X8_MSG_CAD_INIT: return 1;
+    case U8X8_MSG_CAD_START_TRANSFER: ok = self->commands_.flush(); break;
+    case U8X8_MSG_CAD_SEND_CMD: ok = self->commands_.command(count); break;
+    case U8X8_MSG_CAD_SEND_ARG: ok = self->commands_.argument(count); break;
+    case U8X8_MSG_CAD_SEND_DATA: ok = self->commands_.data(static_cast<const uint8_t*>(data), count); break;
+    case U8X8_MSG_CAD_END_TRANSFER: ok = self->commands_.flush(); break;
+    default: return 0;
     }
-    default:
-        return 0;
-    }
-    return self->failed_ ? 0 : 1;
+    if (!ok && !self->failed_) self->transferFailed("command framing", message);
+    return ok ? 1 : 0;
 }
 bool U8g2TextDisplay::begin(const TextDisplayConfiguration& configuration) {
     end();
     failed_ = false;
+    commands_.reset();
     // U8g2 setup routines initialize selected fields, not the entire context.
     // Start from the same zero state as a cold boot before rebinding the driver.
     *display_.getU8g2() = u8g2_t{};
@@ -56,11 +57,11 @@ bool U8g2TextDisplay::begin(const TextDisplayConfiguration& configuration) {
     if (!framebuffer_) { logger_.warn("OLED framebuffer allocation failed"); return false; }
     switch (configuration.type) {
     case TextDisplayType::Ssd1309:
-        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_ssd1309_128x64_noname2, u8x8_cad_ssd13xx_i2c, transfer, u8x8_gpio_and_delay_arduino); break;
+        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_ssd1309_128x64_noname2, commands, u8x8_byte_empty, u8x8_gpio_and_delay_arduino); break;
     case TextDisplayType::Ssd1306:
-        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_ssd1306_128x64_noname, u8x8_cad_ssd13xx_fast_i2c, transfer, u8x8_gpio_and_delay_arduino); break;
+        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_ssd1306_128x64_noname, commands, u8x8_byte_empty, u8x8_gpio_and_delay_arduino); break;
     case TextDisplayType::Sh1106:
-        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_sh1106_128x64_noname, u8x8_cad_ssd13xx_fast_i2c, transfer, u8x8_gpio_and_delay_arduino); break;
+        u8g2_SetupDisplay(display_.getU8g2(), u8x8_d_sh1106_128x64_noname, commands, u8x8_byte_empty, u8x8_gpio_and_delay_arduino); break;
     default: return false;
     }
     // Use per-instance storage; the stock full-buffer setup shares a static buffer.
@@ -80,9 +81,18 @@ bool U8g2TextDisplay::begin(const TextDisplayConfiguration& configuration) {
     if (probeStatus != 0) { transferFailed("I2C acknowledgement", probeStatus); return false; }
     phase_ = "initialization";
     display_.setI2CAddress(address_ << 1);
+    if (configuration.type == TextDisplayType::Ssd1309) {
+        // SSD1309 datasheet: unlock command access even if the controller is
+        // still powered in a locked state; STOP does not reset its registers.
+        commands_.command(0xFD); commands_.argument(0x12); commands_.flush();
+    }
     display_.initDisplay();
-    phase_ = "wake";
-    display_.setPowerSave(0);
+    if (configuration.type == TextDisplayType::Ssd1309) {
+        // U8g2 NONAME2 leaves multiplex ratio at its power-on default.
+        commands_.command(0xA8); commands_.argument(0x3F);
+        commands_.command(0xD3); commands_.argument(0x00); commands_.flush();
+    }
+    if (failed_) return false;
     display_.setFont(u8g2_font_t0_11_tf);
     display_.setFontPosBaseline();
     display_.clearBuffer();
@@ -93,12 +103,18 @@ bool U8g2TextDisplay::show(const TextDisplayFrame& frame) {
     if (!ready_ || wire_ == nullptr) return false;
     BusTimeout timeout(*wire_);
     failed_ = false;
+    commands_.reset();
     phase_ = "frame";
     display_.clearBuffer();
     for (size_t line = 0; line < DisplayLineCount; ++line) {
         display_.drawUTF8(0, (line + 1) * 10, frame.lines[line]);
     }
     display_.sendBuffer();
+    if (!failed_) {
+        // Wake only after the complete RAM image was accepted.
+        phase_ = "wake";
+        display_.setPowerSave(0);
+    }
     ready_ = !failed_;
     return ready_;
 }
@@ -106,6 +122,7 @@ void U8g2TextDisplay::end() {
     if (wire_ != nullptr) {
         BusTimeout timeout(*wire_);
         failed_ = false;
+        commands_.reset();
         phase_ = "sleep";
         display_.setPowerSave(1);
     }

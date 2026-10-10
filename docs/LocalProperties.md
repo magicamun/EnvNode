@@ -521,3 +521,18 @@ The Display section opens on the Displays tab. Page 1 and Page 2 each provide
 their own content editor, preview, save and load controls. Hardware saves use
 `/display/outputs/save`; content saves use `/display/save` with a page selector.
 Each action copies the current configuration and replaces only its own fields.
+
+## OLED transfer recovery
+
+The display transport now sends each command and its arguments in one bounded
+I2C transaction (STOP is always issued). Command buffering is per instance, not
+the library's shared fast-I2C state. A failed packet suppresses the remaining
+operation. Retry starts command framing anew and redraws the full framebuffer.
+SSD1309 recovery explicitly unlocks command access (FD/12) and restores the
+128×64 multiplex ratio (A8/3F) and zero display offset (D3/00), in addition to
+the driver's normal initialization. These commands follow the
+[SSD1309 datasheet](https://files.waveshare.com/wiki/2.42inch-OLED-Module/SSD1309Datasheet.pdf).
+The display is woken after a complete frame transfer, and only then reported
+ready. This means acknowledged I2C transfers, not verification of visible pixels.
+A physical controller hang may still require a hardware reset or power cycle;
+the four-wire I2C hookup provides no firmware-controlled reset/power line.
