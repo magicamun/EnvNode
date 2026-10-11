@@ -34,6 +34,8 @@ public:
     virtual bool setEnumValueDefinitions(const std::vector<EnumValueConfiguration>& definitions) = 0;
     virtual bool saveEnumValueCode(ValueId id, const String& code) = 0;
     virtual bool resetToDefaults() = 0;
+    virtual bool validateRestore(const Configuration& candidate) const { return false; }
+    virtual bool restoreConfiguration(const Configuration& candidate) { return false; }
 };
 
 } // namespace EnvNode

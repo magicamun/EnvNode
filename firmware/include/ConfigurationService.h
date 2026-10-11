@@ -34,6 +34,8 @@ public:
     bool setEnumValueDefinitions(const std::vector<EnumValueConfiguration>& definitions) override;
     bool saveEnumValueCode(ValueId id, const String& code) override;
     bool resetToDefaults() override;
+    bool validateRestore(const Configuration& candidate) const override;
+    bool restoreConfiguration(const Configuration& candidate) override;
 
 private:
     bool persistValues(const ValueConfiguration& values);
@@ -59,12 +61,12 @@ private:
     bool validateNetworkConfiguration(const NetworkConfiguration& network) const;
     bool validateIPv4(const String& value, bool allowEmpty = false) const;
     void initializeSensorDefaults();
-    void loadSensorSlots();
+    void loadSensorSlots(bool checkOccupancy = true);
     bool persistSensorSlot(const SensorSlotConfiguration& slot);
     bool validateSensorSlot(const SensorSlotConfiguration& slot) const;
     bool validateSensorSlots(const SensorSlotConfiguration* slots) const;
     void initializeActuatorDefaults();
-    void loadActuatorSlots();
+    void loadActuatorSlots(bool checkOccupancy = true);
     bool persistActuatorSlot(const ActuatorSlotConfiguration& slot);
     bool validateActuatorSlot(const ActuatorSlotConfiguration& slot) const;
     bool validateActuatorSlots(const ActuatorSlotConfiguration* slots) const;
@@ -74,11 +76,13 @@ private:
     bool validateControllerSlot(
         const ControllerSlotConfiguration& slot,
         const SensorSlotConfiguration* sensorSlots,
-        const ActuatorSlotConfiguration* actuatorSlots) const;
+        const ActuatorSlotConfiguration* actuatorSlots,
+        const ValueConfiguration* values = nullptr) const;
     bool validateControllerSlots(
         const ControllerSlotConfiguration* controllerSlots,
         const SensorSlotConfiguration* sensorSlots,
-        const ActuatorSlotConfiguration* actuatorSlots) const;
+        const ActuatorSlotConfiguration* actuatorSlots,
+        const ValueConfiguration* values = nullptr) const;
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots,
@@ -88,6 +92,7 @@ private:
     Configuration configuration_;
     Preferences preferences_;
     bool preferencesInitialized_ = false;
+    String activeNamespace_ = "weather";
 };
 
 } // namespace EnvNode

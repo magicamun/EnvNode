@@ -234,6 +234,7 @@ Project documentation is intentionally separated by responsibility.
 | TechnicalArchitecture.md | Technical architecture |
 | ActuatorModel.md | Actuator capabilities and Controller interaction |
 | MQTT.md | Current MQTT protocol boundaries and topics |
+| Configuration.md | Configuration backup, restore and NVS persistence |
 | Hardware.md | Hardware entry point, module templates, and implemented boards |
 | ADRs | Architectural decisions |
 

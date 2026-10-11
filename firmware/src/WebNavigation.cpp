@@ -13,7 +13,8 @@ String buildWebNavigationHtml(const char* activeRoute, Locale locale) {
         {"/values", TextId::Values}, {"/actuators", TextId::Actuators},
         {"/controllers", TextId::Controllers}, {"/network", TextId::Network},
         {"/mqtt", TextId::MQTT}, {"/time", TextId::LocaleTime}, {"/units", TextId::Units},
-        {"/device", TextId::Device}, {"/diagnostics", TextId::Diagnostics},
+        {"/device", TextId::Device}, {"/configuration", TextId::Configuration},
+        {"/hardware", TextId::Hardware}, {"/diagnostics", TextId::Diagnostics},
         {"/logs", TextId::Logs}, {"/firmware", TextId::Firmware},
     };
     String html;

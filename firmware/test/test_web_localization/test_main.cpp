@@ -47,6 +47,10 @@ void test_navigation_keeps_routes_and_active_state() {
     const String german = buildWebNavigationHtml("/time", Locale::GermanGermany);
     TEST_ASSERT_NOT_NULL(strstr(german.c_str(), "href='/time' class='active'>Sprache & Zeit"));
     TEST_ASSERT_NOT_NULL(strstr(german.c_str(), "href='/sensors' class=''>Sensoren"));
+    TEST_ASSERT_NOT_NULL(strstr(german.c_str(), "href='/configuration' class=''>Konfiguration"));
+    TEST_ASSERT_NOT_NULL(strstr(german.c_str(), "href='/hardware' class=''>Hardware"));
+    const String hardware = buildWebNavigationHtml("/hardware");
+    TEST_ASSERT_NOT_NULL(strstr(hardware.c_str(), "href='/hardware' class='active'>Hardware"));
     const String english = buildWebNavigationHtml("/time");
     TEST_ASSERT_NOT_NULL(strstr(english.c_str(), "href='/time' class='active'>Locale & Time"));
 }

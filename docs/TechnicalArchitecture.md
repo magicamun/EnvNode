@@ -620,13 +620,28 @@ Runtime configuration is updated only after successful persistence.
 
 ---
 
+## Configuration Backup and Restore
+
+The versioned file codec is owned by `ConfigurationBackup`. `ConfigurationService` validates
+complete restore candidates, including Sensor/Actuator hardware occupancy and Controller/Value
+references. The Web adapter owns bounded upload, preview and explicit confirmation only.
+
+Restore writes and verifies a compact snapshot in an inactive NVS namespace, then atomically
+commits the active-bank pointer. Existing per-setting writes overlay the active snapshot. Legacy
+configuration remains readable. Restoration requires a coordinated device restart.
+
+Device settings, Configuration backup/restore and Hardware provisioning have separate Web pages.
+Board identity and module EEPROM descriptors are excluded from application backups.
+See [Configuration](Configuration.md) for the format and lifecycle.
+
 ## Password Handling
 
 Passwords are treated as sensitive configuration.
 
 Therefore:
 
-- passwords are never rendered back into the Web Interface
+- passwords are never rendered back into HTML forms or restore previews
+- configuration downloads include plaintext passwords only when explicitly requested
 - passwords are never written to normal log output
 - browser autofill must not silently overwrite stored credentials
 - password changes require explicit user interaction

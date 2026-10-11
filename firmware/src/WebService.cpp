@@ -522,6 +522,15 @@ void WebService::begin() {
     server_.on("/time", HTTP_GET, [this]() { handleTime(); });
     server_.on("/units", HTTP_GET, [this]() { handleUnits(); });
     server_.on("/device", HTTP_GET, [this]() { handleDevice(); });
+    server_.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
+    server_.on("/configuration", HTTP_GET, [this]() { handleConfiguration(); });
+    server_.on("/configuration/download", HTTP_POST, [this]() { handleConfigurationDownload(); });
+    server_.on("/configuration/preview", HTTP_POST,
+        [this]() { handleConfigurationPreview(); }, [this]() { handleConfigurationUploadData(); });
+    server_.on("/configuration/restore", HTTP_POST, [this]() { handleConfigurationRestore(); });
+    server_.on("/configuration/cancel", HTTP_POST, [this]() {
+        restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
+    });
     server_.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server_.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
     server_.on("/logs", HTTP_GET, [this]() { handleLogs(); });
@@ -538,8 +547,12 @@ void WebService::begin() {
     server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
     server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
+    server_.on("/hardware/board-identity/write", HTTP_POST,
+        [this]() { handleBoardProvisioning(); });
     server_.on("/device/board-identity/write", HTTP_POST,
         [this]() { handleBoardProvisioning(); });
+    server_.on("/hardware/module-descriptor/write", HTTP_POST,
+        [this]() { handleModuleDescriptorProvisioning(); });
     server_.on("/device/module-descriptor/write", HTTP_POST,
         [this]() { handleModuleDescriptorProvisioning(); });
     server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
@@ -561,6 +574,9 @@ void WebService::begin() {
 }
 
 void WebService::loop() {
+    if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
+        restoreCandidate_.reset(); restoreToken_ = String();
+    }
     server_.handleClient();
 }
 
@@ -830,7 +846,127 @@ void WebService::handleUnits() {
     sendPage(uiText(TextId::Units), "/units", c);
 }
 
+void WebService::handleConfiguration() {
+    String c = "<section class='card'><h2>" + String(uiText(TextId::BackupDownload))
+        + "</h2><p>" + uiText(TextId::BackupHelp)
+        + "</p><form method='post' action='/configuration/download'><label class='choice'>"
+        + "<input type='checkbox' name='includePasswords' value='1'>" + uiText(TextId::BackupPasswords)
+        + "</label><button>" + uiText(TextId::BackupDownload) + "</button></form></section>"
+        + "<section class='card'><h2>" + uiText(TextId::RestorePreview) + "</h2><p>"
+        + uiText(TextId::RestoreHelp) + "</p><form method='post' action='/configuration/preview' enctype='multipart/form-data'>"
+        + "<input type='file' name='configuration' accept='.json,application/json' required><div class='actions'><button>"
+        + uiText(TextId::RestoreUpload) + "</button></div></form></section>";
+    sendPage(uiText(TextId::Configuration), "/configuration", c);
+}
+
+void WebService::handleConfigurationDownload() {
+    String backup;
+    const bool passwords = server_.arg("includePasswords") == "1";
+    if (!encodeConfigurationBackup(configurationService_.getConfiguration(), passwords,
+            FirmwareBuildInfo::SemanticVersion, backup)) {
+        sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::BackupInvalid), false); return;
+    }
+    server_.sendHeader("Cache-Control", "no-store");
+    server_.sendHeader("Content-Disposition", "attachment; filename=\"envnode-configuration.json\"");
+    server_.send(200, "application/json; charset=utf-8", backup);
+}
+
+void WebService::handleConfigurationUploadData() {
+    HTTPUpload& upload = server_.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+        // Multiple files in one request are rejected rather than silently selecting the last one.
+        configurationUploadFailed_ = !configurationUpload_.isEmpty() || configurationUploadComplete_;
+        restoreCandidate_.reset(); restoreToken_ = String();
+        if (otaService_.busy() || upload.name != "configuration") configurationUploadFailed_ = true;
+    } else if (upload.status == UPLOAD_FILE_WRITE && !configurationUploadFailed_) {
+        if (upload.currentSize > MaxConfigurationBackupLength - configurationUpload_.length()
+            || !configurationUpload_.concat(reinterpret_cast<const char*>(upload.buf), upload.currentSize)) {
+            configurationUploadFailed_ = true; configurationUpload_ = String();
+        }
+    } else if (upload.status == UPLOAD_FILE_END) {
+        configurationUploadComplete_ = true;
+    } else if (upload.status == UPLOAD_FILE_ABORTED) {
+        configurationUploadFailed_ = false; configurationUploadComplete_ = false; configurationUpload_ = String();
+        restoreCandidate_.reset(); restoreToken_ = String();
+    }
+}
+
+void WebService::handleConfigurationPreview() {
+    restoreCandidate_.reset(new (std::nothrow) Configuration);
+    bool valid = !otaService_.busy() && !configurationUploadFailed_ && configurationUploadComplete_
+        && restoreCandidate_ && decodeConfigurationBackup(configurationUpload_,
+            configurationService_.getConfiguration(), *restoreCandidate_, restoreIncludesPasswords_)
+        && configurationService_.validateRestore(*restoreCandidate_);
+    configurationUpload_ = String(); configurationUploadFailed_ = false; configurationUploadComplete_ = false;
+    if (!valid) {
+        restoreCandidate_.reset(); restoreToken_ = String();
+        sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::BackupInvalid), false); return;
+    }
+    restorePreviewTime_ = millis();
+    restoreToken_ = String(++restoreSequence_) + "-" + String(restorePreviewTime_);
+    const auto& c = *restoreCandidate_;
+    unsigned sensors = 0, actuators = 0, controllers = 0;
+    for (const auto& s : c.sensorSlots) sensors += s.enabled;
+    for (const auto& s : c.actuatorSlots) actuators += s.enabled;
+    for (const auto& s : c.controllerSlots) controllers += s.enabled;
+    String html = "<section class='card'><h2>" + String(uiText(TextId::RestorePreview))
+        + "</h2><p>" + uiText(TextId::RestoreWarning) + "</p><div class='kv'><span>"
+        + uiText(TextId::DeviceName) + "</span><span>" + escapeHtml(c.device.name)
+        + "</span><span>" + uiText(TextId::Network) + "</span><span>" + escapeHtml(c.network.hostname)
+        + " / " + escapeHtml(c.network.wifiSSID)
+        + (c.network.addressMode == NetworkAddressMode::Static ? " / " + escapeHtml(c.network.ipv4Address) : " / DHCP")
+        + "</span><span>MQTT</span><span>" + escapeHtml(c.mqtt.server) + ":" + String(c.mqtt.port)
+        + "</span><span>" + uiText(TextId::Sensors) + "</span><span>" + String(sensors)
+        + "</span><span>" + uiText(TextId::Actuators) + "</span><span>" + String(actuators)
+        + "</span><span>" + uiText(TextId::Controllers) + "</span><span>" + String(controllers)
+        + "</span></div><p>" + uiText(restoreIncludesPasswords_ ? TextId::PasswordsRestored : TextId::PasswordsPreserved)
+        + "</p><form method='post' action='/configuration/restore'><input type='hidden' name='token' value='"
+        + restoreToken_ + "'><label class='choice'><input type='checkbox' name='confirmRestore' value='1' required>"
+        + uiText(TextId::RestoreConfirm) + "</label><button class='danger'>" + uiText(TextId::RestoreConfirm)
+        + "</button></form><form method='post' action='/configuration/cancel'><button>"
+        + uiText(TextId::CancelRestore) + "</button></form></section>";
+    server_.sendHeader("Cache-Control", "no-store");
+    sendPage(uiText(TextId::RestorePreview), "/configuration", html);
+}
+
+void WebService::handleConfigurationRestore() {
+    if (otaService_.busy() || !restoreCandidate_ || server_.arg("confirmRestore") != "1"
+        || server_.arg("token") != restoreToken_ || millis() - restorePreviewTime_ > 300000UL) {
+        sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::RestoreExpired), false); return;
+    }
+    if (!restoreIncludesPasswords_) {
+        const auto& current = configurationService_.getConfiguration();
+        restoreCandidate_->network.wifiPassword = current.network.wifiPassword;
+        restoreCandidate_->mqtt.password = current.mqtt.password;
+    }
+    const bool saved = configurationService_.restoreConfiguration(*restoreCandidate_);
+    logger_.info(saved ? "Configuration restore saved and verified; device restart required"
+        : "Configuration restore rejected or persistence failed; previous configuration retained");
+    restoreCandidate_.reset(); restoreToken_ = String();
+    if (!saved) {
+        sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::RestoreSaveFailed), false); return;
+    }
+    runtimeManager_.request(RuntimeAction::RestartDevice);
+    String html = "<div class='notice success'><strong>" + String(uiText(TextId::RestoreSaved))
+        + "</strong><p>" + uiText(TextId::RestoreRestart)
+        + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>"
+        + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/configuration'>"
+        + uiText(TextId::RestartLater) + "</a>";
+    sendPage(uiText(TextId::RestoreSaved), "/configuration", html);
+}
+
 void WebService::handleDevice() {
+    String c;
+    c = (((String("<section class='card'><h2>") + uiText(TextId::DeviceIdentity) + "</h2><form method='post' action='/device/save'><label>")) + uiText(TextId::DeviceName) + "<input name='deviceName' required value='") + escapeHtml(configurationService_.getConfiguration().device.name) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveDeviceSettings) + "</button></div></form></section>");
+    c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
+        + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
+        + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
+        + String(boardIdentityResolution_.identity.serialNumber) + "</span></div><a class='button' href='/hardware'>"
+        + uiText(TextId::ViewHardware) + "</a></section>";
+    sendPage(uiText(TextId::Device), "/device", c);
+}
+
+void WebService::handleHardware() {
     String c;
     c.reserve(1500);
     const BoardProfile& board = currentBoardProfile();
@@ -841,7 +977,7 @@ void WebService::handleDevice() {
     const String serialNumber = identity.serialNumber == 0
         ? String(uiText(TextId::Unassigned))
         : localeFormatter_.formatNumber(identity.serialNumber, 0);
-    c = (((String("<section class='card'><h2>") + uiText(TextId::DeviceIdentity) + "</h2><form method='post' action='/device/save'><label>")) + uiText(TextId::DeviceName) + "<input name='deviceName' required value='") + escapeHtml(configurationService_.getConfiguration().device.name) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveDeviceSettings) + "</button></div></form></section>");
+    c = String();
     c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
     c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
     c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
@@ -972,7 +1108,7 @@ void WebService::handleDevice() {
     c += (String("</tbody></table></div><p class='help'>") + uiText(TextId::ThisIsAReadOnlyInventoryDerivedFrom) + "</p></section>");
     c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");
     c += (String("<div class='notice'><strong>ENHD descriptor 0.1</strong><p>") + uiText(TextId::ThisCreatesTheDeterministicDuoRelay03CBOR) + "</p></div>");
-    c += "<form method='post' action='/device/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
+    c += "<form method='post' action='/hardware/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
     c += (String("<label>") + uiText(TextId::ModuleSlot) + "<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>");
     c += (String("<label>") + uiText(TextId::DescriptorTemplate) + "<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>");
     c += (String("<p class='help'>") + uiText(TextId::APersistentUUIDVersion4IsGeneratedAutomatically) + "</p>");
@@ -983,7 +1119,7 @@ void WebService::handleDevice() {
     c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteDuoRelayDescriptor) + "</button></div></form></section>");
     c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionBoardIdentity) + "</h2>");
     c += (String("<div class='notice'><strong>") + uiText(TextId::AdvancedOperation) + "</strong><p>" + uiText(TextId::ThisWritesPermanentPhysicalBoardIdentityDataThe) + "</p></div>");
-    c += "<form method='post' action='/device/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
+    c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
     c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileId' required>");
     for (size_t index = 0; index < boardProfileCount(); ++index) {
         const BoardProfile* profile = boardProfileAt(index);
@@ -998,7 +1134,7 @@ void WebService::handleDevice() {
     c += (String("<p class='help'>") + uiText(TextId::SerialNumber0ExplicitlyMeansUnassigned) + "</p>");
     c += (String("<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesManufacturingIdentityData) + "</label>");
     c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteBoardIdentity) + "</button></div></form></section>");
-    sendPage(uiText(TextId::Device), "/device", c);
+    sendPage(uiText(TextId::Hardware), "/hardware", c);
 }
 
 void WebService::handleSensors() {
@@ -2289,7 +2425,7 @@ void WebService::handleBoardProvisioning() {
         && *end == '\0'
         && parsedSerial <= UINT32_MAX;
     if (requestedProfile == nullptr || !serialValid) {
-        sendResult(uiText(TextId::BoardProvisioningFailed), "/device",
+        sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware",
             uiText(TextId::TheSelectedBoardProfileOrBoardSerialNumber), false);
         return;
     }
@@ -2313,8 +2449,8 @@ void WebService::handleBoardProvisioning() {
     if (result.status == BoardProvisioningStatus::Success) {
         String content;
         content.reserve(600);
-        content = (String("<div class='notice success'><strong>") + uiText(TextId::BoardIdentityWrittenAndVerified) + "</strong><p>" + uiText(TextId::TheActiveBoardProfileIsUnchangedForThisBoot) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/device'>" + uiText(TextId::RestartLater) + "</a>");
-        sendPage(uiText(TextId::BoardIdentityProvisioned), "/device", content);
+        content = (String("<div class='notice success'><strong>") + uiText(TextId::BoardIdentityWrittenAndVerified) + "</strong><p>" + uiText(TextId::TheActiveBoardProfileIsUnchangedForThisBoot) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/hardware'>" + uiText(TextId::RestartLater) + "</a>");
+        sendPage(uiText(TextId::BoardIdentityProvisioned), "/hardware", content);
         return;
     }
 
@@ -2341,7 +2477,7 @@ void WebService::handleBoardProvisioning() {
         default:
             break;
     }
-    sendResult(uiText(TextId::BoardProvisioningFailed), "/device", message, false);
+    sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware", message, false);
 }
 
 void WebService::handleModuleDescriptorProvisioning() {
@@ -2360,7 +2496,7 @@ void WebService::handleModuleDescriptorProvisioning() {
         && productionBatch.length() <= 64
         && productionDate.length() <= 10;
     if (!slotValid || !templateValid || !manufacturingValid) {
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/device",
+        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
             uiText(TextId::TheSlotDescriptorTemplateOrManufacturingDataIs),
             false);
         return;
@@ -2370,14 +2506,19 @@ void WebService::handleModuleDescriptorProvisioning() {
     manufacturing.serialNumber = serialNumber.c_str();
     manufacturing.productionBatch = productionBatch.c_str();
     manufacturing.productionDate = productionDate.c_str();
+    std::unique_ptr<uint8_t[]> payload(new (std::nothrow) uint8_t[DuoRelayDescriptor::MaximumEncodedSize]);
+    if (!payload) {
+        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
+            uiText(TextId::PageRenderingFailedPleaseRetry), false);
+        return;
+    }
     size_t payloadSize = 0;
     const CompactCborStatus encodeStatus = DuoRelayDescriptor::encode(
-        manufacturing, moduleDescriptorPayload_,
-        sizeof(moduleDescriptorPayload_), payloadSize);
+        manufacturing, payload.get(), DuoRelayDescriptor::MaximumEncodedSize, payloadSize);
     if (encodeStatus != CompactCborStatus::Success) {
         logger_.errorf("DuoRelay descriptor encoding failed status=%s",
             compactCborStatusName(encodeStatus));
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/device",
+        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
             uiText(TextId::TheDuoRelayDescriptorCouldNotBeEncodedNo),
             false);
         return;
@@ -2387,7 +2528,7 @@ void WebService::handleModuleDescriptorProvisioning() {
         && server_.arg("confirmModuleDescriptorProvisioning") == "1";
     const ModuleDescriptorProvisioningResult result =
         moduleDescriptorProvisioningService_.provision(
-            slot, moduleDescriptorPayload_, payloadSize, confirmed);
+            slot, payload.get(), payloadSize, confirmed);
     logger_.infof(
         "Module descriptor provisioning result=%s slot=%s uuid=%s bytes=%u bank=%u generation=%lu decode=%s compatibility=%s",
         moduleDescriptorProvisioningStatusName(result.status), moduleSlotName(slot),
@@ -2405,7 +2546,7 @@ void WebService::handleModuleDescriptorProvisioning() {
         message += (String(uiText(TextId::VerifiedAndRediscoveredWithInstanceUuid)) + " ");
         message += descriptorUuid(manufacturing.instanceId);
         message += uiText(TextId::NoRestartRequired);
-        sendResult(uiText(TextId::ModuleDescriptorProvisioned), "/device", message.c_str(), true);
+        sendResult(uiText(TextId::ModuleDescriptorProvisioned), "/hardware", message.c_str(), true);
         return;
     }
 
@@ -2438,7 +2579,7 @@ void WebService::handleModuleDescriptorProvisioning() {
         default:
             break;
     }
-    sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/device", message, false);
+    sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware", message, false);
 }
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();

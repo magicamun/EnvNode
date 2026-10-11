@@ -1,5 +1,7 @@
 #include "ControllerTargetIdentity.h"
 #include "ConfigurationService.h"
+#include "ConfigurationBackup.h"
+#include <memory>
 #include <Arduino.h>
 #include <Preferences.h>
 #include <IPAddress.h>
@@ -111,8 +113,12 @@ void loadModuleTarget(
 
 void ConfigurationService::ensurePreferencesStarted() {
     if (!preferencesInitialized_) {
-        preferences_.begin(PreferencesNamespace, false);
-        preferencesInitialized_ = true;
+        Preferences metadata;
+        if (!metadata.begin("weather_meta", false)) return;
+        const uint32_t bank = metadata.getUInt("active", 2);
+        metadata.end();
+        activeNamespace_ = bank == 0 ? "weather0" : bank == 1 ? "weather1" : PreferencesNamespace;
+        preferencesInitialized_ = preferences_.begin(activeNamespace_.c_str(), false);
     }
 }
 
@@ -231,14 +237,15 @@ void ConfigurationService::loadFromPreferences() {
     if (preferences_.isKey(KeyWifiPassword)) {
         configuration_.network.wifiPassword = preferences_.getString(KeyWifiPassword, configuration_.network.wifiPassword);
     }
-    configuration_.network.hostname = preferences_.getString(KeyHostname, configuration_.device.name);
-    const uint32_t addressMode = preferences_.getUInt(KeyAddressMode, 0);
+    configuration_.network.hostname = preferences_.getString(KeyHostname, preferences_.isKey("cfg_snapshot")
+        ? configuration_.network.hostname : configuration_.device.name);
+    const uint32_t addressMode = preferences_.getUInt(KeyAddressMode, static_cast<uint32_t>(configuration_.network.addressMode));
     configuration_.network.addressMode = addressMode == 1
         ? NetworkAddressMode::Static : NetworkAddressMode::Dhcp;
-    configuration_.network.ipv4Address = preferences_.getString(KeyIpv4Address, "");
-    configuration_.network.subnetMask = preferences_.getString(KeySubnetMask, "");
-    configuration_.network.gateway = preferences_.getString(KeyGateway, "");
-    configuration_.network.dns1 = preferences_.getString(KeyDns1, "");
+    configuration_.network.ipv4Address = preferences_.getString(KeyIpv4Address, configuration_.network.ipv4Address);
+    configuration_.network.subnetMask = preferences_.getString(KeySubnetMask, configuration_.network.subnetMask);
+    configuration_.network.gateway = preferences_.getString(KeyGateway, configuration_.network.gateway);
+    configuration_.network.dns1 = preferences_.getString(KeyDns1, configuration_.network.dns1);
     if (preferences_.isKey(KeyDns2)) {
         configuration_.network.dns2 = preferences_.getString(KeyDns2, "");
     }
@@ -264,7 +271,7 @@ void ConfigurationService::loadFromPreferences() {
         configuration_.time.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.time.ntpServer2);
     }
     const uint32_t storedLocale = preferences_.getUInt(
-        KeyLocale, static_cast<uint32_t>(Locale::GermanGermany));
+        KeyLocale, static_cast<uint32_t>(configuration_.locale.locale));
     configuration_.locale.locale = storedLocale <= static_cast<uint32_t>(Locale::EnglishUnitedStates)
         ? static_cast<Locale>(storedLocale)
         : Locale::GermanGermany;
@@ -276,8 +283,21 @@ void ConfigurationService::loadFromPreferences() {
         loadPresentationUnit(KeySolarCellTemperatureUnit, MeasurementType::SolarCellTemperature);
     configuration_.presentation.rainDetectorLevel =
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
-    loadSensorSlots();
-    loadActuatorSlots();
+    // Read both hardware domains before checking occupancy. Otherwise an edited Sensor
+    // can collide with an Actuator's old snapshot assignment that is about to be replaced.
+    std::unique_ptr<Configuration> baseline(new (std::nothrow) Configuration(configuration_));
+    if (baseline) {
+        configuration_.display.hardware.enabled = false;
+        configuration_.display.secondHardware.enabled = false;
+        loadSensorSlots(false);
+        loadActuatorSlots(false);
+        if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots)) {
+            for (size_t i = 0; i < MaxSensorSlotCount; ++i) configuration_.sensorSlots[i] = baseline->sensorSlots[i];
+            for (size_t i = 0; i < MaxActuatorSlotCount; ++i) configuration_.actuatorSlots[i] = baseline->actuatorSlots[i];
+        }
+        configuration_.display = baseline->display;
+    }
+    baseline.reset();
     loadValues();
     loadControllerSlots();
     String displayRecord;
@@ -299,9 +319,13 @@ void ConfigurationService::loadFromPreferences() {
         }
         configuration_.display = display;
     }
+    if (!validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &configuration_.display)) {
+        configuration_.display.hardware.enabled = false;
+        configuration_.display.secondHardware.enabled = false;
+    }
 }
 
-void ConfigurationService::loadSensorSlots() {
+void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
     SensorSlotConfiguration loaded[MaxSensorSlotCount];
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         loaded[index] = configuration_.sensorSlots[index];
@@ -360,14 +384,14 @@ void ConfigurationService::loadSensorSlots() {
     }
 
     if (validateSensorSlots(loaded)
-        && validateHardwareOccupancy(loaded, configuration_.actuatorSlots)) {
+        && (!checkOccupancy || validateHardwareOccupancy(loaded, configuration_.actuatorSlots))) {
         for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
             configuration_.sensorSlots[index] = loaded[index];
         }
     }
 }
 
-void ConfigurationService::loadActuatorSlots() {
+void ConfigurationService::loadActuatorSlots(bool checkOccupancy) {
     ActuatorSlotConfiguration loaded[MaxActuatorSlotCount];
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
         loaded[index] = configuration_.actuatorSlots[index];
@@ -393,6 +417,7 @@ void ConfigurationService::loadActuatorSlots() {
                 && metadata->interfaceKind == HardwareInterfaceKind::GPIO
             ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
             : HardwareResourceAssignment::none();
+        loaded[index].moduleTarget = ModuleActuatorReference{};
         if (preferences_.getUInt(actuatorKey(expectedId, "mkind").c_str(), 0) == 1) {
             if (!parseHex(preferences_.getString(actuatorKey(expectedId, "muuid").c_str(), ""),
                     loaded[index].moduleTarget.moduleInstanceFingerprint, 8)
@@ -404,7 +429,7 @@ void ConfigurationService::loadActuatorSlots() {
     }
 
     if (validateActuatorSlots(loaded)
-        && validateHardwareOccupancy(configuration_.sensorSlots, loaded)) {
+        && (!checkOccupancy || validateHardwareOccupancy(configuration_.sensorSlots, loaded))) {
         for (size_t index = 0; index < MaxActuatorSlotCount; ++index) {
             configuration_.actuatorSlots[index] = loaded[index];
         }
@@ -481,7 +506,7 @@ void ConfigurationService::loadControllerSlots() {
 }
 
 PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, MeasurementType type) {
-    const PresentationUnit fallback = measurementTypeMetadata(type).defaultPresentationUnit;
+    const PresentationUnit fallback = configuration_.presentationUnitFor(type);
     if (!preferences_.isKey(key)) {
         return fallback;
     }
@@ -529,6 +554,15 @@ void ConfigurationService::validateConfiguration() {
 
 void ConfigurationService::loadConfiguration() {
     initializeDefaults();
+    ensurePreferencesStarted();
+    const size_t length = preferences_.getBytesLength("cfg_snapshot");
+    if (length > 0 && length <= MaxConfigurationBackupLength) {
+        std::vector<uint8_t> bytes(length);
+        std::unique_ptr<Configuration> candidate(new (std::nothrow) Configuration);
+        if (candidate && preferences_.getBytes("cfg_snapshot", bytes.data(), length) == length
+            && decodeConfigurationRecord(bytes, configuration_, *candidate)
+            && validateRestore(*candidate)) configuration_ = *candidate;
+    }
     loadFromPreferences();
     validateConfiguration();
 }
@@ -543,13 +577,13 @@ Locale ConfigurationService::getLocale() const {
 
 bool ConfigurationService::persistString(const char* key, const String& value) {
     ensurePreferencesStarted();
+    if (!preferencesInitialized_) return false;
+    // Empty values must override a restored snapshot, rather than expose its baseline again.
     if (value.isEmpty()) {
-        if (!preferences_.isKey(key)) {
-            return true;
-        }
-        return preferences_.remove(key);
+        preferences_.putString(key, value);
+        return preferences_.isKey(key) && preferences_.getString(key).isEmpty();
     }
-    return preferences_.putString(key, value) > 0;
+    return preferences_.putString(key, value) == value.length();
 }
 
 bool ConfigurationService::persistUInt(const char* key, uint32_t value) {
@@ -941,7 +975,8 @@ bool ConfigurationService::validateActuatorSlots(
 bool ConfigurationService::validateControllerSlot(
     const ControllerSlotConfiguration& slot,
     const SensorSlotConfiguration* sensorSlots,
-    const ActuatorSlotConfiguration* actuatorSlots) const {
+    const ActuatorSlotConfiguration* actuatorSlots,
+    const ValueConfiguration* values) const {
     if (!isValidControllerId(slot.slotId)
         || slot.slotId > MaxControllerSlotCount
         || slot.name.isEmpty()
@@ -1006,7 +1041,7 @@ bool ConfigurationService::validateControllerSlot(
     } else if (slot.implementation == ControllerImplementation::Selector) {
         const auto& selector = slot.implementationConfiguration.selector;
         bool valid = false;
-        for (const auto& value : configuration_.values)
+        for (const auto& value : (values ? *values : configuration_.values))
             if (validSelectorMapping(selector, value.definition)) valid = true;
         if (!valid) return false;
     } else {
@@ -1040,14 +1075,15 @@ bool ConfigurationService::validateControllerSlot(
 bool ConfigurationService::validateControllerSlots(
     const ControllerSlotConfiguration* controllerSlots,
     const SensorSlotConfiguration* sensorSlots,
-    const ActuatorSlotConfiguration* actuatorSlots) const {
+    const ActuatorSlotConfiguration* actuatorSlots,
+    const ValueConfiguration* values) const {
     if (controllerSlots == nullptr || sensorSlots == nullptr || actuatorSlots == nullptr) {
         return false;
     }
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         if (controllerSlots[index].slotId != index + 1
             || !validateControllerSlot(
-                controllerSlots[index], sensorSlots, actuatorSlots)) {
+                controllerSlots[index], sensorSlots, actuatorSlots, values)) {
             return false;
         }
     }
@@ -1312,8 +1348,66 @@ bool ConfigurationService::saveEnumValueCode(ValueId id, const String& code) {
     return false;
 }
 
+bool ConfigurationService::validateRestore(const Configuration& c) const {
+    return validateDeviceName(c.device.name) && validateNetworkConfiguration(c.network)
+        && validateMqttServer(c.mqtt.server) && validateMqttPort(c.mqtt.port)
+        && validateMqttUsername(c.mqtt.username) && validateMqttPassword(c.mqtt.password)
+        && validateTimezone(c.time.timezone) && validateNtpServer(c.time.ntpServer1)
+        && validateNtpServer(c.time.ntpServer2)
+        && static_cast<unsigned>(c.locale.locale) <= static_cast<unsigned>(Locale::EnglishUnitedStates)
+        && supportsPresentationUnit(MeasurementType::Temperature, c.presentation.temperature)
+        && supportsPresentationUnit(MeasurementType::AtmosphericPressure, c.presentation.atmosphericPressure)
+        && supportsPresentationUnit(MeasurementType::SolarCellTemperature, c.presentation.solarCellTemperature)
+        && supportsPresentationUnit(MeasurementType::RainDetectorLevel, c.presentation.rainDetectorLevel)
+        && validValueConfiguration(c.values) && validateDisplayConfiguration(c.display)
+        && validateSensorSlots(c.sensorSlots) && validateActuatorSlots(c.actuatorSlots)
+        && validateControllerSlots(c.controllerSlots, c.sensorSlots, c.actuatorSlots, &c.values)
+        && validateHardwareOccupancy(c.sensorSlots, c.actuatorSlots, &c.display);
+}
+
+bool ConfigurationService::restoreConfiguration(const Configuration& candidate) {
+    if (!validateRestore(candidate)) return false;
+    std::vector<uint8_t> encoded;
+    if (!encodeConfigurationRecord(candidate, encoded)) return false;
+    ensurePreferencesStarted();
+    if (!preferencesInitialized_) return false;
+    const uint32_t bank = activeNamespace_ == "weather0" ? 1 : 0;
+    const char* nextNamespace = bank == 0 ? "weather0" : "weather1";
+    Preferences staging;
+    if (!staging.begin(nextNamespace, false)) return false;
+    bool written = staging.clear()
+        && staging.putBytes("cfg_snapshot", encoded.data(), encoded.size()) == encoded.size();
+    if (written) {
+        std::vector<uint8_t> bytes(encoded.size());
+        written = staging.getBytesLength("cfg_snapshot") == encoded.size()
+            && staging.getBytes("cfg_snapshot", bytes.data(), encoded.size()) == encoded.size()
+            && memcmp(bytes.data(), encoded.data(), encoded.size()) == 0;
+    }
+    staging.end();
+    if (!written) return false;
+    Preferences metadata;
+    if (!metadata.begin("weather_meta", false)) return false;
+    const bool committed = metadata.putUInt("active", bank) == sizeof(uint32_t);
+    metadata.end();
+    if (!committed) return false;
+    preferences_.end();
+    activeNamespace_ = nextNamespace;
+    preferencesInitialized_ = preferences_.begin(nextNamespace, false);
+    configuration_ = candidate;
+    return true;
+}
+
 bool ConfigurationService::resetToDefaults() {
     ensurePreferencesStarted();
+    if (!preferencesInitialized_) return false;
+    // Erase inactive snapshots and legacy credentials too; keep the pointer to the cleared active bank.
+    for (const char* name : {"weather", "weather0", "weather1"}) {
+        if (activeNamespace_ == name) continue;
+        Preferences old;
+        if (!old.begin(name, false)) return false;
+        const bool cleared = old.clear(); old.end();
+        if (!cleared) return false;
+    }
     if (!preferences_.clear()) {
         return false;
     }

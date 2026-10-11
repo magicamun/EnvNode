@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 #include <WebServer.h>
+#include <memory>
+#include "ConfigurationBackup.h"
 #include "IWebService.h"
 #include "IConfigurationService.h"
 #include "IWiFiService.h"
@@ -94,6 +96,20 @@ private:
     void handleTime();
     void handleUnits();
     void handleDevice();
+    void handleHardware();
+    void handleConfiguration();
+    void handleConfigurationDownload();
+    void handleConfigurationUploadData();
+    void handleConfigurationPreview();
+    void handleConfigurationRestore();
+    String configurationUpload_;
+    std::unique_ptr<Configuration> restoreCandidate_;
+    bool configurationUploadFailed_ = false;
+    bool configurationUploadComplete_ = false;
+    bool restoreIncludesPasswords_ = false;
+    uint32_t restorePreviewTime_ = 0;
+    uint32_t restoreSequence_ = 0;
+    String restoreToken_;
     void handleDiagnostics();
     void handleI2CScan();
     void handleLogs();
@@ -154,7 +170,6 @@ private:
     BoardProvisioningService& boardProvisioningService_;
     ModuleDiscoveryService& moduleDiscoveryService_;
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
-    uint8_t moduleDescriptorPayload_[DuoRelayDescriptor::MaximumEncodedSize] = {};
     WebServer server_{80};
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;

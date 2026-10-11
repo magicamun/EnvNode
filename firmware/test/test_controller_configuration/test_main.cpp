@@ -10,6 +10,7 @@
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
 #include "SelectorWebView.h"
+#include "WebLocalization.h"
 
 using namespace EnvNode;
 
@@ -733,7 +734,7 @@ void test_selector_persistence_dependencies_and_exclusive_target() {
     const String html = buildSelectorFields(f.service.getConfiguration(), saved, "<option value='1'>Valve</option>");
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "selectorMode"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "data-current='cistern'"));
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Unknown input holds"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), webText(f.service.getLocale(), TextId::ChooseTheModeValueAndMapItsOptions)));
 }
 
 void test_slot_and_module_alias_cannot_claim_same_output() {
