@@ -241,7 +241,9 @@ void test_driver_type_roundtrip_and_legacy_default() {
     start = legacy.find('\n', start) + 1;
     size_t end = legacy.find('\n', start);
     size_t length = std::stoul(legacy.substr(start, end - start));
-    legacy = legacy.substr(end + 1, length);
+    size_t payload = legacy.find('\n', end + 1) + 1;
+    payload = legacy.find('\n', payload) + 1;
+    legacy = legacy.substr(payload, length);
     legacy.replace(0, 4, "4\n");
     DisplayConfiguration decoded; decoded.hardware.type = TextDisplayType::Sh1106;
     TEST_ASSERT_TRUE(decodeDisplayConfiguration(legacy.c_str(), decoded));
@@ -277,8 +279,39 @@ void test_two_pages_persist_and_bus_conflicts_are_rejected() {
     TEST_ASSERT_FALSE(service.setDisplayConfiguration(page));
 }
 
+void test_fonts_roundtrip_migrate_v6_and_reject_invalid_atomically() {
+    auto page = example(); page.hardware.font = TextDisplayFont::Fixed8x13;
+    page.secondHardware.font = TextDisplayFont::Fixed6x10;
+    page.secondPage.formats[5] = "Retained hidden line";
+    String encoded; TEST_ASSERT_TRUE(encodeDisplayConfiguration(page, encoded));
+    DisplayConfiguration decoded;
+    TEST_ASSERT_TRUE(decodeDisplayConfiguration(encoded, decoded));
+    TEST_ASSERT_EQUAL_INT(1, static_cast<int>(decoded.hardware.font));
+    TEST_ASSERT_EQUAL_INT(0, static_cast<int>(decoded.secondHardware.font));
+    TEST_ASSERT_EQUAL_STRING("Retained hidden line", decoded.secondPage.formats[5].c_str());
+    ConfigurationService service; service.loadConfiguration();
+    TEST_ASSERT_TRUE(service.setDisplayConfiguration(page)); service.loadConfiguration();
+    TEST_ASSERT_EQUAL_INT(1, static_cast<int>(service.getConfiguration().display.hardware.font));
+    std::string old(encoded.c_str());
+    size_t fonts = 0;
+    for (unsigned i = 0; i < 4; ++i) fonts = old.find('\n', fonts) + 1;
+    std::string invalid = old; invalid[fonts] = '9';
+    TEST_ASSERT_FALSE(decodeDisplayConfiguration(invalid.c_str(), decoded));
+    TEST_ASSERT_EQUAL_INT(1, static_cast<int>(decoded.hardware.font));
+    old.erase(fonts, 4); old[0] = '6';
+    TEST_ASSERT_TRUE(decodeDisplayConfiguration(old.c_str(), decoded));
+    TEST_ASSERT_EQUAL_INT(0, static_cast<int>(decoded.hardware.font));
+    TEST_ASSERT_EQUAL_INT(0, static_cast<int>(decoded.secondHardware.font));
+    TEST_ASSERT_EQUAL_STRING(page.formats[0].c_str(), decoded.formats[0].c_str());
+    TextDisplayFont font = TextDisplayFont::Fixed8x13;
+    TEST_ASSERT_FALSE(parseTextDisplayFont("2", font));
+    TEST_ASSERT_EQUAL_INT(1, static_cast<int>(font));
+    page.hardware.font = static_cast<TextDisplayFont>(9);
+    TEST_ASSERT_FALSE(validateDisplayConfiguration(page));
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_fonts_roundtrip_migrate_v6_and_reject_invalid_atomically);
     RUN_TEST(test_two_pages_persist_and_bus_conflicts_are_rejected);
     RUN_TEST(test_driver_type_roundtrip_and_legacy_default);
     RUN_TEST(test_v3_migrates_and_blob_persists_large_enum_page_atomically);

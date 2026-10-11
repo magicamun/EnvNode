@@ -2,6 +2,7 @@
 #include <U8g2lib.h>
 #include <memory>
 #include "ITextDisplay.h"
+#include "TextDisplayLayout.h"
 #include "OledCommandTransport.h"
 #include "I2CBusManager.h"
 namespace EnvNode {
@@ -22,6 +23,7 @@ private:
     const char* phase_ = "idle";
     TwoWire* wire_ = nullptr;
     U8G2 display_;
+    TextDisplayLayout layout_;
     std::unique_ptr<uint8_t[]> framebuffer_;
     uint8_t address_ = 0x3C;
     bool failed_ = false;

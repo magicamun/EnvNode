@@ -5,8 +5,14 @@ namespace EnvNode {
 constexpr const char PageEditorScript[] = R"EDITOR(
 (function () {
 if (!document.getElementById('page-formats')) return;
-const rendered = document.getElementById('page-rendered');
-if (rendered) document.getElementById('page-result').value = rendered.textContent;
+const previewOutput = document.getElementById('preview-output');
+const refreshPreview = () => {
+    const id = previewOutput.value === 'full' ? 'page-rendered' : 'page-rendered-' + previewOutput.value;
+    const rendered = document.getElementById(id);
+    document.getElementById('page-result').value = rendered ? rendered.textContent : '';
+};
+previewOutput.addEventListener('change', refreshPreview);
+refreshPreview();
 (function () {
     const options = document.getElementById('property-sources').content.querySelector('select').options;
     document.querySelectorAll('[data-property-source]').forEach(source => {
@@ -171,7 +177,7 @@ const DisplayPageEditor = (() => {
         warning.appendChild(button); row.appendChild(warning);
     });
     editor.addEventListener('input', () => update());
-    form.addEventListener('input', e => { if (e.target !== editor) note.textContent = 'Preview is out of date. Please refresh.'; });
+    form.addEventListener('input', e => { if (e.target !== editor && e.target.id !== 'preview-output') note.textContent = 'Preview is out of date. Please refresh.'; });
     form.addEventListener('submit', e => {
         update(true);
         const pending = rows.some(r => r.dataset.review === '1');

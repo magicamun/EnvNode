@@ -6,4 +6,4 @@
 
 - [ ] Values-Seite: MQTT-Befehlstopic und Beispiel-Payload pro Value anzeigen; Befehl und Statusrückmeldung klar unterscheiden.
 
-- [ ] Display-Geometrien und Grenzfälle später prüfen: unterschiedliche verfügbare Zeilenzahlen, Font-/Zeilenhöhe und Verhalten bei zu langen oder zu vielen Zeilen. Aktuell bleiben beide Displays bei 128×64 mit sechs Zeilen; vorerst keine Erweiterung.
+- [ ] Font-/Clipping-Hardwaretest: zwei 128×64-Displays mit Fixed 6x10 (21×6) und Fixed 8x13 (16×4), lange Zeilen, Umlaute am rechten Rand, Fontwechsel und Neustart prüfen. Software, Speicherung und Vorschau sind umgesetzt und automatisiert geprüft; weitere Pixelgeometrien bleiben ein späterer Schritt.

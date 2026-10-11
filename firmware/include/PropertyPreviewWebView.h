@@ -21,6 +21,6 @@ constexpr size_t PropertyPreviewLineCount = DisplayLineCount;
 using PropertyPreviewPage = DisplayConfiguration;
 // optionsHtml contains escaped options produced by buildPropertySourceOption.
 String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
-    const PropertyPreviewPage& page, bool submitted, size_t pageIndex = 0);
+    const PropertyPreviewPage& page, bool submitted, size_t pageIndex = 0, int previewOutput = -1);
 
 } // namespace EnvNode

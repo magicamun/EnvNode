@@ -469,8 +469,24 @@ void test_page_editor_layout_and_optional_browser_fixture() {
         std::fclose(file);
     }
 }
+void test_preview_clips_per_assigned_display_and_retains_full_page() {
+    Reader reader; PropertyPreviewPage page;
+    page.hardware.enabled = true; page.hardware.font = TextDisplayFont::Fixed8x13;
+    page.secondHardware.enabled = true; page.pageAssignment[1] = 0;
+    page.formats[0] = "123456789012345äöüXYZtail";
+    page.formats[5] = "Stored sixth line";
+    const String html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "16 columns x 4 lines"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "21 columns x 6 lines"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<pre hidden id='page-rendered-0'>\n123456789012345ä\n\n\n\n</pre>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<pre hidden id='page-rendered-1'>\n123456789012345äöüXYZ\n\n\n\n\nStored sixth line\n</pre>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "123456789012345äöüXYZtail"));
+    const String outputs = buildDisplayOutputsHtml(page);
+    TEST_ASSERT_NOT_NULL(strstr(outputs.c_str(), "name='displayFont'"));
+    TEST_ASSERT_NOT_NULL(strstr(outputs.c_str(), "name='displayFont2'"));
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
+    UNITY_BEGIN(); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
     RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
     RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
     RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);

@@ -510,7 +510,7 @@ different buses is allowed; sensor/actuator resource checks include both outputs
 Both previous targets are released before initializing new ones, including when
 swapping bus assignments.
 
-Storage version 6 wraps two bounded version-5 page records and their assignments
+Storage version 6 originally wrapped two bounded version-5 page records and their assignments
 in one NVS blob (maximum 12400 bytes). Versions 1–5 migrate to Display 1 / Page 1;
 Display 2 is disabled, Page 2 is empty. Existing formats and translations remain.
 Hardware verification: configure the old SSD1309 on I2C0 with Page 1, the second
@@ -556,7 +556,7 @@ that make the assignment ambiguous are marked for review before preview/save.
 Removed placeholders discard their unused sources and translations on submission.
 JavaScript is required for editing; without it, preview/save stay disabled.
 This changes only the editor, not the saved page format or display rendering.
-Font selection, geometry-dependent limits and clipping remain separate work.
+Font selection and clipping are described below.
 
 The page editor UI uses English independently of the locale used to format values.
 Its JavaScript is served separately at `/display-editor.js`, directly from flash,
@@ -564,3 +564,37 @@ with no-store caching to avoid stale editor code after a firmware update. The
 Display handler moves the generated HTML rather than copying the entire page and
 releases temporary source/configuration data before sending the response. This
 reduces peak heap use; rendering failures log buffer sizes and available heap.
+
+
+### Fixed fonts and per-display clipping
+
+Displays now select a fixed font independently of their assigned page:
+
+| Font | Cell size | Columns on 128×64 | Lines on 128×64 |
+| --- | --- | --- | --- |
+| Fixed 6x10 | 6×10 pixels | 21 | 6 |
+| Fixed 8x13 | 8×13 pixels | 16 | 4 |
+
+These use U8g2 `u8g2_font_6x10_mf` and `u8g2_font_8x13_mf`. This replaces the
+previous t0_11 font and its hard-coded 10-pixel baseline spacing. The default
+retains six lines but the glyph shapes change slightly. Geometry is derived by
+integer division of display pixels by font cell dimensions. Glyph baselines fit
+inside each complete cell. Spare pixels at the right and bottom stay clear.
+
+Pages retain all six stored lines and their complete format strings. Each output
+clips to its own rows and columns without wrapping, ellipsis or partial glyphs.
+UTF-8 characters count as cells, not bytes. The fonts cover printable ASCII and
+Latin-1, including German umlauts and the degree symbol; other characters render
+as a single `?`. Hardware output and web preview share the clipping function.
+The full framebuffer is cleared on every render, including after font changes.
+
+The Page editor's **Preview for** selector offers the displays assigned to that
+page and **Full page (unclipped)**. The first enabled assigned display is selected
+initially; users can inspect each output without modifying the page or assignment.
+Refresh reads current values; switching preview targets uses those same readings.
+
+Storage version 7 adds both font IDs to the two-page container while keeping its
+bounded version-5 inner page records. Versions 1–6 load as Fixed 6x10, preserving
+pages, sources, translations and output assignments. Invalid font IDs are rejected.
+Font changes apply with Save on device and survive restart. No hardware/bus or
+partition configuration change is required.

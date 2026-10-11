@@ -93,7 +93,8 @@ bool U8g2TextDisplay::begin(const TextDisplayConfiguration& configuration) {
         commands_.command(0xD3); commands_.argument(0x00); commands_.flush();
     }
     if (failed_) return false;
-    display_.setFont(u8g2_font_t0_11_tf);
+    layout_ = textDisplayLayout(configuration);
+    display_.setFont(configuration.font == TextDisplayFont::Fixed8x13 ? u8g2_font_8x13_mf : u8g2_font_6x10_mf);
     display_.setFontPosBaseline();
     display_.clearBuffer();
     ready_ = !failed_;
@@ -106,8 +107,10 @@ bool U8g2TextDisplay::show(const TextDisplayFrame& frame) {
     commands_.reset();
     phase_ = "frame";
     display_.clearBuffer();
-    for (size_t line = 0; line < DisplayLineCount; ++line) {
-        display_.drawUTF8(0, (line + 1) * 10, frame.lines[line]);
+    for (size_t line = 0; line < DisplayLineCount && line < layout_.rows(); ++line) {
+        char clipped[MaxPropertyTextLength + 1];
+        clipDisplayText(frame.lines[line], layout_.columns(), clipped, sizeof(clipped));
+        display_.drawUTF8(0, line * layout_.cellHeight + layout_.baseline, clipped);
     }
     display_.sendBuffer();
     if (!failed_) {

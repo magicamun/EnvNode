@@ -1,6 +1,7 @@
 #include <unity.h>
 #include <cstring>
 #include "DisplayService.h"
+#include "TextDisplayLayout.h"
 #include "OledCommandTransport.h"
 #include <vector>
 using namespace EnvNode;
@@ -142,7 +143,8 @@ void test_saved_translation_reaches_oled_and_updates_live() {
     TEST_ASSERT_EQUAL_STRING("Ventil: Hauswasser", f.display.last.lines[1]);
     f.config.labels[1][0].falseText = "Leitungswasser";
     f.clock.now = 2000; f.service.loop();
-    TEST_ASSERT_EQUAL_STRING("Ventil: Leitungswasser", f.display.last.lines[1]);
+    TEST_ASSERT_EQUAL_STRING("Ventil: Leitungswasse", f.display.last.lines[1]); // 21 complete cells
+    TEST_ASSERT_EQUAL_STRING("Leitungswasser", f.config.labels[1][0].falseText.c_str());
     TEST_ASSERT_EQUAL_UINT32(1, f.display.begins);
 }
 
@@ -246,8 +248,46 @@ void test_oled_command_state_is_private_to_each_display() {
     TEST_ASSERT_EQUAL_UINT8_ARRAY(offset, a.packets[0].data(), 3);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(multiplex, b.packets[0].data(), 3);
 }
+void test_font_geometry_clips_complete_utf8_cells() {
+    TextDisplayConfiguration config;
+    auto layout = textDisplayLayout(config);
+    TEST_ASSERT_EQUAL_UINT32(21, layout.columns()); TEST_ASSERT_EQUAL_UINT32(6, layout.rows());
+    config.font = TextDisplayFont::Fixed8x13; layout = textDisplayLayout(config);
+    TEST_ASSERT_EQUAL_UINT32(16, layout.columns()); TEST_ASSERT_EQUAL_UINT32(4, layout.rows());
+    char result[128];
+    clipDisplayText("123456789012345äöZ", 16, result, sizeof(result));
+    TEST_ASSERT_EQUAL_STRING("123456789012345ä", result);
+    clipDisplayText("ÄÖÜäöüß°", 8, result, sizeof(result));
+    TEST_ASSERT_EQUAL_STRING("ÄÖÜäöüß°", result);
+    clipDisplayText("A😀äB", 3, result, sizeof(result)); TEST_ASSERT_EQUAL_STRING("A?ä", result);
+    strcpy(result, "A😀äB"); clipDisplayText(result, 3, result, sizeof(result));
+    TEST_ASSERT_EQUAL_STRING("A?ä", result);
+    clipDisplayText("ä", 1, result, 2); TEST_ASSERT_EQUAL_STRING("", result);
+    clipDisplayText("text", 0, result, sizeof(result)); TEST_ASSERT_EQUAL_STRING("", result);
+}
+void test_two_fonts_clip_independently_and_switch_restores_full_page() {
+    Fixture f; Display second;
+    f.config.hardware.enabled = true;
+    f.config.secondHardware.enabled = true; f.config.secondHardware.bus = I2CBus::I2C1;
+    f.config.secondHardware.font = TextDisplayFont::Fixed8x13;
+    f.config.pageAssignment[1] = 0;
+    f.config.formats[0] = "123456789012345äöüXYZtail";
+    f.config.formats[5] = "Sixth line";
+    DisplayService service(f.config, f.reader, f.display, f.clock, f.log, &second);
+    service.loop();
+    TEST_ASSERT_EQUAL_STRING("123456789012345äöüXYZ", f.display.last.lines[0]);
+    TEST_ASSERT_EQUAL_STRING("123456789012345ä", second.last.lines[0]);
+    TEST_ASSERT_EQUAL_STRING("Sixth line", f.display.last.lines[5]);
+    TEST_ASSERT_EQUAL_STRING("", second.last.lines[5]);
+    TEST_ASSERT_EQUAL_STRING("123456789012345äöüXYZtail", f.config.formats[0].c_str());
+    f.config.secondHardware.font = TextDisplayFont::Fixed6x10;
+    service.loop();
+    TEST_ASSERT_EQUAL_UINT32(2, second.begins);
+    TEST_ASSERT_EQUAL_STRING("Sixth line", second.last.lines[5]);
+    TEST_ASSERT_EQUAL_STRING(f.display.last.lines[0], second.last.lines[0]);
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_ready_is_not_reported_when_first_or_recovery_frame_fails); RUN_TEST(test_oled_packets_keep_command_and_arguments_together_and_abort_on_failure); RUN_TEST(test_oled_command_state_is_private_to_each_display); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
+    UNITY_BEGIN(); RUN_TEST(test_font_geometry_clips_complete_utf8_cells); RUN_TEST(test_two_fonts_clip_independently_and_switch_restores_full_page); RUN_TEST(test_ready_is_not_reported_when_first_or_recovery_frame_fails); RUN_TEST(test_oled_packets_keep_command_and_arguments_together_and_abort_on_failure); RUN_TEST(test_oled_command_state_is_private_to_each_display); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
     RUN_TEST(test_saved_translation_reaches_oled_and_updates_live);
     RUN_TEST(test_disabled_enable_refresh_and_live_edit);
     RUN_TEST(test_missing_display_retries_and_recovers);

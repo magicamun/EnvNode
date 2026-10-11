@@ -1,5 +1,6 @@
 #include "DisplayService.h"
 #include "DisplayPageFormatter.h"
+#include "TextDisplayLayout.h"
 #include <cstdio>
 #include <cstring>
 namespace EnvNode {
@@ -66,14 +67,16 @@ void DisplayService::render(size_t index) {
     haveFrame_ = true;
     TextDisplayFrame frame;
     uint8_t errors = 0;
-    for (size_t line = 0; line < DisplayLineCount; ++line) {
+    const auto layout = textDisplayLayout(active_);
+    for (size_t line = 0; line < DisplayLineCount && line < layout.rows(); ++line) {
         const auto result = formatDisplayLine(properties_, configuration_.page(configuration_.pageAssignment[index]), line);
         if (result.error != nullptr) {
             errors |= (1U << line);
             snprintf(frame.lines[line], sizeof(frame.lines[line]), "[Line %u error]", static_cast<unsigned>(line + 1));
+            clipDisplayText(frame.lines[line], layout.columns(), frame.lines[line], sizeof(frame.lines[line]));
             if (!(errorLines_ & (1U << line))) logger_.warnf("OLED line %u: %s", static_cast<unsigned>(line + 1), result.error);
         } else {
-            strcpy(frame.lines[line], result.value.text);
+            clipDisplayText(result.value.text, layout.columns(), frame.lines[line], sizeof(frame.lines[line]));
         }
     }
     if (errorLines_ && !errors) logger_.info("OLED line errors cleared");

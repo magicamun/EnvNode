@@ -1352,6 +1352,8 @@ bool WebService::readDisplayOutputs(DisplayConfiguration& configuration) {
         }
         if (server_.hasArg("displayType" + suffix)
             && !parseTextDisplayType(server_.arg("displayType" + suffix), hardware.type)) return false;
+        if (server_.hasArg("displayFont" + suffix)
+            && !parseTextDisplayFont(server_.arg("displayFont" + suffix), hardware.font)) return false;
         if (server_.hasArg("displayPage" + suffix)) {
             const String value = server_.arg("displayPage" + suffix);
             if (value != "0" && value != "1") return false;
@@ -1364,7 +1366,7 @@ bool WebService::readDisplayOutputs(DisplayConfiguration& configuration) {
 void WebService::handleDisplayOutputsSave() {
     for (size_t index = 0; index < 2; ++index) {
         const String suffix = index == 0 ? "" : "2";
-        const char* fields[] = {"displayEnabled", "displayType", "displayBus", "displayAddress", "displayPage"};
+        const char* fields[] = {"displayEnabled", "displayType", "displayBus", "displayAddress", "displayPage", "displayFont"};
         for (const char* field : fields) if (!server_.hasArg(String(field) + suffix)) {
             sendResult("Display save failed", "/display", "Incomplete display settings; previous settings retained.", false); return;
         }
@@ -1372,7 +1374,7 @@ void WebService::handleDisplayOutputsSave() {
     std::unique_ptr<DisplayConfiguration> storage(new DisplayConfiguration(configurationService_.getConfiguration().display));
     auto& candidate = *storage;
     if (!readDisplayOutputs(candidate)) {
-        sendResult("Display save failed", "/display", "Invalid display type, bus, address or page.", false); return;
+        sendResult("Display save failed", "/display", "Invalid display type, font, bus, address or page.", false); return;
     }
     if (candidate.hardware.enabled && candidate.secondHardware.enabled
         && candidate.hardware.bus == candidate.secondHardware.bus
@@ -1571,8 +1573,17 @@ void WebService::handleDisplay() {
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), "Date (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), "Time (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "datetime"), "Date and time (locale)");
+    int previewOutput = -1;
+    if (server_.hasArg("previewOutput")) {
+        const String value = server_.arg("previewOutput");
+        if (value == "full") previewOutput = -2;
+        else if (value == "0" || value == "1") {
+            previewOutput = value == "0" ? 0 : 1;
+            if (previewPage.pageAssignment[previewOutput] != pageIndex) previewOutput = -2;
+        } else { sendResult("Invalid preview", "/display", "Choose a display or Full page.", false); return; }
+    }
     // Move the result instead of allocating a second complete copy with +=.
-    content = buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured, pageIndex);
+    content = buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured, pageIndex, previewOutput);
     // These temporary inputs are no longer needed while sending the page header/body.
     previewOptions = String();
     storage.reset();

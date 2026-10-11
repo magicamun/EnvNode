@@ -25,8 +25,23 @@ bool parseTextDisplayType(const String& value, TextDisplayType& result) {
     return true;
 }
 
+const char* textDisplayFontName(TextDisplayFont font) {
+    switch (font) {
+    case TextDisplayFont::Fixed6x10: return "Fixed 6x10";
+    case TextDisplayFont::Fixed8x13: return "Fixed 8x13";
+    default: return nullptr;
+    }
+}
+bool parseTextDisplayFont(const String& value, TextDisplayFont& result) {
+    if (value == "0") result = TextDisplayFont::Fixed6x10;
+    else if (value == "1") result = TextDisplayFont::Fixed8x13;
+    else return false;
+    return true;
+}
+
 bool validateTextDisplayConfiguration(const TextDisplayConfiguration& configuration) {
     return textDisplayTypeName(configuration.type) != nullptr
+        && textDisplayFontName(configuration.font) != nullptr
         && BoardCapabilities::current().i2cBus(configuration.bus) != nullptr
         && (configuration.address == 0x3C || configuration.address == 0x3D);
 }
@@ -145,10 +160,12 @@ bool encodeDisplayConfiguration(const DisplayConfiguration& configuration, Strin
     String first, second;
     if (!encodeSinglePage(configuration.page(0), configuration.output(0), first)
         || !encodeSinglePage(configuration.page(1), configuration.output(1), second)) return false;
-    String record("6\n");
+    String record("7\n");
     record += String(configuration.pageAssignment[0]).c_str(); record += '\n';
     record += String(configuration.pageAssignment[1]).c_str(); record += '\n';
     record += String(static_cast<unsigned>(first.length())).c_str(); record += '\n';
+    record += String(static_cast<unsigned>(configuration.hardware.font)).c_str(); record += '\n';
+    record += String(static_cast<unsigned>(configuration.secondHardware.font)).c_str(); record += '\n';
     record += first.c_str(); record += second.c_str();
     if (record.length() > MaximumEncodedLength) return false;
     encoded = record;
@@ -158,10 +175,11 @@ bool encodeDisplayConfiguration(const DisplayConfiguration& configuration, Strin
 bool decodeDisplayConfiguration(const String& encoded, DisplayConfiguration& configuration) {
     if (encoded.length() > MaximumEncodedLength || strlen(encoded.c_str()) != encoded.length()) return false;
     const std::string input(encoded.c_str());
-    if (input.compare(0, 2, "6\n") == 0) {
+    const bool fonts = input.compare(0, 2, "7\n") == 0;
+    if (fonts || input.compare(0, 2, "6\n") == 0) {
         size_t position = 2;
-        unsigned fields[3] = {};
-        for (unsigned i = 0; i < 3; ++i) {
+        unsigned fields[5] = {};
+        for (unsigned i = 0; i < (fonts ? 5U : 3U); ++i) {
             size_t end = input.find('\n', position);
             if (end == std::string::npos || end == position || end - position > 5) return false;
             for (; position < end; ++position) {
@@ -170,7 +188,7 @@ bool decodeDisplayConfiguration(const String& encoded, DisplayConfiguration& con
             }
             ++position;
         }
-        if (fields[0] > 1 || fields[1] > 1 || fields[2] > input.size() - position) return false;
+        if (fields[0] > 1 || fields[1] > 1 || fields[3] > 1 || fields[4] > 1 || fields[2] > input.size() - position) return false;
         const std::string first = input.substr(position, fields[2]);
         const std::string second = input.substr(position + fields[2]);
         // No nested containers: each page uses the bounded version-5 format.
@@ -178,6 +196,8 @@ bool decodeDisplayConfiguration(const String& encoded, DisplayConfiguration& con
         std::unique_ptr<DisplayConfiguration> a(new DisplayConfiguration), b(new DisplayConfiguration);
         if (!decodeDisplayConfiguration(first.c_str(), *a) || !decodeDisplayConfiguration(second.c_str(), *b)) return false;
         a->secondPage = b->page(0); a->secondHardware = b->hardware;
+        a->hardware.font = static_cast<TextDisplayFont>(fields[3]);
+        a->secondHardware.font = static_cast<TextDisplayFont>(fields[4]);
         a->pageAssignment[0] = fields[0]; a->pageAssignment[1] = fields[1];
         if (!validateDisplayConfiguration(*a)) return false;
         configuration = *a;

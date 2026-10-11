@@ -1,5 +1,7 @@
 #include "PropertyPreviewWebView.h"
 #include "DisplayPageFormatter.h"
+#include "TextDisplayLayout.h"
+#include <cstdio>
 
 #include <cstring>
 #include "HtmlEscaping.h"
@@ -82,6 +84,7 @@ String buildPropertyPreviewHtml(const IPropertyReader& reader, const String& opt
                 html += "<p>Result</p><pre style='white-space:pre-wrap;overflow-wrap:anywhere'>";
                 html += escapeHtml(String(result.text)).c_str();
                 html += "</pre>";
+
             } else {
                 html += "<p role='alert'>";
                 html += escapeHtml(String(propertyFormatError(result.status))).c_str();
@@ -123,6 +126,16 @@ String buildDisplayOutputsHtml(const DisplayConfiguration& page) {
             html += type == hardware.type ? "' selected>" : "'>";
             html += textDisplayTypeName(type); html += "</option>";
         }
+        html += "</select></label><label>Font<select name='displayFont"; html += suffix.c_str(); html += "'>";
+        for (unsigned value = 0; value < 2; ++value) {
+            auto candidate = hardware; candidate.font = static_cast<TextDisplayFont>(value);
+            const auto layout = textDisplayLayout(candidate);
+            html += "<option value='"; html += String(value).c_str();
+            html += candidate.font == hardware.font ? "' selected>" : "'>";
+            html += textDisplayFontName(candidate.font); html += " · ";
+            html += String(static_cast<unsigned>(layout.columns())).c_str(); html += " columns x ";
+            html += String(static_cast<unsigned>(layout.rows())).c_str(); html += " lines</option>";
+        }
         html += "</select></label><label>I2C bus<select name='displayBus"; html += suffix.c_str(); html += "'>";
         const auto& board = BoardCapabilities::current();
         for (size_t index = 0; index < board.i2cBusCount(); ++index) {
@@ -139,7 +152,7 @@ String buildDisplayOutputsHtml(const DisplayConfiguration& page) {
         html += hardware.address == 0x3C
             ? "<option value='60' selected>0x3C</option><option value='61'>0x3D</option>"
             : "<option value='60'>0x3C</option><option value='61' selected>0x3D</option>";
-        html += "</select></label><p class='help'>Save on device applies output settings immediately. Refresh: 1 second. Six lines, 10-pixel spacing; long lines are clipped at the right edge. Connection errors are logged; retry: 10 seconds.</p>";
+        html += "</select></label><p class='help'>Save on device applies output settings immediately. Refresh: 1 second. Font determines columns and lines. Output is clipped to complete cells without wrapping; page content is retained. Connection errors are logged; retry: 10 seconds.</p>";
         html += "<label>Page<select name='displayPage"; html += suffix.c_str(); html += "'>";
         for (unsigned i = 0; i < 2; ++i) {
             html += "<option value='"; html += String(i).c_str();
@@ -154,7 +167,7 @@ String buildDisplayOutputsHtml(const DisplayConfiguration& page) {
 }
 
 String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
-    const PropertyPreviewPage& page, bool submitted, size_t pageIndex) {
+    const PropertyPreviewPage& page, bool submitted, size_t pageIndex, int previewOutput) {
     const auto& contentPage = page.page(pageIndex);
     String html("<section class='card' id='text-preview'><h2>Six-line text preview</h2>");
     html += buildDisplayTabs(pageIndex + 1).c_str();
@@ -168,7 +181,24 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     html += "<input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'>";
     html += "<style>#text-preview [hidden]{display:none!important}.page-editor-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.page-editor-grid textarea{box-sizing:border-box;width:100%;max-width:100%;font-family:monospace;white-space:pre;min-height:11em;resize:vertical}[data-page-row]>legend{white-space:nowrap;width:auto;padding:0 6px}.page-source-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}#page-editor-note{min-height:1.5em}@media(max-width:700px){.page-editor-grid{grid-template-columns:1fr}}</style>";
     html += "<div class='page-editor-grid'><label>Format / one line per display line<textarea id='page-formats' disabled rows='6' wrap='off' spellcheck='false'>";
-    html += "</textarea></label><label>Preview<textarea id='page-result' rows='6' wrap='off' readonly aria-label='Display preview'></textarea></label></div><p id='page-editor-note' class='help' role='status'></p><div id='page-sources'>";
+    html += "</textarea></label><div><label>Preview<textarea id='page-result' rows='6' wrap='off' readonly aria-label='Display preview'></textarea></label><label>Preview for<select id='preview-output' name='previewOutput'>";
+    if (previewOutput == -1) for (size_t output = 0; output < 2; ++output) {
+        if (page.output(output).enabled && page.pageAssignment[output] == pageIndex) { previewOutput = output; break; }
+    }
+    html += "<option value='full'"; html += previewOutput < 0 ? " selected>" : ">";
+    html += "Full page (unclipped)</option>";
+    for (size_t output = 0; output < 2; ++output) {
+        if (page.pageAssignment[output] != pageIndex) continue;
+        const auto layout = textDisplayLayout(page.output(output));
+        html += "<option value='"; html += String(static_cast<unsigned>(output)).c_str();
+        html += previewOutput == static_cast<int>(output) ? "' selected>" : "'>";
+        html += "Display "; html += String(static_cast<unsigned>(output + 1)).c_str(); html += " · ";
+        html += String(static_cast<unsigned>(layout.columns())).c_str(); html += " columns x ";
+        html += String(static_cast<unsigned>(layout.rows())).c_str(); html += " lines";
+        if (!page.output(output).enabled) html += " (disabled)";
+        html += "</option>";
+    }
+    html += "</select></label></div></div><p id='page-editor-note' class='help' role='status'></p><div id='page-sources'>";
     for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
         html += "<fieldset data-page-row><legend>Line ";
@@ -244,12 +274,13 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     }
     html += "</div><div class='actions'><button disabled data-editor-submit type='submit' name='preview' value='1'>Preview / refresh all lines</button><button disabled data-editor-submit type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'><input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'></form>";
     html += "<p class='help'>Use %f for decimals, %u for unsigned integers (including actuator percent), %s for text, Boolean or enum text, and %% for a percent sign. Example: Level: %.0f l %.0f%% with two sources. Width up to 64; decimal places 0–6. Numbers use canonical units and a decimal point.</p>";
-    html += "<p class='help'>This is a six-line text preview, not a pixel-accurate OLED simulation. Preview settings remain in this URL until you choose Save on device. Saved settings survive restart. Load saved settings discards the preview edits. Refresh reads all lines again.</p>";
+    html += "<p class='help'>Preview uses the selected display font limits, not a pixel-accurate OLED simulation. Full page shows all stored text. Unsupported display characters appear as ?. Preview settings remain in this URL until you choose Save on device. Saved settings survive restart. Load saved settings discards the preview edits. Refresh reads all lines again.</p>";
     if (optionsHtml.isEmpty()) html += "<p>No sources available; plain text still works.</p>";
     if (submitted) {
         // Render a complete page only after each row has been evaluated. A bad
         // row gets an explicit marker; its previous or partial value is never reused.
         String rendered;
+        String clipped[2];
         for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
             const DisplayLineResult lineResult = formatDisplayLine(reader, contentPage, line);
             const char* error = lineResult.error;
@@ -264,10 +295,26 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
                 rendered += result.text;
             }
             rendered += '\n';
+            for (size_t output = 0; output < 2; ++output) {
+                if (page.pageAssignment[output] != pageIndex) continue;
+                const auto layout = textDisplayLayout(page.output(output));
+                if (line >= layout.rows()) continue;
+                char text[MaxPropertyTextLength + 1];
+                if (error) {
+                    snprintf(text, sizeof(text), "[Line %u error]", static_cast<unsigned>(line + 1));
+                    clipDisplayText(text, layout.columns(), text, sizeof(text));
+                } else clipDisplayText(result.text, layout.columns(), text, sizeof(text));
+                clipped[output] += text; clipped[output] += '\n';
+            }
         }
         html += "<pre hidden id='page-rendered'>\n";
         html += escapeHtml(rendered).c_str();
         html += "</pre>";
+        for (size_t output = 0; output < 2; ++output) {
+            if (page.pageAssignment[output] != pageIndex) continue;
+            html += "<pre hidden id='page-rendered-"; html += String(static_cast<unsigned>(output)).c_str(); html += "'>\n";
+            html += escapeHtml(clipped[output]).c_str(); html += "</pre>";
+        }
     }
     html += "<script src='/display-editor.js' defer></script>";
     html += "</section>";
