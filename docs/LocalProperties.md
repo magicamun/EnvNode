@@ -602,3 +602,16 @@ bounded version-5 inner page records. Versions 1–6 load as Fixed 6x10, preserv
 pages, sources, translations and output assignments. Invalid font IDs are rejected.
 Font changes apply with Save on device and survive restart. No hardware/bus or
 partition configuration change is required.
+
+### Device and network text sources
+
+`system/1/device_name`, `system/1/hostname` and `system/1/ip_address` are
+read-only text sources for display pages (`%s`). They read the current device
+configuration and WiFi service on each render. The IP address is the active
+station address, or the setup access point address in setup mode. Without an
+assigned address it reports `NoValue`. Snapshots own their text.
+
+The Network page shows active station IP, subnet mask, gateway and both DNS
+servers as read-only fields when DHCP is selected. Unassigned values appear
+as a dash. These fields are never submitted as static configuration; reload
+the page to update the runtime snapshot. Saved network changes require restart.

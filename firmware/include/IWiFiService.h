@@ -4,6 +4,15 @@
 
 namespace EnvNode {
 
+// Active station values; empty fields mean no assigned value.
+struct NetworkAddressSnapshot {
+    String ipAddress;
+    String subnetMask;
+    String gateway;
+    String dns1;
+    String dns2;
+};
+
 class IWiFiService {
 public:
     virtual ~IWiFiService() = default;
@@ -15,6 +24,11 @@ public:
     virtual String ipAddress() const = 0;
     virtual String hostname() const = 0;
     virtual int32_t rssi() const = 0;
+    virtual NetworkAddressSnapshot stationAddresses() const {
+        NetworkAddressSnapshot result;
+        if (connected()) result.ipAddress = ipAddress();
+        return result;
+    }
 };
 
 } // namespace EnvNode

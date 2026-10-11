@@ -54,12 +54,12 @@ neben ihnen werden übersetzt.
 - `firmware/src/WebService.cpp:747`: `SSID`
 - `firmware/src/WebService.cpp:751`: `RSSI`
 - `firmware/src/WebService.cpp:784`: `DHCP`
-- `firmware/src/WebService.cpp:796`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:848`: `EEPROM`
-- `firmware/src/WebService.cpp:960`: `ENHD descriptor 0.1`
-- `firmware/src/WebService.cpp:963`: `EnvNode DuoRelay 0.3`
-- `firmware/src/WebService.cpp:1669`: `GPIO`
-- `firmware/src/WebService.cpp:1768`: `GPIO`
-- `firmware/src/WebService.cpp:2028`: `MCU`
-- `firmware/src/WebService.cpp:2028`: `WiFi`
-- `firmware/src/WebService.cpp:2036`: `SDA GPIO`
+- `firmware/src/WebService.cpp:810`: `Home Assistant Discovery`
+- `firmware/src/WebService.cpp:862`: `EEPROM`
+- `firmware/src/WebService.cpp:974`: `ENHD descriptor 0.1`
+- `firmware/src/WebService.cpp:977`: `EnvNode DuoRelay 0.3`
+- `firmware/src/WebService.cpp:1686`: `GPIO`
+- `firmware/src/WebService.cpp:1785`: `GPIO`
+- `firmware/src/WebService.cpp:2045`: `MCU`
+- `firmware/src/WebService.cpp:2045`: `WiFi`
+- `firmware/src/WebService.cpp:2053`: `SDA GPIO`

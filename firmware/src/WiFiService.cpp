@@ -65,6 +65,17 @@ String WiFiService::hostname() const {
     return configurationService_.getConfiguration().network.hostname;
 }
 
+NetworkAddressSnapshot WiFiService::stationAddresses() const {
+    NetworkAddressSnapshot result;
+    if (!connected()) return result;
+    result.ipAddress = WiFi.localIP().toString();
+    result.subnetMask = WiFi.subnetMask().toString();
+    result.gateway = WiFi.gatewayIP().toString();
+    result.dns1 = WiFi.dnsIP(0).toString();
+    result.dns2 = WiFi.dnsIP(1).toString();
+    return result;
+}
+
 int32_t WiFiService::rssi() const {
     return connected() ? WiFi.RSSI() : 0;
 }

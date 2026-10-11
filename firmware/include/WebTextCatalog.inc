@@ -727,3 +727,5 @@ ENVNODE_WEB_TEXT(WriteAndVerifyThisBoardIdentityTheActive, "Write and verify thi
 ENVNODE_WEB_TEXT(VerifiedAndRediscoveredWithInstanceUuid, ", verified, and rediscovered with instance UUID", ", überprüft und mit Instanz-UUID neu erkannt")
 ENVNODE_WEB_TEXT(NoRestartRequired, ". No restart is required.", ". Ein Neustart ist nicht erforderlich.")
 ENVNODE_WEB_TEXT(Infrastructure, "Infrastructure", "Infrastruktur")
+
+ENVNODE_WEB_TEXT(ActiveNetworkAddresses, "Currently assigned network addresses (refresh to update; changes apply after restart).", "Aktuell zugewiesene Netzwerkadressen (zum Aktualisieren Seite neu laden; Änderungen gelten nach dem Neustart).")

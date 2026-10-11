@@ -70,4 +70,38 @@ void test_build_sources_work_without_time_sync() {
     TEST_ASSERT_FALSE(reader.describe({PropertyComponentKind::System,2,"version"},description));
     TEST_ASSERT_FALSE(reader.describe({PropertyComponentKind::System,1,"missing"},description));
 }
-int main(int,char**) { UNITY_BEGIN(); RUN_TEST(test_build_sources_work_without_time_sync); RUN_TEST(test_locale_text_sources_and_owned_snapshots); RUN_TEST(test_time_is_unavailable_until_synchronized_and_local_time_valid); return UNITY_END(); }
+struct WiFiStub : IWiFiService {
+    String address = "192.168.1.42";
+    bool online = true, setup = false;
+    void begin() override {}
+    void loop() override {}
+    bool connected() const override { return online; }
+    bool inSetupAccessPointMode() const override { return setup; }
+    String ipAddress() const override { return address; }
+    String hostname() const override { return "envnode-test"; }
+    int32_t rssi() const override { return -42; }
+};
+void test_device_sources_are_live_and_snapshots_own_text() {
+    ConfigurationService config; config.loadConfiguration(); config.setDeviceName("Garden");
+    LocaleFormatter locale(config); Time time; time.synced = false; WiFiStub wifi;
+    SystemPropertyReader reader(time, locale, "1", "2", "abc", "1+2", &config, &wifi);
+    TEST_ASSERT_EQUAL_STRING("Garden", formatPropertyText(reader,{PropertyComponentKind::System,1,"device_name"},"%s").text);
+    TEST_ASSERT_EQUAL_STRING("envnode-test", formatPropertyText(reader,{PropertyComponentKind::System,1,"hostname"},"%s").text);
+    PropertySnapshot first, second;
+    PropertyReference ip(PropertyComponentKind::System,1,"ip_address");
+    reader.read(ip,first); wifi.address = "192.168.1.43"; reader.read(ip,second);
+    const char* text = nullptr;
+    TEST_ASSERT_TRUE(first.value.tryGetText(text)); TEST_ASSERT_EQUAL_STRING("192.168.1.42",text);
+    TEST_ASSERT_TRUE(second.value.tryGetText(text)); TEST_ASSERT_EQUAL_STRING("192.168.1.43",text);
+    wifi.address = "";
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::NoValue),static_cast<int>(reader.read(ip,second)));
+    TEST_ASSERT_FALSE(second.valid);
+    wifi.address = "0.0.0.0";
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::NoValue),static_cast<int>(reader.read(ip,second)));
+    wifi.online = false; wifi.setup = true; wifi.address = "192.168.4.1";
+    TEST_ASSERT_TRUE(wifi.stationAddresses().ipAddress.isEmpty());
+    TEST_ASSERT_EQUAL_STRING("192.168.4.1",formatPropertyText(reader,ip,"%s").text);
+    config.setDeviceName("Roof");
+    TEST_ASSERT_EQUAL_STRING("Roof", formatPropertyText(reader,{PropertyComponentKind::System,1,"device_name"},"%s").text);
+}
+int main(int,char**) { UNITY_BEGIN(); RUN_TEST(test_device_sources_are_live_and_snapshots_own_text); RUN_TEST(test_build_sources_work_without_time_sync); RUN_TEST(test_locale_text_sources_and_owned_snapshots); RUN_TEST(test_time_is_unavailable_until_synchronized_and_local_time_valid); return UNITY_END(); }

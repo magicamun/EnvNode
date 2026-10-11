@@ -2669,3 +2669,15 @@ original messages and level codes. Routes, form fields, IDs, user names, enum
 labels, timezone values, hardware identities and raw diagnostic status codes
 remain stable. See `WebLocalization.md` for the classification and
 `WebTranslationsRemaining.md` for the generated source audit.
+
+### Active network values and system text properties
+
+`IWiFiService::stationAddresses()` exposes a snapshot of active station IPv4,
+subnet mask, gateway and DNS servers. `WiFiService` owns hardware access; the
+web layer consumes this interface for the DHCP read-only fields. Setup AP
+addresses are not presented as DHCP assignments.
+
+`SystemPropertyReader` receives configuration and WiFi interfaces from the
+composition root. It provides live `device_name`, `hostname` and `ip_address`
+text properties alongside build and time sources, without depending on the
+ESP32 WiFi driver. The display runtime and web preview use the same reader.

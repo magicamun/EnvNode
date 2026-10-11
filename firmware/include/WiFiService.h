@@ -19,6 +19,7 @@ public:
     String ipAddress() const override;
     String hostname() const override;
     int32_t rssi() const override;
+    NetworkAddressSnapshot stationAddresses() const override;
 
 private:
     enum class State {

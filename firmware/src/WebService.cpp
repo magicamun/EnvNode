@@ -782,8 +782,22 @@ void WebService::handleNetwork() {
     c += (String("<label>") + uiText(TextId::Hostname) + "<input name='hostname' required value='") + escapeHtml(n.hostname) + (String("'></label><label>") + uiText(TextId::WiFiSSID) + "<input name='wifiSSID' required value='") + escapeHtml(n.wifiSSID) + "'></label>";
     c += (String("<label class='choice'><input type='checkbox' name='changeWifiPassword' value='1'>") + uiText(TextId::ChangeWiFiPassword) + "</label><label>" + uiText(TextId::NewWiFiPassword) + "<input type='password' name='wifiPassword' autocomplete='new-password'></label>");
     c += (String("<label>") + uiText(TextId::AddressMode) + "<select name='addressMode' id='addressMode' onchange='toggleStatic()'><option value='dhcp'") + String(!isStatic?" selected":"") + ">DHCP</option><option value='static'" + String(isStatic?" selected":"") + (String(">") + uiText(TextId::StaticIPv4) + "</option></select></label>");
+    const NetworkAddressSnapshot assigned = wifiService_.stationAddresses();
+    c += "<div id='dhcpFields'>";
+    c += String("<p class='help'>") + uiText(TextId::ActiveNetworkAddresses) + "</p>";
+    const auto assignedField = [&](TextId label, const String& value) {
+        c += String("<label>") + uiText(label) + "<input readonly value='";
+        c += value.isEmpty() || value == "0.0.0.0" ? String("—") : escapeHtml(value);
+        c += "'></label>";
+    };
+    assignedField(TextId::IPv4Address, assigned.ipAddress);
+    assignedField(TextId::SubnetMask, assigned.subnetMask);
+    assignedField(TextId::DefaultGateway, assigned.gateway);
+    assignedField(TextId::PrimaryDNS, assigned.dns1);
+    assignedField(TextId::SecondaryDNS, assigned.dns2);
+    c += "</div>";
     c += (String("<div id='staticFields'><label>") + uiText(TextId::IPv4Address) + "<input name='ipv4Address' value='") + escapeHtml(n.ipv4Address) + (String("'></label><label>") + uiText(TextId::SubnetMask) + "<input name='subnetMask' value='") + escapeHtml(n.subnetMask) + (String("'></label><label>") + uiText(TextId::DefaultGateway) + "<input name='gateway' value='") + escapeHtml(n.gateway) + (String("'></label><label>") + uiText(TextId::PrimaryDNS) + "<input name='dns1' value='") + escapeHtml(n.dns1) + (String("'></label><label>") + uiText(TextId::SecondaryDNS) + " " + "<span class='help'>" + uiText(TextId::Optional) + "</span><input name='dns2' value='") + escapeHtml(n.dns2) + (String("'></label></div><div class='actions'><button>") + uiText(TextId::SaveNetworkSettings) + "</button></div></form></section>");
-    c += "<script>function toggleStatic(){var s=document.getElementById('addressMode').value==='static',d=document.getElementById('staticFields');d.hidden=!s;d.querySelectorAll('input').forEach(function(i){i.disabled=!s})}toggleStatic()</script>";
+    c += "<script>function toggleStatic(){var s=document.getElementById('addressMode').value==='static',d=document.getElementById('staticFields');d.hidden=!s;document.getElementById('dhcpFields').hidden=s;d.querySelectorAll('input').forEach(function(i){i.disabled=!s})}toggleStatic()</script>";
     sendPage(uiText(TextId::Network), "/network", c);
 }
 
@@ -1515,7 +1529,7 @@ void WebService::handleDisplay() {
         return;
     }
 
-    SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity);
+    SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService_, &wifiService_);
     ValuePropertyReader valueProperties(valueRuntime_);
     PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
@@ -1588,6 +1602,9 @@ void WebService::handleDisplay() {
     for (const auto& value : valueRuntime_.values()) {
         addPreviewSource(PropertyReference(PropertyComponentKind::Value, value.configuration().id, "state"), value.configuration().name.c_str());
     }
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "device_name"), uiText(TextId::DeviceName));
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "hostname"), uiText(TextId::Hostname));
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "ip_address"), uiText(TextId::IPv4Address));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "version"), uiText(TextId::FirmwareVersion2));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "build"), uiText(TextId::BuildNumber2));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "git_commit"), uiText(TextId::GitCommit2));
