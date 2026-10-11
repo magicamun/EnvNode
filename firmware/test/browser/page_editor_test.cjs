@@ -5,7 +5,22 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../../include/PageEditorScript.h'), 'utf8').split('R"EDITOR(')[1].split(')EDITOR"')[0];
-const context = vm.createContext({document: {getElementById: () => null}});
+const catalog = fs.readFileSync(path.join(__dirname, '../../include/WebTextCatalog.inc'), 'utf8');
+const entries = Array.from(catalog.matchAll(/ENVNODE_WEB_TEXT\((\w+), ("(?:\\.|[^"\\])*"), ("(?:\\.|[^"\\])*"|nullptr)\)/g));
+const ids = new Set(entries.map(([, id]) => id));
+const exportedSource = fs.readFileSync(path.join(__dirname, '../../src/WebLocalization.cpp'), 'utf8');
+const exportedIds = new Set(Array.from(exportedSource.matchAll(/\{"(\w+)", TextId::\w+\}/g), m => m[1]));
+for (const relative of ['../../include/PageEditorScript.h', '../../src/LogWebView.cpp', '../../src/SelectorWebView.cpp', '../../src/WebService.cpp']) {
+    const text = fs.readFileSync(path.join(__dirname, relative), 'utf8');
+    for (const [, id] of text.matchAll(/EnvNodeUi\.(\w+)/g)) {
+        assert(ids.has(id), `Unknown browser text ID: ${id}`);
+        assert(exportedIds.has(id), `Browser text ID is not exported: ${id}`);
+    }
+}
+for (const language of ['en', 'de']) {
+const EnvNodeUi = Object.fromEntries(entries.map(([, id, english, german]) => [id,
+    language === 'de' && german !== 'nullptr' ? JSON.parse(german) : JSON.parse(english)]));
+const context = vm.createContext({document: {getElementById: () => null}, EnvNodeUi});
 vm.runInContext(source, context);
 const editor = vm.runInContext('DisplayPageEditor', context);
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -22,4 +37,6 @@ assert.deepEqual(plain(editor.matchLines(old, ['A %.1f','B %s','C %u','','',''])
 const duplicateMapping = plain(editor.matchLines(['%s','%s','x','','',''], ['x','%s','%s','','','']));
 assert.equal(new Set(duplicateMapping).size, 6);
 assert.equal(duplicateMapping[0], 2);
-console.log('Page editor: placeholder validation and line mapping passed.');
+assert.throws(() => editor.placeholders('%d'), error => error.message === EnvNodeUi.InvalidPlaceholderUseFUSOr);
+console.log(`Page editor: placeholder validation and line mapping passed (${language}).`);
+}

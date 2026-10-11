@@ -1,29 +1,31 @@
 #include "WebNavigation.h"
+#include "WebLocalization.h"
 
 #include <cstring>
 
 namespace EnvNode {
 
-String buildWebNavigationHtml(const char* activeRoute) {
-    const char* routes[][2] = {
-        {"/status", "Status"}, {"/sensors", "Sensors"},
-        {"/measurements", "Measurements"}, {"/display", "Display"},
-        {"/values", "Values"}, {"/actuators", "Actuators"},
-        {"/controllers", "Controllers"}, {"/network", "Network"},
-        {"/mqtt", "MQTT"}, {"/time", "Locale & Time"}, {"/units", "Units"},
-        {"/device", "Device"}, {"/diagnostics", "Diagnostics"},
-        {"/logs", "Logs"}, {"/firmware", "Firmware"},
+String buildWebNavigationHtml(const char* activeRoute, Locale locale) {
+    struct Route { const char* path; TextId text; };
+    const Route routes[] = {
+        {"/status", TextId::Status}, {"/sensors", TextId::Sensors},
+        {"/measurements", TextId::Measurements}, {"/display", TextId::Display},
+        {"/values", TextId::Values}, {"/actuators", TextId::Actuators},
+        {"/controllers", TextId::Controllers}, {"/network", TextId::Network},
+        {"/mqtt", TextId::MQTT}, {"/time", TextId::LocaleTime}, {"/units", TextId::Units},
+        {"/device", TextId::Device}, {"/diagnostics", TextId::Diagnostics},
+        {"/logs", TextId::Logs}, {"/firmware", TextId::Firmware},
     };
     String html;
     html.reserve(620);
     html = "<nav class='nav'>";
     for (const auto& route : routes) {
         html += "<a href='";
-        html += route[0];
+        html += route.path;
         html += "' class='";
-        if (strcmp(activeRoute, route[0]) == 0) html += "active";
+        if (strcmp(activeRoute, route.path) == 0) html += "active";
         html += "'>";
-        html += route[1];
+        html += webText(locale, route.text);
         html += "</a>";
     }
     html += "</nav>";

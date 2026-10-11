@@ -1,11 +1,13 @@
 #include "SelectorWebView.h"
+#include "WebLocalization.h"
 #include "HtmlEscaping.h"
 #include "JsonWriter.h"
 namespace EnvNode {
 String buildSelectorFields(const Configuration& configuration, const ControllerSlotConfiguration& slot,
     const String& targetOptions) {
+    const Locale locale = configuration.locale.locale;
     const auto& selector = slot.implementationConfiguration.selector;
-    String html("<div id='selectorConfiguration'><p class='help'>Choose the mode Value and map its options. The Selector alone controls the target. Unknown input holds its current state.</p><label>Mode Value<select id='selectorMode' name='selectorMode'><option value='0'>Select a Value</option>");
+    String html((String("<div id='selectorConfiguration'><p class='help'>") + webText(locale, TextId::ChooseTheModeValueAndMapItsOptions) + "</p><label>" + webText(locale, TextId::ModeValue) + "<select id='selectorMode' name='selectorMode'><option value='0'>" + webText(locale, TextId::SelectAValue) + "</option>"));
     for (const auto& value : configuration.values) {
         String options("[");
         bool first = true;
@@ -21,7 +23,7 @@ String buildSelectorFields(const Configuration& configuration, const ControllerS
         if (value.definition.id == selector.modeValueId) html += " selected";
         html += ">"; html += escapeHtml(value.definition.name).c_str(); html += "</option>";
     }
-    html += "</select></label><label>Automatic decision<select name='selectorSource'><option value='0'>Select a decision-only Threshold</option>";
+    html += (String("</select></label><label>") + webText(locale, TextId::AutomaticDecision) + "<select name='selectorSource'><option value='0'>" + webText(locale, TextId::SelectADecisionOnlyThreshold) + "</option>");
     for (const auto& source : configuration.controllerSlots) {
         if (source.slotId == slot.slotId || !source.enabled || source.implementation != ControllerImplementation::Threshold
             || !source.implementationConfiguration.threshold.decisionOnly) continue;
@@ -31,15 +33,15 @@ String buildSelectorFields(const Configuration& configuration, const ControllerS
     }
     html += "</select></label>";
     const char* names[] = {"selectorAuto", "selectorOn", "selectorOff"};
-    const char* labels[] = {"Use automatic decision when", "Force output On when", "Force output Off when"};
+    const char* labels[] = {webText(locale, TextId::UseAutomaticDecisionWhen), webText(locale, TextId::ForceOutputOnWhen), webText(locale, TextId::ForceOutputOffWhen)};
     const String codes[] = {selector.automaticCode, selector.onCode, selector.offCode};
     for (size_t i = 0; i < 3; ++i) {
         html += "<label>"; html += labels[i]; html += "<select class='selectorChoice' name='"; html += names[i];
-        html += "' data-current='"; html += escapeHtml(codes[i]).c_str(); html += "'><option value=''>Select an option</option></select></label>";
+        html += "' data-current='"; html += escapeHtml(codes[i]).c_str(); html += (String("'><option value=''>") + webText(locale, TextId::SelectAnOption) + "</option></select></label>");
     }
-    html += "<label>Target On/Off actuator<select name='selectorTarget'>"; html += targetOptions.c_str();
-    html += "</select></label><p class='help'>Map Zisterne and Hauswasser to On/Off according to your valve wiring. Missing/invalid automatic input and unmapped modes cause no output command. Stop also holds the output.</p></div>";
-    html += R"JS(<script>function selectorOptions(initial){const mode=document.getElementById('selectorMode'),option=mode.options[mode.selectedIndex],choices=JSON.parse(option.dataset.options||'[]');for(const field of document.querySelectorAll('.selectorChoice')){const previous=initial?field.dataset.current:field.value;field.replaceChildren(new Option('Select an option',''));for(const [code,label] of choices)field.add(new Option(label,code));field.value=choices.some(x=>x[0]===previous)?previous:'';}}document.getElementById('selectorMode').addEventListener('change',()=>selectorOptions(false));selectorOptions(true);</script>)JS";
+    html += (String("<label>") + webText(locale, TextId::TargetOnOffActuator) + "<select name='selectorTarget'>"); html += targetOptions.c_str();
+    html += (String("</select></label><p class='help'>") + webText(locale, TextId::MapZisterneAndHauswasserToOnOffAccording) + "</p></div>");
+    html += R"JS(<script>function selectorOptions(initial){const mode=document.getElementById('selectorMode'),option=mode.options[mode.selectedIndex],choices=JSON.parse(option.dataset.options||'[]');for(const field of document.querySelectorAll('.selectorChoice')){const previous=initial?field.dataset.current:field.value;field.replaceChildren(new Option((globalThis.EnvNodeUi.SelectAnOption),''));for(const [code,label] of choices)field.add(new Option(label,code));field.value=choices.some(x=>x[0]===previous)?previous:'';}}document.getElementById('selectorMode').addEventListener('change',()=>selectorOptions(false));selectorOptions(true);</script>)JS";
     return html;
 }
 }

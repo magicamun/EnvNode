@@ -1,4 +1,5 @@
 #pragma once
+#include "WebLocalization.h"
 
 #include <Arduino.h>
 
@@ -6,7 +7,7 @@
 
 namespace EnvNode {
 
-String buildRecentLogHtml(const IRecentLogReader& logReader);
+String buildRecentLogHtml(const IRecentLogReader& logReader, Locale locale = Locale::EnglishUnitedKingdom);
 String buildRecentLogJson(const IRecentLogReader& logReader);
 
 } // namespace EnvNode

@@ -11,6 +11,7 @@
 #include "ActuatorRuntime.h"
 #include "MeasurementSnapshotCache.h"
 #include "LocaleFormatter.h"
+#include "WebLocalization.h"
 #include "RuntimeManager.h"
 #include "ConfigurationRuntimeEffect.h"
 #include "OTAService.h"
@@ -122,6 +123,7 @@ private:
         const char* failureTitle,
         const char* activeRoute,
         const char* failureMessage);
+    const char* uiText(TextId id) const;
     String renderPageHeader(const char* title, const char* activeRoute,
         bool wideContent = false) const;
     String currentLocalDateTime() const;

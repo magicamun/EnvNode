@@ -1,4 +1,5 @@
 #include "PropertyWebView.h"
+#include "WebPresentationText.h"
 
 #include <cmath>
 #include <cstdio>
@@ -9,8 +10,8 @@
 namespace EnvNode {
 namespace {
 
-String propertyValue(const PropertyDescription& description, const PropertySnapshot& snapshot) {
-    if (!snapshot.valid || snapshot.value.kind() != description.valueKind) return "Invalid";
+String propertyValue(const PropertyDescription& description, const PropertySnapshot& snapshot, Locale locale) {
+    if (!snapshot.valid || snapshot.value.kind() != description.valueKind) return webText(locale, TextId::Invalid);
     const PropertyEnumOption* option = nullptr;
     if (snapshot.value.tryGetEnumeration(option)) {
         return String(option->displayText) + " (" + option->stableCode + ")";
@@ -28,7 +29,7 @@ String propertyValue(const PropertyDescription& description, const PropertySnaps
     } else if (snapshot.value.tryGetUnsignedInteger(integer)) {
         snprintf(buffer, sizeof(buffer), "%lu", static_cast<unsigned long>(integer));
     } else {
-        return "Invalid";
+        return webText(locale, TextId::Invalid);
     }
     String result(buffer);
     const char* unit = UnitConverter::symbol(description.canonicalUnit);
@@ -42,8 +43,8 @@ String propertyValue(const PropertyDescription& description, const PropertySnaps
 } // namespace
 
 String buildPropertyDiagnosticHtml(const IPropertyReader& reader,
-    const PropertyReference& reference, uint32_t nowMs) {
-    String html("<section class='card property-diagnostic'><h2>Property diagnostic</h2>");
+    const PropertyReference& reference, uint32_t nowMs, Locale locale) {
+    String html((String("<section class='card property-diagnostic'><h2>") + webText(locale, TextId::PropertyDiagnostic) + "</h2>"));
     html += "<p><code>";
     html += reference.componentKind == PropertyComponentKind::Sensor ? "sensor"
         : reference.componentKind == PropertyComponentKind::Actuator ? "actuator"
@@ -61,33 +62,33 @@ String buildPropertyDiagnosticHtml(const IPropertyReader& reader,
     const PropertyReadResult status = described
         ? reader.read(reference, snapshot) : PropertyReadResult::UnknownReference;
     if (status == PropertyReadResult::UnknownReference) {
-        html += "<p>Unknown reference</p>";
+        html += (String("<p>") + webText(locale, TextId::UnknownReference) + "</p>");
     } else if (status == PropertyReadResult::NoValue) {
         html += reference.componentKind == PropertyComponentKind::Sensor
-            ? "<p>No measurement available yet</p>" : "<p>State unavailable</p>";
+            ? (String("<p>") + webText(locale, TextId::NoMeasurementAvailableYet) + "</p>") : (String("<p>") + webText(locale, TextId::StateUnavailable) + "</p>");
     } else {
-        html += "<dl><dt>Value (canonical unit)</dt><dd>";
-        html += escapeHtml(propertyValue(description, snapshot)).c_str();
-        html += "</dd><dt>Validity</dt><dd>";
-        html += snapshot.valid ? "Valid" : "Invalid";
-        html += "</dd><dt>Quality</dt><dd>";
+        html += (String("<dl><dt>") + webText(locale, TextId::ValueCanonicalUnit) + "</dt><dd>");
+        html += escapeHtml(propertyValue(description, snapshot, locale)).c_str();
+        html += (String("</dd><dt>") + webText(locale, TextId::Validity) + "</dt><dd>");
+        html += snapshot.valid ? webText(locale, TextId::Valid) : webText(locale, TextId::Invalid);
+        html += (String("</dd><dt>") + webText(locale, TextId::Quality) + "</dt><dd>");
         html += snapshot.hasQuality
-            ? escapeHtml(String(measurementQualityDisplayName(snapshot.quality))).c_str()
-            : "Not available";
-        html += "</dd><dt>Age</dt><dd>";
+            ? escapeHtml(String(webQualityName(locale, snapshot.quality))).c_str()
+            : webText(locale, TextId::NotAvailable);
+        html += (String("</dd><dt>") + webText(locale, TextId::Age) + "</dt><dd>");
         html += snapshot.hasAcceptedMonotonicMs
             ? formatElapsedDuration(nowMs - snapshot.acceptedMonotonicMs).c_str()
-            : "Not available";
+            : webText(locale, TextId::NotAvailable);
         html += "</dd></dl>";
     }
     if (reference.componentKind == PropertyComponentKind::Controller) {
-        html += "<p class='help'>Input evaluation reason; output command success is reported separately by the Controller.</p>";
+        html += (String("<p class='help'>") + webText(locale, TextId::InputEvaluationReasonOutputCommandSuccessIsReported) + "</p>");
     }
     if (reference.componentKind == PropertyComponentKind::Actuator) {
-        html += "<p class='help'>Logical output command; no mechanical feedback. Change time is not recorded.</p>";
+        html += (String("<p class='help'>") + webText(locale, TextId::LogicalOutputCommandNoMechanicalFeedbackChangeTime) + "</p>");
     }
-    html += "<p class='help'>Read through the local Property interface. Canonical units; numbers use a decimal point. Refresh to update.</p>";
-    html += "<a class='button' href='/measurements'>Refresh</a></section>";
+    html += (String("<p class='help'>") + webText(locale, TextId::ReadThroughTheLocalPropertyInterfaceCanonicalUnits) + "</p>");
+    html += (String("<a class='button' href='/measurements'>") + webText(locale, TextId::Refresh) + "</a></section>");
     return html;
 }
 

@@ -558,7 +558,11 @@ JavaScript is required for editing; without it, preview/save stay disabled.
 This changes only the editor, not the saved page format or display rendering.
 Font selection and clipping are described below.
 
-The page editor UI uses English independently of the locale used to format values.
+The page editor and surrounding web interface use the persisted locale for all
+fixed labels, help and validation messages. Browser scripts receive their text
+IDs from the same central WebTextCatalog as server-rendered pages, with English
+fallback. Source keys, user-authored page content and custom Boolean/enum text
+remain unchanged.
 Its JavaScript is served separately at `/display-editor.js`, directly from flash,
 with no-store caching to avoid stale editor code after a firmware update. The
 Display handler moves the generated HTML rather than copying the entire page and

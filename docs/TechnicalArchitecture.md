@@ -2631,3 +2631,41 @@ The central rules of the technical architecture are:
 - Secrets must never appear in normal log output.
 
 These rules define the architectural direction of the project and should remain stable as the implementation evolves.
+
+## Web interface language
+
+The persisted Locale configuration also selects the web interface language.
+`de-DE` selects German; English locales and unsupported language values use
+English. Locale input accepts case-insensitive region codes with hyphens or
+underscores (including `de_de`); output remains canonical (`de-DE`). Existing
+locale defaults and NVS values remain compatible.
+
+`WebLocalization` owns the translation catalog independently of formatting,
+sensor acquisition and MQTT. `WebTextCatalog.inc` is the single dictionary,
+containing stable `TextId` names, English fallback text and optional German text.
+The same catalog generates the enum and the compact constant translation table,
+so IDs and translations cannot drift apart. Lookup uses the ID directly, with
+no string search, mutable map or dynamic allocation. Missing/empty German text
+uses English; invalid IDs return an empty string. IDs are presentation details
+and are not stored in NVS or transmitted through MQTT. Renderers translate only
+explicit static UI text before HTML escaping and composition. User-defined
+names, enum labels, property identifiers, input values, routes, protocol data
+and diagnostic log entries are not translated. The page language tag follows
+the selected interface language. No browser-side text replacement is used.
+
+WebService and the dedicated value, selector, property, display and log views
+accept the selected locale explicitly. UI labels, help, confirmations and input
+validation errors use the catalog. `WebPresentationText` maps typed measurement,
+quality and implementation enums to UI text while their canonical metadata and
+MQTT/diagnostic representations remain unchanged. Display formatting supplies a
+typed `DisplayLineIssue` in addition to its original diagnostic error string.
+The web view translates the issue without changing stored display content or
+physical display output.
+
+Browser scripts receive only the text IDs they use, as an immutable dictionary
+serialized from the same catalog by the page header. They do not duplicate
+translations or replace arbitrary DOM text. Logs continue to transmit their
+original messages and level codes. Routes, form fields, IDs, user names, enum
+labels, timezone values, hardware identities and raw diagnostic status codes
+remain stable. See `WebLocalization.md` for the classification and
+`WebTranslationsRemaining.md` for the generated source audit.

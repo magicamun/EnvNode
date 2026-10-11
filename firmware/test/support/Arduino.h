@@ -43,6 +43,11 @@ public:
         value_.reserve(size);
     }
 
+    String& operator+=(const String& value) {
+        value_ += value.value_;
+        return *this;
+    }
+
     String& operator+=(const char* value) {
         value_ += value == nullptr ? "" : value;
         return *this;

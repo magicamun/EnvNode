@@ -20,10 +20,10 @@ refreshPreview();
         const parts = selected.split('/');
         if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
         const canonical = parts.join('/');
-        source.replaceChildren(new Option('No source', ''));
+        source.replaceChildren(new Option((globalThis.EnvNodeUi.NoSource), ''));
         Array.from(options).forEach(option => source.appendChild(option.cloneNode(true)));
         const available = Array.from(source.options).some(option => option.value === canonical);
-        if (!available) source.add(new Option('Unavailable: ' + selected, selected));
+        if (!available) source.add(new Option((globalThis.EnvNodeUi.Unavailable2 + " ") + selected, selected));
         source.value = available ? canonical : selected;
     });
     const types = new Map(Array.from(options, option => [option.value, option.dataset.boolean === '1']));
@@ -66,17 +66,17 @@ refreshPreview();
 const DisplayPageEditor = (() => {
     function placeholders(text) {
         const result = [];
-        if (unescape(encodeURIComponent(text)).length > 128) throw Error('Maximum 128 UTF-8 bytes per line.');
+        if (unescape(encodeURIComponent(text)).length > 128) throw Error((globalThis.EnvNodeUi.Maximum128UTF8BytesPerLine));
         for (let i = 0; i < text.length; ++i) {
-            if (text.charCodeAt(i) < 32 || text.charCodeAt(i) === 127) throw Error('Control characters are not allowed.');
+            if (text.charCodeAt(i) < 32 || text.charCodeAt(i) === 127) throw Error((globalThis.EnvNodeUi.ControlCharactersAreNotAllowed));
             if (text[i] !== '%') continue;
             if (text[i + 1] === '%') { ++i; continue; }
             const match = /^%(-0?|0-?)?([1-9]\d*)?(?:\.(\d+))?([fus])/.exec(text.slice(i));
             if (!match || Number(match[2]) > 64 || (match[3] !== undefined && (match[4] !== 'f' || Number(match[3]) > 6)) || (match[4] === 's' && (match[1] || '').includes('0')))
-                throw Error('Invalid placeholder. Use %f, %u, %s or %%.');
+                throw Error((globalThis.EnvNodeUi.InvalidPlaceholderUseFUSOr));
             result.push({text: match[0], type: match[4]}); i += match[0].length - 1;
         }
-        if (result.length > 4) throw Error('Maximum four sources per line.');
+        if (result.length > 4) throw Error((globalThis.EnvNodeUi.MaximumFourSourcesPerLine));
         return result;
     }
     function matchLines(previous, next) {
@@ -116,7 +116,7 @@ const DisplayPageEditor = (() => {
     const sourceOptions = Array.from(document.getElementById('property-sources').content.querySelector('select').options);
     const signature = text => { try { return DisplayPageEditor.placeholders(text).map(p => p.text).join('|'); } catch (_) { return '!'; } };
     function renumber(row, index) {
-        row.querySelector('legend').textContent = 'Line ' + (index + 1);
+        row.querySelector('legend').textContent = (globalThis.EnvNodeUi.Line + " ") + (index + 1);
         row.querySelectorAll('[name], [id], [for], [data-boolean-source], [data-enum-source]').forEach(el => {
             ['name', 'id', 'for', 'data-boolean-source', 'data-enum-source'].forEach(attr => {
                 const value = el.getAttribute(attr);
@@ -126,7 +126,7 @@ const DisplayPageEditor = (() => {
     }
     function update(initial = false) {
         const raw = editor.value.replace(/\r\n?/g, '\n').split('\n');
-        if (raw.length > 6) { editor.setCustomValidity('Maximum six lines, including blank lines.'); note.textContent = editor.validationMessage; return; }
+        if (raw.length > 6) { editor.setCustomValidity((globalThis.EnvNodeUi.MaximumSixLinesIncludingBlankLines)); note.textContent = editor.validationMessage; return; }
         editor.setCustomValidity('');
         const next = [...raw]; while (next.length < 6) next.push('');
         const mapping = DisplayPageEditor.matchLines(previous, next);
@@ -144,18 +144,18 @@ const DisplayPageEditor = (() => {
             row.querySelector('[data-format]').value = next[i];
             let tokens = [];
             try { tokens = DisplayPageEditor.placeholders(next[i]); }
-            catch (e) { error = 'Line ' + (i + 1) + ': ' + e.message; }
+            catch (e) { error = (globalThis.EnvNodeUi.Line + " ") + (i + 1) + ': ' + e.message; }
             row.dataset.count = tokens.length;
             row.querySelectorAll('[data-source-slot]').forEach((field, j) => {
                 const select = field.querySelector('select');
                 field.hidden = j >= tokens.length;
                 if (field.hidden) return;
-                field.querySelector('label').textContent = 'Source ' + (j + 1) + ' · ' + tokens[j].text;
+                field.querySelector('label').textContent = (globalThis.EnvNodeUi.Source + " ") + (j + 1) + ' · ' + tokens[j].text;
                 const selected = select.value;
-                select.replaceChildren(new Option('Select a source', ''));
+                select.replaceChildren(new Option((globalThis.EnvNodeUi.SelectASource), ''));
                 sourceOptions.filter(o => o.dataset.format === tokens[j].type).forEach(o => select.appendChild(o.cloneNode(true)));
                 if (selected && !Array.from(select.options).some(o => o.value === selected)) {
-                    select.add(new Option('Please review: ' + selected, selected));
+                    select.add(new Option((globalThis.EnvNodeUi.PleaseReview + " ") + selected, selected));
                     row.dataset.review = '1';
                 }
                 select.value = selected;
@@ -166,24 +166,24 @@ const DisplayPageEditor = (() => {
         });
         previous = next;
         editor.setCustomValidity(error);
-        note.textContent = error || (initial ? 'Use Preview / refresh to update the preview.' : 'Preview is out of date. Please refresh.');
+        note.textContent = error || (initial ? (globalThis.EnvNodeUi.UsePreviewRefreshToUpdateThePreview) : (globalThis.EnvNodeUi.PreviewIsOutOfDatePleaseRefresh));
         if (!initial) preview.dataset.stale = '1';
     }
     rows.forEach(row => {
         const warning = document.createElement('div'); warning.dataset.review = ''; warning.hidden = true;
-        warning.className = 'help'; warning.textContent = 'Format changed: review sources and translations. Unused sources will be removed when saving. ';
-        const button = document.createElement('button'); button.type = 'button'; button.textContent = 'Assignments reviewed';
+        warning.className = 'help'; warning.textContent = (globalThis.EnvNodeUi.FormatChangedReviewSourcesAndTranslationsUnusedSources + " ");
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = (globalThis.EnvNodeUi.AssignmentsReviewed);
         button.addEventListener('click', () => { delete row.dataset.review; update(true); });
         warning.appendChild(button); row.appendChild(warning);
     });
     editor.addEventListener('input', () => update());
-    form.addEventListener('input', e => { if (e.target !== editor && e.target.id !== 'preview-output') note.textContent = 'Preview is out of date. Please refresh.'; });
+    form.addEventListener('input', e => { if (e.target !== editor && e.target.id !== 'preview-output') note.textContent = (globalThis.EnvNodeUi.PreviewIsOutOfDatePleaseRefresh); });
     form.addEventListener('submit', e => {
         update(true);
         const pending = rows.some(r => r.dataset.review === '1');
         const missing = rows.some(r => Array.from(r.querySelectorAll('[data-source-slot]')).some(f => !f.hidden && !f.querySelector('select').value));
         if (!editor.checkValidity() || pending || missing) {
-            e.preventDefault(); note.textContent = editor.validationMessage || (pending ? 'Please review the marked assignments.' : 'Bitte für jeden Platzhalter eine Select a source.'); editor.reportValidity();
+            e.preventDefault(); note.textContent = editor.validationMessage || (pending ? (globalThis.EnvNodeUi.PleaseReviewTheMarkedAssignments) : (globalThis.EnvNodeUi.SelectSourceForEveryPlaceholder)); editor.reportValidity();
         }
     });
     form.addEventListener('formdata', e => {
