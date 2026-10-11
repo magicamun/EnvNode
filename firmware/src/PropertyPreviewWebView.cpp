@@ -24,6 +24,9 @@ String buildPropertySourceOption(const PropertyReference& reference,
     const String source = propertySourceText(reference);
     String html("<option value='");
     html += escapeHtml(source).c_str();
+    html += "' data-format='";
+    html += description.valueKind == PropertyValueKind::FloatingPoint ? "f"
+        : description.valueKind == PropertyValueKind::UnsignedInteger ? "u" : "s";
     html += "' data-boolean='";
     html += description.valueKind == PropertyValueKind::Boolean ? "1" : "0";
     html += "' data-enum='";
@@ -65,7 +68,7 @@ String buildPropertyPreviewHtml(const IPropertyReader& reader, const String& opt
     html += "</select><label for='preview-format'>Format</label>";
     html += "<input id='preview-format' name='format' maxlength='128' required value='";
     if (format.length() <= MaxPropertyFormatLength) html += escapeHtml(format).c_str();
-    html += "'><button type='submit' name='preview' value='1'>Preview / refresh</button></form>";
+    html += "'><button disabled data-editor-submit type='submit' name='preview' value='1'>Preview / refresh</button></form>";
     html += "<p class='help'>One source and one placeholder: %.1f for decimals, %u for unsigned integers, %s for On/Off or enum text. Width: %8.1f; left aligned: %-8s; zero padded: %08.1f; percent sign: %%. Decimal places: 0–6; width: up to 64.</p>";
     html += "<p class='help'>Numbers use the source's canonical unit and a decimal point. Add unit text to the format. Preview settings stay in this URL; they are not saved on the device. Refresh to read the latest value.</p>";
     if (optionsHtml.isEmpty()) html += "<p>No supported sources are currently available.</p>";
@@ -157,19 +160,22 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     html += buildDisplayTabs(pageIndex + 1).c_str();
     html += "<h3>Page "; html += String(static_cast<unsigned>(pageIndex + 1)).c_str();
     html += "</h3><p class='help'>Save edits before switching tabs. Only this page's content is saved here.</p>";
-    html += "<p>Each line has its own format and up to four sources, in placeholder order. Leave sources empty for plain text or an empty line.</p>";
+    html += "<p>Enter up to six format lines on the left. Choose a source for each placeholder below; plain text and %% need no source.</p>";
     html += "<p class='help'>Optional Boolean text applies to %s: empty keeps the default text. Maximum 16 UTF-8 bytes each (umlauts use two bytes). Other source types ignore these labels.</p>";
     html += "<template id='property-sources'><select>";
     html += optionsHtml.c_str();
-    html += "</select></template><noscript><p>Enable JavaScript to choose display sources.</p></noscript><form method='get' action='/display#text-preview'>";
+    html += "</select></template><noscript><p>Enable JavaScript to edit and save display pages.</p></noscript><form method='get' action='/display#text-preview'>";
     html += "<input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'>";
+    html += "<style>#text-preview [hidden]{display:none!important}.page-editor-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.page-editor-grid textarea{box-sizing:border-box;width:100%;max-width:100%;font-family:monospace;white-space:pre;min-height:11em;resize:vertical}[data-page-row]>legend{white-space:nowrap;width:auto;padding:0 6px}.page-source-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}#page-editor-note{min-height:1.5em}@media(max-width:700px){.page-editor-grid{grid-template-columns:1fr}}</style>";
+    html += "<div class='page-editor-grid'><label>Format / one line per display line<textarea id='page-formats' disabled rows='6' wrap='off' spellcheck='false'>";
+    html += "</textarea></label><label>Preview<textarea id='page-result' rows='6' wrap='off' readonly aria-label='Display preview'></textarea></label></div><p id='page-editor-note' class='help' role='status'></p><div id='page-sources'>";
     for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
         const String number(static_cast<unsigned int>(line));
-        html += "<fieldset><legend>Line ";
+        html += "<fieldset data-page-row><legend>Line ";
         html += String(static_cast<unsigned int>(line + 1)).c_str();
-        html += "</legend><label for='f";
+        html += "</legend><div class='page-source-fields'><label hidden for='f";
         html += number.c_str();
-        html += "'>Format</label><input id='f";
+        html += "'>Format</label><input hidden data-format id='f";
         html += number.c_str();
         html += "' name='f";
         html += number.c_str();
@@ -178,7 +184,7 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
         html += "'>";
         for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
             const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
-            html += "<label for='";
+            html += "<div data-source-slot><label for='";
             html += field.c_str();
             html += "'>Source ";
             html += String(static_cast<unsigned int>(source + 1)).c_str();
@@ -232,11 +238,11 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
                 html += "' value='"; html += escapeHtml(String(displayEnumText(contentPage, line, source, option.stableCode))).c_str();
                 html += "'></label>";
             }
-            html += "</div><p class='help'>Empty keeps the original state text. Up to 32 translations per page, 16 UTF-8 bytes each.</p></details>";
+            html += "</div><p class='help'>Empty keeps the original state text. Up to 32 translations per page, 16 UTF-8 bytes each.</p></details></div>";
         }
-        html += "</fieldset>";
+        html += "</div></fieldset>";
     }
-    html += "<div class='actions'><button type='submit' name='preview' value='1'>Preview / refresh all lines</button><button type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'><input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'></form>";
+    html += "</div><div class='actions'><button disabled data-editor-submit type='submit' name='preview' value='1'>Preview / refresh all lines</button><button disabled data-editor-submit type='submit' formmethod='post' formaction='/display/save'>Save on device</button><button type='submit' form='display-load'>Load saved settings</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'><input type='hidden' name='page' value='"; html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'></form>";
     html += "<p class='help'>Use %f for decimals, %u for unsigned integers (including actuator percent), %s for text, Boolean or enum text, and %% for a percent sign. Example: Level: %.0f l %.0f%% with two sources. Width up to 64; decimal places 0–6. Numbers use canonical units and a decimal point.</p>";
     html += "<p class='help'>This is a six-line text preview, not a pixel-accurate OLED simulation. Preview settings remain in this URL until you choose Save on device. Saved settings survive restart. Load saved settings discards the preview edits. Refresh reads all lines again.</p>";
     if (optionsHtml.isEmpty()) html += "<p>No sources available; plain text still works.</p>";
@@ -259,61 +265,11 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
             }
             rendered += '\n';
         }
-        html += "<h3>Display text</h3><pre style='white-space:pre;overflow-x:auto'>";
+        html += "<pre hidden id='page-rendered'>\n";
         html += escapeHtml(rendered).c_str();
         html += "</pre>";
     }
-    html += R"HTML(<script>
-(function () {
-    const options = document.getElementById('property-sources').content.querySelector('select').options;
-    document.querySelectorAll('[data-property-source]').forEach(source => {
-        const selected = source.value;
-        const parts = selected.split('/');
-        if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
-        const canonical = parts.join('/');
-        source.replaceChildren(new Option('No source', ''));
-        Array.from(options).forEach(option => source.appendChild(option.cloneNode(true)));
-        const available = Array.from(source.options).some(option => option.value === canonical);
-        if (!available) source.add(new Option('Unavailable: ' + selected, selected));
-        source.value = available ? canonical : selected;
-    });
-    const types = new Map(Array.from(options, option => [option.value, option.dataset.boolean === '1']));
-    document.querySelectorAll('[data-boolean-source]').forEach(panel => {
-        const source = document.getElementById(panel.dataset.booleanSource);
-        const update = () => {
-            const parts = source.value.split('/');
-            if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
-            panel.hidden = types.get(parts.join('/')) !== true;
-        };
-        source.addEventListener('input', update);
-        source.addEventListener('change', update);
-    });
-    const states = new Map(Array.from(options, option => [option.value, JSON.parse(option.dataset.enum || '[]')]));
-    document.querySelectorAll('[data-enum-source]').forEach(panel => {
-        const source = document.getElementById(panel.dataset.enumSource);
-        const fields = panel.querySelector('[data-enum-fields]');
-        const values = new Map();
-        const update = () => {
-            fields.querySelectorAll('input').forEach(input => values.set(input.dataset.code, input.value));
-            const parts = source.value.split('/');
-            if (parts.length === 3 && /^[0-9]+$/.test(parts[1])) parts[1] = String(Number(parts[1]));
-            const choices = states.get(parts.join('/')) || [];
-            panel.hidden = choices.length === 0;
-            if (!choices.length) return;
-            fields.replaceChildren();
-            choices.forEach(([code, text]) => {
-                const label = document.createElement('label'); label.textContent = text;
-                const input = document.createElement('input');
-                input.name = 'e' + source.id.slice(1) + '_' + code;
-                input.dataset.code = code; input.maxLength = 16; input.value = values.get(code) || '';
-                label.appendChild(input); fields.appendChild(label);
-            });
-        };
-        source.addEventListener('input', update);
-        source.addEventListener('change', update);
-    });
-})();
-</script>)HTML";
+    html += "<script src='/display-editor.js' defer></script>";
     html += "</section>";
     return html;
 }

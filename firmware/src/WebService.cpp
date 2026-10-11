@@ -6,6 +6,7 @@
 #include "SystemPropertyReader.h"
 #include "ValuePropertyReader.h"
 #include "PropertyPreviewWebView.h"
+#include "PageEditorScript.h"
 #include "WebNavigation.h"
 #include "ValueWebView.h"
 #include "MqttTopic.h"
@@ -489,6 +490,11 @@ void WebService::begin() {
     server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
     server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
     server_.on("/display", HTTP_GET, [this]() { handleDisplay(); });
+    server_.on("/display-editor.js", HTTP_GET, [this]() {
+        // Stream static code directly from flash; never add it to the page's heap buffer.
+        server_.sendHeader("Cache-Control", "no-store");
+        server_.send_P(200, PSTR("application/javascript; charset=utf-8"), PageEditorScript, sizeof(PageEditorScript) - 1);
+    });
     server_.on("/display/outputs/save", HTTP_POST, [this]() { handleDisplayOutputsSave(); });
     server_.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
     server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
@@ -554,7 +560,9 @@ void WebService::sendPage(const char* title, const char* activeRoute, const Stri
     const String header = renderPageHeader(title, activeRoute, wideContent);
     static const char footer[] = "</main></div></body></html>";
     if (header.isEmpty() || content.isEmpty()) {
-        logger_.error("Web page rendering failed: empty header or content");
+        logger_.errorf("Web page rendering failed: header=%u content=%u heap=%u largest=%u",
+            static_cast<unsigned>(header.length()), static_cast<unsigned>(content.length()),
+            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
         server_.send(503, "text/plain", "Page rendering failed. Please retry.");
         return;
     }
@@ -1563,7 +1571,11 @@ void WebService::handleDisplay() {
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), "Date (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), "Time (locale)");
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "datetime"), "Date and time (locale)");
-    content += buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured, pageIndex);
+    // Move the result instead of allocating a second complete copy with +=.
+    content = buildPropertyPagePreviewHtml(properties, previewOptions, previewPage, loadSavedDisplay || previewSubmitted || configuration.display.configured, pageIndex);
+    // These temporary inputs are no longer needed while sending the page header/body.
+    previewOptions = String();
+    storage.reset();
     sendPage("Display", "/display", content);
 }
 

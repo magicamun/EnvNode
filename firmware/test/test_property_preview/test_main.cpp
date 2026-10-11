@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <unity.h>
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <limits>
 #include <string>
 #include "PropertyTextFormatter.h"
@@ -438,8 +440,37 @@ void test_hardware_dialog_contains_no_page_content_fields() {
     TEST_ASSERT_NULL(strstr(html.c_str(), "name='f0'"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "Saved content"));
 }
+void test_page_editor_layout_and_optional_browser_fixture() {
+    Reader reader; PropertyPreviewPage page;
+    page.formats[1] = "Level: %.1f l %.0f%%";
+    page.sources[1][0] = "sensor/3/temperature";
+    page.sources[1][1] = "sensor/3/temperature";
+    page.formats[2] = "Literal <text>";
+    const String options = buildPropertySourceOption(Source, reader.description, "Temperature", "");
+    const String html = buildPropertyPagePreviewHtml(reader, options, page, true);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "id='page-formats' disabled"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "id='page-result'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<script src='/display-editor.js' defer></script>"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "const DisplayPageEditor"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "source.replaceChildren"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Format / one line per display line"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<label>Preview<textarea"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<pre hidden id='page-rendered'>\n\nLevel:"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "data-format='f'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "data-source-slot"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Literal &lt;text&gt;"));
+    // Optional local fixture for browser interaction checks, never contacts a device.
+    if (const char* path = std::getenv("ENVNODE_PAGE_EDITOR_FIXTURE")) {
+        FILE* file = std::fopen(path, "w");
+        TEST_ASSERT_NOT_NULL(file);
+        std::fputs("<!doctype html><html><head><meta charset='utf-8'></head><body>", file);
+        std::fputs(html.c_str(), file);
+        std::fputs("</body></html>", file);
+        std::fclose(file);
+    }
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
+    UNITY_BEGIN(); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
     RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
     RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
     RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);

@@ -536,3 +536,31 @@ The display is woken after a complete frame transfer, and only then reported
 ready. This means acknowledged I2C transfers, not verification of visible pixels.
 A physical controller hang may still require a hardware reset or power cycle;
 the four-wire I2C hookup provides no firmware-controlled reset/power line.
+
+
+### Multiline page editor
+
+Page 1 and Page 2 show the format text on the left and the read-only rendered
+preview on the right. Each text line represents one display line, including blank
+lines. The existing limits remain six lines, 128 UTF-8 bytes per format line and
+four placeholders per line. Preview / refresh reads current values from the device;
+editing marks the preview as stale. Save on device persists the selected page.
+
+Below the text, each line offers exactly one source dropdown per placeholder,
+in placeholder order. Sources are filtered by `%f`, `%u` and `%s`; `%%` consumes no
+source. A source can be selected more than once. Boolean and enum translations
+remain in collapsible panels beside their source. Plain text needs no dropdowns.
+
+Unique unchanged lines retain their sources and translations when moved. Edits
+that make the assignment ambiguous are marked for review before preview/save.
+Removed placeholders discard their unused sources and translations on submission.
+JavaScript is required for editing; without it, preview/save stay disabled.
+This changes only the editor, not the saved page format or display rendering.
+Font selection, geometry-dependent limits and clipping remain separate work.
+
+The page editor UI uses English independently of the locale used to format values.
+Its JavaScript is served separately at `/display-editor.js`, directly from flash,
+with no-store caching to avoid stale editor code after a firmware update. The
+Display handler moves the generated HTML rather than copying the entire page and
+releases temporary source/configuration data before sending the response. This
+reduces peak heap use; rendering failures log buffer sizes and available heap.
