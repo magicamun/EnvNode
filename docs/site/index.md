@@ -6,6 +6,9 @@ Messwerte werden über MQTT an externe Systeme weitergegeben, zum Beispiel Home 
 
 ## Hier anfangen
 
+[Kompatibilität von Mainboards, Modulen, Sensoren und Displays](compatibility.md)
+
+
 - [EnvNode Mini](mainboards/mini/index.md): kompaktes Mainboard, Anschlüsse und erste Inbetriebnahme.
 - [Mainboards](mainboards/index.md): Mini, Weatherstation und ORing Power im Überblick.
 - [Sensoren](sensors/index.md): unterstützte Treiber, Anschluss und eigene Sensorhardware.

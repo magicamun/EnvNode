@@ -33,6 +33,7 @@ hooks:
 nav:
   - Start: index.md
   - Grundlagen: concepts/index.md
+  - Kompatibilität: compatibility.md
   - Mainboards:
       - Übersicht: mainboards/index.md
       - EnvNode Mini: mainboards/mini/index.md
