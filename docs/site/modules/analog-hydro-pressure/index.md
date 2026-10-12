@@ -140,3 +140,9 @@ PCB-Padnetze abgeglichen. Dies ersetzt keine physische Boost-, Last-, Temperatur
 EMV- oder Kalibrierprüfung; diese sind in den Unterlagen noch offen.
 
 [Mainboards](../../mainboards/index.md) · [Firmware](../../firmware/index.md)
+
+## Mit der Firmware verwenden
+
+[Gemeinsame Firmware-Bedienung](../../firmware/index.md). Der ADS1115-Messpfad
+ist weiterhin nicht als fertiger registrierter Sensor verfügbar; die allgemeine
+Anleitung ersetzt keine Drucksensorintegration.

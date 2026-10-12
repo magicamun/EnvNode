@@ -46,8 +46,17 @@ in `platformio.ini` sind rechnerabhängig und kein allgemeiner Standard.
 ## Nach dem Start
 
 Ohne eingerichtetes WLAN startet die Firmware einen Setup-Access-Point mit dem
-Namen `<Hostname>-Setup`. Verbinde dich damit und öffne die Weboberfläche unter
-der Geräte-IP, die über die serielle Diagnose ermittelt werden kann.
-Nach der Netzwerkeinrichtung wird die zugewiesene WLAN-IP verwendet.
+Namen `<Hostname>-Setup`. Verbinde dich mit diesem WLAN und öffne
+**http://192.168.4.1/** im Browser. Dies ist die Standard-IP im Access-Point-Modus.
+
+Der Setup-Access-Point startet auch bei bereits gespeicherten WLAN-Zugangsdaten,
+wenn die Verbindung beim Start nicht innerhalb des Verbindungszeitlimits gelingt,
+zum Beispiel wegen eines nicht erreichbaren Routers oder falscher Zugangsdaten.
+Die gespeicherten Einstellungen sind dadurch nicht automatisch gelöscht.
+Über den Setup-Zugang kannst du sie prüfen und korrigieren.
+
+Nach erfolgreicher Verbindung mit deinem WLAN wird die dort zugewiesene Geräte-IP
+verwendet. Bei einem späteren Verbindungsverlust versucht die aktuelle Firmware
+fortlaufend eine Wiederverbindung; dieser Laufzeitfall ist vom Start-Timeout zu unterscheiden.
 
 [Weiter zur Einrichtung](configuration.md)

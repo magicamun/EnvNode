@@ -137,3 +137,10 @@ Diese historischen Konstruktionsprüfungen sind keine neue physische Validierung
 Die vorhandenen Unterlagen nennen noch ausstehende Inbetriebnahme und
 Produktionsvalidierung; elektrische, thermische, EMV-, Umwelt- und Fertigungsprüfungen
 sind damit nicht nachgewiesen.
+
+## Mit der Firmware verwenden
+
+[Erste Inbetriebnahme](../../firmware/configuration.md),
+[Board Identity](../../firmware/provisioning.md) und
+[erste I²C-Messung](../../firmware/example-measurement.md).
+Das Messbeispiel verwendet Mini; bei Weather die tatsächliche Anschlussbelegung beachten.

@@ -96,3 +96,8 @@ abgeglichen. Dies war keine neue vollständige ERC/DRC- oder physische Prüfung.
 Lastqualifikation und anwendungsbezogene Freigaben sind in den Unterlagen noch offen.
 
 [Mainboards](../../mainboards/index.md) · [Firmware](../../firmware/index.md)
+
+## Mit der Firmware verwenden
+
+[Relais einrichten und mit Blink betreiben](../../firmware/example-relay.md).
+[Optionale Modul-Identität provisionieren](../../firmware/provisioning.md).

@@ -1,36 +1,34 @@
-# Firmware
+# Firmware bedienen
 
-Die ESP32-Firmware erfasst Messwerte, stellt Konfiguration und Diagnose bereit
-und verbindet EnvNode über MQTT mit externen Systemen.
-Sie trennt Sensoren, Aktoren, lokale Controller und Anzeige.
+Diese Anleitung führt von der ersten Verbindung mit EnvNode bis zu Messung,
+Schalten, Anzeige und MQTT. Sie beschreibt den Firmware-Quellstand vom
+12. Oktober 2026. Die Sprache der Oberfläche ist einstellbar; englische
+Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
-## Einstieg
+## Der Weg zur ersten Anwendung
 
-1. [Firmware bauen und aufspielen](installation.md).
-2. [Netzwerk, Sensoren und Aktoren konfigurieren](configuration.md).
-3. [MQTT und externe Integration prüfen](mqtt.md).
-4. [Updates und Fehlerdiagnose](maintenance.md).
-
-## Funktionsumfang
-
-| Bereich | Vorhandene Funktionen |
+| Schritt | Ziel |
 | --- | --- |
-| Netzwerk | WLAN, Setup-Access-Point, Wiederverbindung, Hostname |
-| Konfiguration | Persistente Speicherung im ESP32-NVS |
-| Messung | Physische und simulierte Sensoren, typisierte Messwerte |
-| Aktoren | GPIO On/Off und PWM/Level |
-| Controller | Lokale Steuerung, darunter Blink, Threshold und Selector |
-| Anzeige | Zwei I²C-Displayausgänge und konfigurierbare Textseiten |
-| Integration | MQTT, Sensor-Home-Assistant-Discovery |
-| Wartung | Diagnose, Logs, Web-OTA und Factory Reset |
+| [1. Begriffe und Oberfläche](basics.md) | Verstehen, welche Aufgabe jede Komponente hat |
+| [2. Erste Inbetriebnahme](configuration.md) | Gerät erreichen und Netzwerk einrichten |
+| [3. Hardware und Provisioning](provisioning.md) | Board und Module richtig zuordnen |
+| [4. Erste Messung](sensors.md) | Sensor konfigurieren und Werte prüfen |
+| [5. Ausgänge schalten](actuators.md) | Aktoren sicher einrichten und bedienen |
+| [6. Lokal automatisch steuern](controllers.md) | Controller mit einem Zielaktor verbinden |
+| [7. Values und Anzeigen](values-displays.md) | Eigene Werte und Displayinhalte einrichten |
+| [8. MQTT und Home Assistant](mqtt.md) | Messungen und Zustände extern verwenden |
+| [9. Wartung und Diagnose](maintenance.md) | Sichern, aktualisieren und Fehler eingrenzen |
 
-Die [Sensorübersicht](../sensors/index.md) nennt die tatsächlich registrierten
-Treiber. Entwicklungs-Hardware ist nicht automatisch als Sensor integriert.
-Die Firmware übernimmt keine Wettervorhersage, langfristige Historie oder ETo-Berechnung.
+Wenn das ESP32 noch keine passende Firmware hat, beginne mit
+[Bauen und Aufspielen](installation.md).
 
-## Stand und Reproduzierbarkeit
+## Zwei durchgehende Beispiele
 
-Diese Anleitung folgt dem Quellstand vom 9. Oktober 2026.
-Die Weboberfläche **Firmware** zeigt Version, Build-Identität, Git-Stand und
-Quellzustand des laufenden Geräts. Diese Angaben für Tests und Fehlerberichte notieren.
-Ein verfügbarer Treiber ist kein Nachweis einer vollständigen Hardwarequalifikation.
+- [Mini mit SHT4x: von der Verdrahtung zur MQTT-Messung](example-measurement.md)
+- [DuoRelay: manuell schalten und anschließend mit Blink betreiben](example-relay.md)
+
+Die Hardwareanleitungen erklären Bestückung und elektrische Prüfungen.
+Diese Bedienungsanleitung setzt einen entsprechend geprüften Aufbau voraus.
+Firmwareunterstützung und Hardware-Reifegrad werden getrennt beschrieben;
+RainDetector, SCT013 und der ADS1115-Messpfad sind keine fertigen Sensoroptionen
+in der aktuellen Sensorregistry.

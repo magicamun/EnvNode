@@ -49,10 +49,19 @@ nav:
       - SCT013: sensors/sct013.md
   - Displays: displays/index.md
   - Firmware:
-      - Übersicht: firmware/index.md
+      - Bedienungsanleitung: firmware/index.md
+      - Begriffe und Oberfläche: firmware/basics.md
       - Bauen und Aufspielen: firmware/installation.md
-      - Einrichtung: firmware/configuration.md
-      - MQTT: firmware/mqtt.md
-      - Updates und Diagnose: firmware/maintenance.md
+      - Erste Inbetriebnahme: firmware/configuration.md
+      - Hardware und Provisioning: firmware/provisioning.md
+      - Sensoren und Messwerte: firmware/sensors.md
+      - Ausgänge schalten: firmware/actuators.md
+      - Lokale Controller: firmware/controllers.md
+      - Values und Anzeigen: firmware/values-displays.md
+      - MQTT und Home Assistant: firmware/mqtt.md
+      - Wartung und Diagnose: firmware/maintenance.md
+      - Beispiele:
+          - Mini mit SHT4x: firmware/example-measurement.md
+          - DuoRelay mit Blink: firmware/example-relay.md
   - Bausätze und Aufbau: kits/index.md
   - Lizenz und Nutzung: license.md

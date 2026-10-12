@@ -1,5 +1,18 @@
 # Updates und Diagnose
 
+## Konfiguration sichern und wiederherstellen
+
+Unter **Konfiguration (Configuration)** eine Sicherung herunterladen.
+Passwörter werden nur nach ausdrücklicher Auswahl mit exportiert. Eine Sicherung
+mit Passwörtern vertraulich aufbewahren und nicht für Fehlerberichte veröffentlichen.
+
+Für die Wiederherstellung die JSON-Datei hochladen und zuerst die Vorschau prüfen.
+Erst nach Kontrolle des Zielgeräts und der geplanten Änderungen die Wiederherstellung
+bestätigen. Vorher eine Sicherung des aktuellen Zustands erstellen.
+Nach erfolgreichem Speichern und Prüfen der Wiederherstellung das Gerät neu
+starten; die laufende Konfiguration wird nicht allein durch die Vorschau ersetzt.
+Die Konfigurationssicherung ersetzt keine separate Prüfung der EEPROM-Identitäten.
+
 ## Web-OTA
 
 1. Ein passendes `firmware.bin` für das ESP32-Ziel bauen.

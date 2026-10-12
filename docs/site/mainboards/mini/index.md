@@ -129,3 +129,10 @@ Diese Konstruktionsprüfungen ersetzen keine elektrischen, thermischen, EMV-, ES
 oder Fertigungsprüfungen. Die Quellunterlagen nennen für Revision 0.8 noch ausstehende
 physische Inbetriebnahme und Produktionsvalidierung. Die Anleitung beschreibt den
 Aufbau und die Prüfungen; sie ist keine pauschale Produktionsfreigabe.
+
+## Mit der Firmware verwenden
+
+[Erste Inbetriebnahme](../../firmware/configuration.md),
+[Board Identity](../../firmware/provisioning.md) und
+[erste I²C-Messung](../../firmware/example-measurement.md).
+Das Messbeispiel verwendet Mini; bei Weather die tatsächliche Anschlussbelegung beachten.

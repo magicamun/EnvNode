@@ -1,55 +1,55 @@
-# Einrichtung und Konfiguration
+# Erste Inbetriebnahme
 
-## Netzwerk und Gerät
+## 1. Aufbau und Firmware prüfen
 
-In **Network** Hostname, WLAN-SSID und Passwort eintragen.
-Unter **Device**, **Time** und **Units** die Geräteangaben, Zeit- und
-Darstellungseinstellungen prüfen. Nach einem Netzwerkwechsel die neue
-Geräte-IP im Router oder über Serial ermitteln.
+Mainboard nach seiner Hardwareanleitung prüfen und zunächst ohne zusätzliche
+Lasten starten. USB-C am ORing-Power-Modul liefert nur Strom. Zum Flashen wird
+der USB-Datenanschluss des ESP32-DevKit verwendet.
 
-Die Konfiguration wird im NVS gespeichert und übersteht reguläre Neustarts
-und Firmwareupdates. Factory Reset löscht sie.
+## 2. Weboberfläche öffnen
 
-## Board und Module
+Ohne eingerichtetes WLAN startet ein Setup-Access-Point mit dem Namen
+`<Hostname>-Setup`. Verbinde deinen Rechner damit und öffne
+**http://192.168.4.1/** im Browser.
 
-Unter **Diagnostics** Board Identity, aktives Boardprofil und I²C-Ressourcen prüfen.
-Ein erkanntes Modul aktiviert keinen Sensor- oder Aktortreiber automatisch.
-Die Belegung muss zum realen Mainboard und Slot passen.
+Dieser Modus wird auch bei gespeicherten Zugangsdaten erreicht, wenn der
+WLAN-Verbindungsversuch beim Start zu lange erfolglos bleibt. Prüfe dann
+Router-Erreichbarkeit, SSID und Passwort. Die gespeicherten Einstellungen
+bleiben erhalten. Nach einer erfolgreichen WLAN-Verbindung gilt die dort
+zugewiesene IP-Adresse.
 
-## Sensoren
+Der Setup-Access-Point wird im aktuellen Code ohne WLAN-Passwort gestartet;
+führe die Einrichtung in einer kontrollierten Umgebung durch.
 
-Unter **Sensors** einen Sensorplatz konfigurieren:
+## 3. Netzwerk einrichten
 
-1. Physische oder simulierte Implementierung wählen.
-2. Bei I²C den Bus und die vom Treiber unterstützte Adresse eintragen.
-3. Bei GPIO-Sensoren den passenden freien Anschluss wählen.
-4. Speichern und unter **Measurements** die erzeugten Werte prüfen.
+Unter **Netzwerk (Network)** Hostname, WLAN-SSID und Passwort setzen.
+Für den ersten Betrieb DHCP verwenden. Eine statische Adresse benötigt zusätzlich
+passende IP, Netzmaske, Gateway und DNS; falsche Angaben können die Erreichbarkeit verhindern.
 
-[I²C-Treiber und Anschlusshinweise](../sensors/i2c.md)
+Speichern und die Rückmeldung beachten. Nach dem Wechsel zurück ins normale WLAN
+die neue IP im Router oder in der seriellen Ausgabe ermitteln.
+Das Abbrechen der bisherigen Verbindung während eines Netzwerkwechsels ist erwartbar.
 
-Beim Kippwaagen-Treiber sind GPIO, Millimeter pro Kippereignis und Entprellung
-konfigurierbar. AM2302/DHT22 benötigt einen geeigneten GPIO für sein eigenes
-Einleitungsprotokoll; er ist kein I²C-Sensor.
+## 4. Gerät, Sprache und Zeit
 
-## Aktoren und Controller
+Unter **Gerät (Device)** die Geräteangaben prüfen. Unter **Sprache/Zeit** die
+gewünschte Sprache, Zeitzone und NTP-Server einstellen. Synchronisierung kontrollieren.
+Unter **Einheiten (Units)** die gewünschten Darstellungseinheiten auswählen;
+diese Einstellungen können auch zukünftige MQTT-Ausgaben beeinflussen.
 
-Unter **Actuators** GPIO-On/Off oder GPIO-PWM/Level passend zur Hardware konfigurieren.
-Aktive Pegel und sicheren Aus-Zustand vor Anschluss einer realen Last prüfen.
-[DuoRelay](../modules/duo-relay/index.md) benötigt je Kanal einen passenden On/Off-Aktor.
+## 5. Hardware zuordnen
 
-Unter **Controllers** lokale Funktionen konfigurieren. Blink schaltet zeitgesteuert;
-Threshold verarbeitet einen typisierten Messwert mit Hysterese und Frischeprüfung.
-Selector ermöglicht eine konfigurierbare Auswahlsteuerung.
-Freigegebene Controller-Ziele dürfen nicht gleichzeitig widersprüchlich belegt werden.
-Status, Entscheidung und Diagnose vor dem realen Betrieb prüfen.
+[Hardware und Provisioning](provisioning.md) öffnen. Erst nach Kontrolle des
+aktiven Boardprofils die Sensor- und Aktorressourcen auswählen.
+Ein Diagnosehinweis auf einen Entwicklungs-Fallback ist kein Nachweis einer
+korrekt provisionierten Board Identity.
 
-## Values und Anzeige
+## 6. Grundfunktion prüfen
 
-**Values** stellt eigene konfigurierbare Werte bereit.
-[Displays](../displays/index.md) beziehen ihre Inhalte aus ausgewählten Eigenschaften.
-Die angezeigte Vorschau hilft beim Zuordnen und Formatieren der Quellen.
+- Status zeigt das erwartete Gerät und die Netzwerkverbindung.
+- Zeit ist synchronisiert oder ihre noch laufende Synchronisierung ist erklärbar.
+- Aktives Boardprofil passt zum aufgebauten Mainboard.
+- Keine unerklärten Fehler in den Logs.
 
-## Abschließende Prüfung
-
-Zunächst lokal korrekte Werte und Schaltzustände prüfen, dann MQTT einrichten.
-Einen Neustart durchführen und kontrollieren, ob Konfiguration und Verhalten erhalten bleiben.
+[Weiter zur ersten Messung](sensors.md)
