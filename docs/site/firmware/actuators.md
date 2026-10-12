@@ -32,3 +32,16 @@ Bei einem Neustart gelten wieder gespeicherte Einstellungen. Einen momentan
 ausgeschalteten Ausgang deshalb nicht mit einer dauerhaft deaktivierten Funktion verwechseln.
 
 [DuoRelay-Beispiel](example-relay.md) · [Controller](controllers.md)
+
+## Descriptor-basierter Modulaktor
+
+Aufnahme: Firmware 0.5.0, Mini Revision 0.3 und DuoRelay Revision 0.3.
+Die gezeigten Ressourcen gelten für diesen Aufbau; das tatsächliche Boardprofil
+und die revisionsbezogene GPIO-Zuordnung sind maßgeblich.
+
+Bei verfügbarer Descriptor-Zuordnung bietet die Oberfläche **Module On/Off**.
+Für `relay.2` definiert der Descriptor Fähigkeit und GPIO; bearbeitbar sind
+Aktivierung und Name. Speichern und ausstehende Aktoränderungen anwenden.
+Dies ist eine Alternative zur freien GPIO-Zuordnung.
+
+![Descriptor-basierter Modulaktor](../assets/images/firmware/duorelay-channel.jpg)

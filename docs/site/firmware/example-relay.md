@@ -4,6 +4,17 @@ Ziel: Ein Relais zunächst manuell prüfen und anschließend periodisch schalten
 Beispielaufbau: DuoRelay in **Mini Slot A**, ohne Netzspannung und ohne reale Last.
 Andere Slots benötigen die dort angegebenen GPIOs.
 
+## Einrichtungsvariante wählen
+
+Bei vorhandener Descriptor-basierter Modulzuordnung kann der Kanal als
+**Module On/Off** eingerichtet sein. Dann definiert der Descriptor die Ressource;
+die GPIOs werden nicht frei ausgewählt. Aktivierung und Name prüfen,
+speichern und Änderungen anwenden. [Screenshot](actuators.md#descriptor-basierter-modulaktor).
+
+Das folgende Beispiel beschreibt die freie GPIO-Variante für die genannte
+Board-/Slotbelegung. Sie darf nicht ungeprüft auf Mini Revision 0.3 übertragen
+oder zusätzlich auf derselben bereits belegten Ressource eingerichtet werden.
+
 ## Kanal 1 konfigurieren
 
 1. Versorgung ausschalten, Modul korrekt einsetzen und nach Hardwareanleitung prüfen.

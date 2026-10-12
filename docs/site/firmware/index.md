@@ -5,6 +5,18 @@ Schalten, Anzeige und MQTT. Sie beschreibt den Firmware-Quellstand vom
 12. Oktober 2026. Die Sprache der Oberfläche ist einstellbar; englische
 Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
+## Orientierung in der Weboberfläche
+
+Die Navigation links führt durch die Bedienbereiche; rechts stehen die Inhalte
+und Aktionen der gewählten Seite. Die Aufnahme zeigt als Beispiel die
+Konfigurationsseite mit Sicherung und Wiederherstellung. Dieselbe Navigation
+begleitet die Einrichtung von Sensoren, Aktoren, Controllern und Displays.
+
+![Weboberfläche mit Navigation und Konfigurationsseite](../assets/images/firmware/interface-overview.jpg)
+
+Aufnahme von Firmware 0.5.0 auf Mini 0.3 mit DuoRelay 0.3. Die Hardwarebelegung
+ist aufbauspezifisch; die Aufnahme dient der Orientierung in der Bedienoberfläche.
+
 ## Der Weg zur ersten Anwendung
 
 | Schritt | Ziel |

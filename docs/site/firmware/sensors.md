@@ -31,6 +31,22 @@ Ein fehlender Wert ist nicht automatisch null. Bei fehlenden, ungültigen oder
 alten Werten erst Zeit, Sensorzustand und Logs untersuchen. Nicht nur den
 angezeigten Zahlenwert beurteilen.
 
+## Vom Sensor zum sichtbaren Ergebnis
+
+Der Ablauf ist **Sensor konfigurieren → speichern und anwenden → Messwerte prüfen**.
+Die Seite *Sensors* legt Quelle, Bus und Adresse fest; *Measurements* zeigt das
+Ergebnis mit Einheit, Qualität, Zeitpunkt der letzten angenommenen Messung und MQTT-Topic.
+
+![Messwertübersicht mit simulierten Quellen und physischem BME280](../assets/images/firmware/measurements.jpg)
+
+Im Beispiel sind die Plätze 1–3 ausdrücklich Simulationen. Platz 5 ist der physische
+BME280 und liefert Temperatur, relative Feuchte und Luftdruck. Der deaktivierte
+SHTC3 erzeugt keine aktiven Messungen und erscheint deshalb hier nicht als Messquelle.
+Die Zahlen sind eine Momentaufnahme dieses Aufbaus, keine Soll- oder Kalibrierwerte.
+
+Damit lässt sich die [BME280-Konfiguration](#bme280-konfigurieren) mit dem Ergebnis
+vergleichen: Ein eingerichteter Sensor muss auch aktuelle, gültige Messungen liefern.
+
 ## Typische Fehler
 
 | Symptom | Erste Prüfung |
@@ -44,3 +60,14 @@ RainDetector ist kein Rain-Gauge-Treiber. SCT013 und ADS1115 sind im aktuellen
 Sensorregistry nicht als fertige Auswahl enthalten.
 
 [Durchgehendes SHT4x-Beispiel](example-measurement.md)
+
+## BME280 konfigurieren
+
+Aufnahme: Firmware 0.5.0, Mini Revision 0.3 und DuoRelay Revision 0.3.
+Die gezeigten Ressourcen gelten für diesen Aufbau; das tatsächliche Boardprofil
+und die revisionsbezogene GPIO-Zuordnung sind maßgeblich.
+
+BME280 ist in Platz 5 aktiviert: I2C1, Adresse 0x76, Intervall 5000 ms.
+SHTC3 ist im Aufbau eingerichtet, aber deaktiviert.
+
+![BME280 konfigurieren](../assets/images/firmware/bme280-configuration.jpg)

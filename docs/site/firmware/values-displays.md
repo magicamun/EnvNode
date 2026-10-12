@@ -31,3 +31,16 @@ Zahlenwert verdecken. Vorschau und Gerät können sich unterscheiden, wenn keine
 aktuellen Messungen verfügbar sind.
 
 [Displayhardware und Fehlersuche](../displays/index.md)
+
+## Zwei Displays konfigurieren
+
+Aufnahme: Firmware 0.5.0, Mini Revision 0.3 und DuoRelay Revision 0.3.
+Die gezeigten Ressourcen gelten für diesen Aufbau; das tatsächliche Boardprofil
+und die revisionsbezogene GPIO-Zuordnung sind maßgeblich.
+
+Beide SSD1309 verwenden 0x3C, aber unterschiedliche Busse: Display 1 an I2C1
+mit Seite 1, Display 2 an I2C0 mit Seite 2. Damit entsteht kein Adresskonflikt.
+Die Schriftwahl bestimmt das Raster: 6×10 ergibt 21 Spalten und 6 Zeilen;
+8×13 ergibt 16 Spalten und 4 sichtbare Zeilen.
+
+![Zwei Displays konfigurieren](../assets/images/firmware/displays.jpg)
