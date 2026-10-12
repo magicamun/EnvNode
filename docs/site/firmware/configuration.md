@@ -43,7 +43,7 @@ einschließlich Aliasnamen. Gespeichert wird die zugehörige POSIX-Regel; nach d
 Speichern kann deshalb ein gleichbedeutender Ortsname erscheinen. Unregelmäßige
 Zeitumstellungen wie die Ramadan-Ausnahmen in Marokko sind mit diesem Zeitmodell
 nicht vollständig abbildbar. Details und Aktualisierung:
-[Zeitzonenkonfiguration](../../TimezoneConfiguration.md).
+[Zeitzonenkonfiguration](https://github.com/magicamun/EnvNode/blob/main/docs/TimezoneConfiguration.md).
 
 ## 5. Hardware zuordnen
 
