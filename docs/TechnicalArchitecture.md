@@ -1335,6 +1335,11 @@ Local timestamps without timezone information must not be published.
 
 The configured timezone automatically handles daylight-saving transitions.
 
+The web configuration offers the complete offline IANA identifier catalog mapped
+to POSIX rules. Storage remains a POSIX rule rather than an IANA identifier.
+See [Timezone configuration](TimezoneConfiguration.md) for catalog updates, aliases,
+and the limits of recurring rules for irregular or historical transitions.
+
 ---
 
 ## Time Synchronization

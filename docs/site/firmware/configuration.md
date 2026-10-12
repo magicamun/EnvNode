@@ -38,6 +38,13 @@ gewünschte Sprache, Zeitzone und NTP-Server einstellen. Synchronisierung kontro
 Unter **Einheiten (Units)** die gewünschten Darstellungseinheiten auswählen;
 diese Einstellungen können auch zukünftige MQTT-Ausgaben beeinflussen.
 
+Die Zeitzonenauswahl umfasst weltweit alle 597 IANA-Bezeichner (Stand 2026e),
+einschließlich Aliasnamen. Gespeichert wird die zugehörige POSIX-Regel; nach dem
+Speichern kann deshalb ein gleichbedeutender Ortsname erscheinen. Unregelmäßige
+Zeitumstellungen wie die Ramadan-Ausnahmen in Marokko sind mit diesem Zeitmodell
+nicht vollständig abbildbar. Details und Aktualisierung:
+[Zeitzonenkonfiguration](../../TimezoneConfiguration.md).
+
 ## 5. Hardware zuordnen
 
 [Hardware und Provisioning](provisioning.md) öffnen. Erst nach Kontrolle des

@@ -73,10 +73,7 @@ const char SharedStyle[] PROGMEM = R"CSS(
 
 struct TimezoneOption { const char* label; const char* value; };
 const TimezoneOption TimezoneOptions[] = {
-    {"Europe/Berlin", "CET-1CEST,M3.5.0/2,M10.5.0/3"}, {"Europe/London", "GMT0BST,M3.5.0/1,M10.5.0"},
-    {"UTC", "UTC0"}, {"America/New_York", "EST5EDT,M3.2.0/2,M11.1.0/2"},
-    {"America/Chicago", "CST6CDT,M3.2.0/2,M11.1.0/2"}, {"America/Denver", "MST7MDT,M3.2.0/2,M11.1.0/2"},
-    {"America/Los_Angeles", "PST8PDT,M3.2.0/2,M11.1.0/2"},
+#include "TimezoneOptions.inc"
 };
 
 const char* webOtaStateName(OTAState state, Locale locale) {
@@ -220,19 +217,24 @@ String lastMeasurementDisplay(
     return result;
 }
 
-String timezoneSelect(const String& current, Locale locale) {
-    String html;
-    html.reserve(720 + current.length() * 2);
-    html = "<select name='timezone'>";
+void sendTimezoneSelect(WebServer& server, const String& current, Locale locale) {
+    // Keep the worldwide catalog out of contiguous page-sized heap allocations.
+    String chunk;
+    chunk.reserve(1200);
+    chunk = "<select name='timezone'>";
     bool found = false;
     for (const auto& option : TimezoneOptions) {
-        const bool selected = current == option.value;
+        const bool selected = !found && current == option.value;
         found = found || selected;
-        html += "<option value='" + escapeHtml(option.value) + "'" + (selected ? " selected" : "") + ">" + option.label + "</option>";
+        chunk += "<option value='" + escapeHtml(option.value) + "'" + (selected ? " selected" : "") + ">" + option.label + "</option>";
+        if (chunk.length() >= 1024) {
+            server.sendContent(chunk);
+            chunk = "";
+        }
     }
-    if (!found && !current.isEmpty()) html += "<option value='" + escapeHtml(current) + (String("' selected>") + webText(locale, TextId::Custom) + " " + "") + escapeHtml(current) + "</option>";
-    html += "</select>";
-    return html;
+    if (!found && !current.isEmpty()) chunk += "<option value='" + escapeHtml(current) + (String("' selected>") + webText(locale, TextId::Custom) + " ") + escapeHtml(current) + "</option>";
+    chunk += "</select>";
+    server.sendContent(chunk);
 }
 
 String localeSelect(Locale current) {
@@ -828,13 +830,30 @@ void WebService::handleMqtt() {
 }
 
 void WebService::handleTime() {
+    if (!administrationAvailable()) {
+        server_.send(503, "text/plain", uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting));
+        return;
+    }
+    const String header = renderPageHeader(uiText(TextId::LocaleTime), "/time", false);
+    if (header.isEmpty()) {
+        server_.send(503, "text/plain", uiText(TextId::PageRenderingFailedPleaseRetry));
+        return;
+    }
     const TimeConfiguration& t = configurationService_.getConfiguration().time;
     const Locale currentLocale = configurationService_.getLocale();
     String c;
     c.reserve(1300);
     c = (String("<section class='card'><h2>") + uiText(TextId::RuntimeStatus) + "</h2><div class='kv'><span>" + uiText(TextId::Synchronization) + "</span><span>") + badge(uiText(timeService_.synchronized()?TextId::Synchronized:TextId::Synchronizing),timeService_.synchronized()?"good":"warn") + (String("</span><span>") + uiText(TextId::LocalTime) + "</span><span>") + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + (String("</span></div></section><form method='post' action='/time/save'><section class='card'><h2>") + uiText(TextId::Locale) + "</h2><label>" + uiText(TextId::Locale) + "") + localeSelect(currentLocale) + (String("</label></section><section class='card'><h2>") + uiText(TextId::Time) + "</h2>");
-    c += (String("<label>") + uiText(TextId::Timezone) + "") + timezoneSelect(t.timezone, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::NTPServer1) + "<input name='ntpServer1' value='") + escapeHtml(t.ntpServer1) + (String("'></label><label>") + uiText(TextId::NTPServer2) + "<input name='ntpServer2' value='") + escapeHtml(t.ntpServer2) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveLocaleAndTime) + "</button></div></section></form>");
-    sendPage(uiText(TextId::LocaleTime), "/time", c);
+    c += String("<label>") + uiText(TextId::Timezone);
+    server_.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server_.send(200, "text/html; charset=utf-8", header);
+    server_.sendContent(c);
+    c = "";
+    sendTimezoneSelect(server_, t.timezone, currentLocale);
+    c = (String("</label><label>") + uiText(TextId::NTPServer1) + "<input name='ntpServer1' value='") + escapeHtml(t.ntpServer1) + (String("'></label><label>") + uiText(TextId::NTPServer2) + "<input name='ntpServer2' value='") + escapeHtml(t.ntpServer2) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveLocaleAndTime) + "</button></div></section></form>");
+    server_.sendContent(c);
+    server_.sendContent("</main></div></body></html>");
+    server_.sendContent("");
 }
 
 void WebService::handleUnits() {
