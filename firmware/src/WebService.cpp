@@ -980,8 +980,8 @@ void WebService::handleDevice() {
     c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
         + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
         + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
-        + String(boardIdentityResolution_.identity.serialNumber) + "</span></div><a class='button' href='/hardware'>"
-        + uiText(TextId::ViewHardware) + "</a></section>";
+        + String(boardIdentityResolution_.identity.serialNumber) + "</span></div><div class='actions'><a class='button' href='/hardware'>"
+        + uiText(TextId::ViewHardware) + "</a></div></section>";
     sendPage(uiText(TextId::Device), "/device", c);
 }
 
