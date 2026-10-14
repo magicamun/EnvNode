@@ -71,3 +71,12 @@ BME280 ist in Platz 5 aktiviert: I2C1, Adresse 0x76, Intervall 5000 ms.
 SHTC3 ist im Aufbau eingerichtet, aber deaktiviert.
 
 ![BME280 konfigurieren](../assets/images/firmware/bme280-configuration.jpg)
+
+## Luftdruck auf Meereshöhe
+
+Ab Firmware 0.6.0 bleibt der örtliche Luftdruck des BME280 unverändert verfügbar.
+Ein zusätzlicher abgeleiteter Druckwert nutzt die konfigurierte Sensorhöhe und
+optional einen aktuellen Temperaturwert eines lokalen Sensors. Die Erweiterung
+arbeitet auch mit simulierten Barometern.
+
+[GeoPosition, Temperaturauswahl und Druckberechnung einrichten](geo-position-pressure.md)

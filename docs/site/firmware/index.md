@@ -2,7 +2,7 @@
 
 Diese Anleitung führt von der ersten Verbindung mit EnvNode bis zu Messung,
 Schalten, Anzeige und MQTT. Sie beschreibt den Firmware-Quellstand vom
-12. Oktober 2026. Die Sprache der Oberfläche ist einstellbar; englische
+14. Oktober 2026 (Firmware 0.6.1). Die Sprache der Oberfläche ist einstellbar; englische
 Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
 ## Orientierung in der Weboberfläche
@@ -33,6 +33,13 @@ ist aufbauspezifisch; die Aufnahme dient der Orientierung in der Bedienoberfläc
 
 Wenn das ESP32 noch keine passende Firmware hat, beginne mit
 [Bauen und Aufspielen](installation.md).
+
+## Standort und Luftdruck
+
+[GeoPosition und Meereshöhendruck](geo-position-pressure.md) beschreibt die
+optionalen Koordinaten, die tatsächliche Sensorhöhe, die lokale Temperaturauswahl
+und den getrennten abgeleiteten Druckwert einschließlich Qualität und Rückfallverhalten.
+Die Funktion steht ab Firmware 0.6.0 zur Verfügung.
 
 ## Zwei durchgehende Beispiele
 

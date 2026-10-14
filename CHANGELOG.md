@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.1 — 2026-10-14
+
+### Fixed
+
+- Apply the configured Locale to GeoPosition and pressure-temperature age inputs,
+  restore previews and reduction-age diagnostics. German uses decimal commas;
+  English uses decimal points. Keep storage, backups and MQTT locale-neutral.
+- Document GeoPosition and sea-level pressure in the German firmware guide.
+
 ## 0.6.0 — 2026-10-14
 
 ### Added

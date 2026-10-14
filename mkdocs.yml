@@ -54,6 +54,7 @@ nav:
       - Begriffe und Oberfläche: firmware/basics.md
       - Bauen und Aufspielen: firmware/installation.md
       - Erste Inbetriebnahme: firmware/configuration.md
+      - GeoPosition und Meereshöhendruck: firmware/geo-position-pressure.md
       - Hardware und Provisioning: firmware/provisioning.md
       - Sensoren und Messwerte: firmware/sensors.md
       - Ausgänge schalten: firmware/actuators.md

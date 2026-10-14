@@ -45,6 +45,17 @@ Zeitumstellungen wie die Ramadan-Ausnahmen in Marokko sind mit diesem Zeitmodell
 nicht vollständig abbildbar. Details und Aktualisierung:
 [Zeitzonenkonfiguration](https://github.com/magicamun/EnvNode/blob/main/docs/TimezoneConfiguration.md).
 
+### Optional: GeoPosition und Meereshöhendruck
+
+Ab Firmware 0.6.0 unter **Gerät (Device)** Breitengrad und Längengrad als
+Dezimalgrad gemäß der eingestellten Locale (ab 0.6.1: Deutsch Komma, Englisch Punkt)
+sowie die tatsächliche Sensorhöhe über Meereshöhe einschließlich
+Gebäudehöhe eintragen. Unbekannte Angaben bleiben leer; 0 m ist gültig.
+Optional eine lokale Außentemperaturquelle mit Maximalalter wählen (Standard
+60 Sekunden), speichern und die Sensoränderungen anwenden.
+
+[Anleitung, Qualitätsregeln und Prüfbeispiel](geo-position-pressure.md)
+
 ## 5. Hardware zuordnen
 
 [Hardware und Provisioning](provisioning.md) öffnen. Erst nach Kontrolle des

@@ -13,6 +13,11 @@ Nach erfolgreichem Speichern und Prüfen der Wiederherstellung das Gerät neu
 starten; die laufende Konfiguration wird nicht allein durch die Vorschau ersetzt.
 Die Konfigurationssicherung ersetzt keine separate Prüfung der EEPROM-Identitäten.
 
+Standort und lokale Temperaturauswahl für den Meereshöhendruck gehören ab 0.6.0
+zur Sicherung und erscheinen in der Wiederherstellungsvorschau. Ältere Formate
+bleiben lesbar; fehlende Einstellungen werden als nicht konfiguriert übernommen.
+[Details zur Kompatibilität](geo-position-pressure.md#speicherung-und-sicherungen)
+
 ## Web-OTA
 
 1. Ein passendes `firmware.bin` für das ESP32-Ziel bauen.

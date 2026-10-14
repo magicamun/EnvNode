@@ -187,6 +187,9 @@ Implemented
 - typed Measurement pipeline and MQTT publication
 - fixed Sensor slots, physical/simulated implementations and live runtime composition
 - Sensor Home Assistant discovery
+- optional GeoPosition and actual sensor altitude, persisted with backup/restore
+- separate sea-level pressure with local temperature selection, freshness checking,
+  explicit quality and fallback diagnostics (firmware 0.6.0)
 - EEPROM-backed Board Identity, boot-time profile resolution and development fallback
 - Board Identity diagnostics and confirmed Web provisioning with readback verification
 - independent Module Identity discovery for both slots, immutable module profiles and
@@ -235,6 +238,7 @@ Project documentation is intentionally separated by responsibility.
 | ActuatorModel.md | Actuator capabilities and Controller interaction |
 | MQTT.md | Current MQTT protocol boundaries and topics |
 | Configuration.md | Configuration backup, restore and NVS persistence |
+| [SeaLevelPressure.md](docs/SeaLevelPressure.md) | GeoPosition, local temperature input and derived sea-level pressure |
 | Hardware.md | Hardware entry point, module templates, and implemented boards |
 | ADRs | Architectural decisions |
 
