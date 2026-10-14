@@ -124,6 +124,8 @@ private:
     void handleTimeSave();
     void handleUnitsSave();
     void handleDeviceSave();
+    void handleGeoPositionSave();
+    void handlePressureReductionSave();
     void handleBoardProvisioning();
     void handleModuleDescriptorProvisioning();
     void handleRestart();

@@ -616,13 +616,15 @@ void test_threshold_web_bme280_measurements_are_compatible_unique_state_values()
     MeasurementType types[MaxImplementationMeasurementTypeCount];
     const size_t count = thresholdMeasurementTypesForSensor(
         bme280, types, MaxImplementationMeasurementTypeCount);
-    TEST_ASSERT_EQUAL_UINT32(3, count);
+    TEST_ASSERT_EQUAL_UINT32(4, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
         static_cast<int>(types[0]));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),
         static_cast<int>(types[1]));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::AtmosphericPressure),
         static_cast<int>(types[2]));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::SeaLevelPressure),
+        static_cast<int>(types[3]));
     for (size_t left = 0; left < count; ++left) {
         TEST_ASSERT_TRUE(isThresholdCompatibleMeasurementType(types[left]));
         for (size_t right = left + 1; right < count; ++right) {

@@ -2701,3 +2701,23 @@ addresses are not presented as DHCP assignments.
 composition root. It provides live `device_name`, `hostname` and `ip_address`
 text properties alongside build and time sources, without depending on the
 ESP32 WiFi driver. The display runtime and web preview use the same reader.
+
+## Standard-atmosphere pressure composition
+
+`SensorRuntime` registers an `ISensor` composition (`SeaLevelPressureSensor`)
+around each hardware-independent Sensor interface. It forwards original channels
+and adds `sea_level_pressure` only for atmospheric-pressure sources. Hardware
+drivers remain responsible solely for acquisition. The composition uses an active
+location snapshot, replaced only after successful runtime activation; rebuild clears
+the measurement cache. The calculation runs before SensorManager acceptance, so
+source, time, provenance, cache, PropertyResolver and MQTT use the same pipeline.
+The channel's stable numeric MeasurementType is appended, preserving previous IDs.
+Latitude/longitude are metadata and do not influence pressure reduction.
+
+The composition's optional temperature dependency uses only `IMeasurementResolver`
+and `IMonotonicClock`. Method/reason diagnostics use `PressureReductionStatus`,
+exposed read-only through SensorManager to the Web view and MeasurementPublisher.
+No formula or source selection is implemented in MQTT. Configuration references
+are validated against the desired local Sensor composition and migrated explicitly.
+The active pressure configuration and Sensor wrappers use bounded, once-allocated
+heap storage to respect the ESP32's static DRAM limit.

@@ -75,6 +75,9 @@ const MeasurementTypeMetadata MeasurementMetadata[] = {
     {MeasurementType::WaterLevel, "water_level", "Water Level", ValueKind::FloatingPoint,
         PresentationUnit::Metre, 3, MeasurementSemantics::State,
         WaterLevelUnits, unitCount(WaterLevelUnits), PresentationUnit::Metre},
+    {MeasurementType::SeaLevelPressure, "sea_level_pressure", "Sea-level Pressure (derived)", ValueKind::FloatingPoint,
+        PresentationUnit::Pascal, 1, MeasurementSemantics::State,
+        PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal},
 };
 
 constexpr size_t MeasurementMetadataCount =

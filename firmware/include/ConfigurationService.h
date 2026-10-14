@@ -14,6 +14,8 @@ public:
     const Configuration& getConfiguration() const override;
     Locale getLocale() const override;
 
+    bool setPressureReduction(const PressureReductionConfiguration& configuration) override;
+    bool setGeoPosition(const GeoPosition& position) override;
     bool setDeviceName(const String& deviceName) override;
     bool setNetworkConfiguration(const NetworkConfiguration& network, bool updatePassword) override;
     bool setWifiSSID(const String& ssid) override;

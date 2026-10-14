@@ -1,9 +1,12 @@
 #pragma once
 
+#include <memory>
+
 #include "IConfigurationService.h"
 #include "ISensorRuntime.h"
 #include "SensorFactory.h"
 #include "SensorManager.h"
+#include "SeaLevelPressureSensor.h"
 
 namespace EnvNode {
 
@@ -13,7 +16,9 @@ public:
         IConfigurationService& configurationService,
         SensorFactory& firstFactory,
         SensorFactory& secondFactory,
-        SensorManager& sensorManager);
+        SensorManager& sensorManager,
+        const IMeasurementResolver& measurements,
+        const IMonotonicClock& clock);
 
     bool initialize(size_t& activeSensorCount, const char*& failureReason);
     bool rebuild(size_t& activeSensorCount, const char*& failureReason) override;
@@ -36,6 +41,14 @@ private:
     SensorFactory* activeFactory_;
     SensorFactory* inactiveFactory_;
     SensorManager& sensorManager_;
+    const IMeasurementResolver& measurements_;
+    const IMonotonicClock& clock_;
+    struct ActivePressureConfiguration {
+        GeoPosition position;
+        PressureReductionConfiguration reduction;
+    };
+    std::unique_ptr<ActivePressureConfiguration> activePressure_;
+    std::unique_ptr<SeaLevelPressureSensor[]> composedSensors_;
     SensorSlotConfiguration activeSlots_[MaxSensorSlotCount];
     ISensor* activeSensors_[MaxSensorSlotCount] = {};
 };

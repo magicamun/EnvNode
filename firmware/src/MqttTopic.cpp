@@ -41,6 +41,7 @@ const char* mqttMeasurementTypeTopic(MeasurementType type) {
     switch (type) {
         case MeasurementType::Temperature: return "temperature";
         case MeasurementType::RelativeHumidity: return "relative_humidity";
+        case MeasurementType::SeaLevelPressure: return "sea_level_pressure";
         case MeasurementType::AtmosphericPressure: return "atmospheric_pressure";
         case MeasurementType::SolarIrradiance: return "solar_irradiance";
         case MeasurementType::SolarCellTemperature: return "solar_cell_temperature";

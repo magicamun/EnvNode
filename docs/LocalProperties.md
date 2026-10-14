@@ -615,3 +615,13 @@ The Network page shows active station IP, subnet mask, gateway and both DNS
 servers as read-only fields when DHCP is selected. Unassigned values appear
 as a dash. These fields are never submitted as static configuration; reload
 the page to update the runtime snapshot. Saved network changes require restart.
+
+## Sea-level pressure
+
+Atmospheric-pressure Sensor compositions expose the read-only
+`sea_level_pressure` property (canonical Pascal) alongside `atmospheric_pressure`.
+It can be selected in the display editor. Like other Sensor properties, OLED text
+formatting reads the canonical value in Pascal; MQTT and the measurement view
+use the configured atmospheric-pressure presentation unit. No height gives an invalid value, rather than a copied local
+pressure. A valid value is explicitly derived using the standard atmosphere and
+carries estimated quality; simulated source provenance remains simulated.

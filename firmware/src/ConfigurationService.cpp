@@ -125,6 +125,8 @@ void ConfigurationService::ensurePreferencesStarted() {
 void ConfigurationService::initializeDefaults() {
     configuration_.values.clear();
     configuration_.display = DisplayConfiguration{};
+    configuration_.geoPosition = GeoPosition{};
+    configuration_.pressureReduction = PressureReductionConfiguration{};
     configuration_.device.name = "WeatherStation";
     configuration_.network.hostname = "WeatherStation";
     configuration_.network.wifiSSID = String();
@@ -228,6 +230,18 @@ void ConfigurationService::initializeControllerDefaults() {
 void ConfigurationService::loadFromPreferences() {
     ensurePreferencesStarted();
 
+    if (preferences_.isKey("pressureReduce")) {
+        PressureReductionConfiguration reduction;
+        if (decodePressureReduction(preferences_.getString("pressureReduce"), reduction))
+            configuration_.pressureReduction = reduction;
+        else configuration_.pressureReduction = PressureReductionConfiguration{};
+    }
+    if (preferences_.isKey("geoPosition")) {
+        GeoPosition position;
+        if (decodeGeoPosition(preferences_.getString("geoPosition"), position))
+            configuration_.geoPosition = position;
+        else configuration_.geoPosition = GeoPosition{};
+    }
     if (preferences_.isKey(KeyDeviceName)) {
         configuration_.device.name = preferences_.getString(KeyDeviceName, configuration_.device.name);
     }
@@ -520,6 +534,8 @@ PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, Mea
 }
 
 void ConfigurationService::validateConfiguration() {
+    if (!validPressureReduction(configuration_.pressureReduction, configuration_.sensorSlots))
+        configuration_.pressureReduction = PressureReductionConfiguration{};
     if (!validateDeviceName(configuration_.device.name)) {
         configuration_.device.name = "WeatherStation";
     }
@@ -685,6 +701,19 @@ bool ConfigurationService::validateNetworkConfiguration(const NetworkConfigurati
             return false;
         }
     }
+    return true;
+}
+
+bool ConfigurationService::setPressureReduction(const PressureReductionConfiguration& reduction) {
+    if (!validPressureReduction(reduction, configuration_.sensorSlots)
+        || !persistString("pressureReduce", encodePressureReduction(reduction))) return false;
+    configuration_.pressureReduction = reduction;
+    return true;
+}
+
+bool ConfigurationService::setGeoPosition(const GeoPosition& position) {
+    if (!validGeoPosition(position) || !persistString("geoPosition", encodeGeoPosition(position))) return false;
+    configuration_.geoPosition = position;
     return true;
 }
 
@@ -1165,7 +1194,8 @@ bool ConfigurationService::setSensorSlotConfiguration(const SensorSlotConfigurat
         candidate[index] = configuration_.sensorSlots[index];
     }
     candidate[slot.slotId - 1] = slot;
-    if (!validateSensorSlots(candidate)
+    if (!validPressureReduction(configuration_.pressureReduction, candidate)
+        || !validateSensorSlots(candidate)
         || !validateHardwareOccupancy(candidate, configuration_.actuatorSlots)
         || !validateControllerSlots(
             configuration_.controllerSlots, candidate, configuration_.actuatorSlots)
@@ -1349,7 +1379,7 @@ bool ConfigurationService::saveEnumValueCode(ValueId id, const String& code) {
 }
 
 bool ConfigurationService::validateRestore(const Configuration& c) const {
-    return validateDeviceName(c.device.name) && validateNetworkConfiguration(c.network)
+    return validPressureReduction(c.pressureReduction, c.sensorSlots) && validGeoPosition(c.geoPosition) && validateDeviceName(c.device.name) && validateNetworkConfiguration(c.network)
         && validateMqttServer(c.mqtt.server) && validateMqttPort(c.mqtt.port)
         && validateMqttUsername(c.mqtt.username) && validateMqttPassword(c.mqtt.password)
         && validateTimezone(c.time.timezone) && validateNtpServer(c.time.ntpServer1)

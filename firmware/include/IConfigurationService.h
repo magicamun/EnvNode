@@ -12,6 +12,8 @@ public:
     virtual const Configuration& getConfiguration() const = 0;
     virtual Locale getLocale() const = 0;
 
+    virtual bool setPressureReduction(const PressureReductionConfiguration& configuration) { return false; }
+    virtual bool setGeoPosition(const GeoPosition& position) { return false; }
     virtual bool setDeviceName(const String& deviceName) = 0;
     virtual bool setNetworkConfiguration(
         const NetworkConfiguration& network,

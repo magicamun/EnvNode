@@ -49,8 +49,12 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
         }
     }
 
+    PressureReductionStatus pressureStatus;
+    const bool hasPressureStatus = measurement.type == MeasurementType::SeaLevelPressure
+        && pressureStatus_ && pressureStatus_->pressureReductionStatus(measurement.source, pressureStatus);
     const String payload = serializePayload(
-        measurement, timestamp, presentationUnit, presentationValue, hasPresentationValue);
+        measurement, timestamp, presentationUnit, presentationValue, hasPresentationValue,
+        hasPressureStatus ? &pressureStatus : nullptr);
 
     mqttService_.publish(topic.c_str(), payload.c_str(), RetainMeasurements);
 }
@@ -64,7 +68,7 @@ String MeasurementPublisher::serializePayload(
     const String& timestamp,
     PresentationUnit presentationUnit,
     float presentationValue,
-    bool hasPresentationValue) {
+    bool hasPresentationValue, const PressureReductionStatus* pressureStatus) {
     String payload;
     payload.reserve(192);
     payload = "{\"timestamp\":\"";
@@ -110,6 +114,21 @@ String MeasurementPublisher::serializePayload(
         payload += '"';
     }
 
+    if (measurement.type == MeasurementType::SeaLevelPressure) {
+        payload += ",\"derived\":true,\"derivation\":\"";
+        payload += pressureStatus ? pressureReductionMethodId(pressureStatus->method) : "standard_atmosphere";
+        payload += '"';
+        if (pressureStatus) {
+            payload += ",\"reduction_reason\":\"";
+            payload += pressureReductionReasonId(pressureStatus->reason);
+            payload += "\",\"temperature_source\":";
+            payload += String(static_cast<unsigned int>(pressureStatus->temperatureSensorId));
+            if (pressureStatus->hasTemperatureAge) {
+                payload += ",\"temperature_age_ms\":";
+                payload += String(static_cast<unsigned int>(pressureStatus->temperatureAgeMs));
+            }
+        }
+    }
     payload += ",\"valid\":";
     payload += measurement.valid ? "true" : "false";
     payload += ",\"quality\":\"";

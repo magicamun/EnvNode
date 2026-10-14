@@ -13,6 +13,7 @@
 #include "ValueWebView.h"
 #include "MqttTopic.h"
 #include "BoardProfile.h"
+#include "PressureReductionWebView.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -294,6 +295,7 @@ String measurementTypes(const SensorRuntimeInfo& info, Locale locale) {
     appendType(info.supportsTemperature, MeasurementType::Temperature);
     appendType(info.supportsRelativeHumidity, MeasurementType::RelativeHumidity);
     appendType(info.supportsAtmosphericPressure, MeasurementType::AtmosphericPressure);
+    appendType(info.supportsSeaLevelPressure, MeasurementType::SeaLevelPressure);
     appendType(info.supportsSolarIrradiance, MeasurementType::SolarIrradiance);
     appendType(info.supportsSolarCellTemperature, MeasurementType::SolarCellTemperature);
     appendType(info.supportsRainDetectorLevel, MeasurementType::RainDetectorLevel);
@@ -400,6 +402,7 @@ bool runtimeSupportsMeasurement(const SensorRuntimeInfo& info, MeasurementType t
     switch (type) {
         case MeasurementType::Temperature: return info.supportsTemperature;
         case MeasurementType::RelativeHumidity: return info.supportsRelativeHumidity;
+        case MeasurementType::SeaLevelPressure: return info.supportsSeaLevelPressure;
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
         case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
@@ -548,6 +551,8 @@ void WebService::begin() {
         [this]() { handleDiscoveryRepublish(); });
     server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
     server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
+    server_.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
+    server_.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
     server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
     server_.on("/hardware/board-identity/write", HTTP_POST,
         [this]() { handleBoardProvisioning(); });
@@ -935,6 +940,17 @@ void WebService::handleConfigurationPreview() {
         + " / " + escapeHtml(c.network.wifiSSID)
         + (c.network.addressMode == NetworkAddressMode::Static ? " / " + escapeHtml(c.network.ipv4Address) : " / DHCP")
         + "</span><span>MQTT</span><span>" + escapeHtml(c.mqtt.server) + ":" + String(c.mqtt.port)
+        + "</span><span>" + uiText(TextId::Latitude) + "</span><span>"
+        + (c.geoPosition.latitude.configured ? String(c.geoPosition.latitude.value, 7) : String("—"))
+        + "</span><span>" + uiText(TextId::Longitude) + "</span><span>"
+        + (c.geoPosition.longitude.configured ? String(c.geoPosition.longitude.value, 7) : String("—"))
+        + "</span><span>" + uiText(TextId::Altitude) + "</span><span>"
+        + (c.geoPosition.altitude.configured ? String(c.geoPosition.altitude.value, 3) : String("—"))
+        + "</span><span>" + uiText(TextId::PressureTemperatureSource) + "</span><span>"
+        + (c.pressureReduction.temperatureSensorId == InvalidSensorId ? String(uiText(TextId::PressureNoTemperature))
+            : String(uiText(TextId::Slot)) + " " + String(c.pressureReduction.temperatureSensorId))
+        + "</span><span>" + uiText(TextId::PressureTemperatureAge) + "</span><span>"
+        + String(c.pressureReduction.maxTemperatureAgeMs / 1000.0F, 3)
         + "</span><span>" + uiText(TextId::Sensors) + "</span><span>" + String(sensors)
         + "</span><span>" + uiText(TextId::Actuators) + "</span><span>" + String(actuators)
         + "</span><span>" + uiText(TextId::Controllers) + "</span><span>" + String(controllers)
@@ -977,6 +993,22 @@ void WebService::handleConfigurationRestore() {
 void WebService::handleDevice() {
     String c;
     c = (((String("<section class='card'><h2>") + uiText(TextId::DeviceIdentity) + "</h2><form method='post' action='/device/save'><label>")) + uiText(TextId::DeviceName) + "<input name='deviceName' required value='") + escapeHtml(configurationService_.getConfiguration().device.name) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveDeviceSettings) + "</button></div></form></section>");
+    c += buildPressureReductionConfigurationHtml(configurationService_.getConfiguration(), configurationService_.getLocale());
+    const GeoPosition& position = configurationService_.getConfiguration().geoPosition;
+    c += "<section class='card'><h2>" + String(uiText(TextId::GeoPosition))
+        + "</h2><p>" + uiText(TextId::GeoPositionHelp) + "</p><form method='post' action='/location/save'>";
+    const auto coordinateInput = [&c, this](TextId label, const char* name,
+        const OptionalCoordinate& value, int minimum, int maximum, unsigned int precision) {
+        c += "<label>" + String(uiText(label)) + "<input type='number' step='any' name='"
+            + name + "' min='" + String(minimum) + "' max='" + String(maximum) + "' value='";
+        if (value.configured) c += String(value.value, precision);
+        c += "'></label>";
+    };
+    coordinateInput(TextId::Latitude, "latitude", position.latitude, -90, 90, 7);
+    coordinateInput(TextId::Longitude, "longitude", position.longitude, -180, 180, 7);
+    coordinateInput(TextId::Altitude, "altitude", position.altitude, -1000, 10000, 3);
+    c += "<div class='actions'><button>" + String(uiText(TextId::SaveDeviceSettings))
+        + "</button></div></form></section>";
     c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
         + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
         + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
@@ -1656,6 +1688,11 @@ void WebService::handleMeasurements() {
             content += (String("<span class='secondary'>") + uiText(TextId::MQTT2) + " " + "<code class='measurement-topic'>");
             content += mqttTopic.isEmpty() ? "—" : escapeHtml(mqttTopic);
             content += "</code></span>";
+            if (type == MeasurementType::SeaLevelPressure && hasSnapshot) {
+                PressureReductionStatus reduction;
+                if (sensorManager_.pressureReductionStatus(runtime.id, reduction))
+                    content += buildPressureReductionDiagnosticHtml(reduction, configurationService_.getLocale());
+            }
             content += "</td><td class='measurement-value'>";
             content += hasSnapshot
                 ? presentedMeasurementValue(snapshot.measurement, configuration, localeFormatter_, configurationService_.getLocale())
@@ -2421,6 +2458,27 @@ void WebService::handleUnitsSave() {
     PresentationUnit t,p,s,r; bool ok=parseUnit(server_.arg("temperature"),MeasurementType::Temperature,t)&&parseUnit(server_.arg("pressure"),MeasurementType::AtmosphericPressure,p)&&parseUnit(server_.arg("solarTemperature"),MeasurementType::SolarCellTemperature,s)&&parseUnit(server_.arg("rainLevel"),MeasurementType::RainDetectorLevel,r);
     if(ok)ok=configurationService_.setPresentationUnit(MeasurementType::Temperature,t)&&configurationService_.setPresentationUnit(MeasurementType::AtmosphericPressure,p)&&configurationService_.setPresentationUnit(MeasurementType::SolarCellTemperature,s)&&configurationService_.setPresentationUnit(MeasurementType::RainDetectorLevel,r);
     sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::PresentationUnits),uiText(TextId::PresentationUnitsSaved),uiText(TextId::UnitSaveFailed),"/units",uiText(TextId::InvalidOrUnsupportedPresentationUnit));
+}
+
+void WebService::handlePressureReductionSave() {
+    PressureReductionConfiguration candidate;
+    const bool ok = server_.hasArg("temperatureSource") && server_.hasArg("temperatureMaxAge")
+        && decodePressureReduction(server_.arg("temperatureSource") + ";60000", candidate)
+        && parseTemperatureAgeSeconds(server_.arg("temperatureMaxAge"), candidate.maxTemperatureAgeMs)
+        && configurationService_.setPressureReduction(candidate);
+    sendConfigurationResult(configurationSaveResult(ok, ConfigurationArea::GeoPosition),
+        uiText(TextId::DeviceSettingsSaved), uiText(TextId::DeviceSaveFailed),
+        "/device", uiText(TextId::PressureSettingsInvalid));
+}
+
+void WebService::handleGeoPositionSave() {
+    GeoPosition position;
+    const bool ok = server_.hasArg("latitude") && server_.hasArg("longitude") && server_.hasArg("altitude")
+        && parseGeoPosition(server_.arg("latitude"), server_.arg("longitude"), server_.arg("altitude"), position)
+        && configurationService_.setGeoPosition(position);
+    sendConfigurationResult(configurationSaveResult(ok, ConfigurationArea::GeoPosition),
+        uiText(TextId::DeviceSettingsSaved), uiText(TextId::DeviceSaveFailed),
+        "/device", uiText(TextId::InvalidGeoPosition));
 }
 
 void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),uiText(TextId::DeviceSettingsSaved),uiText(TextId::DeviceSaveFailed),"/device",uiText(TextId::InvalidDeviceName)); }

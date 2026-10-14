@@ -237,7 +237,22 @@ private:
     const std::vector<uint8_t>* recordInput_ = nullptr;
     size_t recordPosition_ = 0;
 };
-void configurationFields(Fields& f, Configuration& c, bool passwords) {
+void configurationFields(Fields& f, Configuration& c, bool passwords, const String& version) {
+    if (f.reading()) { c.geoPosition = GeoPosition{}; c.pressureReduction = PressureReductionConfiguration{}; }
+    if (version == "2" || version == "3") {
+        f.boolean("geo.latitude.configured", c.geoPosition.latitude.configured);
+        f.floating("geo.latitude.value", c.geoPosition.latitude.value);
+        f.boolean("geo.longitude.configured", c.geoPosition.longitude.configured);
+        f.floating("geo.longitude.value", c.geoPosition.longitude.value);
+        f.boolean("geo.altitude.configured", c.geoPosition.altitude.configured);
+        f.floating("geo.altitude.value", c.geoPosition.altitude.value);
+        if (!validGeoPosition(c.geoPosition)) f.ok = false;
+    }
+    if (version == "3") {
+        f.number("pressure.temperatureSensorId", c.pressureReduction.temperatureSensorId, MaxSensorSlotCount);
+        f.number("pressure.maxTemperatureAgeMs", c.pressureReduction.maxTemperatureAgeMs, INT32_MAX);
+        if (c.pressureReduction.maxTemperatureAgeMs == 0) f.ok = false;
+    }
     f.text("device.name", c.device.name);
     f.text("network.hostname", c.network.hostname);
     f.text("network.wifiSSID", c.network.wifiSSID);
@@ -324,13 +339,13 @@ void configurationFields(Fields& f, Configuration& c, bool passwords) {
         c.display.configured = configured;
     }
 }
-void header(Fields& f, bool& passwords, String& firmware) {
-    String format("EnvNode-configuration"), version("1");
+void header(Fields& f, bool& passwords, String& firmware, String& version) {
+    String format("EnvNode-configuration");
     String license("LicenseRef-EnvNode-Use-and-Redistribution-1.0; see LICENSE");
     unsigned int profile = static_cast<unsigned int>(currentBoardProfile().id);
     f.text("format", format); f.text("version", version); f.text("license", license);
     f.text("firmware", firmware); f.number("boardProfile", profile, 255); f.boolean("includesPasswords", passwords);
-    if (format != "EnvNode-configuration" || version != "1"
+    if (format != "EnvNode-configuration" || (version != "1" && version != "2" && version != "3")
         || profile != static_cast<unsigned int>(currentBoardProfile().id)) f.ok = false;
 }
 }
@@ -339,7 +354,7 @@ bool encodeConfigurationBackup(const Configuration& configuration, bool includeP
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
     if (!copy) return false;
     String result("{\n"), firmware(firmwareVersion);
-    Fields f(result); header(f, includePasswords, firmware); configurationFields(f, *copy, includePasswords);
+    Fields f(result); String version("3"); header(f, includePasswords, firmware, version); configurationFields(f, *copy, includePasswords, version);
     const size_t expected = result.length() + 3;
     result += "\n}\n";
     if (!f.ok || result.length() != expected || result.length() > MaxConfigurationBackupLength) return false;
@@ -353,7 +368,7 @@ bool decodeConfigurationBackup(const String& input, const Configuration& current
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(current));
     if (!copy) return false;
     bool passwords = false; String firmware;
-    Fields f(object); header(f, passwords, firmware); configurationFields(f, *copy, passwords);
+    Fields f(object); String version("3"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !object.empty()) return false;
     candidate = *copy; includesPasswords = passwords; return true;
 }
@@ -362,7 +377,7 @@ bool encodeConfigurationRecord(const Configuration& configuration, std::vector<u
     if (!copy) return false;
     std::vector<uint8_t> result;
     Fields f(result, true); bool passwords = true; String firmware;
-    header(f, passwords, firmware); configurationFields(f, *copy, true);
+    String version("3"); header(f, passwords, firmware, version); configurationFields(f, *copy, true, version);
     if (!f.ok || result.size() > MaxConfigurationBackupLength) return false;
     output.swap(result); return true;
 }
@@ -372,7 +387,7 @@ bool decodeConfigurationRecord(const std::vector<uint8_t>& input, const Configur
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(current));
     if (!copy) return false;
     Fields f(input); bool passwords = true; String firmware;
-    header(f, passwords, firmware); configurationFields(f, *copy, passwords);
+    String version("3"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !f.complete() || !passwords) return false;
     candidate = *copy; return true;
 }
