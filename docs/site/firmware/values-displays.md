@@ -44,3 +44,14 @@ Die Schriftwahl bestimmt das Raster: 6×10 ergibt 21 Spalten und 6 Zeilen;
 8×13 ergibt 16 Spalten und 4 sichtbare Zeilen.
 
 ![Zwei Displays konfigurieren](../assets/images/firmware/displays.jpg)
+
+## Meereshöhendruck anzeigen
+
+Ab Firmware 0.6.0 kann ein Barometer die Quelle
+`sensor/<SensorId>/sea_level_pressure` anbieten. Im Display-Editor auswählen,
+beispielsweise mit `NN %.0f Pa` formatieren und die Vorschau prüfen.
+Die Property ist in Pascal, wie der örtliche Druck. Die unter **Einheiten** gewählte
+Luftdruckeinheit gilt für MQTT und die Messwertseite; die OLED-Property wird dadurch
+nicht in hPa umgerechnet. Vorhandene Seiten bleiben erhalten.
+
+[Sensorhöhe, Temperaturquelle und Gültigkeit](geo-position-pressure.md)

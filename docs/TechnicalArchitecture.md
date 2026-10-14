@@ -2721,3 +2721,9 @@ No formula or source selection is implemented in MQTT. Configuration references
 are validated against the desired local Sensor composition and migrated explicitly.
 The active pressure configuration and Sensor wrappers use bounded, once-allocated
 heap storage to respect the ESP32's static DRAM limit.
+
+`LocalizedDecimal` formats editable decimals without grouping and normalizes the
+configured Locale at the Web boundary. `GeoPositionWebView` and
+`PressureReductionWebView` own this adaptation. Domain validation and storage codecs
+continue to accept only canonical input; changing the UI Locale does not reinterpret
+persisted coordinates or MQTT payloads.

@@ -3,6 +3,7 @@
 #pragma once
 #include "Configuration.h"
 namespace EnvNode {
+bool parseTemperatureAgeInput(const String& input, Locale locale, uint32_t& milliseconds);
 String buildPressureReductionConfigurationHtml(const Configuration& configuration, Locale locale);
 String buildPressureReductionDiagnosticHtml(const PressureReductionStatus& status, Locale locale);
 }

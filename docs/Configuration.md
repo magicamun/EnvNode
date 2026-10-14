@@ -63,3 +63,11 @@ Sensor runtime activation takes an active snapshot and clears measurement caches
 Backup/snapshot version 3 adds the temperature source and maximum age. Versions 1
 and 2 remain readable; they clear temperature selection and use the default age.
 Version-2 location fields are retained; version 1 still means unknown location.
+
+### Locale and numeric inputs
+
+Firmware 0.6.1 location and pressure-temperature age inputs follow the configured
+Locale (German commas, English points), without thousands separators. The Web
+boundary converts these strings to neutral numeric input; application configuration,
+NVS, backups and MQTT remain independent of the UI Locale. No format migration is
+needed. Restore previews and temperature-age diagnostics are localized too.

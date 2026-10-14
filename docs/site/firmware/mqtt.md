@@ -37,3 +37,19 @@ Die Firmware unterstützt Sensor-Home-Assistant-Discovery.
 Discovery für generische Aktoren und Controller ist nicht gleichermaßen als
 fertiger Funktionsumfang zugesagt. Speicherung und historische Auswertung
 übernimmt das externe System.
+
+## Örtlicher Druck und Meereshöhendruck
+
+Ab Firmware 0.6.0 veröffentlicht ein Barometer den örtlichen Druck unverändert
+als `atmospheric_pressure` und zusätzlich den abgeleiteten Wert als
+`sea_level_pressure`. Ohne konfigurierte Sensorhöhe ist der zusätzliche Wert
+ungültig. Beide verwenden dieselbe konfigurierte Luftdruckeinheit; Home Assistant
+Discovery bietet getrennte Sensoren an.
+
+Der zusätzliche Wert trägt `derived: true`. `derivation` beschreibt
+`local_temperature`, `standard_atmosphere` oder bei ungültiger Berechnung `none`.
+`reduction_reason`, `temperature_source` und gegebenenfalls `temperature_age_ms`
+erklären die Berechnung. Bei fehlenden Eingaben wird `valid: false` ohne numerischen
+Wert gesendet. Temperaturwerte werden ausschließlich lokal bezogen.
+
+[Einrichtung und Qualitätsregeln](geo-position-pressure.md)

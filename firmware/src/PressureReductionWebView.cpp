@@ -2,13 +2,19 @@
 // See the repository root LICENSE.
 #include "PressureReductionWebView.h"
 #include "HtmlEscaping.h"
+#include "LocalizedDecimal.h"
 #include "WebLocalization.h"
 #include <cstdio>
 namespace EnvNode {
+bool parseTemperatureAgeInput(const String& input, Locale locale, uint32_t& milliseconds) {
+    String canonical;
+    return normalizeDecimalInput(input, locale, canonical) && parseTemperatureAgeSeconds(canonical, milliseconds);
+}
+
 String buildPressureReductionConfigurationHtml(const Configuration& c, Locale locale) {
     String html = "<section class='card'><h2>" + String(webText(locale, TextId::PressureReduction))
         + "</h2><p>" + webText(locale, TextId::PressureTemperatureHelp)
-        + "</p><form method='post' action='/pressure/save'><label>"
+        + "</p><p>" + webText(locale, TextId::DecimalInputHelp) + "</p><form method='post' action='/pressure/save'><label>"
         + webText(locale, TextId::PressureTemperatureSource) + "<select name='temperatureSource'><option value='0'";
     if (c.pressureReduction.temperatureSensorId == InvalidSensorId) html += " selected";
     html += ">" + String(webText(locale, TextId::PressureNoTemperature)) + "</option>";
@@ -23,12 +29,11 @@ String buildPressureReductionConfigurationHtml(const Configuration& c, Locale lo
             html += " (" + String(webText(locale, TextId::Simulated)) + ")";
         html += "</option>";
     }
-    char age[32]; snprintf(age, sizeof(age), "%u.%03u",
-        static_cast<unsigned>(c.pressureReduction.maxTemperatureAgeMs / 1000),
-        static_cast<unsigned>(c.pressureReduction.maxTemperatureAgeMs % 1000));
     html += "</select></label><label>" + String(webText(locale, TextId::PressureTemperatureAge))
-        + "<input type='number' name='temperatureMaxAge' min='0.001' max='2147483.647' step='0.001' required value='"
-        + age + "'></label><div class='actions'><button>" + webText(locale, TextId::SaveDeviceSettings)
+        + "<input type='text' inputmode='decimal' maxlength='32' name='temperatureMaxAge' lang='"
+        + localeKey(locale) + "' required value='"
+        + formatDecimalInput(c.pressureReduction.maxTemperatureAgeMs / 1000.0, 3, locale)
+        + "'></label><div class='actions'><button>" + webText(locale, TextId::SaveDeviceSettings)
         + "</button></div></form></section>";
     return html;
 }
@@ -51,11 +56,8 @@ String buildPressureReductionDiagnosticHtml(const PressureReductionStatus& statu
     if (status.temperatureSensorId != InvalidSensorId)
         html += " · " + String(webText(locale, TextId::Slot)) + " "
             + String(static_cast<unsigned int>(status.temperatureSensorId));
-    if (status.hasTemperatureAge) {
-        char age[32]; snprintf(age, sizeof(age), "%u.%03u s",
-            static_cast<unsigned>(status.temperatureAgeMs / 1000), static_cast<unsigned>(status.temperatureAgeMs % 1000));
-        html += " · " + String(age);
-    }
+    if (status.hasTemperatureAge)
+        html += " · " + formatDecimalInput(status.temperatureAgeMs / 1000.0, 3, locale) + " s";
     html += "</span>"; return html;
 }
 }

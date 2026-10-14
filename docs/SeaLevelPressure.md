@@ -87,3 +87,12 @@ The measurement view shows the method, source, age and reason. MQTT adds
 `reduction_reason`, `temperature_source` and, when available, `temperature_age_ms`.
 Diagnostics describe the last pressure reduction attempt, not a continuously updated
 age. Display and Home Assistant retain the same sea-level-pressure channel.
+
+## Locale at the Web boundary
+
+From firmware 0.6.1, location and temperature-age fields use the configured Locale:
+German decimal commas, English decimal points. Editable numbers have no thousands
+separators. Web adapters normalize these strings before invoking the neutral domain
+parsers. Restore previews and reduction-age diagnostics use the same Locale.
+MQTT, NVS and backup/snapshot representations remain unchanged and locale-neutral.
+Firmware 0.6.0 location inputs still require the neutral decimal-point representation.

@@ -771,3 +771,5 @@ ENVNODE_WEB_TEXT(PressureTemperatureQuality, "Temperature quality restricted", "
 ENVNODE_WEB_TEXT(PressureMethodTemperature, "With local temperature", "Mit lokaler Temperatur")
 ENVNODE_WEB_TEXT(PressureMethodStandard, "Standard atmosphere", "Standardatmosphäre")
 ENVNODE_WEB_TEXT(PressureSettingsInvalid, "Select an enabled local temperature source and a positive maximum age. Clear this selection before disabling its sensor.", "Aktivierte lokale Temperaturquelle und positives Maximalalter wählen. Vor dem Deaktivieren des gewählten Sensors diese Auswahl entfernen.")
+
+ENVNODE_WEB_TEXT(DecimalInputHelp, "Use a decimal point, for example 48.137154. Do not use thousands separators.", "Dezimalzahlen mit Komma eingeben, zum Beispiel 48,137154. Keine Tausendertrennzeichen verwenden.")

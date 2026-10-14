@@ -14,6 +14,8 @@
 #include "MqttTopic.h"
 #include "BoardProfile.h"
 #include "PressureReductionWebView.h"
+#include "GeoPositionWebView.h"
+#include "LocalizedDecimal.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -941,16 +943,16 @@ void WebService::handleConfigurationPreview() {
         + (c.network.addressMode == NetworkAddressMode::Static ? " / " + escapeHtml(c.network.ipv4Address) : " / DHCP")
         + "</span><span>MQTT</span><span>" + escapeHtml(c.mqtt.server) + ":" + String(c.mqtt.port)
         + "</span><span>" + uiText(TextId::Latitude) + "</span><span>"
-        + (c.geoPosition.latitude.configured ? String(c.geoPosition.latitude.value, 7) : String("—"))
+        + (c.geoPosition.latitude.configured ? formatDecimalInput(c.geoPosition.latitude.value, 7, configurationService_.getLocale()) : String("—"))
         + "</span><span>" + uiText(TextId::Longitude) + "</span><span>"
-        + (c.geoPosition.longitude.configured ? String(c.geoPosition.longitude.value, 7) : String("—"))
+        + (c.geoPosition.longitude.configured ? formatDecimalInput(c.geoPosition.longitude.value, 7, configurationService_.getLocale()) : String("—"))
         + "</span><span>" + uiText(TextId::Altitude) + "</span><span>"
-        + (c.geoPosition.altitude.configured ? String(c.geoPosition.altitude.value, 3) : String("—"))
+        + (c.geoPosition.altitude.configured ? formatDecimalInput(c.geoPosition.altitude.value, 3, configurationService_.getLocale()) : String("—"))
         + "</span><span>" + uiText(TextId::PressureTemperatureSource) + "</span><span>"
         + (c.pressureReduction.temperatureSensorId == InvalidSensorId ? String(uiText(TextId::PressureNoTemperature))
             : String(uiText(TextId::Slot)) + " " + String(c.pressureReduction.temperatureSensorId))
         + "</span><span>" + uiText(TextId::PressureTemperatureAge) + "</span><span>"
-        + String(c.pressureReduction.maxTemperatureAgeMs / 1000.0F, 3)
+        + formatDecimalInput(c.pressureReduction.maxTemperatureAgeMs / 1000.0, 3, configurationService_.getLocale())
         + "</span><span>" + uiText(TextId::Sensors) + "</span><span>" + String(sensors)
         + "</span><span>" + uiText(TextId::Actuators) + "</span><span>" + String(actuators)
         + "</span><span>" + uiText(TextId::Controllers) + "</span><span>" + String(controllers)
@@ -994,21 +996,8 @@ void WebService::handleDevice() {
     String c;
     c = (((String("<section class='card'><h2>") + uiText(TextId::DeviceIdentity) + "</h2><form method='post' action='/device/save'><label>")) + uiText(TextId::DeviceName) + "<input name='deviceName' required value='") + escapeHtml(configurationService_.getConfiguration().device.name) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveDeviceSettings) + "</button></div></form></section>");
     c += buildPressureReductionConfigurationHtml(configurationService_.getConfiguration(), configurationService_.getLocale());
-    const GeoPosition& position = configurationService_.getConfiguration().geoPosition;
-    c += "<section class='card'><h2>" + String(uiText(TextId::GeoPosition))
-        + "</h2><p>" + uiText(TextId::GeoPositionHelp) + "</p><form method='post' action='/location/save'>";
-    const auto coordinateInput = [&c, this](TextId label, const char* name,
-        const OptionalCoordinate& value, int minimum, int maximum, unsigned int precision) {
-        c += "<label>" + String(uiText(label)) + "<input type='number' step='any' name='"
-            + name + "' min='" + String(minimum) + "' max='" + String(maximum) + "' value='";
-        if (value.configured) c += String(value.value, precision);
-        c += "'></label>";
-    };
-    coordinateInput(TextId::Latitude, "latitude", position.latitude, -90, 90, 7);
-    coordinateInput(TextId::Longitude, "longitude", position.longitude, -180, 180, 7);
-    coordinateInput(TextId::Altitude, "altitude", position.altitude, -1000, 10000, 3);
-    c += "<div class='actions'><button>" + String(uiText(TextId::SaveDeviceSettings))
-        + "</button></div></form></section>";
+    c += buildGeoPositionConfigurationHtml(configurationService_.getConfiguration().geoPosition,
+        configurationService_.getLocale());
     c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
         + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
         + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
@@ -2464,7 +2453,7 @@ void WebService::handlePressureReductionSave() {
     PressureReductionConfiguration candidate;
     const bool ok = server_.hasArg("temperatureSource") && server_.hasArg("temperatureMaxAge")
         && decodePressureReduction(server_.arg("temperatureSource") + ";60000", candidate)
-        && parseTemperatureAgeSeconds(server_.arg("temperatureMaxAge"), candidate.maxTemperatureAgeMs)
+        && parseTemperatureAgeInput(server_.arg("temperatureMaxAge"), configurationService_.getLocale(), candidate.maxTemperatureAgeMs)
         && configurationService_.setPressureReduction(candidate);
     sendConfigurationResult(configurationSaveResult(ok, ConfigurationArea::GeoPosition),
         uiText(TextId::DeviceSettingsSaved), uiText(TextId::DeviceSaveFailed),
@@ -2474,7 +2463,7 @@ void WebService::handlePressureReductionSave() {
 void WebService::handleGeoPositionSave() {
     GeoPosition position;
     const bool ok = server_.hasArg("latitude") && server_.hasArg("longitude") && server_.hasArg("altitude")
-        && parseGeoPosition(server_.arg("latitude"), server_.arg("longitude"), server_.arg("altitude"), position)
+        && parseGeoPositionInput(server_.arg("latitude"), server_.arg("longitude"), server_.arg("altitude"), configurationService_.getLocale(), position)
         && configurationService_.setGeoPosition(position);
     sendConfigurationResult(configurationSaveResult(ok, ConfigurationArea::GeoPosition),
         uiText(TextId::DeviceSettingsSaved), uiText(TextId::DeviceSaveFailed),

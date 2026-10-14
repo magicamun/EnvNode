@@ -69,6 +69,16 @@ die Ressourcentabelle nicht automatisch.
 
 [Details zu I²C-Anschlüssen und Treibern](sensors/i2c.md)
 
+## GeoPosition und abgeleiteter Druck
+
+[GeoPosition und Meereshöhendruck](firmware/geo-position-pressure.md) sind ab
+**Firmware 0.6.0** implementiert und auf einem Gerät geprüft. BME280 und simulierte
+Barometer behalten den örtlichen Druck und bieten einen getrennten abgeleiteten
+Wert. Voraussetzung für einen gültigen Meereshöhendruck ist die konfigurierte
+Sensorhöhe. Eine lokale Temperaturquelle ist optional; ihre Auswahl und Aktualität
+bestimmen Berechnungsmethode und Qualitätskennzeichnung. Diese Prüfung bestätigt
+nicht pauschal jede Sensorplatine oder Installation.
+
 ## Displays
 
 | Displaycontroller | Anschluss / Format | Firmware-Unterstützung | Betriebsnachweis | Mindeststand Firmware | Kommentar |
