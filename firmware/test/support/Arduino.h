@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <cstdio>
 
 class String {
 public:
@@ -12,6 +13,12 @@ public:
     }
     String(unsigned int value)
         : value_(std::to_string(value)) {
+    }
+
+    String(float value, unsigned int precision) {
+        char buffer[80];
+        std::snprintf(buffer, sizeof(buffer), "%.*f", static_cast<int>(precision), static_cast<double>(value));
+        value_ = buffer;
     }
 
     String& operator=(const char* value) {

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "ActuatorRuntime.h"
+#include "SeaLevelPressureSensor.h"
 #include "HomeAssistantDiscoveryPublisher.h"
 
 using namespace EnvNode;
@@ -222,6 +223,34 @@ void test_platform_change_publishes_old_platform_tombstone_then_new_entity() {
         "\"weatherstation_001122334455_actuator_1\":{\"p\":\"light\"");
 }
 
+class Barometer : public ISensor {
+public:
+    SensorId id() const override { return 3; }
+    const char* type() const override { return "test"; }
+    SensorProvenance provenance() const override { return SensorProvenance::Simulated; }
+    SensorState state() const override { return SensorState::Ready; }
+    bool supports(MeasurementType type) const override { return type == MeasurementType::AtmosphericPressure; }
+    void begin() override {}
+    SensorOperationResult service(IMeasurementSink&) override { return SensorOperationResult::NoData; }
+    SensorOperationResult sample(IMeasurementSink&) override { return SensorOperationResult::NoData; }
+};
+void test_barometer_discovery_contains_separate_derived_pressure() {
+    Fixture fixture;
+    fixture.actuators.initialize(fixture.configuration.configuration.actuatorSlots);
+    fixture.configuration.configuration.presentation.atmosphericPressure = PresentationUnit::Hectopascal;
+    Barometer sensor; SeaLevelPressureSensor composition;
+    composition.bind(sensor, fixture.configuration.configuration.geoPosition);
+    TEST_ASSERT_EQUAL(static_cast<int>(SensorRegistrationResult::Registered),
+        static_cast<int>(fixture.sensors.registerSensor(composition, SensorSchedule::periodic(1000))));
+    const std::string& payload = fixture.publish();
+    assertContains(payload, "_sensor_3_atmospheric_pressure");
+    assertContains(payload, "_sensor_3_sea_level_pressure");
+    assertContains(payload, "Sea-level Pressure (derived)");
+    assertContains(payload, "value_json.value if value_json.valid else none");
+    assertContains(payload, "\"unit_of_measurement\":\"hPa\"");
+    TEST_ASSERT_EQUAL_UINT32(2, fixture.publisher.lastEntityCount());
+}
+
 } // namespace
 
 void setUp() {}
@@ -229,6 +258,7 @@ void tearDown() {}
 
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_barometer_discovery_contains_separate_derived_pressure);
     RUN_TEST(test_on_off_actuator_is_discovered_as_switch);
     RUN_TEST(test_level_actuator_is_one_light_with_zero_to_one_hundred_brightness);
     RUN_TEST(test_disabled_actuator_is_removed_from_discovery);

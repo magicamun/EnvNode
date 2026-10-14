@@ -7,6 +7,7 @@ const char* webMeasurementName(Locale locale, MeasurementType value) {
     switch (value) {
         case MeasurementType::Temperature: return webText(locale, TextId::Temperature);
         case MeasurementType::RelativeHumidity: return webText(locale, TextId::RelativeHumidity);
+        case MeasurementType::SeaLevelPressure: return webText(locale, TextId::SeaLevelPressure);
         case MeasurementType::AtmosphericPressure: return webText(locale, TextId::AtmosphericPressure);
         case MeasurementType::SolarIrradiance: return webText(locale, TextId::SolarIrradiance);
         case MeasurementType::SolarCellTemperature: return webText(locale, TextId::SolarCellTemperature);

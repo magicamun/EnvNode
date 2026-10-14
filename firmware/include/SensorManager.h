@@ -56,6 +56,7 @@ struct SensorRuntimeInfo {
     bool supportsTemperature = false;
     bool supportsRelativeHumidity = false;
     bool supportsAtmosphericPressure = false;
+    bool supportsSeaLevelPressure = false;
     bool supportsSolarIrradiance = false;
     bool supportsSolarCellTemperature = false;
     bool supportsRainDetectorLevel = false;
@@ -90,7 +91,7 @@ struct SensorRegistrationMetadata {
     HardwareResourceAssignment hardware;
 };
 
-class SensorManager : public IMeasurementSink {
+class SensorManager : public IMeasurementSink, public IPressureReductionStatusResolver {
 public:
     SensorManager(
         ITimeService& timeService,
@@ -110,6 +111,7 @@ public:
     size_t sensorCount() const;
     // Borrowed metadata view; valid only until clear/rebuild.
     const ISensor* sensor(SensorId id) const;
+    bool pressureReductionStatus(SensorId id, PressureReductionStatus& status) const override;
     bool runtimeStatus(SensorId id, SensorRuntimeStatus& status) const;
     bool runtimeInfo(size_t index, SensorRuntimeInfo& info) const;
 

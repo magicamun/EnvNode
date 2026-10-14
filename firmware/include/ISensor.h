@@ -6,6 +6,7 @@
 #include "SensorOperationResult.h"
 #include "SensorProvenance.h"
 #include "SensorState.h"
+#include "PressureReduction.h"
 
 namespace EnvNode {
 
@@ -18,6 +19,8 @@ public:
     virtual SensorProvenance provenance() const = 0;
     virtual SensorState state() const = 0;
     virtual bool supports(MeasurementType type) const = 0;
+
+    virtual bool pressureReductionStatus(PressureReductionStatus& status) const { return false; }
 
     virtual void begin() = 0;
     virtual SensorOperationResult service(IMeasurementSink& output) = 0;

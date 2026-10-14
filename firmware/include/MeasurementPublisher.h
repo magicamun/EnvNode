@@ -17,6 +17,7 @@ public:
         ITimeService& timeService,
         IMqttService& mqttService);
 
+    void setPressureReductionStatusResolver(const IPressureReductionStatusResolver* resolver) { pressureStatus_ = resolver; }
     void emit(const Measurement& measurement) override;
 
 private:
@@ -26,8 +27,9 @@ private:
         const String& timestamp,
         PresentationUnit presentationUnit,
         float presentationValue,
-        bool hasPresentationValue);
+        bool hasPresentationValue, const PressureReductionStatus* pressureStatus);
 
+    const IPressureReductionStatusResolver* pressureStatus_ = nullptr;
     IConfigurationService& configurationService_;
     ITimeService& timeService_;
     IMqttService& mqttService_;

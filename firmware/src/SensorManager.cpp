@@ -152,6 +152,12 @@ size_t SensorManager::sensorCount() const {
     return sensorCount_;
 }
 
+bool SensorManager::pressureReductionStatus(SensorId id, PressureReductionStatus& status) const {
+    status = PressureReductionStatus{};
+    const ISensor* source = sensor(id);
+    return source != nullptr && source->pressureReductionStatus(status);
+}
+
 bool SensorManager::runtimeStatus(SensorId id, SensorRuntimeStatus& status) const {
     const SensorEntry* entry = findEntry(id);
     if (entry == nullptr) {
@@ -180,6 +186,7 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     info.schedule = entry.schedule;
     info.supportsTemperature = entry.sensor->supports(MeasurementType::Temperature);
     info.supportsRelativeHumidity = entry.sensor->supports(MeasurementType::RelativeHumidity);
+    info.supportsSeaLevelPressure = entry.sensor->supports(MeasurementType::SeaLevelPressure);
     info.supportsAtmosphericPressure = entry.sensor->supports(MeasurementType::AtmosphericPressure);
     info.supportsSolarIrradiance = entry.sensor->supports(MeasurementType::SolarIrradiance);
     info.supportsSolarCellTemperature = entry.sensor->supports(MeasurementType::SolarCellTemperature);
@@ -216,7 +223,9 @@ void SensorManager::emit(const Measurement& measurementContent) {
     Measurement completedMeasurement = measurementContent;
     completedMeasurement.source = activeEntry_->sensor->id();
     completedMeasurement.timestamp = operationTimestamp_;
-    completedMeasurement.provenance = activeEntry_->sensor->provenance();
+    completedMeasurement.provenance = measurementContent.type == MeasurementType::SeaLevelPressure
+        && measurementContent.provenance == SensorProvenance::Simulated
+        ? SensorProvenance::Simulated : activeEntry_->sensor->provenance();
 
     if (!isMeasurementStructurallyValid(completedMeasurement)) {
         ++activeEntry_->status.rejectedMeasurementCount;

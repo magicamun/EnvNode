@@ -1,6 +1,7 @@
 #include "SensorRuntime.h"
 
 #include "SensorImplementationRegistry.h"
+#include <new>
 
 namespace EnvNode {
 
@@ -8,11 +9,17 @@ SensorRuntime::SensorRuntime(
     IConfigurationService& configurationService,
     SensorFactory& firstFactory,
     SensorFactory& secondFactory,
-    SensorManager& sensorManager)
+    SensorManager& sensorManager,
+    const IMeasurementResolver& measurements,
+    const IMonotonicClock& clock)
     : configurationService_(configurationService)
     , activeFactory_(&firstFactory)
     , inactiveFactory_(&secondFactory)
-    , sensorManager_(sensorManager) {
+    , sensorManager_(sensorManager)
+    , measurements_(measurements)
+    , clock_(clock)
+    , activePressure_(new (std::nothrow) ActivePressureConfiguration)
+    , composedSensors_(new (std::nothrow) SeaLevelPressureSensor[MaxSensorSlotCount]) {
 }
 
 bool SensorRuntime::construct(
@@ -22,6 +29,10 @@ bool SensorRuntime::construct(
     size_t& activeSensorCount,
     const char*& failureReason) {
     activeSensorCount = 0;
+    if (!composedSensors_ || !activePressure_) {
+        failureReason = "Pressure composition allocation failed";
+        return false;
+    }
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         sensors[index] = nullptr;
         SensorFactoryResult result;
@@ -52,8 +63,10 @@ bool SensorRuntime::registerComposition(
             failureReason = "Registered implementation metadata unavailable";
             return false;
         }
+        composedSensors_[index].bind(*sensors[index], activePressure_->position,
+            activePressure_->reduction, measurements_, clock_);
         const SensorRegistrationResult registration = sensorManager_.registerSensor(
-            *sensors[index],
+            composedSensors_[index],
             slot.schedule,
             SensorRegistrationMetadata(
                 slot.name.c_str(),
@@ -81,6 +94,9 @@ void SensorRuntime::snapshotActiveConfiguration(
 }
 
 bool SensorRuntime::initialize(size_t& activeSensorCount, const char*& failureReason) {
+    if (!activePressure_) { failureReason = "Pressure configuration allocation failed"; return false; }
+    activePressure_->position = configurationService_.getConfiguration().geoPosition;
+    activePressure_->reduction = configurationService_.getConfiguration().pressureReduction;
     const SensorSlotConfiguration* desired =
         configurationService_.getConfiguration().sensorSlots;
     ISensor* sensors[MaxSensorSlotCount] = {};
@@ -116,6 +132,8 @@ bool SensorRuntime::rebuild(size_t& activeSensorCount, const char*& failureReaso
     }
 
     activeFactory_->destroyAll();
+    activePressure_->position = configurationService_.getConfiguration().geoPosition;
+    activePressure_->reduction = configurationService_.getConfiguration().pressureReduction;
     sensorManager_.begin();
     SensorFactory* previousFactory = activeFactory_;
     activeFactory_ = inactiveFactory_;

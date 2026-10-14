@@ -212,3 +212,28 @@ mosquitto_sub -h BROKER -t 'envnode/RainControl/value/+/status/state' -t 'envnod
 mosquitto_pub -h BROKER -t 'envnode/RainControl/value/1/cmd/state' -m cistern
 mosquitto_pub -h BROKER -t 'envnode/RainControl/value/1/cmd/state' -m auto
 ```
+
+## Derived sea-level pressure
+
+Every atmospheric-pressure Sensor also exposes `sea_level_pressure` at
+`envnode/<device>/sensor/<id>/sea_level_pressure` (using the existing device topic
+normalization). Its canonical value is Pascal; presentation shares the local
+atmospheric-pressure unit setting. The original `atmospheric_pressure` topic is
+unchanged. The derived payload additionally carries `derived: true` and
+a method-specific `derivation`, with `quality: "estimated"` for good pressure
+when no good measured temperature is used.
+Source identity, timestamp and simulated provenance are shared with the local sample.
+Missing altitude or invalid input emits `valid: false` without a numeric value.
+Home Assistant discovery creates a separate atmospheric-pressure sensor with an
+explicitly derived name and an invalid-aware template.
+
+When a local temperature source is configured, `derivation` reports
+`local_temperature` or the fallback `standard_atmosphere`; invalid pressure or
+missing altitude reports `none`. `reduction_reason` explains `no_altitude`,
+`invalid_pressure`, `temperature_not_selected`, `temperature_unavailable`,
+`temperature_invalid`, `temperature_stale`, `temperature_quality`, or `none`.
+`temperature_source` is the selected local Slot ID (0 if none); `temperature_age_ms`
+is included when a snapshot was found. Good, fresh temperature allows the local
+pressure quality to be retained. No MQTT temperature subscription is added.
+If a simulated temperature is used with a physical pressure, only the derived
+measurement is marked simulated. The diagnostics describe that pressure sample.

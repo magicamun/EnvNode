@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 #include "MeasurementType.h"
+#include "GeoPosition.h"
+#include "PressureReduction.h"
 #include "DisplayConfiguration.h"
 #include "ValueConfiguration.h"
 #include "EnvNode/Locale.h"
@@ -58,6 +60,7 @@ struct PresentationConfiguration {
     PresentationUnit unitFor(MeasurementType type) const {
         switch (type) {
             case MeasurementType::Temperature: return temperature;
+            case MeasurementType::SeaLevelPressure:
             case MeasurementType::AtmosphericPressure: return atmosphericPressure;
             case MeasurementType::SolarCellTemperature: return solarCellTemperature;
             case MeasurementType::RainDetectorLevel: return rainDetectorLevel;
@@ -70,6 +73,8 @@ struct Configuration {
     ValueConfiguration values;
     DisplayConfiguration display;
     DeviceConfiguration device;
+    GeoPosition geoPosition;
+    PressureReductionConfiguration pressureReduction;
     NetworkConfiguration network;
     MqttConfiguration mqtt;
     TimeConfiguration time;

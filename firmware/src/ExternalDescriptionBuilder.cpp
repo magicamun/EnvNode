@@ -247,6 +247,14 @@ bool buildControllerDescription(
         appendJsonName(output, "measurement");
         appendJsonString(output, measurement.stableId);
         output += ',';
+        appendJsonName(output, "derived");
+        appendJsonBoolean(output, source.measurementType == MeasurementType::SeaLevelPressure);
+        if (source.measurementType == MeasurementType::SeaLevelPressure) {
+            output += ',';
+            appendJsonName(output, "derivation");
+            appendJsonString(output, "configured_pressure_reduction");
+        }
+        output += ',';
         appendJsonName(output, "measurement_name");
         appendJsonString(output, measurement.displayName);
         output += ',';

@@ -101,7 +101,7 @@ static SensorRuntime sensorRuntime(
     configurationService,
     firstSensorFactory,
     secondSensorFactory,
-    sensorManager);
+    sensorManager, measurementSnapshotCache, monotonicClock);
 static LocaleFormatter localeFormatter(configurationService);
 static RuntimeManager runtimeManager(
     logger, &sensorRuntime, &actuatorRuntime, &controllerRuntime);
@@ -134,6 +134,7 @@ static Application app(logger, configurationService, wifiService, webService, mq
 static bool normalRuntimeStarted = false;
 
 void setup() {
+    measurementPublisher.setPressureReductionStatusResolver(&sensorManager);
     configurationService.setActuatorResolver(&actuatorRuntime);
     logger.begin(115200);
     delay(500);

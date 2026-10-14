@@ -21,15 +21,18 @@ bool UnitConverter::convert(
                 || type == MeasurementType::SolarCellTemperature;
         case PresentationUnit::Hectopascal:
             presentationValue = canonicalValue / 100.0F;
-            return type == MeasurementType::AtmosphericPressure
+            return type == MeasurementType::SeaLevelPressure
+                || type == MeasurementType::AtmosphericPressure
                 || type == MeasurementType::HydrostaticPressure;
         case PresentationUnit::Kilopascal:
             presentationValue = canonicalValue / 1000.0F;
-            return type == MeasurementType::AtmosphericPressure
+            return type == MeasurementType::SeaLevelPressure
+                || type == MeasurementType::AtmosphericPressure
                 || type == MeasurementType::HydrostaticPressure;
         case PresentationUnit::InchMercury:
             presentationValue = canonicalValue / 3386.389F;
-            return type == MeasurementType::AtmosphericPressure;
+            return type == MeasurementType::SeaLevelPressure
+                || type == MeasurementType::AtmosphericPressure;
         case PresentationUnit::Percent:
             presentationValue = type == MeasurementType::RainDetectorLevel
                 ? canonicalValue * 100.0F

@@ -14,6 +14,7 @@ const MeasurementType DiscoverableMeasurementTypes[] = {
     MeasurementType::Temperature,
     MeasurementType::RelativeHumidity,
     MeasurementType::AtmosphericPressure,
+    MeasurementType::SeaLevelPressure,
     MeasurementType::SolarIrradiance,
     MeasurementType::SolarCellTemperature,
     MeasurementType::RainDetectorLevel,
@@ -36,6 +37,7 @@ bool supports(const SensorRuntimeInfo& info, MeasurementType type) {
     switch (type) {
         case MeasurementType::Temperature: return info.supportsTemperature;
         case MeasurementType::RelativeHumidity: return info.supportsRelativeHumidity;
+        case MeasurementType::SeaLevelPressure: return info.supportsSeaLevelPressure;
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
         case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
@@ -58,6 +60,7 @@ const char* deviceClass(MeasurementType type) {
         case MeasurementType::Temperature:
         case MeasurementType::SolarCellTemperature: return "temperature";
         case MeasurementType::RelativeHumidity: return "humidity";
+        case MeasurementType::SeaLevelPressure:
         case MeasurementType::AtmosphericPressure: return "atmospheric_pressure";
         case MeasurementType::SolarIrradiance: return "irradiance";
         case MeasurementType::RainDetectorWet: return "moisture";
@@ -236,6 +239,8 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
                 payload += ",\"event_types\":[\"tip\"],\"value_template\":\"{\\\"event_type\\\":\\\"tip\\\"}\"";
             } else if (type == MeasurementType::RainDetectorWet) {
                 payload += ",\"value_template\":\"{{ 'ON' if value_json.value else 'OFF' }}\"";
+            } else if (type == MeasurementType::SeaLevelPressure) {
+                payload += ",\"value_template\":\"{{ value_json.value if value_json.valid else none }}\"";
             } else {
                 payload += ",\"value_template\":\"{{ value_json.value }}\"";
             }

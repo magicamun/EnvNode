@@ -219,3 +219,31 @@ Whenever new functionality is proposed, the following question should be asked:
 > Does this improve measurement quality?
 
 If the answer is no, the functionality probably belongs outside the firmware.
+
+## Explicitly derived sea-level pressure
+
+EnvNode optionally stores latitude, longitude and actual sensor altitude above sea
+level (including building height). A configured zero altitude differs from absence.
+The user-approved exception to the measurement-first rule is a separate estimated
+sea-level pressure using the standard atmosphere: `p / (1 - h / 44330)^5.255`.
+Local atmospheric pressure is preserved. An ISensor composition outside hardware
+drivers adds this derived channel to physical and simulated barometers. Missing
+altitude or invalid input produces an invalid derived value, without affecting
+other measurements. No weather interpretation is added; the standard atmosphere is the fallback model.
+
+Derivation is independent of quality: the extra channel carries `derived: true`.
+The standard-atmosphere fallback estimates sea-level pressure without measured temperature.
+The temperature-aware method retains the local pressure's quality when
+using a valid, fresh, good-quality outdoor-temperature measurement. Without such
+a temperature, good local pressure yields estimated quality; restricted pressure
+quality must never be upgraded. See `SeaLevelPressure.md` for the agreed policy.
+
+## Local temperature input for pressure reduction
+
+Pressure reduction optionally selects an enabled local Sensor's `temperature`
+channel by stable slot ID, never a driver or MQTT input. `IMeasurementResolver`
+supplies the latest accepted snapshot and `IMonotonicClock` determines freshness.
+A valid, finite, fresh station temperature enables a dry-air lapse-rate reduction.
+Otherwise the existing standard-atmosphere formula remains the explicit fallback.
+The active configuration changes only on successful Sensor runtime activation.
+Diagnostics expose method, selected source, age and fallback/quality reason.

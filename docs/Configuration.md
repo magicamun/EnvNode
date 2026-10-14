@@ -23,10 +23,43 @@ capacity. Existing partition offsets remain unchanged.
 Restore requests a device restart; the user can restart immediately or later. Installation network
 settings from a backup become effective after restart and can change how the device is reached.
 
-The v1 file is a flat JSON object with string-valued, named fields; display pages and enum values
+The v3 file is a flat JSON object with string-valued, named fields; display pages and enum values
 reuse their existing versioned records inside JSON strings. All required fields must be present;
 unknown, duplicate, malformed and unsupported fields are rejected. Fields may appear in any order.
 The maximum file size is 96 KiB. The firmware version is informational; the board profile must
 match and the current firmware must support all configured implementations.
 
 License: LicenseRef-EnvNode-Use-and-Redistribution-1.0; see the root LICENSE.
+
+## Optional location
+
+Device settings accept latitude (-90 to 90 degrees), longitude (-180 to 180 degrees)
+and sensor altitude (-1000 to 10000 metres). These fields are independently optional;
+empty means unknown, while zero is a configured value. Enter the actual sensor height
+above sea level, including the building or mounting height. There is no fixed outdoor
+temperature setting.
+
+Location is stored as a single NVS record so a failed write cannot mix coordinates
+from different submissions. Changes request a Sensor runtime rebuild; use the existing
+apply action or restart the device to activate them and clear cached measurements.
+The running composition retains its previous altitude until activation succeeds.
+Backups and restore previews include location. Version 2 of both JSON backups and
+positional NVS snapshots added explicit presence flags and coordinate values. Version 1
+is still accepted and imports all three fields as absent, even if the target device
+previously had a location. Normal edits can clear location restored from a snapshot.
+Factory reset clears it too. Older firmware cannot import backups newer than its supported format.
+
+## Pressure temperature input
+
+Device settings store a device-wide local `temperatureSensorId` (0 = no temperature)
+and `maxTemperatureAgeMs` (positive, at most INT32_MAX; default 60000 ms).
+The Web UI edits the age in seconds, with millisecond precision. The selected slot
+must be enabled, have an enabled schedule and expose the `temperature` channel.
+Disabling or changing it incompatibly is rejected until the selection is cleared.
+The two settings are persisted atomically in one NVS key (`pressureReduce`), survive
+reboot and OTA, and participate in reset, restore validation and restore preview.
+Sensor runtime activation takes an active snapshot and clears measurement caches.
+
+Backup/snapshot version 3 adds the temperature source and maximum age. Versions 1
+and 2 remain readable; they clear temperature selection and use the default age.
+Version-2 location fields are retained; version 1 still means unknown location.

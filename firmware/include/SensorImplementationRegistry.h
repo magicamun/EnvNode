@@ -21,7 +21,7 @@ enum class SensorImplementation : uint8_t {
     SHTC3 = 8,
 };
 
-constexpr size_t MaxImplementationMeasurementTypeCount = 3;
+constexpr size_t MaxImplementationMeasurementTypeCount = 4;
 
 struct SensorImplementationMetadata {
     SensorImplementation implementation;
