@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.2 — 2026-10-15
+
+### Fixed
+
+- Apply configured presentation units to display output, page previews and source
+  labels, including hPa/kPa for local and sea-level pressure. Share unit resolution
+  with Web and MQTT while preserving canonical readings and controller inputs.
+- Keep page format strings and saved configurations compatible; numeric precision
+  and literal unit labels remain controlled by each page's format strings.
+
+### Validation
+
+- 49 targeted native tests passed and ESP32 firmware built successfully.
+
 ## 0.6.1 — 2026-10-14
 
 ### Fixed

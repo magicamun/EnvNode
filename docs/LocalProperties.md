@@ -625,3 +625,17 @@ formatting reads the canonical value in Pascal; MQTT and the measurement view
 use the configured atmospheric-pressure presentation unit. No height gives an invalid value, rather than a copied local
 pressure. A valid value is explicitly derived using the standard atmosphere and
 carries estimated quality; simulated source provenance remains simulated.
+
+
+### Shared property presentation boundary
+
+Property readers and controller inputs retain canonical values. A
+`PropertyPresentationReader` wraps a canonical reader for human-facing consumers,
+uses measurement-type metadata and the current presentation configuration, and
+converts through the same UnitConverter as Web/MQTT. Description metadata retains
+the canonical unit and separately identifies the presented unit. Display output,
+preview and source labels use this adapter; format strings run after conversion.
+This boundary can later supply a centrally configured default format without
+changing acquisition, controllers or the existing per-line printf override.
+Units written in format strings remain literal text and must match Units settings.
+No saved-page migration is needed. Numeric %s support/default formats are deferred.
