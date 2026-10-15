@@ -29,10 +29,8 @@ void MeasurementPublisher::emit(const Measurement& measurement) {
     if (topic.isEmpty()) return;
     const String timestamp = timeService_.iso8601Local(measurement.timestamp);
     const MeasurementTypeMetadata& metadata = measurementTypeMetadata(measurement.type);
-    PresentationUnit presentationUnit = configuration.presentationUnitFor(measurement.type);
-    if (!supportsPresentationUnit(measurement.type, presentationUnit)) {
-        presentationUnit = metadata.defaultPresentationUnit;
-    }
+    PresentationUnit presentationUnit = UnitConverter::resolvePresentationUnit(
+        measurement.type, configuration.presentationUnitFor(measurement.type));
 
     float presentationValue = 0.0F;
     bool hasPresentationValue = false;

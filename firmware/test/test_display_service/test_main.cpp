@@ -1,6 +1,7 @@
 #include <unity.h>
 #include <cstring>
 #include "DisplayService.h"
+#include "PropertyPresentationReader.h"
 #include "TextDisplayLayout.h"
 #include "OledCommandTransport.h"
 #include <vector>
@@ -29,9 +30,12 @@ struct Reader : IPropertyReader {
     bool valid = true;
     float value = 12.5F;
     bool boolean = false;
+    MeasurementType type = MeasurementType::Unknown;
     mutable unsigned reads = 0;
     bool describe(const PropertyReference&, PropertyDescription& description) const override {
         description = PropertyDescription{};
+        description.measurementType = type;
+        description.canonicalUnit = measurementTypeMetadata(type).canonicalUnit;
         description.valueKind = boolean ? PropertyValueKind::Boolean : PropertyValueKind::FloatingPoint;
         return true;
     }
@@ -286,8 +290,23 @@ void test_two_fonts_clip_independently_and_switch_restores_full_page() {
     TEST_ASSERT_EQUAL_STRING("Sixth line", second.last.lines[5]);
     TEST_ASSERT_EQUAL_STRING(f.display.last.lines[0], second.last.lines[0]);
 }
+void test_display_uses_live_presentation_units_without_changing_source() {
+    Fixture f; f.config.hardware.enabled = true;
+    f.config.formats[1] = "Pressure: %.1f";
+    f.reader.type = MeasurementType::AtmosphericPressure; f.reader.value = 101325.0F;
+    PresentationConfiguration units; units.atmosphericPressure = PresentationUnit::Hectopascal;
+    PropertyPresentationReader presented(f.reader, units);
+    DisplayService service(f.config, presented, f.display, f.clock, f.log);
+    service.loop();
+    TEST_ASSERT_EQUAL_STRING("Pressure: 1013.2", f.display.last.lines[1]);
+    units.atmosphericPressure = PresentationUnit::Kilopascal;
+    f.clock.now = 1000; service.loop();
+    TEST_ASSERT_EQUAL_STRING("Pressure: 101.3", f.display.last.lines[1]);
+    TEST_ASSERT_EQUAL_UINT32(1, f.display.begins);
+    TEST_ASSERT_EQUAL_FLOAT(101325.0F, f.reader.value);
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_font_geometry_clips_complete_utf8_cells); RUN_TEST(test_two_fonts_clip_independently_and_switch_restores_full_page); RUN_TEST(test_ready_is_not_reported_when_first_or_recovery_frame_fails); RUN_TEST(test_oled_packets_keep_command_and_arguments_together_and_abort_on_failure); RUN_TEST(test_oled_command_state_is_private_to_each_display); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
+    UNITY_BEGIN(); RUN_TEST(test_display_uses_live_presentation_units_without_changing_source); RUN_TEST(test_font_geometry_clips_complete_utf8_cells); RUN_TEST(test_two_fonts_clip_independently_and_switch_restores_full_page); RUN_TEST(test_ready_is_not_reported_when_first_or_recovery_frame_fails); RUN_TEST(test_oled_packets_keep_command_and_arguments_together_and_abort_on_failure); RUN_TEST(test_oled_command_state_is_private_to_each_display); RUN_TEST(test_two_displays_render_independent_pages_and_recover_independently); RUN_TEST(test_bus_roundtrip_releases_old_target_even_after_frame_failure); RUN_TEST(test_driver_change_restarts_output_and_keeps_page);
     RUN_TEST(test_saved_translation_reaches_oled_and_updates_live);
     RUN_TEST(test_disabled_enable_refresh_and_live_edit);
     RUN_TEST(test_missing_display_retries_and_recovers);

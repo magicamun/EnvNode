@@ -4,6 +4,11 @@
 
 namespace EnvNode {
 
+PresentationUnit UnitConverter::resolvePresentationUnit(MeasurementType type, PresentationUnit configured) {
+    return supportsPresentationUnit(type, configured)
+        ? configured : measurementTypeMetadata(type).defaultPresentationUnit;
+}
+
 bool UnitConverter::convert(
     MeasurementType type,
     float canonicalValue,

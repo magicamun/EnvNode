@@ -58,6 +58,8 @@ void test_description_exists_before_first_measurement() {
     PropertyDescription description;
     TEST_ASSERT_TRUE(reader.describe(Temperature, description));
     TEST_ASSERT_EQUAL_STRING("temperature", description.stableKey);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature), static_cast<int>(description.measurementType));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PresentationUnit::None), static_cast<int>(description.presentationUnit));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyValueKind::FloatingPoint), static_cast<int>(description.valueKind));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(PresentationUnit::DegreeCelsius), static_cast<int>(description.canonicalUnit));
     PropertySnapshot result;

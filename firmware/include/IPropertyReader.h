@@ -8,6 +8,7 @@
 #include "MeasurementQuality.h"
 #include "PropertyValue.h"
 #include "PresentationUnit.h"
+#include "MeasurementType.h"
 
 namespace EnvNode {
 
@@ -38,7 +39,10 @@ struct PropertyDescription {
     const PropertyEnumOption* enumOptions = nullptr;
     size_t enumOptionCount = 0;
     std::shared_ptr<const PropertyEnumMetadata> enumMetadata;
+    MeasurementType measurementType = MeasurementType::Unknown;
     PresentationUnit canonicalUnit = PresentationUnit::None;
+    // Set only by the presentation boundary; canonical readers leave this unset.
+    PresentationUnit presentationUnit = PresentationUnit::None;
     const char* trueText = "True";
     const char* falseText = "False";
 };

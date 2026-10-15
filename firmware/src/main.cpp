@@ -3,6 +3,7 @@
 #include "DisplayService.h"
 #include "U8g2TextDisplay.h"
 #include "PropertyResolver.h"
+#include "PropertyPresentationReader.h"
 #include "SystemPropertyReader.h"
 #include "ValuePropertyReader.h"
 #include "ConfigurationService.h"
@@ -124,10 +125,11 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
 static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService, &wifiService);
 static ValuePropertyReader valueProperties(valueRuntime);
 static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties);
+static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation);
 static U8g2TextDisplay oled(i2cBusManager, logger);
 static U8g2TextDisplay secondOled(i2cBusManager, logger);
 static DisplayService displayService(configurationService.getConfiguration().display,
-    displayProperties, oled, monotonicClock, logger, &secondOled);
+    presentedDisplayProperties, oled, monotonicClock, logger, &secondOled);
 static OTAService otaService(logger, runtimeManager);
 static WebService webService(logger, configurationService, valueRuntime, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleDescriptorProvisioningService);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher, displayService, valueMqttAdapter, valueStatePublisher);

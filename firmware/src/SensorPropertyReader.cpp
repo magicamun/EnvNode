@@ -30,6 +30,7 @@ bool SensorPropertyReader::describe(
     result.stableKey = metadata.stableId;
     result.displayName = metadata.displayName;
     result.valueKind = propertyValueKind(metadata.expectedValueKind);
+    result.measurementType = type;
     result.canonicalUnit = metadata.canonicalUnit;
     return true;
 }

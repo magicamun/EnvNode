@@ -5,6 +5,7 @@
 #include "HtmlEscaping.h"
 #include "LogWebView.h"
 #include "PropertyResolver.h"
+#include "PropertyPresentationReader.h"
 #include "SystemPropertyReader.h"
 #include "ValuePropertyReader.h"
 #include "PropertyPreviewWebView.h"
@@ -432,8 +433,7 @@ String presentedMeasurementValue(
         case ValueKind::FloatingPoint: {
             float canonicalValue = 0.0F;
             if (!measurement.value.tryGetFloatingPoint(canonicalValue)) return webText(locale, TextId::Invalid);
-            PresentationUnit unit = configuration.presentationUnitFor(measurement.type);
-            if (!supportsPresentationUnit(measurement.type, unit)) unit = metadata.defaultPresentationUnit;
+            PresentationUnit unit = UnitConverter::resolvePresentationUnit(measurement.type, configuration.presentationUnitFor(measurement.type));
             float presentedValue = 0.0F;
             if (!UnitConverter::convert(measurement.type, canonicalValue, unit, presentedValue)) {
                 return webText(locale, TextId::Invalid);
@@ -1712,7 +1712,8 @@ void WebService::handleDisplay() {
 
     SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService_, &wifiService_);
     ValuePropertyReader valueProperties(valueRuntime_);
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
+    PropertyResolver canonicalProperties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
+    PropertyPresentationReader properties(canonicalProperties, configuration.presentation);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
     const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");
     if (server_.hasArg("page") && server_.arg("page") != "1" && server_.arg("page") != "2") {

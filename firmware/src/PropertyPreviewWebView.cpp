@@ -45,7 +45,8 @@ String buildPropertySourceOption(const PropertyReference& reference,
     html += escapeHtml(source).c_str();
     html += " · ";
     html += escapeHtml(String(componentName)).c_str();
-    const char* unit = UnitConverter::symbol(description.canonicalUnit);
+    const char* unit = UnitConverter::symbol(description.presentationUnit == PresentationUnit::None
+        ? description.canonicalUnit : description.presentationUnit);
     if (unit != nullptr && unit[0]) {
         html += " (";
         html += escapeHtml(String(unit)).c_str();

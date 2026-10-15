@@ -9,6 +9,7 @@
 #include "PropertyPreviewWebView.h"
 #include "WebNavigation.h"
 #include "DisplayPageFormatter.h"
+#include "PropertyPresentationReader.h"
 
 using namespace EnvNode;
 
@@ -485,8 +486,76 @@ void test_preview_clips_per_assigned_display_and_retains_full_page() {
     TEST_ASSERT_NOT_NULL(strstr(outputs.c_str(), "name='displayFont'"));
     TEST_ASSERT_NOT_NULL(strstr(outputs.c_str(), "name='displayFont2'"));
 }
+void test_presentation_converts_before_formatting_and_tracks_live_units() {
+    Reader raw; PresentationConfiguration config;
+    raw.description.measurementType = MeasurementType::AtmosphericPressure;
+    raw.description.canonicalUnit = PresentationUnit::Pascal;
+    raw.snapshot.value = MeasurementValue::floatingPoint(101325.0F);
+    raw.snapshot.hasRevision = true; raw.snapshot.revision = 12;
+    raw.snapshot.hasTimestamp = true; raw.snapshot.timestamp = 1234;
+    config.atmosphericPressure = PresentationUnit::Hectopascal;
+    PropertyPresentationReader presented(raw, config);
+    auto result = formatPropertyText(presented, Source, "%.1f hPa");
+    TEST_ASSERT_EQUAL_STRING("1013.2 hPa", result.text);
+    PropertyDescription description;
+    TEST_ASSERT_TRUE(presented.describe(Source, description));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PresentationUnit::Pascal), static_cast<int>(description.canonicalUnit));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PresentationUnit::Hectopascal), static_cast<int>(description.presentationUnit));
+    const auto option = buildPropertySourceOption(Source, description, "Pressure", "");
+    TEST_ASSERT_NOT_NULL(strstr(option.c_str(), "(hPa)"));
+    PropertySnapshot snapshot; presented.read(Source, snapshot);
+    TEST_ASSERT_EQUAL_UINT32(12, snapshot.revision); TEST_ASSERT_EQUAL_INT(1234, snapshot.timestamp);
+    float number = 0; raw.snapshot.value.tryGetFloatingPoint(number);
+    TEST_ASSERT_EQUAL_FLOAT(101325.0F, number);
+    config.atmosphericPressure = PresentationUnit::Kilopascal;
+    result = formatPropertyText(presented, Source, "%.3f");
+    TEST_ASSERT_EQUAL_STRING("101.325", result.text);
+    PropertyPresentationReader twice(presented, config);
+    result = formatPropertyText(twice, Source, "%.3f");
+    TEST_ASSERT_EQUAL_STRING("101.325", result.text);
+    raw.description.measurementType = MeasurementType::SeaLevelPressure;
+    result = formatPropertyText(presented, Source, "%.3f");
+    TEST_ASSERT_EQUAL_STRING("101.325", result.text);
+    raw.description.measurementType = MeasurementType::Temperature;
+    raw.description.canonicalUnit = PresentationUnit::DegreeCelsius;
+    raw.snapshot.value = MeasurementValue::floatingPoint(20.0F);
+    config.temperature = PresentationUnit::DegreeFahrenheit;
+    result = formatPropertyText(presented, Source, "%.1f");
+    TEST_ASSERT_EQUAL_STRING("68.0", result.text);
+    config.temperature = PresentationUnit::Pascal; // Same unsupported-unit fallback as Web/MQTT.
+    result = formatPropertyText(presented, Source, "%.1f");
+    TEST_ASSERT_EQUAL_STRING("20.0", result.text);
+    raw.description.measurementType = MeasurementType::RainDetectorLevel;
+    raw.snapshot.value = MeasurementValue::floatingPoint(0.42F);
+    config.rainDetectorLevel = PresentationUnit::Percent;
+    result = formatPropertyText(presented, Source, "%.0f%%");
+    TEST_ASSERT_EQUAL_STRING("42%", result.text);
+}
+void test_presentation_preserves_untyped_values_and_invalid_states() {
+    Reader raw; PresentationConfiguration config;
+    config.temperature = PresentationUnit::DegreeFahrenheit;
+    PropertyPresentationReader presented(raw, config);
+    TEST_ASSERT_EQUAL_STRING("21.25", formatPropertyText(presented, Source, "%.2f").text);
+    raw.description.valueKind = PropertyValueKind::UnsignedInteger;
+    raw.snapshot.value = MeasurementValue::unsignedInteger(75);
+    TEST_ASSERT_EQUAL_STRING("75", formatPropertyText(presented, Source, "%u").text);
+    raw.description.valueKind = PropertyValueKind::Boolean;
+    raw.snapshot.value = MeasurementValue::boolean(true);
+    TEST_ASSERT_EQUAL_STRING("True", formatPropertyText(presented, Source, "%s").text);
+    raw.description.valueKind = PropertyValueKind::FloatingPoint;
+    raw.description.measurementType = MeasurementType::Temperature;
+    raw.snapshot.value = MeasurementValue::floatingPoint(20.0F); raw.snapshot.valid = false;
+    PropertySnapshot snapshot;
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::Available), static_cast<int>(presented.read(Source, snapshot)));
+    TEST_ASSERT_FALSE(snapshot.valid);
+    raw.snapshot.valid = true; raw.snapshot.value = MeasurementValue::floatingPoint(std::numeric_limits<float>::infinity());
+    presented.read(Source, snapshot); TEST_ASSERT_FALSE(snapshot.valid);
+    raw.status = PropertyReadResult::NoValue;
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::NoValue), static_cast<int>(presented.read(Source, snapshot)));
+    TEST_ASSERT_FALSE(snapshot.valid);
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
+    UNITY_BEGIN(); RUN_TEST(test_presentation_converts_before_formatting_and_tracks_live_units); RUN_TEST(test_presentation_preserves_untyped_values_and_invalid_states); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
     RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
     RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
     RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);

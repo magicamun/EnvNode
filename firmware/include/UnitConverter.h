@@ -6,6 +6,7 @@ namespace EnvNode {
 
 class UnitConverter {
 public:
+    static PresentationUnit resolvePresentationUnit(MeasurementType type, PresentationUnit configured);
     static bool convert(
         MeasurementType type,
         float canonicalValue,
