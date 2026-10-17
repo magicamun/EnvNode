@@ -2,6 +2,13 @@
 
 This page is the entry point for the EnvNode hardware documentation and KiCad reference designs.
 
+## Parts and procurement records
+
+Article master data, purchasing, stock and kit BOMs are maintained in an internally
+used solution. The former central spreadsheet, legacy BOM files and local order
+records have been removed from the repository. KiCad design sources and
+revision-specific assembly documentation remain the hardware references.
+
 ## Specifications and Guidelines
 
 - [EnvNode Module Interface – Hardware Specification](EnvNode_Module_Interface_Hardware_Specification.md) defines the shared electrical and mechanical expansion-module interface.

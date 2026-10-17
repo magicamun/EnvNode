@@ -36,3 +36,6 @@ hardware/~$*.xls*
 # Local documentation environment and generated website
 .venv-docs/
 /site/
+
+# Local migration scripts and internal inventory working files
+/inventory/

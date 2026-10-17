@@ -13,5 +13,11 @@ Montage- und Prüfabläufe.
 5. Einen unterstützten I²C-Sensor anschließen und eine erste Messung prüfen.
 6. MQTT einrichten; weitere Module einzeln ergänzen.
 
-Konkrete Kit-Lieferumfänge und Artikelzuordnungen werden erst nach Abgleich mit der
-Teileliste ergänzt.
+## Anschlusssets
+
+Die [externen Anschlusssets](anschlusssets.md) beschreiben die Komponenten und die
+einheitliche 1:1-Verdrahtung für JST-PH, JST-SH und die 5-V-Versorgung.
+
+Artikelstammdaten, Beschaffung, Bestände und kaufmännische Bausatzstücklisten werden
+in einer intern genutzten Lösung gepflegt. Die öffentliche Dokumentation beschreibt
+revisionsbezogen den Aufbau, die Schnittstellen und die notwendigen Prüfungen.

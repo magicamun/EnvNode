@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Documentation and repository maintenance
+
+- Remove the former central parts spreadsheet, legacy BOM files and local order
+  records. Article master data, purchasing, inventory and kit BOMs are maintained
+  in an internally used solution.
+- Keep migration scripts and internal inventory working files outside version
+  control. Publish the user-facing connection-set wiring instructions in the
+  hardware assembly documentation.
+
 ## 0.6.2 — 2026-10-15
 
 ### Fixed
