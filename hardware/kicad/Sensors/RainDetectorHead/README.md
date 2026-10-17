@@ -59,3 +59,9 @@ Documentation correction, 2026-10-05: J2.1 is SENSE and J2.4 is HEATER- in the c
 `Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf` documents the current 62.12 x 44.12 mm board, 2x2 SMD headers, heater assembly, controller contact mapping, fabrication requirements, and separate heater/sensor checks. It includes current source hashes and PCB views using the common ORing camera angles.
 
 The exported schematic netlist and PCB pad nets match. The heater was verified as five parallel strings of four 15-ohm resistors (R1-R4, R5-R8, R9-R12, R13-R16, R17-R20). No new full ERC/DRC or physical testing was performed for this documentation update.
+
+Assembly table update, 2026-10-17: PDF page 2 now lists kit ENK-00005 and the
+EnvNode article numbers, quantities and packages from `inventory/assemblies.rain.draft.json`
+and `inventory/parts-preview.json`. ENP-00111 is one complete 2x10 strip for two
+2x2 cut pieces. C1, mounting holes and separately required mounting hardware are
+distinguished from purchased kit components. Other PDF pages remain unchanged.

@@ -13,8 +13,8 @@ J3: 1 GND, 2 +5V, 3 HEATER_EN, 4 +3V3.
 J4: 1 GND, 2 +5V, 3 RAIN_FREQ, 4 +3V3.
 The supply pins are shared. J3/J4 are currently marked DNP in the schematic
 and generated BOM; retain or change this deliberately for the intended
-connector/assembly option. Concrete connector part numbers and mating height
-still need selection and verification.
+connector/assembly option. J1/J2 use BKL 10120957 (ENP-00116); mating height
+still needs verification. The J3/J4 connection option remains separate.
 
 `RainDetectorController.csv` is generated from the current schematic:
 
@@ -53,3 +53,9 @@ The Head GND power flag and C1-only 0.10 mm clearance rule are included.
 The current PCB outline is 62.12 x 44.12 mm and J1/J2 use 2x2 sockets. The BOM was regenerated to replace stale 1x4 entries. PCB pad nets and the exported schematic netlist match. On both current projects J2.1 is SENSE and J2.4 is HEATER-; verify mechanical contact alignment and mating height separately.
 
 The historical 2026-09-14 ERC/DRC results predate the connector/outline changes committed on 2026-09-15 (0d3a50b). This documentation update does not repeat full ERC/DRC or physical testing. The PDF includes current source hashes, assembly orientation, connector tables, separate frequency/heater bring-up, and a measurement record.
+
+Assembly table update, 2026-10-17: PDF page 2 now lists kit ENK-00006 and the
+EnvNode article numbers, quantities and packages from `inventory/assemblies.rain.draft.json`
+and `inventory/parts-preview.json`, including the PCB. J3/J4 remain DNP and are
+not included as populated connectors. Other PDF pages remain unchanged;
+their source hashes and validation statements retain their historical scope.
