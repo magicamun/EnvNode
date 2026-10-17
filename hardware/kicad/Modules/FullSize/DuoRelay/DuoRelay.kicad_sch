@@ -4513,7 +4513,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp yes)
+		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5e876ff2-f625-4fa7-bcf9-1762dbf83940")
 		(property "Reference" "U2"
@@ -4691,7 +4691,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp yes)
+		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "632da137-9c4c-4a3d-8195-ec759189f451")
 		(property "Reference" "C1"

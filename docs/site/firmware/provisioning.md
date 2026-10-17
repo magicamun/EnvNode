@@ -6,7 +6,7 @@ Es ist bei leerem oder fehlerhaftem Datensatz nötig, nicht bei jedem Neustart.
 | Speicher | Aufgabe |
 | --- | --- |
 | Mainboard-EEPROM | Board Identity und Auswahl des passenden Boardprofils |
-| Optionales Modul-EEPROM | Module Identity beziehungsweise Descriptor und Kompatibilitätsprüfung |
+| Modul-EEPROM | Module Identity beziehungsweise Descriptor und Kompatibilitätsprüfung |
 | ESP32-NVS | WLAN, MQTT und Anwendungs-Konfiguration |
 
 ## Erkennung zuerst prüfen
@@ -45,9 +45,9 @@ Fertigungsangaben prüfen und die ausdrückliche Bestätigung verwenden.
 Ergebnis und die anschließend erkannte Identität kontrollieren.
 Andere Module werden nicht durch Auswahl der DuoRelay-Vorlage provisioniert.
 
-Bei DuoRelay sind U2 und C1 in der dokumentierten Kit-Bestückung DNP.
-Ohne bestücktes EEPROM ist kein Provisioning möglich; die Relaisfunktion
-kann trotzdem über ausdrücklich konfigurierte GPIO-Aktoren verwendet werden.
+Ein leeres EEPROM muss mit einem passenden Descriptor provisioniert
+werden. Die hier dokumentierte Webfunktion bietet noch keine passende Vorlage
+für AnalogHydroPressure; dafür niemals die DuoRelay-Vorlage verwenden.
 
 ## Was danach noch nötig ist
 

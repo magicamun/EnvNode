@@ -129,7 +129,7 @@ The source project and the separately published schematic and PCB portions in `h
 
 ## 7. Module Identification and Generic Fallback
 
-A module-identification EEPROM is optional, but fitting one is good practice for modules with a defined hardware identity. Current firmware uses it to identify installed modules and validate their compatibility with the selected board and slot. Offering suitable functions in the UI and activating module-specific drivers remain future steps. The Empty templates and DuoRelay provide the reference implementation.
+DuoRelay and AnalogHydroPressure include a module-identification EEPROM with a 100 nF decoupling capacitor. If the EEPROM is omitted, the relay circuitry and analog measurement path remain electrically functional. Without a valid descriptor, firmware cannot identify the module, validate compatibility or derive module-specific settings; explicit manual configuration and suitable driver support are required. SX1262-Remote requires the EEPROM and a valid module descriptor for supported operation; this fallback does not apply to it. Current firmware uses it to identify installed modules and validate their compatibility with the selected board and slot. Offering suitable functions in the UI and activating module-specific drivers remain future steps. The Empty templates and DuoRelay provide the reference implementation.
 
 A conforming module-identification EEPROM should use `I2C0`. This is a discovery convention rather than an electrical limitation: both I²C buses remain available at the connector, but automatic module discovery scans only the reserved identity EEPROM addresses on `I2C0`. Modules store a self-describing ENHD schema-0.1 descriptor. Discovery validates its declared platform, safety profile, drivers, capabilities and logical connector-resource requirements without relying on a product registry. Descriptor-based device activation remains a separate runtime step.
 
@@ -159,13 +159,13 @@ The mainboard identity EEPROM is independent of optional module identification. 
 
 ## 8. DuoRelay Reference Module
 
-`hardware/kicad/Modules/FullSize/DuoRelay/` is a Revision 0.3 FullSize THT module using the connector interface introduced with Revision 0.2. It has an optional identification EEPROM and two independently controlled 5 V changeover relays:
+`hardware/kicad/Modules/FullSize/DuoRelay/` is a Revision 0.3 FullSize THT module using the connector interface introduced with Revision 0.2. It has an identification EEPROM and decoupling capacitor and two independently controlled 5 V changeover relays:
 
 - connector pin 9 / `AUX_GPIO1` drives relay channel 1;
 - connector pin 10 / `AUX_GPIO2` drives relay channel 2;
 - each channel uses a BC817 low-side driver, 1 kΩ base resistor, 100 kΩ pull-down, and 1N4148W flyback diode;
 - each channel has an LED and 1.5 kΩ series resistor from `+5V` to the transistor collector, so the LED lights when that relay is driven;
-- `I2C0` connects the optional module-identification EEPROM; and
+- `I2C0` connects the module-identification EEPROM; and
 - the remaining SPI and I²C pins are unused by the present functional hardware.
 
 The relay-contact routing uses 1.0 mm traces. The 250 VAC contact region is kept at least 8 mm from all SELV copper on both copper layers, including the GND zone. This project-specific layout decision is not a blanket safety certification; enclosure, terminals, fusing, pollution degree, material group, overvoltage category, load type, and applicable product standards still belong to the completed product assessment.

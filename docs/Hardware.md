@@ -36,14 +36,14 @@ revision-specific assembly documentation remain the hardware references.
 
 ## Module Implementations
 
-- [DuoRelay](../hardware/kicad/Modules/FullSize/DuoRelay/README.md) in PCB Revision 0.3 provides two `AUX_GPIO`-controlled 5 V changeover relays, one status LED per channel, and an optional identification EEPROM on a FullSize THT board.
+- [DuoRelay](../hardware/kicad/Modules/FullSize/DuoRelay/README.md) in PCB Revision 0.3 provides two `AUX_GPIO`-controlled 5 V changeover relays, one status LED per channel, and an identification EEPROM with decoupling capacitor on a FullSize THT board.
 - [AnalogHydroPressure](../hardware/kicad/Modules/FullSize/AnalogHydroPressure/README.md) is the Revision 0.5 successor to the legacy AnalogInput module. It retains the ADS1115-based 4–20 mA measurement path and generates the probe supply locally from `+5V` with an LT8330 boost converter.
 
 The current Revision 0.3 hardware is a development baseline. Production release is gated by a complete article list and assembly data, physical bring-up of the relevant boards, and successful operation of at least the Rain Detector heater path.
 
 ## Firmware Contract Without Module Identity
 
-Module identification is optional in the present hardware revision. If no valid module-specific EEPROM record is found, firmware must keep both I2C buses and the two slot-specific `AUX_GPIO` signals available as ordinary configurable interfaces. It must not guess a module type or start a module-specific driver automatically. SPI devices require explicit configuration as well.
+DuoRelay and AnalogHydroPressure include an identity EEPROM and decoupling capacitor in their standard assembly. Their relay circuitry and analog measurement path remain electrically functional if the EEPROM is omitted. Without a valid descriptor, firmware cannot identify the module, check its compatibility or derive module-specific settings; explicit manual configuration and suitable driver support are required. SX1262-Remote requires an assembled EEPROM with a valid module descriptor for supported operation; the generic fallback does not apply to that module. If no valid module-specific EEPROM record is found, firmware must keep both I2C buses and the two slot-specific `AUX_GPIO` signals available as ordinary configurable interfaces. It must not guess a module type or start a module-specific driver automatically. SPI devices require explicit configuration as well.
 
 When fitted, a module-identification EEPROM should use `I2C0` at the slot-defined address `0x52` or `0x53`. This is a hardware convention, not an electrical requirement. Firmware now discovers both reserved addresses, resolves supported identities through the module-profile registry, and checks board/slot compatibility. This stage remains diagnostic: automatic driver activation and module-specific UI functions are not yet implemented.
 

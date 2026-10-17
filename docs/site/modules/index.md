@@ -9,4 +9,4 @@ Zum ersten Dokumentationsumfang gehören zwei Module:
 
 Die Produktseiten enthalten Verdrahtung, Bestückung, Inbetriebnahme und PDF-Anleitungen.
 Wähle den Modulslot und die Firmware-Konfiguration passend zur tatsächlichen Hardware.
-Die optionale EEPROM-Identifikation allein aktiviert keinen Modultreiber.
+Die EEPROM-Identifikation allein aktiviert keinen Modultreiber. Ohne gültigen Descriptor stehen keine daraus abgeleiteten modulabhängigen Einstellungen zur Verfügung.

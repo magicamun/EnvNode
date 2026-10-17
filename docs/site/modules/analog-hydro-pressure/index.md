@@ -26,10 +26,10 @@ von der Sonde ab; Nullpunkt und Endwert müssen mit der konkreten Sonde kalibrie
 | Pin | Signal | Funktion |
 | --- | --- | --- |
 | 1 | GND | Versorgung und Messreferenz |
-| 2 | +3V3_SYS | ADS1115 und optionale Identifikation |
-| 3 | EEPROM_A0 | Optionales EEPROM |
+| 2 | +3V3_SYS | ADS1115 und Identifikation |
+| 3 | EEPROM_A0 | Slotabhängige EEPROM-Adresse |
 | 4 | +5V | Eingang des 24-V-Boosts |
-| 5 / 6 | I2C0 SDA / SCL | Wählbarer ADS1115-Bus; optionales EEPROM fest |
+| 5 / 6 | I2C0 SDA / SCL | Wählbarer ADS1115-Bus; Identity-EEPROM fest |
 | 7 / 8 | I2C1 SDA / SCL | Wählbarer ADS1115-Bus |
 | 9 | AUX_GPIO1 | Nicht verwendet |
 | 10 | AUX_GPIO2 | Boost-Enable |
@@ -51,7 +51,7 @@ Genau einen Adressjumper schließen:
 | JP4 | 0x4B |
 
 Bei mehreren Modulen auf demselben ausgewählten Bus müssen die ADC-Adressen verschieden sein.
-Die ADS1115-Adresse ist unabhängig von der optionalen Module-Identity-Adresse.
+Die ADS1115-Adresse ist unabhängig von der Module-Identity-Adresse.
 
 ### I²C-Buswahl mit JP5 und JP6
 
@@ -67,7 +67,7 @@ Ohne beide Brücken ist der ADS1115 nicht am I²C-Bus erreichbar.
 Keine gemischte Buswahl verwenden und niemals alle drei Pins eines Jumpers
 verbinden: Damit würden I2C0 und I2C1 zusammengeschaltet.
 Die Jumper wählen den Datenbus, nicht die 5-V-Versorgung.
-Das optionale Identity-EEPROM bleibt unabhängig davon fest an I2C0.
+Das Identity-EEPROM bleibt unabhängig davon fest an I2C0.
 
 ### Boost-Enable
 
@@ -91,24 +91,29 @@ J3 verbindet die Zweileiter-4–20-mA-Sonde. Bei Ersatzsonden Versorgung,
 Polung und Anschlussbelegung anhand des jeweiligen Datenblatts prüfen.
 Der optionale Messheader J2 führt GND, +24V, LOOP_RETURN und AIN0.
 
-J2 sowie das Identity-EEPROM U3 und dessen Abblockkondensator C1 sind laut
-aktueller Anleitung DNP, also nicht zu bestücken. Ein nachträglich bestücktes
-EEPROM nutzt I2C0 und die slotabhängige Adresse `0x52` oder `0x53`.
-Die Messfunktion erfordert dieses EEPROM nicht.
+J2 bleibt DNP. Das Identity-EEPROM U3 (24LC32A-I/SN) mit seinem
+100-nF-Abblockkondensator C1 nutzt I2C0 und die slotabhängige Adresse `0x52` oder `0x53`.
+
+Ohne EEPROM ist der analoge Messpfad elektrisch funktionsfähig. Ohne gültigen
+Modul-Descriptor kann die Firmware das Modul jedoch nicht identifizieren, seine
+Kompatibilität prüfen oder modulabhängige Einstellungen daraus ableiten.
+ADC-Anbindung und Boost-Ansteuerung müssen dann manuell konfiguriert werden;
+passende Treiberunterstützung bleibt erforderlich.
 
 ## Bestückung und Inbetriebnahme
 
 Die [PDF-Anleitung](../../assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf)
 enthält Bauteilwerte, Orientierung und den vollständigen Prüfablauf.
 
-1. Feine IC-Pins, Diodenpolung und Bottom-Mount-Stecker prüfen.
+1. Feine IC-Pins, Diodenpolung und Bottom-Mount-Stecker prüfen; U3, C1 und deren Lötstellen prüfen.
 2. Kurzschlüsse ausschließen; genau einen ADC-Adressjumper und JP5 und JP6 synchron auf den gewünschten I²C-Bus setzen.
 3. AUX_GPIO2 zunächst LOW halten und ohne Sonde 5 V strombegrenzt zuführen.
 4. 3,3-V- und 5-V-Versorgung prüfen; Boost anschließend gezielt einschalten.
 5. 24-V-Ausgang, Schaltverhalten, Ripple und Temperatur prüfen.
 6. ADS1115 auf der gewählten Adresse am ausgewählten I²C-Bus suchen.
 7. Mit einer geeigneten Stromquelle 4, 12 und 20 mA prüfen und ADC-Rohwerte dokumentieren.
-8. Versorgung unter Last prüfen und anschließend mit der vorgesehenen Sonde kalibrieren.
+8. U3 auf I2C0 bei `0x52` (Slot A) oder `0x53` (Slot B) prüfen und gültigen, zum Modul passenden Descriptor kontrollieren. Die DuoRelay-Vorlage ist dafür ungeeignet; siehe [Provisioning](../../firmware/provisioning.md).
+9. Versorgung unter Last prüfen und anschließend mit der vorgesehenen Sonde kalibrieren.
 
 ## Firmware-Anbindung
 

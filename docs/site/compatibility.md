@@ -51,7 +51,7 @@ die Ressourcentabelle nicht automatisch.
 
 | Modul | Hardware-Anschluss | Firmware-Unterstützung | Betriebsnachweis | Mindeststand Firmware | Kommentar |
 | --- | --- | --- | --- | --- | --- |
-| [DuoRelay 0.3](modules/duo-relay/index.md) | EnvNode-Modulslot, 5 V und AUX_GPIO1/2 | On/Off; Descriptor-basierter Module-On/Off-Pfad vorhanden | Mini 0.3, Slot A bestätigt | GPIO: 0.5.0 Basis; Modulaktoren: ab `4cd8519` | Bei neueren Mainboards GPIO-Abgleich nötig. Optionales Identity-EEPROM in Standardunterlagen DNP; erkannter Descriptor im Beispielaufbau vorhanden. |
+| [DuoRelay 0.3](modules/duo-relay/index.md) | EnvNode-Modulslot, 5 V und AUX_GPIO1/2 | On/Off; Descriptor-basierter Module-On/Off-Pfad vorhanden | Mini 0.3, Slot A bestätigt | GPIO: 0.5.0 Basis; Modulaktoren: ab `4cd8519` | Bei neueren Mainboards GPIO-Abgleich nötig. Identity-EEPROM U2 mit C1; erkannter Descriptor im Beispielaufbau vorhanden. |
 | [AnalogHydroPressure 0.5](modules/analog-hydro-pressure/index.md) | Modulslot, ADC über I²C und Boost über AUX_GPIO2 | Kein registrierter ADS1115-Drucksensorpfad | Vollständiger Messbetrieb hier nicht bestätigt | Nicht verfügbar als vollständiger Messpfad | JP5/JP6 synchron auf I2C0 oder I2C1; genau einen Adressjumper setzen. Hardwareanleitung ist keine fertige Firmwareintegration. |
 
 ## Sensoren

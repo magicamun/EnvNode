@@ -17,7 +17,7 @@
 | 2 | `+3V3_SYS` | Identification EEPROM supply and fixed `A1` level |
 | 3 | `EEPROM_A0` | Slot-defined identification EEPROM address bit |
 | 4 | `+5V` | Relay-coil supply |
-| 5–6 | `I2C0` | Optional identification EEPROM |
+| 5–6 | `I2C0` | Identification EEPROM |
 | 7–8 | `I2C1` | Not used |
 | 9 | `AUX_GPIO1` | Relay channel 1 control |
 | 10 | `AUX_GPIO2` | Relay channel 2 control |
@@ -27,7 +27,7 @@ Each channel uses a BC817 low-side driver with a 1 kΩ base resistor, a 100 kΩ 
 
 ## Module Identification
 
-The board provides an optional `24LC32` (U2, SOIC-8; kit part ENP-00102 / `24LC32A-I/SN`) module-identification EEPROM and a local 100 nF decoupling capacitor on the bottom side. The EEPROM follows the EnvNode discovery convention:
+The board provides a `24LC32` (U2, SOIC-8; kit part ENP-00102 / `24LC32A-I/SN`) module-identification EEPROM and a local 100 nF decoupling capacitor (C1) on the bottom side. The EEPROM follows the EnvNode discovery convention:
 
 - SDA and SCL use `I2C0`;
 - `A1` is tied to `+3V3_SYS`;
@@ -35,7 +35,7 @@ The board provides an optional `24LC32` (U2, SOIC-8; kit part ENP-00102 / `24LC3
 - Slot A therefore selects `0x52`; and
 - Slot B selects `0x53`.
 
-The EEPROM is not required for the relay hardware to operate, but fitting and provisioning it is good practice. Firmware discovers the reserved module EEPROM addresses independently for both slots, resolves supported records through the module-profile registry, and reports board/slot compatibility diagnostically. Discovery does not yet create a DuoRelay-specific driver or UI controls automatically. Without a valid identity, firmware treats the relay GPIOs as ordinary configurable `AUX_GPIO` ports and must not automatically start a DuoRelay-specific driver.
+During bring-up, verify the 3.3 V supply, I2C0 address and a valid provisioned module descriptor. Firmware discovers the reserved module EEPROM addresses independently for both slots, resolves supported records through the module-profile registry, and reports board/slot compatibility diagnostically. Discovery does not yet create a DuoRelay-specific driver or UI controls automatically. The relay circuitry remains electrically functional without the EEPROM. Without a valid descriptor, firmware cannot identify the module, validate compatibility or derive module-specific settings. Explicit manual configuration and suitable driver support are required. Without a valid identity, firmware treats the relay GPIOs as ordinary configurable `AUX_GPIO` ports and must not automatically start a DuoRelay-specific driver.
 
 ## Mechanical Geometry
 
@@ -64,4 +64,4 @@ ERC and DRC must be repeated after every schematic, footprint, routing, zone, or
 
 ## Documentation verification — 2026-10-05
 
-The Revision 0.3 guide updates the former U1 / SOT-23-6 EEPROM to U2 / SOIC-8 and retains the schematic DNP status for U2 and C1. All common component-pin nets in the exported schematic netlist and PCB were compared and matched, including relay contacts and EEPROM address wiring. Current PCB renders use the common ORing viewing angles. No new full ERC/DRC run or physical validation was performed; the historical Revision 0.2 validation above is not a release check for Revision 0.3.
+The Revision 0.3 guide documents U2 (24LC32A-I/SN, SOIC-8) and C1 (100 nF). The bottom view and source checksums were updated from the saved KiCad project on 2026-10-17; the PCB revision remains unchanged. All common component-pin nets in the exported schematic netlist and PCB were compared and matched, including relay contacts and EEPROM address wiring. The bottom view shows U2 and C1 populated. No new full ERC/DRC run or physical validation was performed; the historical Revision 0.2 validation above is not a release check for Revision 0.3.

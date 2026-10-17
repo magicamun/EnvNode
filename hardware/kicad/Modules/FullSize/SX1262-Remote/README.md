@@ -4,6 +4,8 @@ This KiCad 10 project implements a Revision 0.3 EnvNode FullSize radio daughterb
 
 The board uses the 38 mm × 64 mm FullSize outline, bottom-mounted 2 × 7 THT module connector, two M2.5 support holes and the standard module-identification EEPROM circuit.
 
+For supported operation, the module-identification EEPROM and its decoupling capacitor must be populated, and the EEPROM must contain a valid descriptor matching SX1262-Remote. Operation without module identification is not supported; the manual fallback described for DuoRelay and AnalogHydroPressure does not apply. This is a module requirement, not a statement that automatic radio-driver activation is already implemented.
+
 ## Host interface
 
 The E22 is connected to the EnvNode host as follows:

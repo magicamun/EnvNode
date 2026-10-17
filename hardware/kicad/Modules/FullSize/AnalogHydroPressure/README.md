@@ -20,7 +20,7 @@ The module has two hierarchical circuit sections:
 
 The ADS1115 address is selected with one of four solder jumpers for addresses `0x48` through `0x4B`. Exactly one address jumper must be closed before operation.
 
-JP5 (SDA) and JP6 (SCL) select the ADS1115 bus. Bridge pins 1-2 on both for I2C0, or pins 2-3 on both for I2C1. Both jumpers must select the same bus. Without both bridges the ADS1115 is disconnected from the bus. Never bridge all three pins or mix the bus selections. These jumpers do not select the 5 V supply. The optional identity EEPROM remains on I2C0.
+JP5 (SDA) and JP6 (SCL) select the ADS1115 bus. Bridge pins 1-2 on both for I2C0, or pins 2-3 on both for I2C1. Both jumpers must select the same bus. Without both bridges the ADS1115 is disconnected from the bus. Never bridge all three pins or mix the bus selections. These jumpers do not select the 5 V supply. The identity EEPROM remains on I2C0.
 
 ## Local Libraries
 
@@ -34,6 +34,8 @@ The C&K switch footprint is stored in:
 
 The project-level `sym-lib-table` maps the symbol library. The footprint library name must resolve as `EnvNode-Footprints` in KiCad.
 
+The analog measurement path remains electrically functional without the identity EEPROM. Without a valid module descriptor, firmware cannot identify the module, validate compatibility or derive module-specific settings. ADC acquisition and boost control then require explicit manual configuration and suitable driver support.
+
 ## Bring-up Priorities
 
 1. Populate and inspect the 5 V input and LT8330 boost section.
@@ -41,11 +43,12 @@ The project-level `sym-lib-table` maps the symbol library. The footprint library
 3. Verify startup, switching waveform, output voltage, ripple, and component temperature under the intended load.
 4. Verify that exactly one ADS1115 address jumper is closed and that the ADC is detected on the I2C bus selected by JP5 (SDA) and JP6 (SCL).
 5. Apply known loop currents and verify approximately 0.6 V at 4 mA and 3.0 V at 20 mA across the nominal 150 ohm burden.
-6. Calibrate the complete measurement path with the intended pressure probe.
+6. Verify the bottom-side U3 (24LC32A-I/SN, ENP-00102) and C1 (100 nF, ENP-00006), the 3.3 V supply and I2C0 address 0x52 (Slot A) or 0x53 (Slot B). Validate the module descriptor; an I2C response alone does not confirm provisioning. Use a matching descriptor, never the DuoRelay template.
+7. Calibrate the complete measurement path with the intended pressure probe.
 
 ## Validation and Release Status
 
-Revision 0.4 uses the B260S1F-7 boost diode, selectable ADS1115 address jumpers, and an optional DNP measurement header for GND, `+24V`, `LOOP_RETURN`, and `AIN0`. The bottom-side identification EEPROM and its decoupling capacitor remain DNP in the current kit.
+Revision 0.4 uses the B260S1F-7 boost diode, selectable ADS1115 address jumpers, and an optional DNP measurement header for GND, `+24V`, `LOOP_RETURN`, and `AIN0`. The bottom-side identification EEPROM U3 and its 100 nF decoupling capacitor C1 are part of the standard assembly. J2 remains optional / DNP. The PCB remains Revision 0.5.
 
 At the historical design checkpoint on 2026-09-28, schematic ERC and PCB DRC completed without errors or violations, schematic/PCB parity was clean, and the layout received a visual plausibility review. These checks do not replace physical power-supply bring-up, thermal and EMC verification, probe calibration, or production testing.
 
@@ -62,3 +65,7 @@ The Revision 0.5 review on 2026-09-28, with zone refill, found no PCB DRC violat
 ## Documentation verification — 2026-10-05
 
 The Revision 0.5 guide was checked against an exported schematic netlist and PCB pad nets. J1.10, U4.4 (EN/UVLO), and R7.1 share AUX_GPIO2; J1.9 remains separate. The PCB views use the common ORing camera angles with preserved proportions. No new full ERC/DRC run or physical validation was performed during this documentation update.
+
+## Documentation update — 2026-10-17
+
+The bottom view and source checksums in the current guide were updated from the saved KiCad project. U3 and C1 are shown populated. No new ERC/DRC run or physical validation was performed for this documentation update.

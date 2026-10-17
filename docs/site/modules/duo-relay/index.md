@@ -15,17 +15,17 @@ Diese Seite beschreibt **Revision 0.3**.
 | Anzeige | Eine LED pro Kanal |
 | Modulformat | FullSize, 38 × 64 mm |
 | Anschluss | Von unten bestückte 2 × 7-Stiftleiste |
-| Identifikation | Optionales 24LC32-EEPROM U2 mit C1; im dokumentierten Kit DNP |
+| Identifikation | 24LC32-EEPROM U2 mit 100-nF-Abblockkondensator C1 |
 
 ## Modulanschluss
 
 | Pin | Signal | Funktion |
 | --- | --- | --- |
 | 1 | GND | Masse der Steuerseite |
-| 2 | +3V3_SYS | Optionale EEPROM-Versorgung |
+| 2 | +3V3_SYS | EEPROM-Versorgung |
 | 3 | EEPROM_A0 | Slotabhängige EEPROM-Adresse |
 | 4 | +5V | Relais- und LED-Versorgung |
-| 5 / 6 | I2C0 SDA / SCL | Optionales EEPROM |
+| 5 / 6 | I2C0 SDA / SCL | Identity-EEPROM |
 | 9 | AUX_GPIO1 | Kanal 1 |
 | 10 | AUX_GPIO2 | Kanal 2 |
 
@@ -63,8 +63,11 @@ Aus-Zustand. Die tatsächlichen GPIOs hängen vom Mainboard und Slot ab:
 | Weather A | GPIO33 | GPIO13 |
 
 Prüfe die angezeigte Ressourcenbelegung vor dem Schalten.
-Ein optionales EEPROM verwendet I2C0 mit Adresse `0x52` in Slot A oder `0x53` in Slot B.
-U2 und C1 sind laut aktueller Anleitung nicht zu bestücken (DNP).
+Das EEPROM verwendet I2C0 mit Adresse `0x52` in Slot A oder `0x53` in Slot B.
+Ohne EEPROM ist die Relaisschaltung elektrisch funktionsfähig. Ohne gültigen
+Modul-Descriptor kann die Firmware das Modul jedoch nicht identifizieren, seine
+Kompatibilität prüfen oder modulabhängige Einstellungen daraus ableiten.
+Die Relais müssen dann über manuell konfigurierte GPIO-Aktoren angesteuert werden.
 Ein gültiger Identifikationsdatensatz erzeugt keine Relais-Aktoren automatisch.
 
 ## Bestückung und Inbetriebnahme
@@ -72,13 +75,14 @@ Ein gültiger Identifikationsdatensatz erzeugt keine Relais-Aktoren automatisch.
 Die [PDF-Anleitung](../../assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf)
 enthält die Bauteilwerte und den vollständigen Ablauf.
 
-1. Dioden, LEDs und Transistoren polaritätsrichtig bestücken; J1 von unten montieren.
+1. Dioden, LEDs und Transistoren polaritätsrichtig bestücken; U2 und C1 bestücken und J1 von unten montieren.
 2. Lötstellen, Kurzschlüsse und Trennung zwischen Kontakt- und Steuerseite prüfen.
 3. Spannungsfrei COM/NC und COM/NO beider Kanäle prüfen.
 4. Ohne externe Last starten und beide Steuereingänge LOW halten: Relais und LEDs bleiben aus.
 5. Jeden Kanal einzeln HIGH und wieder LOW schalten; LED und Kontaktzustand prüfen.
 6. Beide Kanäle gleichzeitig prüfen und 5-V-Versorgung sowie Stromaufnahme beobachten.
-7. Erst danach eine geeignete Kleinspannungs-Testlast anschließen.
+7. 3,3 V an U2 und Erreichbarkeit auf I2C0 bei `0x52` (Slot A) oder `0x53` (Slot B) prüfen; passenden Descriptor provisionieren und erkannte Identität kontrollieren. Ein I²C-Antwortsignal allein genügt nicht.
+8. Erst danach eine geeignete Kleinspannungs-Testlast anschließen.
 
 ## Fehlerbilder
 
@@ -100,4 +104,4 @@ Lastqualifikation und anwendungsbezogene Freigaben sind in den Unterlagen noch o
 ## Mit der Firmware verwenden
 
 [Relais einrichten und mit Blink betreiben](../../firmware/example-relay.md).
-[Optionale Modul-Identität provisionieren](../../firmware/provisioning.md).
+[Modul-Identität provisionieren](../../firmware/provisioning.md).
