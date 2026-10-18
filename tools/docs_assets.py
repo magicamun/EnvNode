@@ -20,6 +20,13 @@ DOWNLOADS = {
         "hardware/kicad/Sensors/RainDetectorHead/Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf",
 }
 
+
+# Shared, reviewed Mini reference views also used by the Weather guide.
+for _ref in ("ADC1", "J5"):
+    for _view in ("oblique", "top"):
+        _name = f"{_ref}-{_view}-annotated.png"
+        DOWNLOADS[f"assets/images/connectors/{_name}"] = f"images/envnode-mini/connectors/{_name}"
+
 def on_files(files, config, **kwargs):
     root = Path(config.config_file_path).resolve().parent
     for target, source in DOWNLOADS.items():

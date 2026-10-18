@@ -9,8 +9,8 @@
 	(paper "A4")
 	(title_block
 		(title "EnvNode Weather")
-		(date "2026-09-28")
-		(rev "0.2")
+		(date "2026-10-18")
+		(rev "0.2.1")
 	)
 	(layers
 		(0 "F.Cu" signal)
@@ -3046,6 +3046,7 @@
 		)
 	)
 	(footprint "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical"
+		(locked yes)
 		(layer "F.Cu")
 		(uuid "3ba4f2a0-6d68-4b13-9cb0-248e76693103")
 		(at 68.17 101.35925 180)
@@ -5793,6 +5794,7 @@
 		)
 	)
 	(footprint "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical"
+		(locked yes)
 		(layer "F.Cu")
 		(uuid "5a9d3430-c878-4ee4-8192-73aebc380249")
 		(at 161.73 67.455)
@@ -9937,6 +9939,7 @@
 		(embedded_fonts no)
 	)
 	(footprint "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical"
+		(locked yes)
 		(layer "F.Cu")
 		(uuid "e062a4e8-a915-4804-8126-ff1663759bdc")
 		(at 161.73 125.825)
@@ -13327,6 +13330,42 @@
 		)
 		(layer "Edge.Cuts")
 		(uuid "e19336b9-744e-4274-a066-ae6286cd4699")
+	)
+	(gr_text "GND\n3V3\nSDA0\nSCL0"
+		(at 163.55245 63.17 90)
+		(layer "F.SilkS")
+		(uuid "5fffaa47-eeec-403a-bea7-46afff178e0b")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "GND\n3V3\nSDA1\nSCL1"
+		(at 163.55245 130.8 90)
+		(layer "F.SilkS")
+		(uuid "1aec6d71-b0bb-48e1-bd83-c1d6257c92ad")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "GND\n+5V \nGPIO\n3.3V"
+		(at 61.242109 104.71 270)
+		(layer "F.SilkS")
+		(uuid "e79556fc-1a8f-49f3-bba8-e10f23597617")
+		(effects
+			(font
+				(size 1.3 1.3)
+				(thickness 0.2)
+			)
+			(justify left bottom)
+		)
 	)
 	(gr_text "Slot A"
 		(locked yes)
@@ -19996,14 +20035,6 @@
 			"dd645145-74e2-49f4-a9e0-786d934e8233" "e19336b9-744e-4274-a066-ae6286cd4699"
 			"e6cdec02-c8e6-4b43-8866-8b94b6c4d574" "f2d1151d-4a2b-478f-a59f-766986494438"
 			"f5f38b98-9b12-4458-9bcb-d9844aabafe4" "ffd44ce6-cf86-46d8-9601-fd1eea0a1d78"
-		)
-	)
-	(group "EnvNode_Module_Connector_MainBoard"
-		(uuid "3cd794f2-b8dd-4477-b6da-3ed6bf459470")
-		(lib_id "EnvNodeDesignBlocks:EnvNode_Module_Connector_MainBoard")
-		(members "027ffce4-d752-4a7c-a46d-3b11464bb51f" "2b6a1482-f744-4401-8be8-0d3d1b676da9"
-			"4e311b5b-da68-4aa1-bb85-d9253eee2e99" "643bc130-a111-4a43-8968-95669593c117"
-			"6fa8bc57-97a8-4f35-979e-51c8c3505f15" "c3056185-6b0b-43f6-9d0d-466c7b58b56a"
 		)
 	)
 	(embedded_fonts no)

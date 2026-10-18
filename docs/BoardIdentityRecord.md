@@ -67,6 +67,18 @@ record format versions. Revision `255.255` is reserved and invalid so that an er
 cannot become semantically valid. Firmware must explicitly decide which revisions it supports
 for each `BoardProfileId`.
 
+A third PCB revision component, written `major.minor.patch`, identifies an electrically
+and mechanically unchanged silkscreen/documentation or fabrication-output correction.
+Patch numbers start at 1 and increase for subsequent such corrections. For example,
+Mini PCB `0.8.1` retains Board Identity revision `0.8`, and Weather PCB `0.2.1` retains
+`0.2`. The patch component is not encoded in EEPROM, does not change the board profile,
+and does not require reprovisioning. Guides for the corresponding `major.minor`
+revision continue to apply. A patch must not change components, pin assignments,
+copper, holes, board outline, or mounting/connector geometry. Such changes require
+a separate hardware revision and an explicit compatibility assessment. Patch provenance
+belongs in the PCB title block, fabrication output and revision notes; historical
+source fingerprints and validation records remain tied to their original source state.
+
 `BoardSerialNumber` is the raw numeric value in the range 0 through 4,294,967,295. Value 0 means
 unassigned; assigned serial numbers therefore range from 1 through 4,294,967,295. Presentation
 formats such as `EN-000012` are not persisted. An otherwise valid record with serial 0 may still

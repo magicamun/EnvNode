@@ -45,3 +45,27 @@ Revision 0.2 connects I2C0 SDA to pin 5 and SCL to pin 6. The earlier reversed a
 Run schematic ERC, PCB DRC, and schematic-PCB parity checks after every schematic, footprint, routing, zone, or rule change. Revision 0.2 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, environmental, or manufacturing tests. The current procedure is in `Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf` (5 October 2026). It includes the corrected I2C0 and GPIO assignments, passive continuity checks, the corrected C1 description, and SHA-256 fingerprints of the KiCad sources. The recorded ERC/DRC results are the historical checks of 28 September 2026, not a new validation run. The Revision 0.1 PDF remains as a historical reference.
 
 See the [hardware overview](../../../../docs/Hardware.md), [module-interface specification](../../../../docs/EnvNode_Module_Interface_Hardware_Specification.md), [ORing Power documentation](../../DesignBlocks/ORing%20Power/README.md), and [board identity record](../../../../docs/BoardIdentityRecord.md).
+
+## Connector reference illustrations (18 October 2026)
+
+The assembly PDF now includes two additional connector-reference pages with actual
+KiCad PCB/STEP renders of Mini ADC1 (4-pin JST-PH) and J5 (4-pin JST-SH), pin 1
+markings, pin tables, and orientation guidance. These two views are representative
+of all corresponding four-pin connectors on Mini and Weather, with the signal,
+bus, reference name, and physical rotation determined by the individual connector.
+The two-pin ORing Power input is outside this reference's scope.
+
+The shown silkscreen belongs to Mini; Weather adds corresponding labels in PCB patch 0.2.1.
+
+See the [illustrated board guide](../../../../docs/site/mainboards/weatherstation/index.md) and
+[render sources, provenance, and model notices](../../../../images/envnode-mini/connectors/README.md).
+The original guide pages and their historical validation records are retained.
+
+## PCB patch 0.2.1 (18 October 2026)
+
+This patch adds connector silkscreen labels and updates the PCB revision/date.
+Electrical and mechanical geometry is unchanged from 0.2; footprint locks,
+editor grouping and plot metadata may differ. Board Identity remains 0.2, with
+no profile change or reprovisioning. The existing 0.2 guide remains applicable.
+See the [revision convention](../../../../docs/BoardIdentityRecord.md).
+Gerber jobs identify 0.2.1; generated Gerber directories remain ignored by Git.

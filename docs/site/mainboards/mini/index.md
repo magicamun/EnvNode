@@ -103,6 +103,51 @@ Beide Anschlüsse verwenden dieselbe Pinfolge:
     ESP32-3,3-V-Eingangsbereichs bleiben. Die 5-V-Leitung dient nur der Sensorversorgung.
     Diese Pins dürfen nicht als Ausgänge konfiguriert werden.
 
+
+## Anschlussdetails als Referenz
+
+Die folgenden Detailbilder zeigen die vierpoligen Anschlüsse **ADC1 (JST-PH,
+2,00 mm)** und **J5 (JST-SH, 1,00 mm)** des EnvNode Mini. Sie wurden direkt aus
+den PCB-Daten und den zugehörigen STEP-Modellen gerendert. Die Pinbelegung ist
+gegen PCB und Schaltplan geprüft; Pin 1 ist jeweils orange als **GND** markiert.
+Die kleinen PCB-Ausschnitte besitzen virtuelle Schnittkanten.
+
+Die beiden konkreten Ausschnitte sind **Referenzabbildungen für alle entsprechenden
+vierpoligen JST-PH- und JST-SH-Anschlüsse auf Mini und Weather**. Ihre Pinfolge ist
+bei allen Anschlüssen des jeweiligen Typs gleich. Referenzname, Signal an PH-Pin 3,
+I²C-Bus und Einbaurichtung richten sich nach dem jeweiligen Boardanschluss.
+Die Bilder zeigen die Bestückungsseite, nicht die Kontaktansicht eines Kabelsteckers;
+bei anders gedrehten Anschlüssen Pin 1 am tatsächlichen Footprint zuordnen.
+Der zweipolige Versorgungseingang von ORing Power ist von dieser Referenz nicht erfasst.
+
+### JST-PH: ADC- und GPIO-Anschlüsse
+
+![JST-PH ADC1: Schrägansicht mit markiertem Pin 1](../../assets/images/connectors/ADC1-oblique-annotated.png){ width="48%" }
+![JST-PH ADC1: Draufsicht mit originalem Silkscreen](../../assets/images/connectors/ADC1-top-annotated.png){ width="48%" }
+
+Von Pin 1 bis 4: **GND, +5V, Signal, +3V3_SYS**. Im gezeigten Mini-Ausschnitt
+läuft diese Folge von oben nach unten. Der Silkscreen `GPIO` bezeichnet hier das
+ADC1-Signal an GPIO34; bei den weiteren Anschlüssen ist Pin 3 dem jeweils
+angegebenen ADC- oder GPIO-Signal zugeordnet. Die 5-V-Leitung ist eine Versorgung,
+kein zulässiger Signalpegel für den ESP32.
+
+### JST-SH: I²C-Anschlüsse
+
+![JST-SH J5: Schrägansicht mit markiertem Pin 1](../../assets/images/connectors/J5-oblique-annotated.png){ width="48%" }
+![JST-SH J5: Draufsicht mit Referenz und originalem Silkscreen](../../assets/images/connectors/J5-top-annotated.png){ width="48%" }
+
+Von Pin 1 bis 4: **GND, +3V3_SYS, SDA, SCL**. Im gezeigten Mini-Ausschnitt
+läuft diese Folge von links nach rechts. J5 gehört zu I2C0; deshalb stehen dort
+`SDA0` und `SCL0`. An I2C1 gilt dieselbe Pinfolge für SDA1 und SCL1.
+Die seitlichen Metalllaschen sind mechanische Befestigungen und keine Signalpins.
+Die Draufsicht zeigt die Referenz `J5`, die in der Schrägansicht vom Gehäuse verdeckt wird.
+
+Bei Mini gilt die PH-Referenz für ADC1 und ADC2; die SH-Referenz gilt für
+J4/J5 auf I2C0 und J6/J7 auf I2C1.
+
+Die PDF-Anleitung enthält dieselben Anschlussreferenzen als Ergänzung vom
+18. Oktober 2026. Hardware-Revision und historische Prüfstände bleiben unverändert.
+
 ## Bestückung und erste Inbetriebnahme
 
 Die [PDF-Anleitung für Revision 0.8](../../assets/downloads/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf)

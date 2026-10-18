@@ -1,0 +1,118 @@
+{
+  "board": "hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
+  "board_sha256": "4c7565898c30598e500b4a27f90f7b39c46f8a59408ff5e06168c14182394694",
+  "renderer": "10.0.5",
+  "connectors": {
+    "ADC1": {
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "at": [
+        "188.51",
+        "116.332",
+        "-90"
+      ],
+      "pins": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "/ADC/ADC1",
+        "4": "+3V3_SYS"
+      },
+      "schematic_matches_pcb": true,
+      "models": [
+        {
+          "file": "JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step",
+          "sha256": "0703774983dd0bf32b5175315a63ebb9c9439b35cb491768770aaa13ded27934",
+          "transform": [
+            [
+              "offset",
+              [
+                "xyz",
+                "0",
+                "0",
+                "0"
+              ]
+            ],
+            [
+              "scale",
+              [
+                "xyz",
+                "1",
+                "1",
+                "1"
+              ]
+            ],
+            [
+              "rotate",
+              [
+                "xyz",
+                "0",
+                "0",
+                "0"
+              ]
+            ]
+          ]
+        }
+      ],
+      "virtual_crop_mm": [
+        177,
+        112,
+        192.372,
+        127
+      ]
+    },
+    "J5": {
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "at": [
+        "187.96",
+        "99.822"
+      ],
+      "pins": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL"
+      },
+      "schematic_matches_pcb": true,
+      "models": [
+        {
+          "file": "JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step",
+          "sha256": "8980de73cbad53eb5e794fa02d776853bd9e12958c401f80c4b4c723ec196b98",
+          "transform": [
+            [
+              "offset",
+              [
+                "xyz",
+                "0",
+                "0",
+                "0"
+              ]
+            ],
+            [
+              "scale",
+              [
+                "xyz",
+                "1",
+                "1",
+                "1"
+              ]
+            ],
+            [
+              "rotate",
+              [
+                "xyz",
+                "0",
+                "0",
+                "0"
+              ]
+            ]
+          ]
+        }
+      ],
+      "virtual_crop_mm": [
+        182,
+        94,
+        192.372,
+        107
+      ]
+    }
+  }
+}

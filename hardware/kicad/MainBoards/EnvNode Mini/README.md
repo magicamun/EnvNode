@@ -55,3 +55,25 @@ Revision 0.7 slot wiring is I2C0 SDA on pin 5 and SCL on pin 6, matching AnalogH
 Run schematic ERC and PCB DRC after every schematic, footprint, routing, zone, or rule change. Revision 0.8 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, ESD, or manufacturing tests. The current assembly and bring-up procedure is in `Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf`.
 
 See the [hardware overview](../../../../docs/Hardware.md), [module-interface specification](../../../../docs/EnvNode_Module_Interface_Hardware_Specification.md), and [board identity record](../../../../docs/BoardIdentityRecord.md).
+
+## Connector reference illustrations (18 October 2026)
+
+The assembly PDF now includes two additional connector-reference pages with actual
+KiCad PCB/STEP renders of Mini ADC1 (4-pin JST-PH) and J5 (4-pin JST-SH), pin 1
+markings, pin tables, and orientation guidance. These two views are representative
+of all corresponding four-pin connectors on Mini and Weather, with the signal,
+bus, reference name, and physical rotation determined by the individual connector.
+The two-pin ORing Power input is outside this reference's scope.
+
+See the [illustrated board guide](../../../../docs/site/mainboards/mini/index.md) and
+[render sources, provenance, and model notices](../../../../images/envnode-mini/connectors/README.md).
+The original guide pages and their historical validation records are retained.
+
+## PCB patch 0.8.1 (18 October 2026)
+
+This patch adds connector silkscreen labels and updates the PCB revision/date.
+Electrical and mechanical geometry is unchanged from 0.8; footprint locks,
+editor grouping and plot metadata may differ. Board Identity remains 0.8, with
+no profile change or reprovisioning. The existing 0.8 guide remains applicable.
+See the [revision convention](../../../../docs/BoardIdentityRecord.md).
+Gerber jobs identify 0.8.1; generated Gerber directories remain ignored by Git.
