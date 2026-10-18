@@ -6,9 +6,10 @@ Er verbindet einen 5-V-Eingang, einen 3,3-V-Regler und die Zusammenführung zwei
 
 [Bestückungs- und Bring-up-Anleitung herunterladen (PDF)](../../assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf){ .md-button }
 
-Die Anleitung trägt die Bezeichnung 0.1. Die Platine besitzt derzeit keine formale
-Revision im PCB-Titelblock; die Bezeichnung der Anleitung ist deshalb keine
-zusätzliche PCB-Revisionsangabe.
+Die Anleitung trägt die Bezeichnung 0.1 und gilt auch für PCB-Beschriftungsstand
+**0.1.1** vom 18. Oktober 2026. Dieser ergänzt Titel, Revision und die
+5-V-/GND-Beschriftung am JST-PH-Eingang; Elektrik und Mechanik bleiben unverändert.
+Es ist keine Neuprovisionierung erforderlich.
 
 ## Überblick
 

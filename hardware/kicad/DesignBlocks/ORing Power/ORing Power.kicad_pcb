@@ -7,6 +7,11 @@
 		(legacy_teardrops no)
 	)
 	(paper "A4")
+	(title_block
+		(title "ORing Power")
+		(date "2026-10-18")
+		(rev "0.1.1")
+	)
 	(layers
 		(0 "F.Cu" signal)
 		(2 "B.Cu" signal)
@@ -3438,6 +3443,30 @@
 		(fill no)
 		(layer "Edge.Cuts")
 		(uuid "fb314266-d74d-493d-959c-77f469a4900c")
+	)
+	(gr_text "${TITLE}, ${REVISION}"
+		(at 116.158 99.04 0)
+		(layer "F.SilkS")
+		(uuid "130e2db2-4cba-4fbc-b126-81a67fe8a33f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "+5V\nGND"
+		(at 115.864469 100.41 90)
+		(layer "F.SilkS")
+		(uuid "5e34aab4-d70f-43a4-8508-e63753b8fe3b")
+		(effects
+			(font
+				(size 1.1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
 	)
 	(segment
 		(start 132.89 101.5275)

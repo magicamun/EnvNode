@@ -88,3 +88,18 @@ This validation covers design consistency, not physical manufacture. The first f
 The Revision 0.1 assembly guide now carries current PCB, schematic, and parts-workbook hashes. The PCB has no formal title-block revision; 0.1 is the existing documentation designation. Compared with the previously documented PCB, only plot settings, an empty settings block, and serialization order changed; board geometry and circuitry are unchanged. The existing 3D reference view remains valid.
 
 The guide previously swapped the diode references in its functional description and tests: D1 connects `+3V3_EXT` to `+3V3_SYS`, while D2 connects `+3V3_DEVKIT` to `+3V3_SYS`. These references are corrected. PCB pad nets were checked against an exported schematic netlist and matched. This documentation check did not repeat full ERC/DRC or physical testing.
+
+## PCB patch 0.1.1 (18 October 2026)
+
+The PCB now has a formal title block with revision 0.1.1 and front-silkscreen
+labels for the module and the two-pin JST-PH 5 V input. J1 pin 1 remains GND;
+pin 2 remains +5V. All other PCB data, including copper, pad geometry, components,
+board outline and mounting geometry, is identical to the previous committed PCB.
+The existing Revision 0.1 assembly guide remains applicable; this patch requires
+no mainboard profile change or reprovisioning. See the shared
+[PCB patch convention](../../../../docs/BoardIdentityRecord.md).
+
+The 5 October verification above describes the earlier source snapshot. No new
+ERC/DRC or physical qualification is claimed by this silkscreen-only update.
+The published library design block remains at its earlier snapshot; it has not
+been republished with these labels. No new 3D illustration was generated.
