@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
 // See the repository root LICENSE.
 #include <unity.h>
+#include "HttpRedirect.h"
 #include <cstring>
 #include "WebLocalization.h"
 #include "WebNavigation.h"
@@ -164,8 +165,50 @@ void test_location_and_temperature_age_views_use_configured_locale() {
     TEST_ASSERT_NOT_NULL(strstr(buildPressureReductionDiagnosticHtml(status, Locale::GermanGermany).c_str(), "1,234 s"));
     TEST_ASSERT_NOT_NULL(strstr(buildPressureReductionDiagnosticHtml(status, Locale::EnglishUnitedStates).c_str(), "1.234 s"));
 }
+// Capture the HTTP response at the same server boundary used on the ESP32.
+struct RedirectResponse {
+    String headers;
+    int status = 0;
+    String contentType;
+    String body;
+    bool headerBeforeResponse = false;
+    void sendHeader(const char* name, const char* value, bool first) {
+        TEST_ASSERT_EQUAL_INT(0, status);
+        const String line = String(name) + ": " + value + "\r\n";
+        headers = first ? line + headers : headers + line;
+        headerBeforeResponse = true;
+    }
+    void send(int code, const char* type, const char* content) {
+        TEST_ASSERT_TRUE(headerBeforeResponse);
+        status = code;
+        contentType = type;
+        body = content;
+    }
+};
+void test_redirects_preserve_http_protocol_for_all_ui_locales() {
+    const Locale locales[] = {Locale::GermanGermany,
+        Locale::EnglishUnitedKingdom, Locale::EnglishUnitedStates};
+    const char* targets[] = {"/actuators", "/controllers", "/values", "/display",
+        "/display?page=1#text-preview", "/display?page=2#text-preview"};
+    for (const Locale locale : locales) {
+        // Rendering localized UI text must have no effect on the response.
+        TEST_ASSERT_TRUE(webText(locale, TextId::Sensors)[0] != '\0');
+        for (const char* target : targets) {
+            RedirectResponse response;
+            response.headers = "Cache-Control: no-store\r\n";
+            sendSeeOther(response, target);
+            const String expected = String("Location: ") + target
+                + "\r\nCache-Control: no-store\r\n";
+            TEST_ASSERT_EQUAL_STRING(expected.c_str(), response.headers.c_str());
+            TEST_ASSERT_EQUAL_INT(303, response.status);
+            TEST_ASSERT_EQUAL_STRING("text/plain", response.contentType.c_str());
+            TEST_ASSERT_EQUAL_STRING("See Other", response.body.c_str());
+        }
+    }
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_redirects_preserve_http_protocol_for_all_ui_locales);
     RUN_TEST(test_decimal_inputs_follow_locale_without_localizing_storage);
     RUN_TEST(test_location_and_temperature_age_views_use_configured_locale);
     RUN_TEST(test_locale_aliases_and_invalid_input);

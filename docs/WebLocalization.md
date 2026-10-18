@@ -15,7 +15,7 @@ steuert die Darstellung; Deutsch verwendet `de-DE` (Eingabe auch `de_de`).
 
 ## Nicht zu übersetzen
 
-- HTTP-Routen, Feldnamen, DOM-IDs, CSS-Klassen, JSON-Schlüssel und Protokollwerte.
+- HTTP-Headernamen, HTTP-Routen, Feldnamen, DOM-IDs, CSS-Klassen, JSON-Schlüssel und Protokollwerte.
 - MQTT-Topics, Payloads, Discovery-Daten und stabile Eigenschafts-/Enum-Codes.
 - Benutzerdefinierte Geräte-, Sensor-, Aktor-, Controller- und Wertnamen sowie
   Enum-Beschriftungen und die vom Benutzer verfassten Display-Inhalte.
@@ -25,3 +25,7 @@ steuert die Darstellung; Deutsch verwendet `de-DE` (Eingabe auch `de_de`).
 
 Eine übersetzte Beschriftung darf niemals den gespeicherten oder übertragenen
 Wert verändern. Die Übersetzung gehört ausschließlich in die Präsentationsschicht.
+
+HTTP-303-Weiterleitungen verwenden zentral `sendSeeOther` aus
+`firmware/include/HttpRedirect.h`. Der Headername `Location`, der Statuscode und
+das Weiterleitungsziel sind unabhängig von der eingestellten UI-Sprache.

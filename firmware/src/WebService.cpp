@@ -1,3 +1,4 @@
+#include "HttpRedirect.h"
 #include "ControllerTargetIdentity.h"
 #include "WebService.h"
 #include "WebLocalization.h"
@@ -1597,7 +1598,7 @@ void WebService::handleDisplayOutputsSave() {
     if (!configurationService_.setDisplayConfiguration(candidate)) {
         sendResult(uiText(TextId::DisplaySaveFailed), "/display", uiText(TextId::CouldNotStoreDisplaySettingsStorageFailureOr), false); return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/display"); server_.send(303);
+    sendSeeOther(server_, "/display");
 }
 
 void WebService::handleDisplaySave() {
@@ -1638,8 +1639,7 @@ void WebService::handleDisplaySave() {
         sendResult(uiText(TextId::DisplaySaveFailed), "/display", uiText(TextId::CouldNotStoreDisplaySettingsStorageFailureOr), false);
         return;
     }
-    server_.sendHeader(uiText(TextId::Location), pageIndex == 0 ? "/display?page=1#text-preview" : "/display?page=2#text-preview");
-    server_.send(303);
+    sendSeeOther(server_, pageIndex == 0 ? "/display?page=1#text-preview" : "/display?page=2#text-preview");
 }
 
 void WebService::handleMeasurements() {
@@ -2827,8 +2827,7 @@ void WebService::handleActuatorState(OnOffState state) {
             actuatorOperationFailure(result, configurationService_.getLocale()), false);
         return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/actuators", true);
-    server_.send(303, "text/plain", "See Other");
+    sendSeeOther(server_, "/actuators");
 }
 void WebService::handleActuatorLevel() {
     const long requestedSlot = server_.arg("slot").toInt();
@@ -2860,8 +2859,7 @@ void WebService::handleActuatorLevel() {
             uiText(TextId::TheLevelCapableActuatorRejectedTheOperation), false);
         return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/actuators", true);
-    server_.send(303, "text/plain", "See Other");
+    sendSeeOther(server_, "/actuators");
 }
 void WebService::handleActuatorApply() {
     if (runtimeManager_.pendingAction() != RuntimeAction::RestartActuatorRuntime) {
@@ -2877,8 +2875,7 @@ void WebService::handleActuatorApply() {
             false);
         return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/actuators", true);
-    server_.send(303, "text/plain", "See Other");
+    sendSeeOther(server_, "/actuators");
 }
 void WebService::handleControllerSave() {
     const long requestedSlot = server_.arg("slot").toInt();
@@ -2996,8 +2993,7 @@ void WebService::handleControllerApply() {
             false);
         return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/controllers", true);
-    server_.send(303, "text/plain", "See Other");
+    sendSeeOther(server_, "/controllers");
 }
 void WebService::handleControllerStart() {
     handleControllerRuntimeOperation(true);
@@ -3025,8 +3021,7 @@ void WebService::handleControllerRuntimeOperation(bool start) {
         sendResult(uiText(TextId::ControllerCommandFailed), "/controllers", message.c_str(), false);
         return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/controllers", true);
-    server_.send(303, "text/plain", "See Other");
+    sendSeeOther(server_, "/controllers");
 }
 void WebService::handleRestart() { if(otaService_.busy()){sendResult(uiText(TextId::RestartUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult(uiText(TextId::Restarting),"/firmware",uiText(TextId::TheDeviceIsRestartingNow),true); performExplicitRestart(); }
 void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!configurationService_.resetToDefaults()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }

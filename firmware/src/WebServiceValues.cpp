@@ -1,3 +1,4 @@
+#include "HttpRedirect.h"
 #include "WebService.h"
 #include "ValueWebView.h"
 
@@ -62,7 +63,7 @@ void WebService::handleValueSave() {
     else if (!valueRuntime_.saveDefinition(definition, create))
         error = uiText(TextId::CouldNotSaveAnEnabledSelectorMayRequire);
     if (error) { sendPage(uiText(TextId::ValueSaveFailed), "/values", buildValueEditorHtml(definition, create, error, configurationService_.getLocale()), 400); return; }
-    server_.sendHeader(uiText(TextId::Location), "/values"); server_.send(303, "text/plain", "");
+    sendSeeOther(server_, "/values");
 }
 void WebService::handleValueSet() {
     ValueId id;
@@ -74,13 +75,13 @@ void WebService::handleValueSet() {
         sendResult(uiText(TextId::ValueUnchanged), "/values", result == ValueCommandResult::StorageFailed
             ? uiText(TextId::CouldNotStoreTheNewValuePreviousState) : uiText(TextId::UnknownValueOrOptionReloadTheValuesPage), false); return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/values"); server_.send(303, "text/plain", "");
+    sendSeeOther(server_, "/values");
 }
 void WebService::handleValueDelete() {
     ValueId id;
     if (!parseValueId(server_.arg("id"), id) || !valueRuntime_.remove(id)) {
         sendResult(uiText(TextId::DeleteFailed), "/values", uiText(TextId::UnknownValueReferencedByAnEnabledSelectorOr), false); return;
     }
-    server_.sendHeader(uiText(TextId::Location), "/values"); server_.send(303, "text/plain", "");
+    sendSeeOther(server_, "/values");
 }
 } // namespace EnvNode
