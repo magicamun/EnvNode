@@ -62,3 +62,9 @@ Farbrollen; Warnungen behalten ihre semantischen Farben.
 Sensoren enthält die I²C-Treiberübersicht sowie ausdrücklich öffentliche WIP-Seiten
 für RainDetector und SCT013. Firmware- und Displayangaben folgen dem am
 9. Oktober 2026 geprüften Quellstand; Treiberlisten bei Änderungen abgleichen.
+
+Aktuelle PCB-Stände in Navigation, Produktseiten und Download-URLs:
+Mini 0.8.1, Weather 0.2.1 und ORing Power 0.1.1. Der Asset-Hook stellt die
+PDFs zusätzlich unter diesen Patchnamen bereit; bisherige Download-URLs bleiben
+als identische Aliase erreichbar. Die Quelldateinamen im Hardwareverzeichnis
+bleiben unverändert. ORing enthält die Basisanleitung 0.1 samt Ergänzung für 0.1.1.

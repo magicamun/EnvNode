@@ -1,10 +1,10 @@
-# EnvNode Weather / Weatherstation
+# EnvNode Weather 0.2.1
 
 EnvNode Weather ist das Mainboard für eine fest installierte Wetterstation.
 Es kombiniert ein ESP32-DevKitC mit einem Modulslot, zwei I²C-Bussen und
-zusätzlichen direkten Sensoranschlüssen. Diese Seite beschreibt **Revision 0.2**.
+zusätzlichen direkten Sensoranschlüssen. Diese Seite beschreibt **PCB-Revision 0.2.1**.
 
-[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, Rev. 0.2)](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.2.1)](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf){ .md-button }
 
 Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.2.1**.
 Die Board Identity bleibt bei **0.2**; bisherige Prüfprotokolle behalten ihren historischen Stand.
@@ -164,7 +164,7 @@ Die PDF-Anleitung enthält dieselben Anschlussreferenzen als Ergänzung vom
 
 ## Bestückung und erste Inbetriebnahme
 
-Die [PDF-Anleitung](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf)
+Die [PDF-Anleitung](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf)
 enthält den detaillierten Bestückungs- und Prüfablauf.
 
 1. Platinenrevision und Anleitung abgleichen.

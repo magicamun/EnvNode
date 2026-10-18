@@ -36,9 +36,9 @@ nav:
   - Kompatibilität: compatibility.md
   - Mainboards:
       - Übersicht: mainboards/index.md
-      - EnvNode Mini: mainboards/mini/index.md
-      - Weatherstation: mainboards/weatherstation/index.md
-      - ORing Power: mainboards/oring-power/index.md
+      - EnvNode Mini 0.8.1: mainboards/mini/index.md
+      - Weatherstation 0.2.1: mainboards/weatherstation/index.md
+      - ORing Power 0.1.1: mainboards/oring-power/index.md
   - Module:
       - Übersicht: modules/index.md
       - DuoRelay: modules/duo-relay/index.md

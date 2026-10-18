@@ -23,6 +23,19 @@ DOWNLOADS = {
 }
 
 
+# Current PCB patch names for public downloads. Keep the existing URLs available
+# for bookmarks; both names serve the same reviewed guide (ORing: base + supplement).
+for _base, _patch in (
+    ("EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf",
+     "EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.1.pdf"),
+    ("EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf",
+     "EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf"),
+    ("ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf",
+     "ORing_Power_Bestueckungs_und_Bringup_Rev0.1.1.pdf"),
+):
+    DOWNLOADS[f"assets/downloads/{_patch}"] = DOWNLOADS[f"assets/downloads/{_base}"]
+
+
 # Shared, reviewed Mini reference views also used by the Weather guide.
 for _ref in ("ADC1", "J5"):
     for _view in ("oblique", "top"):
