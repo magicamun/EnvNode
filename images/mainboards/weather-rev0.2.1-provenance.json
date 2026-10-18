@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-18",
+  "pcb_revision": "0.2.1",
+  "board_identity_revision": "0.2",
+  "renderer": "KiCad CLI 10.0",
+  "render_options": "--width 2000 --height 2000 --side top --background transparent --quality high --rotate '-25,0,5' --perspective --zoom 0.72",
+  "transparent_crop_px": [
+    260,
+    476,
+    1819,
+    1679
+  ],
+  "source_sha256": {
+    "Power.kicad_sch": "1b1e36652d6621b422b7d9de3e1460a93c4376938a50cd0f9d70fc41bdb67155",
+    "Weatherstation.kicad_pro": "8abf38bba2fd30609637821f99721fa50fcfeeb752a8c4feab95ea5f54802c97",
+    "Weatherstation.kicad_sch": "947f5fcef8747bdb8fa0b48401ed678914f973e002579f13f121f278a8a4f508",
+    "SlotA.kicad_sch": "08575310281bf13715ff1b76f3a23dd3777e89d7fede6c446bf04f4076f1672e",
+    "qwiic.kicad_sch": "047540728d00ee9a955c5807119e125a0a1fada2133fdb335e175ead853fcb1e",
+    "gpio.kicad_sch": "fef9f739a8ab8b702d6f67de3bc0a6f6af5e98d3c8eefef4a304895d4f398c16",
+    "Weatherstation.kicad_pcb": "03522844fad0329562dca237da38add60c2cfe2100cccc07ab42ce9277234f69",
+    "PCB.kicad_sch": "04b61087758ed3db550336a319e9a180bac551b3461eb8a1879add806ebccd1d",
+    "ESP32.kicad_sch": "b349d0243cf7ae922ee4f81923d4203e3e015d186cb218f4325d61d67b34d97c"
+  },
+  "image_sha256": "45c017836fc69485a049a459b8a2a7c78168efacd55452afa2c5101a59b7398a"
+}

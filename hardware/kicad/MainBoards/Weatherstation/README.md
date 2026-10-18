@@ -42,7 +42,7 @@ Revision 0.2 connects I2C0 SDA to pin 5 and SCL to pin 6. The earlier reversed a
 
 ## Validation
 
-Run schematic ERC, PCB DRC, and schematic-PCB parity checks after every schematic, footprint, routing, zone, or rule change. Revision 0.2 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, environmental, or manufacturing tests. The current procedure is in `Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf` (5 October 2026). It includes the corrected I2C0 and GPIO assignments, passive continuity checks, the corrected C1 description, and SHA-256 fingerprints of the KiCad sources. The recorded ERC/DRC results are the historical checks of 28 September 2026, not a new validation run. The Revision 0.1 PDF remains as a historical reference.
+Run schematic ERC, PCB DRC, and schematic-PCB parity checks after every schematic, footprint, routing, zone, or rule change. Revision 0.2 still requires physical bring-up and production validation; the KiCad consistency checks do not replace electrical, thermal, EMC, environmental, or manufacturing tests. The current procedure is in `Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf` (updated 18 October 2026 for PCB 0.2.1). It includes the corrected I2C0 and GPIO assignments, passive continuity checks, the corrected C1 description, and SHA-256 fingerprints of the KiCad sources. The recorded ERC/DRC results are the historical checks of 28 September 2026, not a new validation run. The Revision 0.1 PDF remains as a historical reference.
 
 See the [hardware overview](../../../../docs/Hardware.md), [module-interface specification](../../../../docs/EnvNode_Module_Interface_Hardware_Specification.md), [ORing Power documentation](../../Power/ORing%20Power/README.md), and [board identity record](../../../../docs/BoardIdentityRecord.md).
 
@@ -59,7 +59,7 @@ The shown silkscreen belongs to Mini; Weather adds corresponding labels in PCB p
 
 See the [illustrated board guide](../../../../docs/site/mainboards/weatherstation/index.md) and
 [render sources, provenance, and model notices](../../../../images/envnode-mini/connectors/README.md).
-The original guide pages and their historical validation records are retained.
+Historical validation records are retained; the current board renderings and source fingerprints were refreshed on 18 October 2026.
 
 ## PCB patch 0.2.1 (18 October 2026)
 
@@ -69,3 +69,16 @@ editor grouping and plot metadata may differ. Board Identity remains 0.2, with
 no profile change or reprovisioning. The existing 0.2 guide remains applicable.
 See the [revision convention](../../../../docs/BoardIdentityRecord.md).
 Gerber jobs identify 0.2.1; generated Gerber directories remain ignored by Git.
+
+## Assembly documentation refresh (18 October 2026)
+
+The current guide now identifies PCB patch **0.2.1**, dated **18 October 2026**.
+Its board renderings were generated from that exact working-tree PCB using the
+shared ORing camera settings. Section 1.1 includes EnvNode article numbers and
+ENK-00020 for the assembled ORing-Power Rev. 0.1 module. The source SHA-256
+fingerprints were refreshed together with the images.
+
+Board Identity remains **0.2**. Historical ERC/DRC results retain their original
+dates; this documentation refresh did not perform a new electrical validation.
+The existing Rev0.2 PDF filename is retained for stable download links.
+Render sources and provenance: [images/mainboards](../../../../images/mainboards/README.md).

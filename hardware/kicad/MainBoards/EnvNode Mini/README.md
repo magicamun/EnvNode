@@ -67,7 +67,7 @@ The two-pin ORing Power input is outside this reference's scope.
 
 See the [illustrated board guide](../../../../docs/site/mainboards/mini/index.md) and
 [render sources, provenance, and model notices](../../../../images/envnode-mini/connectors/README.md).
-The original guide pages and their historical validation records are retained.
+Historical validation records are retained; the current board renderings and source fingerprints were refreshed on 18 October 2026.
 
 ## PCB patch 0.8.1 (18 October 2026)
 
@@ -77,3 +77,16 @@ editor grouping and plot metadata may differ. Board Identity remains 0.8, with
 no profile change or reprovisioning. The existing 0.8 guide remains applicable.
 See the [revision convention](../../../../docs/BoardIdentityRecord.md).
 Gerber jobs identify 0.8.1; generated Gerber directories remain ignored by Git.
+
+## Assembly documentation refresh (18 October 2026)
+
+The current guide now identifies PCB patch **0.8.1**, dated **18 October 2026**.
+Its board renderings were generated from that exact working-tree PCB using the
+shared ORing camera settings. Section 1.1 includes EnvNode article numbers and
+ENK-00020 for the assembled ORing-Power Rev. 0.1 module. The source SHA-256
+fingerprints were refreshed together with the images.
+
+Board Identity remains **0.8**. Historical ERC/DRC results retain their original
+dates; this documentation refresh did not perform a new electrical validation.
+The existing Rev0.8 PDF filename is retained for stable download links.
+Render sources and provenance: [images/mainboards](../../../../images/mainboards/README.md).

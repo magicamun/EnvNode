@@ -2,8 +2,8 @@
 
 | Baustein | Einordnung | Dokumentierter Stand |
 | --- | --- | --- |
-| [EnvNode Mini](mini/index.md) | Kompaktes Mainboard mit zwei Modulslots | Revision 0.8 |
-| [EnvNode Weather / Weatherstation](weatherstation/index.md) | Mainboard mit einem Modulslot und zusätzlichen direkten Anschlüssen | Revision 0.2 |
+| [EnvNode Mini](mini/index.md) | Kompaktes Mainboard mit zwei Modulslots | PCB 0.8.1; Board Identity 0.8 |
+| [EnvNode Weather / Weatherstation](weatherstation/index.md) | Mainboard mit einem Modulslot und zusätzlichen direkten Anschlüssen | PCB 0.2.1; Board Identity 0.2 |
 | [ORing Power](oring-power/index.md) | Aufgelöteter Versorgungsbaustein für Mainboards | Anleitung 0.1; PCB-Beschriftungsstand 0.1.1 |
 
 Die Produktseiten enthalten Anschlüsse, Versorgung, Bestückung und erste Inbetriebnahme

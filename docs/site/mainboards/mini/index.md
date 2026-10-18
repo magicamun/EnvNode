@@ -6,6 +6,9 @@ Diese Seite beschreibt **Hardware-Revision 0.8**.
 
 [Bestückungs- und Bring-up-Anleitung herunterladen (PDF, Rev. 0.8)](../../assets/downloads/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf){ .md-button }
 
+Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.8.1**.
+Die Board Identity bleibt bei **0.8**; bisherige Prüfprotokolle behalten ihren historischen Stand.
+
 ## Überblick
 
 | Merkmal | Revision 0.8 |

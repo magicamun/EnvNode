@@ -6,6 +6,9 @@ zusätzlichen direkten Sensoranschlüssen. Diese Seite beschreibt **Revision 0.2
 
 [Bestückungs- und Bring-up-Anleitung herunterladen (PDF, Rev. 0.2)](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf){ .md-button }
 
+Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.2.1**.
+Die Board Identity bleibt bei **0.2**; bisherige Prüfprotokolle behalten ihren historischen Stand.
+
 ## Überblick
 
 | Merkmal | Ausführung |

@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-18",
+  "pcb_revision": "0.8.1",
+  "board_identity_revision": "0.8",
+  "renderer": "KiCad CLI 10.0",
+  "render_options": "--width 2000 --height 2000 --side top --background transparent --quality high --rotate '-25,0,5' --perspective --zoom 0.72",
+  "transparent_crop_px": [
+    270,
+    635,
+    1769,
+    1448
+  ],
+  "source_sha256": {
+    "EnvNode Mini.kicad_pro": "603dabfd1a7ad8409fda4197f8eaa18cf53902ab3ce4011e0492460370ac20da",
+    "EnvNode Mini.kicad_sch": "78fa1c97c988f2115f3457a907520ab12068aeb523717326baaf04e4c8b47e57",
+    "EnvNode Mini.kicad_pcb": "2e364ea20551036751df5349409bbd5b25c72e8f0e5c8e0cb863ebe0561dfbbf",
+    "SlotB.kicad_sch": "649abacbdd409d99a35778051c58a5466877563ed6fda753ce3fb25c828c579d",
+    "SlotA.kicad_sch": "6acc11c48da4dce5fd633a443f920c35c617c4472b92fc866cc63f65c99d06f2",
+    "ADC.kicad_sch": "ff48076ff5b82145a34fdf95a253e811a9e1ee4cfc0862605f8838f099209a8e",
+    "ESP32Core.kicad_sch": "40aa71dcac9cbd5451ee75570263b55051d8e4af0149612679af53c101b425f4",
+    "Power.kicad_sch": "e31c045d9ccf359a5704e7f459512f885d122886f80038bd971eea93a1a3da0a",
+    "PCB.kicad_sch": "ed19908459ebba8a0c0957a70928c7e5f7a28a7906c4574dc2a22a69e9126551"
+  },
+  "image_sha256": "da5ae89e840f95a4175c2e5303259e2cac6f923fe38c3ddd71877089a25b3c18"
+}

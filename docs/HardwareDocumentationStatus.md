@@ -55,3 +55,11 @@ No PDF is generated for these boards without selecting it with the user.
   findings; inspect the current sources before carrying any historical finding
   into a new guide.
 - Assembly-guide availability does not imply production approval.
+
+## Mainboard rendering refresh — 18 October 2026
+
+Mini and Weather assembly guides now document PCB patches 0.8.1 and 0.2.1,
+respectively, with current KiCad renderings, source SHA-256 fingerprints and
+document date 18 October 2026. Existing download filenames are retained.
+Board Identity stays at 0.8 / 0.2. Historical ERC/DRC records remain historical;
+no new validation run is implied. See [render provenance](../images/mainboards/README.md).
