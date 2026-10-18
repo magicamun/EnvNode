@@ -103,3 +103,12 @@ The 5 October verification above describes the earlier source snapshot. No new
 ERC/DRC or physical qualification is claimed by this silkscreen-only update.
 The published library design block remains at its earlier snapshot; it has not
 been republished with these labels. No new 3D illustration was generated.
+
+## Illustrated edge-pad test points (18 October 2026)
+
+The assembly PDF includes an additional landscape reference page for all five U2
+castellated pads, their nets and the standalone-module measurement conditions.
+The [web guide](../../../../docs/site/mainboards/oring-power/index.md) contains the
+same overview and test-point table. Measurements use U2.1 / GND as their reference.
+The native PCB/STEP render omits the unavailable J1 housing model; its actual
+footprint remains visible. See [render provenance and sources](../../../../images/oring-power/testpoints/README.md).

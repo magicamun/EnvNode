@@ -4,6 +4,8 @@ from mkdocs.structure.files import File
 
 DOWNLOADS = {
     "assets/downloads/EnvNode-LICENSE.txt": "LICENSE",
+    "assets/images/oring-power/ORing-Power-testpoints.png":
+        "images/oring-power/testpoints/ORing-Power-testpoints.png",
     "assets/downloads/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf":
         "hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf",
     "assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf":

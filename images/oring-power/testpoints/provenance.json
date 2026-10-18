@@ -1,0 +1,15 @@
+{
+  "board": "hardware/kicad/DesignBlocks/ORing Power/ORing Power.kicad_pcb",
+  "sha256": "df83af34ffdeca74bf51baeb2a5b21115ba8f441d49b31c917e56db63b5332e1",
+  "renderer": "KiCad 10.0.5",
+  "view": "top, component side, USB-C bottom",
+  "pads": {
+    "U2.1": "GND",
+    "U2.2": "+5V",
+    "U2.5": "+3V3_SYS",
+    "U2.4": "+3V3_DEVKIT",
+    "U2.3": "+3V3_EXT"
+  },
+  "schematic_netlist_matches_pcb": true,
+  "missing_model": "J1; original PCB footprint shown without connector housing"
+}

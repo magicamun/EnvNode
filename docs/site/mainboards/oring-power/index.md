@@ -99,6 +99,34 @@ muss diese Ausführung unterstützen.
 
 Beachte dabei auch die Inbetriebnahmeanleitung des verwendeten Mainboards.
 
+## Prüfpunkte an der Außenkante
+
+![ORing Power: fünf Randpads mit Pinbelegung und Sollwerten](../../assets/images/oring-power/ORing-Power-testpoints.png)
+
+Die Ansicht zeigt die **Bestückungsseite mit USB-C unten**. Die fünf metallisierten
+Randpads bilden die Schnittstelle U2; sie sind zugleich gut zugängliche Messpunkte.
+Die Zuordnung wurde gegen PCB und Schaltplan-Netzliste geprüft. Die farbigen Kreise
+sind Dokumentationsmarkierungen, kein zusätzlicher Platinenaufdruck. Für J1 fehlt
+das 3D-Modell; dort zeigt das Rendering ausschließlich den tatsächlichen Footprint.
+
+| Messpunkt | Lage im Bild | Funktion / Erwartung beim 5-V-Einzeltest |
+| --- | --- | --- |
+| U2.1 / GND | Links mittig | Massebezug für alle Spannungsmessungen |
+| U2.2 / `+5V` | Links oben | 5,0 V bei entsprechend eingestellter Quelle |
+| U2.3 / `+3V3_EXT` | Rechts unten | Ca. 3,3 V vom Regler, vor D1 |
+| U2.4 / `+3V3_DEVKIT` | Rechts mittig | DevKit-Eingang; beim reinen 5-V-Einzeltest nicht aktiv gespeist |
+| U2.5 / `+3V3_SYS` | Rechts oben | Etwas unter `+3V3_EXT`, entsprechend dem Spannungsabfall über D1 |
+
+Alle Spannungen gegen **U2.1 / GND** messen. Den ersten Test ohne Mainboard mit
+nur einer 5-V-Quelle durchführen und die Strombegrenzung zunächst auf etwa 100 mA
+setzen. An U2.4 beim reinen 5-V-Test keinen festen 3,3-V-Sollwert voraussetzen.
+
+Für den getrennten DevKit-Pfadtest die 5-V-Versorgung vollständig trennen und eine
+strombegrenzte, potentialfreie 3,3-V-Quelle zwischen U2.4 und GND anschließen.
+An U2.5 werden dann 3,3 V abzüglich des Spannungsabfalls über D2 erwartet.
+Rückspeisung und alle weiteren Prüfungen gemäß PDF-Anleitung kontrollieren.
+Die Übersicht ist dort als zusätzliche Prüfpunktseite enthalten.
+
 ## Prüfstand
 
 Die Quellunterlagen berichten für den 21. September 2026 über ERC ohne Fehler oder
