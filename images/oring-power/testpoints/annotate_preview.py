@@ -55,5 +55,5 @@ text(65,1530,'PCB-Pads und Schaltplan-Netzliste abgeglichen. J1 ohne 3D-Modell: 
 text(65,1575,'Originale KiCad-Geometrie · Pinmarkierungen sind Dokumentations-Overlays · Lizenz: siehe LICENSE',27,color='#526779')
 meta=PngImagePlugin.PngInfo();meta.add_text('License','LicenseRef-EnvNode-Use-and-Redistribution-1.0; see ../../../LICENSE')
 image.convert('RGB').save(HERE/'ORing-Power-testpoints-preview.png',pnginfo=meta)
-board=ROOT/'hardware/kicad/DesignBlocks/ORing Power/ORing Power.kicad_pcb'
+board=ROOT/'hardware/kicad/Power/ORing Power/ORing Power.kicad_pcb'
 (HERE/'provenance.json').write_text(json.dumps({'board':str(board.relative_to(ROOT)),'sha256':hashlib.sha256(board.read_bytes()).hexdigest(),'renderer':'KiCad 10.0.5','view':'top, component side, USB-C bottom','pads':{t.split(' · ')[0]:t.split(' · ')[1] for _,_,t,_,_ in rows},'schematic_netlist_matches_pcb':True,'missing_model':'J1; original PCB footprint shown without connector housing'},indent=2)+'\n')

@@ -19,11 +19,17 @@ revision-specific assembly documentation remain the hardware references.
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_MainBoard/` contains the mainboard-side 2 x 7 connector block.
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_SMD/` contains the bottom-mounted SMD module connector block.
 - `hardware/kicad/DesignBlocks/EnvNode_Module_Connector_Daughterboard_THT/` contains the bottom-mounted THT module connector block.
-- [`hardware/kicad/DesignBlocks/ORing Power/`](../hardware/kicad/DesignBlocks/ORing%20Power/README.md) contains the castellated 5 V input, 3.3 V regulator, and dual-source 3.3 V ORing module together with its mainboard integration contract.
+
+## Power Boards
+
+- [`hardware/kicad/Power/ORing Power/`](../hardware/kicad/Power/ORing%20Power/README.md) contains the castellated 5 V input, 3.3 V regulator, and dual-source 3.3 V ORing module together with its mainboard integration contract.
+
+The editable power-board projects live in `hardware/kicad/Power/`. Published reusable
+KiCad design blocks remain in `hardware/kicad/Libraries/EnvNodeDesignBlocks.kicad_blocks/`.
 
 ## Mainboard Implementation
 
-[`hardware/kicad/MainBoards/EnvNode Mini/`](../hardware/kicad/MainBoards/EnvNode%20Mini/README.md) is at Revision 0.8 and implements two module slots. It exposes two top-entry 4-pin JST-SH connectors for each of `I2C0` and `I2C1`, using the pin order GND, `+3V3_SYS`, SDA, SCL. Each bus has one 4.7 kΩ pull-up pair that can be connected to `+3V3_SYS` through individual, normally open solder jumpers. Two additional top-entry JST-PH connectors expose the input-only GPIO34 / ADC1_CH6 and GPIO35 / ADC1_CH7 signals together with GND, `+5V`, and `+3V3_SYS`. The mainboard identity is stored in a `24LC32` EEPROM on `I2C0` at address `0x50`. Input protection, 5 V conversion, and 3.3 V source ORing are supplied by the castellated [`ORing Power`](../hardware/kicad/DesignBlocks/ORing%20Power/README.md) module.
+[`hardware/kicad/MainBoards/EnvNode Mini/`](../hardware/kicad/MainBoards/EnvNode%20Mini/README.md) is at Revision 0.8 and implements two module slots. It exposes two top-entry 4-pin JST-SH connectors for each of `I2C0` and `I2C1`, using the pin order GND, `+3V3_SYS`, SDA, SCL. Each bus has one 4.7 kΩ pull-up pair that can be connected to `+3V3_SYS` through individual, normally open solder jumpers. Two additional top-entry JST-PH connectors expose the input-only GPIO34 / ADC1_CH6 and GPIO35 / ADC1_CH7 signals together with GND, `+5V`, and `+3V3_SYS`. The mainboard identity is stored in a `24LC32` EEPROM on `I2C0` at address `0x50`. Input protection, 5 V conversion, and 3.3 V source ORing are supplied by the castellated [`ORing Power`](../hardware/kicad/Power/ORing%20Power/README.md) module.
 
 [`hardware/kicad/MainBoards/Weatherstation/`](../hardware/kicad/MainBoards/Weatherstation/README.md) contains `EnvNode Weather` Revision 0.2 for the BOX4U 5U310700 enclosure. It provides one EnvNode module slot, four top-entry JST-SH connectors per I²C bus, and ten top-entry JST-PH connectors for four ADC inputs and six GPIOs. The JST-PH pin order is GND, `+5V`, signal, `+3V3_SYS`. Board identity, configurable I²C pull-ups, ESP32 processing, and the castellated ORing Power supply follow the same architecture as EnvNode Mini.
 

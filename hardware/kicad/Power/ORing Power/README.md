@@ -4,7 +4,7 @@ The ORing Power module is a 39 mm x 15 mm castellated daughterboard for EnvNode 
 
 ## Project and Library Items
 
-- Editable KiCad project: `hardware/kicad/DesignBlocks/ORing Power/`
+- Editable KiCad project: `hardware/kicad/Power/ORing Power/`
 - Published design block: `hardware/kicad/Libraries/EnvNodeDesignBlocks.kicad_blocks/ORing Power.kicad_block/`
 - Mainboard symbol: `EnvNode-Symbols:ORingPower_Module`
 - Module footprint: `EnvNode-Footprints:ORingPower_Module_Castellated`

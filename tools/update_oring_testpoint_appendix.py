@@ -9,7 +9,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 ROOT=Path(__file__).resolve().parents[1]
-PDF=ROOT/'hardware/kicad/DesignBlocks/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf'
+PDF=ROOT/'hardware/kicad/Power/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf'
 MARKER='PRÜFPUNKTE AN DER AUSSENKANTE / ERGÄNZUNG'
 
 def main():
