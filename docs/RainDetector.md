@@ -37,10 +37,11 @@ second, never in a blocking wait.
 3. In Controllers, configure an enabled **RainDetector**, selecting that sensor
    and heater actuator. Save and apply. One enabled controller owns the output;
    one RainDetector controller may use a given frequency sensor.
-4. Explicitly **Start** the controller. Like the lab, wait at least six seconds
-   before the first spray. Start arms observation with heating off; it does not
-   immediately heat. After boot or controller rebuild, RainDetector stays stopped.
-   Other controller types retain their previous automatic startup behavior.
+4. Enabled sensors and controllers start automatically after boot or runtime
+   activation, just like the other implementations. Wait at least six seconds
+   before the first spray. The controller starts observation with heating off;
+   it does not immediately heat. Manual Stop disarms it until Start or the next
+   boot/runtime activation. A separate configurable autostart option is deferred.
 
 All seven policy settings persist in NVS and configuration backup:
 
@@ -98,8 +99,8 @@ already active. Raw Hz uses the normal measurement channel and publication rate.
 Policy parameters are published under the existing controller parameter topics;
 commands use `cmd/parameter/<name>` with these names: `edge_ms`, `drop_hz`,
 `drop_permille`, `end_seconds`, `dry_hz`, `hysteresis_hz`, `dry_seconds`.
-A parameter change saves configuration and rebuilds controllers; explicitly Start
-RainDetector again afterward. Retained authoritative parameter state is never a
+A parameter change saves configuration and rebuilds controllers; enabled
+RainDetector controllers automatically resume observation with heating off. Retained authoritative parameter state is never a
 command subscription.
 
 ## First hardware acceptance

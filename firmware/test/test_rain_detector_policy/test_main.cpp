@@ -259,7 +259,7 @@ class EmptyRainMeasurements : public IMeasurementResolver {
 public:
     bool latest(const MeasurementSourceReference&,MeasurementSnapshot&) const override { return false; }
 };
-void test_runtime_requires_explicit_start_after_boot_and_rebuild() {
+void test_runtime_autostarts_enabled_rain_controller_with_heater_off() {
     RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
     EmptyRainMeasurements measurements;
     ControllerFactory factory(measurements,actors,clock,logger,nullptr,&source);
@@ -271,11 +271,14 @@ void test_runtime_requires_explicit_start_after_boot_and_rebuild() {
     slots[0].implementationConfiguration.rainDetector.targetActuatorId=1;
     TEST_ASSERT_TRUE(runtime.initialize(slots));
     ControllerRuntimeInfo info;
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_TRUE(info.running);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    TEST_ASSERT_TRUE(runtime.stopController(1)==ControllerOperationResult::NoAction);
     TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_FALSE(info.running);
     TEST_ASSERT_TRUE(runtime.startController(1)==ControllerOperationResult::Completed);
     TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_TRUE(info.running);
     TEST_ASSERT_TRUE(runtime.rebuild(slots));
-    TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_FALSE(info.running);
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_TRUE(info.running);
     TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
 }
 int main() {
@@ -288,6 +291,6 @@ int main() {
     RUN_TEST(test_sensor_keeps_local_frequency_independent_of_sample_publication);
     RUN_TEST(test_frequency_metadata_does_not_reuse_ratio_measurements);
     RUN_TEST(test_controller_operates_without_UTC_and_recovers_after_signal_failure);
-    RUN_TEST(test_runtime_requires_explicit_start_after_boot_and_rebuild);
+    RUN_TEST(test_runtime_autostarts_enabled_rain_controller_with_heater_off);
     return UNITY_END();
 }

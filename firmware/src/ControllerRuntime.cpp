@@ -292,10 +292,7 @@ bool ControllerRuntime::beginComposition(
         RuntimeEntry& entry = entries[index];
         if ((entry.selector != nullptr) != (phase == 1)) continue;
         entry.info.initializationAttempted = true;
-        // RainDetector keeps the lab's explicit arming rule across boot/rebuild.
-        // Other controller types retain their existing automatic activation.
-        entry.info.lastOperationResult = entry.rainDetector
-            ? entry.controller->stop() : entry.controller->begin();
+        entry.info.lastOperationResult = entry.controller->begin();
         updateRuntimeInfo(entry);
         if (entry.info.lastOperationResult == ControllerOperationResult::InvalidConfiguration) {
             return false;

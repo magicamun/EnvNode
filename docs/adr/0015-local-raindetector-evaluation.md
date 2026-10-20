@@ -193,10 +193,11 @@ backup and MQTT parameter/status adapters use the same configuration. Optional
 climate references are stored but no preventive climate heating is implemented.
 See `docs/RainDetector.md` for configuration, diagnostics and hardware acceptance.
 
-For this controller the lab's explicit arming rule refines ADR-0013 startup:
-configured/enabled makes it available, but boot or runtime rebuild leaves it
-stopped and requests output OFF. Explicit runtime Start arms it. Existing controller
-implementations keep their automatic activation. Sensor faults abort the cycle
+Production follows ADR-0013 startup: configured/enabled sensors and controllers
+start automatically after boot or runtime activation. RainDetector begins
+observation with heater output OFF, then waits for a new wetting edge after the
+guard. The user explicitly confirmed this on 2026-10-20; a separate configurable
+autostart option is deferred. The standalone lab retains its explicit AUTO ON. Sensor faults abort the cycle
 while leaving an already started RainDetector armed; manual override disarms it.
 One frequency sensor may belong to only one enabled RainDetector controller, since
 its gate and heater-level interpretation have one owner. Sensor/controller factory
