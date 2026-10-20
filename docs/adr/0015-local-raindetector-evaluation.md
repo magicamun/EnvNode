@@ -118,3 +118,31 @@ This supersedes the earlier retain-heating-on-invalid lab policy, after its
 behavior was exercised on hardware. Explicit OFF also disarms AUTO.
 Configuration is volatile and console-only in this lab stage. Hardware validation
 and later sensor/NVS/web/MQTT integration remain separate work.
+
+## Production port boundaries (2026-10-20)
+
+Port increment 1 extracts the hardware-free `RainDetectorPolicy` into
+`firmware/lib/RainDetectorEvaluation`. The lab now calls that exact implementation;
+its console parser remains in the lab. The legacy recovery evaluator is retained
+for historical replay only. This increment does not register a production sensor
+or controller yet.
+
+The production acquisition sensor owns only its configurable frequency input and
+publishes raw frequency plus explicit validity/diagnostics. A separate actuator
+owns the configurable heater output and safe OFF lifecycle. A RainDetector
+controller resolves sensor and actuator identities through existing runtime
+interfaces, evaluates copied measurements with the shared policy and applies
+heater intentions through actuator capabilities. No driver pointer belongs in
+application, web or MQTT logic. High-rate acquisition/evaluation must continue
+independently from MQTT publication rates; a slow latest-value cache alone must
+not lose subsecond edges. Resource ownership, measurement freshness and runtime
+replacement must be resolved before registering the complete controller.
+
+Temperature and humidity sources are optional controller references, not sensor
+GPIO configuration or acquisition dependencies. Missing climate sources do not
+prevent wetting detection and dry heating. Dew-point prevention and a configurable
+cold-temperature heating rule (discussion example: below 4 degrees C) are deferred;
+no climate heating is implemented by this port increment. Future independent
+heating reasons must prevent dry-cycle completion from cancelling required cold
+heating. SD logging remains deferred until the SD hardware is available. Normal
+operation never depends on a card.

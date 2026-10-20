@@ -1,6 +1,8 @@
 {
   "name": "RainDetectorEvaluation",
-  "version": "0.1.0",
-  "description": "Incremental RainDetector evaluation. EnvNode-owned: see ../../../LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
-  "build": {"includeDir": "src"}
+  "version": "0.2.0",
+  "description": "Bounded RainDetector wetting/rain/dry policy and legacy recovery evaluator. EnvNode-owned: see ../../../LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
+  "build": {
+    "includeDir": "src"
+  }
 }

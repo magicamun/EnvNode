@@ -520,7 +520,7 @@ Erholungskern und steuern die neue Automatik NICHT. Für diesen Versuch sind
 Hosttest:
 
 ```sh
-c++ -std=c++11 -Wall -Wextra -Werror -I lab/RainDetector-PCNT/include \
+c++ -std=c++11 -Wall -Wextra -Werror -I lab/RainDetector-PCNT/include -I firmware/lib/RainDetectorEvaluation/src \
   lab/RainDetector-PCNT/tests/test_lab_rain_automation.cpp -o /tmp/envnode-auto-test
 /tmp/envnode-auto-test
 ```
@@ -538,3 +538,8 @@ violetter Kreis = Benetzung, türkisfarbenes Quadrat = Regenende, grüne Raute =
 Trockenbestätigung. Ereignistabelle und Zoom enthalten auch Heizwechsel und
 Automatik-Aktivierung. Rote Dreiecke bleiben Kandidaten des alten Offline-Detektors.
 AUTO-Meldungen sind keine unabhängigen optischen Beobachtungen.
+
+Die Automatik verwendet jetzt `firmware/lib/RainDetectorEvaluation/src/RainDetectorPolicy.h`.
+`LabRainAutomation.h` enthält nur Konsolenparser und Kompatibilitätsnamen.
+Die Entscheidungslogik existiert nur einmal; die Hardwareanbindung an die normale
+Firmware folgt schrittweise. Der alte Erholungskern bleibt als Vergleich erhalten.
