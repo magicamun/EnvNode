@@ -1,0 +1,81 @@
+# EnvNode SD-Card Rev. 0.1
+
+EnvNode-owned materials: LicenseRef-EnvNode-Use-and-Redistribution-1.0; see the
+repository root LICENSE. Adafruit designs/adapters and KiCad models retain their
+respective licenses; see `../../../Libraries/Adafruit-Breakouts/`.
+
+FullSize carrier (38 x 64 mm) for the assembled **Adafruit MicroSD card breakout
+board+ / product 254** (Reichelt DEBO MICROSD). J1 is the bottom-mounted 2x7
+EnvNode module connector. U1 mounts on the top through a vertical 1x8, 2.54 mm
+header/socket assembly; choose its height and supports together. U2 (24LC32,
+SOIC-8) and C1 (100 nF, 1206) are on the bottom; R1 (10 kOhm, 1206) is on top.
+
+## Purpose and scope
+
+Optional field recording for Raindetector validation in real rain. Measurements
+and diagnostics are evaluated externally. Normal measurement, MQTT and heater
+control must remain functional without an SD card or on a storage error. This
+hardware does not provide weather analysis, historical aggregation or a finished
+firmware logging subsystem.
+
+## Connections
+
+| U1 pin | Function | J1 / carrier connection |
+| --- | --- | --- |
+| 1 | 5V_IN | J1.4, +5V |
+| 2 | 3V3_REG | Deliberately unconnected; onboard regulator output |
+| 3 | GND | J1.1 |
+| 4 | CLK | J1.13, SPI_SCK |
+| 5 | DO / MISO | J1.12, SPI_MISO |
+| 6 | DI / MOSI | J1.11, SPI_MOSI |
+| 7 | CS | J1.14, slot-specific SPI_CS |
+| 8 | CD | J1.9, AUX_GPIO1; R1 = 10 kOhm to +3V3_SYS |
+
+Do not join U1.2 to +3V3_SYS. I2C0 connects U2 for identification at 0x52 in
+slot A or 0x53 in slot B; A1 is HIGH, A2 LOW, A0 follows J1.3. C1 decouples
++3V3_SYS locally. I2C1 and AUX_GPIO2 are unused. CD is a mechanical contact:
+Adafruit documents LOW without a card and HIGH with a card; verify the actual
+socket's polarity.
+
+## Assembly and bring-up
+
+[Bestückungs- und Bring-up-Anleitung Rev. 0.1](Documentation/SD_Card_Bestueckungs_und_Bringup_Rev0.1.pdf)
+
+Follow the existing [module interface specification](../../../../../docs/EnvNode_Module_Interface_Hardware_Specification.md).
+The overlap of U1 and H1 is intentional. Fit/check the H1 fastening before
+installing U1; ensure insulated mechanical clearance beneath the breakout.
+The four U1 support holes are 2.2 mm (#2 hardware), not M2.5. H1/H2 are 2.7 mm
+for M2.5 hardware. Spacer dimensions must match the actual connector stack.
+The model views show the carrier without U1, which has no 3D model assigned.
+
+Local `sym-lib-table` and `fp-lib-table` point to libraries in this checkout.
+The PDF can be regenerated with `tools/build_sd_card_bringup.py` using Python,
+ReportLab and Pillow. Reviewed KiCad render images are kept beside the PDF;
+rerender them after a PCB revision. The generator rejects stale image manifests.
+
+## Verification - 20 October 2026
+
+KiCad 10.0.5: DRC with zone refill and schematic parity check returned 0
+violations, 0 unconnected pads, 0 footprint errors and 0 parity issues. ERC:
+0 errors, 6 warnings (three unused interface labels and three mixed local/global
+labels). See `Documentation/SD_Card_ERC_Rev0.1.txt` and
+`Documentation/SD_Card_DRC_Rev0.1.txt` for the recorded check settings/results.
+This is a CAD review, not a completed physical bring-up or field validation.
+
+## Open work
+
+- [ ] Create/assign parts and BOM in **InvenTree** (including PCB, U1, headers,
+  sockets and fastening hardware). No complete InvenTree BOM exists yet.
+- [ ] Assemble and complete the measurement/bring-up record.
+- [ ] Define and support a dedicated SD-Card module descriptor/profile; do not
+  provision a descriptor for an unrelated module.
+- [ ] Implement/test optional asynchronous diagnostic recording, export and
+  graceful degradation on missing/full/failed SD cards before field use.
+- [ ] Qualify the selected card, power budget, timestamp source and enclosure
+  under the actual outdoor installation conditions.
+
+## Original documentation
+
+- https://www.adafruit.com/product/254
+- https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/download
+- https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/arduino-wiring

@@ -1,0 +1,35 @@
+EnvNode generated CAD review report. LicenseRef-EnvNode-Use-and-Redistribution-1.0; see root LICENSE.
+
+ERC report (2026-10-20T12:04:51, Encoding UTF8)
+Report includes: Errors, Warnings
+
+***** Sheet /
+[isolated_pin_label]: Label connected to only one pin
+    ; warning
+    @(116.84 mm, 69.85 mm): Label 'I2C1_SDA'
+[isolated_pin_label]: Label connected to only one pin
+    ; warning
+    @(129.54 mm, 69.85 mm): Label 'I2C1_SCL'
+[isolated_pin_label]: Label connected to only one pin
+    ; warning
+    @(129.54 mm, 72.39 mm): Label 'AUX_GPIO2'
+[same_local_global_label]: Local and global labels have same name
+    ; warning
+    @(173.99 mm, 59.69 mm): Global Label '+3V3_SYS'
+    @(129.54 mm, 62.23 mm): Label '+3V3_SYS'
+[same_local_global_label]: Local and global labels have same name
+    ; warning
+    @(184.15 mm, 64.77 mm): Global Label 'I2C0_SDA'
+    @(116.84 mm, 67.31 mm): Label 'I2C0_SDA'
+[same_local_global_label]: Local and global labels have same name
+    ; warning
+    @(184.15 mm, 67.31 mm): Global Label 'I2C0_SCL'
+    @(129.54 mm, 67.31 mm): Label 'I2C0_SCL'
+
+ ** ERC messages: 6  Errors 0  Warnings 6
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters
