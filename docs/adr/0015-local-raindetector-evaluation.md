@@ -146,3 +146,39 @@ no climate heating is implemented by this port increment. Future independent
 heating reasons must prevent dry-cycle completion from cancelling required cold
 heating. SD logging remains deferred until the SD hardware is available. Normal
 operation never depends on a card.
+
+### Acquisition increment
+
+`IRainFrequencyInput` isolates pulse acquisition from sensor/controller code.
+`Esp32RainFrequencyInput` uses exclusively claimed classic-ESP32 PCNT units;
+`poll()` returns immediately until a nominal 250-ms gate is complete. It then
+pauses and reads count/overflow. The next service pass starts the next gate,
+after the local observer/controller has applied any heater transition. There is no
+blocking wait, GPIO sampling loop, interrupt callback or dynamic allocation.
+Actual gate start/end times use the 64-bit monotonic ESP timer. Counter wrap is
+invalid rather than a plausible residual-count frequency. Zero pulses and gate
+durations outside 100–1500 ms are explicit invalid measurements. PCNT API failure
+stops and releases this input only; signal loss does not destroy the input, so a
+subsequent normal gate can recover. A copied fault code describes the observation,
+not a proven physical cause (e.g. an unplugged head).
+
+`RainFrequencyAcquisition` forwards every gate synchronously through an abstract
+observer and stores only the latest snapshot for slower publication. It is
+independently testable with simulated inputs. Local control will consume monotonic
+gates before any UTC/NTP-dependent publication acceptance, so startup without
+network time cannot disable physical heating control. The controller must process
+fault windows as well as valid gates; driver failure is delivered once and stops
+acquisition until an explicit restart. Future runtime removal must stop its
+controller/actuator before releasing the acquisition object.
+
+This increment supplies acquisition infrastructure; it intentionally does not yet
+advertise a selectable sensor implementation. A dedicated frequency measurement
+in Hz must be added rather than reusing `rain_detector_level` (ratio). Next steps
+are sensor slot/resource/NVS integration, frequency metadata/publication, then the
+RainDetector controller with high-rate local observation and existing actuator
+capabilities. The existing PWM actuator already supplies a level interface; no
+second heater GPIO driver is required.
+
+Manual actuator changes during a gate must invalidate/restart that gate when the
+runtime adapter is integrated; an assumed heater level must never label a mixed
+window as a valid measurement.
