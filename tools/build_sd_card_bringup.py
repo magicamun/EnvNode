@@ -55,7 +55,7 @@ assert 'Found 0 DRC violations' in (DOC / 'SD_Card_DRC_Rev0.1.txt').read_text()
 c = canvas.Canvas(str(OUTPUT), pagesize=(W, H), pageCompression=1)
 c.setTitle('EnvNode SD-Card Rev. 0.1 - Bestückungs- und Bring-up-Anleitung')
 c.setAuthor('EnvNode')
-c.setSubject('Erstbestückung und Hardware-Bring-up; InvenTree-BOM und Firmwareintegration offen')
+c.setSubject('Erstbestückung und Hardware-Bring-up; InvenTree-BOM ENK-00022 angelegt; physischer Bring-up und Firmwareintegration offen')
 page = 0
 y = 0
 
@@ -142,15 +142,16 @@ table(['Ref.','Anz.','Value / elektrische Daten','Artikelzuordnung','Gehäuse / 
  ['R1','1','10 kOhm, CD-Pull-up','ENP-00018','1206 / 3216 Metric'],
  ['J1','1','Stiftleiste 2x7, 2,54 mm, Bottom-Mount','ENP-00059','EnvNode Bottom-Footprint'],
  ['PCB','1','SD-Card FullSize Rev. 0.1','ENP-00137','38,00 x 64,00 mm'],
- ['U1-Pins','1','Gerade Stiftleiste 1x8, direkt eingelötet','ENP-00019, falls nicht bei U1 enthalten','2,54 mm, 1,0-mm-Bohrungen'],
- ['Mechanik','n. B.','Isolierende Distanzstücke, Schrauben / Muttern','Längen festlegen','H1/H2: M2,5; U1: #2 / 2,2 mm'],
+ ['U1-Pins','1','Gerade Stiftleiste 1x8, direkt eingelötet','Bei U1 enthalten; ENP-00019 nur Ersatz','2,54 mm, 1,0-mm-Bohrungen'],
+ ['Mechanik','n. B.','Isolierende Distanzstücke, Schrauben / Muttern','Nicht in BOM; erst prüfen','H1/H2: M2,5; U1: #2 / 2,2 mm'],
  ['Speicher','1','Geeignete microSD; für ersten Test FAT32','Karte dokumentieren','Keine Karte im Lieferumfang voraussetzen']
 ],[55,28,177,100,WIDTH-360])
-box('<b>InvenTree-BOM bleibt TODO.</b> Die Tabelle ist eine Bestückungsliste aus dem CAD-Stand, '
-    'keine fertig angelegte InvenTree-BOM. U1 und PCB sind angelegt; Standardteile sind identifiziert. '
-    'Bausatz/BOM, Befestigungslängen und Adafruit-Herstellerverknüpfung sind noch offen.')
-para('Direkte Montage über die 1x8-Stiftleiste; keine zusätzliche Buchse. ENP-00019 nur separat '
-     'in die BOM aufnehmen, wenn die Leiste nicht im Lieferumfang von U1 enthalten ist.')
+box('<b>InvenTree-BOM: ENK-00022, angelegt und validiert.</b> Sechs Positionen, jeweils Menge 1: '
+    'PCB, U1, U2, C1, R1 und J1. Distanzhülsen und Montagematerial sind auf Nutzerwunsch '
+    'bis zur Prüfung ausdrücklich nicht in Bestand/BOM aufgenommen. microSD separat.')
+para('Direkte Montage über die laut Adafruit mitgelieferte 1x8-Stiftleiste; keine zusätzliche Buchse. '
+     'ENP-00019 ist kein zusätzlicher BOM-Posten. Lieferumfang vor dem Aufbau prüfen. '
+     'BOM: inventree.thielemann.intern/web/part/135/bom')
 para('Modulidentifikation: U2 wird aus +3V3_SYS versorgt. I2C0-Adresse 0x52 in Slot A bzw. 0x53 in Slot B. '
      'Ein SD-Card-spezifischer Descriptor und seine Firmwareunterstützung sind noch offen; keine fremde Modulvorlage verwenden.')
 end()
@@ -290,7 +291,7 @@ para('Die Überdeckung von H1 mit U1 ist eine bewusste mechanische Entscheidung.
      'ist im realen Aufbau zu prüfen. Renderings zeigen die Trägerplatine; ein Modell des '
      'Adafruit-Breakouts fehlt. Ein CAD-Prüflauf bestätigt keine mechanische Passprobe oder Feldqualifikation.')
 sub('Offene Arbeiten vor produktiver Feldaufzeichnung')
-for t in ['<b>InvenTree:</b> U1 = ENP-00136 und PCB = ENP-00137 sind angelegt; Standardteile stehen in Abschnitt 1.1. Bausatz/BOM noch erstellen, Befestigungshöhen festlegen und Adafruit-Herstellerverknüpfung ergänzen.',
+for t in ['<b>InvenTree:</b> ENK-00022 und seine sechs BOM-Positionen sind angelegt und validiert. Bestellte Distanzhülsen erst nach Prüfung durch den Nutzer in Bestand/BOM aufnehmen; Adafruit-Herstellerverknüpfung noch ergänzen.',
  'Dedizierten Modul-Descriptor und SD-Card-Firmwarepfad definieren; keine Identität eines anderen Moduls übernehmen.',
  'Schreib-/Lesetest und Messprotokoll an der bestückten Hardware abschließen.',
  'Asynchrone Aufzeichnung, Export, Fehlerbehandlung und weiterlaufende Mess-/Heizfunktionen implementieren und testen.',

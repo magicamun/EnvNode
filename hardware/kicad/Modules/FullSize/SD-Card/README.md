@@ -66,18 +66,41 @@ are per module; no stock receipts, consumption or orders were booked.
 | C1 | 1 | ENP-00006 | 100 nF X7R, 1206 |
 | R1 | 1 | ENP-00018 | 10 kOhm, 1206 |
 | J1 | 1 | ENP-00059 | 2x7, 2.54 mm, vertical bottom-mount header |
-| U1 header | 1 if not supplied with U1 | ENP-00019 | 1x8, 2.54 mm, straight header |
+| U1 header | included in U1 | ENP-00019 only as replacement | 1x8, 2.54 mm, straight header; not a separate BOM line |
 
 Mount U1 directly through the 1x8 header; no additional socket is planned.
-Check the breakout delivery contents before adding ENP-00019 as a separate BOM
-line, to avoid counting a supplied header twice. Mechanical fastener/spacer
-parts and lengths remain to be selected. The microSD card is separate operating
+Adafruit specifies the unattached header as included with product 254. The BOM
+therefore counts it within ENP-00136, not again as ENP-00019. Check delivery
+contents before assembly. Mechanical fastener/spacer parts and lengths remain
+to be selected; ordered spacers are intentionally excluded from stock and BOM
+until the user has checked them. The microSD card is separate operating
 accessory/test equipment; its exact type remains to be documented.
 
 ENP-00136 and ENP-00137 were newly created. The Reichelt supplier part for
 ENP-00136 is saved; the separate Adafruit manufacturer-part link (MPN 254) is
-still open. Existing standard-part records were reused. A kit/assembly and its
-complete InvenTree BOM have **not** been created yet.
+still open. Existing standard-part records were reused.
+
+### Kit and BOM
+
+[ENK-00022 - EnvNode SD-Card Bausatz Rev. 0.1](http://inventree.thielemann.intern/web/part/135/bom)
+is a loose-parts kit in category Kits, configured like the other module kits
+(assembly/component, not purchased as a complete kit). Its BOM was created,
+checked and marked validated in InvenTree on 20 October 2026:
+
+| Ref. | Part | Qty |
+| --- | --- | ---: |
+| PCB | ENP-00137 | 1 |
+| U1 | ENP-00136 | 1 |
+| U2 | ENP-00102 | 1 |
+| C1 | ENP-00006 | 1 |
+| R1 | ENP-00018 | 1 |
+| J1 | ENP-00059 | 1 |
+
+Six required positions, no variants or optional lines. The header is included
+with U1. Distanzhülsen/spacers and other mounting hardware are deliberately not
+included; no stock receipts or consumption were posted for them. The microSD
+card is separate accessory/test equipment. BOM validation records the checked
+parts list, not completion of a physical build or field qualification.
 
 ## Verification - 20 October 2026
 
@@ -91,8 +114,10 @@ This is a CAD review, not a completed physical bring-up or field validation.
 ## Open work
 
 - [x] Create U1 and PCB parts in **InvenTree** and identify the existing standard parts.
-- [ ] Create the kit/assembly and complete **InvenTree BOM**, avoiding duplicate
-  header counting; select fastening lengths/parts and link Adafruit as manufacturer.
+- [x] Create and validate **ENK-00022** with its six-position InvenTree BOM.
+- [ ] Check ordered spacers before selecting their lengths/parts and adding them
+  to stock or BOM; keep them excluded until approved.
+- [ ] Link Adafruit as the separate manufacturer record for U1.
 - [ ] Assemble and complete the measurement/bring-up record.
 - [ ] Define and support a dedicated SD-Card module descriptor/profile; do not
   provision a descriptor for an unrelated module.
