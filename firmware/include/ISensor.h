@@ -10,6 +10,8 @@
 
 namespace EnvNode {
 
+struct RainFrequencySnapshot;
+
 class ISensor {
 public:
     virtual ~ISensor() = default;
@@ -21,6 +23,9 @@ public:
     virtual bool supports(MeasurementType type) const = 0;
 
     virtual bool pressureReductionStatus(PressureReductionStatus& status) const { return false; }
+
+    virtual void rainFrequencyHeaterChanged() {}
+    virtual bool rainFrequencySnapshot(RainFrequencySnapshot&) const { return false; }
 
     virtual void begin() = 0;
     virtual SensorOperationResult service(IMeasurementSink& output) = 0;

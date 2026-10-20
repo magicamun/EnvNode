@@ -13,7 +13,7 @@ ControllerRuntime::ControllerRuntime(ControllerFactory& factory, ILogger& logger
     , inactiveFactory_(&secondaryFactory_)
     , secondaryFactory_(
         factory.measurementResolver(), factory.actuatorResolver(),
-        factory.monotonicClock(), logger, factory.values())
+        factory.monotonicClock(), logger, factory.values(), factory.rainSource())
     , logger_(logger)
     , entries_(new (std::nothrow) RuntimeEntry[MaxControllerSlotCount]) {
 }
@@ -149,7 +149,11 @@ bool ControllerRuntime::validateComposition(
             return false;
         }
         if (!slot.enabled || slot.implementation == ControllerImplementation::None) continue;
-        if (slot.implementation == ControllerImplementation::Blink) {
+        if (slot.implementation == ControllerImplementation::RainDetector) {
+            const auto& rain = slot.implementationConfiguration.rainDetector;
+            if (!rain.policy.valid() || !isValidSensorId(rain.sourceSensorId)
+                || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(rain.targetActuatorId))) return false;
+        } else if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
                 slot.implementationConfiguration.blink;
             if ((!validModuleActuatorReference(slot.moduleTarget)
@@ -194,6 +198,10 @@ bool ControllerRuntime::validateComposition(
     for (size_t i = 0; i < MaxControllerSlotCount; ++i) {
         if (!slots[i].enabled) continue;
         for (size_t j = 0; j < i; ++j) {
+            if (slots[i].implementation==ControllerImplementation::RainDetector
+                && slots[j].enabled && slots[j].implementation==ControllerImplementation::RainDetector
+                && slots[i].implementationConfiguration.rainDetector.sourceSensorId
+                    == slots[j].implementationConfiguration.rainDetector.sourceSensorId) return false;
             if (slots[j].enabled && controllerTargetsSameActuator(slots[i], slots[j],
                 nullptr, &activeFactory_->actuatorResolver())) return false;
         }
@@ -216,7 +224,11 @@ bool ControllerRuntime::constructComposition(
         strncpy(entry.info.name, slot.name.c_str(), MaxControllerSlotNameLength);
         entry.info.name[MaxControllerSlotNameLength] = '\0';
         entry.info.implementation = slot.implementation;
-        if (slot.implementation == ControllerImplementation::Blink) {
+        if (slot.implementation == ControllerImplementation::RainDetector) {
+            const auto& rain = slot.implementationConfiguration.rainDetector;
+            if (!rain.policy.valid() || !isValidSensorId(rain.sourceSensorId)
+                || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(rain.targetActuatorId))) return false;
+        } else if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
                 slot.implementationConfiguration.blink;
             entry.info.targetActuatorId = blink.targetActuatorId;
@@ -247,6 +259,12 @@ bool ControllerRuntime::constructComposition(
         entry.blink = instance.blink;
         entry.threshold = instance.threshold;
         entry.selector = instance.selector;
+        entry.rainDetector = instance.rainDetector;
+        if (entry.rainDetector) {
+            entry.info.targetActuatorId = slot.implementationConfiguration.rainDetector.targetActuatorId;
+            entry.info.sourceSensorId = slot.implementationConfiguration.rainDetector.sourceSensorId;
+            entry.info.sourceMeasurementType = MeasurementType::RainDetectorFrequency;
+        }
         if (entry.info.constructionResult != ControllerFactoryResult::Created
             || entry.controller == nullptr) {
             logger_.errorf("Controller %u construction failed: result=%u",
@@ -274,7 +292,10 @@ bool ControllerRuntime::beginComposition(
         RuntimeEntry& entry = entries[index];
         if ((entry.selector != nullptr) != (phase == 1)) continue;
         entry.info.initializationAttempted = true;
-        entry.info.lastOperationResult = entry.controller->begin();
+        // RainDetector keeps the lab's explicit arming rule across boot/rebuild.
+        // Other controller types retain their existing automatic activation.
+        entry.info.lastOperationResult = entry.rainDetector
+            ? entry.controller->stop() : entry.controller->begin();
         updateRuntimeInfo(entry);
         if (entry.info.lastOperationResult == ControllerOperationResult::InvalidConfiguration) {
             return false;
@@ -298,7 +319,13 @@ void ControllerRuntime::stopComposition(
 }
 
 void ControllerRuntime::updateRuntimeInfo(RuntimeEntry& entry) {
-    if (entry.selector != nullptr) {
+    if (entry.rainDetector != nullptr) {
+        entry.info.running = entry.rainDetector->running();
+        entry.info.targetAvailable = entry.rainDetector->targetAvailable();
+        entry.info.rainDetector = entry.rainDetector->result();
+        entry.info.rainWettingCount = entry.rainDetector->wettingCount();
+        entry.info.sourceAvailable = entry.info.rainDetector.valid;
+    } else if (entry.selector != nullptr) {
         entry.info.running = entry.selector->running();
         entry.info.targetAvailable = entry.selector->targetAvailable();
         entry.info.thresholdDecision = entry.selector->decision();

@@ -4,6 +4,11 @@
 #include <RainDetectorPolicy.h>
 #include "RainFrequencyConversion.h"
 #include "RainFrequencyAcquisition.h"
+#include "RainDetectorSensor.h"
+#include "RainDetectorController.h"
+#include "ControllerRuntime.h"
+#include "UnitConverter.h"
+#include "MqttTopic.h"
 using namespace EnvNode;
 HardwareSerial Serial;
 // Native firmware build links the existing logger/GPIO adapters as well.
@@ -112,6 +117,167 @@ void test_acquisition_delivers_every_window_and_fault_without_publication_poll()
     TEST_ASSERT_TRUE(acquisition.begin(27));
     TEST_ASSERT_FALSE(acquisition.latest(copy));
 }
+class FrequencyTestClock : public IMonotonicClock {
+public:
+    uint32_t now = 0;
+    uint32_t nowMs() const override { return now; }
+};
+class FrequencyMeasurementSink : public IMeasurementSink {
+public:
+    Measurement last;
+    unsigned count = 0;
+    void emit(const Measurement& m) override { last=m; ++count; }
+};
+void test_sensor_keeps_local_frequency_independent_of_sample_publication() {
+    TestFrequencyInput input;
+    FrequencyTestClock clock;
+    FrequencyMeasurementSink sink;
+    RainDetectorSensor sensor(1,27,input,clock);
+    sensor.begin();
+    input.next=RainFrequencyPoll::Window;
+    input.window=rainFrequencyWindow(0,250000,10000,false);
+    clock.now=250; sensor.service(sink);
+    TEST_ASSERT_EQUAL_UINT(0,sink.count);
+    RainFrequencySnapshot snapshot;
+    TEST_ASSERT_TRUE(sensor.rainFrequencySnapshot(snapshot));
+    TEST_ASSERT_EQUAL_UINT(1,snapshot.revision);
+    TEST_ASSERT_TRUE(snapshot.window.valid());
+    sensor.sample(sink);
+    TEST_ASSERT_TRUE(sink.last.valid);
+    TEST_ASSERT_TRUE(sink.last.type == MeasurementType::RainDetectorFrequency);
+    TEST_ASSERT_TRUE(isMeasurementContentStructurallyValid(sink.last));
+    input.window=rainFrequencyWindow(250000,500000,0,false);
+    clock.now=500; sensor.service(sink);
+    sensor.sample(sink); TEST_ASSERT_FALSE(sink.last.valid);
+    TEST_ASSERT_TRUE(sensor.state()==SensorState::Degraded);
+    input.window=rainFrequencyWindow(500000,750000,8000,false);
+    clock.now=750; sensor.service(sink); sensor.sample(sink);
+    TEST_ASSERT_TRUE(sink.last.valid);
+    TEST_ASSERT_TRUE(sensor.state()==SensorState::Ready);
+    clock.now=2500; sensor.sample(sink); TEST_ASSERT_FALSE(sink.last.valid);
+    TEST_ASSERT_TRUE(isMeasurementContentStructurallyValid(sink.last));
+    input.next=RainFrequencyPoll::Failed;
+    sensor.service(sink); TEST_ASSERT_TRUE(sensor.state()==SensorState::Failed);
+    input.next=RainFrequencyPoll::Pending;
+    clock.now=3600; sensor.service(sink);
+    sensor.sample(sink); TEST_ASSERT_FALSE(sink.last.valid);
+}
+void test_frequency_metadata_does_not_reuse_ratio_measurements() {
+    TEST_ASSERT_TRUE(measurementTypeMetadata(MeasurementType::RainDetectorFrequency).canonicalUnit==PresentationUnit::Hertz);
+    TEST_ASSERT_TRUE(measurementTypeMetadata(MeasurementType::RainDetectorLevel).canonicalUnit==PresentationUnit::Ratio);
+    TEST_ASSERT_TRUE(measurementTypeFromStableId("rain_detector_frequency")==MeasurementType::RainDetectorFrequency);
+    float hz=0;
+    TEST_ASSERT_TRUE(UnitConverter::convert(MeasurementType::RainDetectorFrequency,32000,PresentationUnit::Hertz,hz));
+    TEST_ASSERT_FLOAT_WITHIN(0.01F,32000,hz);
+    PresentationUnit unit;
+    TEST_ASSERT_TRUE(UnitConverter::parseStableKey("hertz",unit));
+    TEST_ASSERT_TRUE(unit==PresentationUnit::Hertz);
+}
+class RainTestLogger : public ILogger {
+public:
+    void begin(unsigned long) override {}
+    void println(const char*) override {}
+    void printf(const char*,...) override {}
+};
+class RainTestActor : public IOnOffActuator {
+public:
+    OnOffState output=OnOffState::Off;
+    uint8_t percent=100;
+    uint8_t outputPercent() const override { return output==OnOffState::On?percent:0; }
+    ActuatorOperationResult begin() override { return ActuatorOperationResult::Completed; }
+    ActuatorOperationResult shutdown() override { output=OnOffState::Off; return ActuatorOperationResult::Completed; }
+    ActuatorOperationResult setState(OnOffState state) override { output=state; percent=state==OnOffState::On?100:0; return ActuatorOperationResult::Completed; }
+    OnOffState state() const override { return output; }
+    bool initialized() const override { return true; }
+};
+class RainTestActors : public IOnOffActuatorResolver {
+public:
+    RainTestActor actor;
+    bool available=true;
+    IOnOffActuator* onOffActuator(ActuatorId id) override { return available&&id==1?&actor:nullptr; }
+};
+class RainTestSource : public IRainFrequencyResolver {
+public:
+    RainFrequencySnapshot frame;
+    bool available=true;
+    unsigned gateRestarts=0;
+    bool rainFrequencySnapshot(SensorId id,RainFrequencySnapshot& result) const override {
+        if (!available||id!=1) return false;
+        result=frame; return true;
+    }
+    void rainFrequencyHeaterChanged(SensorId) override { ++gateRestarts; }
+};
+void test_controller_operates_without_UTC_and_recovers_after_signal_failure() {
+    RainDetectorControllerConfiguration cfg; cfg.sourceSensorId=1; cfg.targetActuatorId=1;
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    RainDetectorController controller(cfg,ModuleActuatorReference{},source,actors,clock,logger);
+    TEST_ASSERT_TRUE(controller.begin()==ControllerOperationResult::Completed);
+    const auto frame=[&](float hz) {
+        clock.now+=250; ++source.frame.revision;
+        source.frame.acceptedMs=clock.now;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,
+            static_cast<uint32_t>(hz/4),false);
+        return controller.service();
+    };
+    for(unsigned i=0;i<25;++i)frame(34000);
+    frame(30000); TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    frame(0); TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    TEST_ASSERT_TRUE(controller.running());
+    for(unsigned i=0;i<25;++i)frame(30000);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    frame(29000); TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    clock.now+=2000; controller.service();
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    TEST_ASSERT_TRUE(controller.running());
+    for(unsigned i=0;i<25;++i)frame(29000);
+    frame(28000); TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    TEST_ASSERT_EQUAL_UINT(3,controller.wettingCount());
+    actors.actor.output=OnOffState::Off; controller.service();
+    TEST_ASSERT_FALSE(controller.running());
+    frame(26000); TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    TEST_ASSERT_GREATER_THAN_UINT(3,source.gateRestarts);
+    TEST_ASSERT_TRUE(controller.begin()==ControllerOperationResult::Completed);
+    for(unsigned i=0;i<25;++i)frame(34000);
+    frame(30000);
+    for(unsigned i=0;i<265;++i)frame(30000);
+    TEST_ASSERT_TRUE(controller.result().rain==RainDetectorRainState::EndEstimated);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    for(unsigned i=0;i<44;++i)frame(33000);
+    TEST_ASSERT_TRUE(controller.result().dry);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    for(unsigned i=0;i<25;++i)frame(33000);
+    frame(30000);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    actors.actor.percent=30; // Still logically On, but no longer full heat.
+    controller.service();
+    TEST_ASSERT_FALSE(controller.running());
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+
+
+}
+class EmptyRainMeasurements : public IMeasurementResolver {
+public:
+    bool latest(const MeasurementSourceReference&,MeasurementSnapshot&) const override { return false; }
+};
+void test_runtime_requires_explicit_start_after_boot_and_rebuild() {
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    EmptyRainMeasurements measurements;
+    ControllerFactory factory(measurements,actors,clock,logger,nullptr,&source);
+    ControllerRuntime runtime(factory,logger);
+    ControllerSlotConfiguration slots[MaxControllerSlotCount];
+    for(unsigned i=0;i<MaxControllerSlotCount;++i) { slots[i].slotId=i+1; slots[i].name="slot"; }
+    slots[0].enabled=true; slots[0].implementation=ControllerImplementation::RainDetector;
+    slots[0].implementationConfiguration.rainDetector.sourceSensorId=1;
+    slots[0].implementationConfiguration.rainDetector.targetActuatorId=1;
+    TEST_ASSERT_TRUE(runtime.initialize(slots));
+    ControllerRuntimeInfo info;
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_FALSE(info.running);
+    TEST_ASSERT_TRUE(runtime.startController(1)==ControllerOperationResult::Completed);
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_TRUE(info.running);
+    TEST_ASSERT_TRUE(runtime.rebuild(slots));
+    TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_FALSE(info.running);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+}
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_shared_policy_wetting_end_and_dry_are_independent);
@@ -119,5 +285,9 @@ int main() {
     RUN_TEST(test_config_is_atomic_and_bounded);
     RUN_TEST(test_frequency_conversion_detects_zero_wrap_and_gate_errors);
     RUN_TEST(test_acquisition_delivers_every_window_and_fault_without_publication_poll);
+    RUN_TEST(test_sensor_keeps_local_frequency_independent_of_sample_publication);
+    RUN_TEST(test_frequency_metadata_does_not_reuse_ratio_measurements);
+    RUN_TEST(test_controller_operates_without_UTC_and_recovers_after_signal_failure);
+    RUN_TEST(test_runtime_requires_explicit_start_after_boot_and_rebuild);
     return UNITY_END();
 }

@@ -19,10 +19,11 @@ enum class MeasurementType : uint8_t {
     HydrostaticPressure,
     WaterLevel,
     SeaLevelPressure,
+    RainDetectorFrequency,
 };
 
 constexpr uint8_t SupportedMeasurementTypeCount =
-    static_cast<uint8_t>(MeasurementType::SeaLevelPressure);
+    static_cast<uint8_t>(MeasurementType::RainDetectorFrequency);
 
 enum class MeasurementSemantics : uint8_t {
     Unknown,

@@ -190,6 +190,7 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     info.supportsAtmosphericPressure = entry.sensor->supports(MeasurementType::AtmosphericPressure);
     info.supportsSolarIrradiance = entry.sensor->supports(MeasurementType::SolarIrradiance);
     info.supportsSolarCellTemperature = entry.sensor->supports(MeasurementType::SolarCellTemperature);
+    info.supportsRainDetectorFrequency = entry.sensor->supports(MeasurementType::RainDetectorFrequency);
     info.supportsRainDetectorLevel = entry.sensor->supports(MeasurementType::RainDetectorLevel);
     info.supportsRainDetectorWet = entry.sensor->supports(MeasurementType::RainDetectorWet);
     info.supportsRainGaugeTip = entry.sensor->supports(MeasurementType::RainGaugeTip);
@@ -324,6 +325,16 @@ const SensorManager::SensorEntry* SensorManager::findEntry(SensorId id) const {
     }
 
     return nullptr;
+}
+
+void SensorManager::rainFrequencyHeaterChanged(SensorId id) {
+    auto* entry = findEntry(id);
+    if (entry) entry->sensor->rainFrequencyHeaterChanged();
+}
+
+bool SensorManager::rainFrequencySnapshot(SensorId id, RainFrequencySnapshot& result) const {
+    const auto* entry = findEntry(id);
+    return entry && entry->sensor->rainFrequencySnapshot(result);
 }
 
 } // namespace EnvNode

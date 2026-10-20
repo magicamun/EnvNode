@@ -10,7 +10,8 @@ SensorFactory::SensorFactory(IMonotonicClock& monotonicClock,
     I2CBusManager& i2cBusManager, ILogger& logger)
     : monotonicClock_(monotonicClock)
     , i2cBusManager_(i2cBusManager)
-    , logger_(logger) {
+    , logger_(logger)
+    , storage_(new (std::nothrow) SensorStorage[MaxSensorSlotCount]) {
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         constructed_[index] = SensorImplementation::None;
     }
@@ -24,6 +25,7 @@ ISensor* SensorFactory::create(
     size_t storageIndex,
     const SensorSlotConfiguration& slot,
     SensorFactoryResult& result) {
+    if (!storage_) { result = SensorFactoryResult::StorageUnavailable; return nullptr; }
     if (storageIndex >= MaxSensorSlotCount) {
         result = SensorFactoryResult::InvalidStorageIndex;
         return nullptr;
@@ -94,6 +96,11 @@ ISensor* SensorFactory::create(
                 monotonicClock_,
                 logger_);
             break;
+        case SensorImplementation::RainDetector: {
+            auto* instance = new (target) RainDetectorInstance(slot.slotId, slot.hardware.gpio.number, monotonicClock_);
+            sensor = &instance->sensor;
+            break;
+        }
         case SensorImplementation::RainGauge:
             sensor = new (target) RainGaugeSensor(
                 slot.slotId,
@@ -141,6 +148,9 @@ void SensorFactory::destroy(size_t storageIndex) {
             break;
         case SensorImplementation::AM2302:
             static_cast<AM2302Sensor*>(target)->~AM2302Sensor();
+            break;
+        case SensorImplementation::RainDetector:
+            static_cast<RainDetectorInstance*>(target)->~RainDetectorInstance();
             break;
         case SensorImplementation::RainGauge:
             static_cast<RainGaugeSensor*>(target)->~RainGaugeSensor();

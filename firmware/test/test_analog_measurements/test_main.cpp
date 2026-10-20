@@ -408,7 +408,8 @@ void test_new_measurement_metadata_ids_and_structural_validation() {
     TEST_ASSERT_EQUAL_UINT8(10, static_cast<uint8_t>(MeasurementType::HydrostaticPressure));
     TEST_ASSERT_EQUAL_UINT8(11, static_cast<uint8_t>(MeasurementType::WaterLevel));
     TEST_ASSERT_EQUAL_UINT8(12, static_cast<uint8_t>(MeasurementType::SeaLevelPressure));
-    TEST_ASSERT_EQUAL_UINT8(12, SupportedMeasurementTypeCount);
+    TEST_ASSERT_EQUAL_UINT8(13, SupportedMeasurementTypeCount);
+    TEST_ASSERT_EQUAL_UINT8(13, static_cast<uint8_t>(MeasurementType::RainDetectorFrequency));
     TEST_ASSERT_EQUAL_STRING("hydrostatic_pressure",
         measurementTypeStableId(MeasurementType::HydrostaticPressure));
     TEST_ASSERT_EQUAL_STRING("Water Level", measurementTypeMetadata(MeasurementType::WaterLevel).displayName);

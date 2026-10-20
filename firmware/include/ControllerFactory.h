@@ -2,6 +2,8 @@
 
 #include <cstddef>
 #include <type_traits>
+#include <memory>
+#include "RainDetectorController.h"
 
 #include "BlinkController.h"
 #include "ControllerSlotConfiguration.h"
@@ -24,6 +26,7 @@ struct ControllerFactoryInstance {
     BlinkController* blink = nullptr;
     ThresholdController* threshold = nullptr;
     SelectorController* selector = nullptr;
+    RainDetectorController* rainDetector = nullptr;
 };
 
 class ControllerFactory {
@@ -32,7 +35,7 @@ public:
         IMeasurementResolver& measurementResolver,
         IOnOffActuatorResolver& actuatorResolver,
         IMonotonicClock& monotonicClock,
-        ILogger& logger, const IEnumValueReader* values = nullptr);
+        ILogger& logger, const IEnumValueReader* values = nullptr, IRainFrequencyResolver* rainSource = nullptr);
     ~ControllerFactory();
 
     ControllerFactoryInstance create(
@@ -43,11 +46,12 @@ public:
     IMeasurementResolver& measurementResolver() const;
     IOnOffActuatorResolver& actuatorResolver() const;
     IMonotonicClock& monotonicClock() const;
+    IRainFrequencyResolver* rainSource() const { return rainSource_; }
     const IEnumValueReader* values() const { return values_; }
 
 private:
     using ControllerStorage = typename std::aligned_union<
-        0, BlinkController, ThresholdController, SelectorController>::type;
+        0, BlinkController, ThresholdController, SelectorController, RainDetectorController>::type;
     static_assert(sizeof(ControllerStorage) >= sizeof(BlinkController),
         "Controller storage must fit BlinkController");
     static_assert(sizeof(ControllerStorage) >= sizeof(ThresholdController),
@@ -67,7 +71,8 @@ private:
     IMonotonicClock& monotonicClock_;
     ILogger& logger_;
     const IEnumValueReader* values_;
-    ControllerStorage storage_[MaxControllerSlotCount];
+    IRainFrequencyResolver* rainSource_;
+    std::unique_ptr<ControllerStorage[]> storage_;
     ControllerImplementation constructed_[MaxControllerSlotCount];
 };
 

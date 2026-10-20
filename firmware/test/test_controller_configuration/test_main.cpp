@@ -10,6 +10,7 @@
 #include "ControllerImplementationRegistry.h"
 #include "ControllerWebSupport.h"
 #include "SelectorWebView.h"
+#include "ConfigurationBackup.h"
 #include "WebLocalization.h"
 
 using namespace EnvNode;
@@ -776,8 +777,42 @@ void test_slot_and_module_alias_cannot_claim_same_output() {
     TEST_ASSERT_FALSE(controllerTargetsSameActuator(first, second, slots));
 }
 
+void test_rain_detector_configuration_roundtrip_bounds_and_source_integrity() {
+    Fixture fixture;
+    auto sensor=fixture.service.getConfiguration().sensorSlots[4];
+    sensor.enabled=true; sensor.name="Rain Head";
+    sensor.implementation=SensorImplementation::RainDetector;
+    sensor.hardware=HardwareResourceAssignment::gpioResource(GpioResource(17));
+    sensor.schedule=SensorSchedule::periodic(5000);
+    TEST_ASSERT_TRUE(fixture.service.setSensorSlotConfiguration(sensor));
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(fixture.enabledActuator()));
+    auto slot=fixture.service.getConfiguration().controllerSlots[0];
+    slot.enabled=true; slot.name="Rain Control"; slot.implementation=ControllerImplementation::RainDetector;
+    auto& rain=slot.implementationConfiguration.rainDetector;
+    rain.sourceSensorId=5; rain.targetActuatorId=1; rain.policy.dryHz=34000;
+    rain.temperatureSource=MeasurementSourceReference(1,MeasurementType::Temperature);
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(slot));
+    ConfigurationService reboot; reboot.loadConfiguration();
+    const auto& loaded=reboot.getConfiguration().controllerSlots[0].implementationConfiguration.rainDetector;
+    TEST_ASSERT_EQUAL_UINT(34000,loaded.policy.dryHz);
+    TEST_ASSERT_EQUAL_UINT(5,loaded.sourceSensorId);
+    TEST_ASSERT_EQUAL_UINT(1,loaded.temperatureSource.sensorId);
+    TEST_ASSERT_EQUAL_UINT(17,reboot.getConfiguration().sensorSlots[4].hardware.gpio.number);
+    rain.policy.endSeconds=29;
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
+    rain.policy.endSeconds=300;
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(slot));
+    sensor.enabled=false; sensor.schedule.enabled=false;
+    TEST_ASSERT_FALSE(fixture.service.setSensorSlotConfiguration(sensor));
+    String backup; bool passwords=false; Configuration restored;
+    TEST_ASSERT_TRUE(encodeConfigurationBackup(fixture.service.getConfiguration(),false,"test",backup));
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,fixture.service.getConfiguration(),restored,passwords));
+    TEST_ASSERT_TRUE(fixture.service.validateRestore(restored));
+    TEST_ASSERT_EQUAL_UINT(300,restored.controllerSlots[0].implementationConfiguration.rainDetector.policy.endSeconds);
+}
+
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_slot_and_module_alias_cannot_claim_same_output);
+    UNITY_BEGIN(); RUN_TEST(test_rain_detector_configuration_roundtrip_bounds_and_source_integrity); RUN_TEST(test_slot_and_module_alias_cannot_claim_same_output);
     RUN_TEST(test_selector_persistence_dependencies_and_exclusive_target);
     RUN_TEST(test_controller_registry_uses_stable_ids_and_on_off_requirement);
     RUN_TEST(test_threshold_registry_uses_stable_id_and_on_off_requirement);

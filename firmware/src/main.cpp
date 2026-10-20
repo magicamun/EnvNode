@@ -87,15 +87,15 @@ static ActuatorMqttAdapter actuatorMqttAdapter(
 static ActuatorStatePublisher actuatorStatePublisher(
     logger, configurationService, mqttService, actuatorRuntime);
 static MeasurementSnapshotCache measurementSnapshotCache;
-static ControllerFactory controllerFactory(
-    measurementSnapshotCache, actuatorRuntime, monotonicClock, logger, &valueRuntime);
-static ControllerRuntime controllerRuntime(controllerFactory, logger);
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static SensorManager sensorManager(
     timeService,
     monotonicClock,
     measurementPublisher,
     measurementSnapshotCache);
+static ControllerFactory controllerFactory(
+    measurementSnapshotCache, actuatorRuntime, monotonicClock, logger, &valueRuntime, &sensorManager);
+static ControllerRuntime controllerRuntime(controllerFactory, logger);
 static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger);
 static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger);
 static SensorRuntime sensorRuntime(

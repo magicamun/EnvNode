@@ -56,6 +56,7 @@ bool UnitConverter::convert(
         case PresentationUnit::WattPerSquareMetre:
         case PresentationUnit::Ratio:
         case PresentationUnit::Metre:
+        case PresentationUnit::Hertz:
             presentationValue = canonicalValue;
             return true;
         case PresentationUnit::None:
@@ -66,6 +67,7 @@ bool UnitConverter::convert(
 
 const char* UnitConverter::symbol(PresentationUnit unit) {
     switch (unit) {
+        case PresentationUnit::Hertz: return "Hz";
         case PresentationUnit::DegreeCelsius: return "\xC2\xB0" "C";
         case PresentationUnit::DegreeFahrenheit: return "\xC2\xB0" "F";
         case PresentationUnit::Pascal: return "Pa";
@@ -85,6 +87,7 @@ const char* UnitConverter::symbol(PresentationUnit unit) {
 
 const char* UnitConverter::displayName(PresentationUnit unit) {
     switch (unit) {
+        case PresentationUnit::Hertz: return "Hertz";
         case PresentationUnit::DegreeCelsius: return "Celsius";
         case PresentationUnit::DegreeFahrenheit: return "Fahrenheit";
         case PresentationUnit::Pascal: return "Pascal";
@@ -104,6 +107,7 @@ const char* UnitConverter::displayName(PresentationUnit unit) {
 
 const char* UnitConverter::stableKey(PresentationUnit unit) {
     switch (unit) {
+        case PresentationUnit::Hertz: return "hertz";
         case PresentationUnit::None: return "none";
         case PresentationUnit::DegreeCelsius: return "degree_celsius";
         case PresentationUnit::DegreeFahrenheit: return "degree_fahrenheit";
@@ -126,7 +130,7 @@ bool UnitConverter::parseStableKey(const char* key, PresentationUnit& unit) {
         return false;
     }
     for (uint8_t value = static_cast<uint8_t>(PresentationUnit::None);
-         value <= static_cast<uint8_t>(PresentationUnit::Centimetre);
+         value <= static_cast<uint8_t>(PresentationUnit::Hertz);
          ++value) {
         const PresentationUnit candidate = static_cast<PresentationUnit>(value);
         const char* candidateKey = stableKey(candidate);

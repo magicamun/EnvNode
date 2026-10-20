@@ -5,7 +5,7 @@
 namespace EnvNode {
 namespace {
 
-constexpr size_t ImplementationCount = 9;
+constexpr size_t ImplementationCount = 10;
 
 const SensorImplementationMetadata* implementations() {
     static const SensorImplementationMetadata registeredImplementations[ImplementationCount] = {
@@ -45,6 +45,10 @@ const SensorImplementationMetadata* implementations() {
             SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 2,
             HardwareInterfaceKind::I2C, GpioCapability::None, "I2C", SensorSchedule::periodic(5000),
             "SHTC3Configuration: I2C bus and fixed address 0x70"},
+        {SensorImplementation::RainDetector, "rain_detector", "RainDetector (frequency)",
+            SensorProvenance::Physical, {MeasurementType::RainDetectorFrequency}, 1,
+            HardwareInterfaceKind::GPIO, GpioCapability::DigitalInput, "PCNT frequency input", SensorSchedule::periodic(5000),
+            "GPIO frequency input; 250-ms local acquisition independent of publication interval"},
     };
     return registeredImplementations;
 }

@@ -25,6 +25,10 @@ public:
         if (!supports(MeasurementType::SeaLevelPressure)) return false;
         status = status_; return true;
     }
+    void rainFrequencyHeaterChanged() override { if (sensor_) sensor_->rainFrequencyHeaterChanged(); }
+    bool rainFrequencySnapshot(RainFrequencySnapshot& result) const override {
+        return sensor_ && sensor_->rainFrequencySnapshot(result);
+    }
     SensorId id() const override { return sensor_->id(); }
     const char* type() const override { return sensor_->type(); }
     SensorProvenance provenance() const override { return sensor_->provenance(); }

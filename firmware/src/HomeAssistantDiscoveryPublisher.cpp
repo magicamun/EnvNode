@@ -17,6 +17,7 @@ const MeasurementType DiscoverableMeasurementTypes[] = {
     MeasurementType::SeaLevelPressure,
     MeasurementType::SolarIrradiance,
     MeasurementType::SolarCellTemperature,
+    MeasurementType::RainDetectorFrequency,
     MeasurementType::RainDetectorLevel,
     MeasurementType::RainDetectorWet,
     MeasurementType::RainGaugeTip,
@@ -41,6 +42,7 @@ bool supports(const SensorRuntimeInfo& info, MeasurementType type) {
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
         case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
+        case MeasurementType::RainDetectorFrequency: return info.supportsRainDetectorFrequency;
         case MeasurementType::RainDetectorLevel: return info.supportsRainDetectorLevel;
         case MeasurementType::RainDetectorWet: return info.supportsRainDetectorWet;
         case MeasurementType::RainGaugeTip: return info.supportsRainGaugeTip;

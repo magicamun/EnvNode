@@ -31,6 +31,16 @@ const ControllerParameterDescriptor ThresholdParameters[] = {
         ControllerParameterUnit::Milliseconds, true, true, 1, true, INT32_MAX},
 };
 
+const ControllerParameterDescriptor RainParameters[] = {
+    {ControllerParameter::RainEdgeMs,"edge_ms","Maximum edge duration",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Milliseconds,true,true,250,true,2000},
+    {ControllerParameter::RainDropHz,"drop_hz","Minimum frequency drop",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Hertz,true,true,20,true,10000},
+    {ControllerParameter::RainDropPermille,"drop_permille","Relative frequency drop",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Permille,true,true,1,true,200},
+    {ControllerParameter::RainEndSeconds,"end_seconds","Rain-end timeout",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Seconds,true,true,30,true,300},
+    {ControllerParameter::RainDryHz,"dry_hz","Dry threshold",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Hertz,true,true,1000,true,100000},
+    {ControllerParameter::RainHysteresisHz,"hysteresis_hz","Dry hysteresis",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Hertz,true,true,1,true,99999},
+    {ControllerParameter::RainDrySeconds,"dry_seconds","Dry confirmation",ControllerParameterValueType::UnsignedInteger,ControllerParameterUnit::Seconds,true,true,1,true,120},
+};
+
 template <size_t Size>
 constexpr size_t arraySize(const ControllerParameterDescriptor (&)[Size]) {
     return Size;
@@ -56,6 +66,7 @@ const ControllerParameterDescriptor* controllerParameterDescriptor(
     for (const ControllerParameterDescriptor& descriptor : ThresholdParameters) {
         if (descriptor.parameter == parameter) return &descriptor;
     }
+    for (const auto& descriptor : RainParameters) if (descriptor.parameter == parameter) return &descriptor;
     return nullptr;
 }
 
@@ -70,6 +81,7 @@ const ControllerParameterDescriptor* controllerParameterDescriptors(
         count = arraySize(ThresholdParameters);
         return ThresholdParameters;
     }
+    if (implementation == ControllerImplementation::RainDetector) { count=arraySize(RainParameters); return RainParameters; }
     count = 0;
     return nullptr;
 }

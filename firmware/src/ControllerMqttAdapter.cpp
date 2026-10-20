@@ -138,7 +138,23 @@ void ControllerMqttAdapter::handleParameter(
     ControllerSlotConfiguration candidate =
         configurationService_.getConfiguration().controllerSlots[id - 1];
     String acceptedValue;
-    if (candidate.implementation == ControllerImplementation::Blink
+    if (candidate.implementation == ControllerImplementation::RainDetector) {
+        uint32_t parsed=0;
+        if (!parseUnsignedInteger(payload,length,parsed)) return;
+        auto& config=candidate.implementationConfiguration.rainDetector.policy;
+        switch(parameter) {
+            case ControllerParameter::RainEdgeMs: if (config.edgeMs==parsed) return; config.edgeMs=parsed; break;
+            case ControllerParameter::RainDropHz: if (config.dropHz==parsed) return; config.dropHz=parsed; break;
+            case ControllerParameter::RainDropPermille: if (config.dropPermille==parsed) return; config.dropPermille=parsed; break;
+            case ControllerParameter::RainEndSeconds: if (config.endSeconds==parsed) return; config.endSeconds=parsed; break;
+            case ControllerParameter::RainDryHz: if (config.dryHz==parsed) return; config.dryHz=parsed; break;
+            case ControllerParameter::RainHysteresisHz: if (config.hysteresisHz==parsed) return; config.hysteresisHz=parsed; break;
+            case ControllerParameter::RainDrySeconds: if (config.drySeconds==parsed) return; config.drySeconds=parsed; break;
+            default: return;
+        }
+        if (!config.valid()) return;
+        acceptedValue=String(parsed);
+    } else if (candidate.implementation == ControllerImplementation::Blink
         && (parameter == ControllerParameter::OnDurationMs
             || parameter == ControllerParameter::OffDurationMs)) {
         uint32_t duration = 0;

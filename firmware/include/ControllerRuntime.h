@@ -20,6 +20,8 @@ struct ControllerRuntimeInfo {
     float offThreshold = 0.0F;
     ThresholdDirection thresholdDirection = ThresholdDirection::OnAbove;
     uint32_t maxMeasurementAgeMs = 0;
+    RainDetectorPolicyResult rainDetector;
+    uint32_t rainWettingCount = 0;
     bool decisionOnly = false;
     ValueId modeValueId = 0;
     ControllerId automaticControllerId = 0;
@@ -66,6 +68,7 @@ private:
         BlinkController* blink = nullptr;
         ThresholdController* threshold = nullptr;
         SelectorController* selector = nullptr;
+        RainDetectorController* rainDetector = nullptr;
     };
 
     bool validateComposition(const ControllerSlotConfiguration* slots) const;

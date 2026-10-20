@@ -212,10 +212,28 @@ void test_threshold_description_uses_measurement_metadata_and_values() {
     TEST_ASSERT_EQUAL_STRING("", payload.c_str());
 }
 
+void test_rain_description_has_real_frequency_source_and_policy_parameters() {
+    ControllerSlotConfiguration slot;
+    slot.slotId=1; slot.name="Rain"; slot.enabled=true;
+    slot.implementation=ControllerImplementation::RainDetector;
+    auto& rain=slot.implementationConfiguration.rainDetector;
+    rain.sourceSensorId=5; rain.targetActuatorId=2; rain.policy.dryHz=34000;
+    String payload;
+    TEST_ASSERT_TRUE(buildControllerDescription(slot,payload));
+    assertContains(payload,"\"measurement\":\"rain_detector_frequency\"");
+    assertContains(payload,"\"unit\":\"hertz\"");
+    assertContains(payload,"\"name\":\"end_seconds\"");
+    assertContains(payload,"\"name\":\"dry_hz\"");
+    assertContains(payload,"\"value\":34000");
+    assertContains(payload,"\"minimum\":30");
+    assertContains(payload,"\"maximum\":300");
+}
+
 } // namespace
 
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_rain_description_has_real_frequency_source_and_policy_parameters);
     RUN_TEST(test_parameter_metadata_is_neutral_stable_and_typed);
     RUN_TEST(test_external_stable_names_and_mqtt_parameter_names_match);
     RUN_TEST(test_json_string_escaping_handles_quotes_slashes_and_controls);

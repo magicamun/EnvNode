@@ -302,6 +302,7 @@ String measurementTypes(const SensorRuntimeInfo& info, Locale locale) {
     appendType(info.supportsSeaLevelPressure, MeasurementType::SeaLevelPressure);
     appendType(info.supportsSolarIrradiance, MeasurementType::SolarIrradiance);
     appendType(info.supportsSolarCellTemperature, MeasurementType::SolarCellTemperature);
+    appendType(info.supportsRainDetectorFrequency, MeasurementType::RainDetectorFrequency);
     appendType(info.supportsRainDetectorLevel, MeasurementType::RainDetectorLevel);
     appendType(info.supportsRainDetectorWet, MeasurementType::RainDetectorWet);
     appendType(info.supportsRainGaugeTip, MeasurementType::RainGaugeTip);
@@ -410,6 +411,7 @@ bool runtimeSupportsMeasurement(const SensorRuntimeInfo& info, MeasurementType t
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
         case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
+        case MeasurementType::RainDetectorFrequency: return info.supportsRainDetectorFrequency;
         case MeasurementType::RainDetectorLevel: return info.supportsRainDetectorLevel;
         case MeasurementType::RainDetectorWet: return info.supportsRainDetectorWet;
         case MeasurementType::RainGaugeTip: return info.supportsRainGaugeTip;
@@ -1217,6 +1219,13 @@ void WebService::handleSensors() {
                 && runtime.schedule.sampleIntervalMs == slot.schedule.sampleIntervalMs
                 && sameHardwareAssignment(runtime.hardware, slot.hardware)));
         if (!runtimeMatches) c += "<br>" + badge(uiText(TextId::SensorRestartRequired), "warn");
+        if (hasRuntime && runtime.supportsRainDetectorFrequency) {
+            RainFrequencySnapshot snapshot;
+            if (sensorManager_.rainFrequencySnapshot(runtime.id,snapshot)) {
+                c += "<br>" + String(snapshot.window.frequencyHz,1) + " Hz / "
+                    + rainFrequencyFaultName(snapshot.window.fault);
+            }
+        }
         c += "</td><td class='sensor-technical'>" + String(hasRuntime ? sensorStateName(runtime.state, configurationService_.getLocale()) : "—") + "</td><td class='sensor-last-measurement'>";
         SensorRuntimeStatus runtimeStatus;
         c += hasRuntime && sensorManager_.runtimeStatus(runtime.id, runtimeStatus)
@@ -1471,6 +1480,15 @@ void WebService::handleControllers() {
         if (!hasRuntime) {
             c += uiText(TextId::NoRuntimeController);
         } else {
+            if (runtime.implementation == ControllerImplementation::RainDetector) {
+                const TextId state = runtime.rainDetector.rain == RainDetectorRainState::Active ? TextId::RainActive
+                    : runtime.rainDetector.rain == RainDetectorRainState::EndEstimated ? TextId::RainEndEstimated : TextId::Unknown;
+                c += "<strong>" + String(uiText(state)) + "</strong><br>";
+                c += String(uiText(TextId::RainHeater)) + ": " + (runtime.rainDetector.heating ? "100%" : "0%")
+                    + "<br>" + uiText(TextId::RainDryState) + ": " + uiText(runtime.rainDetector.dry ? TextId::Yes : TextId::No)
+                    + "<br>" + uiText(TextId::RainWettingCount) + ": " + String(runtime.rainWettingCount)
+                    + "<br>" + uiText(TextId::RainValid) + ": " + uiText(runtime.rainDetector.valid ? TextId::Yes : TextId::No) + "<br>";
+            }
             c += runtime.running ? badge(uiText(TextId::Running), "good") : badge(uiText(TextId::Stopped), "warn");
             c += (String("<span class='secondary'>") + uiText(TextId::ActiveRuntime) + "</span>");
         }
@@ -2197,6 +2215,46 @@ void WebService::handleControllerEdit() {
         }
     }
     c += buildSelectorFields(configuration, slot, selectorTargets);
+    const auto& rain = slot.implementationConfiguration.rainDetector;
+    c += "<div id='rainConfiguration'><label>" + String(uiText(TextId::SourceSensor)) + "<select name='rainSource'>";
+    for (const auto& sensor : configuration.sensorSlots) {
+        if (!sensor.enabled || sensor.implementation != SensorImplementation::RainDetector) continue;
+        c += "<option value='" + String(sensor.slotId) + "'" + (rain.sourceSensorId==sensor.slotId?" selected":"")
+            + ">" + escapeHtml(sensor.name) + "</option>";
+    }
+    c += "</select></label><label>" + String(uiText(TextId::TargetOnOffActuator)) + "<select name='rainTarget'>";
+    for (const auto& actor : configuration.actuatorSlots) {
+        const auto* meta=ActuatorImplementationRegistry::find(actor.implementation);
+        if (!actor.enabled || !meta || !hasActuatorCapability(meta->capabilities,ActuatorCapability::OnOff)) continue;
+        c += "<option value='" + String(actor.slotId) + "'" + (rain.targetActuatorId==actor.slotId?" selected":"")
+            + ">" + escapeHtml(actor.name) + "</option>";
+    }
+    c += "</select></label>";
+    const auto rainNumber = [&](const char* key, TextId label, unsigned value, unsigned low, unsigned high) {
+        c += "<label>" + String(uiText(label)) + "<input type='number' name='" + key + "' min='" + String(low)
+            + "' max='" + String(high) + "' value='" + String(value) + "'></label>";
+    };
+    const auto climateSelect = [&](const char* name, const char* label, MeasurementType type, SensorId selected) {
+        c += "<label>"+String(label)+"<select name='"+name+"'><option value='0'>—</option>";
+        for (const auto& sensor : configuration.sensorSlots) {
+            const auto* meta=SensorImplementationRegistry::find(sensor.implementation);
+            if (!sensor.enabled || !meta) continue;
+            bool supported=false;
+            for (size_t i=0;i<meta->measurementTypeCount;++i) if (meta->measurementTypes[i]==type) supported=true;
+            if (supported) c += "<option value='"+String(sensor.slotId)+"'"+(selected==sensor.slotId?" selected":"")+">"+escapeHtml(sensor.name)+"</option>";
+        }
+        c += "</select></label>";
+    };
+    climateSelect("rainTemperature",uiText(TextId::RainTemperatureOptional),MeasurementType::Temperature,rain.temperatureSource.sensorId);
+    climateSelect("rainHumidity",uiText(TextId::RainHumidityOptional),MeasurementType::RelativeHumidity,rain.humiditySource.sensorId);
+    rainNumber("rainEdge",TextId::RainEdgeMs,rain.policy.edgeMs,250,2000);
+    rainNumber("rainDrop",TextId::RainDropHz,rain.policy.dropHz,20,10000);
+    rainNumber("rainRelative",TextId::RainRelative,rain.policy.dropPermille,1,200);
+    rainNumber("rainEnd",TextId::RainEndSeconds,rain.policy.endSeconds,30,300);
+    rainNumber("rainDry",TextId::RainDryHz,rain.policy.dryHz,1000,100000);
+    rainNumber("rainHysteresis",TextId::RainHysteresis,rain.policy.hysteresisHz,1,99999);
+    rainNumber("rainConfirm",TextId::RainConfirm,rain.policy.drySeconds,1,120);
+    c += "</div>";
     c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/controllers'>" + uiText(TextId::Cancel) + "</a></div></form></section>");
     if (selected != nullptr) {
         c += (((String("<section class='card'><h2>") + uiText(TextId::ImplementationMetadata) + "</h2><div class='kv'><span>")) + uiText(TextId::Type) + "</span><span>")
@@ -2207,7 +2265,7 @@ void WebService::handleControllerEdit() {
             + (String("</span><span>") + uiText(TextId::Description) + "</span><span>") + escapeHtml(webControllerDescription(configurationService_.getLocale(), selected->implementation))
             + "</span></div></section>";
     }
-    c += "<script>const thresholdMeasurementCatalog=" + measurementCatalog + ";function thresholdMeasurements(rebuild){const s=document.getElementById('thresholdSourceSensor'),m=document.getElementById('thresholdMeasurement'),previous=m.value;if(rebuild){m.replaceChildren(new Option((globalThis.EnvNodeUi.SelectAMeasurement),'unknown'));for(const x of thresholdMeasurementCatalog[s.value]||[]){const o=new Option(x.label,x.value);o.dataset.unit=x.unit;m.add(o)}if(Array.from(m.options).some(o=>o.value===previous))m.value=previous;else m.value='unknown'}const o=m.options[m.selectedIndex];document.getElementById('thresholdUnit').textContent=o?o.dataset.unit||'':''}function controllerFields(){const s=document.getElementById('controllerImplementation'),k=s.options[s.selectedIndex].dataset.kind;document.getElementById('blinkConfiguration').style.display=k==='blink'?'block':'none';document.getElementById('thresholdConfiguration').style.display=k==='threshold'?'block':'none';document.getElementById('selectorConfiguration').style.display=k==='selector'?'block':'none';document.getElementById('thresholdTargetField').style.display=document.getElementById('thresholdDecisionOnly').checked?'none':'block';thresholdMeasurements(false)}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);document.getElementById('thresholdSourceSensor').addEventListener('change',()=>thresholdMeasurements(true));document.getElementById('thresholdMeasurement').addEventListener('change',()=>thresholdMeasurements(false));document.getElementById('thresholdDecisionOnly').addEventListener('change',controllerFields);controllerFields();</script>";
+    c += "<script>const thresholdMeasurementCatalog=" + measurementCatalog + ";function thresholdMeasurements(rebuild){const s=document.getElementById('thresholdSourceSensor'),m=document.getElementById('thresholdMeasurement'),previous=m.value;if(rebuild){m.replaceChildren(new Option((globalThis.EnvNodeUi.SelectAMeasurement),'unknown'));for(const x of thresholdMeasurementCatalog[s.value]||[]){const o=new Option(x.label,x.value);o.dataset.unit=x.unit;m.add(o)}if(Array.from(m.options).some(o=>o.value===previous))m.value=previous;else m.value='unknown'}const o=m.options[m.selectedIndex];document.getElementById('thresholdUnit').textContent=o?o.dataset.unit||'':''}function controllerFields(){const s=document.getElementById('controllerImplementation'),k=s.options[s.selectedIndex].dataset.kind;document.getElementById('rainConfiguration').style.display=k==='rain_detector'?'block':'none';document.getElementById('blinkConfiguration').style.display=k==='blink'?'block':'none';document.getElementById('thresholdConfiguration').style.display=k==='threshold'?'block':'none';document.getElementById('selectorConfiguration').style.display=k==='selector'?'block':'none';document.getElementById('thresholdTargetField').style.display=document.getElementById('thresholdDecisionOnly').checked?'none':'block';thresholdMeasurements(false)}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);document.getElementById('thresholdSourceSensor').addEventListener('change',()=>thresholdMeasurements(true));document.getElementById('thresholdMeasurement').addEventListener('change',()=>thresholdMeasurements(false));document.getElementById('thresholdDecisionOnly').addEventListener('change',controllerFields);controllerFields();</script>";
     sendPage(uiText(TextId::ConfigureControllerSlot), "/controllers", c);
 }
 
@@ -2674,7 +2732,8 @@ void WebService::handleSensorSave() {
             slot.schedule.sampleIntervalMs = 0;
         }
         if (slot.implementation == SensorImplementation::AM2302
-            || slot.implementation == SensorImplementation::RainGauge) {
+            || slot.implementation == SensorImplementation::RainGauge
+            || slot.implementation == SensorImplementation::RainDetector) {
             const long gpio = server_.arg("gpio").toInt();
             if (gpio < 0 || gpio > 255) ok = false;
             else {
@@ -2682,7 +2741,7 @@ void WebService::handleSensorSave() {
                 slot.hardware = HardwareResourceAssignment::gpioResource(resource);
                 if (slot.implementation == SensorImplementation::AM2302) {
                     slot.implementationConfiguration.am2302 = AM2302Configuration(resource);
-                } else {
+                } else if (slot.implementation == SensorImplementation::RainGauge) {
                     char* millimetersEnd = nullptr;
                     const String millimetersText = server_.arg("millimetersPerTip");
                     const float millimetersPerTip = strtof(
@@ -2893,7 +2952,35 @@ void WebService::handleControllerSave() {
         slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
         slot.name = server_.arg("name");
         slot.implementation = metadata->implementation;
-        if (slot.implementation == ControllerImplementation::Blink) {
+        if (slot.implementation == ControllerImplementation::RainDetector) {
+            auto candidate = slot.implementationConfiguration.rainDetector;
+            const auto number = [&](const char* key, unsigned& value) {
+                const String text=server_.arg(key);
+                if (text.isEmpty()) return false;
+                for (size_t i=0;i<text.length();++i) if (text[i]<'0'||text[i]>'9') return false;
+                char* end=nullptr; const unsigned long n=strtoul(text.c_str(),&end,10);
+                if (!end || *end || n>100000) return false;
+                value=static_cast<unsigned>(n); return true;
+            };
+            unsigned source=0,target=0,temperature=0,humidity=0;
+            ok = number("rainSource",source) && source>0 && source<=MaxSensorSlotCount
+                && number("rainTarget",target) && target>0 && target<=MaxActuatorSlotCount
+                && number("rainEdge",candidate.policy.edgeMs) && number("rainDrop",candidate.policy.dropHz)
+                && number("rainRelative",candidate.policy.dropPermille) && number("rainEnd",candidate.policy.endSeconds)
+                && number("rainDry",candidate.policy.dryHz) && number("rainHysteresis",candidate.policy.hysteresisHz)
+                && number("rainConfirm",candidate.policy.drySeconds) && candidate.policy.valid()
+                && number("rainTemperature",temperature) && temperature<=MaxSensorSlotCount
+                && number("rainHumidity",humidity) && humidity<=MaxSensorSlotCount;
+            if (ok) {
+                candidate.temperatureSource.sensorId=temperature;
+                candidate.temperatureSource.measurementType=MeasurementType::Temperature;
+                candidate.humiditySource.sensorId=humidity;
+                candidate.humiditySource.measurementType=MeasurementType::RelativeHumidity;
+                candidate.sourceSensorId=source; candidate.targetActuatorId=target;
+                slot.moduleTarget=ModuleActuatorReference{};
+                slot.implementationConfiguration.rainDetector=candidate;
+            }
+        } else if (slot.implementation == ControllerImplementation::Blink) {
             const String targetText = server_.arg("targetActuator");
             const bool moduleTarget = targetText.startsWith("m:");
             const bool currentModuleTarget = targetText == "m:current"

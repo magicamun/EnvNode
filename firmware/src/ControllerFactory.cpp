@@ -10,11 +10,12 @@ ControllerFactory::ControllerFactory(
     IMeasurementResolver& measurementResolver,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
-    ILogger& logger, const IEnumValueReader* values)
+    ILogger& logger, const IEnumValueReader* values, IRainFrequencyResolver* rainSource)
     : measurementResolver_(measurementResolver)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
-    , logger_(logger), values_(values) {
+    , logger_(logger), values_(values), rainSource_(rainSource)
+    , storage_(new (std::nothrow) ControllerStorage[MaxControllerSlotCount]) {
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         constructed_[index] = ControllerImplementation::None;
     }
@@ -27,6 +28,7 @@ ControllerFactoryInstance ControllerFactory::create(
     const ControllerSlotConfiguration& slot,
     ControllerFactoryResult& result) {
     ControllerFactoryInstance instance;
+    if (!storage_) { result = ControllerFactoryResult::InvalidConfiguration; return instance; }
     if (storageIndex >= MaxControllerSlotCount) {
         result = ControllerFactoryResult::InvalidStorageIndex;
         return instance;
@@ -44,7 +46,17 @@ ControllerFactoryInstance ControllerFactory::create(
         return instance;
     }
     void* target = &storage_[storageIndex];
-    if (slot.implementation == ControllerImplementation::Blink) {
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        const auto& config = slot.implementationConfiguration.rainDetector;
+        if (!rainSource_ || !config.policy.valid() || !isValidSensorId(config.sourceSensorId)
+            || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(config.targetActuatorId))) {
+            result = ControllerFactoryResult::InvalidConfiguration; return instance;
+        }
+        instance.rainDetector = new (target) RainDetectorController(config,slot.moduleTarget,
+            *rainSource_,actuatorResolver_,monotonicClock_,logger_);
+        instance.controller = instance.rainDetector;
+        constructed_[storageIndex] = ControllerImplementation::RainDetector;
+    } else if (slot.implementation == ControllerImplementation::Blink) {
         const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
         if ((!validModuleActuatorReference(slot.moduleTarget)
                 && !isValidActuatorId(blink.targetActuatorId))
@@ -103,6 +115,9 @@ ControllerFactoryInstance ControllerFactory::create(
 }
 
 void ControllerFactory::destroy(size_t storageIndex) {
+    if (constructed_[storageIndex] == ControllerImplementation::RainDetector) {
+        static_cast<RainDetectorController*>(static_cast<void*>(&storage_[storageIndex]))->~RainDetectorController();
+    }
     if (constructed_[storageIndex] == ControllerImplementation::Blink) {
         static_cast<BlinkController*>(
             static_cast<void*>(&storage_[storageIndex]))->~BlinkController();

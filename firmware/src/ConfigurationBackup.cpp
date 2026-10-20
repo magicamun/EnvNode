@@ -27,7 +27,7 @@ public:
             const size_t valuePosition = position_;
             if (!quoted(value, 30000)) return false;
             fields_.push_back({hash(key), keyPosition, valuePosition, false});
-            if (fields_.size() > 1600) return false;
+            if (fields_.size() > 2048) return false;
             space();
             if (position_ < input_.length() && input_[position_] == '}') {
                 ++position_; space(); return position_ == input_.length();
@@ -311,6 +311,22 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         metadata = ControllerImplementationRegistry::findByStableId(impl.c_str());
         if (!metadata) { f.ok = false; return; } s.implementation = metadata->implementation;
         f.target(p + ".target", s.moduleTarget);
+        if (s.implementation == ControllerImplementation::RainDetector) {
+            auto& rain = s.implementationConfiguration.rainDetector;
+            f.number(p+".rain.temperature",rain.temperatureSource.sensorId,MaxSensorSlotCount);
+            f.number(p+".rain.humidity",rain.humiditySource.sensorId,MaxSensorSlotCount);
+            rain.temperatureSource.measurementType=MeasurementType::Temperature;
+            rain.humiditySource.measurementType=MeasurementType::RelativeHumidity;
+            f.number(p+".rain.sensor",rain.sourceSensorId,MaxSensorSlotCount);
+            f.number(p+".rain.actuator",rain.targetActuatorId,MaxActuatorSlotCount);
+            f.number(p+".rain.edgeMs",rain.policy.edgeMs,100000);
+            f.number(p+".rain.dropHz",rain.policy.dropHz,100000);
+            f.number(p+".rain.dropPermille",rain.policy.dropPermille,100000);
+            f.number(p+".rain.endSeconds",rain.policy.endSeconds,100000);
+            f.number(p+".rain.dryHz",rain.policy.dryHz,100000);
+            f.number(p+".rain.hysteresisHz",rain.policy.hysteresisHz,100000);
+            f.number(p+".rain.drySeconds",rain.policy.drySeconds,100000);
+        }
         auto& b = s.implementationConfiguration.blink;
         f.number(p + ".blink.actuator", b.targetActuatorId, MaxActuatorSlotCount);
         f.number(p + ".blink.onMs", b.onDurationMs, UINT32_MAX); f.number(p + ".blink.offMs", b.offDurationMs, UINT32_MAX);

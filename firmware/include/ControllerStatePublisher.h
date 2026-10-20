@@ -20,6 +20,9 @@ public:
 
 private:
     struct StatusSnapshot {
+        RainDetectorRainState rain = RainDetectorRainState::Unknown;
+        bool heating = false, dry = false;
+        uint32_t wettingCount = 0;
         ControllerImplementation implementation = ControllerImplementation::None;
         bool running = false;
         bool targetAvailable = false;

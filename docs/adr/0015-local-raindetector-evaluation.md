@@ -182,3 +182,24 @@ second heater GPIO driver is required.
 Manual actuator changes during a gate must invalidate/restart that gate when the
 runtime adapter is integrated; an assumed heater level must never label a mixed
 window as a valid measurement.
+
+### Integrated runtime increment
+
+The registered `rain_detector` sensor now publishes an independent Hz measurement
+and supplies copied local gate snapshots through `IRainFrequencyResolver`.
+The controller resolves this capability and the existing On/Off-capable actuator
+by identity; full ON also works with the existing level/PWM actuator. Web/NVS,
+backup and MQTT parameter/status adapters use the same configuration. Optional
+climate references are stored but no preventive climate heating is implemented.
+See `docs/RainDetector.md` for configuration, diagnostics and hardware acceptance.
+
+For this controller the lab's explicit arming rule refines ADR-0013 startup:
+configured/enabled makes it available, but boot or runtime rebuild leaves it
+stopped and requests output OFF. Explicit runtime Start arms it. Existing controller
+implementations keep their automatic activation. Sensor faults abort the cycle
+while leaving an already started RainDetector armed; manual override disarms it.
+One frequency sensor may belong to only one enabled RainDetector controller, since
+its gate and heater-level interpretation have one owner. Sensor/controller factory
+storage remains bounded but uses checked startup allocation to avoid overflowing
+ESP32 static DRAM as the maximum implementation size grows. The measurement path
+itself remains allocation-free. SD and climate policies remain deferred.

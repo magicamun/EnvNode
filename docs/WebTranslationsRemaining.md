@@ -46,20 +46,21 @@ Keine Fundstellen in den geprüften Webansichten.
 Diese festen Texte bleiben bewusst unverändert. Sprachliche Beschriftungen
 neben ihnen werden übersetzt.
 
-- `firmware/src/PropertyPreviewWebView.cpp:71`: `Format`
-- `firmware/src/PropertyPreviewWebView.cpp:209`: `Format`
-- `firmware/src/WebService.cpp:705`: `EnvNode · v`
-- `firmware/src/WebService.cpp:745`: `Build`
-- `firmware/src/WebService.cpp:745`: `Flash`
-- `firmware/src/WebService.cpp:747`: `SSID`
-- `firmware/src/WebService.cpp:751`: `RSSI`
-- `firmware/src/WebService.cpp:784`: `DHCP`
-- `firmware/src/WebService.cpp:810`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:862`: `EEPROM`
-- `firmware/src/WebService.cpp:974`: `ENHD descriptor 0.1`
-- `firmware/src/WebService.cpp:977`: `EnvNode DuoRelay 0.3`
-- `firmware/src/WebService.cpp:1686`: `GPIO`
-- `firmware/src/WebService.cpp:1785`: `GPIO`
-- `firmware/src/WebService.cpp:2045`: `MCU`
-- `firmware/src/WebService.cpp:2045`: `WiFi`
-- `firmware/src/WebService.cpp:2053`: `SDA GPIO`
+- `firmware/src/PropertyPreviewWebView.cpp:72`: `Format`
+- `firmware/src/PropertyPreviewWebView.cpp:210`: `Format`
+- `firmware/src/WebService.cpp:733`: `EnvNode · v`
+- `firmware/src/WebService.cpp:773`: `Build`
+- `firmware/src/WebService.cpp:773`: `Flash`
+- `firmware/src/WebService.cpp:775`: `SSID`
+- `firmware/src/WebService.cpp:779`: `RSSI`
+- `firmware/src/WebService.cpp:812`: `DHCP`
+- `firmware/src/WebService.cpp:838`: `Home Assistant Discovery`
+- `firmware/src/WebService.cpp:947`: `MQTT`
+- `firmware/src/WebService.cpp:1041`: `EEPROM`
+- `firmware/src/WebService.cpp:1153`: `ENHD descriptor 0.1`
+- `firmware/src/WebService.cpp:1156`: `EnvNode DuoRelay 0.3`
+- `firmware/src/WebService.cpp:1888`: `GPIO`
+- `firmware/src/WebService.cpp:1987`: `GPIO`
+- `firmware/src/WebService.cpp:2287`: `MCU`
+- `firmware/src/WebService.cpp:2287`: `WiFi`
+- `firmware/src/WebService.cpp:2295`: `SDA GPIO`

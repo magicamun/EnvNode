@@ -5,6 +5,7 @@
 namespace EnvNode {
 namespace {
 
+const PresentationUnit FrequencyUnits[] = {PresentationUnit::Hertz};
 const PresentationUnit NoUnit[] = {PresentationUnit::None};
 const PresentationUnit TemperatureUnits[] = {
     PresentationUnit::DegreeCelsius,
@@ -78,6 +79,9 @@ const MeasurementTypeMetadata MeasurementMetadata[] = {
     {MeasurementType::SeaLevelPressure, "sea_level_pressure", "Sea-level Pressure (derived)", ValueKind::FloatingPoint,
         PresentationUnit::Pascal, 1, MeasurementSemantics::State,
         PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal},
+    {MeasurementType::RainDetectorFrequency, "rain_detector_frequency", "Rain Detector Frequency", ValueKind::FloatingPoint,
+        PresentationUnit::Hertz, 1, MeasurementSemantics::State,
+        FrequencyUnits, unitCount(FrequencyUnits), PresentationUnit::Hertz},
 };
 
 constexpr size_t MeasurementMetadataCount =

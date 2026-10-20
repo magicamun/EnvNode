@@ -374,7 +374,8 @@ void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
         const I2CBus i2cBus = storedI2CBus == static_cast<uint32_t>(I2CBus::I2C1)
             ? I2CBus::I2C1 : I2CBus::I2C0;
         if (loaded[index].implementation == SensorImplementation::AM2302
-            || loaded[index].implementation == SensorImplementation::RainGauge) {
+            || loaded[index].implementation == SensorImplementation::RainGauge
+            || loaded[index].implementation == SensorImplementation::RainDetector) {
             loaded[index].hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
         } else if (loaded[index].implementation == SensorImplementation::BME280
             || loaded[index].implementation == SensorImplementation::SHT4x
@@ -507,6 +508,20 @@ void ConfigurationService::loadControllerSlots() {
             selector.offCode = preferences_.isKey(controllerKey(expectedId, "seloff").c_str())
                 ? preferences_.getString(controllerKey(expectedId, "seloff").c_str(), "") : String();
         }
+        auto& rain = loaded[index].implementationConfiguration.rainDetector;
+        rain.temperatureSource.sensorId=preferences_.getUInt(controllerKey(expectedId,"rtemp").c_str(),0);
+        rain.temperatureSource.measurementType=MeasurementType::Temperature;
+        rain.humiditySource.sensorId=preferences_.getUInt(controllerKey(expectedId,"rhum").c_str(),0);
+        rain.humiditySource.measurementType=MeasurementType::RelativeHumidity;
+        rain.sourceSensorId = preferences_.getUInt(controllerKey(expectedId,"rsrc").c_str(),0);
+        rain.targetActuatorId = preferences_.getUInt(controllerKey(expectedId,"ract").c_str(),0);
+        rain.policy.edgeMs = preferences_.getUInt(controllerKey(expectedId,"redge").c_str(),1000);
+        rain.policy.dropHz = preferences_.getUInt(controllerKey(expectedId,"rdrop").c_str(),150);
+        rain.policy.dropPermille = preferences_.getUInt(controllerKey(expectedId,"rrel").c_str(),5);
+        rain.policy.endSeconds = preferences_.getUInt(controllerKey(expectedId,"rend").c_str(),60);
+        rain.policy.dryHz = preferences_.getUInt(controllerKey(expectedId,"rdry").c_str(),32000);
+        rain.policy.hysteresisHz = preferences_.getUInt(controllerKey(expectedId,"rhyst").c_str(),500);
+        rain.policy.drySeconds = preferences_.getUInt(controllerKey(expectedId,"rconf").c_str(),10);
         threshold.maxMeasurementAgeMs = preferences_.getUInt(
             controllerKey(expectedId, "age").c_str(), 15000);
     }
@@ -928,6 +943,9 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
         return slot.hardware.kind == HardwareResourceKind::GPIO
             && slot.implementationConfiguration.am2302.gpio.number == slot.hardware.gpio.number;
     }
+    if (slot.implementation == SensorImplementation::RainDetector) {
+        return slot.hardware.kind == HardwareResourceKind::GPIO;
+    }
     if (slot.implementation == SensorImplementation::RainGauge) {
         return slot.hardware.kind == HardwareResourceKind::GPIO
             && slot.implementationConfiguration.rainGauge.gpio.number == slot.hardware.gpio.number
@@ -1018,7 +1036,24 @@ bool ConfigurationService::validateControllerSlot(
     if (slot.implementation == ControllerImplementation::None) return true;
     if (!slot.enabled) return true;
 
-    if (slot.implementation == ControllerImplementation::Blink) {
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        const auto& rain = slot.implementationConfiguration.rainDetector;
+        if (!rain.policy.valid() || !sensorSlots || !isValidSensorId(rain.sourceSensorId)
+            || rain.sourceSensorId > MaxSensorSlotCount) return false;
+        const auto& source = sensorSlots[rain.sourceSensorId-1];
+        if (!source.enabled || source.implementation != SensorImplementation::RainDetector) return false;
+        const auto optionalSource = [&](const MeasurementSourceReference& reference, MeasurementType expected) {
+            if (!reference.sensorId) return true;
+            if (reference.sensorId>MaxSensorSlotCount || reference.measurementType!=expected) return false;
+            const auto& slot=sensorSlots[reference.sensorId-1];
+            const auto* meta=SensorImplementationRegistry::find(slot.implementation);
+            if (!slot.enabled || !meta) return false;
+            for (size_t i=0;i<meta->measurementTypeCount;++i) if (meta->measurementTypes[i]==expected) return true;
+            return false;
+        };
+        if (!optionalSource(rain.temperatureSource,MeasurementType::Temperature)
+            || !optionalSource(rain.humiditySource,MeasurementType::RelativeHumidity)) return false;
+    } else if (slot.implementation == ControllerImplementation::Blink) {
         const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
         if (blink.onDurationMs == 0 || blink.onDurationMs > INT32_MAX
             || blink.offDurationMs == 0 || blink.offDurationMs > INT32_MAX) {
@@ -1128,6 +1163,10 @@ bool ConfigurationService::validateControllerSlots(
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         if (!controllerSlots[index].enabled) continue;
         for (size_t other = 0; other < index; ++other) {
+            if (controllerSlots[index].implementation==ControllerImplementation::RainDetector
+                && controllerSlots[other].enabled && controllerSlots[other].implementation==ControllerImplementation::RainDetector
+                && controllerSlots[index].implementationConfiguration.rainDetector.sourceSensorId
+                    ==controllerSlots[other].implementationConfiguration.rainDetector.sourceSensorId) return false;
             if (controllerSlots[other].enabled && controllerTargetsSameActuator(
                 controllerSlots[index], controllerSlots[other], actuatorSlots, actuatorResolver_)) return false;
         }
@@ -1261,6 +1300,20 @@ bool ConfigurationService::persistControllerSlot(
                 configured ? bytesHex(target.deviceIdHash,
                     sizeof(target.deviceIdHash)) : String());
     };
+    const auto& rain = slot.implementationConfiguration.rainDetector;
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        if (!persistUInt(controllerKey(id,"rtemp").c_str(),rain.temperatureSource.sensorId)
+            || !persistUInt(controllerKey(id,"rhum").c_str(),rain.humiditySource.sensorId)
+            || !persistUInt(controllerKey(id,"rsrc").c_str(),rain.sourceSensorId)
+            || !persistUInt(controllerKey(id,"ract").c_str(),rain.targetActuatorId)
+            || !persistUInt(controllerKey(id,"redge").c_str(),rain.policy.edgeMs)
+            || !persistUInt(controllerKey(id,"rdrop").c_str(),rain.policy.dropHz)
+            || !persistUInt(controllerKey(id,"rrel").c_str(),rain.policy.dropPermille)
+            || !persistUInt(controllerKey(id,"rend").c_str(),rain.policy.endSeconds)
+            || !persistUInt(controllerKey(id,"rdry").c_str(),rain.policy.dryHz)
+            || !persistUInt(controllerKey(id,"rhyst").c_str(),rain.policy.hysteresisHz)
+            || !persistUInt(controllerKey(id,"rconf").c_str(),rain.policy.drySeconds)) return false;
+    }
     return persistUInt(controllerKey(id, "id").c_str(), id)
         && persistUInt(controllerKey(id, "en").c_str(), slot.enabled ? 1 : 0)
         && persistString(controllerKey(id, "name").c_str(), slot.name)
