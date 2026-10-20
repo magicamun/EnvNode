@@ -1,17 +1,25 @@
 # RainDetectorController und Head
 
-!!! note "Entwicklungsstand / WIP"
-    Diese Seite beschreibt die vorhandene Hardware und ihre Prüfgrenzen.
-    RainDetector ist noch kein registrierter Sensor der gemeinsamen EnvNode-Firmware.
-    Eine separate Laborfirmware misst die Ausgangsfrequenz und bietet eine manuelle,
-    zeitlich begrenzte oder dauerhafte Heizungsansteuerung für Laborversuche.
+!!! note "Entwicklungsstand / Feldtest ausstehend"
+    Die gemeinsame Firmware unterstützt Frequenzmessung, Benetzungserkennung,
+    Regenende-Schätzung und automatisches Trockenheizen. Die Regeln sind im Labor
+    erprobt; Feldlogging und Feldtests folgen mit dem neuen mechanischen Aufbau.
 
 ## Zwei getrennte Baugruppen
 
 | Baugruppe | Revision | Aufgabe |
 | --- | --- | --- |
-| RainDetectorController | 0.3 | ICM7555-Frequenzfront-end und AO3400A-Heizschalter |
-| RainDetectorHead | 0.1 | Passive kapazitive Sensorfläche und Heizwiderstände |
+| RainDetectorController | 0.4 | ICM7555-Frequenzfront-end und AO3400A-Heizschalter |
+| RainDetectorHead | 0.2 | Passive kapazitive Sensorfläche und Heizwiderstände |
+
+Beide Platinen haben eine Kontur von **62,12 × 54,52 mm**. Die Vergrößerung
+unterstützt die Gehäuseabdichtung; C1 und die Positionen der Interconnects bleiben
+unverändert. Neue PCB-Artikel: Controller **ENP-00138**, Head **ENP-00139**.
+Kits und Assemblies werden separat aktualisiert.
+
+![Controller 0.4](../assets/images/rain-detector/RainDetectorController-Rev0.4-top.png)
+
+![Head 0.2](../assets/images/rain-detector/RainDetectorHead-Rev0.2-top.png)
 
 Die Sensorfläche besitzt zwei von Lötstopplack bedeckte, ineinandergreifende
 Kupferelektroden. Der Controller wandelt das Sensorsignal in einen digitalen
@@ -66,29 +74,21 @@ und am aufgebauten Head geprüft werden. Lötstopplack allein ist keine Zusage d
 
 ## Firmwarestand
 
-Das separate Projekt `lab/RainDetector-PCNT` zählt steigende Flanken über ESP32-PCNT
-und gibt Frequenzwerte und den angeforderten Heizpegel über Serial aus.
-GPIO16 steuert optional HEATER_EN mit 5-kHz-PWM; `HEAT 10 30` startet beispielsweise
-10 % für 30 Sekunden. Zeitbegrenzte Befehle erlauben maximal 120 Sekunden.
-`HEAT 50 ON` heizt mit 50 % ohne Timeout, `HEAT OFF` schaltet ab.
-`HEAT ON` verwendet den zuletzt gewählten Pegel im Dauerbetrieb; ohne vorherige
-Pegelwahl seit Boot wird der Befehl abgewiesen. Startzustand nach Reset ist AUS,
-der letzte Pegel wird nicht dauerhaft gespeichert. `OFF` bleibt als Alias gültig. Es gibt keine Temperaturregelung; Tests bleiben
-beaufsichtigt. Die Lab-Firmware gibt zusätzlich experimentelle lokale Benetzungsereignisse,
-geglättete Frequenzen, einen Trend und eine Regenende-Schätzung als Diagnose aus.
-Das steuert die Heizung nicht automatisch und ist noch nicht als verlässliche
-Wetterklassifikation validiert. Bedienung und Grenzen stehen in der README des Lab-Projekts.
-GPIO27 ist dessen Laborvorgabe, keine feste
-Zuordnung für alle EnvNode-Mainboards. Es gibt dort kein MQTT und keine Heizautomation.
-Das Aufspielen ersetzt die bisherige Firmware auf dem Testgerät.
+Regendetektor (Benetzung/Frequenz) und Regenmesser (Kippwaage) sind getrennte
+Implementierungen. Beim Regendetektor starten aktivierte Sensoren und Controller
+nach Boot automatisch. Die Heizung startet aus; neue Benetzung fordert 100 % an.
+Nach voreingestellt 60 Sekunden ohne neue Benetzung wird Regenende geschätzt.
+Die Heizung bleibt bis zur bestätigten Trockenfrequenz an. Messintervall 5000 ms
+betrifft die Veröffentlichung; lokale Messfenster sind etwa 250 ms lang.
+Parameter und Teststand: [Firmware-Dokumentation im Repository](https://github.com/magicamun/EnvNode/blob/codex/rain-detector/docs/RainDetector.md).
 
-Die gemeinsame EnvNode-Firmware enthält einen Rain-Gauge-Treiber für Kippwaagen.
-Dieser ist funktional verschieden und kein RainDetector-Treiber.
+Die separate Lab-Firmware bietet manuelle Heizung, Intervallversuche und Automatik.
+Temperatur-/Taupunktregelung und Feldlogging sind noch nicht umgesetzt.
 
 ## Anleitungen und Prüfstand
 
-- [Controller: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf)
-- [Head: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf)
+- [Controller: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorController_Bestueckungs_und_Bringup_Rev0.4.pdf)
+- [Head: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.2.pdf)
 
 Die dokumentierten ERC/DRC-Prüfungen vom 14. September 2026 liegen vor den
 anschließenden Stecker- und Konturänderungen. Vor Fertigung sind aktuelle Prüfungen

@@ -1,4 +1,28 @@
-# EnvNode RainDetector Head — Revision 0.1
+# EnvNode RainDetector Head — Revision 0.2
+
+## Current mechanical revision - 2026-10-21
+
+PCB **ENP-00139**, revision **0.2**, paired with RainDetectorController **0.4**.
+The outline is **62.12 x 54.52 mm** (Edge.Cuts centerline), enlarged for the
+housing seal; mounting holes moved with the outline. The active C1 detector
+geometry, J1/J2 positions/orientations and PCB pad-net assignments are unchanged
+relative to the previous committed PCB. No electrical or firmware change follows
+from this mechanical revision. The head C1 footprint identifier is
+`RainDetector_Interdigitated_44.78x37.25mm_P0.51mm`.
+
+![Current component/sensor side](../../../../images/rain-detector/RainDetectorHead-Rev0.2-top.png)
+
+![Current underside](../../../../images/rain-detector/RainDetectorHead-Rev0.2-bottom.png)
+
+Current guide: [Revision 0.2 assembly and bring-up](Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.2.pdf).
+Native KiCad renders and source fingerprints: [render provenance](../../../../images/rain-detector/README.md).
+The guide uses the new PCB article; kit/assembly records are awaiting the user's
+update and were not modified here. Prior PDFs and the historical notes below
+remain records of their respective revisions, not the current mechanical guide.
+No new full ERC/DRC or physical qualification is claimed for the enlarged boards.
+
+## Previous revision notes (historical)
+
 
 Passive capacitive sensor head with two soldermask-covered interdigitated
 F.Cu electrodes and twenty 15-ohm 1206 heater resistors on B.Cu.

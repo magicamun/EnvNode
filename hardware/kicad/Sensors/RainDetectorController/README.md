@@ -1,4 +1,28 @@
-# EnvNode RainDetector Controller — Revision 0.3
+# EnvNode RainDetector Controller — Revision 0.4
+
+## Current mechanical revision - 2026-10-21
+
+PCB **ENP-00138**, revision **0.4**, paired with RainDetectorHead **0.2**.
+The outline is **62.12 x 54.52 mm** (Edge.Cuts centerline), enlarged for the
+housing seal; mounting holes moved with the outline. The active C1 detector
+geometry, J1/J2 positions/orientations and PCB pad-net assignments are unchanged
+relative to the previous committed PCB. No electrical or firmware change follows
+from this mechanical revision. The head C1 footprint identifier is
+`RainDetector_Interdigitated_44.78x37.25mm_P0.51mm`.
+
+![Current component/sensor side](../../../../images/rain-detector/RainDetectorController-Rev0.4-top.png)
+
+![Current underside](../../../../images/rain-detector/RainDetectorController-Rev0.4-bottom.png)
+
+Current guide: [Revision 0.4 assembly and bring-up](Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.4.pdf).
+Native KiCad renders and source fingerprints: [render provenance](../../../../images/rain-detector/README.md).
+The guide uses the new PCB article; kit/assembly records are awaiting the user's
+update and were not modified here. Prior PDFs and the historical notes below
+remain records of their respective revisions, not the current mechanical guide.
+No new full ERC/DRC or physical qualification is claimed for the enlarged boards.
+
+## Previous revision notes (historical)
+
 
 ICM7555 frequency measurement front end at 3.3 V and AO3400A low-side heater
 switch. Timing resistors are 10 kohms and 100 kohms; C1 is the 100 nF supply
