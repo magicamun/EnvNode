@@ -191,6 +191,9 @@ sind damit nicht nachgewiesen.
 
 ## Mit der Firmware verwenden
 
+[Weather 0.2 provisionieren](../../firmware/provisioning.md#weather-revision-02-provisionierung).
+
+
 [Erste Inbetriebnahme](../../firmware/configuration.md),
 [Board Identity](../../firmware/provisioning.md) und
 [erste I²C-Messung](../../firmware/example-measurement.md).

@@ -22,7 +22,7 @@ enum class HardwareResourceKind {
 };
 
 struct GpioResource {
-    explicit GpioResource(uint8_t gpioNumber = 0)
+    explicit constexpr GpioResource(uint8_t gpioNumber = 0)
         : number(gpioNumber) {
     }
 

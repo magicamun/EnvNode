@@ -110,7 +110,7 @@ void test_blank_unavailable_and_corrupt_records_use_visible_fallback() {
 void test_unknown_profile_and_unsupported_revision_never_fall_back() {
     MemoryStorage unknown;
     unknown.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
-    unknown.bytes[6] = 1;
+    unknown.bytes[6] = 0xFE;
     const uint32_t unknownCrc = BoardIdentityCodec::calculateCrc32(unknown.bytes, 28);
     for (size_t index = 0; index < 4; ++index) {
         unknown.bytes[28 + index] = static_cast<uint8_t>(unknownCrc >> (index * 8));
@@ -152,6 +152,17 @@ void test_resolution_is_read_and_frozen_once() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(first.source), static_cast<int>(second.source));
 }
 
+void test_weather_eeprom_identity_wins_over_mainboard_fallback() {
+    MemoryStorage storage;
+    storage.setIdentity({BoardProfileId::EnvNodeWeather, {0, 2}, 42});
+    const auto result = resolve(storage);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(BoardIdentitySource::EEPROM),
+        static_cast<int>(result.source));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(BoardProfileId::EnvNodeWeather),
+        static_cast<int>(result.identity.profileId));
+    TEST_ASSERT_TRUE(result.normalRuntimeAllowed);
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_valid_eeprom_identity_wins);
@@ -159,5 +170,6 @@ int main(int, char**) {
     RUN_TEST(test_blank_unavailable_and_corrupt_records_use_visible_fallback);
     RUN_TEST(test_unknown_profile_and_unsupported_revision_never_fall_back);
     RUN_TEST(test_resolution_is_read_and_frozen_once);
+    RUN_TEST(test_weather_eeprom_identity_wins_over_mainboard_fallback);
     return UNITY_END();
 }

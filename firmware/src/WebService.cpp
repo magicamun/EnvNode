@@ -1167,7 +1167,9 @@ void WebService::handleHardware() {
         if (profile == nullptr) continue;
         c += "<option value='" + String(encodeBoardProfileId(profile->id)) + "'";
         if (profile->id == identity.profileId) c += " selected";
-        c += ">" + escapeHtml(profile->displayName) + "</option>";
+        c += ">" + escapeHtml(profile->displayName) + " "
+            + String(profile->revision.major) + "." + String(profile->revision.minor)
+            + "</option>";
     }
     c += "</select></label>";
     c += (String("<p class='help'>") + uiText(TextId::TheSelectedBoardNameIsStoredAsIts) + "</p>");

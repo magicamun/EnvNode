@@ -58,3 +58,28 @@ dessen Buswahljumper betreffen den ADC, nicht das Identity-EEPROM.
 
 [Mini](../mainboards/mini/index.md) · [Weather](../mainboards/weatherstation/index.md)
 · [DuoRelay](../modules/duo-relay/index.md)
+
+## Weather Revision 0.2: Provisionierung
+
+Dieser Ablauf gilt für das aufgebaute Weather 0.2; PCB 0.2.1 verwendet dieselbe
+Board Identity 0.2. Voraussetzung ist eine Firmware, die unter **Hardware** das
+Profil **EnvNode Weather**, Revision **0.2**, anbietet. Fehlt dieses Angebot,
+zuerst eine Firmware mit Weather-Profil bauen und installieren. Das ältere
+**EnvNode Mainboard 0.3** ist kein Ersatz: dessen Slot-A-GPIO1 ist GPIO4 statt GPIO33.
+
+### 1. Mainboard ohne Modul provisionieren
+
+1. Ohne Relais-Modul und RainDetector starten. Firmwareversion und Ausgangszustand
+   protokollieren. Bei leerem EEPROM ist `NotProvisioned` zu erwarten; das aktive
+   Profil kann bis zur Provisionierung aus `BuildFallback` stammen.
+2. I2C0 prüfen: das Board-EEPROM muss bei `0x50` antworten.
+3. Unter **Hardware** **EnvNode Weather / 0.2** auswählen. Eine für dieses Board
+   vergebene, dauerhaft dokumentierte Seriennummer von 1 bis 4294967295 eintragen.
+   Null bedeutet noch nicht zugewiesen (`UnassignedSerial`).
+4. Schreibbestätigung setzen, provisionieren und erfolgreiche Rückleseprüfung abwarten.
+5. Neustarten. Erwartung: Status `Valid`, Quelle `EEPROM`, Profil **EnvNode Weather**,
+   Revision **0.2**, eigene Seriennummer, genau **Slot A**.
+6. Aus- und wieder einschalten und dieselben Angaben erneut prüfen.
+
+Erst nach diesen Prüfungen weitere Hardware anschließen. WLAN/MQTT-Konfiguration
+in NVS und Board Identity im EEPROM sind getrennte Datenbestände.

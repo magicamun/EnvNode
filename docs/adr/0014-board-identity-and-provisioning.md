@@ -249,3 +249,12 @@ activation makes the lifecycle deterministic and avoids partial hardware reiniti
 
 Rejected because divergent formats, validation and write behavior would make provisioning
 unreliable and prevent the normal firmware from verifying records written by the dedicated tool.
+
+### Weather 0.2 profile (2026-10-18)
+
+Profile ID 0 remains the existing Mainboard 0.3 contract. Profile ID 1 identifies
+EnvNode Weather 0.2, with one slot A (AUX1 GPIO33, AUX2 GPIO13, CS GPIO5),
+I2C0 GPIO21/22 and I2C1 GPIO25/26. Direct GPIO27 is available; GPIO15 is
+not exposed. PCB silkscreen revision 0.2.1 retains Board Identity revision 0.2.
+Both profiles are provisionable in the same build. Empty EEPROMs retain the
+existing development fallback until explicitly provisioned and rebooted.

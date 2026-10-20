@@ -106,7 +106,7 @@ void test_validation_order_distinguishes_format_length_and_crc() {
 void test_unknown_profile_does_not_fall_back() {
     uint8_t record[BoardIdentityCodec::EncodedSize];
     std::memcpy(record, ExampleRecord, sizeof(record));
-    record[6] = 1;
+    record[6] = 0xFE;
     writeCrc(record);
     BoardIdentity identity = {};
     TEST_ASSERT_EQUAL_INT(

@@ -10,6 +10,7 @@ namespace EnvNode {
 
 enum class BoardProfileId : uint8_t {
     EnvNodeMainboard = 0,
+    EnvNodeWeather = 1,
 };
 
 struct BoardRevision {

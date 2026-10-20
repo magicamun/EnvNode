@@ -3,7 +3,8 @@
 namespace EnvNode {
 
 bool isKnownBoardProfileId(uint16_t encodedId) {
-    return encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMainboard);
+    return encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMainboard)
+        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeWeather);
 }
 
 bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId) {
@@ -11,7 +12,7 @@ bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId) {
         return false;
     }
 
-    profileId = BoardProfileId::EnvNodeMainboard;
+    profileId = static_cast<BoardProfileId>(encodedId);
     return true;
 }
 
@@ -31,6 +32,11 @@ BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
     switch (identity.profileId) {
         case BoardProfileId::EnvNodeMainboard:
             if (identity.revision.major != 0 || identity.revision.minor != 3) {
+                return BoardIdentityStatus::UnsupportedRevision;
+            }
+            break;
+        case BoardProfileId::EnvNodeWeather:
+            if (identity.revision.major != 0 || identity.revision.minor != 2) {
                 return BoardIdentityStatus::UnsupportedRevision;
             }
             break;
