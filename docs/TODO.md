@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] SD-Card Rev. 0.1: Artikel und vollständige BOM in InvenTree anlegen/zuordnen, einschließlich Adafruit 254, PCB, Steckverbindern und Befestigungsmaterial. Bestückungs- und Bring-up-Anleitung liegt im FullSize/SD-Card-Projekt; physischer Bring-up und SD-Firmwareintegration stehen noch aus.
+- [ ] SD-Card Rev. 0.1: Bausatz/Baugruppe und vollständige BOM in InvenTree erstellen. U1 (ENP-00136, Adafruit 254) und PCB (ENP-00137) sind angelegt; vorhandene Standardteile sind zugeordnet. Direkte Montage über 1×8-Stiftleiste ENP-00019; Lieferumfang prüfen und mitgelieferte Leiste nicht doppelt zählen. Befestigungslängen/-artikel und Adafruit-Herstellerverknüpfung noch offen. Bestückungs- und Bring-up-Anleitung liegt im FullSize/SD-Card-Projekt; physischer Bring-up und SD-Firmwareintegration stehen noch aus.
 
 - [x] Controller-Zielauswahl: konfigurierten Aktor-Slot und automatisch erkanntes Modulrelais bei identischer Hardware als einen Eintrag mit Benutzername und Modulzuordnung anzeigen. Auch die exklusive Zielbelegung muss beide Referenzarten als dasselbe Ziel erkennen. Bestehende gespeicherte Referenzen kompatibel halten.
 

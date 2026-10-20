@@ -7,7 +7,7 @@ respective licenses; see `../../../Libraries/Adafruit-Breakouts/`.
 FullSize carrier (38 x 64 mm) for the assembled **Adafruit MicroSD card breakout
 board+ / product 254** (Reichelt DEBO MICROSD). J1 is the bottom-mounted 2x7
 EnvNode module connector. U1 mounts on the top through a vertical 1x8, 2.54 mm
-header/socket assembly; choose its height and supports together. U2 (24LC32,
+header soldered directly to the carrier; choose its height and supports together. U2 (24LC32,
 SOIC-8) and C1 (100 nF, 1206) are on the bottom; R1 (10 kOhm, 1206) is on top.
 
 ## Purpose and scope
@@ -53,6 +53,32 @@ The PDF can be regenerated with `tools/build_sd_card_bringup.py` using Python,
 ReportLab and Pillow. Reviewed KiCad render images are kept beside the PDF;
 rerender them after a PCB revision. The generator rejects stale image manifests.
 
+## InvenTree parts - 20 October 2026
+
+The following parts were checked against the live InvenTree catalogue. Quantities
+are per module; no stock receipts, consumption or orders were booked.
+
+| Position | Qty | Part | Description |
+| --- | ---: | --- | --- |
+| U1 | 1 | [ENP-00136](http://inventree.thielemann.intern/web/part/133/details) | Adafruit MicroSD card breakout board+ (254); Reichelt DEBO MICROSD |
+| PCB | 1 | [ENP-00137](http://inventree.thielemann.intern/web/part/134/details) | SD-Card PCB Rev. 0.1, unpopulated, 38 x 64 mm |
+| U2 | 1 | ENP-00102 | 24LC32 / 24LC32A, SOIC-8 |
+| C1 | 1 | ENP-00006 | 100 nF X7R, 1206 |
+| R1 | 1 | ENP-00018 | 10 kOhm, 1206 |
+| J1 | 1 | ENP-00059 | 2x7, 2.54 mm, vertical bottom-mount header |
+| U1 header | 1 if not supplied with U1 | ENP-00019 | 1x8, 2.54 mm, straight header |
+
+Mount U1 directly through the 1x8 header; no additional socket is planned.
+Check the breakout delivery contents before adding ENP-00019 as a separate BOM
+line, to avoid counting a supplied header twice. Mechanical fastener/spacer
+parts and lengths remain to be selected. The microSD card is separate operating
+accessory/test equipment; its exact type remains to be documented.
+
+ENP-00136 and ENP-00137 were newly created. The Reichelt supplier part for
+ENP-00136 is saved; the separate Adafruit manufacturer-part link (MPN 254) is
+still open. Existing standard-part records were reused. A kit/assembly and its
+complete InvenTree BOM have **not** been created yet.
+
 ## Verification - 20 October 2026
 
 KiCad 10.0.5: DRC with zone refill and schematic parity check returned 0
@@ -64,8 +90,9 @@ This is a CAD review, not a completed physical bring-up or field validation.
 
 ## Open work
 
-- [ ] Create/assign parts and BOM in **InvenTree** (including PCB, U1, headers,
-  sockets and fastening hardware). No complete InvenTree BOM exists yet.
+- [x] Create U1 and PCB parts in **InvenTree** and identify the existing standard parts.
+- [ ] Create the kit/assembly and complete **InvenTree BOM**, avoiding duplicate
+  header counting; select fastening lengths/parts and link Adafruit as manufacturer.
 - [ ] Assemble and complete the measurement/bring-up record.
 - [ ] Define and support a dedicated SD-Card module descriptor/profile; do not
   provision a descriptor for an unrelated module.

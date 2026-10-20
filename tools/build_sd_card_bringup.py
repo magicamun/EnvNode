@@ -136,18 +136,21 @@ end()
 
 start('1. Teile und Vorbereitung');sub('1.1 Elektronische Bestückung')
 table(['Ref.','Anz.','Value / elektrische Daten','Artikelzuordnung','Gehäuse / Footprint'],[
- ['U1','1','Adafruit MicroSD card breakout board+, Produkt 254','Reichelt DEBO MICROSD','Fertiges Breakout; 1x8 / 2,54 mm'],
- ['U2','1','24LC32 / 24LC32A; 3,3-V-Betrieb','InvenTree: TODO','SOIC-8, 3,9 x 4,9 mm'],
- ['C1','1','100 nF, X7R; für 3,3 V geeignet','InvenTree: TODO','1206 / 3216 Metric'],
- ['R1','1','10 kOhm, CD-Pull-up','InvenTree: TODO','1206 / 3216 Metric'],
- ['J1','1','Stiftleiste 2x7, 2,54 mm, Bottom-Mount','InvenTree: TODO','EnvNode Bottom-Footprint'],
- ['PCB','1','SD-Card FullSize Rev. 0.1','InvenTree: TODO','38,00 x 64,00 mm'],
- ['U1-Anschluss','1 Satz','Gerade Stiftleiste 1x8; optional passende Buchsenleiste','Höhe festlegen','2,54 mm, 1,0-mm-Bohrungen'],
- ['Mechanik','nach Bedarf','Isolierende Distanzstücke, Schrauben / Muttern','Längen festlegen','H1/H2: M2,5; U1: #2 / 2,2 mm'],
+ ['U1','1','Adafruit MicroSD card breakout board+, Produkt 254','ENP-00136; Reichelt DEBO MICROSD','Fertiges Breakout; 1x8 / 2,54 mm'],
+ ['U2','1','24LC32 / 24LC32A; 3,3-V-Betrieb','ENP-00102','SOIC-8, 3,9 x 4,9 mm'],
+ ['C1','1','100 nF, X7R; für 3,3 V geeignet','ENP-00006','1206 / 3216 Metric'],
+ ['R1','1','10 kOhm, CD-Pull-up','ENP-00018','1206 / 3216 Metric'],
+ ['J1','1','Stiftleiste 2x7, 2,54 mm, Bottom-Mount','ENP-00059','EnvNode Bottom-Footprint'],
+ ['PCB','1','SD-Card FullSize Rev. 0.1','ENP-00137','38,00 x 64,00 mm'],
+ ['U1-Pins','1','Gerade Stiftleiste 1x8, direkt eingelötet','ENP-00019, falls nicht bei U1 enthalten','2,54 mm, 1,0-mm-Bohrungen'],
+ ['Mechanik','n. B.','Isolierende Distanzstücke, Schrauben / Muttern','Längen festlegen','H1/H2: M2,5; U1: #2 / 2,2 mm'],
  ['Speicher','1','Geeignete microSD; für ersten Test FAT32','Karte dokumentieren','Keine Karte im Lieferumfang voraussetzen']
-],[40,27,190,95,WIDTH-352])
+],[55,28,177,100,WIDTH-360])
 box('<b>InvenTree-BOM bleibt TODO.</b> Die Tabelle ist eine Bestückungsliste aus dem CAD-Stand, '
-    'keine fertig angelegte InvenTree-BOM. PCB, Breakout, Steckverbinder und Mechanik dort noch zuordnen.')
+    'keine fertig angelegte InvenTree-BOM. U1 und PCB sind angelegt; Standardteile sind identifiziert. '
+    'Bausatz/BOM, Befestigungslängen und Adafruit-Herstellerverknüpfung sind noch offen.')
+para('Direkte Montage über die 1x8-Stiftleiste; keine zusätzliche Buchse. ENP-00019 nur separat '
+     'in die BOM aufnehmen, wenn die Leiste nicht im Lieferumfang von U1 enthalten ist.')
 para('Modulidentifikation: U2 wird aus +3V3_SYS versorgt. I2C0-Adresse 0x52 in Slot A bzw. 0x53 in Slot B. '
      'Ein SD-Card-spezifischer Descriptor und seine Firmwareunterstützung sind noch offen; keine fremde Modulvorlage verwenden.')
 end()
@@ -176,7 +179,7 @@ para('Oberseite: J1 liegt oben. R1 befindet sich links oberhalb der U1-Anschluss
      'U1 Pin 1 liegt in dieser Ansicht rechts. Der Kartenzugang liegt am unteren Ende des U1-Umrisses, Richtung H2.')
 picture('top.png',435,'Draufsicht aus dem gespeicherten PCB. Weißer U1-Umriss = Breakout-Position; '
         'U1 selbst ist wegen des fehlenden 3D-Modells nicht sichtbar. H1 liegt innerhalb dieses Umrisses.')
-box('Vor dem Löten U1 probeweise mit Stecker/Buchse und Abstandshaltern einsetzen. '
+box('Vor dem Löten U1 probeweise mit Stiftleiste und Abstandshaltern einsetzen. '
     'Alle vier Lochpositionen, Pinfolge, Zugang zum Push-Push-Sockel und Freiraum über H1 prüfen. '
     'Der 10-mm-Zugangsbereich im Footprint ist eine Planungshilfe, keine garantierte Fingerfreiheit.')
 end()
@@ -197,8 +200,8 @@ for title,txt in [
  ('2. EEPROM U2','Pin 1 ausrichten; zunächst einen Pin fixieren, anschließend alle SOIC-8-Pins löten. Keine Brücken an SDA/SCL oder Versorgung.'),
  ('3. Bottom-Mount J1','Von der Unterseite montieren. Mit geeigneter Gegenbuchse rechtwinklig ausrichten, zwei Pins fixieren, Sitz prüfen und fertig löten.'),
  ('4. Mechanik vorbereiten','H1-Befestigung vor U1 einsetzen. Spacerhöhe nach realem Steckverbinder festlegen. H2 und die U1-Stützen auf spannungsfreien Sitz prüfen.'),
- ('5. U1-Anschluss bestücken','1x8-Header bzw. Buchse zur Pinfolge ausrichten. Pin 1 der Trägerplatine mit 5V am Breakout abgleichen. Keine Reihe um einen Pin versetzen.'),
- ('6. Breakout U1 montieren','Bauteilseite nach oben, Kartenzugang Richtung H2. Bei steckbarer Montage erst nach der Trägerprüfung einsetzen; bei fester Montage vorher alle verdeckten Stellen prüfen.'),
+ ('5. U1-Anschluss bestücken','1x8-Stiftleiste zur direkten Lötmontage ausrichten. Pin 1 der Trägerplatine mit 5V am Breakout abgleichen. Keine Reihe um einen Pin versetzen.'),
+ ('6. Breakout U1 montieren','Bauteilseite nach oben, Kartenzugang Richtung H2. Vor dem festen Einlöten alle später verdeckten Stellen prüfen.'),
  ('7. Reinigung und Abnahme','Lötstellen reinigen und unter Vergrößerung prüfen. Keine leitenden Reste unter U1. H1 darf die Breakout-Unterseite nicht berühren.')]:
  sub(title);para(txt)
 end()
@@ -287,7 +290,7 @@ para('Die Überdeckung von H1 mit U1 ist eine bewusste mechanische Entscheidung.
      'ist im realen Aufbau zu prüfen. Renderings zeigen die Trägerplatine; ein Modell des '
      'Adafruit-Breakouts fehlt. Ein CAD-Prüflauf bestätigt keine mechanische Passprobe oder Feldqualifikation.')
 sub('Offene Arbeiten vor produktiver Feldaufzeichnung')
-for t in ['<b>InvenTree:</b> Artikelzuordnung und vollständige BOM erstellen; Steckverbinder und Befestigungshöhen konkretisieren.',
+for t in ['<b>InvenTree:</b> U1 = ENP-00136 und PCB = ENP-00137 sind angelegt; Standardteile stehen in Abschnitt 1.1. Bausatz/BOM noch erstellen, Befestigungshöhen festlegen und Adafruit-Herstellerverknüpfung ergänzen.',
  'Dedizierten Modul-Descriptor und SD-Card-Firmwarepfad definieren; keine Identität eines anderen Moduls übernehmen.',
  'Schreib-/Lesetest und Messprotokoll an der bestückten Hardware abschließen.',
  'Asynchrone Aufzeichnung, Export, Fehlerbehandlung und weiterlaufende Mess-/Heizfunktionen implementieren und testen.',
