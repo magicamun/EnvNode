@@ -26,3 +26,6 @@
 !Display-SSD1309/include/LabConfig.h
 !Display-SSD1309/src/
 !Display-SSD1309/src/main.cpp
+
+!RainDetector-PCNT/include/LabRainAutomation.h
+!RainDetector-PCNT/tests/test_lab_rain_automation.cpp

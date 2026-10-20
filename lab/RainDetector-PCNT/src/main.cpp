@@ -6,6 +6,7 @@
 
 #include "LabConfig.h"
 #include "HeaterControl.h"
+#include "LabRainAutomation.h"
 #include <RainDetectorEvaluation.h>
 
 namespace {
@@ -14,6 +15,8 @@ constexpr uint32_t CounterMask = 1U << CounterUnit;
 constexpr int16_t CounterLimit = 32767;
 
 RainLab::HeaterControl heater;
+RainLab::LabRainAutomation automation;
+uint64_t lastAutoReportMs = 0;
 bool pwmReady = false;
 EnvNode::RainDetectorEvaluation rainEvaluation;
 static_assert(sizeof(EnvNode::RainDetectorEvaluation) <= 256, "Evaluation RAM budget");
@@ -48,7 +51,28 @@ void reportHeater(const char* reason) {
         reason);
 }
 
+void writeHeaterPwm();
+
+void reportInterval(const char* reason, int64_t plannedUs, int64_t appliedUs) {
+    Serial.printf("# interval,%s,%lld,%lld,%llu,%u,%u,%lld,%s\n", reason,
+        static_cast<long long>(plannedUs), static_cast<long long>(appliedUs),
+        static_cast<unsigned long long>(heater.phase()), heater.percent(), heater.step(),
+        static_cast<long long>(heater.intervalUs()), heater.ascending() ? "up" : "down");
+}
+
 void serviceTimeout() {
+    const int64_t plannedUs = heater.deadlineUs();
+    if (heater.interval() && esp_timer_get_time() - plannedUs >= heater.intervalUs()) {
+        stopHeater();
+        reportHeater("interval_overrun");
+        Serial.println("# error,interval,missed full interval; sequence stopped");
+        return;
+    }
+    if (heater.advanceInterval(esp_timer_get_time())) {
+        writeHeaterPwm();
+        reportInterval("step", plannedUs, esp_timer_get_time());
+        reportHeater("interval");
+    }
     if (heater.expire(esp_timer_get_time())) {
         stopHeater();
         reportHeater("timeout");
@@ -61,13 +85,90 @@ void writeHeaterPwm() {
         (heater.percent() * maximumDuty + 50) / 100);
 }
 
+void reportAutoConfig() {
+    const auto& c = automation.config();
+    Serial.printf("# auto_config,edge_ms=%u,drop_hz=%u,drop_permille=%u,end_s=%u,dry_hz=%u,hysteresis_hz=%u,dry_s=%u\n",
+        c.edgeMs, c.dropHz, c.dropPermille, c.endSeconds, c.dryHz, c.hysteresisHz, c.drySeconds);
+}
+
+void reportAuto(uint64_t timeMs, const char* reason) {
+    const auto& r = automation.result();
+    Serial.printf("# auto,%llu,%s,%u,%u,%s,%u,%u,%u,%llu,%llu\n",
+        static_cast<unsigned long long>(timeMs), reason, automation.enabled(), r.valid,
+        RainLab::autoRainName(r.rain), r.wetting, r.heating, r.dry,
+        static_cast<unsigned long long>(r.quietMs), static_cast<unsigned long long>(r.dryMs));
+    lastAutoReportMs = timeMs;
+}
+
+void disableAuto(const char* reason) {
+    if (!automation.enabled()) return;
+    automation.disable();
+    reportAuto(esp_timer_get_time() / 1000, reason);
+}
+
+void evaluateAuto(uint64_t timeMs, float frequencyHz, unsigned measuredPercent) {
+    if (!automation.enabled()) return;
+    const auto before = automation.result();
+    const auto current = automation.update(timeMs, frequencyHz, measuredPercent);
+    if (current.heating != before.heating) {
+        if (current.heating) { heater.startContinuous(100); writeHeaterPwm(); }
+        else stopHeater();
+        reportHeater(current.heating ? "auto_wetting"
+            : current.valid && current.dry ? "auto_dry" : "auto_signal_invalid");
+    }
+    if (current.wetting || current.rain != before.rain || current.valid != before.valid
+        || current.heating != before.heating || current.dry != before.dry
+        || timeMs - lastAutoReportMs >= 1000) {
+        const char* reason = !current.valid && before.heating && !current.heating
+            ? "signal_invalid" : current.wetting ? "wetting" : current.dry && !before.dry ? "dry"
+            : current.rain == RainLab::AutoRain::EndEstimated && before.rain != current.rain
+                ? "rain_end" : !current.valid ? "guard_or_invalid" : "sample";
+        reportAuto(timeMs, reason);
+    }
+}
+
 void handleCommand(const char* line) {
+    if (RainLab::autoWord(line, "ON")) {
+        stopHeater();
+        automation.enable();
+        reportHeater("auto_start_off");
+        reportAutoConfig();
+        reportAuto(esp_timer_get_time() / 1000, "enabled");
+        return;
+    }
+    if (RainLab::autoWord(line, "OFF")) {
+        disableAuto("disabled");
+        stopHeater(); reportHeater("off");
+        return;
+    }
+    if (RainLab::autoWord(line, "STATUS")) {
+        reportAutoConfig(); reportAuto(esp_timer_get_time() / 1000, "status");
+        return;
+    }
+    RainLab::AutoConfig config;
+    if (RainLab::parseAutoConfig(line, config)) {
+        if (!automation.configure(config)) Serial.println("# error,auto,disable AUTO before configuring");
+        else reportAutoConfig();
+        return;
+    }
+
     const auto command = RainLab::parseCommand(line);
     switch (command.kind) {
+        case RainLab::CommandKind::Interval: {
+            disableAuto("manual_interval");
+            const int64_t startedUs = esp_timer_get_time();
+            heater.startInterval(command.percent, command.seconds, startedUs);
+            writeHeaterPwm();
+            reportInterval("start", startedUs, esp_timer_get_time());
+            reportHeater("interval_start");
+            break;
+        }
         case RainLab::CommandKind::Heat:
+            disableAuto("manual_heat");
             heater.start(command.percent, command.seconds, esp_timer_get_time());
             writeHeaterPwm(); reportHeater("command"); break;
         case RainLab::CommandKind::HeatContinuous:
+            disableAuto("manual_heat");
             heater.startContinuous(command.percent);
             writeHeaterPwm(); reportHeater("command"); break;
         case RainLab::CommandKind::Resume:
@@ -75,13 +176,18 @@ void handleCommand(const char* line) {
                 Serial.println("# error,command,no previous heater level; use HEAT percent ON");
                 break;
             }
+            disableAuto("manual_resume");
             writeHeaterPwm(); reportHeater("command"); break;
         case RainLab::CommandKind::Off:
+            disableAuto("off");
             stopHeater(); reportHeater("off"); break;
         case RainLab::CommandKind::Status:
-            reportHeater("status"); break;
+            reportAutoConfig(); reportAuto(esp_timer_get_time() / 1000, "status");
+            reportHeater("status");
+            if (heater.interval()) reportInterval("status", heater.deadlineUs() - heater.intervalUs(), esp_timer_get_time());
+            break;
         case RainLab::CommandKind::Help:
-            Serial.printf("# commands: HEAT <1..100 percent> <1..%u seconds> | HEAT <percent> ON | HEAT ON | HEAT OFF | OFF | STATUS | HELP\n",
+            Serial.printf("# commands: AUTO ON | AUTO OFF | AUTO STATUS | AUTO CONFIG <edge_ms> <drop_hz> <drop_permille> <end_s> <dry_hz> <hysteresis_hz> <dry_s> | INTERVALL <step dividing 100> <1..300 seconds> | HEAT <1..100 percent> <1..%u seconds> | HEAT <percent> ON | HEAT ON | HEAT OFF | OFF | STATUS | HELP\n",
                 LabConfig::HeaterMaxDurationSeconds);
             break;
         default:
@@ -113,6 +219,7 @@ void check(esp_err_t result, const char* operation) {
     if (result == ESP_OK) {
         return;
     }
+    automation.disable();
     stopHeater();
     Serial.printf("# error,%s,%s\n", operation, esp_err_to_name(result));
     Serial.flush();
@@ -156,6 +263,8 @@ void setup() {
     check(pcnt_event_enable(CounterUnit, PCNT_EVT_H_LIM), "limit_event");
     Serial.println("timestamp_ms,pulse_count,frequency_hz,heater_percent");
     reportHeater("boot_off");
+    reportAutoConfig();
+    reportAuto(esp_timer_get_time() / 1000, "boot_disabled");
     Serial.printf("# evaluation_core_bytes,%u\n", static_cast<unsigned>(sizeof(rainEvaluation)));
     Serial.flush();
 }
@@ -173,11 +282,18 @@ void loop() {
     PCNT.int_clr.val = CounterMask;
     const int64_t startUs = esp_timer_get_time();
     check(pcnt_counter_resume(CounterUnit), "resume");
-    while (esp_timer_get_time() - startUs < LabConfig::MeasurementWindowUs) {
+    // Shorten the final window so switching is not delayed by a full window.
+    const int64_t windowEndUs = heater.interval()
+        && heater.deadlineUs() < startUs + LabConfig::MeasurementWindowUs
+        ? heater.deadlineUs() : startUs + LabConfig::MeasurementWindowUs;
+    while (esp_timer_get_time() < windowEndUs) {
         delay(1);  // Yield; PCNT counts autonomously. No GPIO polling.
     }
     check(pcnt_counter_pause(CounterUnit), "pause");
     const int64_t endUs = esp_timer_get_time();
+    serviceTimeout();
+    Serial.printf("# window,%lld,%lld,%u\n", static_cast<long long>(startUs),
+        static_cast<long long>(endUs), measuredHeaterPercent);
     int16_t pulseCount = 0;
     check(pcnt_get_counter_value(CounterUnit, &pulseCount), "read");
     const bool overflow = (PCNT.int_raw.val & CounterMask) != 0;
@@ -193,6 +309,10 @@ void loop() {
     }
     evaluateRain(static_cast<uint64_t>(endUs / 1000),
         overflow ? NAN : static_cast<float>(pulseCount * 1000000.0 / (endUs - startUs)),
+        measuredHeaterPercent);
+    evaluateAuto(static_cast<uint64_t>(endUs / 1000),
+        overflow || endUs - startUs < 100000 ? NAN
+            : static_cast<float>(pulseCount * 1000000.0 / (endUs - startUs)),
         measuredHeaterPercent);
     serviceTimeout();
     Serial.flush();  // Complete output outside the next measurement window.

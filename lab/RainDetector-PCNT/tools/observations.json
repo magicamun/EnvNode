@@ -184,6 +184,27 @@
           "label": "HEAT OFF, aus Log"
         }
       ]
+    },
+    "device-monitor-261020-092352.log": {
+      "role": "exploratory_pwm30",
+      "notes": "User confirmed wetting began before the planned five-minute settling period. Individual spray times not recorded. Stopped before full drying.",
+      "observations": []
+    },
+    "device-monitor-261020-094317.log": {
+      "role": "prospective_pwm30_repeat",
+      "notes": "User reports surface dried before run. Heater commanded to 30% at 61048 ms. First and last spray marks supplied; intermediate sprays unmarked. User ended capture with CTRL-C and confirms heater is off; shutdown time is not recorded in log. No confirmed visible-dry timestamp. Partial PWM evaluation remains invalid.",
+      "observations": [
+        {
+          "time_ms": 360000,
+          "kind": "wetting",
+          "label": "Erste Benetzung, ungefähre Nutzerzeit"
+        },
+        {
+          "time_ms": 515000,
+          "kind": "wetting",
+          "label": "Letzte Benetzung, ungefähre Nutzerzeit; anschließend trocknen lassen"
+        }
+      ]
     }
   }
 }

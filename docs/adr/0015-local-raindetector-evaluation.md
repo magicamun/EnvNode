@@ -82,3 +82,39 @@ The normal production firmware still has no RainDetector integration or automati
 heater control. The original offline tool retains its documented, frozen
 one-second-median detector. Its missed short pulse at the end of the spray
 sequence remains part of the validation record.
+
+## Open experiment proposals (2026-10-20)
+
+Discussion points recorded on 2026-10-20; these are proposals, not validated requirements.
+
+- Define configurable wetting detection, end-of-wetting confirmation and a separate dry-state criterion, including meaningful parameter limits.
+- Investigate frequency bands as qualitative surface-wetting categories. Rain intensity and percentage scales remain unvalidated; temperature, contamination and water distribution confound frequency.
+- Investigate full heating after wetting to accelerate recovery. Define heater inputs separately, including suitable temperature/humidity measurements for dew-point control and possible surface-temperature feedback.
+- Consider a linear heater-power ramp between temperature/dew-point-related limits; determine endpoints experimentally.
+- First characterize the dry head at ascending and descending heater levels, initially in 10 percentage-point increments, with separate runs of 1–5 minutes per level. Partial PWM interference must be distinguished from thermal drift.
+
+
+## Lab policy revision (2026-10-20)
+
+The user accepted a simpler experimental rain-end policy: a rapid negative raw
+frequency edge marks new wetting; 60 seconds of valid observation without another
+edge estimates rain end (configurable 30–300 seconds). Sustained recovery is no
+longer required for this new lab policy. Rain status, surface-dry assessment and
+heater-cycle state remain separate. The original shared evaluation core and its
+replay remain unchanged for comparison; `LabRainAutomation` implements the new
+policy independently in the lab, not in production firmware.
+
+An explicit `AUTO ON` arms observation with the heater off. New wetting starts
+full heating. Only within that cycle, at constant 100% output, a provisional
+32000-Hz threshold with 500-Hz hysteresis and ten-second confirmation ends heating.
+The user accepts this installation-specific dry estimate pending field data.
+No new wetting is inferred from a slow threshold crossing after cooling.
+The edge detector experimentally permits partial PWM; automatic output is ON/OFF.
+Heater transitions pause observation for five seconds. Invalid data discard rain
+history and dry confirmation; they cannot establish rain end or dryness. A heating
+cycle is aborted on invalid samples; AUTO remains armed. Signal return starts
+a five-second guard, then a fresh wetting edge is required to restart heating.
+This supersedes the earlier retain-heating-on-invalid lab policy, after its
+behavior was exercised on hardware. Explicit OFF also disarms AUTO.
+Configuration is volatile and console-only in this lab stage. Hardware validation
+and later sensor/NVS/web/MQTT integration remain separate work.

@@ -61,4 +61,39 @@ int main() {
     HeaterControl afterReset;
     assert(afterReset.percent() == 0 && !afterReset.resume());
 
+    for (const char* text : {"INTERVALL 0 60", "INTERVALL 30 60", "INTERVALL 10 0",
+             "INTERVALL 10 301", "INTERVALL 10 60 extra", "INTERVALL 10.5 60",
+             "INTERVALL 101 60", "INTERVALL 1060", "INTERVALL 10 -1"})
+        assert(parseCommand(text).kind == CommandKind::Invalid);
+    command = parseCommand("INTERVALL 10 60");
+    assert(command.kind == CommandKind::Interval && command.percent == 10 && command.seconds == 60);
+    assert(parseCommand("INTERVALL 100 300").kind == CommandKind::Interval);
+    heater.startInterval(10, 60, nowUs);
+    assert(heater.interval() && !heater.continuous() && heater.percent() == 0);
+    assert(heater.remainingUs(nowUs) == 60000000);
+    assert(!heater.advanceInterval(nowUs + 59999999));
+    for (unsigned phase = 1; phase <= 40; ++phase) {
+        const int64_t planned = nowUs + phase * 60000000LL;
+        assert(heater.advanceInterval(planned + 1234));
+        const unsigned triangle = phase % 20;
+        assert(heater.percent() == (triangle <= 10 ? triangle : 20 - triangle) * 10);
+        assert(heater.phase() == phase);
+        assert(heater.deadlineUs() == planned + 60000000);
+        assert(!heater.expire(planned + 1234));
+        assert(!heater.advanceInterval(planned + 1234));
+    }
+    heater.off();
+    assert(!heater.interval() && heater.percent() == 0);
+    assert(!heater.advanceInterval(nowUs + 9999999999LL));
+    heater.startInterval(100, 300, nowUs);
+    assert(heater.advanceInterval(nowUs + 300000000));
+    assert(heater.percent() == 100 && !heater.ascending());
+    assert(heater.advanceInterval(nowUs + 600000000));
+    assert(heater.percent() == 0 && heater.ascending());
+    heater.start(25, 1, nowUs);
+    assert(!heater.interval() && heater.expire(nowUs + 1000000));
+    heater.startInterval(10, 60, nowUs);
+    heater.startContinuous(50);
+    assert(!heater.interval() && heater.continuous());
+
 }

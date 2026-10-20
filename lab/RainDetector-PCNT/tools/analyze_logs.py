@@ -4,7 +4,7 @@
 import argparse
 from collections import defaultdict
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import json
 import math
@@ -28,6 +28,7 @@ class Session:
     heaters: list
     errors: list
     ignored: int = 0
+    automation: list = field(default_factory=list)
 
 
 def parse_log(path, raw_text=None):
@@ -53,6 +54,22 @@ def parse_log(path, raw_text=None):
                 current = Session([], [], [])
                 saw_boot = True
             current.heaters.append(event)
+            continue
+        if line.startswith('# auto,'):
+            fields = line.split(',')
+            try:
+                if len(fields) != 11:
+                    raise ValueError('auto field count')
+                event = dict(time_ms=int(fields[1]), reason=fields[2],
+                    enabled=int(fields[3]), valid=int(fields[4]), rain=fields[5],
+                    new_wetting=int(fields[6]), heating_cycle=int(fields[7]),
+                    dry=int(fields[8]), quiet_ms=int(fields[9]), dry_ms=int(fields[10]))
+                if any(event[k] not in (0, 1) for k in
+                       ('enabled', 'valid', 'new_wetting', 'heating_cycle', 'dry')):
+                    raise ValueError('invalid auto flag')
+                current.automation.append(event)
+            except (ValueError, IndexError):
+                current.ignored += 1
             continue
         if line.startswith('# error,'):
             current.errors.append(line)
@@ -209,7 +226,7 @@ def analyze(paths, annotations):
             analyses.append(dict(name=path.name, session=index,
                 role=meta.get('role','unannotated'), sha256=hashlib.sha256(snapshot).hexdigest(),
                 samples=len(session.samples), ignored=session.ignored, errors=session.errors,
-                heaters=session.heaters, detections=detections, observations=matched,
+                heaters=session.heaters, automation=session.automation, detections=detections, observations=matched,
                 unassigned=extra, trends=trends(session), points=downsample(session.samples)))
     return analyses
 

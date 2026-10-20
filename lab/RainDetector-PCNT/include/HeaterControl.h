@@ -7,7 +7,7 @@
 #include "LabConfig.h"
 
 namespace RainLab {
-enum class CommandKind { Invalid, Heat, HeatContinuous, Resume, Off, Status, Help };
+enum class CommandKind { Invalid, Interval, Heat, HeatContinuous, Resume, Off, Status, Help };
 struct Command {
     CommandKind kind = CommandKind::Invalid;
     unsigned percent = 0;
@@ -43,7 +43,13 @@ inline bool readWord(const char*& text, const char* word) {
 
 inline Command parseCommand(const char* line) {
     Command command;
-    if (readWord(line, "HEAT")) {
+    if (readWord(line, "INTERVALL")) {
+        if (!readNumber(line, 100, command.percent) || command.percent == 0
+            || 100 % command.percent != 0 || (*line != ' ' && *line != '\t')
+            || !readNumber(line, 300, command.seconds) || command.seconds == 0)
+            return Command{};
+        command.kind = CommandKind::Interval;
+    } else if (readWord(line, "HEAT")) {
         if (readWord(line, "OFF")) command.kind = CommandKind::Off;
         else if (readWord(line, "ON")) command.kind = CommandKind::Resume;
         else {
@@ -67,11 +73,13 @@ inline Command parseCommand(const char* line) {
 class HeaterControl {
 public:
     void start(unsigned percent, unsigned seconds, int64_t nowUs) {
+        interval_ = false;
         percent_ = lastPercent_ = percent;
         timed_ = true;
         deadlineUs_ = nowUs + static_cast<int64_t>(seconds) * 1000000;
     }
     void startContinuous(unsigned percent) {
+        interval_ = false;
         percent_ = lastPercent_ = percent;
         timed_ = false;
         deadlineUs_ = 0;
@@ -81,18 +89,48 @@ public:
         startContinuous(lastPercent_);
         return true;
     }
-    void off() { percent_ = 0; deadlineUs_ = 0; timed_ = false; }
-    bool continuous() const { return percent_ != 0 && !timed_; }
+    void off() { interval_ = false; percent_ = 0; deadlineUs_ = 0; timed_ = false; }
+    bool continuous() const { return !interval_ && percent_ != 0 && !timed_; }
     bool expire(int64_t nowUs) {
-        if (percent_ == 0 || !timed_ || nowUs < deadlineUs_) return false;
+        if (interval_ || percent_ == 0 || !timed_ || nowUs < deadlineUs_) return false;
         off();
         return true;
     }
+    void startInterval(unsigned step, unsigned seconds, int64_t nowUs) {
+        off();
+        interval_ = true;
+        step_ = step;
+        intervalUs_ = static_cast<int64_t>(seconds) * 1000000;
+        deadlineUs_ = nowUs + intervalUs_;
+        ascending_ = true;
+        phase_ = 0;
+    }
+    bool advanceInterval(int64_t nowUs) {
+        if (!interval_ || nowUs < deadlineUs_) return false;
+        percent_ = ascending_ ? percent_ + step_ : percent_ - step_;
+        if (percent_ == 100) ascending_ = false;
+        else if (percent_ == 0) ascending_ = true;
+        if (percent_) lastPercent_ = percent_;
+        ++phase_;
+        deadlineUs_ += intervalUs_;
+        return true;
+    }
+    bool interval() const { return interval_; }
+    uint64_t phase() const { return phase_; }
+    int64_t deadlineUs() const { return deadlineUs_; }
+    int64_t intervalUs() const { return intervalUs_; }
+    unsigned step() const { return step_; }
+    bool ascending() const { return ascending_; }
     unsigned percent() const { return percent_; }
     int64_t remainingUs(int64_t nowUs) const {
-        return percent_ != 0 && nowUs < deadlineUs_ ? deadlineUs_ - nowUs : 0;
+        return (interval_ || percent_ != 0) && nowUs < deadlineUs_ ? deadlineUs_ - nowUs : 0;
     }
 private:
+    bool interval_ = false;
+    bool ascending_ = true;
+    unsigned step_ = 0;
+    uint64_t phase_ = 0;
+    int64_t intervalUs_ = 0;
     unsigned percent_ = 0;
     unsigned lastPercent_ = 0;
     bool timed_ = false;

@@ -65,5 +65,26 @@ class AnalysisTests(unittest.TestCase):
         sampled=analysis.downsample(log.samples)
         self.assertIn(10000,[p[1] for p in sampled])
 
+class AutoLogTests(unittest.TestCase):
+    def test_auto_records_follow_boot_sessions(self):
+        text = """# heater,53,0,0,boot_off
+# auto,100,enabled,1,0,unknown,0,0,0,0,0
+1000,100,35000,0
+# auto,1200,wetting,1,1,active,1,1,0,0,0
+# auto,61200,rain_end,1,1,end_estimated,0,1,0,60000,0
+# auto,90000,dry,1,1,end_estimated,0,0,1,60000,10000
+# auto,bad
+# heater,53,0,0,boot_off
+1000,100,35000,0
+# auto,1000,boot_disabled,0,0,unknown,0,0,0,0,0
+"""
+        sessions = analysis.parse_log(Path('example.log'), text)
+        self.assertEqual(len(sessions), 2)
+        self.assertEqual([e['reason'] for e in sessions[0].automation],
+                         ['enabled', 'wetting', 'rain_end', 'dry'])
+        self.assertEqual(sessions[0].automation[-1]['dry_ms'], 10000)
+        self.assertEqual(sessions[0].ignored, 1)
+        self.assertEqual(len(sessions[1].automation), 1)
+
 if __name__=='__main__':
     unittest.main()

@@ -2,7 +2,7 @@
 
 Eigenständiger PoC für den digitalen 3,3-V-Ausgang eines ICM7555.
 Eigenständige Anwendung mit gemeinsamem Auswertungskern aus `firmware/lib`,
-experimenteller lokaler Benetzungsauswertung, ohne MQTT und ohne Kapazitätsberechnung. Eine manuelle,
+experimenteller lokaler Benetzungsauswertung und optionaler Heizautomatik, ohne MQTT und ohne Kapazitätsberechnung. Eine manuelle,
 wahlweise zeitlich begrenzte oder dauerhafte Heater-Steuerung dient dem Heiz-/Trocknungsversuch.
 
 ## Projekt und Toolchain
@@ -117,7 +117,7 @@ mit `HEAT OFF` oder dem weiterhin gültigen Alias `OFF` beenden.
 und startet immer Dauerbetrieb. Vor der ersten Pegelwahl seit Boot wird es abgewiesen.
 Ein neuer gültiger Einschaltbefehl ersetzt den bisherigen Modus und dessen Timer.
 Der letzte Pegel bleibt nur im RAM; nach Reset startet alles AUS und ohne gemerkten
-Pegel. Keine kumulative Laufzeitbegrenzung und keine automatische Heizregelung.
+Pegel. Im manuellen Modus keine kumulative Laufzeitbegrenzung. Die optionale Automatik ist unten beschrieben.
 Ungültige Befehle ändern den laufenden Test nicht. Zeilen über 63 Zeichen oder
 mit ungültigen Steuerzeichen werden bis zum nächsten Zeilenende verworfen.
 
@@ -390,3 +390,151 @@ erste Fassung 20 Kandidaten einschließlich des letzten kurzen Impulses. Eine
 Regenende-Schätzung folgt bei etwa 567 s seit Boot (rund 126 s nach letztem Impuls).
 Zusätzliche Kandidaten in älteren Logs bleiben ungeklärt und werden nicht als
 bestätigte Benetzungen gewertet.
+
+
+## Automatischer trockener Heizversuch
+
+`INTERVALL 10 60` startet sofort bei 0 % und hält jeden Pegel für nominell
+60 Sekunden: 0, 10, …, 100, 90, …, 0, 10, … . Die Endpunkte werden jeweils
+nur einmal gehalten. Die Rampe wiederholt sich bis `OFF` / `HEAT OFF` oder einem
+neuen gültigen Heizbefehl. Ein neuer INTERVALL-Befehl beginnt wieder bei 0 %.
+Reset startet weiterhin AUS, ohne automatische Wiederaufnahme.
+Schrittweiten müssen 100 ohne Rest teilen (1, 2, 4, 5, 10, 20, 25, 50, 100);
+Intervallzeiten sind ganzzahlig 1–300 Sekunden. Ungültige Befehle ändern nichts.
+Für längere Haltezeiten separat `INTERVALL 10 120`, `180`, `240` oder `300`
+starten; die Haltezeit erhöht sich nicht selbstständig. Bei 10-%-Schritten dauert
+eine Periode von Beginn 0 % bis zum nächsten Beginn 0 % 20 Intervalle, also
+20 Minuten bei 60 Sekunden bzw. 100 Minuten bei 300 Sekunden.
+
+Zusätzliche Logzeilen (Formatbeschreibung):
+
+```text
+# interval,reason,planned_us,applied_us,phase,heater_percent,step_percent,duration_us,next_direction
+# window,start_us,end_us,heater_percent
+```
+
+`reason` ist `start`, `step` oder `status`; Phase 0 ist der erste 0-%-Abschnitt.
+`status` meldet den geplanten Beginn der aktuellen Phase und die aktuelle
+Abfragezeit, keinen neuen Schaltvorgang. Alle Zeiten kommen aus derselben
+64-Bit-Monotonuhr `esp_timer_get_time()` seit Boot, nicht aus der Empfangszeit
+am Computer. `applied_us` wird unmittelbar nach dem PWM-Schreibaufruf erfasst;
+es ist keine elektrische Messung der Ausgangsflanke. Die Differenz zu
+`planned_us` zeigt die Softwareverspätung. Die geplanten Termine bleiben am
+Start ausgerichtet, sodass normale Verzögerungen nicht pro Intervall auflaufen.
+Es gibt keine harte Echtzeitgarantie; bei Überlast können tatsächliche Haltezeiten
+abweichen. Bei Verspätung um mindestens ein ganzes Intervall wird mit
+`interval_overrun` abgeschaltet, statt fehlende Stufen schnell nachzuholen.
+Bootmeldungen trennen unabhängige Zeitachsen.
+
+Messfenster werden vor einem geplanten Heizwechsel verkürzt. Der Wechsel erfolgt
+nach dem Pausieren des Zählers und vor der Logausgabe. Dadurch enthält jedes
+Fenster genau einen angeforderten Heizpegel; kurze Fenster haben eine schlechtere
+Frequenzauflösung. Die tatsächlichen Fenstergrenzen stehen in `# window`;
+die vier CSV-Spalten bleiben unverändert. Kommentarzeilen können zwischen
+zusammengehörigen Messungen stehen: anhand der Zeitstempel zuordnen.
+Die Schaltzeiten sind damit nachvollziehbar, die Zeitmessung bleibt die oben
+beschriebene Software-Näherung und kein kalibriertes Zeitnormal.
+
+Teil-PWM ist hier bewusst Teil des trockenen Charakterisierungsversuchs.
+Sie kann Frequenzstörungen erzeugen; die Benetzungsauswertung ist dabei ungültig.
+Der Versuch läuft auch bei geschlossenem Monitor weiter. Mit `OFF` beenden und
+Pegel 0 prüfen. Build und Hosttests ersetzen keine Hardwareprüfung der Zeitabweichung.
+
+
+## Lab-Automatik: Benetzung, Regenende und Trockenheizen
+
+Die neue Automatik ist nach Boot AUS und wird explizit mit `AUTO ON` aktiviert.
+Dabei wird die Heizung zunächst ausgeschaltet und die Beobachtung beginnt neu.
+Nach fünf Sekunden Anlauf-/Heizwechsel-Sperre erkennt ein schneller Frequenzabfall
+neue Benetzung. Benetzung startet einen Heizzyklus mit konstant 100 %.
+Regenende und Heizzyklus sind unabhängig: Nach 60 Sekunden gültiger Beobachtung
+ohne neue erkannte Benetzung wird `end_estimated` gemeldet; die Heizung läuft bis
+zur Trockenbestätigung weiter. Neue Benetzung setzt Regenstatus und Zeitgeber zurück.
+
+Trocken wird ausschließlich während eines durch Benetzung gestarteten Heizzyklus
+bei konstant 100 % bewertet. Ab 32000 Hz beginnt eine zehnsekündige Bestätigung.
+Im Hystereseband 31500–32000 Hz läuft sie weiter; unter 31500 Hz oder bei neuer
+Benetzung wird sie verworfen. Nach Bestätigung geht die Heizung AUS. `dry=1`
+protokolliert den Abschluss des Heizzyklus, keine laufende Messung einer trockenen
+Umgebung. Abkühlung oder langsame Drift allein starten keinen neuen Heizzyklus.
+Eine ausreichend schnelle Abkühlungsflanke könnte dennoch als Benetzung erscheinen;
+die fünfsekündige Heizwechsel-Sperre ist deshalb im Versuch zu überprüfen.
+
+```text
+AUTO ON
+AUTO STATUS
+AUTO OFF
+AUTO CONFIG 1000 150 5 60 32000 500 10
+```
+
+`AUTO CONFIG` ist nur bei deaktivierter Automatik zulässig, gilt atomar und nur
+bis Reset (noch kein NVS). Zahlen sind ganzzahlig, Reihenfolge:
+
+| Parameter | Standard | Lab-Einstellgrenzen |
+| --- | --- | --- |
+| Maximale Flankendauer, ms | 1000 | 250–2000 |
+| Mindestabfall, Hz | 150 | 20–10000 |
+| Relativer Mindestabfall, Promille | 5 (=0,5 %) | 1–200 |
+| Regenende, Sekunden | 60 | 30–300 |
+| Trockenschwelle, Hz | 32000 | 1000–100000 |
+| Hysterese, Hz | 500 | 1 bis Trockenschwelle minus 1 |
+| Trockenbestätigung, Sekunden | 10 | 1–120 |
+
+Beide Abfallkriterien müssen gegenüber einem vorherigen Rohwert innerhalb der
+Flankendauer erfüllt sein. Zwei Sekunden Ereignissperre verhindern Mehrfachmeldungen.
+Die Grenzen sind technische Lab-Grenzen, keine validierten Sensorgrenzen.
+Die Messfenster dauern etwa 250 ms; 250 ms als maximale Flankendauer kann deshalb
+praktisch zu kurz sein. Es gibt keine Frequenzglättung im neuen Flankendetektor.
+Teil-PWM ist für diesen experimentellen Detektor erlaubt, aber nicht für die
+Trockenbestätigung. Die Automatik selbst schaltet nur AUS/100 %.
+
+`OFF`, `HEAT OFF` und `AUTO OFF` beenden Automatik und Heizung. Jeder gültige
+manuelle Einschalt-/Intervallbefehl übernimmt die Steuerung und deaktiviert die
+Automatik. `STATUS` zeigt auch Automatik und Parameter. Ungültige Befehle ändern
+nichts. Ein erneutes `AUTO ON` startet die Beobachtung wieder neu und schaltet AUS.
+
+Bei Heizwechseln pausiert gültige Beobachtungszeit fünf Sekunden; eine angefangene
+Trockenbestätigung wird verworfen. Nullsignal, `nan`, Zeitrücksprung oder Lücken
+über 1,5 Sekunden setzen Regenstatus auf `unknown` und verwerfen Zeitgeber und
+Flankenhistorie. Ein laufender Heizzyklus wird dabei beendet und die Heizung ausgeschaltet
+(`auto_signal_invalid` / AUTO-Grund `signal_invalid`). AUTO bleibt aktiviert.
+Nach Signalrückkehr folgen fünf Sekunden Anlaufsperre; erst eine neue
+Benetzungsflanke startet wieder einen Heizzyklus. Ein Messfehler
+bedeutet keine trockene Fläche. PCNT-Treiberfehler schalten weiterhin ab.
+Die Automatik hat keinen maximalen Heizzeitgeber und keine Temperaturüberwachung.
+
+Zusätzliche Diagnosezeilen (Formatbeschreibung, kein ausgegebener Header):
+
+```text
+# auto,timestamp_ms,reason,enabled,valid,rain,new_wetting,heating_cycle,dry,quiet_ms,dry_ms
+# auto_config,edge_ms=1000,drop_hz=150,drop_permille=5,end_s=60,dry_hz=32000,hysteresis_hz=500,dry_s=10
+```
+
+Zeitstempel sind Gerätezeit seit Boot. Heizbefehle bestätigen weiterhin die
+`# heater`-Zeilen mit Gründen `auto_start_off`, `auto_wetting` und `auto_dry`.
+`quiet_ms` zählt gültige Beobachtungszeit, `dry_ms` die laufende Bestätigung.
+Die bisherigen `# evaluation`-Zeilen stammen weiterhin vom unveränderten alten
+Erholungskern und steuern die neue Automatik NICHT. Für diesen Versuch sind
+`# auto` und `# heater` maßgeblich. CSV-Messspalten bleiben unverändert.
+
+Hosttest:
+
+```sh
+c++ -std=c++11 -Wall -Wextra -Werror -I lab/RainDetector-PCNT/include \
+  lab/RainDetector-PCNT/tests/test_lab_rain_automation.cpp -o /tmp/envnode-auto-test
+/tmp/envnode-auto-test
+```
+
+Hardwareprüfung: trocken starten, `AUTO ON`, Anlauf abwarten und benetzen.
+Heizung muss auf 100 % gehen, neue Benetzung setzt die Zeitgeber zurück.
+Regenende nach 60 s gültiger Ruhe prüfen; Heizung unabhängig davon bis bestätigtem
+Trocken weiterlaufen lassen. Nach Abschaltung abkühlen lassen, erneut benetzen
+und einen zweiten Zyklus prüfen. Mit `OFF` abbrechen und Pegel 0 kontrollieren.
+Die bisherigen Tests und Builds ersetzen diesen noch ausstehenden Live-Test nicht.
+
+Der Offline-Bericht zeigt den angeforderten Heizlevel als orange Stufenkurve
+mit rechter Prozentachse. AUTO-Meldungen aus dem Gerät sind separat markiert:
+violetter Kreis = Benetzung, türkisfarbenes Quadrat = Regenende, grüne Raute =
+Trockenbestätigung. Ereignistabelle und Zoom enthalten auch Heizwechsel und
+Automatik-Aktivierung. Rote Dreiecke bleiben Kandidaten des alten Offline-Detektors.
+AUTO-Meldungen sind keine unabhängigen optischen Beobachtungen.
