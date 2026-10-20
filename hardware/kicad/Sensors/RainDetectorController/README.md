@@ -15,6 +15,8 @@ from this mechanical revision. The head C1 footprint identifier is
 ![Current underside](../../../../images/rain-detector/RainDetectorController-Rev0.4-bottom.png)
 
 Current guide: [Revision 0.4 assembly and bring-up](Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.4.pdf).
+Structure, typography, ochre colors and component-table columns follow the
+DuoRelay revision 0.3 assembly guide.
 Native KiCad renders and source fingerprints: [render provenance](../../../../images/rain-detector/README.md).
 The guide uses the new PCB article; kit/assembly records are awaiting the user's
 update and were not modified here. Prior PDFs and the historical notes below
