@@ -22,6 +22,7 @@ struct ControllerRuntimeInfo {
     uint32_t maxMeasurementAgeMs = 0;
     RainDetectorPolicyResult rainDetector;
     uint32_t rainWettingCount = 0;
+    uint32_t rainLastWettingAgeMs = 0, rainEndConfirmationAgeMs = 0;
     bool decisionOnly = false;
     ValueId modeValueId = 0;
     ControllerId automaticControllerId = 0;

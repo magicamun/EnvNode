@@ -322,6 +322,8 @@ void ControllerRuntime::updateRuntimeInfo(RuntimeEntry& entry) {
         entry.info.targetAvailable = entry.rainDetector->targetAvailable();
         entry.info.rainDetector = entry.rainDetector->result();
         entry.info.rainWettingCount = entry.rainDetector->wettingCount();
+        entry.info.rainLastWettingAgeMs = entry.rainDetector->lastWettingAgeMs();
+        entry.info.rainEndConfirmationAgeMs = entry.rainDetector->rainEndConfirmationAgeMs();
         entry.info.sourceAvailable = entry.info.rainDetector.valid;
     } else if (entry.selector != nullptr) {
         entry.info.running = entry.selector->running();

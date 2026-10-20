@@ -123,3 +123,9 @@ The sensor form distinguishes the Rain Detector (wetting/frequency) from the
 Rain Gauge (tipping bucket). Implementation metadata follows the current form
 selection immediately. The recommended 5000-ms sample interval controls published
 frequency readings, independently of the approximately 250-ms local acquisition.
+
+For estimated rain end, the controller page shows the last detected wetting and
+the later rain-end detection time separately. These are volatile runtime events,
+reset by controller restart; local wall-clock times are derived from monotonic
+event ages when time is synchronized, otherwise elapsed ages are shown.
+RainDetector diagnostics report measurement usability and actuator availability.

@@ -1484,6 +1484,15 @@ void WebService::handleControllers() {
                 const TextId state = runtime.rainDetector.rain == RainDetectorRainState::Active ? TextId::RainActive
                     : runtime.rainDetector.rain == RainDetectorRainState::EndEstimated ? TextId::RainEndEstimated : TextId::Unknown;
                 c += "<strong>" + String(uiText(state)) + "</strong><br>";
+                if (runtime.rainDetector.rain == RainDetectorRainState::EndEstimated) {
+                    const auto eventTime = [&](uint32_t ageMs) -> String {
+                        if (timeService_.synchronized())
+                            return escapeHtml(timeService_.iso8601Local(timeService_.now() - ageMs / 1000));
+                        return formatElapsedDuration(ageMs) + " " + uiText(TextId::Ago2);
+                    };
+                    c += String(uiText(TextId::RainLastWetting)) + ": " + eventTime(runtime.rainLastWettingAgeMs)
+                        + "<br>" + uiText(TextId::RainEndConfirmedAt) + ": " + eventTime(runtime.rainEndConfirmationAgeMs) + "<br>";
+                }
                 c += String(uiText(TextId::RainHeater)) + ": " + (runtime.rainDetector.heating ? "100%" : "0%")
                     + "<br>" + uiText(TextId::RainDryState) + ": " + uiText(runtime.rainDetector.dry ? TextId::Yes : TextId::No)
                     + "<br>" + uiText(TextId::RainWettingCount) + ": " + String(runtime.rainWettingCount)
@@ -1496,6 +1505,10 @@ void WebService::handleControllers() {
         c += "</td><td class='controller-diagnostics'><div class='diagnostic-stack'>";
         if (!hasRuntime) {
             c += "—";
+        } else if (runtime.implementation == ControllerImplementation::RainDetector) {
+            c += runtime.sourceAvailable ? uiText(TextId::UsableMeasurement) : uiText(TextId::UnusableMeasurement);
+            c += "<br>" + String(runtime.targetAvailable ? uiText(TextId::TargetAvailable) : uiText(TextId::TargetUnavailable));
+            c += "<br>" + String(controllerOperationName(runtime.lastOperationResult, configurationService_.getLocale()));
         } else if (runtime.implementation == ControllerImplementation::Blink) {
             c += runtime.targetAvailable ? uiText(TextId::TargetAvailable) : uiText(TextId::TargetUnavailable);
             c += "<br>" + String(blinkPhaseName(runtime.blinkPhase, configurationService_.getLocale()));

@@ -57,7 +57,13 @@ ControllerOperationResult RainDetectorController::service() {
             actor->outputPercent());
     } else return ControllerOperationResult::NoAction;
     const auto& result=policy_.result();
-    if (result.wetting) ++wettingCount_;
+    if (result.wetting) {
+        ++wettingCount_;
+        lastWettingMs_ = clock_.nowMs();
+    }
+    if (result.rain == RainDetectorRainState::EndEstimated
+        && before.rain != RainDetectorRainState::EndEstimated)
+        rainEndConfirmationMs_ = clock_.nowMs();
     if (result.wetting || result.valid!=before.valid || result.rain!=before.rain || result.heating!=before.heating || result.dry!=before.dry)
         logger_.infof("RainDetector: rain=%s valid=%u wetting=%u heating=%u dry=%u",
             rainDetectorRainStateName(result.rain),result.valid,result.wetting,result.heating,result.dry);

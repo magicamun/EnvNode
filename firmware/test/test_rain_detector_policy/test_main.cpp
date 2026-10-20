@@ -239,8 +239,13 @@ void test_controller_operates_without_UTC_and_recovers_after_signal_failure() {
     TEST_ASSERT_TRUE(controller.begin()==ControllerOperationResult::Completed);
     for(unsigned i=0;i<25;++i)frame(34000);
     frame(30000);
+    const uint32_t lastWettingMs = clock.now;
     for(unsigned i=0;i<265;++i)frame(30000);
     TEST_ASSERT_TRUE(controller.result().rain==RainDetectorRainState::EndEstimated);
+    TEST_ASSERT_EQUAL_UINT32(clock.now-lastWettingMs,controller.lastWettingAgeMs());
+    const uint32_t confirmedAge = controller.rainEndConfirmationAgeMs();
+    frame(30000);
+    TEST_ASSERT_EQUAL_UINT32(confirmedAge+250,controller.rainEndConfirmationAgeMs());
     TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
     for(unsigned i=0;i<44;++i)frame(33000);
     TEST_ASSERT_TRUE(controller.result().dry);

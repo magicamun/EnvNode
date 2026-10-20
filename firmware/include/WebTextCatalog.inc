@@ -794,3 +794,6 @@ ENVNODE_WEB_TEXT(RainHumidityOptional, "Humidity source (optional)", "Feuchteque
 
 ENVNODE_WEB_TEXT(RainDetectorSensorName, "Rain Detector (wetting/frequency)", "Regendetektor (Benetzung/Frequenz)")
 ENVNODE_WEB_TEXT(RainIntervalHelp, "Publication interval for frequency readings; recommended: 5000 ms. Local wetting detection runs independently with approximately 250 ms acquisition windows.", "Intervall für die Veröffentlichung der Frequenzmesswerte; empfohlen: 5000 ms. Die lokale Benetzungserkennung arbeitet unabhängig davon mit Messfenstern von etwa 250 ms.")
+
+ENVNODE_WEB_TEXT(RainLastWetting, "Last detected wetting", "Letzte erkannte Benetzung")
+ENVNODE_WEB_TEXT(RainEndConfirmedAt, "Rain end detected at", "Regenende erkannt um")
