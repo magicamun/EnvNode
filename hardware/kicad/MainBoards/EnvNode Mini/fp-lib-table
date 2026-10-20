@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "EnvNode-Footprints")(type "KiCad")(uri "${KIPRJMOD}/../../Libraries/EnvNode-Footprints.pretty")(options "")(descr "EnvNode project footprints"))
+)
