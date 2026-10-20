@@ -10,8 +10,7 @@ SensorFactory::SensorFactory(IMonotonicClock& monotonicClock,
     I2CBusManager& i2cBusManager, ILogger& logger)
     : monotonicClock_(monotonicClock)
     , i2cBusManager_(i2cBusManager)
-    , logger_(logger)
-    , storage_(new (std::nothrow) SensorStorage[MaxSensorSlotCount]) {
+    , logger_(logger) {
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         constructed_[index] = SensorImplementation::None;
     }
@@ -25,7 +24,6 @@ ISensor* SensorFactory::create(
     size_t storageIndex,
     const SensorSlotConfiguration& slot,
     SensorFactoryResult& result) {
-    if (!storage_) { result = SensorFactoryResult::StorageUnavailable; return nullptr; }
     if (storageIndex >= MaxSensorSlotCount) {
         result = SensorFactoryResult::InvalidStorageIndex;
         return nullptr;
@@ -77,6 +75,9 @@ ISensor* SensorFactory::create(
         return nullptr;
     }
 
+    // Reserve bounded storage only after the scheduler has started.
+    if (!storage_) storage_.reset(new (std::nothrow) SensorStorage[MaxSensorSlotCount]);
+    if (!storage_) { result = SensorFactoryResult::StorageUnavailable; return nullptr; }
     void* target = &storage_[storageIndex];
     ISensor* sensor = nullptr;
     switch (slot.implementation) {
@@ -135,6 +136,7 @@ ISensor* SensorFactory::create(
 }
 
 void SensorFactory::destroy(size_t storageIndex) {
+    if (!storage_) return;
     void* target = &storage_[storageIndex];
     switch (constructed_[storageIndex]) {
         case SensorImplementation::SimulatedTemperature:

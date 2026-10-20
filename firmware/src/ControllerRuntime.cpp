@@ -14,8 +14,7 @@ ControllerRuntime::ControllerRuntime(ControllerFactory& factory, ILogger& logger
     , secondaryFactory_(
         factory.measurementResolver(), factory.actuatorResolver(),
         factory.monotonicClock(), logger, factory.values(), factory.rainSource())
-    , logger_(logger)
-    , entries_(new (std::nothrow) RuntimeEntry[MaxControllerSlotCount]) {
+    , logger_(logger) {
 }
 
 ControllerRuntime::~ControllerRuntime() {
@@ -25,7 +24,9 @@ ControllerRuntime::~ControllerRuntime() {
 }
 
 bool ControllerRuntime::initialize(const ControllerSlotConfiguration* slots) {
-    if (initialized_ || !entries_ || !validateComposition(slots)) return false;
+    if (initialized_ || !validateComposition(slots)) return false;
+    if (!entries_) entries_.reset(new (std::nothrow) RuntimeEntry[MaxControllerSlotCount]);
+    if (!entries_) return false;
     initialized_ = true;
     if (!constructComposition(*activeFactory_, slots, entries_.get(), runtimeCount_)) {
         activeFactory_->destroyAll();

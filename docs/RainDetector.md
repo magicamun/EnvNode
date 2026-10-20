@@ -114,3 +114,7 @@ same cases validated in the lab. Confirm stored parameters after reboot. These
 production hardware checks remain outstanding despite host tests and successful
 builds. Full signal polarity, thermal behavior and thresholds must be rechecked
 with the modified Head PCB before field use.
+
+Runtime storage pools are allocated on first composition/use, never in global
+constructors. This leaves early ESP32 heap available for the FreeRTOS main task
+before startup-stack memory becomes available to the normal runtime heap.
