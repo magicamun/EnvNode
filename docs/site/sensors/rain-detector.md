@@ -3,7 +3,8 @@
 !!! note "Entwicklungsstand / WIP"
     Diese Seite beschreibt die vorhandene Hardware und ihre Prüfgrenzen.
     RainDetector ist noch kein registrierter Sensor der gemeinsamen EnvNode-Firmware.
-    Eine separate Laborfirmware misst die Ausgangsfrequenz; sie steuert keine Heizung.
+    Eine separate Laborfirmware misst die Ausgangsfrequenz und bietet eine manuelle,
+    zeitlich begrenzte oder dauerhafte Heizungsansteuerung für Laborversuche.
 
 ## Zwei getrennte Baugruppen
 
@@ -66,7 +67,18 @@ und am aufgebauten Head geprüft werden. Lötstopplack allein ist keine Zusage d
 ## Firmwarestand
 
 Das separate Projekt `lab/RainDetector-PCNT` zählt steigende Flanken über ESP32-PCNT
-und gibt Frequenzwerte über Serial aus. GPIO27 ist dessen Laborvorgabe, keine feste
+und gibt Frequenzwerte und den angeforderten Heizpegel über Serial aus.
+GPIO16 steuert optional HEATER_EN mit 5-kHz-PWM; `HEAT 10 30` startet beispielsweise
+10 % für 30 Sekunden. Zeitbegrenzte Befehle erlauben maximal 120 Sekunden.
+`HEAT 50 ON` heizt mit 50 % ohne Timeout, `HEAT OFF` schaltet ab.
+`HEAT ON` verwendet den zuletzt gewählten Pegel im Dauerbetrieb; ohne vorherige
+Pegelwahl seit Boot wird der Befehl abgewiesen. Startzustand nach Reset ist AUS,
+der letzte Pegel wird nicht dauerhaft gespeichert. `OFF` bleibt als Alias gültig. Es gibt keine Temperaturregelung; Tests bleiben
+beaufsichtigt. Die Lab-Firmware gibt zusätzlich experimentelle lokale Benetzungsereignisse,
+geglättete Frequenzen, einen Trend und eine Regenende-Schätzung als Diagnose aus.
+Das steuert die Heizung nicht automatisch und ist noch nicht als verlässliche
+Wetterklassifikation validiert. Bedienung und Grenzen stehen in der README des Lab-Projekts.
+GPIO27 ist dessen Laborvorgabe, keine feste
 Zuordnung für alle EnvNode-Mainboards. Es gibt dort kein MQTT und keine Heizautomation.
 Das Aufspielen ersetzt die bisherige Firmware auf dem Testgerät.
 

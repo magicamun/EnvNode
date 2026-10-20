@@ -1,0 +1,189 @@
+{
+  "license": "EnvNode: see ../../../LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
+  "notes": "Explorative Auswertung der Versuche vom 19.10.2026. Parameter vor Auswertung des Holdout-Logs festgelegt; keine Parametersuche. Holdout ist retrospektiv: Das Log wurde bereits im Gespräch betrachtet, also kein unabhängiger Blindtest. Zeitmarken sind ungefähre Nutzerbeobachtungen bzw. ausdrücklich gekennzeichnete Log-Zuordnungen; Markierungen sind unvollständig. Globale absolute Trockenreferenz und Regenklassifikation sind nicht implementiert.",
+  "logs": {
+    "device-monitor-261019-134016.log": {
+      "role": "development",
+      "observations": [
+        {
+          "time_ms": 3815000,
+          "kind": "wetting",
+          "label": "Zwei größere Tropfen (Zeit aus Log zugeordnet)"
+        },
+        {
+          "time_ms": 4798000,
+          "kind": "visible_dry",
+          "label": "Optisch trocken bei OFF, ungefähr"
+        }
+      ]
+    },
+    "device-monitor-261019-151915.log": {
+      "role": "development",
+      "observations": [
+        {
+          "time_ms": 2668000,
+          "kind": "wetting",
+          "label": "Sprühbenetzung (Zeit aus Log zugeordnet)"
+        },
+        {
+          "time_ms": 3720000,
+          "kind": "handling",
+          "label": "Letzten Tropfen mit Tuch entfernt, Zuordnung vermutet"
+        }
+      ]
+    },
+    "device-monitor-261019-163136.log": {
+      "role": "development",
+      "observations": [
+        {
+          "time_ms": 20000,
+          "kind": "wetting",
+          "label": "Erste Sprühbenetzung"
+        },
+        {
+          "time_ms": 303000,
+          "kind": "wetting",
+          "label": "Erneute Benetzung (Notiz 30000, Zuordnung 303000 vermutet)"
+        },
+        {
+          "time_ms": 1205000,
+          "kind": "visible_wet",
+          "label": "Ein Resttropfen"
+        },
+        {
+          "time_ms": 1280000,
+          "kind": "visible_dry",
+          "label": "Optisch trocken"
+        }
+      ]
+    },
+    "device-monitor-261019-173457.log": {
+      "role": "dry_observation",
+      "observations": []
+    },
+    "device-monitor-261019-170314.log": {
+      "role": "retrospective_holdout",
+      "observations": [
+        {
+          "time_ms": 150000,
+          "kind": "wetting",
+          "label": "Untere Hälfte erneut benetzt"
+        },
+        {
+          "time_ms": 230000,
+          "kind": "wetting",
+          "label": "Untere Hälfte, größere Tropfen"
+        },
+        {
+          "time_ms": 467000,
+          "kind": "wetting",
+          "label": "Obere Hälfte, feine Benetzung"
+        },
+        {
+          "time_ms": 615000,
+          "kind": "wetting",
+          "label": "Erneute Benetzung"
+        },
+        {
+          "time_ms": 921000,
+          "kind": "wetting",
+          "label": "Andere Stelle (Notiz 900000, Logzuordnung 921000)"
+        },
+        {
+          "time_ms": 1720000,
+          "kind": "visible_wet",
+          "label": "Mikrotropfen übrig"
+        },
+        {
+          "time_ms": 1750000,
+          "kind": "visible_dry",
+          "label": "Optisch trocken"
+        }
+      ]
+    },
+    "device-monitor-261019-130914.log": {
+      "role": "pwm_reference",
+      "observations": []
+    },
+    "device-monitor-261019-180137.log": {
+      "role": "prospective_validation",
+      "observations": [
+        {
+          "time_ms": 121500,
+          "kind": "pattern_start",
+          "label": "Beginn der Sprühfolge (aus Log zugeordnet)"
+        },
+        {
+          "time_ms": 440000,
+          "kind": "wetting",
+          "label": "Letzter Sprühstoß, vom Nutzer bestätigt (ungefähr)"
+        },
+        {
+          "time_ms": 2100000,
+          "kind": "visible_dry",
+          "label": "Optisch trocken, Nutzerbeobachtung (ungefähr)"
+        },
+        {
+          "time_ms": 2172572,
+          "kind": "heater_off",
+          "label": "Heizung AUS, aus protokolliertem OFF"
+        }
+      ]
+    },
+    "device-monitor-261019-202433.log": {
+      "role": "live_validation",
+      "observations": [
+        {
+          "time_ms": 408000,
+          "kind": "wetting",
+          "label": "Letzter Sprühstoß, Nutzerbeobachtung (ungefähr)"
+        },
+        {
+          "time_ms": 785452,
+          "kind": "live_estimate",
+          "label": "Live-Kern meldet end_estimated (kein Trockenheitsnachweis)"
+        },
+        {
+          "time_ms": 1600000,
+          "kind": "visible_dry",
+          "label": "Optisch trocken, Nutzerbeobachtung (ungefähr)"
+        },
+        {
+          "time_ms": 1738071,
+          "kind": "heater_off",
+          "label": "HEAT OFF, aus Log"
+        }
+      ]
+    },
+    "device-monitor-261019-210940.log": {
+      "role": "inclined_live_trial",
+      "observations": [
+        {
+          "time_ms": 520000,
+          "kind": "wetting",
+          "label": "Letzte Sprühung bei etwa 520 s; Head etwa 45 Grad geneigt"
+        }
+      ]
+    },
+    "device-monitor-261019-213948.log": {
+      "role": "inclined_live_repeat",
+      "observations": [
+        {
+          "time_ms": 380000,
+          "kind": "wetting",
+          "label": "Letzte Sprühung: Nutzernotiz 38…, Zuordnung zu etwa 380 s"
+        },
+        {
+          "time_ms": 505021,
+          "kind": "live_estimate",
+          "label": "Live-Kern: end_estimated"
+        },
+        {
+          "time_ms": 1418175,
+          "kind": "heater_off",
+          "label": "HEAT OFF, aus Log"
+        }
+      ]
+    }
+  }
+}

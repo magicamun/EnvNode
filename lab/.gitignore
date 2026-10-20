@@ -6,6 +6,17 @@
 !RainDetector-PCNT/README.md
 !RainDetector-PCNT/include/
 !RainDetector-PCNT/include/LabConfig.h
+!RainDetector-PCNT/include/HeaterControl.h
+!RainDetector-PCNT/tests/
+!RainDetector-PCNT/tests/test_heater_control.cpp
+!RainDetector-PCNT/tests/test_analyze_logs.py
+!RainDetector-PCNT/tests/test_rain_evaluation.cpp
+!RainDetector-PCNT/tools/
+!RainDetector-PCNT/tools/analyze_logs.py
+!RainDetector-PCNT/tools/observations.json
+!RainDetector-PCNT/tools/report.html
+!RainDetector-PCNT/tools/replay_evaluation.py
+!RainDetector-PCNT/tools/replay_core.cpp
 !RainDetector-PCNT/src/
 !RainDetector-PCNT/src/main.cpp
 !Display-SSD1309/

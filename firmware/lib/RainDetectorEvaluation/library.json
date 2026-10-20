@@ -1,0 +1,6 @@
+{
+  "name": "RainDetectorEvaluation",
+  "version": "0.1.0",
+  "description": "Incremental RainDetector evaluation. EnvNode-owned: see ../../../LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
+  "build": {"includeDir": "src"}
+}
