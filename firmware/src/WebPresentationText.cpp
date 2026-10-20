@@ -75,7 +75,7 @@ const char* webDisplayLineError(Locale locale, const DisplayLineResult& result) 
 }
 const char* webSensorImplementationName(Locale locale, SensorImplementation value) {
     switch (value) {
-        case SensorImplementation::RainDetector: return "RainDetector";
+        case SensorImplementation::RainDetector: return webText(locale, TextId::RainDetectorSensorName);
         case SensorImplementation::None: return webText(locale, TextId::None);
         case SensorImplementation::SimulatedTemperature: return webText(locale, TextId::SimulatedTemperature);
         case SensorImplementation::SimulatedHumidity: return webText(locale, TextId::SimulatedHumidity);

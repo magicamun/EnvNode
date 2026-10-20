@@ -118,3 +118,8 @@ with the modified Head PCB before field use.
 Runtime storage pools are allocated on first composition/use, never in global
 constructors. This leaves early ESP32 heap available for the FreeRTOS main task
 before startup-stack memory becomes available to the normal runtime heap.
+
+The sensor form distinguishes the Rain Detector (wetting/frequency) from the
+Rain Gauge (tipping bucket). Implementation metadata follows the current form
+selection immediately. The recommended 5000-ms sample interval controls published
+frequency readings, independently of the approximately 250-ms local acquisition.

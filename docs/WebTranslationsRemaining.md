@@ -59,8 +59,8 @@ neben ihnen werden übersetzt.
 - `firmware/src/WebService.cpp:1041`: `EEPROM`
 - `firmware/src/WebService.cpp:1153`: `ENHD descriptor 0.1`
 - `firmware/src/WebService.cpp:1156`: `EnvNode DuoRelay 0.3`
-- `firmware/src/WebService.cpp:1888`: `GPIO`
-- `firmware/src/WebService.cpp:1987`: `GPIO`
-- `firmware/src/WebService.cpp:2287`: `MCU`
-- `firmware/src/WebService.cpp:2287`: `WiFi`
-- `firmware/src/WebService.cpp:2295`: `SDA GPIO`
+- `firmware/src/WebService.cpp:1890`: `GPIO`
+- `firmware/src/WebService.cpp:1992`: `GPIO`
+- `firmware/src/WebService.cpp:2292`: `MCU`
+- `firmware/src/WebService.cpp:2292`: `WiFi`
+- `firmware/src/WebService.cpp:2300`: `SDA GPIO`
