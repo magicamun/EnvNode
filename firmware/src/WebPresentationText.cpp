@@ -32,6 +32,7 @@ const char* webQualityName(Locale locale, MeasurementQuality value) {
 }
 const char* webUnitName(Locale locale, PresentationUnit value) {
     switch (value) {
+        case PresentationUnit::Kilohertz: return "Kilohertz";
         case PresentationUnit::Hertz: return "Hertz";
         case PresentationUnit::DegreeCelsius: return webText(locale, TextId::Celsius);
         case PresentationUnit::DegreeFahrenheit: return webText(locale, TextId::Fahrenheit);

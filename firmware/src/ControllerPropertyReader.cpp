@@ -75,3 +75,55 @@ PropertyReadResult ControllerPropertyReader::read(const PropertyReference& refer
 }
 
 } // namespace EnvNode
+
+#include "ControllerRuntime.h"
+namespace EnvNode {
+namespace {
+const PropertyEnumOption RainStates[] = {
+    {"unknown", "Unknown"}, {"active", "Rain active"}, {"end_estimated", "Rain end estimated"}
+};
+const char* const RainKeys[] = {"rain", "valid", "heating", "heater_percent", "dry", "wetting_count", "running", "target_available"};
+}
+const char* const* RainDetectorPropertyReader::keys(size_t& count) {
+    count = sizeof(RainKeys)/sizeof(RainKeys[0]); return RainKeys;
+}
+bool RainDetectorPropertyReader::describe(const PropertyReference& reference, PropertyDescription& result) const {
+    result = PropertyDescription{};
+    if (reference.componentKind != PropertyComponentKind::Controller || reference.componentId != info_.id
+        || info_.implementation != ControllerImplementation::RainDetector || !reference.propertyKey) return false;
+    size_t count; const auto list=keys(count);
+    for (size_t i=0;i<count;++i) {
+        if (strcmp(reference.propertyKey,list[i])) continue;
+        result.stableKey=list[i]; result.displayName=list[i];
+        result.valueKind=PropertyValueKind::Boolean;
+        if (!strcmp(list[i],"rain")) {
+            result.valueKind=PropertyValueKind::Enumeration;
+            result.enumOptions=RainStates; result.enumOptionCount=3;
+        } else if (!strcmp(list[i],"wetting_count") || !strcmp(list[i],"heater_percent")) {
+            result.valueKind=PropertyValueKind::UnsignedInteger;
+            if (!strcmp(list[i],"heater_percent")) result.canonicalUnit=PresentationUnit::Percent;
+        }
+        return true;
+    }
+    return false;
+}
+PropertyReadResult RainDetectorPropertyReader::read(const PropertyReference& reference, PropertySnapshot& result) const {
+    result=PropertySnapshot{};
+    PropertyDescription description;
+    if (!describe(reference,description)) return PropertyReadResult::UnknownReference;
+    const char* key=reference.propertyKey;
+    if (!strcmp(key,"rain")) result.value=PropertyValue::enumeration(RainStates[static_cast<unsigned>(info_.rainDetector.rain)]);
+    else if (!strcmp(key,"wetting_count")) result.value=MeasurementValue::unsignedInteger(info_.rainWettingCount);
+    else if (!strcmp(key,"heater_percent")) result.value=MeasurementValue::unsignedInteger(info_.rainDetector.heating?100:0);
+    else {
+        const bool value=!strcmp(key,"valid")?info_.rainDetector.valid
+            :!strcmp(key,"heating")?info_.rainDetector.heating
+            :!strcmp(key,"dry")?info_.rainDetector.dry
+            :!strcmp(key,"running")?info_.running:info_.targetAvailable;
+        result.value=MeasurementValue::boolean(value);
+    }
+    // Controller status is available even if the input measurement is invalid.
+    result.valid=true;
+    return PropertyReadResult::Available;
+}
+}

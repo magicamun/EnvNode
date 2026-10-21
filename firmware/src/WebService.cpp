@@ -1,3 +1,4 @@
+#include "ControllerPropertyReader.h"
 #include "HttpRedirect.h"
 #include "ControllerTargetIdentity.h"
 #include "WebService.h"
@@ -871,6 +872,7 @@ void WebService::handleUnits() {
     String c;
     c.reserve(1400);
     c = (String("<section class='card'><h2>") + uiText(TextId::PresentationUnits) + "</h2><p class='help'>" + uiText(TextId::ChangesAffectFutureMQTTPayloadsAndDoNot) + "</p><form method='post' action='/units/save'>");
+    c += String("<label>") + uiText(TextId::FrequencyUnit) + unitSelect("rainFrequency", MeasurementType::RainDetectorFrequency, p.rainDetectorFrequency, configurationService_.getLocale()) + "</label>";
     c += (String("<label>") + uiText(TextId::Temperature) + "") + unitSelect("temperature",MeasurementType::Temperature,p.temperature, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::AtmosphericPressure) + "") + unitSelect("pressure",MeasurementType::AtmosphericPressure,p.atmosphericPressure, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::SolarCellTemperature) + "") + unitSelect("solarTemperature",MeasurementType::SolarCellTemperature,p.solarCellTemperature, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::RainDetectorLevel) + "") + unitSelect("rainLevel",MeasurementType::RainDetectorLevel,p.rainDetectorLevel, configurationService_.getLocale()) + (String("</label><div class='actions'><button>") + uiText(TextId::SaveUnits) + "</button></div></form></section>");
     sendPage(uiText(TextId::Units), "/units", c);
 }
@@ -1810,6 +1812,12 @@ void WebService::handleDisplay() {
     for (size_t index = 0; index < controllerRuntime_.runtimeCount(); ++index) {
         ControllerRuntimeInfo runtime;
         if (controllerRuntime_.runtimeInfo(index, runtime)) {
+            if (runtime.implementation == ControllerImplementation::RainDetector) {
+                size_t count;
+                const auto keys = RainDetectorPropertyReader::keys(count);
+                for (size_t i=0;i<count;++i)
+                    addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, keys[i]), runtime.name);
+            }
             addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "decision"), runtime.name);
             addPreviewSource(PropertyReference(PropertyComponentKind::Controller, runtime.id, "reason"), runtime.name);
         }
@@ -2523,8 +2531,8 @@ void WebService::handleDiscoveryRepublish() {
 void WebService::handleTimeSave() { const Configuration& current=configurationService_.getConfiguration(); Locale locale; bool ok=parseLocaleKey(server_.arg("locale").c_str(),locale); const bool localeChanged=ok&&locale!=current.locale.locale; const bool timeChanged=server_.arg("timezone")!=current.time.timezone||server_.arg("ntpServer1")!=current.time.ntpServer1||server_.arg("ntpServer2")!=current.time.ntpServer2; if(ok)ok=configurationService_.setLocale(locale)&&configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Locale,localeChanged,ConfigurationArea::Time,timeChanged),uiText(TextId::LocaleAndTimeSaved),uiText(TextId::LocaleAndTimeSaveFailed),"/time",uiText(TextId::InvalidLocaleOrTimeConfiguration)); }
 
 void WebService::handleUnitsSave() {
-    PresentationUnit t,p,s,r; bool ok=parseUnit(server_.arg("temperature"),MeasurementType::Temperature,t)&&parseUnit(server_.arg("pressure"),MeasurementType::AtmosphericPressure,p)&&parseUnit(server_.arg("solarTemperature"),MeasurementType::SolarCellTemperature,s)&&parseUnit(server_.arg("rainLevel"),MeasurementType::RainDetectorLevel,r);
-    if(ok)ok=configurationService_.setPresentationUnit(MeasurementType::Temperature,t)&&configurationService_.setPresentationUnit(MeasurementType::AtmosphericPressure,p)&&configurationService_.setPresentationUnit(MeasurementType::SolarCellTemperature,s)&&configurationService_.setPresentationUnit(MeasurementType::RainDetectorLevel,r);
+    PresentationUnit t,p,s,r,f; bool ok=parseUnit(server_.arg("rainFrequency"),MeasurementType::RainDetectorFrequency,f)&&parseUnit(server_.arg("temperature"),MeasurementType::Temperature,t)&&parseUnit(server_.arg("pressure"),MeasurementType::AtmosphericPressure,p)&&parseUnit(server_.arg("solarTemperature"),MeasurementType::SolarCellTemperature,s)&&parseUnit(server_.arg("rainLevel"),MeasurementType::RainDetectorLevel,r);
+    if(ok)ok=configurationService_.setPresentationUnit(MeasurementType::RainDetectorFrequency,f)&&configurationService_.setPresentationUnit(MeasurementType::Temperature,t)&&configurationService_.setPresentationUnit(MeasurementType::AtmosphericPressure,p)&&configurationService_.setPresentationUnit(MeasurementType::SolarCellTemperature,s)&&configurationService_.setPresentationUnit(MeasurementType::RainDetectorLevel,r);
     sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::PresentationUnits),uiText(TextId::PresentationUnitsSaved),uiText(TextId::UnitSaveFailed),"/units",uiText(TextId::InvalidOrUnsupportedPresentationUnit));
 }
 

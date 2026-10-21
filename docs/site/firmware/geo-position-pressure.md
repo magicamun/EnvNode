@@ -117,7 +117,7 @@ Standort, Temperaturquelle und Maximalalter werden dauerhaft gespeichert und
 die Einstellungen; die Vorschau zeigt sie vor dem Übernehmen.
 Sicherungen der Formate 1 und 2 bleiben lesbar: Sie wählen keine Temperaturquelle.
 Format 1 enthält außerdem keinen Standort; Format 2 erhält die Standortangaben.
-Aktuelle Sicherungen verwenden Format 3. Ein Factory Reset löscht diese Einstellungen.
+Aktuelle Sicherungen verwenden Format 4 (zusätzlich mit Frequenzeinheit Hz/kHz); ältere Formate bleiben lesbar. Ein Factory Reset löscht diese Einstellungen.
 
 [MQTT und Integration](mqtt.md) · [Displays einrichten](values-displays.md) ·
 [Sicherung und Diagnose](maintenance.md)

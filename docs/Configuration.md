@@ -71,3 +71,6 @@ Locale (German commas, English points), without thousands separators. The Web
 boundary converts these strings to neutral numeric input; application configuration,
 NVS, backups and MQTT remain independent of the UI Locale. No format migration is
 needed. Restore previews and temperature-age diagnostics are localized too.
+
+Backup/snapshot version 4 adds the RainDetector frequency presentation unit (Hz or kHz).
+Versions 1-3 remain readable, with Hz as the default for that field.

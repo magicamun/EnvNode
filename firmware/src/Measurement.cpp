@@ -5,7 +5,7 @@
 namespace EnvNode {
 namespace {
 
-const PresentationUnit FrequencyUnits[] = {PresentationUnit::Hertz};
+const PresentationUnit FrequencyUnits[] = {PresentationUnit::Hertz, PresentationUnit::Kilohertz};
 const PresentationUnit NoUnit[] = {PresentationUnit::None};
 const PresentationUnit TemperatureUnits[] = {
     PresentationUnit::DegreeCelsius,

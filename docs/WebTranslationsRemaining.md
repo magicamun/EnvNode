@@ -48,19 +48,19 @@ neben ihnen werden übersetzt.
 
 - `firmware/src/PropertyPreviewWebView.cpp:72`: `Format`
 - `firmware/src/PropertyPreviewWebView.cpp:210`: `Format`
-- `firmware/src/WebService.cpp:733`: `EnvNode · v`
-- `firmware/src/WebService.cpp:773`: `Build`
-- `firmware/src/WebService.cpp:773`: `Flash`
-- `firmware/src/WebService.cpp:775`: `SSID`
-- `firmware/src/WebService.cpp:779`: `RSSI`
-- `firmware/src/WebService.cpp:812`: `DHCP`
-- `firmware/src/WebService.cpp:838`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:947`: `MQTT`
-- `firmware/src/WebService.cpp:1041`: `EEPROM`
-- `firmware/src/WebService.cpp:1153`: `ENHD descriptor 0.1`
-- `firmware/src/WebService.cpp:1156`: `EnvNode DuoRelay 0.3`
-- `firmware/src/WebService.cpp:1903`: `GPIO`
-- `firmware/src/WebService.cpp:2005`: `GPIO`
-- `firmware/src/WebService.cpp:2305`: `MCU`
-- `firmware/src/WebService.cpp:2305`: `WiFi`
-- `firmware/src/WebService.cpp:2313`: `SDA GPIO`
+- `firmware/src/WebService.cpp:734`: `EnvNode · v`
+- `firmware/src/WebService.cpp:774`: `Build`
+- `firmware/src/WebService.cpp:774`: `Flash`
+- `firmware/src/WebService.cpp:776`: `SSID`
+- `firmware/src/WebService.cpp:780`: `RSSI`
+- `firmware/src/WebService.cpp:813`: `DHCP`
+- `firmware/src/WebService.cpp:839`: `Home Assistant Discovery`
+- `firmware/src/WebService.cpp:949`: `MQTT`
+- `firmware/src/WebService.cpp:1043`: `EEPROM`
+- `firmware/src/WebService.cpp:1155`: `ENHD descriptor 0.1`
+- `firmware/src/WebService.cpp:1158`: `EnvNode DuoRelay 0.3`
+- `firmware/src/WebService.cpp:1911`: `GPIO`
+- `firmware/src/WebService.cpp:2013`: `GPIO`
+- `firmware/src/WebService.cpp:2313`: `MCU`
+- `firmware/src/WebService.cpp:2313`: `WiFi`
+- `firmware/src/WebService.cpp:2321`: `SDA GPIO`

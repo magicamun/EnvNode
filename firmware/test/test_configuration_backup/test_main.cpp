@@ -53,7 +53,7 @@ void test_reject_malformed_and_incompatible() {
     String backup; Configuration candidate; bool passwords;
     TEST_ASSERT_TRUE(encodeConfigurationBackup(service.getConfiguration(), false, "", backup));
     for (const auto& input : {
-            replace(backup, "\"version\": \"3\"", "\"version\": \"4\""),
+            replace(backup, "\"version\": \"4\"", "\"version\": \"5\""),
             replace(backup, "\"boardProfile\": \"0\"", "\"boardProfile\": \"255\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"65536\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"-1\""),
@@ -247,7 +247,8 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
     auto end = legacy.find("\"device.name\"", begin);
     TEST_ASSERT_TRUE(begin != std::string::npos && end != std::string::npos);
     legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"3\"", "\"version\": \"1\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"4\"", "\"version\": \"1\"");
+    backup = replace(backup, "\"presentation.rainDetectorFrequency\": \"13\",\n", "");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, decoded, passwords));
     TEST_ASSERT_FALSE(decoded.geoPosition.altitude.configured);
     TEST_ASSERT_FALSE(decoded.geoPosition.latitude.configured);
@@ -260,6 +261,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
         const size_t length = record[i] | (record[i + 1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data() + i), length); i += length;
     }
+    TEST_ASSERT_EQUAL_STRING("13", fields[36].c_str()); fields.erase(fields.begin()+36);
     fields[1] = "1"; fields.erase(fields.begin() + 6, fields.begin() + 14);
     record.clear();
     for (const auto& field : fields) {
@@ -324,7 +326,8 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     TEST_ASSERT_EQUAL(1, rebooted.getConfiguration().pressureReduction.temperatureSensorId);
     std::string legacy(backup.c_str()); auto begin = legacy.find("\"pressure.temperatureSensorId\"");
     auto end = legacy.find("\"device.name\"", begin); legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"3\"", "\"version\": \"2\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"4\"", "\"version\": \"2\"");
+    backup = replace(backup, "\"presentation.rainDetectorFrequency\": \"13\",\n", "");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, candidate, passwords));
     TEST_ASSERT_EQUAL(0, candidate.pressureReduction.temperatureSensorId);
     TEST_ASSERT_TRUE(candidate.geoPosition.altitude.configured); TEST_ASSERT_EQUAL_FLOAT(694, candidate.geoPosition.altitude.value);
@@ -334,6 +337,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
         size_t size = record[i] | (record[i+1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data()+i), size); i += size;
     }
+    TEST_ASSERT_EQUAL_STRING("13", fields[36].c_str()); fields.erase(fields.begin()+36);
     fields[1] = "2"; fields.erase(fields.begin()+12, fields.begin()+14); record.clear();
     for (const auto& field : fields) {
         record.push_back(field.size() & 255); record.push_back(field.size() >> 8);
@@ -345,8 +349,27 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     current.sensorSlots[0].enabled = false; TEST_ASSERT_FALSE(service.validateRestore(current));
     TEST_ASSERT_TRUE(service.resetToDefaults()); TEST_ASSERT_EQUAL(0, service.getConfiguration().pressureReduction.temperatureSensorId);
 }
+
+void test_frequency_units_persist_and_backup_v4_migrates_v3() {
+    ConfigurationService service; service.loadConfiguration();
+    TEST_ASSERT_TRUE(service.setPresentationUnit(MeasurementType::RainDetectorFrequency,PresentationUnit::Kilohertz));
+    ConfigurationService rebooted; rebooted.loadConfiguration();
+    TEST_ASSERT_TRUE(rebooted.getConfiguration().presentation.rainDetectorFrequency==PresentationUnit::Kilohertz);
+    String backup; Configuration candidate; bool passwords;
+    TEST_ASSERT_TRUE(encodeConfigurationBackup(rebooted.getConfiguration(),true,"",backup));
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),candidate,passwords));
+    TEST_ASSERT_TRUE(candidate.presentation.rainDetectorFrequency==PresentationUnit::Kilohertz);
+    backup=replace(backup,"\"version\": \"4\"","\"version\": \"3\"");
+    backup=replace(backup,"\"presentation.rainDetectorFrequency\": \"14\",\n","");
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),candidate,passwords));
+    TEST_ASSERT_TRUE(candidate.presentation.rainDetectorFrequency==PresentationUnit::Hertz);
+    TEST_ASSERT_TRUE(service.resetToDefaults());
+    TEST_ASSERT_TRUE(service.getConfiguration().presentation.rainDetectorFrequency==PresentationUnit::Hertz);
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_frequency_units_persist_and_backup_v4_migrates_v3);
     RUN_TEST(test_pressure_temperature_configuration_validation_persistence_and_web_filter);
     RUN_TEST(test_temperature_settings_backup_v3_and_v2_migration);
     RUN_TEST(test_geoposition_validation_persistence_and_empty_override);

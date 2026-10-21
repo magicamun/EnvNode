@@ -129,3 +129,22 @@ the later rain-end detection time separately. These are volatile runtime events,
 reset by controller restart; local wall-clock times are derived from monotonic
 event ages when time is synchronized, otherwise elapsed ages are shown.
 RainDetector diagnostics report measurement usability and actuator availability.
+
+## Frequency presentation and controller properties
+
+The Units page offers Hz and kHz. The selection persists in NVS and is included
+in configuration backup/record version 4; versions 1-3 remain readable and use Hz.
+Only presentation values are converted. PCNT input, thresholds and policy stay in Hz.
+Display format unit text remains literal: use e.g. `%5.2f kHz` after choosing kHz.
+
+The display source inventory exposes `controller/<id>/rain` (enum: `unknown`,
+`active`, `end_estimated`), `valid`, `heating`, `heater_percent` (unsigned 0/100),
+`dry`, `wetting_count`, `running`, and `target_available`. Boolean sources use `%s`
+with configurable labels, the count and percent use `%u`. These are controller
+status/commands, not physical heater feedback. `valid` describes evaluation validity;
+its value remains readable even while the signal is invalid.
+
+Formatting already accepts minimum field widths and float precision: `%3u` prints
+42 as ` 42`, `%5.2f` prints 3.5 as ` 3.50`; `%03u` pads with zeros and `%-5.2f`
+left-aligns. Width is not truncation. Limits remain 64 characters of width and
+0-6 decimal places, with a decimal point.

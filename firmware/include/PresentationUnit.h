@@ -19,6 +19,7 @@ enum class PresentationUnit : uint8_t {
     Metre = 11,
     Centimetre = 12,
     Hertz = 13,
+    Kilohertz = 14,
 };
 
 } // namespace EnvNode

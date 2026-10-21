@@ -1,3 +1,4 @@
+#include "ControllerPropertyReader.h"
 #include <unity.h>
 #include <cstring>
 #include "PropertyResolver.h"
@@ -244,8 +245,51 @@ void test_routes_configurable_values_and_resolves_deletion_live() {
     TEST_ASSERT_TRUE(resolver.read(ref, snapshot) == PropertyReadResult::UnknownReference);
 }
 
+
+void test_rain_controller_properties_are_typed_and_status_survives_invalid_input() {
+    ControllerRuntimeInfo info; info.id=2; info.implementation=ControllerImplementation::RainDetector;
+    info.running=true; info.rainDetector.rain=RainDetectorRainState::Active;
+    info.rainDetector.heating=true; info.rainDetector.valid=false; info.rainWettingCount=42;
+    RainDetectorPropertyReader reader(info);
+    PropertySnapshot value; bool flag=false; uint32_t count=0;
+    PropertyReference ref(PropertyComponentKind::Controller,2,"rain");
+    const PropertyEnumOption* state=nullptr;
+    TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.valid); TEST_ASSERT_TRUE(value.value.tryGetEnumeration(state));
+    TEST_ASSERT_EQUAL_STRING("active",state->stableCode);
+    ref.propertyKey="valid"; TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.value.tryGetBoolean(flag)); TEST_ASSERT_FALSE(flag);
+    ref.propertyKey="heater_percent"; TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.value.tryGetUnsignedInteger(count)); TEST_ASSERT_EQUAL_UINT32(100,count);
+    ref.propertyKey="wetting_count";
+    TEST_ASSERT_EQUAL_STRING("[ 42]",formatPropertyText(reader,ref,"[%3u]").text);
+    info.rainDetector.rain=RainDetectorRainState::EndEstimated;
+    ref.propertyKey="rain"; TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.value.tryGetEnumeration(state)); TEST_ASSERT_EQUAL_STRING("end_estimated",state->stableCode);
+    ref.componentId=3; TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::UnknownReference); TEST_ASSERT_FALSE(value.valid);
+}
+
+void test_rain_controller_values_route_through_shared_resolver() {
+    Fixture f;
+    ControllerFactory factory(f.measurements,f.actuators,f.clock,f.log,nullptr,&f.sensors);
+    ControllerRuntime controllers(factory,f.log);
+    f.controllerSlots[0].implementation=ControllerImplementation::RainDetector;
+    f.controllerSlots[0].implementationConfiguration.rainDetector.sourceSensorId=1;
+    f.controllerSlots[0].implementationConfiguration.rainDetector.targetActuatorId=1;
+    TEST_ASSERT_TRUE(controllers.initialize(f.controllerSlots));
+    PropertyResolver resolver(f.sensors,f.measurements,f.actuators,controllers);
+    PropertyReference reference(PropertyComponentKind::Controller,1,"running");
+    PropertySnapshot value; bool running=false;
+    TEST_ASSERT_TRUE(resolver.read(reference,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.value.tryGetBoolean(running)); TEST_ASSERT_TRUE(running);
+    controllers.stopController(1);
+    TEST_ASSERT_TRUE(resolver.read(reference,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.value.tryGetBoolean(running)); TEST_ASSERT_FALSE(running);
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_rain_controller_properties_are_typed_and_status_survives_invalid_input);
+    RUN_TEST(test_rain_controller_values_route_through_shared_resolver);
     RUN_TEST(test_routes_configurable_values_and_resolves_deletion_live);
     RUN_TEST(test_routes_all_categories_with_same_id_and_preserves_types);
     RUN_TEST(test_unknown_reference_resets_previous_output);

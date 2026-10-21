@@ -37,6 +37,7 @@ constexpr const char* KeyLocale = "locale";
 constexpr const char* KeyTemperatureUnit = "unitTemp";
 constexpr const char* KeyPressureUnit = "unitPressure";
 constexpr const char* KeySolarCellTemperatureUnit = "unitSolarTemp";
+constexpr const char* KeyRainFrequencyUnit = "unitRainFreq";
 constexpr const char* KeyRainDetectorLevelUnit = "unitRainLevel";
 constexpr uint16_t DefaultMqttPort = 1883;
 constexpr const char* DefaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
@@ -153,6 +154,7 @@ void ConfigurationService::initializeDefaults() {
         measurementTypeMetadata(MeasurementType::SolarCellTemperature).defaultPresentationUnit;
     configuration_.presentation.rainDetectorLevel =
         measurementTypeMetadata(MeasurementType::RainDetectorLevel).defaultPresentationUnit;
+    configuration_.presentation.rainDetectorFrequency = PresentationUnit::Hertz;
     initializeSensorDefaults();
     initializeActuatorDefaults();
     initializeControllerDefaults();
@@ -297,6 +299,8 @@ void ConfigurationService::loadFromPreferences() {
         loadPresentationUnit(KeySolarCellTemperatureUnit, MeasurementType::SolarCellTemperature);
     configuration_.presentation.rainDetectorLevel =
         loadPresentationUnit(KeyRainDetectorLevelUnit, MeasurementType::RainDetectorLevel);
+    configuration_.presentation.rainDetectorFrequency =
+        loadPresentationUnit(KeyRainFrequencyUnit, MeasurementType::RainDetectorFrequency);
     // Read both hardware domains before checking occupancy. Otherwise an edited Sensor
     // can collide with an Actuator's old snapshot assignment that is about to be replaced.
     std::unique_ptr<Configuration> baseline(new (std::nothrow) Configuration(configuration_));
@@ -541,7 +545,7 @@ PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, Mea
     }
 
     const uint32_t encoded = preferences_.getUInt(key, static_cast<uint32_t>(fallback));
-    if (encoded > static_cast<uint32_t>(PresentationUnit::Ratio)) {
+    if (encoded > static_cast<uint32_t>(PresentationUnit::Kilohertz)) {
         return fallback;
     }
     const PresentationUnit unit = static_cast<PresentationUnit>(encoded);
@@ -896,6 +900,10 @@ bool ConfigurationService::setPresentationUnit(MeasurementType type, Presentatio
         case MeasurementType::SolarCellTemperature:
             key = KeySolarCellTemperatureUnit;
             configuredUnit = &configuration_.presentation.solarCellTemperature;
+            break;
+        case MeasurementType::RainDetectorFrequency:
+            key = KeyRainFrequencyUnit;
+            configuredUnit = &configuration_.presentation.rainDetectorFrequency;
             break;
         case MeasurementType::RainDetectorLevel:
             key = KeyRainDetectorLevelUnit;
@@ -1441,6 +1449,7 @@ bool ConfigurationService::validateRestore(const Configuration& c) const {
         && supportsPresentationUnit(MeasurementType::Temperature, c.presentation.temperature)
         && supportsPresentationUnit(MeasurementType::AtmosphericPressure, c.presentation.atmosphericPressure)
         && supportsPresentationUnit(MeasurementType::SolarCellTemperature, c.presentation.solarCellTemperature)
+        && supportsPresentationUnit(MeasurementType::RainDetectorFrequency, c.presentation.rainDetectorFrequency)
         && supportsPresentationUnit(MeasurementType::RainDetectorLevel, c.presentation.rainDetectorLevel)
         && validValueConfiguration(c.values) && validateDisplayConfiguration(c.display)
         && validateSensorSlots(c.sensorSlots) && validateActuatorSlots(c.actuatorSlots)

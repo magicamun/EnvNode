@@ -27,6 +27,12 @@ bool PropertyResolver::describe(const PropertyReference& reference, PropertyDesc
             return ActuatorPropertyReader(reference.componentId, *actuator, actuators_.levelActuator(reference.componentId)).describe(reference, result);
         }
         case PropertyComponentKind::Controller: {
+            for (size_t i=0;i<controllers_.runtimeCount();++i) {
+                ControllerRuntimeInfo info;
+                if (controllers_.runtimeInfo(i,info) && info.id==reference.componentId
+                    && info.implementation==ControllerImplementation::RainDetector)
+                    return RainDetectorPropertyReader(info).describe(reference,result);
+            }
             const IThresholdReasonProvider* provider = controllers_.reasonProvider(reference.componentId);
             if (provider == nullptr) return false;
             return ControllerPropertyReader(reference.componentId, *provider).describe(reference, result);
@@ -51,6 +57,12 @@ PropertyReadResult PropertyResolver::read(const PropertyReference& reference, Pr
             return ActuatorPropertyReader(reference.componentId, *actuator, actuators_.levelActuator(reference.componentId)).read(reference, result);
         }
         case PropertyComponentKind::Controller: {
+            for (size_t i=0;i<controllers_.runtimeCount();++i) {
+                ControllerRuntimeInfo info;
+                if (controllers_.runtimeInfo(i,info) && info.id==reference.componentId
+                    && info.implementation==ControllerImplementation::RainDetector)
+                    return RainDetectorPropertyReader(info).read(reference,result);
+            }
             const IThresholdReasonProvider* provider = controllers_.reasonProvider(reference.componentId);
             if (provider == nullptr) return PropertyReadResult::UnknownReference;
             return ControllerPropertyReader(reference.componentId, *provider).read(reference, result);

@@ -169,9 +169,13 @@ void test_frequency_metadata_does_not_reuse_ratio_measurements() {
     float hz=0;
     TEST_ASSERT_TRUE(UnitConverter::convert(MeasurementType::RainDetectorFrequency,32000,PresentationUnit::Hertz,hz));
     TEST_ASSERT_FLOAT_WITHIN(0.01F,32000,hz);
+    TEST_ASSERT_TRUE(UnitConverter::convert(MeasurementType::RainDetectorFrequency,32000,PresentationUnit::Kilohertz,hz));
+    TEST_ASSERT_FLOAT_WITHIN(0.001F,32,hz);
     PresentationUnit unit;
     TEST_ASSERT_TRUE(UnitConverter::parseStableKey("hertz",unit));
     TEST_ASSERT_TRUE(unit==PresentationUnit::Hertz);
+    TEST_ASSERT_TRUE(UnitConverter::parseStableKey("kilohertz",unit));
+    TEST_ASSERT_TRUE(unit==PresentationUnit::Kilohertz);
 }
 class RainTestLogger : public ILogger {
 public:

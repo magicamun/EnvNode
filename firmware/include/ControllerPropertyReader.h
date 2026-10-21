@@ -19,3 +19,17 @@ private:
 };
 
 } // namespace EnvNode
+
+namespace EnvNode {
+struct ControllerRuntimeInfo;
+// Borrowed copied runtime snapshot; no driver dependency or hardware side effects.
+class RainDetectorPropertyReader : public IPropertyReader {
+public:
+    explicit RainDetectorPropertyReader(const ControllerRuntimeInfo& info) : info_(info) {}
+    static const char* const* keys(size_t& count);
+    bool describe(const PropertyReference&, PropertyDescription&) const override;
+    PropertyReadResult read(const PropertyReference&, PropertySnapshot&) const override;
+private:
+    const ControllerRuntimeInfo& info_;
+};
+}
