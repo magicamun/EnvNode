@@ -76,7 +76,10 @@ und am aufgebauten Head geprüft werden. Lötstopplack allein ist keine Zusage d
 
 Regendetektor (Benetzung/Frequenz) und Regenmesser (Kippwaage) sind getrennte
 Implementierungen. Beim Regendetektor starten aktivierte Sensoren und Controller
-nach Boot automatisch. Die Heizung startet aus; neue Benetzung fordert 100 % an.
+nach Boot automatisch. Die Heizung startet aus. Nach gültigem Signal und Wartezeit
+prüft der Controller einmalig den Ausgangszustand: unterhalb der Trockenschwelle
+100 % zum Trocknen, ab der Schwelle Trockenbestätigung ohne Heizung. Dies erzeugt
+keine Regenmeldung. Danach fordert neue Benetzung 100 % an.
 Nach voreingestellt 60 Sekunden ohne neue Benetzung wird Regenende geschätzt.
 Die Heizung bleibt bis zur bestätigten Trockenfrequenz an. Messintervall 5000 ms
 betrifft die Veröffentlichung; lokale Messfenster sind etwa 250 ms lang.

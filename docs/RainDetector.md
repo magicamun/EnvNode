@@ -39,8 +39,10 @@ second, never in a blocking wait.
    one RainDetector controller may use a given frequency sensor.
 4. Enabled sensors and controllers start automatically after boot or runtime
    activation, just like the other implementations. Wait at least six seconds
-   before the first spray. The controller starts observation with heating off;
-   it does not immediately heat. Manual Stop disarms it until Start or the next
+   before the first spray. The controller starts with heating off and waits for
+   valid signal and the five-second guard. Its one-time startup check then requests
+   100% heating below the dry threshold; at/above the threshold it confirms dry
+   with heating off for the configured dry duration. Neither path creates rain. Manual Stop disarms it until Start or the next
    boot/runtime activation. A separate configurable autostart option is deferred.
 
 All seven policy settings persist in NVS and configuration backup:
@@ -57,8 +59,10 @@ All seven policy settings persist in NVS and configuration backup:
 
 Both fall thresholds must be satisfied. Confirmation begins at the dry threshold,
 continues within the hysteresis band, and resets below the lower limit or on new
-wetting. Dry confirmation applies only inside a wetting-started 100% heating
-cycle. An event cooldown of two seconds and heater guard of five seconds retain
+wetting. Dry confirmation applies inside a startup- or wetting-started 100%
+heating cycle, plus the one-time unheated startup check above the dry threshold.
+If frequency falls below the threshold before that startup confirmation completes,
+initialization switches to full drying heat. An event cooldown of two seconds and heater guard of five seconds retain
 the lab behavior. A 250-ms edge window can be too short at actual gate spacing;
 the default is recommended for initial testing. These are experimental limits,
 not calibrated specifications of rain intensity or surface moisture.
@@ -75,13 +79,17 @@ for the current wetting/drying policy. SD diagnostics remain deferred.
   heating remains independent until dry confirmation.
 - Zero pulses, overflow, stale/missing source or invalid gates abort heating and
   reset rain to unknown. The started controller remains armed; after signal
-  recovery and its guard, only new wetting can restart heating.
+  recovery and its guard, only new wetting can restart heating once the startup
+  check has been consumed. Invalid data before the initial classification merely
+  keep startup pending; they never request heat.
 - Driver failure is retried; a temporarily unavailable target is resumed safely
   off when available. Manual output changes, including a partial PWM level while logically ON,
   disarm the controller and command the output off. Start is then
   required again. Stop commands output off and disarms the controller.
-- Rain-end and dry are local estimates. Dry is a latched completion of the last
-  heating cycle, not an ambient dry-surface measurement during cooling.
+- Rain-end and dry are local estimates. Dry latches after the startup check or
+  the last heating cycle; a later slow frequency decrease after completed startup
+  does not create another initialization or heating cycle. Explicit Start/rebuild
+  starts a new initialization; ordinary signal recovery does not.
 
 ## Diagnostics and MQTT
 

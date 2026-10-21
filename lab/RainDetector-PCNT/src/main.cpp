@@ -113,7 +113,7 @@ void evaluateAuto(uint64_t timeMs, float frequencyHz, unsigned measuredPercent) 
     if (current.heating != before.heating) {
         if (current.heating) { heater.startContinuous(100); writeHeaterPwm(); }
         else stopHeater();
-        reportHeater(current.heating ? "auto_wetting"
+        reportHeater(current.heating ? (current.wetting ? "auto_wetting" : "auto_startup_drying")
             : current.valid && current.dry ? "auto_dry" : "auto_signal_invalid");
     }
     if (current.wetting || current.rain != before.rain || current.valid != before.valid

@@ -42,7 +42,8 @@ ControllerOperationResult RainDetectorController::service() {
         return stop();
     }
     if (!applied_) {
-        policy_.disable(); policy_.enable(); processed_=false;
+        const bool startupPending = policy_.startupPending();
+        policy_.disable(); policy_.enable(startupPending); processed_=false;
         return apply(false); // Replacement/unavailable target resumes safely OFF.
     }
     RainFrequencySnapshot snapshot;
@@ -57,6 +58,8 @@ ControllerOperationResult RainDetectorController::service() {
             actor->outputPercent());
     } else return ControllerOperationResult::NoAction;
     const auto& result=policy_.result();
+    if (result.heating && !before.heating && !result.wetting)
+        logger_.info("RainDetector: startup frequency below dry threshold; full drying heat requested");
     if (result.wetting) {
         ++wettingCount_;
         lastWettingMs_ = clock_.nowMs();

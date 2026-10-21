@@ -543,3 +543,16 @@ Die Automatik verwendet jetzt `firmware/lib/RainDetectorEvaluation/src/RainDetec
 `LabRainAutomation.h` enthält nur Konsolenparser und Kompatibilitätsnamen.
 Die Entscheidungslogik existiert nur einmal; die Hardwareanbindung an die normale
 Firmware folgt schrittweise. Der alte Erholungskern bleibt als Vergleich erhalten.
+
+### Startprüfung nach AUTO ON (21.10.2026)
+
+Nach gültigem Signal und der fünfsekündigen Wartezeit erfolgt einmalig eine
+Trockenprüfung: unterhalb `dryHz` Heizung 100 %, ab `dryHz` Trockenbestätigung bei
+ausgeschalteter Heizung über `drySeconds`. Fällt die Frequenz vor der Bestätigung
+unter die Schwelle, folgt ein Trocknungszyklus mit 100 %. Das erzeugt weder ein
+Regenereignis noch einen Benetzungszähler-Eintrag. Die Heizdiagnose verwendet dafür
+`auto_startup_drying`, bei real erkannter Benetzung weiterhin `auto_wetting`.
+Nach abgeschlossener Initialisierung startet langsame Drift allein keine Heizung.
+Nach einem Signalausfall während/nach der Initialisierung bleibt die Heizung aus;
+eine neue Benetzungsflanke ist erforderlich. Ungültiges Signal vor der ersten
+Klassifizierung lässt die Startprüfung warten.

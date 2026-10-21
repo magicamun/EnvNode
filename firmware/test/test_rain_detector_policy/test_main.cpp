@@ -56,6 +56,54 @@ void test_config_is_atomic_and_bounded() {
     policy.disable();
     TEST_ASSERT_FALSE(policy.result().heating);
 }
+
+void test_startup_above_threshold_confirms_dry_without_heat_or_rain() {
+    RainDetectorPolicy policy; policy.enable();
+    for(uint64_t t=250;t<=15000;t+=250) {
+        const auto result=policy.update(t,32000,0);
+        TEST_ASSERT_FALSE(result.heating); TEST_ASSERT_FALSE(result.wetting);
+        TEST_ASSERT_TRUE(result.rain==RainDetectorRainState::Unknown);
+        TEST_ASSERT_FALSE(result.dry);
+    }
+    TEST_ASSERT_TRUE(policy.update(15250,32000,0).dry);
+    // A slow fall after completed startup must not create a second startup cycle.
+    for(uint64_t t=15500;t<=35500;t+=250) policy.update(t,32000-(t-15250)/10.0f,0);
+    TEST_ASSERT_FALSE(policy.result().heating);
+}
+void test_startup_below_threshold_drives_one_drying_cycle_without_rain() {
+    RainDetectorPolicy policy; policy.enable();
+    for(uint64_t t=250;t<5250;t+=250) TEST_ASSERT_FALSE(policy.update(t,30000,0).heating);
+    const auto started=policy.update(5250,30000,0);
+    TEST_ASSERT_TRUE(started.heating); TEST_ASSERT_FALSE(started.wetting);
+    TEST_ASSERT_TRUE(started.rain==RainDetectorRainState::Unknown);
+    for(uint64_t t=5500;t<=22000;t+=250) policy.update(t,33000,100);
+    TEST_ASSERT_TRUE(policy.result().dry); TEST_ASSERT_FALSE(policy.result().heating);
+    TEST_ASSERT_TRUE(policy.result().rain==RainDetectorRainState::Unknown);
+}
+void test_startup_waits_for_valid_signal_and_fault_does_not_restart_heat() {
+    RainDetectorPolicy policy; policy.enable();
+    for(uint64_t t=250;t<=10000;t+=250) TEST_ASSERT_FALSE(policy.update(t,NAN,0).heating);
+    TEST_ASSERT_TRUE(policy.startupPending());
+    for(uint64_t t=10250;t<=15250;t+=250) policy.update(t,30000,0);
+    TEST_ASSERT_TRUE(policy.result().heating); TEST_ASSERT_FALSE(policy.startupPending());
+    TEST_ASSERT_FALSE(policy.update(15500,NAN,100).heating);
+    for(uint64_t t=15750;t<=23000;t+=250) policy.update(t,30000,0);
+    TEST_ASSERT_FALSE(policy.result().heating);
+    TEST_ASSERT_TRUE(policy.update(23250,29000,0).wetting);
+    TEST_ASSERT_TRUE(policy.result().heating);
+}
+void test_startup_high_then_low_restarts_confirmation_with_full_heat() {
+    RainDetectorPolicy policy; policy.enable();
+    for(uint64_t t=250;t<=10000;t+=250) policy.update(t,32100,0);
+    // Smaller than both wetting thresholds: threshold crossing alone during startup.
+    const auto result=policy.update(10250,31999,0);
+    TEST_ASSERT_TRUE(result.heating); TEST_ASSERT_FALSE(result.dry); TEST_ASSERT_FALSE(result.wetting);
+    TEST_ASSERT_TRUE(result.rain==RainDetectorRainState::Unknown);
+    policy.disable(); TEST_ASSERT_FALSE(policy.result().heating);
+    policy.enable();
+    for(uint64_t t=10500;t<=15750;t+=250) policy.update(t,30000,0);
+    TEST_ASSERT_TRUE(policy.result().heating);
+}
 class TestFrequencyInput : public IRainFrequencyInput {
 public:
     bool startOk = true;
@@ -211,6 +259,33 @@ public:
     }
     void rainFrequencyHeaterChanged(SensorId) override { ++gateRestarts; }
 };
+
+void test_controller_initial_drying_has_no_wetting_and_target_recovery_stays_off() {
+    RainDetectorControllerConfiguration cfg; cfg.sourceSensorId=1; cfg.targetActuatorId=1;
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    RainDetectorController controller(cfg,ModuleActuatorReference{},source,actors,clock,logger);
+    TEST_ASSERT_TRUE(controller.begin()==ControllerOperationResult::Completed);
+    const auto frame=[&](float hz) {
+        clock.now+=250; ++source.frame.revision; source.frame.acceptedMs=clock.now;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,
+            static_cast<uint32_t>(hz/4),false);
+        controller.service();
+    };
+    for(unsigned i=0;i<30;++i) frame(30000);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    TEST_ASSERT_EQUAL_UINT32(0,controller.wettingCount());
+    TEST_ASSERT_TRUE(controller.result().rain==RainDetectorRainState::Unknown);
+    for(unsigned i=0;i<150;++i) frame(34000);
+    TEST_ASSERT_TRUE(controller.result().dry);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    actors.available=false; controller.service();
+    actors.available=true; controller.service();
+    for(unsigned i=0;i<40;++i) frame(30000);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    frame(29000);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    TEST_ASSERT_EQUAL_UINT32(1,controller.wettingCount());
+}
 void test_controller_operates_without_UTC_and_recovers_after_signal_failure() {
     RainDetectorControllerConfiguration cfg; cfg.sourceSensorId=1; cfg.targetActuatorId=1;
     RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
@@ -292,6 +367,11 @@ void test_runtime_autostarts_enabled_rain_controller_with_heater_off() {
 }
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_startup_above_threshold_confirms_dry_without_heat_or_rain);
+    RUN_TEST(test_controller_initial_drying_has_no_wetting_and_target_recovery_stays_off);
+    RUN_TEST(test_startup_below_threshold_drives_one_drying_cycle_without_rain);
+    RUN_TEST(test_startup_waits_for_valid_signal_and_fault_does_not_restart_heat);
+    RUN_TEST(test_startup_high_then_low_restarts_confirmation_with_full_heat);
     RUN_TEST(test_shared_policy_wetting_end_and_dry_are_independent);
     RUN_TEST(test_signal_loss_aborts_cycle_but_preserves_arming);
     RUN_TEST(test_config_is_atomic_and_bounded);

@@ -204,3 +204,17 @@ its gate and heater-level interpretation have one owner. Sensor/controller facto
 storage remains bounded but uses checked startup allocation to avoid overflowing
 ESP32 static DRAM as the maximum implementation size grows. The measurement path
 itself remains allocation-free. SD and climate policies remain deferred.
+
+## 2026-10-21: one-time startup dry initialization
+
+The user accepts frequency-based initialization after enabled startup (or explicit
+Start/AUTO ON), following the valid-signal guard. Below dryHz, request 100% drying;
+at/above dryHz, confirm dry with heating OFF over drySeconds. If frequency falls
+below dryHz before unheated confirmation completes, finish initialization by full
+heating. Rain remains unknown and wetting_count stays zero until an actual edge.
+This supersedes the previously documented requirement that every drying cycle
+must begin with wetting, but only for initialization. Existing wet-cycle hysteresis,
+confirmation, rain-end timing, manual override, and fault shutdown remain intact.
+An invalid input before initial classification keeps it pending. A fault after
+classification consumes the initialization; recovery needs a fresh wetting edge
+for heating. Actuator replacement must not silently rearm a consumed startup check.

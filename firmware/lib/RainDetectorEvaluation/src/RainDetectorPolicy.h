@@ -29,14 +29,14 @@ inline const char* rainDetectorRainStateName(RainDetectorRainState rain) {
 struct RainDetectorPolicyResult {
     bool valid = false;
     bool wetting = false;
-    bool dry = false; // Latched completion of this cycle; no ambient dry inference.
+    bool dry = false; // Latched confirmation after startup check or a drying cycle.
     bool heating = false;
     RainDetectorRainState rain = RainDetectorRainState::Unknown;
     uint64_t quietMs = 0;
     uint64_t dryMs = 0;
 };
 // Hardware-free, bounded state; caller owns GPIO and time. Partial PWM is
-// experimentally allowed for edge detection only; dry confirmation needs 100%.
+// experimentally allowed for edge detection only; active drying needs 100%.
 class RainDetectorPolicy {
 public:
     const RainDetectorPolicyConfig& config() const { return config_; }
@@ -47,13 +47,15 @@ public:
         config_ = config;
         return true;
     }
-    void enable() { disable(); enabled_ = true; }
+    bool startupPending() const { return startupPending_; }
+    void enable(bool initializeDry = true) { disable(); enabled_ = true; startupPending_ = initializeDry; }
     void disable() {
         enabled_ = false;
         initialized_ = false;
         count_ = 0;
         hasEvent_ = false;
         drying_ = false;
+        startupPending_ = startupDryConfirmation_ = false;
         result_ = RainDetectorPolicyResult{};
     }
     RainDetectorPolicyResult update(uint64_t timeMs, float hz, unsigned heater) {
@@ -100,6 +102,7 @@ public:
         const bool edge = count_ && drop >= config_.dropHz
             && drop >= peak * config_.dropPermille / 1000.0f;
         if (edge && (!hasEvent_ || timeMs - lastEventMs_ >= 2000)) {
+            startupPending_ = startupDryConfirmation_ = false;
             result_.wetting = true;
             result_.rain = RainDetectorRainState::Active;
             result_.heating = true;
@@ -113,8 +116,24 @@ public:
             if (result_.quietMs >= config_.endSeconds * 1000ULL)
                 result_.rain = RainDetectorRainState::EndEstimated;
         }
+        // One startup classification after the normal valid-signal guard. It
+        // never fabricates rain. Bad input before this point simply keeps waiting.
+        if (startupPending_ && !result_.wetting) {
+            startupPending_ = false;
+            startupDryConfirmation_ = hz >= config_.dryHz;
+            result_.heating = !startupDryConfirmation_;
+        }
+        // A high startup value still needs confirmation. If it drops before that
+        // confirmation, complete this initialization by drying at full power.
+        if (startupDryConfirmation_ && hz < config_.dryHz) {
+            startupDryConfirmation_ = false;
+            drying_ = false;
+            result_.dryMs = 0;
+            result_.heating = true;
+        }
         // A fresh wetting always restarts confirmation, even above dryHz.
-        if (result_.heating && heater == 100 && !result_.wetting) {
+        if (((result_.heating && heater == 100)
+                || (startupDryConfirmation_ && heater == 0)) && !result_.wetting) {
             if (hz < config_.dryHz - config_.hysteresisHz) {
                 drying_ = false;
                 result_.dryMs = 0;
@@ -124,6 +143,7 @@ public:
             } else if (drying_) {
                 result_.dryMs += dt;
                 if (result_.dryMs >= config_.drySeconds * 1000ULL) {
+                    startupDryConfirmation_ = false;
                     result_.dry = true;
                     result_.heating = false;
                     drying_ = false;
@@ -147,7 +167,9 @@ private:
         result_.rain = RainDetectorRainState::Unknown;
         result_.quietMs = result_.dryMs = 0;
         result_.dry = false;
-        // Abort heating on bad data. Remain armed; only a fresh edge may restart it.
+        startupDryConfirmation_ = false;
+        // Abort heating on bad data. A consumed startup check is not rearmed;
+        // only a fresh edge may restart heating after recovery.
         result_.heating = false;
     }
     struct Point { uint64_t timeMs; float hz; };
@@ -157,6 +179,7 @@ private:
     RainDetectorPolicyConfig config_;
     RainDetectorPolicyResult result_;
     bool enabled_ = false, initialized_ = false, hasEvent_ = false, drying_ = false;
+    bool startupPending_ = false, startupDryConfirmation_ = false;
     unsigned lastHeater_ = 0;
     uint64_t lastMs_ = 0, guardSinceMs_ = 0, lastEventMs_ = 0;
 };

@@ -71,10 +71,17 @@ int main() {
     assert(r.tick(29000, 0).wetting && r.a.result().heating);
     r.a.disable();
     assert(!r.a.enabled() && !r.a.result().heating);
-    // Dry head at boot cannot trigger a heater cycle or a dry claim.
+    // Dry head at startup confirms dry without a heater cycle or rain claim.
     r.ready(); r.hold(300, 35000, 0);
-    assert(!r.a.result().dry && !r.a.result().heating);
-    // Partial PWM edges are explicitly experimental, dry requires full ON.
+    assert(r.a.result().dry && !r.a.result().heating);
+    assert(r.a.result().rain == AutoRain::Unknown);
+    Rig startup;
+    startup.a.enable(); startup.hold(25,30000,0);
+    assert(startup.a.result().heating && !startup.a.result().wetting);
+    assert(startup.a.result().rain == AutoRain::Unknown);
+    startup.hold(100,34000,100);
+    assert(startup.a.result().dry && !startup.a.result().heating);
+    // Partial PWM edges are explicitly experimental, wet-cycle dry needs full ON.
     Rig pwm; pwm.ready(30); assert(pwm.tick(33000,30).wetting);
     pwm.hold(300,35000,30); assert(!pwm.a.result().dry);
     // Clock reversal/gaps invalidate confirmation and stop a wet cycle.
