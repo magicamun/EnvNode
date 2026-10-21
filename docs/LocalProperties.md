@@ -652,3 +652,9 @@ Frequency presentation supports Hz/kHz; canonical input and controller threshold
 remain Hz. A format such as `%5.2f kHz` uses the selected presentation value but
 literal unit text. `%3u` is minimum width 3 for unsigned values; `%5.2f` is minimum
 width 5 with two decimal places. Both forms are supported by firmware and editor.
+
+The presentation adapter also supplies the locale-specific decimal separator to
+the text formatter: German comma, English point. This replaces only the decimal
+point in each formatted floating-point value; literal dots, field widths, source
+data and MQTT JSON are unchanged. Locale changes take effect without rewriting
+saved display pages.

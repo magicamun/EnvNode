@@ -92,6 +92,10 @@ PropertyTextResult formatValue(const IPropertyReader& reader, const PropertyRefe
         const char* numericFormat = conversion.left ? "%-*.*f" : conversion.zero ? "%0*.*f" : "%*.*f";
         count = snprintf(formatted, sizeof(formatted), numericFormat,
             conversion.width, conversion.precision, static_cast<double>(number));
+        if (description.decimalSeparator == ',') {
+            char* decimal = strchr(formatted, '.');
+            if (decimal) *decimal = ',';
+        }
     } else if (conversion.type == 'u') {
         uint32_t number = 0;
         if (!snapshot.value.tryGetUnsignedInteger(number)) return failure(PropertyFormatStatus::InvalidValue);

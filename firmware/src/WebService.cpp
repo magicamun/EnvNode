@@ -1748,7 +1748,7 @@ void WebService::handleDisplay() {
     SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService_, &wifiService_);
     ValuePropertyReader valueProperties(valueRuntime_);
     PropertyResolver canonicalProperties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
-    PropertyPresentationReader properties(canonicalProperties, configuration.presentation);
+    PropertyPresentationReader properties(canonicalProperties, configuration.presentation, &configuration.locale);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
     const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");
     if (server_.hasArg("page") && server_.arg("page") != "1" && server_.arg("page") != "2") {

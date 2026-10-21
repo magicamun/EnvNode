@@ -125,7 +125,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
 static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService, &wifiService);
 static ValuePropertyReader valueProperties(valueRuntime);
 static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties);
-static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation);
+static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation, &configurationService.getConfiguration().locale);
 static U8g2TextDisplay oled(i2cBusManager, logger);
 static U8g2TextDisplay secondOled(i2cBusManager, logger);
 static DisplayService displayService(configurationService.getConfiguration().display,

@@ -147,4 +147,6 @@ its value remains readable even while the signal is invalid.
 Formatting already accepts minimum field widths and float precision: `%3u` prints
 42 as ` 42`, `%5.2f` prints 3.5 as ` 3.50`; `%03u` pads with zeros and `%-5.2f`
 left-aligns. Width is not truncation. Limits remain 64 characters of width and
-0-6 decimal places, with a decimal point.
+0-6 decimal places. Human-facing text uses the configured locale: comma for
+German, point for English. MQTT and canonical numeric values retain their
+protocol representation.
