@@ -31,3 +31,5 @@ Weitere Entwicklungen werden erst nach Einzelfallprüfung aufgenommen.
 [Wie EnvNode aufgebaut ist](concepts/index.md)
 
 [Erlaubte Nutzung und Lizenzbedingungen](license.md)
+
+[Hardware-Schnittstellen und Pinbelegungen](interfaces/index.md)

@@ -32,7 +32,11 @@ hooks:
   - tools/docs_assets.py
 nav:
   - Start: index.md
-  - Grundlagen: concepts/index.md
+  - Grundlagen:
+      - Überblick: concepts/index.md
+  - Hardware-Schnittstellen:
+      - Übersicht und Pinouts: interfaces/index.md
+      - Modulschnittstelle im Detail: concepts/module-interface.md
   - Kompatibilität: compatibility.md
   - Mainboards:
       - Übersicht: mainboards/index.md

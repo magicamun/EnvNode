@@ -27,3 +27,9 @@ Board Identity und optionale Module Identity beschreiben die eingesetzte Hardwar
 Die Erkennung eines Moduls bedeutet nicht automatisch, dass ein passender Treiber
 aktiviert wird. Sensoren und Aktoren müssen passend zur tatsächlichen Verdrahtung
 konfiguriert werden.
+
+## Modulschnittstelle
+
+[2×7-Modulstecker: Pinbelegung, Versorgung und Bussignale](module-interface.md)
+
+[Zentrale Übersicht: I²C, GPIO/ADC und Modulstecker](../interfaces/index.md)

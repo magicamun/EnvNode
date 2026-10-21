@@ -1,0 +1,28 @@
+{
+  "source": "hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
+  "sha256": "2e364ea20551036751df5349409bbd5b25c72e8f0e5c8e0cb863ebe0561dfbbf",
+  "pins_verified_against_exported_schematic": {
+    "2": "+3V3_SYS",
+    "4": "+5V",
+    "14": "/ESP32Core/CS",
+    "10": "/ESP32Core/GPIO13",
+    "9": "/ESP32Core/GPIO33",
+    "12": "/ESP32Core/MISO",
+    "11": "/ESP32Core/MOSI",
+    "13": "/ESP32Core/SCK",
+    "3": "EEPROM_A0_A",
+    "1": "GND",
+    "6": "I2C0_SCL",
+    "5": "I2C0_SDA",
+    "8": "I2C1_SCL",
+    "7": "I2C1_SDA"
+  },
+  "renderer": "KiCad CLI; original library STEP",
+  "crop_mm": [
+    154,
+    73,
+    178,
+    85
+  ],
+  "note": "First draft. Rectangular board edges are virtual cuts. Annotation is not silkscreen."
+}
