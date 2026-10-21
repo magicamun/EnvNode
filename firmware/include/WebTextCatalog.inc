@@ -517,7 +517,7 @@ ENVNODE_WEB_TEXT(SensorChangesNotApplied, "Sensor changes not applied", "Sensor�
 ENVNODE_WEB_TEXT(SensorRestartRequired, "Sensor restart required", "Sensorneustart erforderlich")
 ENVNODE_WEB_TEXT(SerialNumber, "Serial number", "Seriennummer")
 ENVNODE_WEB_TEXT(SerialNumberOptional, "Serial number (optional)", "Seriennummer (optional)")
-ENVNODE_WEB_TEXT(SerialNumber0ExplicitlyMeansUnassigned, "Serial number 0 explicitly means unassigned.", "Seriennummer 0 bedeutet ausdrücklich nicht zugewiesen.")
+ENVNODE_WEB_TEXT(SerialNumber0ExplicitlyMeansUnassigned, "Letters, digits, hyphen, underscore and dot are allowed. An empty field means unassigned.", "Erlaubt sind Buchstaben, Ziffern, Bindestrich, Unterstrich und Punkt. Ein leeres Feld bedeutet nicht zugewiesen.")
 ENVNODE_WEB_TEXT(SetLevel, "Set Level", "Stellwert setzen")
 ENVNODE_WEB_TEXT(SetNamedValuesForLocalUseChangesTake, "Set named values for local use. Changes take effect immediately.", "Benannte Werte für die lokale Verwendung festlegen. Änderungen werden sofort aktiv.")
 ENVNODE_WEB_TEXT(SetValue, "Set value", "Wert setzen")

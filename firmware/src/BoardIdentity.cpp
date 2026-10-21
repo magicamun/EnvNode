@@ -1,10 +1,13 @@
 #include "BoardIdentity.h"
 
+#include <cstring>
+
 namespace EnvNode {
 
 bool isKnownBoardProfileId(uint16_t encodedId) {
     return encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMainboard)
-        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeWeather);
+        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeWeather)
+        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMini);
 }
 
 bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId) {
@@ -40,15 +43,47 @@ BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
                 return BoardIdentityStatus::UnsupportedRevision;
             }
             break;
+        case BoardProfileId::EnvNodeMini:
+            if (identity.revision.major != 0 || identity.revision.minor != 8) {
+                return BoardIdentityStatus::UnsupportedRevision;
+            }
+            break;
         default:
             return BoardIdentityStatus::UnknownBoardProfile;
     }
 
-    if (identity.serialNumber == 0) {
+    if (!isValidBoardSerialNumber(identity.serialNumber.value)) {
+        return BoardIdentityStatus::InvalidSerial;
+    }
+    if (!isBoardSerialNumberAssigned(identity.serialNumber)) {
         return BoardIdentityStatus::UnassignedSerial;
     }
 
     return BoardIdentityStatus::Valid;
+}
+
+bool isValidBoardSerialNumber(const char* serialNumber) {
+    if (serialNumber == nullptr) return false;
+    const size_t length = std::strlen(serialNumber);
+    if (length > MaxBoardSerialNumberLength) return false;
+    for (size_t index = 0; index < length; ++index) {
+        const char c = serialNumber[index];
+        const bool alphaNumeric = (c >= 'A' && c <= 'Z')
+            || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+        if (!alphaNumeric && c != '-' && c != '_' && c != '.') return false;
+    }
+    return true;
+}
+
+bool setBoardSerialNumber(BoardSerialNumber& target, const char* serialNumber) {
+    if (!isValidBoardSerialNumber(serialNumber)) return false;
+    std::memset(target.value, 0, sizeof(target.value));
+    std::memcpy(target.value, serialNumber, std::strlen(serialNumber));
+    return true;
+}
+
+bool isBoardSerialNumberAssigned(const BoardSerialNumber& serialNumber) {
+    return serialNumber.value[0] != '\0';
 }
 
 } // namespace EnvNode

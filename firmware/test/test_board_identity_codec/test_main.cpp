@@ -50,20 +50,26 @@ void test_decode_documented_example() {
         static_cast<int>(identity.profileId));
     TEST_ASSERT_EQUAL_UINT8(0, identity.revision.major);
     TEST_ASSERT_EQUAL_UINT8(3, identity.revision.minor);
-    TEST_ASSERT_EQUAL_UINT32(12, identity.serialNumber);
+    TEST_ASSERT_EQUAL_STRING("12", identity.serialNumber.value);
 }
 
 void test_encode_matches_documented_example() {
     const BoardIdentity identity = {
         BoardProfileId::EnvNodeMainboard,
         {0, 3},
-        12,
+        {"MB-12"},
     };
     uint8_t encoded[BoardIdentityCodec::EncodedSize];
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityStatus::Valid),
         static_cast<int>(BoardIdentityCodec::encode(identity, encoded, sizeof(encoded))));
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(ExampleRecord, encoded, sizeof(encoded));
+    TEST_ASSERT_EQUAL_UINT8(BoardIdentityCodec::FormatVersion, encoded[4]);
+    TEST_ASSERT_EQUAL_UINT8(5, encoded[10]);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY("MB-12", encoded + 11, 5);
+    BoardIdentity decoded = {};
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(BoardIdentityStatus::Valid),
+        static_cast<int>(BoardIdentityCodec::decode(encoded, sizeof(encoded), decoded)));
+    TEST_ASSERT_EQUAL_STRING("MB-12", decoded.serialNumber.value);
 }
 
 void test_blank_records_are_not_provisioned() {
@@ -85,7 +91,7 @@ void test_validation_order_distinguishes_format_length_and_crc() {
     BoardIdentity identity = {};
 
     std::memcpy(record, ExampleRecord, sizeof(record));
-    record[4] = 2;
+    record[4] = 3;
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityStatus::UnsupportedFormat),
         static_cast<int>(BoardIdentityCodec::decode(record, sizeof(record), identity)));
@@ -157,11 +163,18 @@ void test_current_mainboard_revision_is_supported() {
     const BoardIdentity identity = {
         BoardProfileId::EnvNodeMainboard,
         {0, 3},
-        12,
+        {"MB-12"},
     };
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityStatus::Valid),
         static_cast<int>(validateBoardIdentity(identity)));
+}
+
+void test_alphanumeric_serial_validation_is_bounded() {
+    TEST_ASSERT_TRUE(isValidBoardSerialNumber("MINI-08_A.1"));
+    TEST_ASSERT_TRUE(isValidBoardSerialNumber(""));
+    TEST_ASSERT_FALSE(isValidBoardSerialNumber("MINI 08"));
+    TEST_ASSERT_FALSE(isValidBoardSerialNumber("123456789012345678"));
 }
 
 int main(int, char**) {
@@ -175,5 +188,6 @@ int main(int, char**) {
     RUN_TEST(test_revision_and_unassigned_serial_are_distinct);
     RUN_TEST(test_non_zero_reserved_bytes_are_accepted_when_crc_is_valid);
     RUN_TEST(test_current_mainboard_revision_is_supported);
+    RUN_TEST(test_alphanumeric_serial_validation_is_bounded);
     return UNITY_END();
 }

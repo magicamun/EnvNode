@@ -42,7 +42,7 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
     resolution_.source = BoardIdentitySource::BuildFallback;
     resolution_.identity.profileId = fallbackProfile->id;
     resolution_.identity.revision = fallbackProfile->revision;
-    resolution_.identity.serialNumber = 0;
+    resolution_.identity.serialNumber.value[0] = '\0';
     resolution_.normalRuntimeAllowed = true;
     return resolution_;
 }
@@ -86,6 +86,7 @@ const char* boardIdentityStatusName(BoardIdentityStatus status) {
         case BoardIdentityStatus::UnknownBoardProfile: return "UnknownBoardProfile";
         case BoardIdentityStatus::InvalidRevision: return "InvalidRevision";
         case BoardIdentityStatus::UnsupportedRevision: return "UnsupportedRevision";
+        case BoardIdentityStatus::InvalidSerial: return "InvalidSerial";
         case BoardIdentityStatus::UnassignedSerial: return "UnassignedSerial";
         default: return "Unknown";
     }

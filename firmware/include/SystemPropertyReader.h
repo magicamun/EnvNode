@@ -9,9 +9,10 @@ namespace EnvNode {
 class SystemPropertyReader : public IPropertyReader {
 public:
     SystemPropertyReader(const ITimeService& time, const LocaleFormatter& locale,
-        const char* version, const char* build, const char* commit, const char* identity,
+        const char* version, const char* build, const char* commit, const char* branch,
+        const char* identity,
         const IConfigurationService* configuration = nullptr, const IWiFiService* wifi = nullptr)
-        : time_(time, locale), version_(version), build_(build), commit_(commit), identity_(identity), configuration_(configuration), wifi_(wifi) {}
+        : time_(time, locale), version_(version), build_(build), commit_(commit), branch_(branch), identity_(identity), configuration_(configuration), wifi_(wifi) {}
     bool describe(const PropertyReference& reference, PropertyDescription& result) const override {
         result = PropertyDescription{};
         if (reference.componentKind != PropertyComponentKind::System || reference.componentId != 1
@@ -20,6 +21,7 @@ public:
         if (strcmp(reference.propertyKey, "version") == 0) name = "Firmware version";
         else if (strcmp(reference.propertyKey, "build") == 0) name = "Build number";
         else if (strcmp(reference.propertyKey, "git_commit") == 0) name = "Git commit";
+        else if (strcmp(reference.propertyKey, "git_branch") == 0) name = "Git branch";
         else if (strcmp(reference.propertyKey, "build_identity") == 0) name = "Full build identity";
         else if (configuration_ && strcmp(reference.propertyKey, "device_name") == 0) name = "Device name";
         else if (wifi_ && strcmp(reference.propertyKey, "hostname") == 0) name = "Hostname";
@@ -52,6 +54,7 @@ private:
         if (strcmp(reference.propertyKey, "version") == 0) text = version_;
         else if (strcmp(reference.propertyKey, "build") == 0) text = build_;
         else if (strcmp(reference.propertyKey, "git_commit") == 0) text = commit_;
+        else if (strcmp(reference.propertyKey, "git_branch") == 0) text = branch_;
         else if (strcmp(reference.propertyKey, "build_identity") == 0) text = identity_;
         else return time_.read(reference, result);
         result.value = PropertyValue::text(String(text));
@@ -62,6 +65,7 @@ private:
     const char* version_;
     const char* build_;
     const char* commit_;
+    const char* branch_;
     const char* identity_;
     const IConfigurationService* configuration_;
     const IWiFiService* wifi_;

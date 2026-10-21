@@ -153,6 +153,7 @@ A record is rejected when any of the following applies:
 - integrity validation fails
 - `BoardProfileId` is unknown to the running firmware
 - the identified board revision is unsupported by the selected firmware profile
+- the board serial contains unsupported characters or exceeds the record limit
 
 Diagnostics must distinguish storage absence/read failure, blank record, malformed record,
 integrity failure, unsupported schema, unknown profile and unsupported revision. They must also

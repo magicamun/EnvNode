@@ -26,6 +26,9 @@ Zwei aktive Displays dürfen nicht dieselbe Adresse am selben Bus besitzen.
 
 Quellen können Sensor-, Aktor-, Controller-, Value- und Systemeigenschaften sein.
 Eine Controller-Entscheidung und deren Grund helfen beim Verstehen des Verhaltens.
+Ab Firmware 0.7.0 steht zusätzlich **Git-Branch** als Systemeigenschaft zur
+Auswahl. Damit lassen sich Geräte mit unterschiedlichen Entwicklungsständen
+direkt auf dem Display unterscheiden.
 Fehlende oder ungültige Eingaben nicht durch einen scheinbar plausiblen festen
 Zahlenwert verdecken. Vorschau und Gerät können sich unterscheiden, wenn keine
 aktuellen Messungen verfügbar sind.

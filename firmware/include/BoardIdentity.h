@@ -1,12 +1,17 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 #include "BoardProfile.h"
 
 namespace EnvNode {
 
-using BoardSerialNumber = uint32_t;
+constexpr size_t MaxBoardSerialNumberLength = 17;
+
+struct BoardSerialNumber {
+    char value[MaxBoardSerialNumberLength + 1];
+};
 
 struct BoardIdentity {
     BoardProfileId profileId;
@@ -25,6 +30,7 @@ enum class BoardIdentityStatus : uint8_t {
     UnknownBoardProfile,
     InvalidRevision,
     UnsupportedRevision,
+    InvalidSerial,
     UnassignedSerial,
 };
 
@@ -32,5 +38,8 @@ bool isKnownBoardProfileId(uint16_t encodedId);
 bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId);
 uint16_t encodeBoardProfileId(BoardProfileId profileId);
 BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity);
+bool isValidBoardSerialNumber(const char* serialNumber);
+bool setBoardSerialNumber(BoardSerialNumber& target, const char* serialNumber);
+bool isBoardSerialNumberAssigned(const BoardSerialNumber& serialNumber);
 
 } // namespace EnvNode

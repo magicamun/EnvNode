@@ -12,7 +12,7 @@ bool identitiesEqual(const BoardIdentity& left, const BoardIdentity& right) {
     return left.profileId == right.profileId
         && left.revision.major == right.revision.major
         && left.revision.minor == right.revision.minor
-        && left.serialNumber == right.serialNumber;
+        && std::strcmp(left.serialNumber.value, right.serialNumber.value) == 0;
 }
 
 } // namespace

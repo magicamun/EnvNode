@@ -1,6 +1,6 @@
 # EnvNode Board Identity Record Specification
 
-**Status:** Version 1
+**Status:** Version 2 (Version 1 read-compatible)
 
 **Record size:** 32 bytes
 
@@ -19,25 +19,25 @@ implementation.
 
 The record starts at user-memory byte address `0x00` of the board identity EEPROM and occupies
 addresses `0x00` through `0x1F`. EEPROM addresses outside that range are not part of this record
-and must not be modified by a Board Identity writer. EnvNode Mini Revision 0.6 uses a `24LC32`;
+and must not be modified by a Board Identity writer. EnvNode Mini Revision 0.8 uses a `24LC32`;
 Revision 0.2 used a `24AA025E48` whose factory-programmed EUI-48 area was likewise outside this
 record.
 
-## 2. Version 1 byte layout
+## 2. Version 2 byte layout
 
 Offsets are zero-based. All multi-byte integers use little-endian byte order, independently of
 the processor's native byte order.
 
-| Offset | Size | Field | Encoding | Version 1 meaning |
+| Offset | Size | Field | Encoding | Version 2 meaning |
 | ---: | ---: | --- | --- | --- |
 | 0 | 4 | Magic | ASCII bytes | `ENID`, exactly `45 4E 49 44` |
-| 4 | 1 | `BoardIdentityFormatVersion` | `uint8` | `1` |
+| 4 | 1 | `BoardIdentityFormatVersion` | `uint8` | `2` |
 | 5 | 1 | Record length | `uint8` | `32` (`0x20`) |
 | 6 | 2 | `BoardProfileId` | little-endian `uint16` | Stable numeric profile identifier |
 | 8 | 1 | `BoardRevision.major` | `uint8` | Physical PCB revision major component |
 | 9 | 1 | `BoardRevision.minor` | `uint8` | Physical PCB revision minor component |
-| 10 | 4 | `BoardSerialNumber` | little-endian `uint32` | Raw numeric board serial number |
-| 14 | 14 | Reserved | bytes | Writers set every byte to `0x00` |
+| 10 | 1 | Serial length | `uint8` | Number of serial bytes, 0 through 17 |
+| 11 | 17 | `BoardSerialNumber` | ASCII bytes | Serial text followed by zero padding |
 | 28 | 4 | CRC | little-endian `uint32` | CRC-32/ISO-HDLC over bytes 0 through 27 |
 
 The total size is exactly 32 bytes. No field alignment or implicit padding exists.
@@ -45,21 +45,23 @@ The total size is exactly 32 bytes. No field alignment or implicit padding exist
 ### 2.1 Field rules
 
 `BoardIdentityFormatVersion` versions the binary EEPROM encoding. It is not a firmware version,
-board revision or `BoardProfile` version. A version 1 reader accepts only value `1` and record
-length `32`.
+board revision or `BoardProfile` version. Version 2 readers accept versions 1 and 2 with record
+length `32`; writers always emit version 2.
 
 `BoardProfileId` has a stable 16-bit EEPROM representation. Numeric IDs are assigned in this
 specification and, once assigned, shall never be reused for another physical board family. The
-current repository defines only one profile:
+assigned profiles are:
 
 | Numeric ID | Encoded bytes | Profile |
 | ---: | --- | --- |
 | 0 | `00 00` | `EnvNodeMainboard` |
+| 1 | `01 00` | `EnvNodeWeather` |
+| 2 | `02 00` | `EnvNodeMini` |
 
-The current C++ declaration uses `enum class BoardProfileId : uint8_t` and gives
-`EnvNodeMainboard` the implicit value 0. That in-memory enum representation is not the EEPROM
-encoding. Future source declarations should use explicit numeric assignments matching this
-registry. No IDs are assigned here to EnvNode 868, EnvNode Nano or other prospective boards.
+The C++ declaration uses `enum class BoardProfileId : uint8_t` with explicit numeric assignments.
+That in-memory enum representation is not the EEPROM encoding; source assignments must continue
+to match this registry. No IDs are assigned here to EnvNode 868, EnvNode Nano or other
+prospective boards.
 
 `BoardRevision` is the physical PCB revision. The two components are unsigned integers in the
 range 0 through 255 and are displayed as `major.minor`. They are independent of firmware and
@@ -79,11 +81,13 @@ a separate hardware revision and an explicit compatibility assessment. Patch pro
 belongs in the PCB title block, fabrication output and revision notes; historical
 source fingerprints and validation records remain tied to their original source state.
 
-`BoardSerialNumber` is the raw numeric value in the range 0 through 4,294,967,295. Value 0 means
-unassigned; assigned serial numbers therefore range from 1 through 4,294,967,295. Presentation
-formats such as `EN-000012` are not persisted. An otherwise valid record with serial 0 may still
-select its board profile, but must report `UnassignedSerial` and is not fully provisioned for
-manufacturing purposes.
+`BoardSerialNumber` contains at most 17 ASCII characters. Letters `A-Z`/`a-z`, digits, hyphen,
+underscore and dot are permitted. Serial matching is case-sensitive. Length 0 means unassigned;
+an otherwise valid record may still select its profile, but reports `UnassignedSerial`.
+
+Version 1 stored an unsigned 32-bit numeric serial at offsets 10 through 13 and reserved offsets
+14 through 27. Readers convert a non-zero legacy value to decimal text; zero becomes unassigned.
+Rewriting such an identity migrates it to version 2.
 
 Version 1 writers set all reserved bytes to zero and include them in the CRC. Readers validate
 integrity before interpreting fields, but otherwise ignore reserved-byte values. In particular,
@@ -120,15 +124,16 @@ apply these checks in order so blank storage and compatibility failures remain d
    `0x00` as `NotProvisioned` for devices or development tools that initialize storage to zero.
 4. If bytes 0 through 3 are not `ENID`, report `InvalidMagic`.
 5. If the format version is not supported, report `UnsupportedFormat`.
-6. If the length is not exactly 32 for format 1, report `InvalidLength`.
+6. If the length is not exactly 32 for formats 1 or 2, report `InvalidLength`.
 7. Calculate and compare the CRC; a mismatch is `InvalidCRC`.
 8. Decode the `BoardProfileId`; a syntactically valid, integrity-valid record whose ID is not in
    the running firmware is `UnknownBoardProfile`.
 9. Validate the revision against the selected firmware profile. Reserved `255.255` is
    `InvalidRevision`; a well-formed revision that the profile does not support is
    `UnsupportedRevision`.
-10. If the serial number is 0, report the non-fatal diagnostic `UnassignedSerial`.
-11. Otherwise report `Valid`.
+10. Validate serial length and characters; invalid content is `InvalidSerial`.
+11. If the serial length is zero, report the non-fatal diagnostic `UnassignedSerial`.
+12. Otherwise report `Valid`.
 
 Only `Valid` and the otherwise-valid `UnassignedSerial` state provide a usable board identity and
 may select the record's `BoardProfileId`. `NotProvisioned`, `StorageUnavailable`, `InvalidMagic`,
@@ -167,40 +172,33 @@ specified redundant-slot or transactional scheme; it must not change this record
 
 ## 6. Complete example
 
-This example identifies the current EnvNode Mainboard PCB revision 0.6 with serial number 12.
-The repository's KiCad schematic and PCB declare revision 0.6 and use a `24LC32` EEPROM.
+This example describes an EnvNode Mini PCB revision 0.8 with serial `MINI-A01`.
 
 | Field | Value | Encoded bytes |
 | --- | --- | --- |
 | Magic | `ENID` | `45 4E 49 44` |
-| Format version | 1 | `01` |
+| Format version | 2 | `02` |
 | Record length | 32 | `20` |
-| `BoardProfileId` | 0 (`EnvNodeMainboard`) | `00 00` |
-| Revision | 0.6 | `00 06` |
-| Serial | 12 | `0C 00 00 00` |
-| Reserved | fourteen zero bytes | `00` × 14 |
-| CRC-32/ISO-HDLC | `0x028E3F34` | `34 3F 8E 02` |
+| `BoardProfileId` | 2 (`EnvNodeMini`) | `02 00` |
+| Revision | 0.8 | `00 08` |
+| Serial length | 8 | `08` |
+| Serial | `MINI-A01` | `4D 49 4E 49 2D 41 30 31`, then `00` × 9 |
+| CRC-32/ISO-HDLC | Calculated over bytes 0–27 | little-endian |
 
 CRC input, bytes 0 through 27:
 
 ```text
-45 4E 49 44 01 20 00 00 00 06 0C 00 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 00 00
+45 4E 49 44 02 20 02 00 00 08 08 4D 49 4E
+49 2D 41 30 31 00 00 00 00 00 00 00 00 00
 ```
 
-Complete 32-byte record:
-
-```text
-45 4E 49 44 01 20 00 00 00 03 0C 00 00 00 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 8E B2 04 3C
-```
+The final four bytes contain the CRC calculated for that input.
 
 ## 7. Format evolution
 
 - Existing format versions must never be reinterpreted incompatibly.
 - An incompatible layout or interpretation requires a new format version.
-- Record length is part of each version's contract; version 1 is always 32 bytes.
+- Record length is part of each version's contract; versions 1 and 2 are 32 bytes.
 - `BoardProfileId` assignments remain stable independently of record format versions.
-- Version 1 writers keep reserved bytes zero. A future compatible use of reserved bytes must not
-  change the meaning of existing fields or require version 1 readers to interpret them.
+- Version 2 writers zero-pad unused serial bytes.
 - Readers reject unsupported format versions instead of guessing a compatible layout.

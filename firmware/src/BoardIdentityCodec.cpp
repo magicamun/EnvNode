@@ -66,7 +66,9 @@ BoardIdentityStatus BoardIdentityCodec::encode(
     writeUint16LittleEndian(output + 6, encodeBoardProfileId(identity.profileId));
     output[8] = identity.revision.major;
     output[9] = identity.revision.minor;
-    writeUint32LittleEndian(output + 10, identity.serialNumber);
+    const size_t serialLength = std::strlen(identity.serialNumber.value);
+    output[10] = static_cast<uint8_t>(serialLength);
+    std::memcpy(output + 11, identity.serialNumber.value, serialLength);
     writeUint32LittleEndian(output + CrcOffset, calculateCrc32(output, CrcOffset));
     return identityStatus;
 }
@@ -87,7 +89,7 @@ BoardIdentityStatus BoardIdentityCodec::decode(
     if (std::memcmp(input, Magic, sizeof(Magic)) != 0) {
         return BoardIdentityStatus::InvalidMagic;
     }
-    if (input[4] != FormatVersion) {
+    if (input[4] != FormatVersion && input[4] != LegacyNumericFormatVersion) {
         return BoardIdentityStatus::UnsupportedFormat;
     }
     if (input[5] != EncodedSize) {
@@ -106,7 +108,27 @@ BoardIdentityStatus BoardIdentityCodec::decode(
 
     identity.revision.major = input[8];
     identity.revision.minor = input[9];
-    identity.serialNumber = readUint32LittleEndian(input + 10);
+    std::memset(identity.serialNumber.value, 0, sizeof(identity.serialNumber.value));
+    if (input[4] == LegacyNumericFormatVersion) {
+        uint32_t numericSerial = readUint32LittleEndian(input + 10);
+        if (numericSerial != 0) {
+            char reversed[10];
+            size_t length = 0;
+            while (numericSerial != 0) {
+                reversed[length++] = static_cast<char>('0' + numericSerial % 10);
+                numericSerial /= 10;
+            }
+            for (size_t index = 0; index < length; ++index) {
+                identity.serialNumber.value[index] = reversed[length - index - 1];
+            }
+        }
+    } else {
+        const size_t serialLength = input[10];
+        if (serialLength > MaxBoardSerialNumberLength) {
+            return BoardIdentityStatus::InvalidSerial;
+        }
+        std::memcpy(identity.serialNumber.value, input + 11, serialLength);
+    }
     return validateBoardIdentity(identity);
 }
 

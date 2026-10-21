@@ -1002,7 +1002,7 @@ void WebService::handleDevice() {
     c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
         + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
         + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
-        + String(boardIdentityResolution_.identity.serialNumber) + "</span></div><div class='actions'><a class='button' href='/hardware'>"
+        + escapeHtml(boardIdentityResolution_.identity.serialNumber.value) + "</span></div><div class='actions'><a class='button' href='/hardware'>"
         + uiText(TextId::ViewHardware) + "</a></div></section>";
     sendPage(uiText(TextId::Device), "/device", c);
 }
@@ -1015,9 +1015,9 @@ void WebService::handleHardware() {
     const bool recordFormatKnown =
         boardIdentityResolution_.recordStatus == BoardIdentityStatus::Valid
         || boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial;
-    const String serialNumber = identity.serialNumber == 0
+    const String serialNumber = !isBoardSerialNumberAssigned(identity.serialNumber)
         ? String(uiText(TextId::Unassigned))
-        : localeFormatter_.formatNumber(identity.serialNumber, 0);
+        : String(identity.serialNumber.value);
     c = String();
     c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
     c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
@@ -1173,7 +1173,7 @@ void WebService::handleHardware() {
     }
     c += "</select></label>";
     c += (String("<p class='help'>") + uiText(TextId::TheSelectedBoardNameIsStoredAsIts) + "</p>");
-    c += (String("<label>") + uiText(TextId::BoardSerialNumber) + "<input type='number' name='serialNumber' min='0' max='4294967295' required value='") + String(identity.serialNumber) + "'></label>";
+    c += (String("<label>") + uiText(TextId::BoardSerialNumber) + "<input name='serialNumber' maxlength='") + String(MaxBoardSerialNumberLength) + "' pattern='[A-Za-z0-9._-]*' value='" + escapeHtml(identity.serialNumber.value) + "'></label>";
     c += (String("<p class='help'>") + uiText(TextId::SerialNumber0ExplicitlyMeansUnassigned) + "</p>");
     c += (String("<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesManufacturingIdentityData) + "</label>");
     c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteBoardIdentity) + "</button></div></form></section>");
@@ -1712,7 +1712,7 @@ void WebService::handleDisplay() {
         return;
     }
 
-    SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService_, &wifiService_);
+    SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::GitBranch, FirmwareBuildInfo::CompactIdentity, &configurationService_, &wifiService_);
     ValuePropertyReader valueProperties(valueRuntime_);
     PropertyResolver canonicalProperties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
     PropertyPresentationReader properties(canonicalProperties, configuration.presentation);
@@ -1792,6 +1792,7 @@ void WebService::handleDisplay() {
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "version"), uiText(TextId::FirmwareVersion2));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "build"), uiText(TextId::BuildNumber2));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "git_commit"), uiText(TextId::GitCommit2));
+    addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "git_branch"), uiText(TextId::GitBranch));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "build_identity"), uiText(TextId::FullBuildIdentity));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "date"), uiText(TextId::DateLocale));
     addPreviewSource(PropertyReference(PropertyComponentKind::System, 1, "time"), uiText(TextId::TimeLocale));
@@ -2487,33 +2488,29 @@ void WebService::handleBoardProvisioning() {
         && decodeBoardProfileId(static_cast<uint16_t>(parsedProfile), profileId);
     const BoardProfile* requestedProfile = profileValid ? boardProfile(profileId) : nullptr;
     const String serialText = server_.arg("serialNumber");
-    char* end = nullptr;
-    const unsigned long long parsedSerial = strtoull(serialText.c_str(), &end, 10);
-    const bool serialValid = !serialText.isEmpty()
-        && end != serialText.c_str()
-        && *end == '\0'
-        && parsedSerial <= UINT32_MAX;
+    const bool serialValid = isValidBoardSerialNumber(serialText.c_str());
     if (requestedProfile == nullptr || !serialValid) {
         sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware",
             uiText(TextId::TheSelectedBoardProfileOrBoardSerialNumber), false);
         return;
     }
 
-    const BoardIdentity requested = {
+    BoardIdentity requested = {
         requestedProfile->id,
         requestedProfile->revision,
-        static_cast<uint32_t>(parsedSerial),
+        {},
     };
+    setBoardSerialNumber(requested.serialNumber, serialText.c_str());
     const bool confirmed = server_.hasArg("confirmProvisioning")
         && server_.arg("confirmProvisioning") == "1";
     const BoardProvisioningResult result =
         boardProvisioningService_.provision(requested, confirmed);
-    logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%lu",
+    logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%s",
         boardProvisioningStatusName(result.status),
         static_cast<unsigned int>(requested.profileId),
         requested.revision.major,
         requested.revision.minor,
-        static_cast<unsigned long>(requested.serialNumber));
+        requested.serialNumber.value);
 
     if (result.status == BoardProvisioningStatus::Success) {
         String content;

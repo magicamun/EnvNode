@@ -11,6 +11,7 @@ namespace EnvNode {
 enum class BoardProfileId : uint8_t {
     EnvNodeMainboard = 0,
     EnvNodeWeather = 1,
+    EnvNodeMini = 2,
 };
 
 struct BoardRevision {

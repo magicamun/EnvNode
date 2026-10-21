@@ -122,7 +122,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     mqttService,
     sensorManager,
     actuatorRuntime);
-static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService, &wifiService);
+static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::GitBranch, FirmwareBuildInfo::CompactIdentity, &configurationService, &wifiService);
 static ValuePropertyReader valueProperties(valueRuntime);
 static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties);
 static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation);
@@ -143,13 +143,13 @@ void setup() {
     i2cBusManager.beginIdentityBus();
     const BoardIdentityResolution& identityResolution = boardIdentityResolver.resolve();
     logger.infof(
-        "Board identity source=%s status=%s profile=%u revision=%u.%u serial=%lu",
+        "Board identity source=%s status=%s profile=%u revision=%u.%u serial=%s",
         boardIdentitySourceName(identityResolution.source),
         boardIdentityStatusName(identityResolution.recordStatus),
         static_cast<unsigned int>(identityResolution.identity.profileId),
         identityResolution.identity.revision.major,
         identityResolution.identity.revision.minor,
-        static_cast<unsigned long>(identityResolution.identity.serialNumber));
+        identityResolution.identity.serialNumber.value);
     if (!identityResolution.normalRuntimeAllowed
         || !selectCurrentBoardProfile(identityResolution.identity.profileId)) {
         logger.error("Board identity unsupported; normal runtime initialization stopped");

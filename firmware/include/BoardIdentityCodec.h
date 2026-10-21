@@ -10,7 +10,8 @@ namespace EnvNode {
 class BoardIdentityCodec {
 public:
     static constexpr size_t EncodedSize = 32;
-    static constexpr uint8_t FormatVersion = 1;
+    static constexpr uint8_t FormatVersion = 2;
+    static constexpr uint8_t LegacyNumericFormatVersion = 1;
 
     static BoardIdentityStatus encode(
         const BoardIdentity& identity,
