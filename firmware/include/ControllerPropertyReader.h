@@ -22,14 +22,16 @@ private:
 
 namespace EnvNode {
 struct ControllerRuntimeInfo;
+class LocaleFormatter;
 // Borrowed copied runtime snapshot; no driver dependency or hardware side effects.
 class RainDetectorPropertyReader : public IPropertyReader {
 public:
-    explicit RainDetectorPropertyReader(const ControllerRuntimeInfo& info) : info_(info) {}
+    explicit RainDetectorPropertyReader(const ControllerRuntimeInfo& info, const LocaleFormatter* locale = nullptr) : info_(info), locale_(locale) {}
     static const char* const* keys(size_t& count);
     bool describe(const PropertyReference&, PropertyDescription&) const override;
     PropertyReadResult read(const PropertyReference&, PropertySnapshot&) const override;
 private:
     const ControllerRuntimeInfo& info_;
+    const LocaleFormatter* locale_;
 };
 }

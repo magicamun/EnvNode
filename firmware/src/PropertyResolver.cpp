@@ -10,8 +10,8 @@
 namespace EnvNode {
 
 PropertyResolver::PropertyResolver(const SensorManager& sensors, const IMeasurementResolver& measurements,
-    const ActuatorRuntime& actuators, const ControllerRuntime& controllers, const IPropertyReader* system, const IPropertyReader* values)
-    : sensors_(sensors), measurements_(measurements), actuators_(actuators), controllers_(controllers), system_(system), values_(values) {}
+    const ActuatorRuntime& actuators, const ControllerRuntime& controllers, const IPropertyReader* system, const IPropertyReader* values, const LocaleFormatter* locale)
+    : sensors_(sensors), measurements_(measurements), actuators_(actuators), controllers_(controllers), system_(system), values_(values), locale_(locale) {}
 
 bool PropertyResolver::describe(const PropertyReference& reference, PropertyDescription& result) const {
     result = PropertyDescription{};
@@ -31,7 +31,7 @@ bool PropertyResolver::describe(const PropertyReference& reference, PropertyDesc
                 ControllerRuntimeInfo info;
                 if (controllers_.runtimeInfo(i,info) && info.id==reference.componentId
                     && info.implementation==ControllerImplementation::RainDetector)
-                    return RainDetectorPropertyReader(info).describe(reference,result);
+                    return RainDetectorPropertyReader(info,locale_).describe(reference,result);
             }
             const IThresholdReasonProvider* provider = controllers_.reasonProvider(reference.componentId);
             if (provider == nullptr) return false;
@@ -61,7 +61,7 @@ PropertyReadResult PropertyResolver::read(const PropertyReference& reference, Pr
                 ControllerRuntimeInfo info;
                 if (controllers_.runtimeInfo(i,info) && info.id==reference.componentId
                     && info.implementation==ControllerImplementation::RainDetector)
-                    return RainDetectorPropertyReader(info).read(reference,result);
+                    return RainDetectorPropertyReader(info,locale_).read(reference,result);
             }
             const IThresholdReasonProvider* provider = controllers_.reasonProvider(reference.componentId);
             if (provider == nullptr) return PropertyReadResult::UnknownReference;

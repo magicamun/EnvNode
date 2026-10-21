@@ -1665,7 +1665,7 @@ void WebService::handleDisplaySave() {
         }
     }
     ValuePropertyReader valueProperties(valueRuntime_);
-    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, nullptr, &valueProperties);
+    PropertyResolver properties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, nullptr, &valueProperties, &localeFormatter_);
     if (!readDisplayEnumTranslations(editedPage, properties) || !validateDisplayConfiguration(candidate)) {
         sendResult(uiText(TextId::DisplaySaveFailed), "/display", uiText(TextId::InvalidFormatSourcesOrBooleanTextMatchPlaceholders), false);
         return;
@@ -1747,7 +1747,7 @@ void WebService::handleDisplay() {
 
     SystemPropertyReader timeProperties(timeService_, localeFormatter_, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService_, &wifiService_);
     ValuePropertyReader valueProperties(valueRuntime_);
-    PropertyResolver canonicalProperties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties);
+    PropertyResolver canonicalProperties(sensorManager_, measurementSnapshotCache_, actuatorRuntime_, controllerRuntime_, &timeProperties, &valueProperties, &localeFormatter_);
     PropertyPresentationReader properties(canonicalProperties, configuration.presentation, &configuration.locale);
     const bool loadSavedDisplay = server_.hasArg("loadDisplay");
     const bool previewSubmitted = !loadSavedDisplay && server_.hasArg("preview");

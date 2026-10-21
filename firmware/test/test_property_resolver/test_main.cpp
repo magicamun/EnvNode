@@ -286,8 +286,30 @@ void test_rain_controller_values_route_through_shared_resolver() {
     TEST_ASSERT_TRUE(resolver.read(reference,value)==PropertyReadResult::Available);
     TEST_ASSERT_TRUE(value.value.tryGetBoolean(running)); TEST_ASSERT_FALSE(running);
 }
+
+void test_rain_timestamp_properties_use_text_and_no_value_before_event_or_sync() {
+    ControllerRuntimeInfo info; info.id=1; info.implementation=ControllerImplementation::RainDetector;
+    RainDetectorPropertyReader reader(info);
+    PropertyReference ref(PropertyComponentKind::Controller,1,"rain_start");
+    PropertyDescription description; PropertySnapshot value;
+    TEST_ASSERT_TRUE(reader.describe(ref,description)); TEST_ASSERT_TRUE(description.valueKind==PropertyValueKind::Text);
+    TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::NoValue);
+    info.rainStart.occurred=true;
+    TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::NoValue);
+    info.rainStart.hasTimestamp=true; info.rainStart.timestamp=1800000000;
+    TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available);
+    TEST_ASSERT_TRUE(value.hasTimestamp); TEST_ASSERT_EQUAL(1800000000,value.timestamp);
+    const char* text=nullptr; TEST_ASSERT_TRUE(value.value.tryGetText(text)); TEST_ASSERT_EQUAL_UINT(19,strlen(text));
+    TEST_ASSERT_EQUAL_STRING(text,formatPropertyText(reader,ref,"%s").text);
+    ref.propertyKey="rain_end"; TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::NoValue);
+    info.rainEnd=info.rainStart; info.rainEnd.timestamp+=10;
+    TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available); TEST_ASSERT_EQUAL(1800000010,value.timestamp);
+    ref.propertyKey="rain_end_detected"; info.rainEndDetected=info.rainEnd; info.rainEndDetected.timestamp+=60;
+    TEST_ASSERT_TRUE(reader.read(ref,value)==PropertyReadResult::Available); TEST_ASSERT_EQUAL(1800000070,value.timestamp);
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_rain_timestamp_properties_use_text_and_no_value_before_event_or_sync);
     RUN_TEST(test_rain_controller_properties_are_typed_and_status_survives_invalid_input);
     RUN_TEST(test_rain_controller_values_route_through_shared_resolver);
     RUN_TEST(test_routes_configurable_values_and_resolves_deletion_live);

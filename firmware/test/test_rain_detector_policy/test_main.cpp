@@ -343,6 +343,72 @@ class EmptyRainMeasurements : public IMeasurementResolver {
 public:
     bool latest(const MeasurementSourceReference&,MeasurementSnapshot&) const override { return false; }
 };
+
+class EventTestTime : public ITimeService {
+public:
+    FrequencyTestClock& clock;
+    bool synced=false; time_t offset=1800000000;
+    explicit EventTestTime(FrequencyTestClock& c):clock(c) {}
+    void begin() override {} void loop() override {}
+    bool synchronized() const override { return synced; }
+    time_t now() const override { return offset+clock.now/1000; }
+    bool localCivilTime(tm&) const override { return false; }
+    String iso8601Utc() const override { return ""; }
+    String iso8601Local() const override { return ""; }
+    String iso8601Local(time_t) const override { return ""; }
+    uint32_t epoch() const override { return now(); }
+};
+void test_rain_event_times_resolve_after_sync_and_track_each_rain_episode() {
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    EmptyRainMeasurements measurements; EventTestTime time(clock);
+    ControllerFactory factory(measurements,actors,clock,logger,nullptr,&source);
+    ControllerRuntime runtime(factory,logger,&time);
+    ControllerSlotConfiguration slots[MaxControllerSlotCount];
+    for(unsigned i=0;i<MaxControllerSlotCount;++i) { slots[i].slotId=i+1; slots[i].name="slot"; }
+    slots[0].enabled=true; slots[0].implementation=ControllerImplementation::RainDetector;
+    auto& config=slots[0].implementationConfiguration.rainDetector;
+    config.sourceSensorId=1; config.targetActuatorId=1; config.policy.endSeconds=30;
+    TEST_ASSERT_TRUE(runtime.initialize(slots));
+    ControllerRuntimeInfo info;
+    const auto tick=[&](float hz) {
+        clock.now+=250; ++source.frame.revision; source.frame.acceptedMs=clock.now;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,
+            static_cast<uint32_t>(hz/4),false);
+        runtime.loop(); TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info));
+    };
+    for(unsigned i=0;i<70;++i) tick(34000);
+    TEST_ASSERT_TRUE(info.rainDetector.dry);
+    TEST_ASSERT_FALSE(info.rainStart.occurred); TEST_ASSERT_FALSE(info.rainEnd.occurred);
+    tick(30000);
+    const uint32_t start=clock.now;
+    TEST_ASSERT_TRUE(info.rainStart.occurred); TEST_ASSERT_TRUE(info.rainEnd.occurred);
+    TEST_ASSERT_FALSE(info.rainStart.hasTimestamp); TEST_ASSERT_FALSE(info.rainEndDetected.occurred);
+    for(unsigned i=0;i<25;++i) tick(30000);
+    time.synced=true; runtime.loop(); TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info));
+    const time_t initialStart=info.rainStart.timestamp;
+    TEST_ASSERT_TRUE(info.rainStart.hasTimestamp);
+    TEST_ASSERT_INT_WITHIN(1,time.offset+start/1000,initialStart);
+    tick(29000);
+    TEST_ASSERT_EQUAL(initialStart,info.rainStart.timestamp);
+    TEST_ASSERT_TRUE(info.rainEnd.monotonicMs>info.rainStart.monotonicMs);
+    const time_t lastWetting=info.rainEnd.timestamp;
+    for(unsigned i=0;i<121;++i) tick(29000);
+    TEST_ASSERT_TRUE(info.rainEndDetected.hasTimestamp);
+    TEST_ASSERT_EQUAL(lastWetting+30,info.rainEndDetected.timestamp);
+    const time_t detection=info.rainEndDetected.timestamp;
+    // Refresh and subsequent clock correction must not move stored event times.
+    time.offset+=5; for(unsigned i=0;i<5;++i) tick(29000);
+    TEST_ASSERT_EQUAL(initialStart,info.rainStart.timestamp);
+    TEST_ASSERT_EQUAL(lastWetting,info.rainEnd.timestamp);
+    TEST_ASSERT_EQUAL(detection,info.rainEndDetected.timestamp);
+    tick(28000);
+    TEST_ASSERT_TRUE(info.rainStart.timestamp>initialStart);
+    TEST_ASSERT_EQUAL(info.rainStart.timestamp,info.rainEnd.timestamp);
+    TEST_ASSERT_EQUAL(detection,info.rainEndDetected.timestamp);
+    runtime.stopController(1);
+    runtime.startController(1); TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info));
+    TEST_ASSERT_FALSE(info.rainStart.occurred); TEST_ASSERT_FALSE(info.rainEndDetected.occurred);
+}
 void test_runtime_autostarts_enabled_rain_controller_with_heater_off() {
     RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
     EmptyRainMeasurements measurements;
@@ -368,6 +434,7 @@ void test_runtime_autostarts_enabled_rain_controller_with_heater_off() {
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_startup_above_threshold_confirms_dry_without_heat_or_rain);
+    RUN_TEST(test_rain_event_times_resolve_after_sync_and_track_each_rain_episode);
     RUN_TEST(test_controller_initial_drying_has_no_wetting_and_target_recovery_stays_off);
     RUN_TEST(test_startup_below_threshold_drives_one_drying_cycle_without_rain);
     RUN_TEST(test_startup_waits_for_valid_signal_and_fault_does_not_restart_heat);

@@ -658,3 +658,10 @@ the text formatter: German comma, English point. This replaces only the decimal
 point in each formatted floating-point value; literal dots, field widths, source
 data and MQTT JSON are unchanged. Locale changes take effect without rewriting
 saved display pages.
+
+RainDetector event sources `rain_start`, `rain_end` (last detected wetting), and
+`rain_end_detected` are date/time text sources for `%s`. They follow the configured
+locale. Snapshots additionally identify the UTC event time. They are unavailable
+before the event/time synchronization and are cleared on controller Start/rebuild.
+The runtime resolves monotonic events through ITimeService; evaluation never waits
+for NTP. The most recent event of each type is retained until replaced or restarted.

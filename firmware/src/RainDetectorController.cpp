@@ -21,6 +21,7 @@ ControllerOperationResult RainDetectorController::apply(bool heating) {
 }
 ControllerOperationResult RainDetectorController::begin() {
     policy_.disable(); processed_=false; applied_=false; wettingCount_=0;
+    rainStartKnown_ = rainEndDetectionKnown_ = false;
     if (!config_.policy.valid() || !policy_.configure(config_.policy)) return ControllerOperationResult::InvalidConfiguration;
     policy_.enable(); running_=true;
     return apply(false);
@@ -61,12 +62,18 @@ ControllerOperationResult RainDetectorController::service() {
     if (result.heating && !before.heating && !result.wetting)
         logger_.info("RainDetector: startup frequency below dry threshold; full drying heat requested");
     if (result.wetting) {
+        if (before.rain != RainDetectorRainState::Active) {
+            rainStartMs_ = clock_.nowMs();
+            rainStartKnown_ = true;
+        }
         ++wettingCount_;
         lastWettingMs_ = clock_.nowMs();
     }
     if (result.rain == RainDetectorRainState::EndEstimated
-        && before.rain != RainDetectorRainState::EndEstimated)
+        && before.rain != RainDetectorRainState::EndEstimated) {
         rainEndConfirmationMs_ = clock_.nowMs();
+        rainEndDetectionKnown_ = true;
+    }
     if (result.wetting || result.valid!=before.valid || result.rain!=before.rain || result.heating!=before.heating || result.dry!=before.dry)
         logger_.infof("RainDetector: rain=%s valid=%u wetting=%u heating=%u dry=%u",
             rainDetectorRainStateName(result.rain),result.valid,result.wetting,result.heating,result.dry);

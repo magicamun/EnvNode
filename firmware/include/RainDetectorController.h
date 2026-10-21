@@ -17,6 +17,12 @@ public:
     ControllerOperationResult stop() override;
     ControllerOperationResult service() override;
     uint32_t wettingCount() const { return wettingCount_; }
+    bool rainStartKnown() const { return rainStartKnown_; }
+    bool rainEndDetectionKnown() const { return rainEndDetectionKnown_; }
+    uint32_t rainStartMs() const { return rainStartMs_; }
+    uint32_t lastWettingMs() const { return lastWettingMs_; }
+    uint32_t rainEndConfirmationMs() const { return rainEndConfirmationMs_; }
+    uint32_t rainStartAgeMs() const { return clock_.nowMs() - rainStartMs_; }
     uint32_t lastWettingAgeMs() const { return clock_.nowMs() - lastWettingMs_; }
     uint32_t rainEndConfirmationAgeMs() const { return clock_.nowMs() - rainEndConfirmationMs_; }
     bool running() const { return running_; }
@@ -34,7 +40,8 @@ private:
     RainDetectorPolicy policy_;
     bool running_ = false, processed_ = false, applied_ = false;
     uint32_t revision_ = 0, wettingCount_ = 0;
-    uint32_t lastWettingMs_ = 0, rainEndConfirmationMs_ = 0;
+    uint32_t lastWettingMs_ = 0, rainEndConfirmationMs_ = 0, rainStartMs_ = 0;
+    bool rainStartKnown_ = false, rainEndDetectionKnown_ = false;
     uint64_t endUs_ = 0;
     OnOffState lastOutput_ = OnOffState::Off;
 };

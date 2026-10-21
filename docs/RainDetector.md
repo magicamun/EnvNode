@@ -158,3 +158,24 @@ left-aligns. Width is not truncation. Limits remain 64 characters of width and
 0-6 decimal places. Human-facing text uses the configured locale: comma for
 German, point for English. MQTT and canonical numeric values retain their
 protocol representation.
+
+## Rain event timestamps as display sources
+
+Three additional controller sources use `%s`, like the system date/time sources:
+
+| Property | Meaning | Updated by |
+| --- | --- | --- |
+| `controller/<id>/rain_start` | Last rain start | First wetting of a new rain episode; later wetting during active rain does not move it |
+| `controller/<id>/rain_end` | Last detected wetting (estimated end) | Every newly detected wetting |
+| `controller/<id>/rain_end_detected` | Rain-end decision time | Transition to estimated rain end after valid quiet time |
+
+Values are local date/time text in the configured locale. Property snapshots also
+carry the event's UTC timestamp in `hasTimestamp`/`timestamp`. Before an event or
+before UTC has synchronized they return NoValue, not a fabricated date. Rain
+acquisition and heating remain independent of UTC. Monotonic events captured
+before synchronization are resolved when the clock becomes available; resolved
+UTC times then remain fixed across refreshes and clock corrections. A new event
+updates its own value; a new rain episode keeps the previous end-decision time
+until a subsequent end is detected. Initialization heating/dry confirmation does
+not create rain timestamps. They are volatile: explicit Start/rebuild/reboot
+clears them, while Stop or a signal fault retains the last events.

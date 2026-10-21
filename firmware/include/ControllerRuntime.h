@@ -4,9 +4,17 @@
 #include <memory>
 
 #include "ControllerFactory.h"
+#include "ITimeService.h"
 
 namespace EnvNode {
 
+// Volatile event time. Once UTC is resolved it remains fixed until a new event.
+struct ControllerEventTimestamp {
+    bool occurred = false;
+    uint32_t monotonicMs = 0;
+    bool hasTimestamp = false;
+    time_t timestamp = 0;
+};
 struct ControllerRuntimeInfo {
     ControllerId id = InvalidControllerId;
     char name[MaxControllerSlotNameLength + 1] = {};
@@ -22,6 +30,7 @@ struct ControllerRuntimeInfo {
     uint32_t maxMeasurementAgeMs = 0;
     RainDetectorPolicyResult rainDetector;
     uint32_t rainWettingCount = 0;
+    ControllerEventTimestamp rainStart, rainEnd, rainEndDetected;
     uint32_t rainLastWettingAgeMs = 0, rainEndConfirmationAgeMs = 0;
     bool decisionOnly = false;
     ValueId modeValueId = 0;
@@ -48,7 +57,7 @@ struct ControllerRuntimeInfo {
 
 class ControllerRuntime {
 public:
-    ControllerRuntime(ControllerFactory& factory, ILogger& logger);
+    ControllerRuntime(ControllerFactory& factory, ILogger& logger, const ITimeService* time = nullptr);
     ~ControllerRuntime();
 
     bool initialize(const ControllerSlotConfiguration* slots);
@@ -80,13 +89,14 @@ private:
         size_t& runtimeCount) const;
     bool beginComposition(RuntimeEntry* entries, size_t runtimeCount) const;
     void stopComposition(RuntimeEntry* entries, size_t runtimeCount) const;
-    static void updateRuntimeInfo(RuntimeEntry& entry);
+    void updateRuntimeInfo(RuntimeEntry& entry) const;
     RuntimeEntry* findEntry(ControllerId id);
 
     ControllerFactory* activeFactory_;
     ControllerFactory* inactiveFactory_;
     ControllerFactory secondaryFactory_;
     ILogger& logger_;
+    const ITimeService* time_;
     std::unique_ptr<RuntimeEntry[]> entries_;
     size_t runtimeCount_ = 0;
     uint32_t compositionRevision_ = 0;

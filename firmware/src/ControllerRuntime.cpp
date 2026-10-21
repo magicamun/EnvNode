@@ -8,13 +8,13 @@
 
 namespace EnvNode {
 
-ControllerRuntime::ControllerRuntime(ControllerFactory& factory, ILogger& logger)
+ControllerRuntime::ControllerRuntime(ControllerFactory& factory, ILogger& logger, const ITimeService* time)
     : activeFactory_(&factory)
     , inactiveFactory_(&secondaryFactory_)
     , secondaryFactory_(
         factory.measurementResolver(), factory.actuatorResolver(),
         factory.monotonicClock(), logger, factory.values(), factory.rainSource())
-    , logger_(logger) {
+    , logger_(logger), time_(time) {
 }
 
 ControllerRuntime::~ControllerRuntime() {
@@ -316,12 +316,32 @@ void ControllerRuntime::stopComposition(
     }
 }
 
-void ControllerRuntime::updateRuntimeInfo(RuntimeEntry& entry) {
+void ControllerRuntime::updateRuntimeInfo(RuntimeEntry& entry) const {
     if (entry.rainDetector != nullptr) {
         entry.info.running = entry.rainDetector->running();
         entry.info.targetAvailable = entry.rainDetector->targetAvailable();
         entry.info.rainDetector = entry.rainDetector->result();
         entry.info.rainWettingCount = entry.rainDetector->wettingCount();
+        const auto updateEvent = [&](ControllerEventTimestamp& event, bool known, uint32_t atMs, uint32_t ageMs) {
+            if (!known) { event = ControllerEventTimestamp{}; return; }
+            if (!event.occurred || event.monotonicMs != atMs) {
+                event = ControllerEventTimestamp{};
+                event.occurred = true; event.monotonicMs = atMs;
+            }
+            if (!event.hasTimestamp && time_ && time_->synchronized()) {
+                const time_t now = time_->now();
+                if (now >= static_cast<time_t>(ageMs / 1000)) {
+                    event.timestamp = now - ageMs / 1000;
+                    event.hasTimestamp = true;
+                }
+            }
+        };
+        updateEvent(entry.info.rainStart, entry.rainDetector->rainStartKnown(),
+            entry.rainDetector->rainStartMs(), entry.rainDetector->rainStartAgeMs());
+        updateEvent(entry.info.rainEnd, entry.info.rainWettingCount != 0,
+            entry.rainDetector->lastWettingMs(), entry.rainDetector->lastWettingAgeMs());
+        updateEvent(entry.info.rainEndDetected, entry.rainDetector->rainEndDetectionKnown(),
+            entry.rainDetector->rainEndConfirmationMs(), entry.rainDetector->rainEndConfirmationAgeMs());
         entry.info.rainLastWettingAgeMs = entry.rainDetector->lastWettingAgeMs();
         entry.info.rainEndConfirmationAgeMs = entry.rainDetector->rainEndConfirmationAgeMs();
         entry.info.sourceAvailable = entry.info.rainDetector.valid;

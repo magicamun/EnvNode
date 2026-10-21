@@ -95,7 +95,7 @@ static SensorManager sensorManager(
     measurementSnapshotCache);
 static ControllerFactory controllerFactory(
     measurementSnapshotCache, actuatorRuntime, monotonicClock, logger, &valueRuntime, &sensorManager);
-static ControllerRuntime controllerRuntime(controllerFactory, logger);
+static ControllerRuntime controllerRuntime(controllerFactory, logger, &timeService);
 static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger);
 static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger);
 static SensorRuntime sensorRuntime(
@@ -124,7 +124,7 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     actuatorRuntime);
 static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::CompactIdentity, &configurationService, &wifiService);
 static ValuePropertyReader valueProperties(valueRuntime);
-static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties);
+static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties, &localeFormatter);
 static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation, &configurationService.getConfiguration().locale);
 static U8g2TextDisplay oled(i2cBusManager, logger);
 static U8g2TextDisplay secondOled(i2cBusManager, logger);

@@ -8,6 +8,7 @@ class SensorManager;
 class IMeasurementResolver;
 class ActuatorRuntime;
 class ControllerRuntime;
+class LocaleFormatter;
 
 // Runtimes must outlive this resolver. Component bindings are looked up afresh
 // on each call, so the resolver can survive a runtime rebuild.
@@ -15,7 +16,8 @@ class PropertyResolver : public IPropertyReader {
 public:
     PropertyResolver(const SensorManager& sensors, const IMeasurementResolver& measurements,
         const ActuatorRuntime& actuators, const ControllerRuntime& controllers,
-        const IPropertyReader* system = nullptr, const IPropertyReader* values = nullptr);
+        const IPropertyReader* system = nullptr, const IPropertyReader* values = nullptr,
+        const LocaleFormatter* locale = nullptr);
 
     bool describe(const PropertyReference& reference, PropertyDescription& result) const override;
     PropertyReadResult read(const PropertyReference& reference, PropertySnapshot& result) const override;
@@ -27,6 +29,7 @@ private:
     const ControllerRuntime& controllers_;
     const IPropertyReader* system_;
     const IPropertyReader* values_;
+    const LocaleFormatter* locale_;
 };
 
 } // namespace EnvNode
