@@ -6,6 +6,10 @@ Schleifenstrom. Diese Seite beschreibt **Revision 0.5**.
 
 [Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf){ .md-button }
 
+
+[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
+
+
 ## Messpfad und Versorgung
 
 Ein LT8330 erzeugt aus den 5 V des Modulslots die lokale Versorgung von etwa 24 V.

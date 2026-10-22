@@ -5,6 +5,10 @@
     RainDetector ist noch kein registrierter Sensor der gemeinsamen EnvNode-Firmware.
     Eine separate Laborfirmware misst die Ausgangsfrequenz; sie steuert keine Heizung.
 
+
+[Controller: Bestückung und Bring-up (Pilot)](rain-detector-controller/assembly.md){ .md-button }
+[Head: Bestückung und Bring-up (Pilot)](rain-detector-head/assembly.md){ .md-button }
+
 ## Zwei getrennte Baugruppen
 
 | Baugruppe | Revision | Aufgabe |

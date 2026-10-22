@@ -8,7 +8,7 @@ pdf:
   document_version: '1.0-pilot'
   document_date: '2026-10-22'
   source_document_date: '2026-10-17'
-  status: Entwurf - keine Produktionsfreigabe
+  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
 ---
 
 # DuoRelay - Bestückung und Inbetriebnahme
@@ -146,17 +146,17 @@ Daraus folgen die 7-Bit-Adressen 0x52 bei A0 LOW und 0x53 bei A0 HIGH.
 
 ## 5. Prüfungen ohne Versorgung
 
-- [ ] Lötstellen, Platinenkanten und Abstände visuell geprüft.
-- [ ] Keine niederohmigen Kurzschlüsse von +5V beziehungsweise +3V3_SYS nach GND.
-- [ ] Q1/Q2 und D1/D2 plausibel im Diodentest; keine SOT-23-Lötbrücken.
-- [ ] J1 korrekt von unten, Pin 1 richtig, vollständig und rechtwinklig verlötet.
-- [ ] Relais und Klemmen plan; keine kalten oder gerissenen Lötstellen.
-- [ ] Beide Kanäle: COM-NC niederohmig, COM-NO offen.
-- [ ] Kein Durchgang zwischen Kontaktkreis und GND, +5V, +3V3_SYS oder GPIOs.
-- [ ] U2 und C1 bestückt; Orientierung und Lötstellen geprüft.
-- [ ] U2.5 zu J1.5 und U2.6 zu J1.6 auf Durchgang geprüft.
-- [ ] U2.8 und C1.1 zu J1.2; U2.4/U2.7/C1.2 zu GND geprüft.
-- [ ] U2.1 zu J1.3, U2.2 zu +3V3_SYS und U2.3 zu GND geprüft.
+- ☐ Lötstellen, Platinenkanten und Abstände visuell geprüft.
+- ☐ Keine niederohmigen Kurzschlüsse von +5V beziehungsweise +3V3_SYS nach GND.
+- ☐ Q1/Q2 und D1/D2 plausibel im Diodentest; keine SOT-23-Lötbrücken.
+- ☐ J1 korrekt von unten, Pin 1 richtig, vollständig und rechtwinklig verlötet.
+- ☐ Relais und Klemmen plan; keine kalten oder gerissenen Lötstellen.
+- ☐ Beide Kanäle: COM-NC niederohmig, COM-NO offen.
+- ☐ Kein Durchgang zwischen Kontaktkreis und GND, +5V, +3V3_SYS oder GPIOs.
+- ☐ U2 und C1 bestückt; Orientierung und Lötstellen geprüft.
+- ☐ U2.5 zu J1.5 und U2.6 zu J1.6 auf Durchgang geprüft.
+- ☐ U2.8 und C1.1 zu J1.2; U2.4/U2.7/C1.2 zu GND geprüft.
+- ☐ U2.1 zu J1.3, U2.2 zu +3V3_SYS und U2.3 zu GND geprüft.
 
 !!! warning "Unerwartete Verbindung"
     Bei einer unerwarteten Verbindung zwischen Kontaktseite und SELV-Steuerseite
@@ -186,11 +186,11 @@ GPIO-Zuordnung und LOW-Zustand während Reset/Boot am tatsächlichen Board prüf
 
 ### Funktions- und Belastungstest
 
-- [ ] Erste Kontaktprüfung ausschließlich mit sicherer Kleinspannungs-Testlast.
-- [ ] Jeden Kanal mindestens zehnmal schalten; LED, Relaisgeräusch und Kontakte konsistent.
-- [ ] Beide Kanäle gleichzeitig prüfen und Versorgungseinbruch beobachten.
-- [ ] Kontaktwiderstand und Erwärmung bei der vorgesehenen Last gesondert qualifizieren.
-- [ ] Induktive, kapazitive oder motorische Lasten mit geeigneter Schutzbeschaltung und Absicherung bewerten.
+- ☐ Erste Kontaktprüfung ausschließlich mit sicherer Kleinspannungs-Testlast.
+- ☐ Jeden Kanal mindestens zehnmal schalten; LED, Relaisgeräusch und Kontakte konsistent.
+- ☐ Beide Kanäle gleichzeitig prüfen und Versorgungseinbruch beobachten.
+- ☐ Kontaktwiderstand und Erwärmung bei der vorgesehenen Last gesondert qualifizieren.
+- ☐ Induktive, kapazitive oder motorische Lasten mit geeigneter Schutzbeschaltung und Absicherung bewerten.
 
 ## 7. Messprotokoll
 

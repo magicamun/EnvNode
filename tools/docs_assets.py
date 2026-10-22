@@ -3,6 +3,8 @@ from pathlib import Path
 from mkdocs.structure.files import File
 
 DOWNLOADS = {
+    "assets/downloads/EnvNode_I2C_Carrier_HalfSize_Jumper_Dokumentation_Rev0.1.pdf":
+        "hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/EnvNode_I2C_Carrier_HalfSize_Jumper_Dokumentation_Rev0.1.pdf",
     "assets/downloads/EnvNode-LICENSE.txt": "LICENSE",
     "assets/images/oring-power/ORing-Power-testpoints.png":
         "images/oring-power/testpoints/ORing-Power-testpoints.png",
@@ -42,8 +44,32 @@ for _ref in ("ADC1", "J5"):
         _name = f"{_ref}-{_view}-annotated.png"
         DOWNLOADS[f"assets/images/connectors/{_name}"] = f"images/envnode-mini/connectors/{_name}"
 
+def pdf_documents(config):
+    """An explicit manifest selects only the latest approved source for each guide."""
+    import yaml
+    root = Path(config.config_file_path).resolve().parent
+    documents = yaml.safe_load((root / "docs/pdf/documents.yml").read_text())
+    sources, targets = set(), set()
+    for document in documents:
+        source, target = document["source"], document["target"]
+        if source in sources or target in targets:
+            raise ValueError("Duplicate PDF source or destination")
+        if not target.startswith("assets/downloads/") or not target.endswith("_Markdown-Pilot.pdf"):
+            raise ValueError(f"Invalid pilot PDF destination: {target}")
+        for base, relative in ((root / "docs/site", source), (root, document["original"]), (root, document["images"])):
+            path = (base / relative).resolve()
+            if not path.is_relative_to(base.resolve()) or not path.exists():
+                raise ValueError(f"Missing or invalid PDF input: {relative}")
+        sources.add(source)
+        targets.add(target)
+    return documents
+
+
 def on_files(files, config, **kwargs):
-    files.append(File.generated(config, "assets/downloads/DuoRelay_Rev0.3_Markdown-Pilot.pdf", content=b""))
+    for document in pdf_documents(config):
+        if files.get_file_from_path(document["target"]):
+            raise ValueError(f"Duplicate generated PDF: {document['target']}")
+        files.append(File.generated(config, document["target"], content=b""))
     root = Path(config.config_file_path).resolve().parent
     for target, source in DOWNLOADS.items():
         path = root / source
@@ -55,12 +81,12 @@ def on_files(files, config, **kwargs):
     return files
 
 
-# Single-document pilot. The reserved download is replaced only after the
-# complete HTML build succeeds; any PDF error fails the build and deployment.
+# Reserved downloads are replaced after HTML generation. Any PDF error prevents
+# a successful build and therefore prevents deployment of incomplete artifacts.
 def on_post_build(config, **kwargs):
     import importlib.util
     root = Path(config.config_file_path).resolve().parent
     spec = importlib.util.spec_from_file_location("envnode_docs_pdf", root / "tools/docs_pdf.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.render(config)
+    module.render_all(config, pdf_documents(config))

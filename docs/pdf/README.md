@@ -1,8 +1,6 @@
-# PDF-Pilot: DuoRelay 0.3
+# PDF-Piloten: aktuelle Aufbauanleitungen
 
-Einzige Inhaltsquelle: `docs/site/modules/duo-relay/assembly.md`.
-Die letzte historische PDF mit Stand 17.10.2026 bleibt unverändert.
-Bilder wurden unverändert aus deren Seiten 4 und 5 übernommen.
+Jede Anleitung besitzt genau eine redaktionelle Markdown-Quelle. Die Auswahl der acht aktuellen Anleitungen steht in `documents.yml`; der erste Pilot ist DuoRelay 0.3. Die ursprünglichen PDFs bleiben unverändert, ihre Ansichten werden als Inhaltsbilder übernommen.
 
 ## Build
 
@@ -15,7 +13,7 @@ python -m mkdocs build --strict
 ```
 
 Der Build erstellt zunächst HTML, entnimmt genau dessen Artikelinhalt und erzeugt
-anschließend automatisch `site/assets/downloads/DuoRelay_Rev0.3_Markdown-Pilot.pdf`.
+anschließend automatisch alle registrierten PDFs unter `site/assets/downloads/`, zum Beispiel `DuoRelay_Rev0.3_Markdown-Pilot.pdf`.
 Daneben entsteht ein JSON-Buildnachweis. Keine gesonderte Markdown-Konvertierung
 und kein manuelles PDF-Nachbearbeiten. Die ursprüngliche PDF wird nicht ersetzt.
 
@@ -37,3 +35,11 @@ zwischen unterschiedlichen Font-/Pango-Systemversionen. JSON protokolliert die E
 Metadaten `pdf:` am Markdown-Anfang bestimmen Hardware- und Dokumentversion,
 Dokumentdatum, Status und ursprünglichen Quelldokumentstand. Diese Angaben bewusst
 pflegen, nicht automatisch als neues Hardware-Prüfdatum ausgeben.
+
+## Auswahl und Pflege der Anleitungen (Pilot)
+
+`documents.yml` registriert explizit jede Markdown-Quelle, die ursprüngliche letzte PDF, das Bildverzeichnis, den neuen PDF-Ausgabepfad und inhaltliche Pflichtmerkmale. Es gibt keine automatische Auswahl nach Dateinamen oder Revisionsnummer. Historische PDFs und Herstellerdatenblätter werden nicht migriert.
+
+Die zentrale Webübersicht liegt unter `docs/site/guides/index.md`. Alle Ausgaben behalten `Pilot` im Downloadnamen, in Dokumentversion und Status. Die alten PDFs werden unverändert weiter angeboten. Änderungen werden künftig in der jeweiligen `assembly.md` gepflegt; beim MkDocs-Build entstehen HTML, PDF und JSON-Nachweis gemeinsam. Keine separate redaktionelle PDF-Quelle pflegen.
+
+Neue Anleitung: Markdown mit `pdf`-Metadaten anlegen, einen geprüften Eintrag in `documents.yml` ergänzen und in Übersicht sowie Produktseite verlinken. Anschließend `mkdocs build --strict` und die neu gerenderten PDF-Seiten prüfen. Die Manifestdatei wird von den bestehenden CI-Pfadfiltern `docs/pdf/**` erfasst.

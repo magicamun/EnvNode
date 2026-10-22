@@ -21,3 +21,8 @@ einheitliche 1:1-Verdrahtung für JST-PH, JST-SH und die 5-V-Versorgung.
 Artikelstammdaten, Beschaffung, Bestände und kaufmännische Bausatzstücklisten werden
 in einer intern genutzten Lösung gepflegt. Die öffentliche Dokumentation beschreibt
 revisionsbezogen den Aufbau, die Schnittstellen und die notwendigen Prüfungen.
+
+
+## Aufbauanleitungen als Web und PDF (Pilot)
+
+Die [zentrale Übersicht der Aufbauanleitungen](../guides/index.md) enthält die aktuellen Pilotfassungen für Mainboards, Versorgung, Module und Regensensor-Baugruppen. Beide Formate verwenden dieselbe Markdown-Quelle.

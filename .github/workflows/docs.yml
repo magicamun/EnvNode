@@ -10,6 +10,7 @@ on:
       - 'requirements-docs.txt'
       - 'tools/docs_assets.py'
       - 'hardware/kicad/**/Documentation/*.pdf'
+      - 'hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/*Jumper_Dokumentation*.pdf'
       - 'LICENSE'
       - '.github/workflows/docs.yml'
   workflow_dispatch:

@@ -8,14 +8,12 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML, CSS, default_url_fetcher
 from pypdf import PdfReader
 
-REL = 'modules/duo-relay/assembly.md'
-TARGET = 'assets/downloads/DuoRelay_Rev0.3_Markdown-Pilot.pdf'
 
-def render(config):
+def render(config, document):
     root=Path(config.config_file_path).resolve().parent
     site=Path(config['site_dir']).resolve()
-    page=site/'modules/duo-relay/assembly/index.html'
-    source=root/'docs/site'/REL
+    page=site/Path(document['source']).with_suffix('')/'index.html'
+    source=root/'docs/site'/document['source']
     import yaml
     meta=yaml.safe_load(source.read_text().split('---',2)[1])['pdf']
     required=['title','subtitle','hardware_revision','document_version','document_date','status','source_document_date']
@@ -43,7 +41,7 @@ def render(config):
     while article.contents and getattr(article.contents[0], 'name', None) != 'h2':
         child=article.contents[0].extract()
         if getattr(child,'name',None) != 'h1':intro.append(child)
-    template=root/'docs/pdf/template.html';style=root/'docs/pdf/print.css' 
+    template=root/'docs/pdf/template.html';style=root/'docs/pdf/print.css'
     webstyle=root/'docs/site/assets/stylesheets/envnode.css'
     colors=dict(re.findall(r'(--envnode-[a-z-]+):\s*(#[0-9A-Fa-f]{6})',webstyle.read_text()))
     if len(colors)<9:raise ValueError('Shared EnvNode palette incomplete')
@@ -57,7 +55,7 @@ def render(config):
     env=Environment(loader=FileSystemLoader(str(template.parent)),autoescape=select_autoescape(['html']))
     from markupsafe import Markup
     html=env.get_template(template.name).render(**meta,content=Markup(str(article)),intro=Markup(str(intro)))
-    out=site/TARGET;out.parent.mkdir(parents=True,exist_ok=True)
+    out=site/document['target'];out.parent.mkdir(parents=True,exist_ok=True)
     def local_fetch(url):
         parsed=urlparse(url)
         if parsed.scheme!='file':raise ValueError(f'External PDF asset prohibited: {url}')
@@ -68,11 +66,17 @@ def render(config):
     font_config=FontConfiguration()
     HTML(string=html,base_url=page.as_uri(),url_fetcher=local_fetch).write_pdf(out,stylesheets=[CSS(string=css,font_config=font_config)],font_config=font_config)
     reader=PdfReader(out); text='\n'.join(p.extract_text() or '' for p in reader.pages)
-    for required_text in ['ENP-00102','Messprotokoll','Fehlerbilder','0x52','0x53','9c7e7d0384efa0a1']:
+    for required_text in document['required_text']:
         if required_text not in text:raise ValueError(f'PDF content missing: {required_text}')
-    if not reader.pages or any(abs(float(p.mediabox.width)-595.276)>1 for p in reader.pages):raise ValueError('PDF must use A4')
-    original=root/'hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf'
+    if not reader.pages or any(abs(float(p.mediabox.width)-595.276)>1 or abs(float(p.mediabox.height)-841.89)>1 for p in reader.pages):raise ValueError('PDF must use A4')
+    original=root/document['original']
     digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
-    manifest={'generator':'WeasyPrint fixed-template v1','metadata':meta,'pages':len(reader.pages),'source_pdf_sha256':digest(original),'markdown_sha256':digest(source),'template_sha256':digest(template),'print_style_sha256':digest(style),'palette':colors,'renderer_version':__import__('weasyprint').__version__,'generator_sha256':digest(Path(__file__)), 'images':{img.name:digest(img) for img in (root/'docs/site/assets/images/duorelay-assembly').glob('*.png')},'fonts':{p.name:digest(p) for p in fonts},'pdf_sha256':digest(out)}
+    manifest={'generator':'WeasyPrint fixed-template v1','metadata':meta,'pages':len(reader.pages),'source_pdf':document['original'],'source_pdf_sha256':digest(original),'markdown_sha256':digest(source),'template_sha256':digest(template),'print_style_sha256':digest(style),'palette':colors,'renderer_version':__import__('weasyprint').__version__,'generator_sha256':digest(Path(__file__)), 'images':{img.name:digest(img) for img in (root/document['images']).glob('*.png')},'fonts':{p.name:digest(p) for p in fonts},'pdf_sha256':digest(out)}
     out.with_suffix('.json').write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
     print(f'PDF pilot: {out} ({len(reader.pages)} pages)')
+
+
+def render_all(config, documents):
+    """Build each explicitly registered guide from its generated HTML article."""
+    for document in documents:
+        render(config, document)

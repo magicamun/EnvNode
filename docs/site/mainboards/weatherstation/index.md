@@ -9,6 +9,10 @@ zusätzlichen direkten Sensoranschlüssen. Diese Seite beschreibt **PCB-Revision
 Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.2.1**.
 Die Board Identity bleibt bei **0.2**; bisherige Prüfprotokolle behalten ihren historischen Stand.
 
+
+[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
+
+
 ## Überblick
 
 | Merkmal | Ausführung |

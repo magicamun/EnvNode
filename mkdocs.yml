@@ -46,7 +46,6 @@ nav:
   - Module:
       - Übersicht: modules/index.md
       - DuoRelay: modules/duo-relay/index.md
-      - DuoRelay - Bestückung und Bring-up: modules/duo-relay/assembly.md
       - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
   - Sensoren:
       - Übersicht: sensors/index.md
@@ -70,5 +69,15 @@ nav:
       - Beispiele:
           - Mini mit SHT4x: firmware/example-measurement.md
           - DuoRelay mit Blink: firmware/example-relay.md
+  - Aufbauanleitungen (Pilot):
+      - Übersicht: guides/index.md
+      - DuoRelay: modules/duo-relay/assembly.md
+      - EnvNode Mini: mainboards/mini/assembly.md
+      - Weatherstation: mainboards/weatherstation/assembly.md
+      - ORing Power: mainboards/oring-power/assembly.md
+      - AnalogHydroPressure: modules/analog-hydro-pressure/assembly.md
+      - RainDetectorController: sensors/rain-detector-controller/assembly.md
+      - RainDetectorHead: sensors/rain-detector-head/assembly.md
+      - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
   - Bausätze und Aufbau: kits/index.md
   - Lizenz und Nutzung: license.md

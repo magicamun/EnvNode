@@ -1,9 +1,9 @@
 /* Fixed EnvNode PDF template v1; tokens are loaded from the web stylesheet. */
 @page {
   size: A4; margin: 20mm 16mm 19mm;
-  @top-left { content: string(doc-title); color: var(--envnode-gold); font: 9pt sans-serif; border-bottom: 0.5pt solid var(--envnode-accent); }
-  @bottom-left { content: 'EnvNode · PCB ' string(hw-revision) ' · ' string(doc-date); font: 8pt sans-serif; color: var(--envnode-secondary); }
-  @bottom-right { content: counter(page) ' / ' counter(pages); font: 8pt sans-serif; color: var(--envnode-secondary); }
+  @top-left { content: string(doc-title); color: var(--envnode-gold); font: 9pt 'DejaVu Sans', sans-serif; border-bottom: 0.5pt solid var(--envnode-accent); }
+  @bottom-left { content: 'EnvNode · PCB ' string(hw-revision) ' · ' string(doc-date); font: 8pt 'DejaVu Sans', sans-serif; color: var(--envnode-secondary); }
+  @bottom-right { content: counter(page) ' / ' counter(pages); font: 8pt 'DejaVu Sans', sans-serif; color: var(--envnode-secondary); }
 }
 @page :first { @top-left { content: none; } }
 body { font-family: 'DejaVu Sans', sans-serif; font-size: 9pt; line-height: 1.4; color: var(--envnode-text); }
@@ -35,3 +35,8 @@ code { font-family: "EnvNode Mono", monospace; font-size:7pt; overflow-wrap:anyw
 .cover dl { margin-top:15mm; }
 .cover dt { font-weight:bold; margin-top:4mm; }
 .cover dd { margin-left:0; }
+
+h4 { color: var(--envnode-gold); font-size: 10pt; break-after: avoid; }
+img.connector-view { display: inline-block; max-height: 45mm; max-width: 47%; width: auto; margin: 2mm; vertical-align: middle; }
+img.paired-board-view { display: inline-block; max-height: 55mm; max-width: 47%; width: auto; margin: 2mm; vertical-align: middle; }
+img.testpoint-view { display: block; max-height: 65mm; width: auto; height: auto; margin: 2mm auto; }

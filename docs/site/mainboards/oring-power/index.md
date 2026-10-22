@@ -11,6 +11,10 @@ mit ergänzter Prüfpunktseite gilt für diesen Beschriftungsstand. Er ergänzt 
 5-V-/GND-Beschriftung am JST-PH-Eingang; Elektrik und Mechanik bleiben unverändert.
 Es ist keine Neuprovisionierung erforderlich.
 
+
+[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
+
+
 ## Überblick
 
 | Merkmal | Ausführung |
