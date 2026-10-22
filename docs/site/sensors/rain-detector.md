@@ -76,10 +76,7 @@ Das Aufspielen ersetzt die bisherige Firmware auf dem Testgerät.
 Die gemeinsame EnvNode-Firmware enthält einen Rain-Gauge-Treiber für Kippwaagen.
 Dieser ist funktional verschieden und kein RainDetector-Treiber.
 
-## Anleitungen und Prüfstand
-
-- [Controller: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorController_Rev0.3_Anleitung.pdf)
-- [Head: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorHead_Rev0.1_Anleitung.pdf)
+## Prüfstand
 
 Die dokumentierten ERC/DRC-Prüfungen vom 14. September 2026 liegen vor den
 anschließenden Stecker- und Konturänderungen. Vor Fertigung sind aktuelle Prüfungen

@@ -5,8 +5,6 @@ Diese Seite beschreibt **Revision 0.3**.
 
 [Bestückungs- und Bring-up-Anleitung im Web](assembly.md){ .md-button }
 
-[Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/DuoRelay_Rev0.3_Anleitung.pdf){ .md-button }
-
 ## Überblick
 
 | Merkmal | Ausführung |
@@ -74,7 +72,7 @@ Ein gültiger Identifikationsdatensatz erzeugt keine Relais-Aktoren automatisch.
 
 ## Bestückung und Inbetriebnahme
 
-Die [PDF-Anleitung](../../assets/downloads/DuoRelay_Rev0.3_Anleitung.pdf)
+Die Aufbauanleitung
 enthält die Bauteilwerte und den vollständigen Ablauf.
 
 1. Dioden, LEDs und Transistoren polaritätsrichtig bestücken; U2 und C1 bestücken und J1 von unten montieren.
