@@ -1,0 +1,1 @@
+EnvNode-owned images extracted unchanged from the current DuoRelay Rev0.3 guide (document date 2026-10-17), pages 4 and 5. See root LICENSE. Third-party model rights remain unchanged. No new rendering or hardware validation.

@@ -3,7 +3,9 @@
 DuoRelay ist ein FullSize-Modul mit zwei unabhängig gesteuerten 5-V-Wechslerrelais.
 Diese Seite beschreibt **Revision 0.3**.
 
-[Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung im Web](assembly.md){ .md-button }
+
+[Bisherige Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf){ .md-button }
 
 ## Überblick
 

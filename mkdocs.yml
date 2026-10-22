@@ -46,6 +46,7 @@ nav:
   - Module:
       - Übersicht: modules/index.md
       - DuoRelay: modules/duo-relay/index.md
+      - DuoRelay - Bestückung und Bring-up: modules/duo-relay/assembly.md
       - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
   - Sensoren:
       - Übersicht: sensors/index.md

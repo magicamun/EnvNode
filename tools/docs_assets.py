@@ -43,6 +43,7 @@ for _ref in ("ADC1", "J5"):
         DOWNLOADS[f"assets/images/connectors/{_name}"] = f"images/envnode-mini/connectors/{_name}"
 
 def on_files(files, config, **kwargs):
+    files.append(File.generated(config, "assets/downloads/DuoRelay_Rev0.3_Markdown-Pilot.pdf", content=b""))
     root = Path(config.config_file_path).resolve().parent
     for target, source in DOWNLOADS.items():
         path = root / source
@@ -52,3 +53,14 @@ def on_files(files, config, **kwargs):
             raise ValueError(f"Duplicate documentation asset: {target}")
         files.append(File.generated(config, target, content=path.read_bytes()))
     return files
+
+
+# Single-document pilot. The reserved download is replaced only after the
+# complete HTML build succeeds; any PDF error fails the build and deployment.
+def on_post_build(config, **kwargs):
+    import importlib.util
+    root = Path(config.config_file_path).resolve().parent
+    spec = importlib.util.spec_from_file_location("envnode_docs_pdf", root / "tools/docs_pdf.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.render(config)

@@ -1,2 +1,7 @@
 mkdocs==1.6.1
 mkdocs-material==9.7.7
+
+# Fixed-template PDF pilot (requires system Pango)
+weasyprint==68.0
+beautifulsoup4==4.14.3
+pypdf==6.1.1
