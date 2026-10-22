@@ -5,22 +5,17 @@ pdf:
   title: RainDetectorController
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.3'
-  document_version: 1.0-pilot
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: '2026-10-17'
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # RainDetectorController - Bestückung und Inbetriebnahme
 
-Controller für den separaten RainDetectorHead: ICM7555-Frequenzsignal mit 3,3 V und schaltbare 5-V-Heizung. Entwurf: reale Funktions-, Temperatur- und Umweltprüfungen stehen aus. Der letzte PDF-Stand enthält die am 17. Oktober aktualisierte Stückliste; die übrigen Nachweise tragen ihre ursprünglichen Datumsangaben.
+Controller für den separaten RainDetectorHead: ICM7555-Frequenzsignal mit 3,3 V und schaltbare 5-V-Heizung. Entwurf: reale Funktions-, Temperatur- und Umweltprüfungen stehen aus. Stücklistenstand: 17. Oktober 2026. Die Prüf- und Quellennachweise sind jeweils datiert.
 
-!!! info "Pilotfassung"
-    Aus der jeweils letzten PDF-Anleitung überführt. Inhalt und Darstellung sind noch zur Durchsicht vorgesehen. Webansicht und neue PDF verwenden dieselbe Markdown-Quelle. Die Überführung ist keine neue Hardwareprüfung.
-
-[Generierte PDF-Pilotfassung](../../assets/downloads/RainDetectorController_Rev0.3_Markdown-Pilot.pdf){ .md-button }
-
-[Bisherige PDF-Ausgabe](../../assets/downloads/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf)
+[Anleitung als PDF](../../assets/downloads/RainDetectorController_Rev0.3_Anleitung.pdf){ .md-button }
 
 ## 1. Teile und Vorbereitung
 
@@ -198,8 +193,6 @@ Historischer Prüfstand vom 14. September 2026: Laut Projekt-README bestanden Co
 
 Prüfumfang dieser Dokumentaktualisierung: Quellen-, Stücklisten- und Netzabgleich sowie visuelle PDF-Prüfung. Kein neuer vollständiger ERC-/DRC-Lauf, kein Flashen und keine reale Hardwaremessung. Steckverbinder-Auswahl, Montagehöhe, Heizverhalten, Witterungsbeständigkeit und produktive Integration bleiben zu qualifizieren.
 
-### Überführung und Lizenz
-
-Diese Pilotfassung übernimmt den zuletzt gepflegten PDF-Stand einschließlich seiner Ergänzungen. Quellenprüfsummen und Prüfberichte im Text sind historische Nachweise aus der PDF und wurden durch diese Überführung nicht neu bestätigt. Für neu generierte Ausgaben protokolliert der Build zusätzlich die Prüfsummen von Markdown, ursprünglicher PDF, Inhaltsbildern, Druckvorlage und Schriften.
+### Lizenz
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.

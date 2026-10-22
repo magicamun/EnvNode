@@ -5,10 +5,10 @@ pdf:
   title: DuoRelay
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.3'
-  document_version: '1.0-pilot'
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: '2026-10-17'
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # DuoRelay - Bestückung und Inbetriebnahme
@@ -16,13 +16,9 @@ pdf:
 **FullSize-Modul, PCB-Revision 0.3.** Diese Anleitung beschreibt Handbestückung,
 Sichtprüfung und Erstinbetriebnahme mit sicherer Kleinspannung.
 
-Diese Pilotfassung überführt ausschließlich die zuletzt gepflegte PDF-Anleitung
-mit Dokumentstand 17. Oktober 2026. Die Überführung ist keine neue Hardwareprüfung.
-Webansicht und generierte PDF verwenden denselben Markdown-Inhalt.
+[Anleitung als PDF](../../assets/downloads/DuoRelay_Rev0.3_Anleitung.pdf){ .md-button }
 
-[Generierte PDF-Pilotfassung](../../assets/downloads/DuoRelay_Rev0.3_Markdown-Pilot.pdf){ .md-button }
-
-[Produktübersicht](index.md) · [Bisherige PDF-Ausgabe](../../assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf)
+[Produktübersicht](index.md)
 
 ## 1. Teile und Vorbereitung
 
@@ -43,7 +39,7 @@ Webansicht und generierte PDF verwenden denselben Markdown-Inhalt.
 | C1 | 1 | 100 nF, X7R | ENP-00006 | 1206 |
 | PCB | 1 | DuoRelay FullSize 0.3 | ENP-00066 | 38 × 64 mm |
 
-U2 und C1 werden im hier überführten Bestückungsstand gemeinsam bestückt.
+U2 und C1 werden im dokumentierten Bestückungsstand gemeinsam bestückt.
 U2 nutzt I2C0 mit 0x52 in Slot A beziehungsweise 0x53 in Slot B.
 Der passende Modul-Descriptor ist zu provisionieren und die erkannte Identität zu prüfen.
 
@@ -225,9 +221,7 @@ Mainboard / Slot / Firmware: ______________________________________________
 
 ## 9. Dokumentierter Stand und Quellen
 
-PCB-Revision 0.3 bleibt unverändert. Quellenstand dieser Überführung ist die
-letzte PDF vom 17. Oktober 2026; der Build protokolliert zusätzlich deren SHA-256
-sowie die Prüfsummen von Markdown und Vorlage.
+PCB-Revision 0.3. Dokumentierter Quellenstand: 17. Oktober 2026.
 
 Der Netzlisten-/PCB-Abgleich vom 5. Oktober bestätigte J1.9 über R1 zu Kanal 1,
 J1.10 über R2 zu Kanal 2, J3.1/2/3 = NO1/COM1/NC1 und
@@ -236,11 +230,9 @@ J4.1/2/3 = NC2/COM2/NO2. Die historischen ERC-/DRC-Ergebnisse der Revision 0.2
 sind keine erneute Validierung der Revision 0.3. Vollständige erneute Prüfung,
 konkrete Klemmen-MPN, Lastqualifikation und anwendungsbezogene Freigaben bleiben offen.
 
-Die Oberseitenabbildung wurde aus der aktuellen PDF übernommen. Die dort am
-17. Oktober aktualisierte Rückseitenabbildung zeigt bestückte U2/C1. Beide Bilder
-werden proportional und unverändert als Inhaltsassets verwendet.
+Die Rückseitenabbildung vom 17. Oktober 2026 zeigt bestückte U2/C1.
 
-### Historische Quellenprüfsummen aus der letzten PDF
+### Historische Quellenprüfsummen
 
 | Quelle | SHA-256 (historischer Nachweis, nicht neu berechnet) |
 | --- | --- |

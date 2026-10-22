@@ -5,22 +5,17 @@ pdf:
   title: AnalogHydroPressure
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.5'
-  document_version: 1.0-pilot
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: '2026-10-17'
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # AnalogHydroPressure - Bestückung und Inbetriebnahme
 
 FullSize-Modul für eine Zweileiter-4-20-mA-Drucksonde mit lokalem 24-V-Boost und ADS1115. JP5 (SDA) und JP6 (SCL) müssen gemeinsam auf denselben I²C-Bus gesetzt werden. Ohne diese Brücken ist der ADS1115 nicht erreichbar.
 
-!!! info "Pilotfassung"
-    Aus der jeweils letzten PDF-Anleitung überführt. Inhalt und Darstellung sind noch zur Durchsicht vorgesehen. Webansicht und neue PDF verwenden dieselbe Markdown-Quelle. Die Überführung ist keine neue Hardwareprüfung.
-
-[Generierte PDF-Pilotfassung](../../assets/downloads/AnalogHydroPressure_Rev0.5_Markdown-Pilot.pdf){ .md-button }
-
-[Bisherige PDF-Ausgabe](../../assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf)
+[Anleitung als PDF](../../assets/downloads/AnalogHydroPressure_Rev0.5_Anleitung.pdf){ .md-button }
 
 ## 1. Teile und Vorbereitung
 
@@ -303,8 +298,6 @@ Bring-up: 3,3 V am EEPROM prüfen. Auf I2C0 muss es in Slot A bei 0x52, in Slot 
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe LICENSE im Repository. Drittanbieterrechte bleiben unberührt.
 
-### Überführung und Lizenz
-
-Diese Pilotfassung übernimmt den zuletzt gepflegten PDF-Stand einschließlich seiner Ergänzungen. Quellenprüfsummen und Prüfberichte im Text sind historische Nachweise aus der PDF und wurden durch diese Überführung nicht neu bestätigt. Für neu generierte Ausgaben protokolliert der Build zusätzlich die Prüfsummen von Markdown, ursprünglicher PDF, Inhaltsbildern, Druckvorlage und Schriften.
+### Lizenz
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.

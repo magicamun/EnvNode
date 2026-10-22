@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
 # Explicitly selected latest guides only; never discover PDFs by revision sorting.
 - source: modules/duo-relay/assembly.md
-  target: assets/downloads/DuoRelay_Rev0.3_Markdown-Pilot.pdf
+  target: assets/downloads/DuoRelay_Rev0.3_Anleitung.pdf
   original: hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf
   images: docs/site/assets/images/duorelay-assembly
   required_text:
@@ -12,7 +12,7 @@
   - '0x53'
   - 9c7e7d0384efa0a1
 - source: mainboards/mini/assembly.md
-  target: assets/downloads/EnvNode_Mini_Rev0.8.1_Markdown-Pilot.pdf
+  target: assets/downloads/EnvNode_Mini_Rev0.8.1_Anleitung.pdf
   original: hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf
   images: docs/site/assets/images/mini-assembly
   required_text:
@@ -24,7 +24,7 @@
   - CRC / Read-back geprüft
   - Provisioniert am / durch
 - source: mainboards/weatherstation/assembly.md
-  target: assets/downloads/Weatherstation_Rev0.2.1_Markdown-Pilot.pdf
+  target: assets/downloads/Weatherstation_Rev0.2.1_Anleitung.pdf
   original: hardware/kicad/MainBoards/Weatherstation/Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf
   images: docs/site/assets/images/weather-assembly
   required_text:
@@ -36,7 +36,7 @@
   - CRC / Read-back geprüft
   - Provisioniert am / durch
 - source: mainboards/oring-power/assembly.md
-  target: assets/downloads/ORing_Power_Rev0.1.1_Markdown-Pilot.pdf
+  target: assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf
   original: hardware/kicad/Power/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf
   images: docs/site/assets/images/oring-assembly
   required_text:
@@ -45,7 +45,7 @@
   - Rückspeisung
   - U2.1
 - source: modules/analog-hydro-pressure/assembly.md
-  target: assets/downloads/AnalogHydroPressure_Rev0.5_Markdown-Pilot.pdf
+  target: assets/downloads/AnalogHydroPressure_Rev0.5_Anleitung.pdf
   original: hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf
   images: docs/site/assets/images/analog-assembly
   required_text:
@@ -55,7 +55,7 @@
   - J1.10
   - U3
 - source: sensors/rain-detector-controller/assembly.md
-  target: assets/downloads/RainDetectorController_Rev0.3_Markdown-Pilot.pdf
+  target: assets/downloads/RainDetectorController_Rev0.3_Anleitung.pdf
   original: hardware/kicad/Sensors/RainDetectorController/Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf
   images: docs/site/assets/images/rain-controller-assembly
   required_text:
@@ -64,7 +64,7 @@
   - '417'
   - ENP-00116
 - source: sensors/rain-detector-head/assembly.md
-  target: assets/downloads/RainDetectorHead_Rev0.1_Markdown-Pilot.pdf
+  target: assets/downloads/RainDetectorHead_Rev0.1_Anleitung.pdf
   original: hardware/kicad/Sensors/RainDetectorHead/Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf
   images: docs/site/assets/images/rain-head-assembly
   required_text:
@@ -73,7 +73,7 @@
   - 12 Ohm
   - ENP-00111
 - source: modules/i2c-carrier/assembly.md
-  target: assets/downloads/I2C_Carrier_HalfSize_Rev0.1_Markdown-Pilot.pdf
+  target: assets/downloads/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf
   original: hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/EnvNode_I2C_Carrier_HalfSize_Jumper_Dokumentation_Rev0.1.pdf
   images: docs/site/assets/images/i2c-carrier-assembly
   required_text:

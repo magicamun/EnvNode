@@ -5,10 +5,10 @@ pdf:
   title: Weatherstation
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: 0.2.1
-  document_version: 1.0-pilot
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: '2026-10-18'
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # Weatherstation - Bestückung und Inbetriebnahme
@@ -17,12 +17,7 @@ ESP32-Mainboard mit einem Modulslot, acht I²C-Anschlüssen und zehn ADC-/GPIO-A
 
 **PCB 0.2.1; Board Identity 0.2.**
 
-!!! info "Pilotfassung"
-    Aus der jeweils letzten PDF-Anleitung überführt. Inhalt und Darstellung sind noch zur Durchsicht vorgesehen. Webansicht und neue PDF verwenden dieselbe Markdown-Quelle. Die Überführung ist keine neue Hardwareprüfung.
-
-[Generierte PDF-Pilotfassung](../../assets/downloads/Weatherstation_Rev0.2.1_Markdown-Pilot.pdf){ .md-button }
-
-[Bisherige PDF-Ausgabe](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf)
+[Anleitung als PDF](../../assets/downloads/Weatherstation_Rev0.2.1_Anleitung.pdf){ .md-button }
 
 ## 1. Baugruppen und Teile
 
@@ -393,8 +388,6 @@ Alle entsprechenden Mini-/Weather-Padbelegungen verglichen; historische Prüfst�
 
 EnvNode: siehe Root-Lizenz LICENSE. Modelle: Rene Poeschl (2017), KiCAD (2025), CC BY-SA 4.0 mit KiCad-Ausnahme.
 
-### Überführung und Lizenz
-
-Diese Pilotfassung übernimmt den zuletzt gepflegten PDF-Stand einschließlich seiner Ergänzungen. Quellenprüfsummen und Prüfberichte im Text sind historische Nachweise aus der PDF und wurden durch diese Überführung nicht neu bestätigt. Für neu generierte Ausgaben protokolliert der Build zusätzlich die Prüfsummen von Markdown, ursprünglicher PDF, Inhaltsbildern, Druckvorlage und Schriften.
+### Lizenz
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.

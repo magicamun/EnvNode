@@ -4,11 +4,9 @@ AnalogHydroPressure ist ein FullSize-Modul für eine Zweileiter-Drucksonde mit
 **4–20-mA-Ausgang**. Es erzeugt lokal die Sondenversorgung und digitalisiert den
 Schleifenstrom. Diese Seite beschreibt **Revision 0.5**.
 
-[Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/AnalogHydroPressure_Rev0.5_Anleitung.pdf){ .md-button }
 
-
-[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
-
+[Bestückung und Bring-up](assembly.md){ .md-button }
 
 ## Messpfad und Versorgung
 
@@ -106,7 +104,7 @@ passende Treiberunterstützung bleibt erforderlich.
 
 ## Bestückung und Inbetriebnahme
 
-Die [PDF-Anleitung](../../assets/downloads/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf)
+Die [PDF-Anleitung](../../assets/downloads/AnalogHydroPressure_Rev0.5_Anleitung.pdf)
 enthält Bauteilwerte, Orientierung und den vollständigen Prüfablauf.
 
 1. Feine IC-Pins, Diodenpolung und Bottom-Mount-Stecker prüfen; U3, C1 und deren Lötstellen prüfen.

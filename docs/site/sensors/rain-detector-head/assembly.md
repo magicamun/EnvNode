@@ -5,22 +5,17 @@ pdf:
   title: RainDetectorHead
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.1'
-  document_version: 1.0-pilot
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: '2026-10-17'
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # RainDetectorHead - Bestückung und Inbetriebnahme
 
-Passiver kapazitiver Sensorkopf mit fünf parallelen Heizsträngen und insgesamt zwanzig 15-Ω-Widerständen. Entwurf: Der beschichtete Head wurde laut überführtem Projektstand noch nicht gefertigt oder erprobt. Beschichtung, Via-Verschluss und Witterungsbeständigkeit bleiben zu qualifizieren. Der letzte PDF-Stand enthält die am 17. Oktober aktualisierte Stückliste; die übrigen Nachweise tragen ihre ursprünglichen Datumsangaben.
+Passiver kapazitiver Sensorkopf mit fünf parallelen Heizsträngen und insgesamt zwanzig 15-Ω-Widerständen. Entwurf: Der beschichtete Head wurde laut dokumentiertem Projektstand noch nicht gefertigt oder erprobt. Beschichtung, Via-Verschluss und Witterungsbeständigkeit bleiben zu qualifizieren. Stücklistenstand: 17. Oktober 2026. Die Prüf- und Quellennachweise sind jeweils datiert.
 
-!!! info "Pilotfassung"
-    Aus der jeweils letzten PDF-Anleitung überführt. Inhalt und Darstellung sind noch zur Durchsicht vorgesehen. Webansicht und neue PDF verwenden dieselbe Markdown-Quelle. Die Überführung ist keine neue Hardwareprüfung.
-
-[Generierte PDF-Pilotfassung](../../assets/downloads/RainDetectorHead_Rev0.1_Markdown-Pilot.pdf){ .md-button }
-
-[Bisherige PDF-Ausgabe](../../assets/downloads/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf)
+[Anleitung als PDF](../../assets/downloads/RainDetectorHead_Rev0.1_Anleitung.pdf){ .md-button }
 
 ## 1. Teile und Vorbereitung
 
@@ -179,8 +174,6 @@ Historischer Prüfstand: Laut Controller-README bestanden beide Projekte am 14. 
 
 Offen: Vollständige erneute ERC-/DRC-Prüfung mit projektspezifischen Regeln, Fertigerbestätigung zu Sensorstruktur und Via-Verschluss, Auswahl und Passprobe der Steckverbinder, reale Heiz-, Beschichtungs- und Witterungsprüfungen. Im Rahmen dieser Dokumentation erfolgte kein neuer vollständiger ERC-/DRC-Lauf und keine Hardwaremessung.
 
-### Überführung und Lizenz
-
-Diese Pilotfassung übernimmt den zuletzt gepflegten PDF-Stand einschließlich seiner Ergänzungen. Quellenprüfsummen und Prüfberichte im Text sind historische Nachweise aus der PDF und wurden durch diese Überführung nicht neu bestätigt. Für neu generierte Ausgaben protokolliert der Build zusätzlich die Prüfsummen von Markdown, ursprünglicher PDF, Inhaltsbildern, Druckvorlage und Schriften.
+### Lizenz
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.

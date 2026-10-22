@@ -4,14 +4,12 @@ EnvNode Weather ist das Mainboard für eine fest installierte Wetterstation.
 Es kombiniert ein ESP32-DevKitC mit einem Modulslot, zwei I²C-Bussen und
 zusätzlichen direkten Sensoranschlüssen. Diese Seite beschreibt **PCB-Revision 0.2.1**.
 
-[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.2.1)](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.2.1)](../../assets/downloads/Weatherstation_Rev0.2.1_Anleitung.pdf){ .md-button }
 
 Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.2.1**.
 Die Board Identity bleibt bei **0.2**; bisherige Prüfprotokolle behalten ihren historischen Stand.
 
-
-[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
-
+[Bestückung und Bring-up](assembly.md){ .md-button }
 
 ## Überblick
 
@@ -118,7 +116,6 @@ H1 und H2 sind M2,5-Stützbohrungen für das Modul; H3 bis H6 sind die
 4,5-mm-Gehäusebefestigungsbohrungen. Prüfe Steckerzugang, Abstandshalter und
 Kabelführung vor dem Einbau.
 
-
 ## Anschlussdetails als Referenz
 
 Die folgenden Detailbilder zeigen die vierpoligen Anschlüsse **ADC1 (JST-PH,
@@ -203,7 +200,7 @@ Die PDF-Anleitung enthält dieselben Anschlussreferenzen als Ergänzung vom
 
 ## Bestückung und erste Inbetriebnahme
 
-Die [PDF-Anleitung](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf)
+Die [PDF-Anleitung](../../assets/downloads/Weatherstation_Rev0.2.1_Anleitung.pdf)
 enthält den detaillierten Bestückungs- und Prüfablauf.
 
 1. Platinenrevision und Anleitung abgleichen.
@@ -231,7 +228,6 @@ sind damit nicht nachgewiesen.
 ## Mit der Firmware verwenden
 
 [Weather 0.2 provisionieren](../../firmware/provisioning.md#weather-revision-02-provisionierung).
-
 
 [Erste Inbetriebnahme](../../firmware/configuration.md),
 [Board Identity](../../firmware/provisioning.md) und

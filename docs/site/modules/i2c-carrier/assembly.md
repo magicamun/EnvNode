@@ -5,22 +5,17 @@ pdf:
   title: I2C Carrier HalfSize
   subtitle: Montage- und Jumper-Anleitung
   hardware_revision: '0.1'
-  document_version: 1.0-pilot
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: Stand der letzten PDF; ohne Datumsangabe
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # I2C Carrier HalfSize - Montage und Buswahl
 
 Das HalfSize-Modul nimmt zwei kleine I²C-Platinen auf. Jeder Carrier-Steckplatz kann unabhängig mit I2C0 oder I2C1 verbunden werden. Ohne Brücken auf den vier Lötjumpern ist kein Bus vorausgewählt.
 
-!!! info "Pilotfassung"
-    Die aktuelle Montage-/Jumper-PDF ist in Markdown überführt. Webansicht und PDF werden aus derselben Quelle erzeugt. Die Pilotkennzeichnung bleibt bis zur abschließenden Durchsicht bestehen. Ein vollständiger elektrischer Bring-up ist nicht Gegenstand dieser Anleitung.
-
-[Generierte PDF-Pilotfassung](../../assets/downloads/I2C_Carrier_HalfSize_Rev0.1_Markdown-Pilot.pdf){ .md-button }
-
-[Bisherige PDF-Ausgabe](../../assets/downloads/EnvNode_I2C_Carrier_HalfSize_Jumper_Dokumentation_Rev0.1.pdf)
+[Anleitung als PDF](../../assets/downloads/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf){ .md-button }
 
 ## 1. Orientierung und Jumper
 
@@ -76,6 +71,6 @@ Das optionale Modul-EEPROM bleibt fest auf I2C0. Seine Busanbindung wird durch d
 
 ### Dokumentationsbasis und Lizenz
 
-Überführt ist die letzte Montage-/Jumper-PDF für Hardware 0.1. Sie nennt das KiCad-Projekt I2C Carrier HalfSize, Commit `cac0859`, einschließlich der später aus dem lokalen Projektstand übernommenen Jumper-Korrektur. Die PDF enthält keine Datumsangabe. Diese Überführung bestätigt keinen neuen Hardwareprüfstand.
+Dokumentationsbasis: KiCad-Projekt I2C Carrier HalfSize, Hardware 0.1, Commit `cac0859`, einschließlich der später aus dem lokalen Projektstand übernommenen Jumper-Korrektur.
 
-Der Build protokolliert Prüfsummen der ursprünglichen PDF, Markdown-Quelle, Inhaltsbilder, Druckvorlage und Schriften. EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Drittanbieterrechte bleiben unberührt.
+EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Drittanbieterrechte bleiben unberührt.

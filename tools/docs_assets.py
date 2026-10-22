@@ -54,8 +54,8 @@ def pdf_documents(config):
         source, target = document["source"], document["target"]
         if source in sources or target in targets:
             raise ValueError("Duplicate PDF source or destination")
-        if not target.startswith("assets/downloads/") or not target.endswith("_Markdown-Pilot.pdf"):
-            raise ValueError(f"Invalid pilot PDF destination: {target}")
+        if not target.startswith("assets/downloads/") or not target.endswith("_Anleitung.pdf"):
+            raise ValueError(f"Invalid PDF destination: {target}")
         for base, relative in ((root / "docs/site", source), (root, document["original"]), (root, document["images"])):
             path = (base / relative).resolve()
             if not path.is_relative_to(base.resolve()) or not path.exists():

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
-"""Fixed-template PDF pilot: consume the actual MkDocs-generated article."""
+"""Fixed-template PDF generation: consume the actual MkDocs-generated article."""
 from pathlib import Path
 import hashlib, json, re, os
 from urllib.parse import urljoin, urlparse, unquote
@@ -73,7 +73,7 @@ def render(config, document):
     digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
     manifest={'generator':'WeasyPrint fixed-template v1','metadata':meta,'pages':len(reader.pages),'source_pdf':document['original'],'source_pdf_sha256':digest(original),'markdown_sha256':digest(source),'template_sha256':digest(template),'print_style_sha256':digest(style),'palette':colors,'renderer_version':__import__('weasyprint').__version__,'generator_sha256':digest(Path(__file__)), 'images':{img.name:digest(img) for img in (root/document['images']).glob('*.png')},'fonts':{p.name:digest(p) for p in fonts},'pdf_sha256':digest(out)}
     out.with_suffix('.json').write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
-    print(f'PDF pilot: {out} ({len(reader.pages)} pages)')
+    print(f'PDF: {out} ({len(reader.pages)} pages)')
 
 
 def render_all(config, documents):

@@ -69,7 +69,7 @@ nav:
       - Beispiele:
           - Mini mit SHT4x: firmware/example-measurement.md
           - DuoRelay mit Blink: firmware/example-relay.md
-  - Aufbauanleitungen (Pilot):
+  - Aufbauanleitungen:
       - Übersicht: guides/index.md
       - DuoRelay: modules/duo-relay/assembly.md
       - EnvNode Mini: mainboards/mini/assembly.md

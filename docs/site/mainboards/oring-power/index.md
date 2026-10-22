@@ -4,16 +4,14 @@ ORing Power ist der aufgelötete Versorgungsbaustein für EnvNode-Mainboards.
 Er verbindet einen 5-V-Eingang, einen 3,3-V-Regler und die Zusammenführung zweier
 3,3-V-Quellen auf einer **39 × 15 mm** großen Tochterplatine. Diese Seite beschreibt **PCB-Revision 0.1.1**.
 
-[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.1.1)](../../assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.1.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.1.1)](../../assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf){ .md-button }
 
 Dokumentstand: **18. Oktober 2026**, für PCB **0.1.1**. Die Basisanleitung 0.1
 mit ergänzter Prüfpunktseite gilt für diesen Beschriftungsstand. Er ergänzt Titel, Revision und die
 5-V-/GND-Beschriftung am JST-PH-Eingang; Elektrik und Mechanik bleiben unverändert.
 Es ist keine Neuprovisionierung erforderlich.
 
-
-[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
-
+[Bestückung und Bring-up](assembly.md){ .md-button }
 
 ## Überblick
 
@@ -79,7 +77,7 @@ Die Systemversorgung wird über `+3V3_SYS` geführt.
 | J3 | 5-V-USB-C-Eingang | GCT USB4125-GF-A-0190 |
 
 Die detaillierte Zuordnung, Orientierung und Prüfung stehen in der
-[PDF-Anleitung](../../assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.1.pdf).
+[PDF-Anleitung](../../assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf).
 Achte insbesondere auf die Polarität von Dioden, Elektrolyt- und Tantalkondensator.
 
 ## Montage

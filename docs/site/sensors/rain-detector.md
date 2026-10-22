@@ -5,9 +5,8 @@
     RainDetector ist noch kein registrierter Sensor der gemeinsamen EnvNode-Firmware.
     Eine separate Laborfirmware misst die Ausgangsfrequenz; sie steuert keine Heizung.
 
-
-[Controller: Bestückung und Bring-up (Pilot)](rain-detector-controller/assembly.md){ .md-button }
-[Head: Bestückung und Bring-up (Pilot)](rain-detector-head/assembly.md){ .md-button }
+[Controller: Bestückung und Bring-up](rain-detector-controller/assembly.md){ .md-button }
+[Head: Bestückung und Bring-up](rain-detector-head/assembly.md){ .md-button }
 
 ## Zwei getrennte Baugruppen
 
@@ -79,8 +78,8 @@ Dieser ist funktional verschieden und kein RainDetector-Treiber.
 
 ## Anleitungen und Prüfstand
 
-- [Controller: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf)
-- [Head: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf)
+- [Controller: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorController_Rev0.3_Anleitung.pdf)
+- [Head: Bestückung und Bring-up (PDF)](../assets/downloads/RainDetectorHead_Rev0.1_Anleitung.pdf)
 
 Die dokumentierten ERC/DRC-Prüfungen vom 14. September 2026 liegen vor den
 anschließenden Stecker- und Konturänderungen. Vor Fertigung sind aktuelle Prüfungen

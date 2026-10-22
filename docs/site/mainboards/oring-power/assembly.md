@@ -5,22 +5,17 @@ pdf:
   title: ORing Power
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: 0.1.1
-  document_version: 1.0-pilot
+  document_version: '1.0'
   document_date: '2026-10-22'
   source_document_date: '2026-10-18'
-  status: Pilot - Entwurf; Prüfung durch den Projektverantwortlichen ausstehend
+  status: Entwicklungsstand - keine Produktionsfreigabe
 ---
 
 # ORing Power - Bestückung und Inbetriebnahme
 
 Castellated-Versorgungsmodul mit 5-V-Eingang, LM3940 und Dioden-ORing der beiden 3,3-V-Quellen. J1 und USB-C J3 liegen direkt parallel; nur eine eindeutig festgelegte 5-V-Quelle verwenden. Enthalten ist die letzte Prüfpunktergänzung für Beschriftungsstand 0.1.1.
 
-!!! info "Pilotfassung"
-    Aus der jeweils letzten PDF-Anleitung überführt. Inhalt und Darstellung sind noch zur Durchsicht vorgesehen. Webansicht und neue PDF verwenden dieselbe Markdown-Quelle. Die Überführung ist keine neue Hardwareprüfung.
-
-[Generierte PDF-Pilotfassung](../../assets/downloads/ORing_Power_Rev0.1.1_Markdown-Pilot.pdf){ .md-button }
-
-[Bisherige PDF-Ausgabe](../../assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf)
+[Anleitung als PDF](../../assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf){ .md-button }
 
 ## Baugruppe und Orientierung
 
@@ -279,8 +274,6 @@ Diese Abbildung ergänzt die Orientierung. Die vollständigen Bestückungs-, Dur
 
 EnvNode: siehe Root-Lizenz LICENSE. KiCad-Modelle behalten ihre Lizenzen; siehe [Modellnachweise](https://github.com/magicamun/EnvNode/blob/main/images/oring-power/testpoints/THIRD_PARTY_NOTICES.txt).
 
-### Überführung und Lizenz
-
-Diese Pilotfassung übernimmt den zuletzt gepflegten PDF-Stand einschließlich seiner Ergänzungen. Quellenprüfsummen und Prüfberichte im Text sind historische Nachweise aus der PDF und wurden durch diese Überführung nicht neu bestätigt. Für neu generierte Ausgaben protokolliert der Build zusätzlich die Prüfsummen von Markdown, ursprünglicher PDF, Inhaltsbildern, Druckvorlage und Schriften.
+### Lizenz
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.

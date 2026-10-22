@@ -4,14 +4,12 @@ EnvNode Mini ist das kompakte ESP32-Mainboard der EnvNode-Plattform.
 Es bietet zwei Modulslots, zwei I²C-Busse und direkte Eingänge für analoge oder digitale Signale.
 Diese Seite beschreibt **PCB-Revision 0.8.1**.
 
-[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.8.1)](../../assets/downloads/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.1.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.8.1)](../../assets/downloads/EnvNode_Mini_Rev0.8.1_Anleitung.pdf){ .md-button }
 
 Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.8.1**.
 Die Board Identity bleibt bei **0.8**; bisherige Prüfprotokolle behalten ihren historischen Stand.
 
-
-[Bestückung und Bring-up (Pilot)](assembly.md){ .md-button }
-
+[Bestückung und Bring-up](assembly.md){ .md-button }
 
 ## Überblick
 
@@ -110,7 +108,6 @@ Beide Anschlüsse verwenden dieselbe Pinfolge:
     ESP32-3,3-V-Eingangsbereichs bleiben. Die 5-V-Leitung dient nur der Sensorversorgung.
     Diese Pins dürfen nicht als Ausgänge konfiguriert werden.
 
-
 ## Anschlussdetails als Referenz
 
 Die folgenden Detailbilder zeigen die vierpoligen Anschlüsse **ADC1 (JST-PH,
@@ -192,7 +189,7 @@ Die PDF-Anleitung enthält dieselben Anschlussreferenzen als Ergänzung vom
 
 ## Bestückung und erste Inbetriebnahme
 
-Die [PDF-Anleitung für PCB 0.8.1](../../assets/downloads/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.1.pdf)
+Die [PDF-Anleitung für PCB 0.8.1](../../assets/downloads/EnvNode_Mini_Rev0.8.1_Anleitung.pdf)
 ist die maßgebliche Anleitung für Bestückung und elektrische Prüfungen.
 
 1. Gleiche die Revision deiner Platine mit der Anleitung ab.
