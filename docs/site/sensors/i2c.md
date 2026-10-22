@@ -34,7 +34,8 @@ Konfiguriere einen Sensorplatz mit der passenden Implementierung, dem Bus und de
 Prüfe anschließend Diagnose und Messwerte, bevor du die MQTT-Integration einrichtest.
 
 Ein beliebiger I²C-Sensor ist nicht automatisch unterstützt. Ein konkreter Sensor muss
-zur verfügbaren Firmware-Implementierung passen. Ein durchgehend geprüfter Beispielablauf
-mit einem ausgewählten Sensor wird als nächster Schritt ergänzt.
+zur verfügbaren Firmware-Implementierung passen. Der
+[Einstieg mit Mini und BME280](../getting-started/index.md) verbindet Anschluss,
+Einrichtung und lokale Messwertprüfung.
 
 [Anschlüsse des EnvNode Mini](../mainboards/mini/index.md#i2c-anschlusse)

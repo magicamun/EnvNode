@@ -1,6 +1,7 @@
 # Bausätze und Aufbau
 
-Für den ersten Aufbau beginnt die Dokumentation mit [EnvNode Mini](../mainboards/mini/index.md).
+Für den ersten Aufbau führt dich [Dein erstes EnvNode](../getting-started/index.md)
+von der Auswahl der Bausteine bis zum ersten Messwert.
 Die revisionsbezogene Bestückungs- und Bring-up-Anleitung enthält die detaillierten
 Montage- und Prüfabläufe.
 

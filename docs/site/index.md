@@ -4,17 +4,29 @@ EnvNode ist eine modulare ESP32-Plattform für zuverlässige Umweltmessungen.
 Mainboards, Erweiterungsmodule und Sensoren arbeiten mit einer gemeinsamen Firmware.
 Messwerte werden über MQTT an externe Systeme weitergegeben, zum Beispiel Home Assistant.
 
-## Hier anfangen
+## Neu bei EnvNode?
 
-[Kompatibilität von Mainboards, Modulen, Sensoren und Displays](compatibility.md)
+Mit EnvNode kannst du zum Beispiel Temperatur und Luftfeuchte messen, die Werte
+im Browser ansehen und später an deine Hausautomation weitergeben. Du stellst den
+Aufbau aus passenden Platinen und Sensoren zusammen und richtest ihn über die
+Weboberfläche ein.
 
+[Dein erstes EnvNode](getting-started/index.md){ .md-button }
+[So arbeitet EnvNode zusammen](concepts/index.md){ .md-button }
 
-- [EnvNode Mini](mainboards/mini/index.md): kompaktes Mainboard, Anschlüsse und erste Inbetriebnahme.
-- [Mainboards](mainboards/index.md): Mini, Weatherstation und ORing Power im Überblick.
-- [Sensoren](sensors/index.md): unterstützte Treiber, Anschluss und eigene Sensorhardware.
-- [Displays](displays/index.md): unterstützte Anzeigen und Konfiguration.
+Der Einstieg führt dich mit einem Mini und BME280 vom geprüften Aufbau bis zum
+ersten lokalen Messwert. Die Gesamtübersicht erklärt Hardware, Firmware und den
+Weg der Daten bis zu einer externen Anwendung.
+
+## Direkt zu den Details
+
+- [Kompatibilität](compatibility.md): passende Hardware und Firmware auswählen.
+- [Mainboards](mainboards/index.md): Mini, Weatherstation und ORing Power.
+- [Aufbauanleitungen](guides/index.md): Bestückung und elektrische Prüfungen.
+- [Sensoren](sensors/index.md): unterstützte Treiber und Sensoranschlüsse.
+- [Module](modules/index.md): Erweiterungen für zusätzliche Aufgaben.
+- [Displays](displays/index.md): Anzeigen und deren Konfiguration.
 - [Firmware](firmware/index.md): Einrichtung, Messbetrieb, MQTT und Diagnose.
-- [Bausätze und Aufbau](kits/index.md): von der Bestückung zur ersten Messung.
 
 ## Umfang dieser Dokumentation
 
@@ -27,8 +39,6 @@ Die vollständige Station befindet sich noch im Aufbau. Bereits nutzbare Kompone
 werden deshalb einzeln beschrieben und nach ihrer jeweiligen Revision eingeordnet.
 RainDetector und SCT013 sind ausdrücklich als Entwicklungsstand gekennzeichnet.
 Weitere Entwicklungen werden erst nach Einzelfallprüfung aufgenommen.
-
-[Wie EnvNode aufgebaut ist](concepts/index.md)
 
 [Erlaubte Nutzung und Lizenzbedingungen](license.md)
 

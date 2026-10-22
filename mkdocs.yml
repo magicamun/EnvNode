@@ -32,8 +32,9 @@ hooks:
   - tools/docs_assets.py
 nav:
   - Start: index.md
+  - Dein erstes EnvNode: getting-started/index.md
   - Grundlagen:
-      - Überblick: concepts/index.md
+      - Gesamtübersicht: concepts/index.md
   - Hardware-Schnittstellen:
       - Übersicht und Pinouts: interfaces/index.md
       - Modulschnittstelle im Detail: concepts/module-interface.md
