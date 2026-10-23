@@ -29,7 +29,6 @@ for the palette and camera settings.
 
 | Board | PCB title-block revision | Remaining work before/documented in a new PDF |
 | --- | --- | --- |
-| SCT013Head | 0.1 | Create guide from current sources; reconcile R1 BOM mismatch and ADC/ADC1 reference findings in REVIEW.md |
 | SX1262-Remote | 0.1 | Create guide; clarify whether README's Revision 0.3 names the interface or board revision |
 | SolarRadiation | 0.1 | Create guide from an agreed hardware snapshot; local PCB/project edits are outside this documentation commit |
 | RemoteNode | Not specified | Establish revision and documented scope, then create guide |
@@ -63,3 +62,23 @@ respectively, with current KiCad renderings, source SHA-256 fingerprints and
 document date 18 October 2026. Existing download filenames are retained.
 Board Identity stays at 0.8 / 0.2. Historical ERC/DRC records remain historical;
 no new validation run is implied. See [render provenance](../images/mainboards/README.md).
+
+## SCT013Head Markdown guide - 23 October 2026
+
+The [Rev. 0.1 assembly guide](site/sensors/sct013-head/assembly.md) now uses the
+shared Markdown/front-matter schema and website theme. It is linked from the
+assembly index, sensor overview, SCT013 page, compatibility matrix and navigation.
+No standalone PDF is generated or registered for this initial guide.
+
+The InvenTree article pool was checked directly: R1-R4 ENP-00018 (four 10-kΩ
+resistors), C1 ENP-00044, C2 ENP-00007, pigtail ENP-00127, socket ENP-00125,
+PCB ENP-00126. This is an article assignment, not a stock-availability check.
+The guide supersedes the historical 1-kΩ R1 assembly note and identifies ADC1
+as solder pads for the pigtail. It covers assembly without the socket/sensor,
+unpowered continuity checks, bias measurements and raw ADC noise captures.
+
+The user reviewed the local themed HTML preview. Source hashes and real KiCad
+views are included. Physical testing and socket fit remain open. The attempted
+new DRC run aborted without a report; no successful DRC result is claimed.
+Local `mkdocs serve` skips PDF rendering and serves existing reference PDFs;
+production `mkdocs build` retains mandatory PDF generation and validation.

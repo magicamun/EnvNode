@@ -22,7 +22,9 @@ Die Liste folgt der Sensorregistry im dokumentierten Firmwarestand.
 - [RainDetectorController und Head](rain-detector.md): kapazitive Sensorfläche,
   Frequenzauswertung und Heizung; Entwicklungsstand mit separater Laborfirmware.
 - [SCT013 und SCT013Head](sct013.md): Stromwandler mit Spannungsaufbereitung;
-  Entwicklungsstand ohne integrierten Firmware-Treiber.
+  Entwicklungsstand ohne integrierten Firmware-Treiber. Die
+  [Aufbauanleitung Rev. 0.1](sct013-head/assembly.md) beschreibt Bestückung und
+  Erstprüfung, auch ohne Klinkenbuchse und Sensor.
 - [AnalogHydroPressure](../modules/analog-hydro-pressure/index.md): Modul für eine
   4–20-mA-Drucksonde; Hardwareanleitung und Status der Firmware-Anbindung.
 

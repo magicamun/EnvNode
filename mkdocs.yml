@@ -79,6 +79,7 @@ nav:
       - AnalogHydroPressure: modules/analog-hydro-pressure/assembly.md
       - RainDetectorController: sensors/rain-detector-controller/assembly.md
       - RainDetectorHead: sensors/rain-detector-head/assembly.md
+      - SCT013Head: sensors/sct013-head/assembly.md
       - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
   - Bausätze und Aufbau: kits/index.md
   - Lizenz und Nutzung: license.md

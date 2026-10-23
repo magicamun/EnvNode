@@ -1,6 +1,6 @@
 # Aufbauanleitungen
 
-Die jeweils aktuelle Bestückungs-, Bring-up- oder Jumper-Anleitung steht jetzt als durchsuchbare Webseite bereit. Die jeweilige Anleitung bietet einen PDF-Download. Die **PDF-Ausgabe wird automatisch aus derselben Markdown-Quelle** mit der gemeinsamen EnvNode-Druckvorlage erzeugt.
+Die jeweils aktuelle Bestückungs-, Bring-up- oder Jumper-Anleitung steht jetzt als durchsuchbare Webseite bereit. Die aus bisherigen PDFs übernommenen Anleitungen bieten zusätzlich einen PDF-Download. Die **PDF-Ausgabe wird automatisch aus derselben Markdown-Quelle** mit der gemeinsamen EnvNode-Druckvorlage erzeugt.
 
 | Baugruppe | PCB-Stand | Anleitung |
 | --- | --- | --- |
@@ -11,8 +11,9 @@ Die jeweils aktuelle Bestückungs-, Bring-up- oder Jumper-Anleitung steht jetzt 
 | AnalogHydroPressure | 0.5 | [Lesen](../modules/analog-hydro-pressure/assembly.md) |
 | RainDetectorController | 0.3 | [Lesen](../sensors/rain-detector-controller/assembly.md) |
 | RainDetectorHead | 0.1 | [Lesen](../sensors/rain-detector-head/assembly.md) |
+| SCT013Head | 0.1 | [Lesen](../sensors/sct013-head/assembly.md) |
 | I2C Carrier HalfSize | 0.1 | [Lesen](../modules/i2c-carrier/assembly.md) |
 
 Bei Mini 0.8.1 und Weatherstation 0.2.1 unterscheiden sich PCB-Beschriftungsstand und Board-Identity-Revision: Die Identity bleibt 0.8 beziehungsweise 0.2. Die ORing-Anleitung enthält die Prüfpunktergänzung für Beschriftungsstand 0.1.1. Die I²C-Carrier-Anleitung beschreibt Montage und Jumper-Konfiguration; ein vollständiger Bring-up ist darin nicht beschrieben.
 
-RainDetectorController und Head bleiben Entwicklungsstände. Für SCT013 existiert bisher keine eigene PDF-Aufbauanleitung; die [vorhandene Webdokumentation](../sensors/sct013.md) bleibt der Einstieg.
+RainDetectorController und Head bleiben Entwicklungsstände. Die neue SCT013Head-Anleitung liegt zunächst als Markdown/Webseite vor und enthält den Erstaufbau ohne Buchse und Sensor; eine PDF-Ausgabe ist noch nicht registriert.
