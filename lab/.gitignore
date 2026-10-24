@@ -15,3 +15,14 @@
 !Display-SSD1309/include/LabConfig.h
 !Display-SSD1309/src/
 !Display-SSD1309/src/main.cpp
+
+!SCT013-ADC/
+!SCT013-ADC/platformio.ini
+!SCT013-ADC/README.md
+!SCT013-ADC/src/
+!SCT013-ADC/src/main.cpp
+!SCT013-ADC/include/
+!SCT013-ADC/include/RmsWindow.h
+!SCT013-ADC/include/RawDiagnostics.h
+!SCT013-ADC/tests/
+!SCT013-ADC/tests/rms_test.cpp
