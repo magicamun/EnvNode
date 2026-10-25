@@ -134,3 +134,21 @@ test_hardware_descriptor_codec, test_hardware_descriptor_store,
 test_module_discovery and test_module_descriptor_provisioning cover this
 boundary. The library also compiles and links using only its own include
 folder and standard C++11, without application headers or Arduino.
+
+## Fixed I2C wiring and EEPROM transport
+
+`firmware/lib/EnvNodeI2C` owns I2CBusController, the II2CBusProvider interface,
+bus types and IdentityEeprom24LC32. Each application supplies its fixed bus/SDA/SCL
+constants during startup. No pin fields were added to web forms or NVS.
+EnvNodeIdentityI2C in `firmware/include/EnvNodeI2CConfiguration.h` remains I2C0
+on GPIO21/22; I2CBusManager is the EnvNode adapter for bootstrap and board-profile
+startup/scanAll. Normal I2C1 remains GPIO25/26 in the current board profiles.
+
+The EEPROM constructor accepts a provider, device address and optional bus ID.
+Existing calls default to I2C0; main.cpp passes EnvNodeIdentityI2C.bus explicitly.
+The test application will supply its own fixed wiring, without a new EnvNode
+board profile or user-selectable pin configuration.
+
+Native bus/EEPROM checks run with `pio test -e native -f test_i2c_transport`.
+The Wire double emulates EEPROM page wrap to verify page splitting and exposes
+bus initialization, address transactions, NACKs, short transfers and ACK timeouts.

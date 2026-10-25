@@ -147,3 +147,5 @@ static EspClass ESP;
 // Controllable host clock; defaults preserve the previous zero-time stub.
 inline uint32_t& arduinoTestMillis() { static uint32_t value = 0; return value; }
 inline uint32_t millis() { return arduinoTestMillis(); }
+
+inline void delay(unsigned long duration) { arduinoTestMillis() += duration; }

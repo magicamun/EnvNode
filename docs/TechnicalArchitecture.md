@@ -162,6 +162,14 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
+The shared `EnvNodeI2C` library accepts application-owned fixed bus/pin assignments
+and provides initialization/scanning plus 24LC32 transport through II2CBusProvider.
+The EnvNode I2CBusManager adapts board-profile resources to that controller; its
+identity bootstrap uses the fixed EnvNodeIdentityI2C constant before a profile is
+known. EEPROM objects receive a bus provider, address and bus ID. A future test
+application uses the same transport with its own fixed wiring. Neither variant
+requires a web setting or persistent pin configuration.
+
 The shared `EnvNodeIdentity` library owns hardware identity data types, supported
 record validation, codecs/CRC, verified board provisioning and redundant descriptor
 storage through `IIdentityStorage`. It has no application or Arduino dependency.

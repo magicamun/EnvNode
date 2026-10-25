@@ -59,16 +59,16 @@ static SerialLogger serialLogSink;
 static StructuredLogger logger(recentLogStore, logTimeProvider, serialLogSink);
 static ActuatorFactory actuatorFactory(logger);
 static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
-static I2CBusManager i2cBusManager(logger);
-static IdentityEeprom24LC32 boardIdentityEeprom(i2cBusManager, 0x50);
+static I2CBusManager i2cBusManager(logger, EnvNodeIdentityI2C);
+static IdentityEeprom24LC32 boardIdentityEeprom(i2cBusManager, 0x50, EnvNodeIdentityI2C.bus);
 static BoardIdentityStore boardIdentityStore(boardIdentityEeprom);
 static BoardIdentityResolver boardIdentityResolver(
     boardIdentityStore, buildFallbackBoardProfileId());
 static BoardProvisioningService boardProvisioningService(boardIdentityStore);
 static IdentityEeprom24LC32 slotAModuleEeprom(
-    i2cBusManager, ModuleDiscoveryService::SlotAEepromAddress);
+    i2cBusManager, ModuleDiscoveryService::SlotAEepromAddress, EnvNodeIdentityI2C.bus);
 static IdentityEeprom24LC32 slotBModuleEeprom(
-    i2cBusManager, ModuleDiscoveryService::SlotBEepromAddress);
+    i2cBusManager, ModuleDiscoveryService::SlotBEepromAddress, EnvNodeIdentityI2C.bus);
 static HardwareDescriptorStore slotAHardwareDescriptorStore(slotAModuleEeprom);
 static HardwareDescriptorStore slotBHardwareDescriptorStore(slotBModuleEeprom);
 static ModuleDiscoveryService moduleDiscoveryService(

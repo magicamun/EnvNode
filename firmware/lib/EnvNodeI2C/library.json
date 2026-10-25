@@ -1,0 +1,17 @@
+{
+  "name": "EnvNodeI2C",
+  "version": "0.1.0",
+  "description": "Shared fixed I2C bus wiring and identity EEPROM transport; see repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeLogging"
+    },
+    {
+      "name": "EnvNodeIdentity"
+    }
+  ]
+}

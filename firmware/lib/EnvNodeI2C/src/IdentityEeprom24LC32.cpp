@@ -5,17 +5,17 @@
 namespace EnvNode {
 namespace {
 
-const I2CBus IdentityBus = I2CBus::I2C0;
 const size_t ReadChunkSize = 32;
 const uint32_t WriteTimeoutMs = 10;
 
 } // namespace
 
 IdentityEeprom24LC32::IdentityEeprom24LC32(
-    I2CBusManager& i2cBusManager,
-    uint8_t deviceAddress)
+    II2CBusProvider& i2cBusManager,
+    uint8_t deviceAddress, I2CBus bus)
     : i2cBusManager_(i2cBusManager)
-    , deviceAddress_(deviceAddress) {
+    , deviceAddress_(deviceAddress)
+    , bus_(bus) {
 }
 
 bool IdentityEeprom24LC32::read(
@@ -26,7 +26,7 @@ bool IdentityEeprom24LC32::read(
         || size > Capacity - static_cast<size_t>(address)) {
         return false;
     }
-    TwoWire* wire = i2cBusManager_.wire(IdentityBus);
+    TwoWire* wire = i2cBusManager_.wire(bus_);
     if (wire == nullptr) return false;
 
     size_t offset = 0;
@@ -82,7 +82,7 @@ bool IdentityEeprom24LC32::writePage(
     uint16_t address,
     const uint8_t* data,
     size_t size) {
-    TwoWire* wire = i2cBusManager_.wire(IdentityBus);
+    TwoWire* wire = i2cBusManager_.wire(bus_);
     if (wire == nullptr || size == 0 || size > PageSize) return false;
 
     wire->beginTransmission(deviceAddress_);
@@ -92,14 +92,14 @@ bool IdentityEeprom24LC32::writePage(
 }
 
 bool IdentityEeprom24LC32::writeAddress(uint16_t address) {
-    TwoWire* wire = i2cBusManager_.wire(IdentityBus);
+    TwoWire* wire = i2cBusManager_.wire(bus_);
     return wire != nullptr
         && wire->write(static_cast<uint8_t>(address >> 8)) == 1
         && wire->write(static_cast<uint8_t>(address & 0xFF)) == 1;
 }
 
 bool IdentityEeprom24LC32::waitUntilReady() {
-    TwoWire* wire = i2cBusManager_.wire(IdentityBus);
+    TwoWire* wire = i2cBusManager_.wire(bus_);
     if (wire == nullptr) return false;
 
     const uint32_t startedAt = millis();

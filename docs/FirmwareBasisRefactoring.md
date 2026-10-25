@@ -297,3 +297,38 @@ Validation on 2026-10-25:
   board-profile-count failure; no product assertion or profile data was changed.
 - No physical EEPROM write, device restart, flash or configuration migration
   was performed. A physical EnvNode runtime check remains for the user.
+
+## Step 8: fixed application I2C wiring and shared EEPROM transport
+
+The user confirmed Mini 0.8 provisioning and normal runtime for step 7.
+
+EnvNodeI2C owns bus initialization/availability/scans and the 24LC32 EEPROM
+transport. Applications supply fixed bus/pin definitions in code. There are no
+new web settings, NVS fields or user-selectable pin maps. EnvNode's adapter
+retains board-profile selection and scanAll; its bootstrap pins remain 21/22.
+The future test application can initialize its own fixed bus through the same
+controller without depending on EnvNode board resources. No test firmware or
+unverified test-board pin assignment is introduced in this step.
+
+The EEPROM driver depends on II2CBusProvider and an explicit bus ID (I2C0 is
+retained as the compatible constructor default), not the EnvNode bus manager.
+EnvNode explicitly passes its fixed identity bus to all three EEPROM objects.
+Capacity, addressing, page/chunk sizes, timeout and read/write sequence remain
+unchanged. The controller rejects attempts to remap an initialized bus rather
+than silently using the previous pins. Repeating the same assignment is a no-op;
+a failed initialization can be retried. Bootstrap success/failure logs now use
+the same generic format as ordinary bus initialization.
+
+Validation on 2026-10-25:
+
+- ESP32 application build passes; English/German browser checks pass.
+- Full native run: 462 passing tests, the same pre-existing board-profile-count
+  failure, no compilation errors or additional failures.
+- Nine new native tests exercise fixed pin/bus selection and idempotency,
+  rejection of remapping/invalid bus IDs, failed-init retry, unchanged EnvNode
+  bootstrap/profile wiring, EEPROM page/read-chunk boundaries, independent bus
+  and device addresses, bounds/unavailable bus guards, short transfers, NACK/
+  ACK timeout and scan address/error reporting.
+- No device upload, physical EEPROM write, configuration erase or restart was
+  performed. The next hardware check should confirm identity readback, normal
+  sensor/I2C operation and Mini 0.8 provisioning followed by restart.

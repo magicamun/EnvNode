@@ -103,14 +103,6 @@ HardwareResourceValidationResult BoardCapabilities::validate(
     return HardwareResourceValidationResult::Valid;
 }
 
-const char* i2cBusName(I2CBus bus) {
-    switch (bus) {
-        case I2CBus::I2C0: return "I2C0";
-        case I2CBus::I2C1: return "I2C1";
-        default: return "unknown I2C bus";
-    }
-}
-
 const char* hardwareInterfaceKindName(HardwareInterfaceKind kind) {
     switch (kind) {
         case HardwareInterfaceKind::Simulation: return "Simulation";
