@@ -72,16 +72,6 @@ const TimezoneOption TimezoneOptions[] = {
 #include "TimezoneOptions.inc"
 };
 
-const char* webOtaStateName(OTAState state, Locale locale) {
-    switch (state) {
-        case OTAState::Idle: return webText(locale, TextId::Idle);
-        case OTAState::Uploading: return webText(locale, TextId::Uploading);
-        case OTAState::Verifying: return webText(locale, TextId::Verifying);
-        case OTAState::FirmwareStaged: return webText(locale, TextId::FirmwareStaged);
-        case OTAState::Failed: return webText(locale, TextId::Failed);
-        default: return webText(locale, TextId::Unknown);
-    }
-}
 
 String badge(const char* text, const char* style) {
     return "<span class='badge " + String(style) + "'>" + text + "</span>";
@@ -493,12 +483,20 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService),
       webHost_(logger, wifiService), server_(webHost_.server()),
       networkRoutes_(webHost_, configurationService, wifiService, *this, *this),
-      logRoutes_(webHost_, *this, logReader) {}
+      logRoutes_(webHost_, *this, logReader),
+      firmwareRoutes_(webHost_.server(), *this, otaService, runtimeManager,
+          {FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::CompactIdentity,
+           FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit,
+           FirmwareBuildInfo::GitBranch, FirmwareBuildInfo::BuildTimestampUtc,
+           FirmwareBuildInfo::SourceState, FirmwareBuildInfo::SourceDirty},
+          [this]() { return configurationService_.resetToDefaults(); },
+          [this](double value, uint8_t decimals) { return localeFormatter_.formatNumber(value, decimals); }) {}
 
 void WebService::begin() {
     webHost_.registerRoutes(*this);
     webHost_.registerRoutes(networkRoutes_);
     webHost_.registerRoutes(logRoutes_);
+    webHost_.registerRoutes(firmwareRoutes_);
     webHost_.begin();
 }
 
@@ -540,10 +538,6 @@ void WebService::registerRoutes(WebServer& server) {
     });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
-    server.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
-    server.on("/firmware/upload", HTTP_POST,
-        [this]() { handleFirmwareUpload(); },
-        [this]() { handleFirmwareUploadData(); });
     server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
     server.on("/mqtt/discovery/republish", HTTP_POST,
         [this]() { handleDiscoveryRepublish(); });
@@ -571,8 +565,6 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
     server.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
     server.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
-    server.on("/restart", HTTP_POST, [this]() { handleRestart(); });
-    server.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
     server.onNotFound([this]() { handleNotFound(); });
 }
 
@@ -659,36 +651,6 @@ String WebService::pendingRuntimeActionHtml() const {
     return html;
 }
 
-String WebService::otaStatusHtml() const {
-    String html;
-    html.reserve(520);
-    html = (String("<div class='kv'><span>") + uiText(TextId::OTAState) + "</span><span>");
-    html += webOtaStateName(otaService_.state(), configurationService_.getLocale());
-    html += (String("</span><span>") + uiText(TextId::UploadStatus) + "</span><span>");
-    if (otaService_.totalBytesKnown()) {
-        html += localeFormatter_.formatNumber(otaService_.bytesReceived(), 0);
-        html += " / ";
-        html += localeFormatter_.formatNumber(otaService_.totalBytes(), 0);
-        html += (String(" ") + uiText(TextId::Bytes2));
-        html += localeFormatter_.formatNumber(otaService_.progressPercent(), 0);
-        html += "%)";
-    } else if (otaService_.bytesReceived() > 0) {
-        html += localeFormatter_.formatNumber(otaService_.bytesReceived(), 0);
-        html += (String(" ") + uiText(TextId::BytesReceived));
-    } else {
-        html += "—";
-    }
-    html += (String("</span><span>") + uiText(TextId::RestartRequired) + "</span><span>");
-    html += uiText(otaService_.restartRequired() ? TextId::Yes : TextId::No);
-    html += "</span>";
-    if (otaService_.state() == OTAState::Failed && !otaService_.lastError().isEmpty()) {
-        html += (String("<span>") + uiText(TextId::LastError) + "</span><span>");
-        html += escapeHtml(otaService_.lastError());
-        html += "</span>";
-    }
-    html += "</div>";
-    return html;
-}
 
 const char* WebService::uiText(TextId id) const {
     return webText(configurationService_.getLocale(), id);
@@ -764,7 +726,6 @@ void WebService::handleStatus() {
         + (String("</span></div><p><a href='/controllers'>") + uiText(TextId::ViewControllers) + "</a></p></section></div>");
     sendPage(uiText(TextId::Status), "/status", c);
 }
-
 
 
 void WebService::handleMqtt() {
@@ -2256,91 +2217,6 @@ void WebService::renderDiagnostics() {
 }
 
 
-
-
-
-void WebService::handleFirmware() {
-    String c;
-    c.reserve(2000);
-    const char* sourceStyle = FirmwareBuildInfo::SourceDirty ? "warn"
-        : String(FirmwareBuildInfo::SourceState) == "clean" ? "good" : "warn";
-    c = (String("<section class='card'><h2>") + uiText(TextId::RunningFirmware) + "</h2><div class='kv'><span>" + uiText(TextId::FirmwareVersion) + "</span><span>") + String(FirmwareBuildInfo::SemanticVersion) + (String("</span><span>") + uiText(TextId::BuildIdentity) + "</span><span>") + FirmwareBuildInfo::CompactIdentity + (String("</span><span>") + uiText(TextId::BuildNumber) + "</span><span>") + FirmwareBuildInfo::BuildNumber + (String("</span><span>") + uiText(TextId::GitCommit) + "</span><span>") + FirmwareBuildInfo::GitCommit + (String("</span><span>") + uiText(TextId::GitBranch) + "</span><span>") + escapeHtml(FirmwareBuildInfo::GitBranch) + (String("</span><span>") + uiText(TextId::BuildTimestamp) + "</span><span>") + FirmwareBuildInfo::BuildTimestampUtc + (String("</span><span>") + uiText(TextId::SourceState) + "</span><span>") + badge(FirmwareBuildInfo::SourceDirty ? uiText(TextId::Dirty) : String(FirmwareBuildInfo::SourceState) == "clean" ? uiText(TextId::Clean) : uiText(TextId::Unknown), sourceStyle) + (String("</span><span>") + uiText(TextId::StagedFirmware) + "</span><span>")+(otaService_.firmwareStaged()?uiText(TextId::ReadyForActivation):"—")+"</span></div>";
-    if (otaService_.firmwareStaged()) c += (String("<p class='help'>") + uiText(TextId::StagedFirmwareVersionMetadataIsNotYetAvailable) + "</p>");
-    c += (String("</section><section class='card'><h2>") + uiText(TextId::FirmwareUpdateStatus) + "</h2>") + otaStatusHtml() + "</section>";
-    if (!otaService_.firmwareStaged() && !otaService_.busy()) {
-        c += (String("<section class='card'><h2>") + uiText(TextId::UploadFirmware) + (String("</h2><p class='help'>") + uiText(TextId::BuildWith) + " " + "<code>pio run</code>" + uiText(TextId::ThenUpload) + " " + "<code>.pio/build/&lt;environment&gt;/firmware.bin</code>.</p><form method='post' action='/firmware/upload' enctype='multipart/form-data' onsubmit='document.getElementById(\"firmwareSize\").value=document.getElementById(\"firmwareFile\").files[0].size'><input type='hidden' id='firmwareSize' name='firmwareSize' value='0'><label>" + uiText(TextId::FirmwareBinary) + "<input id='firmwareFile' type='file' name='firmware' accept='.bin,application/octet-stream' required></label><div class='actions'><button>") + uiText(TextId::UploadFirmware) + "</button></div></form></section>");
-    }
-    c += (String("<section class='card'><h2>") + uiText(TextId::Restart) + (String("</h2><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>") + uiText(TextId::RestartNow) + "</button></form></section><section class='card'><h2>") + uiText(TextId::FactoryReset) + (String("</h2><p>") + uiText(TextId::ThisPermanentlyRemovesAllStoredConfigurationAndRestarts) + "</p><form method='post' action='/factory-reset' onsubmit='return confirm(globalThis.EnvNodeUi.EraseALLConfigurationAndRestart)'><button class='danger'>") + uiText(TextId::FactoryReset) + "</button></form></section>");
-    sendPage(uiText(TextId::Firmware), "/firmware", c);
-}
-
-void WebService::handleFirmwareUploadData() {
-    HTTPUpload& upload = server_.upload();
-    if (upload.status == UPLOAD_FILE_START) {
-        firmwareUploadRequestAccepted_ = false;
-        firmwareUploadRequestError_ = String();
-        if (otaService_.busy()) {
-            firmwareUploadRequestError_ = uiText(TextId::AnotherFirmwareUploadIsAlreadyActive);
-            return;
-        }
-        if (otaService_.firmwareStaged()) {
-            firmwareUploadRequestError_ = uiText(TextId::FirmwareIsAlreadyStagedAndAwaitingRestart);
-            return;
-        }
-        if (upload.name != "firmware" || upload.filename.isEmpty()
-            || !upload.filename.endsWith(".bin")) {
-            firmwareUploadRequestError_ = uiText(TextId::SelectAValidPlatformIOFirmwareBinFile);
-            otaService_.rejectUpload(firmwareUploadRequestError_.c_str());
-            return;
-        }
-        const size_t expectedSize = static_cast<size_t>(server_.arg("firmwareSize").toInt());
-        firmwareUploadRequestAccepted_ = otaService_.beginUpload(expectedSize);
-        if (!firmwareUploadRequestAccepted_) {
-            firmwareUploadRequestError_ = otaService_.lastError().isEmpty()
-                ? String(uiText(TextId::FirmwareUploadCouldNotBeStarted)) : otaService_.lastError();
-        }
-        return;
-    }
-    if (!firmwareUploadRequestAccepted_) return;
-    if (upload.status == UPLOAD_FILE_WRITE) {
-        if (!otaService_.writeChunk(upload.buf, upload.currentSize)) {
-            firmwareUploadRequestAccepted_ = false;
-            firmwareUploadRequestError_ = otaService_.lastError();
-        }
-    } else if (upload.status == UPLOAD_FILE_END) {
-        if (!otaService_.finishUpload()) {
-            firmwareUploadRequestAccepted_ = false;
-            firmwareUploadRequestError_ = otaService_.lastError();
-        }
-    } else if (upload.status == UPLOAD_FILE_ABORTED) {
-        otaService_.abortUpload(uiText(TextId::FirmwareUploadWasAbortedBeforeCompletion));
-        firmwareUploadRequestAccepted_ = false;
-        firmwareUploadRequestError_ = otaService_.lastError();
-    }
-}
-
-void WebService::handleFirmwareUpload() {
-    if (firmwareUploadRequestAccepted_ && otaService_.firmwareStaged()) {
-        String content;
-        content.reserve(520);
-        content = (String("<div class='notice success'><strong>") + uiText(TextId::FirmwareUploadedSuccessfully) + "</strong><p>" + uiText(TextId::FirmwareIsStaged) + "</p><p>" + uiText(TextId::DeviceRestartIsRequiredToActivateTheNew) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/firmware'>" + uiText(TextId::RestartLater) + "</a>");
-        sendPage(uiText(TextId::FirmwareStaged), "/firmware", content);
-        return;
-    }
-    const String reason = !firmwareUploadRequestError_.isEmpty()
-        ? firmwareUploadRequestError_ : otaService_.lastError();
-    String content;
-    content.reserve(480 + reason.length());
-    content = (String("<div class='notice error'><strong>") + uiText(TextId::FirmwareUpdateFailed2) + "</strong><p>");
-    content += escapeHtml(reason.isEmpty() ? String(uiText(TextId::InvalidFirmwareUploadRequest)) : reason);
-    content += (((String("</p><p>") + uiText(TextId::TheCurrentlyRunningFirmwareRemainsActive) + "</p></div><a class='button' href='/firmware'>")) + uiText(TextId::Back) + "</a>");
-    sendPage(uiText(TextId::FirmwareUpdateFailed), "/firmware", content, 400);
-}
-
-
-
-
-
 void WebService::handleMqttSave() {
     const String portText=server_.arg("port"); const long port=portText.toInt();
     bool ok=port>=1&&port<=65535&&configurationService_.setMqttServer(server_.arg("server"))&&configurationService_.setMqttPort(static_cast<uint16_t>(port))&&configurationService_.setMqttUsername(server_.arg("username"));
@@ -2943,10 +2819,10 @@ void WebService::handleControllerRuntimeOperation(bool start) {
     }
     sendSeeOther(server_, "/controllers");
 }
-void WebService::handleRestart() { if(otaService_.busy()){sendResult(uiText(TextId::RestartUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} deviceRestart_.requestDeviceRestart(); sendResult(uiText(TextId::Restarting),"/firmware",uiText(TextId::TheDeviceIsRestartingNow),true); performExplicitRestart(); }
-void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!configurationService_.resetToDefaults()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} deviceRestart_.requestDeviceRestart(); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }
+
+
 void WebService::handleNotFound() { server_.send(404,"text/plain",uiText(TextId::NotFound)); }
-void WebService::performExplicitRestart() { server_.client().flush(); deviceRestart_.performDeviceRestart(); }
+
 
 } // namespace EnvNode
 

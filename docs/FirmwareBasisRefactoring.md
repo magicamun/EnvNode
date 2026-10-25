@@ -229,3 +229,36 @@ The next hardware check should stage a valid image using Web OTA, choose restart
 later and confirm the running firmware remains active, then explicitly restart
 and verify boot/configuration. Native Update tests verify interaction/state
 policy, not physical flash integrity, bootloader behavior or rollback.
+
+## Step 6: shared firmware administration
+
+The user confirmed the step-5 firmware on hardware, including OTA staging,
+restart later, explicit restart and preserved configuration.
+
+FirmwareWebRoutes in EnvNodeWebAdmin now owns the firmware page, multipart OTA
+handlers, explicit restart and factory-reset HTTP routes. The existing public
+WebService constructor, URLs, form fields, page content and OTA state machine
+are preserved. Firmware metadata is supplied as data by the application;
+the shared module does not include the generated application build header.
+
+Two callbacks keep application-specific storage/reset and number formatting
+behind the EnvNode adapter. The shared routes depend on IDeviceRestart and
+OTAService rather than RuntimeManager, IConfigurationService, sensors or NVS.
+Reset still calls the existing resetToDefaults implementation. Upload success
+still stages only; an explicit restart sends the response and flushes the client
+before invoking the restart interface. Configuration-restore handling remains
+in the EnvNode application and retains its OTA busy checks.
+
+Eight new native HTTP regression tests cover route/page metadata, response and
+flush ordering, successful/failed reset, busy-upload guards, successful staging
+without execution of a restart, invalid file rejection and aborted uploads.
+Browser checks include the newly moved confirmation strings in both languages.
+No device upload or reset was performed by the agent during this step.
+
+Validation on 2026-10-25: ESP32 build succeeds; browser checks pass in English
+and German; translation inventory reports zero missing or unwired entries.
+All previous native outcomes are preserved. The first full run exposed a test
+assertion with incorrect capitalization of a localized label; after using the
+catalog text, all eight new tests pass in the focused rerun. Together this gives
+453 passing assertions/tests and the same existing board-profile failure.
+The registered route/method inventory is unchanged.

@@ -1,4 +1,5 @@
 #pragma once
+#include "FirmwareWebRoutes.h"
 
 #include <Arduino.h>
 #include <WebServer.h>
@@ -119,9 +120,6 @@ private:
     String restoreToken_;
     void handleDiagnostics();
     void handleI2CScan();
-    void handleFirmware();
-    void handleFirmwareUpload();
-    void handleFirmwareUploadData();
     void handleMqttSave();
     void handleDiscoveryRepublish();
     void handleTimeSave();
@@ -131,8 +129,6 @@ private:
     void handlePressureReductionSave();
     void handleBoardProvisioning();
     void handleModuleDescriptorProvisioning();
-    void handleRestart();
-    void handleFactoryReset();
     void handleNotFound();
 
     void sendPage(const char* title, const char* activeRoute, const String& content,
@@ -149,9 +145,7 @@ private:
         bool wideContent = false) const;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;
-    String otaStatusHtml() const;
     const char* pendingActionMessage() const;
-    void performExplicitRestart();
     bool administrationAvailable() const;
     void renderDiagnostics();
 
@@ -179,8 +173,7 @@ private:
     WebServer& server_;
     NetworkWebRoutes networkRoutes_;
     LogWebRoutes logRoutes_;
-    bool firmwareUploadRequestAccepted_ = false;
-    String firmwareUploadRequestError_;
+    FirmwareWebRoutes firmwareRoutes_;
 };
 
 } // namespace EnvNode

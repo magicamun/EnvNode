@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 
 #ifndef PROGMEM
 #define PROGMEM
@@ -41,6 +42,12 @@ public:
 
     bool isEmpty() const {
         return value_.empty();
+    }
+
+    long toInt() const { return std::strtol(value_.c_str(), nullptr, 10); }
+    bool endsWith(const char* suffix) const {
+        const size_t length = std::strlen(suffix);
+        return value_.size() >= length && value_.compare(value_.size()-length, length, suffix) == 0;
     }
 
     size_t length() const {

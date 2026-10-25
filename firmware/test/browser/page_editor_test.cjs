@@ -10,7 +10,7 @@ const entries = Array.from(catalog.matchAll(/ENVNODE_WEB_TEXT\((\w+), ("(?:\\.|[
 const ids = new Set(entries.map(([, id]) => id));
 const exportedSource = fs.readFileSync(path.join(__dirname, '../../lib/EnvNodeWeb/src/WebLocalization.cpp'), 'utf8');
 const exportedIds = new Set(Array.from(exportedSource.matchAll(/\{"(\w+)", TextId::\w+\}/g), m => m[1]));
-for (const relative of ['../../include/PageEditorScript.h', '../../lib/EnvNodeWebAdmin/src/LogWebView.cpp', '../../src/SelectorWebView.cpp', '../../src/WebService.cpp']) {
+for (const relative of ['../../include/PageEditorScript.h', '../../lib/EnvNodeWebAdmin/src/LogWebView.cpp', '../../src/SelectorWebView.cpp', '../../src/WebService.cpp', '../../lib/EnvNodeWebAdmin/src/FirmwareWebRoutes.cpp']) {
     const text = fs.readFileSync(path.join(__dirname, relative), 'utf8');
     for (const [, id] of text.matchAll(/EnvNodeUi\.(\w+)/g)) {
         assert(ids.has(id), `Unknown browser text ID: ${id}`);

@@ -6,9 +6,17 @@
 #include <vector>
 #include <map>
 enum HTTPMethod { HTTP_GET, HTTP_POST };
+enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END, UPLOAD_FILE_ABORTED };
+struct HTTPUpload { HTTPUploadStatus status = UPLOAD_FILE_START; String name, filename; uint8_t buf[2048] = {}; size_t currentSize = 0; };
 class WebServer {
 public:
-    struct Route { std::string path; HTTPMethod method; std::function<void()> handler; };
+    struct Route { std::string path; HTTPMethod method; std::function<void()> handler; std::function<void()> uploadHandler; };
+    struct Client { int flushes = 0; void flush() { ++flushes; } } clientState;
+    Client& client() { return clientState; }
+    HTTPUpload uploadState;
+    HTTPUpload& upload() { return uploadState; }
+    void uploadEvent(const char* path) { for (auto& route : routes) if (route.path == path && route.uploadHandler) route.uploadHandler(); }
+    void on(const char* path, HTTPMethod method, std::function<void()> handler, std::function<void()> uploadHandler) { routes.push_back({path, method, handler, uploadHandler}); }
     std::map<std::string, String> arguments;
     String arg(const char* name) const {
         const auto found = arguments.find(name);

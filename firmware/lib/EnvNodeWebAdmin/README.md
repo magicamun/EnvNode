@@ -11,3 +11,9 @@ Page providers and referenced services must outlive the HTTP server. Locale is r
 The unchanged translation catalog/rendering lives in EnvNodeWeb, including existing EnvNode text IDs. JsonWriter lives in EnvNodeBaseConfiguration so configuration backup and MQTT consumers do not acquire an HTTP dependency. Existing include names remain available.
 
 EnvNode-owned files follow the repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+
+FirmwareWebRoutes owns `/firmware`, `/firmware/upload`, `/restart` and
+`/factory-reset`. The application supplies build metadata, a configuration-reset
+callback and localized number formatting. It does not expose its full
+configuration or runtime manager to this library. Explicit restart flushes the
+HTTP response before execution; successful OTA upload only stages the image.
