@@ -5,5 +5,13 @@
   "build": {
     "includeDir": "include",
     "srcDir": "src"
-  }
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeLogging"
+    },
+    {
+      "name": "EnvNodeBaseConfiguration"
+    }
+  ]
 }

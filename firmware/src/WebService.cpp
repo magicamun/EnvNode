@@ -12,6 +12,7 @@
 #include "PropertyPreviewWebView.h"
 #include "PageEditorScript.h"
 #include "WebNavigation.h"
+#include "WebPageFrame.h"
 #include "ValueWebView.h"
 #include "MqttTopic.h"
 #include "BoardProfile.h"
@@ -66,15 +67,6 @@ bool actuatorInfoById(const ActuatorRuntime& runtime, ActuatorId id, ActuatorRun
     return false;
 }
 
-const char SharedStyle[] PROGMEM = R"CSS(
-:root{--bg:#f5f5f5;--panel:#fff;--ink:#262626;--muted:#595959;--line:#d6d6d6;--brand:#9e6c00;--brand2:#805700;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#262626;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#d6d6d6;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#faf4e6;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#9e6c00;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.main.main-wide{max-width:none}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help,.secondary{color:var(--muted)}.help,.secondary{font-size:13px}.secondary{display:block;margin-top:4px}.grid,.summary-grid{display:grid;gap:16px;min-width:0;max-width:100%;margin-bottom:16px}.grid{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}.summary-grid.primary{grid-template-columns:repeat(4,minmax(0,1fr))}.summary-grid.domain{grid-template-columns:repeat(3,minmax(0,1fr))}.grid>.card,.summary-grid>.card{margin-bottom:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#faf4e6;max-width:100%;white-space:nowrap;overflow-wrap:normal}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #d6d6d6;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:nowrap}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.nowrap,.sensor-technical,.sensor-last-measurement,.sensor-actions{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.table-scroll,.scroll{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}.table-actions{display:flex;gap:8px;align-items:center;justify-content:center;margin:0}.table-actions.vertical{flex-direction:column}.table-actions form{margin:0}.table-actions button,.table-action{min-width:max-content;white-space:nowrap}.measurement-table{min-width:620px}.measurement-table .measurement-name{width:auto}.measurement-table .measurement-value{min-width:130px;white-space:nowrap}.measurement-table .measurement-quality{min-width:90px;white-space:nowrap}.measurement-table .measurement-time{min-width:175px;white-space:nowrap}.actuator-table{min-width:1120px}.actuator-table th{white-space:nowrap;overflow-wrap:normal}.actuator-table td{vertical-align:middle}.actuator-table .actuator-slot{width:58px;white-space:nowrap}.actuator-table .actuator-name{min-width:145px}.actuator-table .actuator-configured{min-width:130px}.actuator-table .actuator-hardware{min-width:90px;white-space:nowrap}.actuator-table .actuator-runtime{min-width:175px}.actuator-table .actuator-initialization{min-width:120px;white-space:nowrap}.actuator-table .actuator-state{min-width:68px;white-space:nowrap}.actuator-table .actuator-controls{min-width:90px;text-align:center}.actuator-table .actuator-configure{min-width:112px;text-align:center}.actuator-table .actuator-controls button{min-width:58px}.controller-table{min-width:1320px}.controller-table th{white-space:nowrap;overflow-wrap:normal}.controller-table td{vertical-align:middle}.controller-table .controller-slot{width:58px;white-space:nowrap}.controller-table .controller-name{min-width:190px}.controller-table .controller-name .secondary{white-space:nowrap}.controller-table .controller-route{min-width:290px}.controller-table .controller-policy{min-width:210px}.controller-table .controller-runtime{min-width:150px}.controller-table .controller-diagnostics{min-width:245px}.controller-table .controller-controls{min-width:120px;text-align:center}.controller-table .controller-controls .table-actions{align-items:stretch}.controller-table .controller-controls button,.controller-table .controller-controls .button{width:100%}.diagnostic-stack{line-height:1.55}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}h1,h2{color:var(--brand)}input[type=checkbox],input[type=radio]{accent-color:var(--brand)}:focus-visible{outline:2px solid var(--brand);outline-offset:3px}@media(max-width:900px){.summary-grid.primary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}.summary-grid.domain{grid-template-columns:1fr}}@media(max-width:480px){.summary-grid.primary{grid-template-columns:1fr}}
-)CSS" R"CSS(
-.log-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.log-summary .help{margin-bottom:0}.log-table{min-width:620px;table-layout:fixed}.log-table .log-seq{width:84px;white-space:nowrap;overflow-wrap:normal}.log-table .log-time{width:190px;white-space:nowrap;overflow-wrap:normal}.log-table .log-level-cell{width:86px;white-space:nowrap;overflow-wrap:normal}.log-table .log-message{white-space:normal;overflow-wrap:anywhere}.log-level.debug{color:var(--muted)}.log-level.info{color:var(--brand)}@media(max-width:480px){.log-summary{display:block}.log-summary .button{display:inline-block;margin-top:10px}}
-)CSS" R"CSS(
-.log-refresh-controls{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}.log-refresh-controls .choice{margin:0}.log-refresh-controls .help{white-space:nowrap}@media(max-width:480px){.log-refresh-controls{justify-content:flex-start;margin-top:12px}}
-)CSS" R"CSS(
-.measurement-topic{font-size:12px;white-space:normal;overflow-wrap:anywhere;user-select:text}
-)CSS";
 
 struct TimezoneOption { const char* label; const char* value; };
 const TimezoneOption TimezoneOptions[] = {
@@ -500,119 +492,108 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       boardIdentityResolution_(boardIdentityResolution),
       boardProvisioningService_(boardProvisioningService),
       moduleDiscoveryService_(moduleDiscoveryService),
-      moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService) {}
+      moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService),
+      webHost_(logger, wifiService), server_(webHost_.server()) {}
 
 void WebService::begin() {
-    server_.on("/values", HTTP_GET, [this]() { handleValues(); });
-    server_.on("/values/edit", HTTP_GET, [this]() { handleValueEdit(); });
-    server_.on("/values/save", HTTP_POST, [this]() { handleValueSave(); });
-    server_.on("/values/set", HTTP_POST, [this]() { handleValueSet(); });
-    server_.on("/values/delete", HTTP_POST, [this]() { handleValueDelete(); });
-    server_.on("/", HTTP_GET, [this]() { handleStatus(); });
-    server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
-    server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
-    server_.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
-    server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
-    server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
-    server_.on("/display", HTTP_GET, [this]() { handleDisplay(); });
-    server_.on("/display-editor.js", HTTP_GET, [this]() {
+    webHost_.registerRoutes(*this);
+    webHost_.begin();
+}
+
+void WebService::registerRoutes(WebServer& server) {
+    server.on("/values", HTTP_GET, [this]() { handleValues(); });
+    server.on("/values/edit", HTTP_GET, [this]() { handleValueEdit(); });
+    server.on("/values/save", HTTP_POST, [this]() { handleValueSave(); });
+    server.on("/values/set", HTTP_POST, [this]() { handleValueSet(); });
+    server.on("/values/delete", HTTP_POST, [this]() { handleValueDelete(); });
+    server.on("/", HTTP_GET, [this]() { handleStatus(); });
+    server.on("/status", HTTP_GET, [this]() { handleStatus(); });
+    server.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
+    server.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
+    server.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
+    server.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
+    server.on("/display", HTTP_GET, [this]() { handleDisplay(); });
+    server.on("/display-editor.js", HTTP_GET, [this]() {
         // Stream static code directly from flash; never add it to the page's heap buffer.
         server_.sendHeader("Cache-Control", "no-store");
         server_.send_P(200, PSTR("application/javascript; charset=utf-8"), PageEditorScript, sizeof(PageEditorScript) - 1);
     });
-    server_.on("/display/outputs/save", HTTP_POST, [this]() { handleDisplayOutputsSave(); });
-    server_.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
-    server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
-    server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
-    server_.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
-    server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
-    server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
-    server_.on("/time", HTTP_GET, [this]() { handleTime(); });
-    server_.on("/units", HTTP_GET, [this]() { handleUnits(); });
-    server_.on("/device", HTTP_GET, [this]() { handleDevice(); });
-    server_.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
-    server_.on("/configuration", HTTP_GET, [this]() { handleConfiguration(); });
-    server_.on("/configuration/download", HTTP_POST, [this]() { handleConfigurationDownload(); });
-    server_.on("/configuration/preview", HTTP_POST,
+    server.on("/display/outputs/save", HTTP_POST, [this]() { handleDisplayOutputsSave(); });
+    server.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
+    server.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
+    server.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
+    server.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
+    server.on("/network", HTTP_GET, [this]() { handleNetwork(); });
+    server.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
+    server.on("/time", HTTP_GET, [this]() { handleTime(); });
+    server.on("/units", HTTP_GET, [this]() { handleUnits(); });
+    server.on("/device", HTTP_GET, [this]() { handleDevice(); });
+    server.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
+    server.on("/configuration", HTTP_GET, [this]() { handleConfiguration(); });
+    server.on("/configuration/download", HTTP_POST, [this]() { handleConfigurationDownload(); });
+    server.on("/configuration/preview", HTTP_POST,
         [this]() { handleConfigurationPreview(); }, [this]() { handleConfigurationUploadData(); });
-    server_.on("/configuration/restore", HTTP_POST, [this]() { handleConfigurationRestore(); });
-    server_.on("/configuration/cancel", HTTP_POST, [this]() {
+    server.on("/configuration/restore", HTTP_POST, [this]() { handleConfigurationRestore(); });
+    server.on("/configuration/cancel", HTTP_POST, [this]() {
         restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
     });
-    server_.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
-    server_.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
-    server_.on("/logs", HTTP_GET, [this]() { handleLogs(); });
-    server_.on("/logs/data", HTTP_GET, [this]() { handleLogData(); });
-    server_.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
-    server_.on("/firmware/upload", HTTP_POST,
+    server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
+    server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
+    server.on("/logs", HTTP_GET, [this]() { handleLogs(); });
+    server.on("/logs/data", HTTP_GET, [this]() { handleLogData(); });
+    server.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
+    server.on("/firmware/upload", HTTP_POST,
         [this]() { handleFirmwareUpload(); },
         [this]() { handleFirmwareUploadData(); });
-    server_.on("/style.css", HTTP_GET, [this]() { handleStyle(); });
-    server_.on("/network/save", HTTP_POST, [this]() { handleNetworkSave(); });
-    server_.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
-    server_.on("/mqtt/discovery/republish", HTTP_POST,
+    server.on("/network/save", HTTP_POST, [this]() { handleNetworkSave(); });
+    server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
+    server.on("/mqtt/discovery/republish", HTTP_POST,
         [this]() { handleDiscoveryRepublish(); });
-    server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
-    server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
-    server_.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
-    server_.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
-    server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
-    server_.on("/hardware/board-identity/write", HTTP_POST,
+    server.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
+    server.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
+    server.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
+    server.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
+    server.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
+    server.on("/hardware/board-identity/write", HTTP_POST,
         [this]() { handleBoardProvisioning(); });
-    server_.on("/device/board-identity/write", HTTP_POST,
+    server.on("/device/board-identity/write", HTTP_POST,
         [this]() { handleBoardProvisioning(); });
-    server_.on("/hardware/module-descriptor/write", HTTP_POST,
+    server.on("/hardware/module-descriptor/write", HTTP_POST,
         [this]() { handleModuleDescriptorProvisioning(); });
-    server_.on("/device/module-descriptor/write", HTTP_POST,
+    server.on("/device/module-descriptor/write", HTTP_POST,
         [this]() { handleModuleDescriptorProvisioning(); });
-    server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
-    server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
-    server_.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
-    server_.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
-    server_.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
-    server_.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
-    server_.on("/actuators/level", HTTP_POST, [this]() { handleActuatorLevel(); });
-    server_.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
-    server_.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
-    server_.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
-    server_.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
-    server_.on("/restart", HTTP_POST, [this]() { handleRestart(); });
-    server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
-    server_.onNotFound([this]() { handleNotFound(); });
-    server_.begin();
-    logger_.info("Web administration started");
+    server.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
+    server.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
+    server.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
+    server.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
+    server.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
+    server.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
+    server.on("/actuators/level", HTTP_POST, [this]() { handleActuatorLevel(); });
+    server.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
+    server.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
+    server.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
+    server.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
+    server.on("/restart", HTTP_POST, [this]() { handleRestart(); });
+    server.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
+    server.onNotFound([this]() { handleNotFound(); });
 }
 
 void WebService::loop() {
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }
-    server_.handleClient();
+    webHost_.loop();
 }
 
-bool WebService::administrationAvailable() const { return wifiService_.inSetupAccessPointMode() || wifiService_.connected(); }
+bool WebService::administrationAvailable() const { return webHost_.administrationAvailable(); }
 
 void WebService::sendPage(const char* title, const char* activeRoute, const String& content,
     int status, bool wideContent) {
-    if (!administrationAvailable()) {
-        server_.send(503, "text/plain", uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting));
-        return;
-    }
-    // Send the existing content without constructing a second full-page String.
-    // Large display forms otherwise need several simultaneous contiguous copies.
-    const String header = renderPageHeader(title, activeRoute, wideContent);
-    static const char footer[] = "</main></div></body></html>";
-    if (header.isEmpty() || content.isEmpty()) {
-        logger_.errorf("Web page rendering failed: header=%u content=%u heap=%u largest=%u",
-            static_cast<unsigned>(header.length()), static_cast<unsigned>(content.length()),
-            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
-        server_.send(503, "text/plain", uiText(TextId::PageRenderingFailedPleaseRetry));
-        return;
-    }
-    server_.setContentLength(header.length() + content.length() + sizeof(footer) - 1);
-    server_.send(status, "text/html; charset=utf-8", header);
-    server_.sendContent(content);
-    server_.sendContent(footer, sizeof(footer) - 1);
+    webHost_.sendPage([this, title, activeRoute, wideContent]() {
+        return renderPageHeader(title, activeRoute, wideContent);
+    }, content, status,
+        uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting),
+        uiText(TextId::PageRenderingFailedPleaseRetry));
 }
 
 void WebService::sendResult(const char* title, const char* route, const char* message, bool success) {
@@ -718,29 +699,16 @@ const char* WebService::uiText(TextId id) const {
 String WebService::renderPageHeader(const char* title, const char* active,
     bool wideContent) const {
     const Configuration& cfg = configurationService_.getConfiguration();
-    String html;
-    if (!html.reserve(2048)) return String();
-    html = String("<!doctype html><html lang='") + webLanguageTag(cfg.locale.locale) + "'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>";
-    html += escapeHtml(title);
-    html += " · EnvNode</title><link rel='stylesheet' href='/style.css?build=";
-    html += FirmwareBuildInfo::BuildTimestampUtc;
-    html += "'>";
-    html += buildWebUiScript(cfg.locale.locale);
-    html += "</head><body><div class='shell'><aside class='side'><div class='brand'>";
-    html += escapeHtml(cfg.device.name);
-    html += "</div><div class='version'>EnvNode · v";
-    html += FirmwareBuildInfo::SemanticVersion;
-    html += "</div>";
-    html += buildWebNavigationHtml(active, cfg.locale.locale);
-    html += "</aside><main class='main";
-    if (wideContent) html += " main-wide";
-    html += "'><div class='top'><div><h1>";
-    html += escapeHtml(title);
-    html += "</h1>";
-    if (wifiService_.inSetupAccessPointMode()) html += (String("<p class='muted'>") + uiText(TextId::SetupAccessPointMode) + "</p>");
-    html += "</div></div>";
-    html += pendingRuntimeActionHtml();
-    return html;
+    const WebPageFrameData page = {
+        title, cfg.device.name, "EnvNode", FirmwareBuildInfo::SemanticVersion,
+        FirmwareBuildInfo::BuildTimestampUtc, webLanguageTag(cfg.locale.locale),
+        [this]() { return buildWebUiScript(configurationService_.getLocale()); },
+        [this, active]() { return buildWebNavigationHtml(active, configurationService_.getLocale()); },
+        [this]() { return pendingRuntimeActionHtml(); },
+        wifiService_.inSetupAccessPointMode(),
+        uiText(TextId::SetupAccessPointMode), wideContent
+    };
+    return buildWebPageHeader(page);
 }
 
 String WebService::currentLocalDateTime() const {
@@ -2405,11 +2373,7 @@ void WebService::handleFirmwareUpload() {
     sendPage(uiText(TextId::FirmwareUpdateFailed), "/firmware", content, 400);
 }
 
-void WebService::handleStyle() {
-    const size_t styleLength = strlen_P(SharedStyle);
-    server_.sendHeader("Cache-Control", "public, max-age=86400");
-    server_.send_P(200, PSTR("text/css"), SharedStyle, styleLength);
-}
+
 
 void WebService::handleNetworkSave() {
     NetworkConfiguration n = configurationService_.getConfiguration().network;

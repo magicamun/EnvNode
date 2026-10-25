@@ -4,6 +4,15 @@
 #include <cstdint>
 #include <string>
 #include <cstdio>
+#include <cstring>
+
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+#ifndef PSTR
+#define PSTR(value) (value)
+#endif
+inline size_t strlen_P(const char* value) { return std::strlen(value); }
 
 class String {
 public:
@@ -46,8 +55,9 @@ public:
         return value_[index];
     }
 
-    void reserve(size_t size) {
+    bool reserve(size_t size) {
         value_.reserve(size);
+        return true;
     }
 
     String& operator+=(const String& value) {
@@ -120,6 +130,8 @@ extern HardwareSerial Serial;
 
 class EspClass {
 public:
+    uint32_t getFreeHeap() const { return 200000; }
+    uint32_t getMaxAllocHeap() const { return 100000; }
     uint64_t getEfuseMac() const { return 0x001122334455ULL; }
 };
 

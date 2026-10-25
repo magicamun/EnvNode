@@ -82,3 +82,16 @@ the shared base definitions. IConfigurationService forwards the narrow network
 view to its existing Configuration.network member. NVS storage and restore
 formats remain unchanged. See FirmwareBasisRefactoring.md for the scope and
 validation record.
+
+## Shared web host
+
+`firmware/lib/EnvNodeWeb` owns WebServer, the common page frame and stylesheet.
+Applications register IWebRoutes providers with WebHost before starting it. The
+current EnvNode WebService remains the application-level provider; existing URLs
+and pages are retained. Rendering takes the device/product metadata and trusted
+application fragments explicitly rather than depending on EnvNode Configuration.
+
+Changes in the shared header/streaming path need a browser smoke test as well as
+the native web-host tests, especially for large display forms. Existing runtime
+behavior before step 3 was confirmed by the user; this web change requires its
+own hardware check.

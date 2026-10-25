@@ -85,8 +85,8 @@ void WiFiService::startConnection() {
 
     logger_.debug("WiFi connection parameters:");
     logger_.debugf("SSID: '%s'", network.wifiSSID.c_str());
-    logger_.debugf("SSID length: %u", network.wifiSSID.length());
-    logger_.debugf("Password length: %u", network.wifiPassword.length());
+    logger_.debugf("SSID length: %u", static_cast<unsigned int>(network.wifiSSID.length()));
+    logger_.debugf("Password length: %u", static_cast<unsigned int>(network.wifiPassword.length()));
     logger_.debugf("Hostname: '%s'", network.hostname.c_str());
     logger_.infof("WiFi target SSID='%s' length=%u",
         network.wifiSSID.c_str(),

@@ -100,3 +100,45 @@ Locale.cpp application source-filter entries. Sensor and actuator APIs, NVS
 formats and the current main.cpp composition were not changed. The next major
 step is the web server/page-registration boundary; storage lifecycle and the
 remaining services can then be disentangled incrementally.
+
+## Runtime confirmation after step 2
+
+The user flashed the refactored firmware and confirmed that the existing
+configuration, including sensors, was present and working. This confirms the
+reported basic runtime/configuration check; it does not establish a complete
+OTA, setup-AP, radio or actuator validation matrix.
+
+## Step 3: shared web host and page frame
+
+`EnvNodeWeb` now owns the HTTP server, shared stylesheet, HTML escaping and
+page-frame rendering. Applications implement IWebRoutes and register handlers
+with the host. EnvNode WebService is the current application provider and keeps
+its existing page handlers, navigation and localization. A native fixture route
+provider demonstrates use without constructing SensorManager or RuntimeManager.
+
+The same 61 URL/method registrations are retained, including uploads and aliases.
+The stylesheet is transferred byte-for-byte and keeps its cache header. Existing
+page handlers still use the same server instance owned by WebHost. The header,
+content and footer continue to stream separately; application fragments render
+sequentially. NVS/configuration persistence, handler bodies and sensor APIs are
+unchanged. Two WLAN debug-length arguments now use explicit unsigned casts to
+match their format strings on both 32-bit ESP32 and 64-bit native builds.
+
+Local library manifests explicitly declare the network/base/logging dependency
+chain so transitive consumers build without relying on application includes to
+expose dependency paths.
+
+Validation on 2026-10-25:
+
+- ESP32 application build succeeds on the local verification snapshot.
+- Eight new native web tests cover independent route providers, CSS content and
+  cache policy, offline 503, station/setup-AP serving, exact streaming length,
+  rendering failure and application-independent/escaped page framing.
+- Overall: 428 passed and the same pre-existing board-profile failure.
+- Previously passing tests retain their outcomes.
+- New web-host hardware runtime test remains pending; no upload was performed.
+
+The next hardware smoke test should open status, sensor/configuration pages,
+large display forms, logs/refresh and the firmware page, and confirm styling and
+navigation. Shared network/log/OTA page modules and runtime lifecycle separation
+are still future steps; this commit extracts the server/frame boundary only.

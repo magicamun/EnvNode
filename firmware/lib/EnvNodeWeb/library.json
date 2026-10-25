@@ -1,0 +1,17 @@
+{
+  "name": "EnvNodeWeb",
+  "version": "0.1.0",
+  "description": "Shared HTTP host, page frame, escaping and stylesheet. See repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeLogging"
+    },
+    {
+      "name": "EnvNodeNetwork"
+    }
+  ]
+}

@@ -5,6 +5,8 @@
 #include <memory>
 #include "ConfigurationBackup.h"
 #include "IWebService.h"
+#include "IWebRoutes.h"
+#include "WebHost.h"
 #include "IConfigurationService.h"
 #include "IWiFiService.h"
 #include "IMqttService.h"
@@ -31,7 +33,7 @@
 
 namespace EnvNode {
 
-class WebService : public IWebService {
+class WebService : public IWebService, private IWebRoutes {
 public:
     WebService(
         ILogger& logger,
@@ -59,6 +61,7 @@ public:
     void loop() override;
 
 private:
+    void registerRoutes(WebServer& server) override;
     void handleValues();
     void handleValueEdit();
     void handleValueSave();
@@ -117,7 +120,6 @@ private:
     void handleFirmware();
     void handleFirmwareUpload();
     void handleFirmwareUploadData();
-    void handleStyle();
     void handleNetworkSave();
     void handleMqttSave();
     void handleDiscoveryRepublish();
@@ -172,7 +174,8 @@ private:
     BoardProvisioningService& boardProvisioningService_;
     ModuleDiscoveryService& moduleDiscoveryService_;
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
-    WebServer server_{80};
+    WebHost webHost_;
+    WebServer& server_;
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;
 };
