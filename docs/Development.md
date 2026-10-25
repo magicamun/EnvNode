@@ -43,3 +43,29 @@ running and restart later.
 
 Web OTA accepts firmware application binaries only. USB flashing remains the
 recovery path if a valid firmware cannot be uploaded through the running device.
+
+## Shared firmware basis: logging
+
+The first shared component lives in `firmware/lib/EnvNodeLogging`, as a local
+PlatformIO library. Both the ESP32 application and native tests consume the same
+sources. Existing includes such as `Logger.h` and `StructuredLogger.h` remain
+unchanged. Logging implementation files are no longer enumerated in the native
+application source filter.
+
+Application composition remains in `firmware/src/main.cpp`. The system-time
+adapter and web log view stay in the application for now. Network configuration,
+OTA, the central WebService and sensor APIs have not been changed. A second
+firmware application is deliberately deferred until the common basis is extracted.
+
+For the first extraction, compare the existing application build and all native
+tests before and after the move:
+
+```sh
+cd firmware
+pio run -e esp32dev
+pio test -e native
+```
+
+A hardware smoke test still needs to cover boot, serial logging, WiFi/AP fallback,
+configuration persistence, web pages, measurements/MQTT and OTA on an existing
+EnvNode board. A successful host build does not establish these hardware results.
