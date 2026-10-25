@@ -1,3 +1,4 @@
+#include "ConfigurationTestStorage.h"
 // EnvNode: see repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
 #include <unity.h>
 #include "BaseConfigurationValidation.h"
@@ -12,6 +13,7 @@ size_t HardwareSerial::write(const uint8_t*, size_t size) { return size; }
 void pinMode(unsigned char, int) {}
 void digitalWrite(unsigned char, int) {}
 void setUp() {
+    clearConfigurationTestStorage();
     Preferences::failStringWrites() = false; Preferences::failUIntKey() = String();
     Preferences::failByteReads() = false;
     for (const auto* name : {"weather", "weather0", "weather1", "weather_meta"}) {

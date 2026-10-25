@@ -1,3 +1,4 @@
+#include "ConfigurationTestStorage.h"
 // EnvNode: see repository LICENSE.
 #include <unity.h>
 #include "ConfigurationBackup.h"
@@ -29,6 +30,7 @@ size_t HardwareSerial::write(const uint8_t*,size_t n){return n;}
 void pinMode(unsigned char,int){}
 void digitalWrite(unsigned char,int){}
 void setUp(){
+    clearConfigurationTestStorage();
     rejectIndexAllocation=false;trackAllocations=false;arrayAllocations=objectAllocations=0;
     Preferences::failStringWrites()=false;Preferences::failByteReads()=false;Preferences::failUIntKey()=String();
     for(const char* name:{"weather","weather0","weather1","weather_meta"}){Preferences p;p.begin(name);p.clear();}

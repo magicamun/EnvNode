@@ -170,6 +170,13 @@ validation and application-specific keys; it delegates common base operations.
 The weather namespaces, key names, snapshot formats and override/commit ordering
 are preserved. Ordinary edits retain their existing partial-write behavior.
 
+A layout can specify a dedicated NVS snapshot partition. EnvNode uses cfg_nvs,
+a 256 KiB partition carved from the unused SPIFFS region, while preserving legacy
+NVS and OTA offsets. Boot stays on the legacy source until a verified restore
+commits dedicated metadata; then subsequent reads and edits use that partition.
+Factory reset clears both sources. The JSON/compact record codecs are unchanged.
+Installing the partition table requires USB once; application-only OTA is insufficient.
+
 The shared EnvNodeTime service reads only ITimeConfiguration and IWiFiService;
 LocaleFormatter reads ILocaleConfiguration in EnvNodeBaseConfiguration. The
 application IConfigurationService adapts its complete model to these views and

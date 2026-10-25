@@ -15,10 +15,31 @@ Legacy `weather` configuration remains readable until the first successful resto
 ordinary configuration changes use the active bank. Factory reset clears the active bank, inactive snapshots and legacy credentials.
 
 The Web UI separates Device settings, Configuration backup/restore and Hardware provisioning.
-The compact internal snapshot omits JSON field names to conserve NVS space. Both active and
-staging banks share the existing 20 KiB partition. If there is insufficient space, restoration
-fails without activating the candidate; the file size limit is not a guarantee of available NVS
-capacity. Existing partition offsets remain unchanged.
+The compact internal snapshot omits JSON field names. New partition tables provide
+`cfg_nvs`, a dedicated 256 KiB NVS partition at 0x390000. The original 20 KiB
+`nvs`, OTA metadata and both application slot offsets/sizes are preserved. The
+previously unused SPIFFS range is reduced to 192 KiB at 0x3D0000; this firmware
+does not mount or use SPIFFS. Available NVS capacity still includes bookkeeping
+and garbage-collection overhead; file size alone is not a capacity guarantee.
+
+Installing the new partition table requires one normal USB firmware upload,
+including the partition table. Application-only web OTA cannot install it. Export
+and retain the configuration JSON first; do not use a full-flash erase for this
+transition. A normal USB upload retains the original NVS bytes. No device flash
+or erase is performed by the source change itself.
+
+On first boot after USB upload, existing legacy/snapshot data in the default NVS
+remain authoritative. Normal edits continue there. Only an explicitly confirmed,
+verified restore commits the active-bank pointer in `cfg_nvs`; after that, normal
+edits and subsequent boots use the dedicated partition. The previous partition's
+data are retained during migration. Failed staging/commit leaves the original
+configuration authoritative. Factory reset clears both partitions' configuration
+namespaces, preventing legacy credentials from returning.
+
+With an old partition table, normal operation remains compatible, but a restore
+requiring `cfg_nvs` fails without changing current data. Older firmware without
+this feature reads the retained old NVS configuration, not subsequent edits in
+`cfg_nvs`. No JSON or compact-record schema migration is involved.
 
 Restore requests a device restart; the user can restart immediately or later. Installation network
 settings from a backup become effective after restart and can change how the device is reached.

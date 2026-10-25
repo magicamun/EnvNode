@@ -1,3 +1,4 @@
+#include "ConfigurationTestStorage.h"
 // SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
 // See the repository root LICENSE.
 #include <unity.h>
@@ -14,6 +15,7 @@ void pinMode(unsigned char, int) {}
 void digitalWrite(unsigned char, int) {}
 
 void setUp() {
+    clearConfigurationTestStorage();
     Preferences::failStringWrites() = false;
     Preferences::failByteReads() = false;
     Preferences::failUIntKey() = String();

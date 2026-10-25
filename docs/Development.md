@@ -210,3 +210,20 @@ fault tests cover initialization, staging/readback/metadata failure and namespac
 isolation. Physical follow-up should export a backup, save/reboot a base setting,
 restore the backup and verify credentials, settings and application slots survive.
 A factory reset is not required for that hardware smoke test.
+
+## Installing the dedicated configuration partition
+
+The partition table adds cfg_nvs (data/nvs, 0x390000, 0x40000), reducing the unused
+SPIFFS range to 0x3D0000/0x30000. nvs, otadata, app0 and app1 are unchanged.
+First save a configuration JSON backup. Perform a normal USB upload of esp32dev
+(including bootloader/partition table/application), without a full-flash erase.
+After boot verify existing settings, then retry the confirmed restore and reboot.
+Application-only Web OTA updates cannot introduce the partition table; after this
+one-time USB transition normal Web OTA continues to use the unchanged slots.
+
+The shared storage selects dedicated metadata only after a verified restore has
+committed it. Old NVS data remain readable until then. Native checks include
+`pio test -e native -f test_configuration_partition`, legacy backup tests and the
+full suite. Native partition doubles do not validate physical flash contents.
+The firmware does not auto-erase an unreadable dedicated partition; if initialization
+reports an error, diagnose that exact error before erasing anything.

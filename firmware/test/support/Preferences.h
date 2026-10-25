@@ -11,9 +11,9 @@ class Preferences {
 public:
     static String& failBeginNamespace() { static String name; return name; }
     static String& failClearNamespace() { static String name; return name; }
-    bool begin(const char* name, bool = false) {
+    bool begin(const char* name, bool = false, const char* partition = nullptr) {
         if (failBeginNamespace() == name) return false;
-        namespace_ = name; return true;
+        namespace_ = name; partition_ = partition ? partition : "nvs"; return true;
     }
     void end() {}
 
@@ -85,9 +85,10 @@ public:
 
 private:
     std::string namespace_ = "weather";
+    std::string partition_ = "nvs";
     static std::map<std::string, std::map<std::string, std::string>>& namespaces() {
         static std::map<std::string, std::map<std::string, std::string>> stored;
         return stored;
     }
-    std::map<std::string, std::string>& values() const { return namespaces()[namespace_]; }
+    std::map<std::string, std::string>& values() const { return namespaces()[partition_ == "nvs" ? namespace_ : partition_ + ":" + namespace_]; }
 };

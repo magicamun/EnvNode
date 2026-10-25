@@ -33,3 +33,16 @@ WeatherStation/time/locale defaults. EnvNode ConfigurationService retains full
 snapshot/backup codecs, restore validation, MQTT, measurements, slots, values and
 display handling. Existing public API and NVS keys/formats remain unchanged. The
 future test application supplies its own fixed layout and base data structs.
+
+
+Layouts may additionally specify a dedicated snapshot partition. Without that
+optional label, existing single-partition behavior is unchanged. With a label,
+startup reads its committed metadata if present; otherwise it keeps the original
+NVS data authoritative. Snapshot replacement targets the dedicated partition and
+switches only after verified bytes/metadata commit. Ordinary edits use whichever
+partition is authoritative. Clear removes configuration data in both partitions.
+A missing dedicated partition permits legacy operation but blocks replacement.
+EnvNode selects cfg_nvs (256 KiB) through its fixed layout; installation requires
+the matching partition table by USB. The layout and label strings must remain
+alive for the lifetime of the store. The partition-aware native Preferences double
+and migration tests cover both old flat keys and old-bank snapshots.

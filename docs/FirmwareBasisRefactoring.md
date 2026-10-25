@@ -511,3 +511,33 @@ All existing backup/restore compatibility cases pass. Translation inventory stay
 at zero missing/unwired entries. No physical flash, reset or restore was performed
 by the agent. The next device retry should first check whether the preview appears;
 if it still hangs, the final Configuration backup/preview phase marker is needed.
+
+## Dedicated configuration capacity follow-up
+
+The user's next device log reached the confirmed restore and reported
+nvs_set_blob cfg_snapshot NOT_ENOUGH_SPACE. Preview had progressed; the default
+20 KiB NVS could not hold live data plus the staged snapshot and bookkeeping.
+A local native default configuration measures 5172 compact bytes / 31009 JSON
+bytes; actual device records vary. The user confirmed USB flashing is available.
+
+The new table adds cfg_nvs at 0x390000 (256 KiB), retains the original NVS/OTA/
+app locations and reduces unused SPIFFS to 0x3D0000 (192 KiB). Storage layouts
+accept an optional target partition. EnvNode keeps legacy data authoritative until
+a confirmed snapshot writes/verifies/commits in the dedicated partition; then
+normal edits and reboot loading use it. The old source is retained on migration.
+Missing tables allow legacy operation while restore is rejected. Reset clears
+both configuration sources. Partition contents are never auto-erased on init error.
+
+Six new native integration tests cover existing legacy settings after table-only
+installation, actual full-model restore/reboot and edited keys in cfg_nvs, failed
+metadata commit retaining legacy authority, old-table operation, old default-NVS
+snapshot migration, bank alternation and reset across both partitions. The native
+Preferences double now isolates partitions, and restore suites reset both sources.
+
+Validation: ESP32 build and both browser-language checks pass. Full native run:
+504 passing tests and only the same existing board-profile-count failure. The
+partition CSV has no overlap, fits 4 MiB and preserves all original NVS/OTA/app
+ranges; PlatformIO also builds its binary successfully. No physical flash or
+erase was performed. Next: retain JSON backup, normal USB upload including table,
+verify previous settings, then preview/confirm restore and reboot. Physical NVS
+capacity and previous flash contents still require that hardware check.
