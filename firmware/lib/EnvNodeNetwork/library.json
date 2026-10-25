@@ -1,0 +1,9 @@
+{
+  "name": "EnvNodeNetwork",
+  "version": "0.1.0",
+  "description": "Shared ESP32 WiFi lifecycle using a narrow read-only configuration view. See repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  }
+}

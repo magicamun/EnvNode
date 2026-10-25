@@ -3,7 +3,7 @@
 
 namespace EnvNode {
 
-WiFiService::WiFiService(ILogger& logger, IConfigurationService& configurationService)
+WiFiService::WiFiService(ILogger& logger, INetworkConfiguration& configurationService)
     : logger_(logger)
     , configurationService_(configurationService) {
 }
@@ -62,7 +62,7 @@ String WiFiService::ipAddress() const {
 }
 
 String WiFiService::hostname() const {
-    return configurationService_.getConfiguration().network.hostname;
+    return configurationService_.getNetworkConfiguration().hostname;
 }
 
 NetworkAddressSnapshot WiFiService::stationAddresses() const {
@@ -81,11 +81,9 @@ int32_t WiFiService::rssi() const {
 }
 
 void WiFiService::startConnection() {
-    const Configuration& configuration = configurationService_.getConfiguration();
-
+    const NetworkConfiguration& network = configurationService_.getNetworkConfiguration();
 
     logger_.debug("WiFi connection parameters:");
-    const NetworkConfiguration& network = configuration.network;
     logger_.debugf("SSID: '%s'", network.wifiSSID.c_str());
     logger_.debugf("SSID length: %u", network.wifiSSID.length());
     logger_.debugf("Password length: %u", network.wifiPassword.length());
@@ -108,8 +106,7 @@ void WiFiService::startConnection() {
 }
 
 void WiFiService::startSetupAccessPoint() {
-    const Configuration& configuration = configurationService_.getConfiguration();
-    const String apSsid = configuration.network.hostname + "-Setup";
+    const String apSsid = configurationService_.getNetworkConfiguration().hostname + "-Setup";
     WiFi.mode(WIFI_AP);
     WiFi.softAP(apSsid.c_str());
     logger_.infof("Setup access point started: %s", apSsid.c_str());
@@ -117,8 +114,7 @@ void WiFiService::startSetupAccessPoint() {
 }
 
 bool WiFiService::configurationIsValid() const {
-    const Configuration& config = configurationService_.getConfiguration();
-    return !config.network.wifiSSID.isEmpty();
+    return !configurationService_.getNetworkConfiguration().wifiSSID.isEmpty();
 }
 
 bool WiFiService::applyAddressConfiguration(const NetworkConfiguration& network) {
@@ -175,7 +171,7 @@ void WiFiService::updateConnectedState() {
 
 void WiFiService::logNetworkScanDiagnostics() {
     const String configuredSsid =
-        configurationService_.getConfiguration().network.wifiSSID;
+        configurationService_.getNetworkConfiguration().wifiSSID;
     logger_.warnf(
         "WiFi connection timeout; scanning for target SSID='%s' length=%u",
         configuredSsid.c_str(),
@@ -224,9 +220,9 @@ void WiFiService::updateReconnectingState() {
     }
 
     if (millis() - lastReconnectAttemptMs_ >= ReconnectIntervalMs) {
-        const Configuration& configuration = configurationService_.getConfiguration();
-        if (!configuration.network.wifiSSID.isEmpty()) {
-            WiFi.begin(configuration.network.wifiSSID.c_str(), configuration.network.wifiPassword.c_str());
+        const NetworkConfiguration& network = configurationService_.getNetworkConfiguration();
+        if (!network.wifiSSID.isEmpty()) {
+            WiFi.begin(network.wifiSSID.c_str(), network.wifiPassword.c_str());
         }
         lastReconnectAttemptMs_ = millis();
     }

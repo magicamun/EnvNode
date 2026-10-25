@@ -1,16 +1,20 @@
 #pragma once
 
 #include "Configuration.h"
+#include "INetworkConfiguration.h"
 
 namespace EnvNode {
 
-class IConfigurationService {
+class IConfigurationService : public INetworkConfiguration {
 public:
     virtual ~IConfigurationService() = default;
 
     virtual void loadConfiguration() = 0;
     virtual const Configuration& getConfiguration() const = 0;
     virtual Locale getLocale() const = 0;
+    const NetworkConfiguration& getNetworkConfiguration() const override {
+        return getConfiguration().network;
+    }
 
     virtual bool setPressureReduction(const PressureReductionConfiguration& configuration) { return false; }
     virtual bool setGeoPosition(const GeoPosition& position) { return false; }

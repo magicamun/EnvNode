@@ -3,14 +3,14 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "IWiFiService.h"
-#include "IConfigurationService.h"
+#include "INetworkConfiguration.h"
 #include "Logger.h"
 
 namespace EnvNode {
 
 class WiFiService : public IWiFiService {
 public:
-    WiFiService(ILogger& logger, IConfigurationService& configurationService);
+    WiFiService(ILogger& logger, INetworkConfiguration& configurationService);
 
     void begin() override;
     void loop() override;
@@ -40,7 +40,7 @@ private:
     void logNetworkScanDiagnostics();
 
     ILogger& logger_;
-    IConfigurationService& configurationService_;
+    INetworkConfiguration& configurationService_;
     State state_ = State::Uninitialized;
     unsigned long connectionStartTimeMs_ = 0;
     unsigned long lastReconnectAttemptMs_ = 0;

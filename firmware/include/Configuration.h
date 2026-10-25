@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "BaseConfiguration.h"
 #include "MeasurementType.h"
 #include "GeoPosition.h"
 #include "PressureReduction.h"
@@ -13,42 +14,11 @@
 
 namespace EnvNode {
 
-enum class NetworkAddressMode : uint8_t {
-    Dhcp = 0,
-    Static = 1,
-};
-
-struct DeviceConfiguration {
-    String name;
-};
-
-struct NetworkConfiguration {
-    String hostname;
-    String wifiSSID;
-    String wifiPassword;
-    NetworkAddressMode addressMode = NetworkAddressMode::Dhcp;
-    String ipv4Address;
-    String subnetMask;
-    String gateway;
-    String dns1;
-    String dns2;
-};
-
 struct MqttConfiguration {
     String server;
     uint16_t port = 1883;
     String username;
     String password;
-};
-
-struct TimeConfiguration {
-    String timezone;
-    String ntpServer1;
-    String ntpServer2;
-};
-
-struct LocaleConfiguration {
-    Locale locale = Locale::GermanGermany;
 };
 
 struct PresentationConfiguration {

@@ -4,7 +4,7 @@
 #include <memory>
 #include <Arduino.h>
 #include <Preferences.h>
-#include <IPAddress.h>
+#include "BaseConfigurationValidation.h"
 #include "SensorImplementationRegistry.h"
 #include "ActuatorImplementationRegistry.h"
 #include "ControllerImplementationRegistry.h"
@@ -42,15 +42,9 @@ constexpr uint16_t DefaultMqttPort = 1883;
 constexpr const char* DefaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
 constexpr const char* DefaultNtpServer1 = "pool.ntp.org";
 constexpr const char* DefaultNtpServer2 = "time.cloudflare.com";
-constexpr size_t MaxDeviceNameLength = 32;
-constexpr size_t MaxWifiSSIDLength = 32;
-constexpr size_t MaxWifiPasswordLength = 64;
 constexpr size_t MaxMqttServerLength = 64;
 constexpr size_t MaxMqttUsernameLength = 32;
 constexpr size_t MaxMqttPasswordLength = 64;
-constexpr size_t MaxTimezoneLength = 128;
-constexpr size_t MaxNtpServerLength = 64;
-constexpr size_t MaxHostnameLength = 63;
 
 String sensorKey(SensorId slotId, const char* field) {
     return "s" + String(slotId) + "_" + field;
@@ -613,15 +607,15 @@ bool ConfigurationService::persistFloat(const char* key, float value) {
 }
 
 bool ConfigurationService::validateDeviceName(const String& deviceName) const {
-    return !deviceName.isEmpty() && deviceName.length() <= MaxDeviceNameLength;
+    return BaseConfigurationValidation::deviceName(deviceName);
 }
 
 bool ConfigurationService::validateWifiSSID(const String& ssid) const {
-    return ssid.length() <= MaxWifiSSIDLength;
+    return BaseConfigurationValidation::wifiSSID(ssid);
 }
 
 bool ConfigurationService::validateWifiPassword(const String& password) const {
-    return password.length() <= MaxWifiPasswordLength;
+    return BaseConfigurationValidation::wifiPassword(password);
 }
 
 bool ConfigurationService::validateMqttServer(const String& server) const {
@@ -647,61 +641,23 @@ bool ConfigurationService::validateMqttPassword(const String& password) const {
 }
 
 bool ConfigurationService::validateTimezone(const String& timezone) const {
-    return timezone.length() <= MaxTimezoneLength;
+    return BaseConfigurationValidation::timezone(timezone);
 }
 
 bool ConfigurationService::validateNtpServer(const String& server) const {
-    return server.length() <= MaxNtpServerLength;
+    return BaseConfigurationValidation::ntpServer(server);
 }
 
 bool ConfigurationService::validateHostname(const String& hostname) const {
-    if (hostname.isEmpty() || hostname.length() > MaxHostnameLength) return false;
-    if (hostname[0] == '-' || hostname[hostname.length() - 1] == '-') return false;
-    for (size_t index = 0; index < hostname.length(); ++index) {
-        const char character = hostname[index];
-        if (!isalnum(character) && character != '-') return false;
-    }
-    return true;
+    return BaseConfigurationValidation::hostname(hostname);
 }
 
 bool ConfigurationService::validateIPv4(const String& value, bool allowEmpty) const {
-    if (allowEmpty && value.isEmpty()) return true;
-    IPAddress address;
-    return address.fromString(value) && static_cast<uint32_t>(address) != 0;
+    return BaseConfigurationValidation::ipv4(value, allowEmpty);
 }
 
 bool ConfigurationService::validateNetworkConfiguration(const NetworkConfiguration& network) const {
-    if (!validateHostname(network.hostname)
-        || !validateWifiSSID(network.wifiSSID)
-        || !validateWifiPassword(network.wifiPassword)) {
-        return false;
-    }
-    if (network.addressMode == NetworkAddressMode::Dhcp) return true;
-    if (network.addressMode != NetworkAddressMode::Static
-        || !validateIPv4(network.ipv4Address)
-        || !validateIPv4(network.subnetMask)
-        || !validateIPv4(network.gateway)
-        || !validateIPv4(network.dns1)
-        || !validateIPv4(network.dns2, true)) {
-        return false;
-    }
-
-    IPAddress address, mask, gateway;
-    address.fromString(network.ipv4Address);
-    mask.fromString(network.subnetMask);
-    gateway.fromString(network.gateway);
-    bool zeroSeen = false;
-    for (uint8_t byteIndex = 0; byteIndex < 4; ++byteIndex) {
-        for (int bit = 7; bit >= 0; --bit) {
-            const bool set = (mask[byteIndex] & (1U << bit)) != 0;
-            if (!set) zeroSeen = true;
-            else if (zeroSeen) return false;
-        }
-        if ((address[byteIndex] & mask[byteIndex]) != (gateway[byteIndex] & mask[byteIndex])) {
-            return false;
-        }
-    }
-    return true;
+    return BaseConfigurationValidation::networkConfiguration(network);
 }
 
 bool ConfigurationService::setPressureReduction(const PressureReductionConfiguration& reduction) {

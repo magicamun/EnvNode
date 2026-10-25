@@ -69,3 +69,16 @@ pio test -e native
 A hardware smoke test still needs to cover boot, serial logging, WiFi/AP fallback,
 configuration persistence, web pages, measurements/MQTT and OTA on an existing
 EnvNode board. A successful host build does not establish these hardware results.
+
+## Shared network and configuration types
+
+`firmware/lib/EnvNodeNetwork` contains WiFiService and its interface. Its only
+configuration dependency is INetworkConfiguration from
+`firmware/lib/EnvNodeBaseConfiguration`; a minimal application need not construct
+EnvNode sensor/actuator configuration to start WiFi.
+
+EnvNode Configuration.h still exposes the same field names and types, importing
+the shared base definitions. IConfigurationService forwards the narrow network
+view to its existing Configuration.network member. NVS storage and restore
+formats remain unchanged. See FirmwareBasisRefactoring.md for the scope and
+validation record.
