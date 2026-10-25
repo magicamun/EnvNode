@@ -19,25 +19,20 @@ class JsonObject {
 public:
     explicit JsonObject(const String& input) : input_(input) {}
     bool parse() {
-        if (!take('{')) return false;
-        do {
-            String key, value;
-            const size_t keyPosition = position_;
-            if (!quoted(key, 100) || !take(':')) return false;
-            const size_t valuePosition = position_;
-            if (!quoted(value, 30000)) return false;
-            fields_.push_back({hash(key), keyPosition, valuePosition, false});
-            if (fields_.size() > 1600) return false;
-            space();
-            if (position_ < input_.length() && input_[position_] == '}') {
-                ++position_; space(); return position_ == input_.length();
-            }
-        } while (take(','));
-        return false;
+        // Count and validate first. Allocate exactly once rather than growing a
+        // vector whose reallocation can abort an ESP32 with a fragmented heap.
+        if (!parseFields(false)) return false;
+        capacity_ = fieldCount_;
+        fields_.reset(new (std::nothrow) Field[capacity_]);
+        if (!fields_) return false;
+        position_ = 0;
+        fieldCount_ = 0;
+        return parseFields(true);
     }
     bool get(const String& key, String& value) {
         const uint32_t wanted = hash(key);
-        for (auto& field : fields_) {
+        for (size_t index = 0; index < fieldCount_; ++index) {
+            auto& field = fields_[index];
             if (field.used || field.hash != wanted) continue;
             position_ = field.keyPosition;
             String actual;
@@ -49,8 +44,31 @@ public:
         }
         return false;
     }
-    bool empty() const { for (const auto& field : fields_) if (!field.used) return false; return true; }
+    bool empty() const {
+        for (size_t index = 0; index < fieldCount_; ++index) if (!fields_[index].used) return false;
+        return true;
+    }
 private:
+    bool parseFields(bool recordPositions) {
+        if (!take('{')) return false;
+        do {
+            String key, value;
+            const size_t keyPosition = position_;
+            if (!quoted(key, 100) || !take(':')) return false;
+            const size_t valuePosition = position_;
+            if (!quoted(value, 30000) || fieldCount_ >= 1600) return false;
+            if (recordPositions) {
+                if (fieldCount_ >= capacity_) return false;
+                fields_[fieldCount_] = {hash(key), keyPosition, valuePosition, false};
+            }
+            ++fieldCount_;
+            space();
+            if (position_ < input_.length() && input_[position_] == '}') {
+                ++position_; space(); return position_ == input_.length();
+            }
+        } while (take(','));
+        return false;
+    }
     static bool validUtf8(const String& text) {
         for (size_t i = 0; i < text.length();) {
             uint32_t code = static_cast<uint8_t>(text[i++]);
@@ -133,7 +151,9 @@ private:
     struct Field { uint32_t hash; size_t keyPosition; size_t valuePosition; bool used; };
     const String& input_;
     size_t position_ = 0;
-    std::vector<Field> fields_;
+    std::unique_ptr<Field[]> fields_;
+    size_t fieldCount_ = 0;
+    size_t capacity_ = 0;
 };
 class Fields {
 public:
@@ -360,8 +380,8 @@ bool encodeConfigurationBackup(const Configuration& configuration, bool includeP
     if (!f.ok || result.length() != expected || result.length() > MaxConfigurationBackupLength) return false;
     output = std::move(result); return output.length() == expected;
 }
-bool decodeConfigurationBackup(const String& input, const Configuration& current,
-    Configuration& candidate, bool& includesPasswords) {
+bool decodeConfigurationBackupCandidate(const String& input, const Configuration& current,
+    std::unique_ptr<Configuration>& candidate, bool& includesPasswords) {
     if (input.length() > MaxConfigurationBackupLength || strlen(input.c_str()) != input.length()) return false;
     JsonObject object(input);
     if (!object.parse()) return false;
@@ -370,7 +390,16 @@ bool decodeConfigurationBackup(const String& input, const Configuration& current
     bool passwords = false; String firmware;
     Fields f(object); String version("3"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !object.empty()) return false;
-    candidate = *copy; includesPasswords = passwords; return true;
+    candidate = std::move(copy); includesPasswords = passwords; return true;
+}
+bool decodeConfigurationBackup(const String& input, const Configuration& current,
+    Configuration& candidate, bool& includesPasswords) {
+    std::unique_ptr<Configuration> decoded;
+    bool passwords = false;
+    if (!decodeConfigurationBackupCandidate(input, current, decoded, passwords)) return false;
+    candidate = *decoded;
+    includesPasswords = passwords;
+    return true;
 }
 bool encodeConfigurationRecord(const Configuration& configuration, std::vector<uint8_t>& output) {
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));

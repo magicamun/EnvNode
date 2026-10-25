@@ -56,10 +56,10 @@ neben ihnen werden übersetzt.
 - `firmware/src/WebService.cpp:641`: `SSID`
 - `firmware/src/WebService.cpp:645`: `RSSI`
 - `firmware/src/WebService.cpp:677`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:760`: `MQTT`
-- `firmware/src/WebService.cpp:1500`: `GPIO`
-- `firmware/src/WebService.cpp:1599`: `GPIO`
-- `firmware/src/WebService.cpp:1859`: `MCU`
-- `firmware/src/WebService.cpp:1859`: `WiFi`
-- `firmware/src/WebService.cpp:1867`: `SDA GPIO`
-- `firmware/src/WebService.cpp:2420`: `EEPROM`
+- `firmware/src/WebService.cpp:775`: `MQTT`
+- `firmware/src/WebService.cpp:1518`: `GPIO`
+- `firmware/src/WebService.cpp:1617`: `GPIO`
+- `firmware/src/WebService.cpp:1877`: `MCU`
+- `firmware/src/WebService.cpp:1877`: `WiFi`
+- `firmware/src/WebService.cpp:1885`: `SDA GPIO`
+- `firmware/src/WebService.cpp:2438`: `EEPROM`

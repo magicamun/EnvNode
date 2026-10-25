@@ -720,6 +720,7 @@ void WebService::handleConfigurationUploadData() {
         configurationUploadFailed_ = !configurationUpload_.isEmpty() || configurationUploadComplete_;
         restoreCandidate_.reset(); restoreToken_ = String();
         if (otaService_.busy() || upload.name != "configuration") configurationUploadFailed_ = true;
+        logger_.info("Configuration backup upload started");
     } else if (upload.status == UPLOAD_FILE_WRITE && !configurationUploadFailed_) {
         if (upload.currentSize > MaxConfigurationBackupLength - configurationUpload_.length()
             || !configurationUpload_.concat(reinterpret_cast<const char*>(upload.buf), upload.currentSize)) {
@@ -727,6 +728,9 @@ void WebService::handleConfigurationUploadData() {
         }
     } else if (upload.status == UPLOAD_FILE_END) {
         configurationUploadComplete_ = true;
+        logger_.infof("Configuration backup upload complete bytes=%u rejected=%u heap=%u largest=%u",
+            static_cast<unsigned>(configurationUpload_.length()), configurationUploadFailed_ ? 1u : 0u,
+            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     } else if (upload.status == UPLOAD_FILE_ABORTED) {
         configurationUploadFailed_ = false; configurationUploadComplete_ = false; configurationUpload_ = String();
         restoreCandidate_.reset(); restoreToken_ = String();
@@ -734,12 +738,23 @@ void WebService::handleConfigurationUploadData() {
 }
 
 void WebService::handleConfigurationPreview() {
-    restoreCandidate_.reset(new (std::nothrow) Configuration);
+    const uint32_t startedAt = millis();
+    restoreCandidate_.reset();
+    logger_.infof("Configuration preview decoding bytes=%u heap=%u largest=%u",
+        static_cast<unsigned>(configurationUpload_.length()),
+        static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     bool valid = !otaService_.busy() && !configurationUploadFailed_ && configurationUploadComplete_
-        && restoreCandidate_ && decodeConfigurationBackup(configurationUpload_,
-            configurationService_.getConfiguration(), *restoreCandidate_, restoreIncludesPasswords_)
-        && configurationService_.validateRestore(*restoreCandidate_);
+        && decodeConfigurationBackupCandidate(configurationUpload_,
+            configurationService_.getConfiguration(), restoreCandidate_, restoreIncludesPasswords_);
+    // The candidate owns its strings. Release the uploaded JSON before domain
+    // validation and rendering, instead of keeping both representations alive.
     configurationUpload_ = String(); configurationUploadFailed_ = false; configurationUploadComplete_ = false;
+    logger_.infof("Configuration preview decoded=%u elapsed=%u heap=%u largest=%u",
+        valid ? 1u : 0u, static_cast<unsigned>(millis() - startedAt),
+        static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
+    if (valid) valid = configurationService_.validateRestore(*restoreCandidate_);
+    logger_.infof("Configuration preview validated=%u elapsed=%u", valid ? 1u : 0u,
+        static_cast<unsigned>(millis() - startedAt));
     if (!valid) {
         restoreCandidate_.reset(); restoreToken_ = String();
         sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::BackupInvalid), false); return;
@@ -780,6 +795,9 @@ void WebService::handleConfigurationPreview() {
         + uiText(TextId::CancelRestore) + "</button></form></section>";
     server_.sendHeader("Cache-Control", "no-store");
     sendPage(uiText(TextId::RestorePreview), "/configuration", html);
+    logger_.infof("Configuration preview response sent elapsed=%u heap=%u largest=%u",
+        static_cast<unsigned>(millis() - startedAt), static_cast<unsigned>(ESP.getFreeHeap()),
+        static_cast<unsigned>(ESP.getMaxAllocHeap()));
 }
 
 void WebService::handleConfigurationRestore() {

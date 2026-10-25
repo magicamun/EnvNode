@@ -71,3 +71,22 @@ Locale (German commas, English points), without thousands separators. The Web
 boundary converts these strings to neutral numeric input; application configuration,
 NVS, backups and MQTT remain independent of the UI Locale. No format migration is
 needed. Restore previews and temperature-age diagnostics are localized too.
+
+## Restore preview memory and diagnostics
+
+The upload/preview stage does not write NVS. It decodes and validates a candidate;
+only the later explicitly confirmed restore stages/commits a bank. A browser
+connection reset during upload/preview does not by itself identify a storage fault.
+
+The JSON decoder validates/counts fields before allocating an exact-size index
+with checked nothrow allocation. It no longer grows an unchecked vector while the
+uploaded JSON occupies heap. The web preview takes ownership of the single decoded
+Configuration rather than keeping an additional full destination model, and frees
+the JSON before domain validation/rendering. The existing decoder API remains
+available; format versions, input limits, validation and credential handling remain.
+
+INFO diagnostics mark upload start/completion, preview decode, domain validation
+and response completion, including bytes, elapsed time, free heap and largest
+free block. They contain no uploaded credentials or configuration contents.
+A simulated index-allocation failure is covered natively; physical constrained
+heap/network behavior still requires the device retry and these phase logs.

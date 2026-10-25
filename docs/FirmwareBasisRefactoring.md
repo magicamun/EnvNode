@@ -481,3 +481,33 @@ Validation on 2026-10-25:
 The remaining structural work is separating startup/main-loop composition and a
 final dependency review. The existing EnvNode backup schema deliberately remains
 application-specific; the future test application supplies its own record codec.
+
+## Restore preview follow-up
+
+After step 11 the user reported a reproducible hang while uploading/checking the
+backup, before the preview page appears. They clarified that restore had not been
+used for a long time, so the report does not establish a regression from the
+latest extraction. This phase does not call configuration persistence.
+
+Review found pre-existing memory pressure: an unchecked geometrically growing
+JSON index vector alongside uploaded JSON, a destination Configuration and a
+second decoded copy. The JSON index now uses a counted, exact-size nothrow array;
+allocation failure returns false. The web adapter takes ownership of one decoded
+candidate and releases the uploaded JSON before domain validation and rendering.
+The legacy decoder interface delegates to the same codec. File versions and
+credential/default/validation behavior remain unchanged; bank storage is untouched.
+
+Upload/decode/validation/response INFO markers now show lengths, timing and heap
+availability, without configuration values/passwords. Five new native tests cover
+single checked candidate/index allocation, injected index-allocation failure with
+candidate/credential flags unchanged (including the legacy API), excessive field
+counts rejected before allocation, and equivalent owned/legacy decoding with
+omitted-password retention. These verify the corrected allocation path, not yet
+the exact cause or resolution of the user's physical device hang.
+
+Validation: ESP32 build passes; English/German browser checks pass; full native
+suite has 498 passing tests and only the same pre-existing board-profile failure.
+All existing backup/restore compatibility cases pass. Translation inventory stays
+at zero missing/unwired entries. No physical flash, reset or restore was performed
+by the agent. The next device retry should first check whether the preview appears;
+if it still hangs, the final Configuration backup/preview phase marker is needed.
