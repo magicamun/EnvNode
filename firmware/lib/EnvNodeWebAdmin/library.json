@@ -1,0 +1,23 @@
+{
+  "name": "EnvNodeWebAdmin",
+  "version": "0.1.0",
+  "description": "Network and log administration routes; see repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeWeb"
+    },
+    {
+      "name": "EnvNodeBaseConfiguration"
+    },
+    {
+      "name": "EnvNodeNetwork"
+    },
+    {
+      "name": "EnvNodeLogging"
+    }
+  ]
+}

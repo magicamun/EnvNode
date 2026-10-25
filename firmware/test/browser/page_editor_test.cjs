@@ -5,12 +5,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../../include/PageEditorScript.h'), 'utf8').split('R"EDITOR(')[1].split(')EDITOR"')[0];
-const catalog = fs.readFileSync(path.join(__dirname, '../../include/WebTextCatalog.inc'), 'utf8');
+const catalog = fs.readFileSync(path.join(__dirname, '../../lib/EnvNodeWeb/include/WebTextCatalog.inc'), 'utf8');
 const entries = Array.from(catalog.matchAll(/ENVNODE_WEB_TEXT\((\w+), ("(?:\\.|[^"\\])*"), ("(?:\\.|[^"\\])*"|nullptr)\)/g));
 const ids = new Set(entries.map(([, id]) => id));
-const exportedSource = fs.readFileSync(path.join(__dirname, '../../src/WebLocalization.cpp'), 'utf8');
+const exportedSource = fs.readFileSync(path.join(__dirname, '../../lib/EnvNodeWeb/src/WebLocalization.cpp'), 'utf8');
 const exportedIds = new Set(Array.from(exportedSource.matchAll(/\{"(\w+)", TextId::\w+\}/g), m => m[1]));
-for (const relative of ['../../include/PageEditorScript.h', '../../src/LogWebView.cpp', '../../src/SelectorWebView.cpp', '../../src/WebService.cpp']) {
+for (const relative of ['../../include/PageEditorScript.h', '../../lib/EnvNodeWebAdmin/src/LogWebView.cpp', '../../src/SelectorWebView.cpp', '../../src/WebService.cpp']) {
     const text = fs.readFileSync(path.join(__dirname, relative), 'utf8');
     for (const [, id] of text.matchAll(/EnvNodeUi\.(\w+)/g)) {
         assert(ids.has(id), `Unknown browser text ID: ${id}`);

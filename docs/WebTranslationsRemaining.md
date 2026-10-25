@@ -4,7 +4,7 @@
 
 Die Zuordnung ist in [WebLocalization.md](WebLocalization.md) festgelegt.
 Alle erfassten Bedien-, Hilfe-, Bestätigungs- und Fehlertexte verwenden stabile
-Text-IDs im zentralen `firmware/include/WebTextCatalog.inc`. Die gespeicherte
+Text-IDs im zentralen `firmware/lib/EnvNodeWeb/include/WebTextCatalog.inc`. Die gespeicherte
 Locale wählt Deutsch oder den englischen Fallback. Browsertexte verwenden eine
 kleine, vom Server gelieferte Auswahl desselben Katalogs.
 
@@ -46,20 +46,20 @@ Keine Fundstellen in den geprüften Webansichten.
 Diese festen Texte bleiben bewusst unverändert. Sprachliche Beschriftungen
 neben ihnen werden übersetzt.
 
-- `firmware/src/PropertyPreviewWebView.cpp:71`: `Format`
-- `firmware/src/PropertyPreviewWebView.cpp:209`: `Format`
-- `firmware/src/WebService.cpp:705`: `EnvNode · v`
-- `firmware/src/WebService.cpp:745`: `Build`
-- `firmware/src/WebService.cpp:745`: `Flash`
-- `firmware/src/WebService.cpp:747`: `SSID`
-- `firmware/src/WebService.cpp:751`: `RSSI`
-- `firmware/src/WebService.cpp:784`: `DHCP`
-- `firmware/src/WebService.cpp:810`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:862`: `EEPROM`
-- `firmware/src/WebService.cpp:974`: `ENHD descriptor 0.1`
-- `firmware/src/WebService.cpp:977`: `EnvNode DuoRelay 0.3`
-- `firmware/src/WebService.cpp:1686`: `GPIO`
-- `firmware/src/WebService.cpp:1785`: `GPIO`
-- `firmware/src/WebService.cpp:2045`: `MCU`
-- `firmware/src/WebService.cpp:2045`: `WiFi`
-- `firmware/src/WebService.cpp:2053`: `SDA GPIO`
+- `firmware/lib/EnvNodeWebAdmin/src/NetworkWebRoutes.cpp:21`: `DHCP`
+- `firmware/src/PropertyPreviewWebView.cpp:72`: `Format`
+- `firmware/src/PropertyPreviewWebView.cpp:210`: `Format`
+- `firmware/src/WebService.cpp:737`: `Build`
+- `firmware/src/WebService.cpp:737`: `Flash`
+- `firmware/src/WebService.cpp:739`: `SSID`
+- `firmware/src/WebService.cpp:743`: `RSSI`
+- `firmware/src/WebService.cpp:776`: `Home Assistant Discovery`
+- `firmware/src/WebService.cpp:885`: `MQTT`
+- `firmware/src/WebService.cpp:979`: `EEPROM`
+- `firmware/src/WebService.cpp:1091`: `ENHD descriptor 0.1`
+- `firmware/src/WebService.cpp:1094`: `EnvNode DuoRelay 0.3`
+- `firmware/src/WebService.cpp:1811`: `GPIO`
+- `firmware/src/WebService.cpp:1910`: `GPIO`
+- `firmware/src/WebService.cpp:2170`: `MCU`
+- `firmware/src/WebService.cpp:2170`: `WiFi`
+- `firmware/src/WebService.cpp:2178`: `SDA GPIO`

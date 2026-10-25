@@ -142,3 +142,50 @@ The next hardware smoke test should open status, sensor/configuration pages,
 large display forms, logs/refresh and the firmware page, and confirm styling and
 navigation. Shared network/log/OTA page modules and runtime lifecycle separation
 are still future steps; this commit extracts the server/frame boundary only.
+
+## Runtime confirmation after step 3
+
+The user reported that the new web-host version looked good in the runtime
+check. Further work continues on EnvNode alone; no test/provisioning application
+is being built as part of this separation.
+
+## Step 4: network and log administration pages
+
+`EnvNodeWebAdmin` contains NetworkWebRoutes and LogWebRoutes. EnvNode WebService
+registers these providers with its existing WebHost and implements the narrow
+IWebPagePresenter and INetworkSaveObserver adapters. Public constructor arguments
+remain unchanged.
+
+NetworkWebRoutes reads/writes only INetworkSettings. IConfigurationService
+inherits this interface, retaining existing implementations and its network
+reference adapter. Save success/failure is reported back to EnvNode, which keeps
+its previous ConfigurationArea::Network handling, pending restart action and
+result texts. Network settings storage, keys, defaults and restore behavior are
+unchanged.
+
+LogWebRoutes uses only the log reader and web presentation interfaces. Log HTML,
+JSON and refresh behavior are transferred unchanged. Existing routes/methods are
+preserved across all providers (61 registrations in total).
+
+Shared localization/catalog files move byte-for-byte into EnvNodeWeb; JsonWriter
+moves into EnvNodeBaseConfiguration, keeping configuration backup and MQTT below
+the HTTP layer. The translation inventory and browser test paths follow these
+moves. No catalog entries or translations were changed.
+
+Validation on 2026-10-25:
+
+- ESP32 application build succeeds in the local verification snapshot.
+- All previous native test outcomes are preserved.
+- Seven new administration tests pass: form escaping/password secrecy, current
+  locale/assigned addresses, preserving versus explicitly clearing passwords,
+  static-field forwarding, failed-save notification, offline/setup-AP log JSON
+  and localized log page/entry rendering.
+- Overall: 435 passed and the same known board-profile assertion failed.
+- Browser page-editor tests pass in English and German before and after the move.
+- Source comparison confirms unchanged localization, log view and JSON helper
+  bytes and unchanged URL/method inventory.
+- No firmware upload was performed.
+
+The next runtime check should open /network and /logs, exercise log refresh and
+verify that a successful network save still reports the required restart without
+performing it automatically. OTA/restart separation is the next independent step.

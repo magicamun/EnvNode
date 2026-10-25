@@ -4,10 +4,16 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <map>
 enum HTTPMethod { HTTP_GET, HTTP_POST };
 class WebServer {
 public:
     struct Route { std::string path; HTTPMethod method; std::function<void()> handler; };
+    std::map<std::string, String> arguments;
+    String arg(const char* name) const {
+        const auto found = arguments.find(name);
+        return found == arguments.end() ? String() : found->second;
+    }
     uint16_t port;
     std::vector<Route> routes;
     bool started = false;

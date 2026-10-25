@@ -7,6 +7,9 @@
 #include "IWebService.h"
 #include "IWebRoutes.h"
 #include "WebHost.h"
+#include "IWebPagePresenter.h"
+#include "NetworkWebRoutes.h"
+#include "LogWebRoutes.h"
 #include "IConfigurationService.h"
 #include "IWiFiService.h"
 #include "IMqttService.h"
@@ -33,7 +36,7 @@
 
 namespace EnvNode {
 
-class WebService : public IWebService, private IWebRoutes {
+class WebService : public IWebService, private IWebRoutes, private IWebPagePresenter, private INetworkSaveObserver {
 public:
     WebService(
         ILogger& logger,
@@ -62,6 +65,8 @@ public:
 
 private:
     void registerRoutes(WebServer& server) override;
+    Locale webLocale() const override;
+    void networkSettingsSaved(bool success) override;
     void handleValues();
     void handleValueEdit();
     void handleValueSave();
@@ -94,7 +99,6 @@ private:
     void handleControllerStart();
     void handleControllerStop();
     void handleControllerRuntimeOperation(bool start);
-    void handleNetwork();
     void handleMqtt();
     void handleTime();
     void handleUnits();
@@ -115,12 +119,9 @@ private:
     String restoreToken_;
     void handleDiagnostics();
     void handleI2CScan();
-    void handleLogs();
-    void handleLogData();
     void handleFirmware();
     void handleFirmwareUpload();
     void handleFirmwareUploadData();
-    void handleNetworkSave();
     void handleMqttSave();
     void handleDiscoveryRepublish();
     void handleTimeSave();
@@ -135,7 +136,7 @@ private:
     void handleNotFound();
 
     void sendPage(const char* title, const char* activeRoute, const String& content,
-        int status = 200, bool wideContent = false);
+        int status = 200, bool wideContent = false) override;
     void sendResult(const char* title, const char* activeRoute, const char* message, bool success);
     void sendConfigurationResult(
         const ConfigurationSaveResult& result,
@@ -165,7 +166,6 @@ private:
     ActuatorRuntime& actuatorRuntime_;
     ControllerRuntime& controllerRuntime_;
     MeasurementSnapshotCache& measurementSnapshotCache_;
-    const IRecentLogReader& logReader_;
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
     OTAService& otaService_;
@@ -176,6 +176,8 @@ private:
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
     WebHost webHost_;
     WebServer& server_;
+    NetworkWebRoutes networkRoutes_;
+    LogWebRoutes logRoutes_;
     bool firmwareUploadRequestAccepted_ = false;
     String firmwareUploadRequestError_;
 };

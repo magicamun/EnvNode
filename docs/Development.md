@@ -95,3 +95,16 @@ Changes in the shared header/streaming path need a browser smoke test as well as
 the native web-host tests, especially for large display forms. Existing runtime
 behavior before step 3 was confirmed by the user; this web change requires its
 own hardware check.
+
+## Administration route modules
+
+EnvNode WebService registers NetworkWebRoutes and LogWebRoutes from
+`firmware/lib/EnvNodeWebAdmin`. These modules use a page presenter and narrow
+settings/log interfaces rather than the complete application runtime. EnvNode
+still owns the result-page and restart decision after a network save.
+
+Shared translations are in `firmware/lib/EnvNodeWeb`; their public include names
+are unchanged. The JSON helper is in EnvNodeBaseConfiguration and remains
+independent of HTTP. Native administration tests run with `pio test -e native
+-f test_web_admin`; browser script tests run from the repository root with
+`node firmware/test/browser/page_editor_test.cjs`.

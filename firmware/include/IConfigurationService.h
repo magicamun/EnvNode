@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Configuration.h"
-#include "INetworkConfiguration.h"
+#include "INetworkSettings.h"
 
 namespace EnvNode {
 
-class IConfigurationService : public INetworkConfiguration {
+class IConfigurationService : public INetworkSettings {
 public:
     virtual ~IConfigurationService() = default;
 
@@ -21,7 +21,7 @@ public:
     virtual bool setDeviceName(const String& deviceName) = 0;
     virtual bool setNetworkConfiguration(
         const NetworkConfiguration& network,
-        bool updatePassword) = 0;
+        bool updatePassword) override = 0;
     virtual bool setWifiSSID(const String& ssid) = 0;
     virtual bool setWifiPassword(const String& password) = 0;
     virtual bool setMqttServer(const String& server) = 0;

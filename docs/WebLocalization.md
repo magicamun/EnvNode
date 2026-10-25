@@ -9,7 +9,7 @@
 - Sichtbare Zustands-, Qualitäts- und Messgrößenbezeichnungen der Weboberfläche.
 - Dynamisch erzeugte Beschriftungen und Fehlermeldungen in Browser-Skripten.
 
-Diese Texte stehen zentral in `firmware/include/WebTextCatalog.inc` mit stabiler
+Diese Texte stehen zentral in `firmware/lib/EnvNodeWeb/include/WebTextCatalog.inc` mit stabiler
 TextId, englischem Fallback und deutscher Übersetzung. Die gespeicherte Locale
 steuert die Darstellung; Deutsch verwendet `de-DE` (Eingabe auch `de_de`).
 

@@ -4,7 +4,6 @@
 #include "WebLocalization.h"
 #include "WebPresentationText.h"
 #include "HtmlEscaping.h"
-#include "LogWebView.h"
 #include "PropertyResolver.h"
 #include "PropertyPresentationReader.h"
 #include "SystemPropertyReader.h"
@@ -486,17 +485,20 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
       controllerRuntime_(controllerRuntime),
       measurementSnapshotCache_(measurementSnapshotCache),
-      logReader_(logReader),
       discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
       i2cBusManager_(i2cBusManager),
       boardIdentityResolution_(boardIdentityResolution),
       boardProvisioningService_(boardProvisioningService),
       moduleDiscoveryService_(moduleDiscoveryService),
       moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService),
-      webHost_(logger, wifiService), server_(webHost_.server()) {}
+      webHost_(logger, wifiService), server_(webHost_.server()),
+      networkRoutes_(webHost_, configurationService, wifiService, *this, *this),
+      logRoutes_(webHost_, *this, logReader) {}
 
 void WebService::begin() {
     webHost_.registerRoutes(*this);
+    webHost_.registerRoutes(networkRoutes_);
+    webHost_.registerRoutes(logRoutes_);
     webHost_.begin();
 }
 
@@ -523,7 +525,6 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
     server.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
     server.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
-    server.on("/network", HTTP_GET, [this]() { handleNetwork(); });
     server.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
     server.on("/time", HTTP_GET, [this]() { handleTime(); });
     server.on("/units", HTTP_GET, [this]() { handleUnits(); });
@@ -539,13 +540,10 @@ void WebService::registerRoutes(WebServer& server) {
     });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
-    server.on("/logs", HTTP_GET, [this]() { handleLogs(); });
-    server.on("/logs/data", HTTP_GET, [this]() { handleLogData(); });
     server.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
     server.on("/firmware/upload", HTTP_POST,
         [this]() { handleFirmwareUpload(); },
         [this]() { handleFirmwareUploadData(); });
-    server.on("/network/save", HTTP_POST, [this]() { handleNetworkSave(); });
     server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
     server.on("/mqtt/discovery/republish", HTTP_POST,
         [this]() { handleDiscoveryRepublish(); });
@@ -767,33 +765,7 @@ void WebService::handleStatus() {
     sendPage(uiText(TextId::Status), "/status", c);
 }
 
-void WebService::handleNetwork() {
-    const NetworkConfiguration& n = configurationService_.getConfiguration().network;
-    const bool isStatic = n.addressMode == NetworkAddressMode::Static;
-    String c;
-    c.reserve(2200);
-    c = (String("<section class='card'><h2>") + uiText(TextId::NetworkConfiguration) + "</h2><form method='post' action='/network/save' autocomplete='off'>");
-    c += (String("<label>") + uiText(TextId::Hostname) + "<input name='hostname' required value='") + escapeHtml(n.hostname) + (String("'></label><label>") + uiText(TextId::WiFiSSID) + "<input name='wifiSSID' required value='") + escapeHtml(n.wifiSSID) + "'></label>";
-    c += (String("<label class='choice'><input type='checkbox' name='changeWifiPassword' value='1'>") + uiText(TextId::ChangeWiFiPassword) + "</label><label>" + uiText(TextId::NewWiFiPassword) + "<input type='password' name='wifiPassword' autocomplete='new-password'></label>");
-    c += (String("<label>") + uiText(TextId::AddressMode) + "<select name='addressMode' id='addressMode' onchange='toggleStatic()'><option value='dhcp'") + String(!isStatic?" selected":"") + ">DHCP</option><option value='static'" + String(isStatic?" selected":"") + (String(">") + uiText(TextId::StaticIPv4) + "</option></select></label>");
-    const NetworkAddressSnapshot assigned = wifiService_.stationAddresses();
-    c += "<div id='dhcpFields'>";
-    c += String("<p class='help'>") + uiText(TextId::ActiveNetworkAddresses) + "</p>";
-    const auto assignedField = [&](TextId label, const String& value) {
-        c += String("<label>") + uiText(label) + "<input readonly value='";
-        c += value.isEmpty() || value == "0.0.0.0" ? String("—") : escapeHtml(value);
-        c += "'></label>";
-    };
-    assignedField(TextId::IPv4Address, assigned.ipAddress);
-    assignedField(TextId::SubnetMask, assigned.subnetMask);
-    assignedField(TextId::DefaultGateway, assigned.gateway);
-    assignedField(TextId::PrimaryDNS, assigned.dns1);
-    assignedField(TextId::SecondaryDNS, assigned.dns2);
-    c += "</div>";
-    c += (String("<div id='staticFields'><label>") + uiText(TextId::IPv4Address) + "<input name='ipv4Address' value='") + escapeHtml(n.ipv4Address) + (String("'></label><label>") + uiText(TextId::SubnetMask) + "<input name='subnetMask' value='") + escapeHtml(n.subnetMask) + (String("'></label><label>") + uiText(TextId::DefaultGateway) + "<input name='gateway' value='") + escapeHtml(n.gateway) + (String("'></label><label>") + uiText(TextId::PrimaryDNS) + "<input name='dns1' value='") + escapeHtml(n.dns1) + (String("'></label><label>") + uiText(TextId::SecondaryDNS) + " " + "<span class='help'>" + uiText(TextId::Optional) + "</span><input name='dns2' value='") + escapeHtml(n.dns2) + (String("'></label></div><div class='actions'><button>") + uiText(TextId::SaveNetworkSettings) + "</button></div></form></section>");
-    c += "<script>function toggleStatic(){var s=document.getElementById('addressMode').value==='static',d=document.getElementById('staticFields');d.hidden=!s;document.getElementById('dhcpFields').hidden=s;d.querySelectorAll('input').forEach(function(i){i.disabled=!s})}toggleStatic()</script>";
-    sendPage(uiText(TextId::Network), "/network", c);
-}
+
 
 void WebService::handleMqtt() {
     const MqttConfiguration& m = configurationService_.getConfiguration().mqtt;
@@ -2283,17 +2255,9 @@ void WebService::renderDiagnostics() {
     sendPage(uiText(TextId::Diagnostics), "/diagnostics", c);
 }
 
-void WebService::handleLogs() {
-    sendPage(uiText(TextId::Logs), "/logs", buildRecentLogHtml(logReader_, configurationService_.getLocale()));
-}
 
-void WebService::handleLogData() {
-    if (!administrationAvailable()) {
-        server_.send(503, "application/json", "{\"error\":\"Administration unavailable\"}");
-        return;
-    }
-    server_.send(200, "application/json; charset=utf-8", buildRecentLogJson(logReader_));
-}
+
+
 
 void WebService::handleFirmware() {
     String c;
@@ -2375,14 +2339,7 @@ void WebService::handleFirmwareUpload() {
 
 
 
-void WebService::handleNetworkSave() {
-    NetworkConfiguration n = configurationService_.getConfiguration().network;
-    n.hostname=server_.arg("hostname"); n.wifiSSID=server_.arg("wifiSSID"); n.addressMode=server_.arg("addressMode")=="static"?NetworkAddressMode::Static:NetworkAddressMode::Dhcp;
-    n.ipv4Address=server_.arg("ipv4Address"); n.subnetMask=server_.arg("subnetMask"); n.gateway=server_.arg("gateway"); n.dns1=server_.arg("dns1"); n.dns2=server_.arg("dns2");
-    const bool updatePassword=server_.arg("changeWifiPassword")=="1"; if(updatePassword)n.wifiPassword=server_.arg("wifiPassword");
-    const ConfigurationSaveResult result=configurationSaveResult(configurationService_.setNetworkConfiguration(n,updatePassword),ConfigurationArea::Network);
-    sendConfigurationResult(result,uiText(TextId::NetworkSettingsSaved),uiText(TextId::NetworkSaveFailed),"/network",uiText(TextId::InvalidNetworkSettingsStaticModeRequiresAValid));
-}
+
 
 void WebService::handleMqttSave() {
     const String portText=server_.arg("port"); const long port=portText.toInt();
@@ -2991,4 +2948,13 @@ void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText
 void WebService::handleNotFound() { server_.send(404,"text/plain",uiText(TextId::NotFound)); }
 void WebService::performExplicitRestart() { server_.client().flush(); runtimeManager_.performPendingRestart(); }
 
+} // namespace EnvNode
+
+namespace EnvNode {
+Locale WebService::webLocale() const { return configurationService_.getLocale(); }
+void WebService::networkSettingsSaved(bool success) {
+    const ConfigurationSaveResult result = configurationSaveResult(success, ConfigurationArea::Network);
+    sendConfigurationResult(result, uiText(TextId::NetworkSettingsSaved), uiText(TextId::NetworkSaveFailed),
+        "/network", uiText(TextId::InvalidNetworkSettingsStaticModeRequiresAValid));
+}
 } // namespace EnvNode
