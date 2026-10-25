@@ -188,3 +188,25 @@ Native checks: `pio test -e native -f test_time_basis -f test_common_settings_we
 Physical follow-up: verify synchronized time and locale/date/number presentation,
 change device name and locale/time settings, then confirm persistence after reboot.
 No configuration migration, reset or physical upload is part of the refactoring.
+
+## Shared configuration persistence
+
+EnvNodeConfigurationStorage contains ConfigurationStorage and BaseSettingsService.
+Storage receives a fixed application namespace layout; the base service borrows
+existing device/network/time/locale structs plus defaults. EnvNode's
+EnvNodeConfigurationStorage.h fixes the previous weather/weather0/weather1/
+weather_meta names. Its ConfigurationService delegates base operations and raw
+storage while retaining complete model validation and backup/snapshot encoding.
+
+No NVS key, default, configuration field or record schema is migrated. Opaque
+snapshot bytes, verification-before-bank-commit order, explicit empty overrides,
+ordinary-edit partial-failure semantics and factory-reset namespace erasure are
+preserved. The shared service stores no duplicate configuration model on the ESP32.
+A future test application can reuse it without any EnvNode sensor/slot types.
+
+Checks: `pio test -e native -f test_configuration_storage -f test_configuration_backup
+-f test_base_configuration` plus the full native suite and ESP32 build. Native
+fault tests cover initialization, staging/readback/metadata failure and namespace
+isolation. Physical follow-up should export a backup, save/reboot a base setting,
+restore the backup and verify credentials, settings and application slots survive.
+A factory reset is not required for that hardware smoke test.

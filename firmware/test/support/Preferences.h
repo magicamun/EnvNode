@@ -9,7 +9,12 @@
 
 class Preferences {
 public:
-    bool begin(const char* name, bool = false) { namespace_ = name; return true; }
+    static String& failBeginNamespace() { static String name; return name; }
+    static String& failClearNamespace() { static String name; return name; }
+    bool begin(const char* name, bool = false) {
+        if (failBeginNamespace() == name) return false;
+        namespace_ = name; return true;
+    }
     void end() {}
 
     bool isKey(const char* key) const {
@@ -70,7 +75,7 @@ public:
     }
 
     bool remove(const char* key) { return values().erase(key) != 0; }
-    bool clear() { values().clear(); return true; }
+    bool clear() { if (failClearNamespace() == namespace_.c_str()) return false; values().clear(); return true; }
 
     static String storedString(const char* key) {
         const auto& stored = namespaces()["weather"];

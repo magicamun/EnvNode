@@ -15,33 +15,19 @@
 namespace EnvNode {
 
 namespace {
-constexpr const char* PreferencesNamespace = "weather";
-constexpr const char* KeyDeviceName = "deviceName";
-constexpr const char* KeyWifiSSID = "wifiSSID";
-constexpr const char* KeyWifiPassword = "wifiPassword";
-constexpr const char* KeyHostname = "hostname";
-constexpr const char* KeyAddressMode = "addressMode";
-constexpr const char* KeyIpv4Address = "ipv4Address";
-constexpr const char* KeySubnetMask = "subnetMask";
-constexpr const char* KeyGateway = "gateway";
-constexpr const char* KeyDns1 = "dns1";
-constexpr const char* KeyDns2 = "dns2";
 constexpr const char* KeyMqttServer = "mqttServer";
 constexpr const char* KeyMqttPort = "mqttPort";
 constexpr const char* KeyMqttUsername = "mqttUsername";
 constexpr const char* KeyMqttPassword = "mqttPassword";
-constexpr const char* KeyTimezone = "timezone";
-constexpr const char* KeyNtpServer1 = "ntpServer1";
-constexpr const char* KeyNtpServer2 = "ntpServer2";
-constexpr const char* KeyLocale = "locale";
 constexpr const char* KeyTemperatureUnit = "unitTemp";
 constexpr const char* KeyPressureUnit = "unitPressure";
 constexpr const char* KeySolarCellTemperatureUnit = "unitSolarTemp";
 constexpr const char* KeyRainDetectorLevelUnit = "unitRainLevel";
+constexpr BaseSettingsDefaults EnvNodeBaseDefaults = {
+    "WeatherStation", "WeatherStation", "CET-1CEST,M3.5.0/2,M10.5.0/3",
+    "pool.ntp.org", "time.cloudflare.com", Locale::GermanGermany,
+};
 constexpr uint16_t DefaultMqttPort = 1883;
-constexpr const char* DefaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
-constexpr const char* DefaultNtpServer1 = "pool.ntp.org";
-constexpr const char* DefaultNtpServer2 = "time.cloudflare.com";
 constexpr size_t MaxMqttServerLength = 64;
 constexpr size_t MaxMqttUsernameLength = 32;
 constexpr size_t MaxMqttPasswordLength = 64;
@@ -105,40 +91,17 @@ void loadModuleTarget(
 }
 }
 
-void ConfigurationService::ensurePreferencesStarted() {
-    if (!preferencesInitialized_) {
-        Preferences metadata;
-        if (!metadata.begin("weather_meta", false)) return;
-        const uint32_t bank = metadata.getUInt("active", 2);
-        metadata.end();
-        activeNamespace_ = bank == 0 ? "weather0" : bank == 1 ? "weather1" : PreferencesNamespace;
-        preferencesInitialized_ = preferences_.begin(activeNamespace_.c_str(), false);
-    }
-}
 
 void ConfigurationService::initializeDefaults() {
     configuration_.values.clear();
     configuration_.display = DisplayConfiguration{};
     configuration_.geoPosition = GeoPosition{};
     configuration_.pressureReduction = PressureReductionConfiguration{};
-    configuration_.device.name = "WeatherStation";
-    configuration_.network.hostname = "WeatherStation";
-    configuration_.network.wifiSSID = String();
-    configuration_.network.wifiPassword = String();
-    configuration_.network.addressMode = NetworkAddressMode::Dhcp;
-    configuration_.network.ipv4Address = String();
-    configuration_.network.subnetMask = String();
-    configuration_.network.gateway = String();
-    configuration_.network.dns1 = String();
-    configuration_.network.dns2 = String();
+    baseSettings().initializeDefaults();
     configuration_.mqtt.server = String();
     configuration_.mqtt.port = DefaultMqttPort;
     configuration_.mqtt.username = String();
     configuration_.mqtt.password = String();
-    configuration_.time.timezone = String(DefaultTimezone);
-    configuration_.time.ntpServer1 = String(DefaultNtpServer1);
-    configuration_.time.ntpServer2 = String(DefaultNtpServer2);
-    configuration_.locale.locale = Locale::GermanGermany;
     configuration_.presentation.temperature =
         measurementTypeMetadata(MeasurementType::Temperature).defaultPresentationUnit;
     configuration_.presentation.atmosphericPressure =
@@ -224,65 +187,32 @@ void ConfigurationService::initializeControllerDefaults() {
 void ConfigurationService::loadFromPreferences() {
     ensurePreferencesStarted();
 
-    if (preferences_.isKey("pressureReduce")) {
+    if (storage_.preferences().isKey("pressureReduce")) {
         PressureReductionConfiguration reduction;
-        if (decodePressureReduction(preferences_.getString("pressureReduce"), reduction))
+        if (decodePressureReduction(storage_.preferences().getString("pressureReduce"), reduction))
             configuration_.pressureReduction = reduction;
         else configuration_.pressureReduction = PressureReductionConfiguration{};
     }
-    if (preferences_.isKey("geoPosition")) {
+    if (storage_.preferences().isKey("geoPosition")) {
         GeoPosition position;
-        if (decodeGeoPosition(preferences_.getString("geoPosition"), position))
+        if (decodeGeoPosition(storage_.preferences().getString("geoPosition"), position))
             configuration_.geoPosition = position;
         else configuration_.geoPosition = GeoPosition{};
     }
-    if (preferences_.isKey(KeyDeviceName)) {
-        configuration_.device.name = preferences_.getString(KeyDeviceName, configuration_.device.name);
+    baseSettings().loadIdentityAndNetworkOverrides();
+    if (storage_.preferences().isKey(KeyMqttServer)) {
+        configuration_.mqtt.server = storage_.preferences().getString(KeyMqttServer, configuration_.mqtt.server);
     }
-    if (preferences_.isKey(KeyWifiSSID)) {
-        configuration_.network.wifiSSID = preferences_.getString(KeyWifiSSID, configuration_.network.wifiSSID);
+    if (storage_.preferences().isKey(KeyMqttPort)) {
+        configuration_.mqtt.port = static_cast<uint16_t>(storage_.preferences().getUInt(KeyMqttPort, configuration_.mqtt.port));
     }
-    if (preferences_.isKey(KeyWifiPassword)) {
-        configuration_.network.wifiPassword = preferences_.getString(KeyWifiPassword, configuration_.network.wifiPassword);
+    if (storage_.preferences().isKey(KeyMqttUsername)) {
+        configuration_.mqtt.username = storage_.preferences().getString(KeyMqttUsername, configuration_.mqtt.username);
     }
-    configuration_.network.hostname = preferences_.getString(KeyHostname, preferences_.isKey("cfg_snapshot")
-        ? configuration_.network.hostname : configuration_.device.name);
-    const uint32_t addressMode = preferences_.getUInt(KeyAddressMode, static_cast<uint32_t>(configuration_.network.addressMode));
-    configuration_.network.addressMode = addressMode == 1
-        ? NetworkAddressMode::Static : NetworkAddressMode::Dhcp;
-    configuration_.network.ipv4Address = preferences_.getString(KeyIpv4Address, configuration_.network.ipv4Address);
-    configuration_.network.subnetMask = preferences_.getString(KeySubnetMask, configuration_.network.subnetMask);
-    configuration_.network.gateway = preferences_.getString(KeyGateway, configuration_.network.gateway);
-    configuration_.network.dns1 = preferences_.getString(KeyDns1, configuration_.network.dns1);
-    if (preferences_.isKey(KeyDns2)) {
-        configuration_.network.dns2 = preferences_.getString(KeyDns2, "");
+    if (storage_.preferences().isKey(KeyMqttPassword)) {
+        configuration_.mqtt.password = storage_.preferences().getString(KeyMqttPassword, configuration_.mqtt.password);
     }
-    if (preferences_.isKey(KeyMqttServer)) {
-        configuration_.mqtt.server = preferences_.getString(KeyMqttServer, configuration_.mqtt.server);
-    }
-    if (preferences_.isKey(KeyMqttPort)) {
-        configuration_.mqtt.port = static_cast<uint16_t>(preferences_.getUInt(KeyMqttPort, configuration_.mqtt.port));
-    }
-    if (preferences_.isKey(KeyMqttUsername)) {
-        configuration_.mqtt.username = preferences_.getString(KeyMqttUsername, configuration_.mqtt.username);
-    }
-    if (preferences_.isKey(KeyMqttPassword)) {
-        configuration_.mqtt.password = preferences_.getString(KeyMqttPassword, configuration_.mqtt.password);
-    }
-    if (preferences_.isKey(KeyTimezone)) {
-        configuration_.time.timezone = preferences_.getString(KeyTimezone, configuration_.time.timezone);
-    }
-    if (preferences_.isKey(KeyNtpServer1)) {
-        configuration_.time.ntpServer1 = preferences_.getString(KeyNtpServer1, configuration_.time.ntpServer1);
-    }
-    if (preferences_.isKey(KeyNtpServer2)) {
-        configuration_.time.ntpServer2 = preferences_.getString(KeyNtpServer2, configuration_.time.ntpServer2);
-    }
-    const uint32_t storedLocale = preferences_.getUInt(
-        KeyLocale, static_cast<uint32_t>(configuration_.locale.locale));
-    configuration_.locale.locale = storedLocale <= static_cast<uint32_t>(Locale::EnglishUnitedStates)
-        ? static_cast<Locale>(storedLocale)
-        : Locale::GermanGermany;
+    baseSettings().loadTimeAndLocaleOverrides();
     configuration_.presentation.temperature =
         loadPresentationUnit(KeyTemperatureUnit, MeasurementType::Temperature);
     configuration_.presentation.atmosphericPressure =
@@ -309,15 +239,15 @@ void ConfigurationService::loadFromPreferences() {
     loadValues();
     loadControllerSlots();
     String displayRecord;
-    if (preferences_.isKey("display_page4")) {
-        const size_t length = preferences_.getBytesLength("display_page4");
+    if (storage_.preferences().isKey("display_page4")) {
+        const size_t length = storage_.preferences().getBytesLength("display_page4");
         if (length > 0 && length <= MaxDisplayEncodedLength) {
             std::vector<char> bytes(length + 1, 0);
-            if (preferences_.getBytes("display_page4", bytes.data(), length) == length
+            if (storage_.preferences().getBytes("display_page4", bytes.data(), length) == length
                 && strlen(bytes.data()) == length) displayRecord = bytes.data();
         }
-    } else if (preferences_.isKey("display_page")) {
-        displayRecord = preferences_.getString("display_page");
+    } else if (storage_.preferences().isKey("display_page")) {
+        displayRecord = storage_.preferences().getString("display_page");
     }
     DisplayConfiguration display;
     if (decodeDisplayConfiguration(displayRecord, display)) {
@@ -339,31 +269,31 @@ void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
         loaded[index] = configuration_.sensorSlots[index];
         const SensorId expectedId = static_cast<SensorId>(index + 1);
         const String implementationKey = sensorKey(expectedId, "impl");
-        if (!preferences_.isKey(implementationKey.c_str())) continue;
+        if (!storage_.preferences().isKey(implementationKey.c_str())) continue;
 
-        loaded[index].slotId = static_cast<SensorId>(preferences_.getUInt(
+        loaded[index].slotId = static_cast<SensorId>(storage_.preferences().getUInt(
             sensorKey(expectedId, "id").c_str(), expectedId));
-        loaded[index].enabled = preferences_.getUInt(
+        loaded[index].enabled = storage_.preferences().getUInt(
             sensorKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
-        loaded[index].name = preferences_.getString(
+        loaded[index].name = storage_.preferences().getString(
             sensorKey(expectedId, "name").c_str(), loaded[index].name);
-        const String stableImplementation = preferences_.getString(
+        const String stableImplementation = storage_.preferences().getString(
             implementationKey.c_str(), "none");
         const SensorImplementationMetadata* metadata =
             SensorImplementationRegistry::findByStableId(stableImplementation.c_str());
         loaded[index].implementation = metadata == nullptr
             ? static_cast<SensorImplementation>(255) : metadata->implementation;
-        const uint32_t mode = preferences_.getUInt(sensorKey(expectedId, "mode").c_str(), 0);
+        const uint32_t mode = storage_.preferences().getUInt(sensorKey(expectedId, "mode").c_str(), 0);
         loaded[index].schedule.acquisitionMode = mode == 1
             ? AcquisitionMode::Periodic : AcquisitionMode::EventOnly;
-        loaded[index].schedule.sampleIntervalMs = preferences_.getUInt(
+        loaded[index].schedule.sampleIntervalMs = storage_.preferences().getUInt(
             sensorKey(expectedId, "int").c_str(), 0);
         loaded[index].schedule.enabled = loaded[index].enabled;
-        const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
+        const uint8_t gpio = static_cast<uint8_t>(storage_.preferences().getUInt(
             sensorKey(expectedId, "gpio").c_str(), 0));
-        const uint8_t i2cAddress = static_cast<uint8_t>(preferences_.getUInt(
+        const uint8_t i2cAddress = static_cast<uint8_t>(storage_.preferences().getUInt(
             sensorKey(expectedId, "i2caddr").c_str(), 0x76));
-        const uint32_t storedI2CBus = preferences_.getUInt(
+        const uint32_t storedI2CBus = storage_.preferences().getUInt(
             sensorKey(expectedId, "i2cbus").c_str(), static_cast<uint32_t>(I2CBus::I2C0));
         const I2CBus i2cBus = storedI2CBus == static_cast<uint32_t>(I2CBus::I2C1)
             ? I2CBus::I2C1 : I2CBus::I2C0;
@@ -387,8 +317,8 @@ void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
             I2CResource(i2cBus, i2cAddress));
         loaded[index].implementationConfiguration.rainGauge = RainGaugeConfiguration(
             GpioResource(gpio),
-            preferences_.getFloat(sensorKey(expectedId, "rgmm").c_str(), 0.2794F),
-            preferences_.getUInt(sensorKey(expectedId, "rgdeb").c_str(), 50));
+            storage_.preferences().getFloat(sensorKey(expectedId, "rgmm").c_str(), 0.2794F),
+            storage_.preferences().getUInt(sensorKey(expectedId, "rgdeb").c_str(), 50));
     }
 
     if (validateSensorSlots(loaded)
@@ -405,31 +335,31 @@ void ConfigurationService::loadActuatorSlots(bool checkOccupancy) {
         loaded[index] = configuration_.actuatorSlots[index];
         const ActuatorId expectedId = static_cast<ActuatorId>(index + 1);
         const String implementationKey = actuatorKey(expectedId, "impl");
-        if (!preferences_.isKey(implementationKey.c_str())) continue;
+        if (!storage_.preferences().isKey(implementationKey.c_str())) continue;
 
-        loaded[index].slotId = static_cast<ActuatorId>(preferences_.getUInt(
+        loaded[index].slotId = static_cast<ActuatorId>(storage_.preferences().getUInt(
             actuatorKey(expectedId, "id").c_str(), expectedId));
-        loaded[index].enabled = preferences_.getUInt(
+        loaded[index].enabled = storage_.preferences().getUInt(
             actuatorKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
-        loaded[index].name = preferences_.getString(
+        loaded[index].name = storage_.preferences().getString(
             actuatorKey(expectedId, "name").c_str(), loaded[index].name);
-        const String stableImplementation = preferences_.getString(
+        const String stableImplementation = storage_.preferences().getString(
             implementationKey.c_str(), "none");
         const ActuatorImplementationMetadata* metadata =
             ActuatorImplementationRegistry::findByStableId(stableImplementation.c_str());
         loaded[index].implementation = metadata == nullptr
             ? static_cast<ActuatorImplementation>(255) : metadata->implementation;
-        const uint8_t gpio = static_cast<uint8_t>(preferences_.getUInt(
+        const uint8_t gpio = static_cast<uint8_t>(storage_.preferences().getUInt(
             actuatorKey(expectedId, "gpio").c_str(), 0));
         loaded[index].hardware = metadata != nullptr
                 && metadata->interfaceKind == HardwareInterfaceKind::GPIO
             ? HardwareResourceAssignment::gpioResource(GpioResource(gpio))
             : HardwareResourceAssignment::none();
         loaded[index].moduleTarget = ModuleActuatorReference{};
-        if (preferences_.getUInt(actuatorKey(expectedId, "mkind").c_str(), 0) == 1) {
-            if (!parseHex(preferences_.getString(actuatorKey(expectedId, "muuid").c_str(), ""),
+        if (storage_.preferences().getUInt(actuatorKey(expectedId, "mkind").c_str(), 0) == 1) {
+            if (!parseHex(storage_.preferences().getString(actuatorKey(expectedId, "muuid").c_str(), ""),
                     loaded[index].moduleTarget.moduleInstanceFingerprint, 8)
-                || !parseHex(preferences_.getString(actuatorKey(expectedId, "mdev").c_str(), ""),
+                || !parseHex(storage_.preferences().getString(actuatorKey(expectedId, "mdev").c_str(), ""),
                     loaded[index].moduleTarget.deviceIdHash, 4)
                 || !validModuleActuatorReference(loaded[index].moduleTarget)) return;
             loaded[index].hardware = HardwareResourceAssignment::none();
@@ -450,58 +380,58 @@ void ConfigurationService::loadControllerSlots() {
         loaded[index] = configuration_.controllerSlots[index];
         const ControllerId expectedId = static_cast<ControllerId>(index + 1);
         const String implementationKey = controllerKey(expectedId, "impl");
-        if (!preferences_.isKey(implementationKey.c_str())) continue;
+        if (!storage_.preferences().isKey(implementationKey.c_str())) continue;
 
-        loaded[index].slotId = static_cast<ControllerId>(preferences_.getUInt(
+        loaded[index].slotId = static_cast<ControllerId>(storage_.preferences().getUInt(
             controllerKey(expectedId, "id").c_str(), expectedId));
-        loaded[index].enabled = preferences_.getUInt(
+        loaded[index].enabled = storage_.preferences().getUInt(
             controllerKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
-        loaded[index].name = preferences_.getString(
+        loaded[index].name = storage_.preferences().getString(
             controllerKey(expectedId, "name").c_str(), loaded[index].name);
-        const String stableImplementation = preferences_.getString(
+        const String stableImplementation = storage_.preferences().getString(
             implementationKey.c_str(), "none");
         const ControllerImplementationMetadata* metadata =
             ControllerImplementationRegistry::findByStableId(stableImplementation.c_str());
         loaded[index].implementation = metadata == nullptr
             ? static_cast<ControllerImplementation>(255) : metadata->implementation;
         loaded[index].implementationConfiguration.blink.targetActuatorId =
-            static_cast<ActuatorId>(preferences_.getUInt(
+            static_cast<ActuatorId>(storage_.preferences().getUInt(
                 controllerKey(expectedId, "act").c_str(), InvalidActuatorId));
-        loadModuleTarget(preferences_, expectedId, "m", loaded[index].moduleTarget);
-        loaded[index].implementationConfiguration.blink.onDurationMs = preferences_.getUInt(
+        loadModuleTarget(storage_.preferences(), expectedId, "m", loaded[index].moduleTarget);
+        loaded[index].implementationConfiguration.blink.onDurationMs = storage_.preferences().getUInt(
             controllerKey(expectedId, "onms").c_str(), 1000);
-        loaded[index].implementationConfiguration.blink.offDurationMs = preferences_.getUInt(
+        loaded[index].implementationConfiguration.blink.offDurationMs = storage_.preferences().getUInt(
             controllerKey(expectedId, "offms").c_str(), 1000);
         ThresholdControllerConfiguration& threshold =
             loaded[index].implementationConfiguration.threshold;
-        threshold.source.sensorId = static_cast<SensorId>(preferences_.getUInt(
+        threshold.source.sensorId = static_cast<SensorId>(storage_.preferences().getUInt(
             controllerKey(expectedId, "src").c_str(), InvalidSensorId));
         threshold.source.measurementType = measurementTypeFromStableId(
-            preferences_.getString(
+            storage_.preferences().getString(
                 controllerKey(expectedId, "type").c_str(), "unknown").c_str());
-        threshold.targetActuatorId = static_cast<ActuatorId>(preferences_.getUInt(
+        threshold.targetActuatorId = static_cast<ActuatorId>(storage_.preferences().getUInt(
             controllerKey(expectedId, "tact").c_str(), InvalidActuatorId));
-        threshold.onThreshold = preferences_.getFloat(
+        threshold.onThreshold = storage_.preferences().getFloat(
             controllerKey(expectedId, "on").c_str(), 70.0F);
-        threshold.offThreshold = preferences_.getFloat(
+        threshold.offThreshold = storage_.preferences().getFloat(
             controllerKey(expectedId, "off").c_str(), 65.0F);
-        threshold.direction = preferences_.getUInt(
+        threshold.direction = storage_.preferences().getUInt(
             controllerKey(expectedId, "tdir").c_str(), 0) == 1
             ? ThresholdDirection::OnBelow : ThresholdDirection::OnAbove;
-        threshold.decisionOnly = preferences_.getUInt(controllerKey(expectedId, "decOnly").c_str(), 0) != 0;
+        threshold.decisionOnly = storage_.preferences().getUInt(controllerKey(expectedId, "decOnly").c_str(), 0) != 0;
         auto& selector = loaded[index].implementationConfiguration.selector;
-        if (preferences_.isKey(controllerKey(expectedId, "selmode").c_str())) {
-            selector.modeValueId = preferences_.getUInt(controllerKey(expectedId, "selmode").c_str(), 0);
-            selector.automaticControllerId = preferences_.getUInt(controllerKey(expectedId, "selsrc").c_str(), 0);
-            selector.targetActuatorId = preferences_.getUInt(controllerKey(expectedId, "selact").c_str(), 0);
-            selector.automaticCode = preferences_.isKey(controllerKey(expectedId, "selauto").c_str())
-                ? preferences_.getString(controllerKey(expectedId, "selauto").c_str(), "") : String();
-            selector.onCode = preferences_.isKey(controllerKey(expectedId, "selon").c_str())
-                ? preferences_.getString(controllerKey(expectedId, "selon").c_str(), "") : String();
-            selector.offCode = preferences_.isKey(controllerKey(expectedId, "seloff").c_str())
-                ? preferences_.getString(controllerKey(expectedId, "seloff").c_str(), "") : String();
+        if (storage_.preferences().isKey(controllerKey(expectedId, "selmode").c_str())) {
+            selector.modeValueId = storage_.preferences().getUInt(controllerKey(expectedId, "selmode").c_str(), 0);
+            selector.automaticControllerId = storage_.preferences().getUInt(controllerKey(expectedId, "selsrc").c_str(), 0);
+            selector.targetActuatorId = storage_.preferences().getUInt(controllerKey(expectedId, "selact").c_str(), 0);
+            selector.automaticCode = storage_.preferences().isKey(controllerKey(expectedId, "selauto").c_str())
+                ? storage_.preferences().getString(controllerKey(expectedId, "selauto").c_str(), "") : String();
+            selector.onCode = storage_.preferences().isKey(controllerKey(expectedId, "selon").c_str())
+                ? storage_.preferences().getString(controllerKey(expectedId, "selon").c_str(), "") : String();
+            selector.offCode = storage_.preferences().isKey(controllerKey(expectedId, "seloff").c_str())
+                ? storage_.preferences().getString(controllerKey(expectedId, "seloff").c_str(), "") : String();
         }
-        threshold.maxMeasurementAgeMs = preferences_.getUInt(
+        threshold.maxMeasurementAgeMs = storage_.preferences().getUInt(
             controllerKey(expectedId, "age").c_str(), 15000);
     }
 
@@ -515,11 +445,11 @@ void ConfigurationService::loadControllerSlots() {
 
 PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, MeasurementType type) {
     const PresentationUnit fallback = configuration_.presentationUnitFor(type);
-    if (!preferences_.isKey(key)) {
+    if (!storage_.preferences().isKey(key)) {
         return fallback;
     }
 
-    const uint32_t encoded = preferences_.getUInt(key, static_cast<uint32_t>(fallback));
+    const uint32_t encoded = storage_.preferences().getUInt(key, static_cast<uint32_t>(fallback));
     if (encoded > static_cast<uint32_t>(PresentationUnit::Ratio)) {
         return fallback;
     }
@@ -530,15 +460,7 @@ PresentationUnit ConfigurationService::loadPresentationUnit(const char* key, Mea
 void ConfigurationService::validateConfiguration() {
     if (!validPressureReduction(configuration_.pressureReduction, configuration_.sensorSlots))
         configuration_.pressureReduction = PressureReductionConfiguration{};
-    if (!validateDeviceName(configuration_.device.name)) {
-        configuration_.device.name = "WeatherStation";
-    }
-    if (!validateNetworkConfiguration(configuration_.network)) {
-        configuration_.network.addressMode = NetworkAddressMode::Dhcp;
-        if (!validateHostname(configuration_.network.hostname)) configuration_.network.hostname = "WeatherStation";
-        if (!validateWifiSSID(configuration_.network.wifiSSID)) configuration_.network.wifiSSID = String();
-        if (!validateWifiPassword(configuration_.network.wifiPassword)) configuration_.network.wifiPassword = String();
-    }
+    baseSettings().validateIdentityAndNetwork();
     if (!validateMqttServer(configuration_.mqtt.server)) {
         configuration_.mqtt.server = String();
     }
@@ -551,25 +473,17 @@ void ConfigurationService::validateConfiguration() {
     if (!validateMqttPassword(configuration_.mqtt.password)) {
         configuration_.mqtt.password = String();
     }
-    if (!validateTimezone(configuration_.time.timezone)) {
-        configuration_.time.timezone = String(DefaultTimezone);
-    }
-    if (!validateNtpServer(configuration_.time.ntpServer1)) {
-        configuration_.time.ntpServer1 = String(DefaultNtpServer1);
-    }
-    if (!validateNtpServer(configuration_.time.ntpServer2)) {
-        configuration_.time.ntpServer2 = String(DefaultNtpServer2);
-    }
+    baseSettings().validateTime();
 }
 
 void ConfigurationService::loadConfiguration() {
     initializeDefaults();
     ensurePreferencesStarted();
-    const size_t length = preferences_.getBytesLength("cfg_snapshot");
+    const size_t length = storage_.preferences().getBytesLength("cfg_snapshot");
     if (length > 0 && length <= MaxConfigurationBackupLength) {
         std::vector<uint8_t> bytes(length);
         std::unique_ptr<Configuration> candidate(new (std::nothrow) Configuration);
-        if (candidate && preferences_.getBytes("cfg_snapshot", bytes.data(), length) == length
+        if (candidate && storage_.preferences().getBytes("cfg_snapshot", bytes.data(), length) == length
             && decodeConfigurationRecord(bytes, configuration_, *candidate)
             && validateRestore(*candidate)) configuration_ = *candidate;
     }
@@ -585,26 +499,6 @@ Locale ConfigurationService::getLocale() const {
     return configuration_.locale.locale;
 }
 
-bool ConfigurationService::persistString(const char* key, const String& value) {
-    ensurePreferencesStarted();
-    if (!preferencesInitialized_) return false;
-    // Empty values must override a restored snapshot, rather than expose its baseline again.
-    if (value.isEmpty()) {
-        preferences_.putString(key, value);
-        return preferences_.isKey(key) && preferences_.getString(key).isEmpty();
-    }
-    return preferences_.putString(key, value) == value.length();
-}
-
-bool ConfigurationService::persistUInt(const char* key, uint32_t value) {
-    ensurePreferencesStarted();
-    return preferences_.putUInt(key, value);
-}
-
-bool ConfigurationService::persistFloat(const char* key, float value) {
-    ensurePreferencesStarted();
-    return preferences_.putFloat(key, value) > 0;
-}
 
 bool ConfigurationService::validateDeviceName(const String& deviceName) const {
     return BaseConfigurationValidation::deviceName(deviceName);
@@ -673,60 +567,6 @@ bool ConfigurationService::setGeoPosition(const GeoPosition& position) {
     return true;
 }
 
-bool ConfigurationService::setDeviceName(const String& deviceName) {
-    if (!validateDeviceName(deviceName)) {
-        return false;
-    }
-    if (!persistString(KeyDeviceName, deviceName)) {
-        return false;
-    }
-    configuration_.device.name = deviceName;
-    return true;
-}
-
-bool ConfigurationService::setNetworkConfiguration(
-    const NetworkConfiguration& requestedNetwork,
-    bool updatePassword) {
-    NetworkConfiguration network = requestedNetwork;
-    if (!updatePassword) network.wifiPassword = configuration_.network.wifiPassword;
-    if (!validateNetworkConfiguration(network)) return false;
-
-    if (!persistString(KeyHostname, network.hostname)
-        || !persistString(KeyWifiSSID, network.wifiSSID)
-        || (updatePassword && !persistString(KeyWifiPassword, network.wifiPassword))
-        || !persistUInt(KeyAddressMode, static_cast<uint32_t>(network.addressMode))
-        || !persistString(KeyIpv4Address, network.ipv4Address)
-        || !persistString(KeySubnetMask, network.subnetMask)
-        || !persistString(KeyGateway, network.gateway)
-        || !persistString(KeyDns1, network.dns1)
-        || !persistString(KeyDns2, network.dns2)) {
-        return false;
-    }
-    configuration_.network = network;
-    return true;
-}
-
-bool ConfigurationService::setWifiSSID(const String& ssid) {
-    if (!validateWifiSSID(ssid)) {
-        return false;
-    }
-    if (!persistString(KeyWifiSSID, ssid)) {
-        return false;
-    }
-    configuration_.network.wifiSSID = ssid;
-    return true;
-}
-
-bool ConfigurationService::setWifiPassword(const String& password) {
-    if (!validateWifiPassword(password)) {
-        return false;
-    }
-    if (!persistString(KeyWifiPassword, password)) {
-        return false;
-    }
-    configuration_.network.wifiPassword = password;
-    return true;
-}
 
 bool ConfigurationService::setMqttServer(const String& server) {
     if (!validateMqttServer(server)) {
@@ -772,51 +612,6 @@ bool ConfigurationService::setMqttPassword(const String& password) {
     return true;
 }
 
-bool ConfigurationService::setTimezone(const String& timezone) {
-    if (!validateTimezone(timezone)) {
-        return false;
-    }
-    if (!persistString(KeyTimezone, timezone)) {
-        return false;
-    }
-    configuration_.time.timezone = timezone;
-    return true;
-}
-
-bool ConfigurationService::setNtpServer1(const String& server) {
-    if (!validateNtpServer(server)) {
-        return false;
-    }
-    if (!persistString(KeyNtpServer1, server)) {
-        return false;
-    }
-    configuration_.time.ntpServer1 = server;
-    return true;
-}
-
-bool ConfigurationService::setNtpServer2(const String& server) {
-    if (!validateNtpServer(server)) {
-        return false;
-    }
-    if (!persistString(KeyNtpServer2, server)) {
-        return false;
-    }
-    configuration_.time.ntpServer2 = server;
-    return true;
-}
-
-bool ConfigurationService::setLocale(Locale locale) {
-    if (locale != Locale::GermanGermany
-        && locale != Locale::EnglishUnitedKingdom
-        && locale != Locale::EnglishUnitedStates) {
-        return false;
-    }
-    if (!persistUInt(KeyLocale, static_cast<uint32_t>(locale))) {
-        return false;
-    }
-    configuration_.locale.locale = locale;
-    return true;
-}
 
 bool ConfigurationService::setPresentationUnit(MeasurementType type, PresentationUnit unit) {
     if (!supportsPresentationUnit(type, unit)) {
@@ -1268,18 +1063,18 @@ bool ConfigurationService::setDisplayConfiguration(const DisplayConfiguration& d
     if (!encodeDisplayConfiguration(display, encoded)
         || !validateHardwareOccupancy(configuration_.sensorSlots, configuration_.actuatorSlots, &display)) return false;
     ensurePreferencesStarted();
-    if (preferences_.putBytes("display_page4", encoded.c_str(), encoded.length()) != encoded.length()) return false;
+    if (storage_.preferences().putBytes("display_page4", encoded.c_str(), encoded.length()) != encoded.length()) return false;
     configuration_.display = display;
     configuration_.display.configured = true;
     return true;
 }
 
 void ConfigurationService::loadValues() {
-    if (!preferences_.isKey("enum_values1")) return;
-    const size_t length = preferences_.getBytesLength("enum_values1");
+    if (!storage_.preferences().isKey("enum_values1")) return;
+    const size_t length = storage_.preferences().getBytesLength("enum_values1");
     if (length == 0 || length > MaxValueRecordLength) return;
     std::vector<char> bytes(length + 1, 0);
-    if (preferences_.getBytes("enum_values1", bytes.data(), length) != length
+    if (storage_.preferences().getBytes("enum_values1", bytes.data(), length) != length
         || strlen(bytes.data()) != length) return;
     ValueConfiguration loaded;
     if (decodeValueConfiguration(String(bytes.data()), loaded)) configuration_.values = loaded;
@@ -1289,7 +1084,7 @@ bool ConfigurationService::persistValues(const ValueConfiguration& values) {
     String encoded;
     if (!encodeValueConfiguration(values, encoded)) return false;
     ensurePreferencesStarted();
-    if (preferences_.putBytes("enum_values1", encoded.c_str(), encoded.length()) != encoded.length()) return false;
+    if (storage_.preferences().putBytes("enum_values1", encoded.c_str(), encoded.length()) != encoded.length()) return false;
     configuration_.values = values;
     return true;
 }
@@ -1351,52 +1146,36 @@ bool ConfigurationService::validateRestore(const Configuration& c) const {
         && validateHardwareOccupancy(c.sensorSlots, c.actuatorSlots, &c.display);
 }
 
+
+BaseSettingsService ConfigurationService::baseSettings() {
+    return BaseSettingsService(storage_, configuration_.device, configuration_.network,
+        configuration_.time, configuration_.locale, EnvNodeBaseDefaults);
+}
+void ConfigurationService::ensurePreferencesStarted() { storage_.begin(); }
+bool ConfigurationService::persistString(const char* key, const String& value) { return storage_.persistString(key, value); }
+bool ConfigurationService::persistUInt(const char* key, uint32_t value) { return storage_.persistUInt(key, value); }
+bool ConfigurationService::persistFloat(const char* key, float value) { return storage_.persistFloat(key, value); }
+bool ConfigurationService::setDeviceName(const String& deviceName) { return baseSettings().setDeviceName(deviceName); }
+bool ConfigurationService::setNetworkConfiguration(
+    const NetworkConfiguration& requestedNetwork,
+    bool updatePassword) { return baseSettings().setNetworkConfiguration(requestedNetwork, updatePassword); }
+bool ConfigurationService::setWifiSSID(const String& ssid) { return baseSettings().setWifiSSID(ssid); }
+bool ConfigurationService::setWifiPassword(const String& password) { return baseSettings().setWifiPassword(password); }
+bool ConfigurationService::setTimezone(const String& timezone) { return baseSettings().setTimezone(timezone); }
+bool ConfigurationService::setNtpServer1(const String& server) { return baseSettings().setNtpServer1(server); }
+bool ConfigurationService::setNtpServer2(const String& server) { return baseSettings().setNtpServer2(server); }
+bool ConfigurationService::setLocale(Locale locale) { return baseSettings().setLocale(locale); }
+
 bool ConfigurationService::restoreConfiguration(const Configuration& candidate) {
     if (!validateRestore(candidate)) return false;
     std::vector<uint8_t> encoded;
-    if (!encodeConfigurationRecord(candidate, encoded)) return false;
-    ensurePreferencesStarted();
-    if (!preferencesInitialized_) return false;
-    const uint32_t bank = activeNamespace_ == "weather0" ? 1 : 0;
-    const char* nextNamespace = bank == 0 ? "weather0" : "weather1";
-    Preferences staging;
-    if (!staging.begin(nextNamespace, false)) return false;
-    bool written = staging.clear()
-        && staging.putBytes("cfg_snapshot", encoded.data(), encoded.size()) == encoded.size();
-    if (written) {
-        std::vector<uint8_t> bytes(encoded.size());
-        written = staging.getBytesLength("cfg_snapshot") == encoded.size()
-            && staging.getBytes("cfg_snapshot", bytes.data(), encoded.size()) == encoded.size()
-            && memcmp(bytes.data(), encoded.data(), encoded.size()) == 0;
-    }
-    staging.end();
-    if (!written) return false;
-    Preferences metadata;
-    if (!metadata.begin("weather_meta", false)) return false;
-    const bool committed = metadata.putUInt("active", bank) == sizeof(uint32_t);
-    metadata.end();
-    if (!committed) return false;
-    preferences_.end();
-    activeNamespace_ = nextNamespace;
-    preferencesInitialized_ = preferences_.begin(nextNamespace, false);
+    if (!encodeConfigurationRecord(candidate, encoded)
+        || !storage_.replaceSnapshot(encoded.data(), encoded.size())) return false;
     configuration_ = candidate;
     return true;
 }
-
 bool ConfigurationService::resetToDefaults() {
-    ensurePreferencesStarted();
-    if (!preferencesInitialized_) return false;
-    // Erase inactive snapshots and legacy credentials too; keep the pointer to the cleared active bank.
-    for (const char* name : {"weather", "weather0", "weather1"}) {
-        if (activeNamespace_ == name) continue;
-        Preferences old;
-        if (!old.begin(name, false)) return false;
-        const bool cleared = old.clear(); old.end();
-        if (!cleared) return false;
-    }
-    if (!preferences_.clear()) {
-        return false;
-    }
+    if (!storage_.clearAll()) return false;
     initializeDefaults();
     return true;
 }

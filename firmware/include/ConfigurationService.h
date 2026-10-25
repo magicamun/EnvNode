@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Preferences.h>
+#include "BaseSettingsService.h"
+#include "EnvNodeConfigurationStorage.h"
 #include "Configuration.h"
 #include "IConfigurationService.h"
 
@@ -40,6 +41,7 @@ public:
     bool restoreConfiguration(const Configuration& candidate) override;
 
 private:
+    BaseSettingsService baseSettings();
     bool persistValues(const ValueConfiguration& values);
     void loadValues();
     void initializeDefaults();
@@ -92,9 +94,7 @@ private:
 
     const IOnOffActuatorResolver* actuatorResolver_ = nullptr;
     Configuration configuration_;
-    Preferences preferences_;
-    bool preferencesInitialized_ = false;
-    String activeNamespace_ = "weather";
+    ConfigurationStorage storage_{EnvNodeConfigurationStorage};
 };
 
 } // namespace EnvNode

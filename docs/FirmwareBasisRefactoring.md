@@ -432,3 +432,52 @@ Validation on 2026-10-25:
 The remaining main boundaries are shared settings persistence and the application
 startup/loop composition; application-specific backup/restore must stay adapted
 to the appropriate configuration model. This step does not create test firmware.
+
+## Step 11: reusable configuration storage and base settings persistence
+
+The user confirmed time/locale/device administration on hardware after step 10.
+
+EnvNodeConfigurationStorage owns Preferences lifecycle, typed key writes, opaque
+snapshot staging/readback/metadata commit and erase across legacy/two-bank storage.
+A fixed application-owned namespace layout is injected. EnvNode retains weather,
+weather0, weather1 and weather_meta, active and cfg_snapshot keys and the existing
+bank selection/commit order. No namespace/schema migration is introduced.
+
+BaseSettingsService operates on injected device/network/time/locale references,
+application defaults and the shared storage. It supplies common read/write,
+validation/default recovery and legacy override loading without the EnvNode
+Configuration model, sensors, MQTT, web or runtime dependencies. EnvNode's existing
+ConfigurationService delegates its base operations using a lightweight temporary
+adapter; its public API, in-memory model and application-specific slot/value/
+display/MQTT handling remain unchanged. Snapshot encoding/validation and complete
+EnvNode backup/import/export policy remain application-owned.
+
+Initialization/override ordering, explicit empty-value tombstones after snapshots,
+sequential partial-write behavior and in-memory updates only after success are
+preserved. The store deliberately retains the existing post-commit reopen result
+semantics; this refactoring adds no new transactional guarantee to ordinary edits.
+
+Validation on 2026-10-25:
+
+- ESP32 application build and English/German browser checks pass; static RAM is
+  124496 bytes. No duplicate full configuration model or persistent base adapter
+  object was added to the ESP32.
+- Full native suite: 493 passing tests, the same pre-existing board-profile-count
+  failure, no new failures/compilation errors. All 29 focused base/backup/storage
+  tests pass, including eleven new storage tests for fixed namespace compatibility,
+  independent base-settings persistence, exact snapshot bytes and alternating banks,
+  failed staging/readback/metadata commit, initialization/clear failures and retry,
+  empty restored overrides, validation/default recovery, partial-write semantics,
+  static network/password retention and isolation between application layouts.
+- A standalone C++11 native program links/runs with only the new storage library,
+  shared base validation/types and platform doubles, without any EnvNode model or
+  application header. It exercises base persistence, snapshot replacement and clear.
+- Full EnvNode backup/record codec files are untouched. Existing restore/reboot,
+  credentials, sensor/actuator/controller/display/value and reset tests remain green.
+- No physical upload, write, reset or restart was performed. Hardware follow-up:
+  export a backup, change/save a base setting, reboot and verify; restore the backup,
+  reboot and verify base values plus sensors/slots. Factory reset is not required.
+
+The remaining structural work is separating startup/main-loop composition and a
+final dependency review. The existing EnvNode backup schema deliberately remains
+application-specific; the future test application supplies its own record codec.

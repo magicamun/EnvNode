@@ -162,6 +162,14 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
+EnvNodeConfigurationStorage separates typed Preferences access and opaque snapshot
+bank commits from application data models. BaseSettingsService persists borrowed
+base settings using fixed application defaults and namespace layout. EnvNode's
+ConfigurationService remains the owner of the complete model, its codecs/restore
+validation and application-specific keys; it delegates common base operations.
+The weather namespaces, key names, snapshot formats and override/commit ordering
+are preserved. Ordinary edits retain their existing partial-write behavior.
+
 The shared EnvNodeTime service reads only ITimeConfiguration and IWiFiService;
 LocaleFormatter reads ILocaleConfiguration in EnvNodeBaseConfiguration. The
 application IConfigurationService adapts its complete model to these views and
