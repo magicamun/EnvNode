@@ -742,7 +742,9 @@ OTAService must never directly call:
 
     ESP.restart()
 
-The single device restart boundary remains inside RuntimeManager.
+RuntimeManager retains the pending-action gate. OTA accesses it through the
+shared IDeviceRestart interface; DeviceRestartExecutor owns the single platform
+restart call after RuntimeManager has authorized explicit execution.
 
 ---
 
@@ -814,12 +816,18 @@ The restart flow is:
     performPendingRestart()
           |
           v
+    DeviceRestartExecutor.execute()
+          |
+          v
     ESP.restart()
 
 
 There is exactly one executable restart boundary in the firmware.
 
-All components requiring a device restart request the action through RuntimeManager.
+All components requiring a device restart request it through IDeviceRestart
+(or the existing EnvNode RuntimeManager API). RuntimeManager implements the
+interface and retains action prioritization; shared OTA has no sensor/runtime
+dependency.
 
 No communication service, configuration service or Web handler may directly restart the device.
 

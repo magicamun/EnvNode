@@ -189,3 +189,43 @@ Validation on 2026-10-25:
 The next runtime check should open /network and /logs, exercise log refresh and
 verify that a successful network save still reports the required restart without
 performing it automatically. OTA/restart separation is the next independent step.
+
+## Runtime confirmation after step 4
+
+The user confirmed the administration-page version worked. The refactoring
+continues to preserve EnvNode as the sole firmware application.
+
+## Step 5: OTA and explicit device restart
+
+`EnvNodeLifecycle` contains OTAService, IDeviceRestart and DeviceRestartExecutor.
+OTA no longer includes RuntimeManager or any sensor/actuator/controller runtime.
+The upload algorithm is byte-for-byte equivalent after substituting only the
+restart interface calls.
+
+RuntimeManager implements IDeviceRestart while retaining action priorities and
+its existing performPendingRestart() entry point. A shared executor owns the
+only actual ESP.restart() call; RuntimeManager still gates it on RestartDevice.
+Its constructor gains an optional last driver parameter for host tests; existing
+construction sites do not change. The default native driver remains a no-op.
+
+EnvNode firmware-page/upload handlers stay in WebService for this step. Explicit
+restart, restore and factory-reset requests now use the narrow restart interface.
+Their HTTP responses and client flush still precede execution, and busy-OTA
+checks remain unchanged. Factory-reset storage behavior, partitions and NVS keys
+are unchanged.
+
+Validation on 2026-10-25:
+
+- ESP32 application build succeeds.
+- All previous native test outcomes are preserved.
+- Ten new lifecycle tests pass: successful known/unknown-size staging, no restart
+  during staging, empty/truncated uploads, partial writes, initialization retry,
+  finalization/driver errors, abort/reject guards, EnvNode restart prioritization
+  and integration of OTA staging with the EnvNode restart adapter.
+- Overall: 445 passed and the same pre-existing board-profile failure.
+- No device upload, erase or restart was performed by the agent.
+
+The next hardware check should stage a valid image using Web OTA, choose restart
+later and confirm the running firmware remains active, then explicitly restart
+and verify boot/configuration. Native Update tests verify interaction/state
+policy, not physical flash integrity, bootloader behavior or rollback.

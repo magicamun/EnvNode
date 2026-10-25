@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #include "Logger.h"
-#include "RuntimeManager.h"
+#include "IDeviceRestart.h"
 
 namespace EnvNode {
 
@@ -19,7 +19,7 @@ const char* otaStateName(OTAState state);
 
 class OTAService {
 public:
-    OTAService(ILogger& logger, RuntimeManager& runtimeManager);
+    OTAService(ILogger& logger, IDeviceRestart& deviceRestart);
 
     bool beginUpload(size_t totalBytes = 0);
     bool writeChunk(uint8_t* data, size_t length);
@@ -42,7 +42,7 @@ private:
     String updateError(const char* fallback) const;
 
     ILogger& logger_;
-    RuntimeManager& runtimeManager_;
+    IDeviceRestart& deviceRestart_;
     OTAState state_ = OTAState::Idle;
     size_t bytesReceived_ = 0;
     size_t totalBytes_ = 0;

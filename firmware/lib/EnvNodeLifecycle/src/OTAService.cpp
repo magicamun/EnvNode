@@ -15,8 +15,8 @@ const char* otaStateName(OTAState state) {
     }
 }
 
-OTAService::OTAService(ILogger& logger, RuntimeManager& runtimeManager)
-    : logger_(logger), runtimeManager_(runtimeManager) {
+OTAService::OTAService(ILogger& logger, IDeviceRestart& deviceRestart)
+    : logger_(logger), deviceRestart_(deviceRestart) {
 }
 
 bool OTAService::beginUpload(size_t totalBytes) {
@@ -77,7 +77,7 @@ bool OTAService::finishUpload() {
     state_ = OTAState::FirmwareStaged;
     lastError_ = String();
     logger_.infof("OTA staging succeeded: %u bytes", static_cast<unsigned int>(bytesReceived_));
-    runtimeManager_.request(RuntimeAction::RestartDevice);
+    deviceRestart_.requestDeviceRestart();
     logger_.info("OTA requested device restart for staged firmware activation");
     return true;
 }
@@ -104,7 +104,7 @@ uint8_t OTAService::progressPercent() const {
 const String& OTAService::lastError() const { return lastError_; }
 bool OTAService::firmwareStaged() const { return state_ == OTAState::FirmwareStaged; }
 bool OTAService::restartRequired() const {
-    return firmwareStaged() && runtimeManager_.pendingAction() == RuntimeAction::RestartDevice;
+    return firmwareStaged() && deviceRestart_.deviceRestartPending();
 }
 bool OTAService::busy() const {
     return state_ == OTAState::Uploading || state_ == OTAState::Verifying;

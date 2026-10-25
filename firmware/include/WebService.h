@@ -168,6 +168,7 @@ private:
     MeasurementSnapshotCache& measurementSnapshotCache_;
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
+    IDeviceRestart& deviceRestart_;
     OTAService& otaService_;
     I2CBusManager& i2cBusManager_;
     const BoardIdentityResolution& boardIdentityResolution_;

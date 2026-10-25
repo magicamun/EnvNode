@@ -485,7 +485,7 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
       controllerRuntime_(controllerRuntime),
       measurementSnapshotCache_(measurementSnapshotCache),
-      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
+      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), deviceRestart_(runtimeManager), otaService_(otaService),
       i2cBusManager_(i2cBusManager),
       boardIdentityResolution_(boardIdentityResolution),
       boardProvisioningService_(boardProvisioningService),
@@ -924,7 +924,7 @@ void WebService::handleConfigurationRestore() {
     if (!saved) {
         sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::RestoreSaveFailed), false); return;
     }
-    runtimeManager_.request(RuntimeAction::RestartDevice);
+    deviceRestart_.requestDeviceRestart();
     String html = "<div class='notice success'><strong>" + String(uiText(TextId::RestoreSaved))
         + "</strong><p>" + uiText(TextId::RestoreRestart)
         + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>"
@@ -2943,10 +2943,10 @@ void WebService::handleControllerRuntimeOperation(bool start) {
     }
     sendSeeOther(server_, "/controllers");
 }
-void WebService::handleRestart() { if(otaService_.busy()){sendResult(uiText(TextId::RestartUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult(uiText(TextId::Restarting),"/firmware",uiText(TextId::TheDeviceIsRestartingNow),true); performExplicitRestart(); }
-void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!configurationService_.resetToDefaults()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }
+void WebService::handleRestart() { if(otaService_.busy()){sendResult(uiText(TextId::RestartUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} deviceRestart_.requestDeviceRestart(); sendResult(uiText(TextId::Restarting),"/firmware",uiText(TextId::TheDeviceIsRestartingNow),true); performExplicitRestart(); }
+void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!configurationService_.resetToDefaults()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} deviceRestart_.requestDeviceRestart(); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }
 void WebService::handleNotFound() { server_.send(404,"text/plain",uiText(TextId::NotFound)); }
-void WebService::performExplicitRestart() { server_.client().flush(); runtimeManager_.performPendingRestart(); }
+void WebService::performExplicitRestart() { server_.client().flush(); deviceRestart_.performDeviceRestart(); }
 
 } // namespace EnvNode
 

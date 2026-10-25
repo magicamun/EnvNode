@@ -108,3 +108,13 @@ are unchanged. The JSON helper is in EnvNodeBaseConfiguration and remains
 independent of HTTP. Native administration tests run with `pio test -e native
 -f test_web_admin`; browser script tests run from the repository root with
 `node firmware/test/browser/page_editor_test.cjs`.
+
+## OTA and restart boundary
+
+The shared OTAService and platform restart executor are in
+`firmware/lib/EnvNodeLifecycle`. OTA requests restart through IDeviceRestart;
+EnvNode RuntimeManager retains pending-action priority and explicit execution.
+No new automatic restart is introduced. Firmware HTTP handlers and factory-reset
+storage policy remain application-owned. Native lifecycle tests run with
+`pio test -e native -f test_ota_lifecycle`; physical OTA/boot needs its own runtime
+check.
