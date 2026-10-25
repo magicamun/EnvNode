@@ -162,6 +162,13 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
+The shared `EnvNodeIdentity` library owns hardware identity data types, supported
+record validation, codecs/CRC, verified board provisioning and redundant descriptor
+storage through `IIdentityStorage`. It has no application or Arduino dependency.
+The application retains EEPROM transport, active-profile resolution, module discovery
+and firmware/resource compatibility policy. Board IDs, revision types, record
+formats and existing public include names are preserved across this boundary.
+
 The active typed `BoardProfile` is the single immutable description of physical board
 resources. `BoardCapabilities` derives its lookup and compatibility validation from that
 profile; it does not own a second pin map. The profile is selected once during boot by the

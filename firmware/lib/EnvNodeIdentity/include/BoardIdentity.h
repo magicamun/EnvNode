@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "BoardProfile.h"
+#include "BoardIdentityTypes.h"
 
 namespace EnvNode {
 

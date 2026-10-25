@@ -98,7 +98,7 @@ own hardware check.
 
 ## Administration route modules
 
-EnvNode WebService registers NetworkWebRoutes and LogWebRoutes from
+EnvNode WebService registers NetworkWebRoutes, LogWebRoutes and FirmwareWebRoutes from
 `firmware/lib/EnvNodeWebAdmin`. These modules use a page presenter and narrow
 settings/log interfaces rather than the complete application runtime. EnvNode
 still owns the result-page and restart decision after a network save.
@@ -114,7 +114,23 @@ independent of HTTP. Native administration tests run with `pio test -e native
 The shared OTAService and platform restart executor are in
 `firmware/lib/EnvNodeLifecycle`. OTA requests restart through IDeviceRestart;
 EnvNode RuntimeManager retains pending-action priority and explicit execution.
-No new automatic restart is introduced. Firmware HTTP handlers and factory-reset
-storage policy remain application-owned. Native lifecycle tests run with
+No new automatic restart is introduced. Firmware HTTP handlers live in EnvNodeWebAdmin; factory-reset storage policy
+remains application-owned through an injected callback. Native lifecycle tests run with
 `pio test -e native -f test_ota_lifecycle`; physical OTA/boot needs its own runtime
 check.
+
+## Identity and provisioning storage
+
+`firmware/lib/EnvNodeIdentity` contains the portable identity/descriptor codecs,
+CRC, storage interfaces, verified board provisioning and redundant descriptor
+bank store. Its ten implementation files are compiled as a local library in
+both native and ESP32 environments. Existing header names remain valid; board
+IDs and revisions are now declared in BoardIdentityTypes.h and included by
+BoardProfile.h. EEPROM wire transport, board fallback/selection, module discovery
+and compatibility policy remain application services.
+
+The existing native suites test_board_identity_codec, test_board_provisioning,
+test_hardware_descriptor_codec, test_hardware_descriptor_store,
+test_module_discovery and test_module_descriptor_provisioning cover this
+boundary. The library also compiles and links using only its own include
+folder and standard C++11, without application headers or Arduino.

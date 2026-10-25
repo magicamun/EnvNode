@@ -262,3 +262,38 @@ assertion with incorrect capitalization of a localized label; after using the
 catalog text, all eight new tests pass in the focused rerun. Together this gives
 453 passing assertions/tests and the same existing board-profile failure.
 The registered route/method inventory is unchanged.
+
+## Step 7: identity and provisioning storage basis
+
+EnvNodeIdentity owns board identity records, validation, codecs, CRC32, board
+provisioning with verified readback, hardware descriptor models/CBOR codecs and
+the redundant descriptor-bank store. It depends only on the C++ standard
+library and IIdentityStorage; it has no Arduino, Wire, sensor, network, HTTP,
+NVS, active-board selection or application runtime dependencies.
+
+BoardProfileId and BoardRevision are shared data types in BoardIdentityTypes.h;
+BoardProfile.h includes that header, preserving callers and encoded values.
+BoardIdentity.h includes the data types directly rather than board runtime
+capabilities. Existing public include names and provisioning APIs are retained.
+All ten moved implementations remain byte-for-byte identical. Supported board
+identities/revisions and record formats remain unchanged.
+
+BoardIdentityResolver, the I2C/EEPROM transport, module discovery, compatibility
+policy and ModuleDescriptorProvisioningService remain in the EnvNode application.
+They decide how a stored identity affects the running device. No new tester
+application, EEPROM write operation, configuration migration or firmware upload
+is part of this step.
+
+Validation on 2026-10-25:
+
+- All ten moved implementations match their pre-extraction contents byte-for-byte.
+- All shared sources compile with C++11, -Wall -Wextra -Werror and only their own
+  include directory; linking all objects succeeds without application/Arduino.
+- ESP32 application build and English/German browser tests pass.
+- Native full run preserves all earlier passing results except a compile error
+  in the board-provisioning integration test: it had obtained BoardProfile.h
+  transitively. Adding its explicit include restores all seven tests in a focused
+  rerun. Combined results are 453 passing tests with the same pre-existing
+  board-profile-count failure; no product assertion or profile data was changed.
+- No physical EEPROM write, device restart, flash or configuration migration
+  was performed. A physical EnvNode runtime check remains for the user.

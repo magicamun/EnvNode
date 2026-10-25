@@ -4,6 +4,7 @@
 #include <unity.h>
 
 #include "BoardProvisioningService.h"
+#include "BoardProfile.h"
 
 using namespace EnvNode;
 
