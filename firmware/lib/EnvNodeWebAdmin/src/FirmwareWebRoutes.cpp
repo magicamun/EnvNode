@@ -1,3 +1,4 @@
+#include "WebResult.h"
 // EnvNode: see repository LICENSE.
 #include "FirmwareWebRoutes.h"
 #include "HtmlEscaping.h"
@@ -34,20 +35,7 @@ const char* FirmwareWebRoutes::uiText(TextId id) const { return webText(pages_.w
 void FirmwareWebRoutes::sendPage(const char* title, const char* route, const String& content, int status) {
     pages_.sendPage(title, route, content, status);
 }
-void FirmwareWebRoutes::sendResult(const char* title, const char* route, const char* message, bool success) {
-    String content;
-    content.reserve(240 + strlen(title) + strlen(message) + strlen(route));
-    content = "<div class='notice ";
-    content += success ? "success" : "error";
-    content += "'><strong>";
-    content += escapeHtml(title);
-    content += "</strong><p>";
-    content += escapeHtml(message);
-    content += "</p></div><a class='button' href='";
-    content += route;
-    content += (String("'>") + uiText(TextId::Back) + "</a>");
-    sendPage(title, route, content, success ? 200 : 400);
-}
+
 String FirmwareWebRoutes::otaStatusHtml() const {
     String html;
     html.reserve(520);
@@ -162,4 +150,8 @@ void FirmwareWebRoutes::handleRestart() { if(otaService_.busy()){sendResult(uiTe
 void FirmwareWebRoutes::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!resetConfiguration_()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} deviceRestart_.requestDeviceRestart(); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }
 
 void FirmwareWebRoutes::performExplicitRestart() { server_.client().flush(); deviceRestart_.performDeviceRestart(); }
+}
+
+namespace EnvNode {
+void FirmwareWebRoutes::sendResult(const char* title, const char* route, const char* message, bool success) { sendWebResult(pages_, title, route, message, success); }
 }

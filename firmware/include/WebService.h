@@ -1,5 +1,6 @@
 #pragma once
 #include "FirmwareWebRoutes.h"
+#include "HardwareProvisioningWebRoutes.h"
 
 #include <Arduino.h>
 #include <WebServer.h>
@@ -31,13 +32,12 @@
 #include "BoardIdentityResolver.h"
 #include "BoardProvisioningService.h"
 #include "ModuleDescriptorProvisioningService.h"
-#include "DuoRelayDescriptor.h"
 #include "ValueRuntime.h"
 #include "ModuleDeviceInventory.h"
 
 namespace EnvNode {
 
-class WebService : public IWebService, private IWebRoutes, private IWebPagePresenter, private INetworkSaveObserver {
+class WebService : public IWebService, private IWebRoutes, private IWebPagePresenter, private INetworkSaveObserver, private IProvisioningAdministration {
 public:
     WebService(
         ILogger& logger,
@@ -65,6 +65,14 @@ public:
     void loop() override;
 
 private:
+    BoardIdentity provisioningBoardIdentity() const override;
+    size_t provisioningProfileCount() const override;
+    bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
+    bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;
+    BoardProvisioningResult provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) override;
+    ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
+        const uint8_t* payload, size_t size, bool confirmed) override;
+    String renderHardwareOverview();
     void registerRoutes(WebServer& server) override;
     Locale webLocale() const override;
     void networkSettingsSaved(bool success) override;
@@ -104,7 +112,6 @@ private:
     void handleTime();
     void handleUnits();
     void handleDevice();
-    void handleHardware();
     void handleConfiguration();
     void handleConfigurationDownload();
     void handleConfigurationUploadData();
@@ -127,8 +134,6 @@ private:
     void handleDeviceSave();
     void handleGeoPositionSave();
     void handlePressureReductionSave();
-    void handleBoardProvisioning();
-    void handleModuleDescriptorProvisioning();
     void handleNotFound();
 
     void sendPage(const char* title, const char* activeRoute, const String& content,
@@ -174,6 +179,7 @@ private:
     NetworkWebRoutes networkRoutes_;
     LogWebRoutes logRoutes_;
     FirmwareWebRoutes firmwareRoutes_;
+    std::unique_ptr<HardwareProvisioningWebRoutes> provisioningRoutes_;
 };
 
 } // namespace EnvNode

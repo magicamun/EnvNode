@@ -1,7 +1,7 @@
 {
   "name": "EnvNodeWebAdmin",
   "version": "0.1.0",
-  "description": "Network, log and firmware administration routes; see repository LICENSE.",
+  "description": "Network, log, firmware and provisioning administration routes; see repository LICENSE.",
   "build": {
     "includeDir": "include",
     "srcDir": "src"
@@ -21,6 +21,9 @@
     },
     {
       "name": "EnvNodeLifecycle"
+    },
+    {
+      "name": "EnvNodeIdentity"
     }
   ]
 }

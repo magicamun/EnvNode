@@ -332,3 +332,55 @@ Validation on 2026-10-25:
 - No device upload, physical EEPROM write, configuration erase or restart was
   performed. The next hardware check should confirm identity readback, normal
   sensor/I2C operation and Mini 0.8 provisioning followed by restart.
+
+## Step 9: provisioning web routes and application policy adapter
+
+The user confirmed the shared I2C/EEPROM transport on hardware after step 8.
+
+HardwareProvisioningWebRoutes owns /hardware and both existing aliases for board
+and module writes. Forms, input parsing, confirmation fields, result messages,
+DuoRelay descriptor encoding and UUID-v4 formatting remain unchanged. Applications
+supply IProvisioningAdministration for profile metadata/current identity and the
+actual provisioning operations; randomness and the read-only hardware overview
+are injected separately. The module does not depend on BoardProfile,
+ModuleDiscoveryService, RuntimeManager, IConfigurationService or ESP random APIs.
+
+EnvNode retains its read-only runtime/compatibility/device-inventory overview,
+active-profile selection, module compatibility checks, discovery and write policy.
+Provisioning does not request or execute an automatic restart. Success still offers
+restart now/later for board identities and preserves the module rediscovery path.
+Pure module status types, slot IDs/names, UUID helper and deterministic DuoRelay
+encoding move to EnvNodeIdentity; compatibility evaluation remains application-owned.
+The public WebService and provisioning service constructors remain unchanged.
+
+This closes the provisioning extraction block, not the overall application split.
+Still to audit/extract: time and locale/settings service boundaries, device metadata
+settings, application-specific configuration backup/import/export adapters and the
+startup/loop composition. The tester application is not introduced in this step.
+
+The remaining configuration boundary includes common settings persistence:
+ConfigurationService still owns the complete EnvNode model and Preferences bank
+selection. Existing shared data types/read-only interfaces alone do not yet make
+an independent application configuration store. Backup/import/export must remain
+application-specific through appropriate adapters.
+
+Validation on 2026-10-25:
+
+- ESP32 build passes. The first link exposed a 48-byte static DRAM overflow;
+  placing the small provisioning route object behind an owned heap pointer at
+  web startup resolves it. Allocation failure is checked/logged and does not
+  disable the other administration routes.
+- Full native suite: 471 passing tests, the same pre-existing board-profile-count
+  failure, no new failures or compile errors. Nine new HTTP tests cover forms,
+  locale/escaped profile names, real Mini 0.8 record write/readback without changing
+  active identity, aliases/confirmations, invalid forms, write failure, valid
+  module CBOR/manufacturing/UUID-v4 data and policy/storage failure responses.
+- English/German browser checks pass. Translation inventory reports zero missing
+  or unwired entries. URL/method inventory is unchanged.
+- The expanded identity library still compiles with C++11/-Wall/-Wextra/-Werror
+  and links using only its own include directory and standard library.
+- No physical EEPROM write, erase, upload or restart was performed by the agent.
+  Hardware follow-up: open Hardware and verify inventory/forms; provision Mini
+  0.8, choose restart later, then explicitly restart and check identity/runtime.
+  Module HTTP coverage is native; physical module provisioning needs a suitable
+  module and slot and is not covered by Mini board provisioning alone.

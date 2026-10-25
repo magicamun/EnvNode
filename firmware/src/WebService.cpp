@@ -1,3 +1,5 @@
+#include "WebResult.h"
+#include "InstanceUuidWebText.h"
 #include "HttpRedirect.h"
 #include "ControllerTargetIdentity.h"
 #include "WebService.h"
@@ -39,8 +41,6 @@
 #include "ControllerWebSupport.h"
 #include "SelectorWebView.h"
 #include "ElapsedTimeFormatter.h"
-#include "DuoRelayDescriptor.h"
-#include "InstanceUuid.h"
 
 namespace EnvNode {
 namespace {
@@ -98,17 +98,6 @@ String moduleActuatorLabel(const ModuleDiscoveryService& discovery,
     return webText(locale, TextId::ModuleDescriptor);
 }
 
-String descriptorUuid(const uint8_t (&value)[16]) {
-    static const char Hex[] = "0123456789abcdef";
-    String result;
-    result.reserve(36);
-    for (size_t index = 0; index < sizeof(value); ++index) {
-        if (index == 4 || index == 6 || index == 8 || index == 10) result += '-';
-        result += Hex[value[index] >> 4];
-        result += Hex[value[index] & 0x0F];
-    }
-    return result;
-}
 
 const char* sensorStateName(SensorState state, Locale locale) {
     switch (state) {
@@ -497,6 +486,15 @@ void WebService::begin() {
     webHost_.registerRoutes(networkRoutes_);
     webHost_.registerRoutes(logRoutes_);
     webHost_.registerRoutes(firmwareRoutes_);
+    // Keep this administration object out of the ESP32's constrained static DRAM.
+    if (!provisioningRoutes_) {
+        provisioningRoutes_.reset(new (std::nothrow) HardwareProvisioningWebRoutes(
+            server_, *this, logger_, *this,
+            [this]() { return renderHardwareOverview(); },
+            [](uint8_t* bytes, size_t size) { esp_fill_random(bytes, size); }));
+    }
+    if (provisioningRoutes_) webHost_.registerRoutes(*provisioningRoutes_);
+    else logger_.error("Insufficient memory to initialize provisioning web routes");
     webHost_.begin();
 }
 
@@ -527,7 +525,6 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/time", HTTP_GET, [this]() { handleTime(); });
     server.on("/units", HTTP_GET, [this]() { handleUnits(); });
     server.on("/device", HTTP_GET, [this]() { handleDevice(); });
-    server.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
     server.on("/configuration", HTTP_GET, [this]() { handleConfiguration(); });
     server.on("/configuration/download", HTTP_POST, [this]() { handleConfigurationDownload(); });
     server.on("/configuration/preview", HTTP_POST,
@@ -546,14 +543,6 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
     server.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
     server.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
-    server.on("/hardware/board-identity/write", HTTP_POST,
-        [this]() { handleBoardProvisioning(); });
-    server.on("/device/board-identity/write", HTTP_POST,
-        [this]() { handleBoardProvisioning(); });
-    server.on("/hardware/module-descriptor/write", HTTP_POST,
-        [this]() { handleModuleDescriptorProvisioning(); });
-    server.on("/device/module-descriptor/write", HTTP_POST,
-        [this]() { handleModuleDescriptorProvisioning(); });
     server.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
     server.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
     server.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
@@ -586,20 +575,6 @@ void WebService::sendPage(const char* title, const char* activeRoute, const Stri
         uiText(TextId::PageRenderingFailedPleaseRetry));
 }
 
-void WebService::sendResult(const char* title, const char* route, const char* message, bool success) {
-    String content;
-    content.reserve(240 + strlen(title) + strlen(message) + strlen(route));
-    content = "<div class='notice ";
-    content += success ? "success" : "error";
-    content += "'><strong>";
-    content += escapeHtml(title);
-    content += "</strong><p>";
-    content += escapeHtml(message);
-    content += "</p></div><a class='button' href='";
-    content += route;
-    content += (String("'>") + uiText(TextId::Back) + "</a>");
-    sendPage(title, route, content, success ? 200 : 400);
-}
 
 void WebService::sendConfigurationResult(
     const ConfigurationSaveResult& result,
@@ -908,178 +883,6 @@ void WebService::handleDevice() {
     sendPage(uiText(TextId::Device), "/device", c);
 }
 
-void WebService::handleHardware() {
-    String c;
-    c.reserve(1500);
-    const BoardProfile& board = currentBoardProfile();
-    const BoardIdentity& identity = boardIdentityResolution_.identity;
-    const bool recordFormatKnown =
-        boardIdentityResolution_.recordStatus == BoardIdentityStatus::Valid
-        || boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial;
-    const String serialNumber = !isBoardSerialNumberAssigned(identity.serialNumber)
-        ? String(uiText(TextId::Unassigned))
-        : String(identity.serialNumber.value);
-    c = String();
-    c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
-    c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
-    c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
-    c += (String("<span>") + uiText(TextId::BoardProfile) + "</span><span>") + escapeHtml(board.displayName) + "</span>";
-    c += (String("<span>") + uiText(TextId::BoardProfileId) + "</span><span>") + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
-    c += (String("<span>") + uiText(TextId::HardwareRevision) + "</span><span>") + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";
-    c += (String("<span>") + uiText(TextId::SerialNumber) + "</span><span>") + serialNumber + "</span>";
-    c += (String("<span>") + uiText(TextId::EEPROMFormat) + "</span><span>") + String(recordFormatKnown ? "1" : "—") + "</span>";
-    c += (String("<span>") + uiText(TextId::NormalRuntime) + "</span><span>") + String(boardIdentityResolution_.normalRuntimeAllowed ? uiText(TextId::Allowed) : uiText(TextId::Blocked)) + "</span>";
-    c += "</div>";
-    if (boardIdentityResolution_.source == BoardIdentitySource::BuildFallback) {
-        c += (String("<div class='notice'>") + uiText(TextId::NoUsableEEPROMBoardIdentityWasSelectedThis) + "</div>");
-    }
-    if (boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial) {
-        c += (String("<div class='notice'>") + uiText(TextId::TheEEPROMBoardIdentityIsValidButIts) + "</div>");
-    }
-    c += "</section>";
-    c += (((String("<section class='card'><h2>") + uiText(TextId::ModuleIdentity) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>EEPROM</th><th>")) + uiText(TextId::Source) + (String("</th><th>") + uiText(TextId::Status) + "</th><th>" + uiText(TextId::Module) + "</th><th>" + uiText(TextId::Revision) + "</th><th>" + uiText(TextId::InstanceUUID) + "</th><th>" + uiText(TextId::SerialNumber) + "</th><th>" + uiText(TextId::ProductionBatch) + "</th><th>" + uiText(TextId::ProductionDate) + "</th></tr></thead><tbody>"));
-    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
-        const ModuleSlot slot = static_cast<ModuleSlot>(index);
-        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
-        if (module == nullptr) continue;
-        const bool descriptor = module->source == ModuleDiscoverySource::Descriptor;
-        const String moduleName = descriptor
-            ? escapeHtml(descriptorText(module->descriptorName.empty()
-                ? module->descriptorTypeId : module->descriptorName))
-            : String("—");
-        const String revision = descriptor && module->identified()
-            ? String(module->descriptorRevision.major) + "." + String(module->descriptorRevision.minor)
-            : String("—");
-        const String moduleSerial = descriptor
-            ? (module->descriptorSerialNumber.empty()
-                ? String(uiText(TextId::Unassigned)) : escapeHtml(descriptorText(module->descriptorSerialNumber)))
-            : String("—");
-        const String instanceId = descriptor && module->descriptorHasInstanceId
-            ? descriptorUuid(module->descriptorInstanceId) : String("—");
-        const String productionBatch = descriptor
-            && !module->descriptorProductionBatch.empty()
-            ? escapeHtml(descriptorText(module->descriptorProductionBatch)) : String("—");
-        const String productionDate = descriptor
-            && !module->descriptorProductionDate.empty()
-            ? escapeHtml(descriptorText(module->descriptorProductionDate)) : String("—");
-        const char* status = descriptor
-            ? (module->descriptorStoreStatus == HardwareDescriptorStoreStatus::Valid
-                ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
-                : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus))
-            : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus);
-        c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
-        if (module->eepromAddress < 0x10) c += "0";
-        c += String(module->eepromAddress, HEX) + "</td><td>";
-        c += moduleDiscoverySourceName(module->source);
-        c += "</td><td>";
-        c += status;
-        c += "</td><td>" + moduleName + "</td><td>" + revision;
-        c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
-        c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
-    }
-    c += "</tbody></table></div></section>";
-    c += (((String("<section class='card'><h2>") + uiText(TextId::DiscoveredModuleDevices) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>")) + uiText(TextId::Device) + (String("</th><th>") + uiText(TextId::Kind) + "</th><th>" + uiText(TextId::Driver) + "</th><th>" + uiText(TextId::Capability) + "</th><th>" + uiText(TextId::Binding) + "</th><th>" + uiText(TextId::BoardResource) + "</th><th>" + uiText(TextId::Parameters) + "</th><th>" + uiText(TextId::Status) + "</th></tr></thead><tbody>"));
-    // Keep the large inventory off both static DRAM and the HTTP task stack.
-    std::unique_ptr<ModuleDeviceInventoryEntry[]> moduleDeviceInventory(
-        new (std::nothrow) ModuleDeviceInventoryEntry[MaximumDescriptorDevices]);
-    bool hasModuleDevices = false;
-    for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
-        const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
-        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
-        if (module == nullptr || !module->identified()
-            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
-            continue;
-        }
-        size_t entryCount = 0;
-        if (!moduleDeviceInventory || !deriveModuleDeviceInventory(
-                module->descriptor, currentBoardProfile(), slot,
-                moduleDeviceInventory.get(), MaximumDescriptorDevices, entryCount)) {
-            continue;
-        }
-        for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
-            hasModuleDevices = true;
-            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory[entryIndex];
-            String bindingText;
-            String resourceText;
-            for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {
-                const ModuleDeviceBindingResolution& binding = entry.bindings[bindingIndex];
-                if (bindingIndex > 0) { bindingText += "<br>"; resourceText += "<br>"; }
-                bindingText += escapeHtml(descriptorText(binding.name));
-                bindingText += " → ";
-                bindingText += escapeHtml(descriptorText(binding.logicalResource.empty()
-                    ? binding.target : binding.logicalResource));
-                if (!binding.resolved) resourceText += "—";
-                else if (binding.kind == HardwareDescriptorResourceKind::Gpio) {
-                    resourceText += "GPIO";
-                    resourceText += String(binding.gpio.number);
-                } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
-                    resourceText += i2cBusName(binding.i2cBus);
-                } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
-                    resourceText += "+5V";
-                } else resourceText += uiText(TextId::Resolved);
-            }
-            String parameters = "—";
-            if (entry.hasActiveLevel || entry.hasSafeLevel) {
-                parameters = "active=";
-                parameters += entry.hasActiveLevel
-                    ? (entry.activeLevelHigh ? "high" : "low") : "—";
-                parameters += ", safe=";
-                parameters += entry.hasSafeLevel
-                    ? (entry.safeLevelHigh ? "high" : "low") : "—";
-            }
-            const String capability = entry.capabilities.contains(
-                HardwareDescriptorCapabilityCode::ActuatorOnOff)
-                ? String("actuator.on-off") : String("—");
-            c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
-            c += escapeHtml(descriptorText(entry.id));
-            c += "</td><td>" + String((entry.kind == HardwareDescriptorDeviceKind::Sensor ? uiText(TextId::Sensor) : entry.kind == HardwareDescriptorDeviceKind::Actuator ? uiText(TextId::Actuator) : uiText(TextId::Infrastructure)));
-            c += "</td><td>" + String(moduleDeviceDriverName(entry.driver));
-            c += " v" + String(entry.driver.apiVersion);
-            c += "</td><td>" + capability + "</td><td>" + bindingText;
-            c += "</td><td>" + resourceText + "</td><td>" + parameters;
-            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
-            c += "</td></tr>";
-        }
-    }
-    if (!moduleDeviceInventory) {
-        c += (String("<tr><td colspan='9'>") + uiText(TextId::InsufficientMemoryToRenderModuleDeviceInventory) + "</td></tr>");
-    } else if (!hasModuleDevices) {
-        c += (String("<tr><td colspan='9'>") + uiText(TextId::NoCompatibleDescriptorDefinedDevicesDiscovered) + "</td></tr>");
-    }
-    moduleDeviceInventory.reset();
-    c += (String("</tbody></table></div><p class='help'>") + uiText(TextId::ThisIsAReadOnlyInventoryDerivedFrom) + "</p></section>");
-    c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");
-    c += (String("<div class='notice'><strong>ENHD descriptor 0.1</strong><p>") + uiText(TextId::ThisCreatesTheDeterministicDuoRelay03CBOR) + "</p></div>");
-    c += "<form method='post' action='/hardware/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
-    c += (String("<label>") + uiText(TextId::ModuleSlot) + "<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>");
-    c += (String("<label>") + uiText(TextId::DescriptorTemplate) + "<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>");
-    c += (String("<p class='help'>") + uiText(TextId::APersistentUUIDVersion4IsGeneratedAutomatically) + "</p>");
-    c += (String("<label>") + uiText(TextId::SerialNumberOptional) + "<input name='descriptorSerialNumber' maxlength='64'></label>");
-    c += (String("<label>") + uiText(TextId::ProductionBatchOptional) + "<input name='descriptorProductionBatch' maxlength='64'></label>");
-    c += (String("<label>") + uiText(TextId::ProductionDateOptional) + "<input type='date' name='descriptorProductionDate'></label>");
-    c += (String("<label class='choice'><input type='checkbox' name='confirmModuleDescriptorProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesASelfDescribing) + "</label>");
-    c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteDuoRelayDescriptor) + "</button></div></form></section>");
-    c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionBoardIdentity) + "</h2>");
-    c += (String("<div class='notice'><strong>") + uiText(TextId::AdvancedOperation) + "</strong><p>" + uiText(TextId::ThisWritesPermanentPhysicalBoardIdentityDataThe) + "</p></div>");
-    c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
-    c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileId' required>");
-    for (size_t index = 0; index < boardProfileCount(); ++index) {
-        const BoardProfile* profile = boardProfileAt(index);
-        if (profile == nullptr) continue;
-        c += "<option value='" + String(encodeBoardProfileId(profile->id)) + "'";
-        if (profile->id == identity.profileId) c += " selected";
-        c += ">" + escapeHtml(profile->displayName) + " "
-            + String(profile->revision.major) + "." + String(profile->revision.minor)
-            + "</option>";
-    }
-    c += "</select></label>";
-    c += (String("<p class='help'>") + uiText(TextId::TheSelectedBoardNameIsStoredAsIts) + "</p>");
-    c += (String("<label>") + uiText(TextId::BoardSerialNumber) + "<input name='serialNumber' maxlength='") + String(MaxBoardSerialNumberLength) + "' pattern='[A-Za-z0-9._-]*' value='" + escapeHtml(identity.serialNumber.value) + "'></label>";
-    c += (String("<p class='help'>") + uiText(TextId::SerialNumber0ExplicitlyMeansUnassigned) + "</p>");
-    c += (String("<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesManufacturingIdentityData) + "</label>");
-    c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteBoardIdentity) + "</button></div></form></section>");
-    sendPage(uiText(TextId::Hardware), "/hardware", c);
-}
 
 void WebService::handleSensors() {
     String c;
@@ -2273,177 +2076,7 @@ void WebService::handleGeoPositionSave() {
 
 void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),uiText(TextId::DeviceSettingsSaved),uiText(TextId::DeviceSaveFailed),"/device",uiText(TextId::InvalidDeviceName)); }
 
-void WebService::handleBoardProvisioning() {
-    const String profileText = server_.arg("boardProfileId");
-    char* profileEnd = nullptr;
-    const unsigned long parsedProfile = strtoul(profileText.c_str(), &profileEnd, 10);
-    BoardProfileId profileId = BoardProfileId::EnvNodeMainboard;
-    const bool profileValid = !profileText.isEmpty()
-        && profileEnd != profileText.c_str()
-        && *profileEnd == '\0'
-        && parsedProfile <= UINT16_MAX
-        && decodeBoardProfileId(static_cast<uint16_t>(parsedProfile), profileId);
-    const BoardProfile* requestedProfile = profileValid ? boardProfile(profileId) : nullptr;
-    const String serialText = server_.arg("serialNumber");
-    const bool serialValid = isValidBoardSerialNumber(serialText.c_str());
-    if (requestedProfile == nullptr || !serialValid) {
-        sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware",
-            uiText(TextId::TheSelectedBoardProfileOrBoardSerialNumber), false);
-        return;
-    }
 
-    BoardIdentity requested = {
-        requestedProfile->id,
-        requestedProfile->revision,
-        {},
-    };
-    setBoardSerialNumber(requested.serialNumber, serialText.c_str());
-    const bool confirmed = server_.hasArg("confirmProvisioning")
-        && server_.arg("confirmProvisioning") == "1";
-    const BoardProvisioningResult result =
-        boardProvisioningService_.provision(requested, confirmed);
-    logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%s",
-        boardProvisioningStatusName(result.status),
-        static_cast<unsigned int>(requested.profileId),
-        requested.revision.major,
-        requested.revision.minor,
-        requested.serialNumber.value);
-
-    if (result.status == BoardProvisioningStatus::Success) {
-        String content;
-        content.reserve(600);
-        content = (String("<div class='notice success'><strong>") + uiText(TextId::BoardIdentityWrittenAndVerified) + "</strong><p>" + uiText(TextId::TheActiveBoardProfileIsUnchangedForThisBoot) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/hardware'>" + uiText(TextId::RestartLater) + "</a>");
-        sendPage(uiText(TextId::BoardIdentityProvisioned), "/hardware", content);
-        return;
-    }
-
-    const char* message = uiText(TextId::BoardIdentityCouldNotBeWrittenAndVerified);
-    switch (result.status) {
-        case BoardProvisioningStatus::ConfirmationRequired:
-            message = uiText(TextId::ExplicitConfirmationIsRequiredNoEEPROMDataWas);
-            break;
-        case BoardProvisioningStatus::InvalidIdentity:
-            message = uiText(TextId::TheRequestedBoardIdentityIsNotSupportedNo);
-            break;
-        case BoardProvisioningStatus::WriteFailed:
-            message = uiText(TextId::TheEEPROMDidNotAcceptTheWriteIt);
-            break;
-        case BoardProvisioningStatus::ReadbackFailed:
-            message = uiText(TextId::TheEEPROMWriteCouldNotBeReadBack);
-            break;
-        case BoardProvisioningStatus::ReadbackInvalid:
-            message = uiText(TextId::TheEEPROMReadbackFailedRecordValidationProvisioningWas);
-            break;
-        case BoardProvisioningStatus::ReadbackMismatch:
-            message = uiText(TextId::TheEEPROMReadbackDidNotExactlyMatchThe);
-            break;
-        default:
-            break;
-    }
-    sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware", message, false);
-}
-
-void WebService::handleModuleDescriptorProvisioning() {
-    const String slotText = server_.arg("descriptorModuleSlot");
-    ModuleSlot slot = ModuleSlot::A;
-    const bool slotValid = slotText == "A" || slotText == "B";
-    if (slotText == "B") slot = ModuleSlot::B;
-    const bool templateValid =
-        server_.arg("descriptorTemplate") == "duo-relay-0.3";
-
-    DuoRelayDescriptorManufacturingData manufacturing;
-    const String serialNumber = server_.arg("descriptorSerialNumber");
-    const String productionBatch = server_.arg("descriptorProductionBatch");
-    const String productionDate = server_.arg("descriptorProductionDate");
-    const bool manufacturingValid = serialNumber.length() <= 64
-        && productionBatch.length() <= 64
-        && productionDate.length() <= 10;
-    if (!slotValid || !templateValid || !manufacturingValid) {
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
-            uiText(TextId::TheSlotDescriptorTemplateOrManufacturingDataIs),
-            false);
-        return;
-    }
-    esp_fill_random(manufacturing.instanceId, sizeof(manufacturing.instanceId));
-    InstanceUuid::makeVersion4(manufacturing.instanceId);
-    manufacturing.serialNumber = serialNumber.c_str();
-    manufacturing.productionBatch = productionBatch.c_str();
-    manufacturing.productionDate = productionDate.c_str();
-    std::unique_ptr<uint8_t[]> payload(new (std::nothrow) uint8_t[DuoRelayDescriptor::MaximumEncodedSize]);
-    if (!payload) {
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
-            uiText(TextId::PageRenderingFailedPleaseRetry), false);
-        return;
-    }
-    size_t payloadSize = 0;
-    const CompactCborStatus encodeStatus = DuoRelayDescriptor::encode(
-        manufacturing, payload.get(), DuoRelayDescriptor::MaximumEncodedSize, payloadSize);
-    if (encodeStatus != CompactCborStatus::Success) {
-        logger_.errorf("DuoRelay descriptor encoding failed status=%s",
-            compactCborStatusName(encodeStatus));
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
-            uiText(TextId::TheDuoRelayDescriptorCouldNotBeEncodedNo),
-            false);
-        return;
-    }
-
-    const bool confirmed = server_.hasArg("confirmModuleDescriptorProvisioning")
-        && server_.arg("confirmModuleDescriptorProvisioning") == "1";
-    const ModuleDescriptorProvisioningResult result =
-        moduleDescriptorProvisioningService_.provision(
-            slot, payload.get(), payloadSize, confirmed);
-    logger_.infof(
-        "Module descriptor provisioning result=%s slot=%s uuid=%s bytes=%u bank=%u generation=%lu decode=%s compatibility=%s",
-        moduleDescriptorProvisioningStatusName(result.status), moduleSlotName(slot),
-        descriptorUuid(manufacturing.instanceId).c_str(),
-        static_cast<unsigned int>(payloadSize),
-        static_cast<unsigned int>(result.bank),
-        static_cast<unsigned long>(result.generation),
-        hardwareDescriptorDecodeStatusName(result.decodeStatus),
-        hardwareDescriptorCompatibilityStatusName(result.compatibilityStatus));
-
-    if (result.status == ModuleDescriptorProvisioningStatus::Success) {
-        const char* bank = result.bank == HardwareDescriptorBank::B ? "B" : "A";
-        String message = (String(uiText(TextId::TheDuoRelayDescriptorWasEncodedValidatedWrittenTo)) + " ");
-        message += bank;
-        message += (String(uiText(TextId::VerifiedAndRediscoveredWithInstanceUuid)) + " ");
-        message += descriptorUuid(manufacturing.instanceId);
-        message += uiText(TextId::NoRestartRequired);
-        sendResult(uiText(TextId::ModuleDescriptorProvisioned), "/hardware", message.c_str(), true);
-        return;
-    }
-
-    const char* message = uiText(TextId::TheModuleDescriptorCouldNotBeWrittenAnd);
-    switch (result.status) {
-        case ModuleDescriptorProvisioningStatus::ConfirmationRequired:
-            message = uiText(TextId::ExplicitConfirmationIsRequiredNoEEPROMDataWas);
-            break;
-        case ModuleDescriptorProvisioningStatus::InvalidSlot:
-            message = uiText(TextId::TheSelectedModuleSlotIsInvalidNoEEPROM);
-            break;
-        case ModuleDescriptorProvisioningStatus::InvalidDescriptor:
-            message = uiText(TextId::TheGeneratedDescriptorFailedSemanticValidationNoEEPROM);
-            break;
-        case ModuleDescriptorProvisioningStatus::IncompatibleDescriptor:
-            message = uiText(TextId::TheDescriptorIsNotCompatibleWithTheActive);
-            break;
-        case ModuleDescriptorProvisioningStatus::StorageUnavailable:
-            message = uiText(TextId::TheSelectedModuleEEPROMIsUnavailableCheckThat);
-            break;
-        case ModuleDescriptorProvisioningStatus::WriteFailed:
-            message = uiText(TextId::TheSelectedModuleEEPROMDidNotAcceptThe);
-            break;
-        case ModuleDescriptorProvisioningStatus::VerificationFailed:
-            message = uiText(TextId::TheDescriptorWriteFailedAtomicBankReadbackVerification);
-            break;
-        case ModuleDescriptorProvisioningStatus::RediscoveryFailed:
-            message = uiText(TextId::TheDescriptorWasWrittenAndVerifiedButSemantic);
-            break;
-        default:
-            break;
-    }
-    sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware", message, false);
-}
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();
     const SensorImplementationMetadata* metadata =
@@ -2824,13 +2457,176 @@ void WebService::handleControllerRuntimeOperation(bool start) {
 void WebService::handleNotFound() { server_.send(404,"text/plain",uiText(TextId::NotFound)); }
 
 
-} // namespace EnvNode
-
-namespace EnvNode {
 Locale WebService::webLocale() const { return configurationService_.getLocale(); }
 void WebService::networkSettingsSaved(bool success) {
     const ConfigurationSaveResult result = configurationSaveResult(success, ConfigurationArea::Network);
     sendConfigurationResult(result, uiText(TextId::NetworkSettingsSaved), uiText(TextId::NetworkSaveFailed),
         "/network", uiText(TextId::InvalidNetworkSettingsStaticModeRequiresAValid));
+}
+
+void WebService::sendResult(const char* title, const char* route, const char* message, bool success) { sendWebResult(*this, title, route, message, success); }
+
+String WebService::renderHardwareOverview() {
+    String c;
+    c.reserve(1500);
+    const BoardProfile& board = currentBoardProfile();
+    const BoardIdentity& identity = boardIdentityResolution_.identity;
+    const bool recordFormatKnown =
+        boardIdentityResolution_.recordStatus == BoardIdentityStatus::Valid
+        || boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial;
+    const String serialNumber = !isBoardSerialNumberAssigned(identity.serialNumber)
+        ? String(uiText(TextId::Unassigned))
+        : String(identity.serialNumber.value);
+    c = String();
+    c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
+    c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
+    c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
+    c += (String("<span>") + uiText(TextId::BoardProfile) + "</span><span>") + escapeHtml(board.displayName) + "</span>";
+    c += (String("<span>") + uiText(TextId::BoardProfileId) + "</span><span>") + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
+    c += (String("<span>") + uiText(TextId::HardwareRevision) + "</span><span>") + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";
+    c += (String("<span>") + uiText(TextId::SerialNumber) + "</span><span>") + serialNumber + "</span>";
+    c += (String("<span>") + uiText(TextId::EEPROMFormat) + "</span><span>") + String(recordFormatKnown ? "1" : "—") + "</span>";
+    c += (String("<span>") + uiText(TextId::NormalRuntime) + "</span><span>") + String(boardIdentityResolution_.normalRuntimeAllowed ? uiText(TextId::Allowed) : uiText(TextId::Blocked)) + "</span>";
+    c += "</div>";
+    if (boardIdentityResolution_.source == BoardIdentitySource::BuildFallback) {
+        c += (String("<div class='notice'>") + uiText(TextId::NoUsableEEPROMBoardIdentityWasSelectedThis) + "</div>");
+    }
+    if (boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial) {
+        c += (String("<div class='notice'>") + uiText(TextId::TheEEPROMBoardIdentityIsValidButIts) + "</div>");
+    }
+    c += "</section>";
+    c += (((String("<section class='card'><h2>") + uiText(TextId::ModuleIdentity) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>EEPROM</th><th>")) + uiText(TextId::Source) + (String("</th><th>") + uiText(TextId::Status) + "</th><th>" + uiText(TextId::Module) + "</th><th>" + uiText(TextId::Revision) + "</th><th>" + uiText(TextId::InstanceUUID) + "</th><th>" + uiText(TextId::SerialNumber) + "</th><th>" + uiText(TextId::ProductionBatch) + "</th><th>" + uiText(TextId::ProductionDate) + "</th></tr></thead><tbody>"));
+    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(index);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
+        if (module == nullptr) continue;
+        const bool descriptor = module->source == ModuleDiscoverySource::Descriptor;
+        const String moduleName = descriptor
+            ? escapeHtml(descriptorText(module->descriptorName.empty()
+                ? module->descriptorTypeId : module->descriptorName))
+            : String("—");
+        const String revision = descriptor && module->identified()
+            ? String(module->descriptorRevision.major) + "." + String(module->descriptorRevision.minor)
+            : String("—");
+        const String moduleSerial = descriptor
+            ? (module->descriptorSerialNumber.empty()
+                ? String(uiText(TextId::Unassigned)) : escapeHtml(descriptorText(module->descriptorSerialNumber)))
+            : String("—");
+        const String instanceId = descriptor && module->descriptorHasInstanceId
+            ? descriptorUuid(module->descriptorInstanceId) : String("—");
+        const String productionBatch = descriptor
+            && !module->descriptorProductionBatch.empty()
+            ? escapeHtml(descriptorText(module->descriptorProductionBatch)) : String("—");
+        const String productionDate = descriptor
+            && !module->descriptorProductionDate.empty()
+            ? escapeHtml(descriptorText(module->descriptorProductionDate)) : String("—");
+        const char* status = descriptor
+            ? (module->descriptorStoreStatus == HardwareDescriptorStoreStatus::Valid
+                ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
+                : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus))
+            : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus);
+        c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
+        if (module->eepromAddress < 0x10) c += "0";
+        c += String(module->eepromAddress, HEX) + "</td><td>";
+        c += moduleDiscoverySourceName(module->source);
+        c += "</td><td>";
+        c += status;
+        c += "</td><td>" + moduleName + "</td><td>" + revision;
+        c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
+        c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
+    }
+    c += "</tbody></table></div></section>";
+    c += (((String("<section class='card'><h2>") + uiText(TextId::DiscoveredModuleDevices) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>")) + uiText(TextId::Device) + (String("</th><th>") + uiText(TextId::Kind) + "</th><th>" + uiText(TextId::Driver) + "</th><th>" + uiText(TextId::Capability) + "</th><th>" + uiText(TextId::Binding) + "</th><th>" + uiText(TextId::BoardResource) + "</th><th>" + uiText(TextId::Parameters) + "</th><th>" + uiText(TextId::Status) + "</th></tr></thead><tbody>"));
+    // Keep the large inventory off both static DRAM and the HTTP task stack.
+    std::unique_ptr<ModuleDeviceInventoryEntry[]> moduleDeviceInventory(
+        new (std::nothrow) ModuleDeviceInventoryEntry[MaximumDescriptorDevices]);
+    bool hasModuleDevices = false;
+    for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
+        if (module == nullptr || !module->identified()
+            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
+            continue;
+        }
+        size_t entryCount = 0;
+        if (!moduleDeviceInventory || !deriveModuleDeviceInventory(
+                module->descriptor, currentBoardProfile(), slot,
+                moduleDeviceInventory.get(), MaximumDescriptorDevices, entryCount)) {
+            continue;
+        }
+        for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
+            hasModuleDevices = true;
+            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory[entryIndex];
+            String bindingText;
+            String resourceText;
+            for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {
+                const ModuleDeviceBindingResolution& binding = entry.bindings[bindingIndex];
+                if (bindingIndex > 0) { bindingText += "<br>"; resourceText += "<br>"; }
+                bindingText += escapeHtml(descriptorText(binding.name));
+                bindingText += " → ";
+                bindingText += escapeHtml(descriptorText(binding.logicalResource.empty()
+                    ? binding.target : binding.logicalResource));
+                if (!binding.resolved) resourceText += "—";
+                else if (binding.kind == HardwareDescriptorResourceKind::Gpio) {
+                    resourceText += "GPIO";
+                    resourceText += String(binding.gpio.number);
+                } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
+                    resourceText += i2cBusName(binding.i2cBus);
+                } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
+                    resourceText += "+5V";
+                } else resourceText += uiText(TextId::Resolved);
+            }
+            String parameters = "—";
+            if (entry.hasActiveLevel || entry.hasSafeLevel) {
+                parameters = "active=";
+                parameters += entry.hasActiveLevel
+                    ? (entry.activeLevelHigh ? "high" : "low") : "—";
+                parameters += ", safe=";
+                parameters += entry.hasSafeLevel
+                    ? (entry.safeLevelHigh ? "high" : "low") : "—";
+            }
+            const String capability = entry.capabilities.contains(
+                HardwareDescriptorCapabilityCode::ActuatorOnOff)
+                ? String("actuator.on-off") : String("—");
+            c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
+            c += escapeHtml(descriptorText(entry.id));
+            c += "</td><td>" + String((entry.kind == HardwareDescriptorDeviceKind::Sensor ? uiText(TextId::Sensor) : entry.kind == HardwareDescriptorDeviceKind::Actuator ? uiText(TextId::Actuator) : uiText(TextId::Infrastructure)));
+            c += "</td><td>" + String(moduleDeviceDriverName(entry.driver));
+            c += " v" + String(entry.driver.apiVersion);
+            c += "</td><td>" + capability + "</td><td>" + bindingText;
+            c += "</td><td>" + resourceText + "</td><td>" + parameters;
+            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
+            c += "</td></tr>";
+        }
+    }
+    if (!moduleDeviceInventory) {
+        c += (String("<tr><td colspan='9'>") + uiText(TextId::InsufficientMemoryToRenderModuleDeviceInventory) + "</td></tr>");
+    } else if (!hasModuleDevices) {
+        c += (String("<tr><td colspan='9'>") + uiText(TextId::NoCompatibleDescriptorDefinedDevicesDiscovered) + "</td></tr>");
+    }
+    moduleDeviceInventory.reset();
+    c += (String("</tbody></table></div><p class='help'>") + uiText(TextId::ThisIsAReadOnlyInventoryDerivedFrom) + "</p></section>");
+    return c;
+}
+BoardIdentity WebService::provisioningBoardIdentity() const { return boardIdentityResolution_.identity; }
+size_t WebService::provisioningProfileCount() const { return boardProfileCount(); }
+bool WebService::provisioningProfileAt(size_t index, ProvisioningBoardProfile& result) const {
+    const BoardProfile* profile = boardProfileAt(index);
+    if (profile == nullptr) return false;
+    result = {profile->id, profile->displayName, profile->revision};
+    return true;
+}
+bool WebService::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& result) const {
+    const BoardProfile* profile = boardProfile(id);
+    if (profile == nullptr) return false;
+    result = {profile->id, profile->displayName, profile->revision};
+    return true;
+}
+BoardProvisioningResult WebService::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
+    return boardProvisioningService_.provision(identity, confirmed);
+}
+ModuleDescriptorProvisioningResult WebService::provisionModuleDescriptor(ModuleSlot slot,
+    const uint8_t* payload, size_t size, bool confirmed) {
+    return moduleDescriptorProvisioningService_.provision(slot, payload, size, confirmed);
 }
 } // namespace EnvNode

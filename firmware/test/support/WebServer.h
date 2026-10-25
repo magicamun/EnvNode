@@ -18,6 +18,7 @@ public:
     void uploadEvent(const char* path) { for (auto& route : routes) if (route.path == path && route.uploadHandler) route.uploadHandler(); }
     void on(const char* path, HTTPMethod method, std::function<void()> handler, std::function<void()> uploadHandler) { routes.push_back({path, method, handler, uploadHandler}); }
     std::map<std::string, String> arguments;
+    bool hasArg(const char* name) const { return arguments.count(name) != 0; }
     String arg(const char* name) const {
         const auto found = arguments.find(name);
         return found == arguments.end() ? String() : found->second;

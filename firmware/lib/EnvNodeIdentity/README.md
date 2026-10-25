@@ -18,3 +18,9 @@ The application retains active-board selection/fallback, bus selection and EEPRO
 transport, module discovery, firmware compatibility checks and restart policy.
 Moving these files does not alter supported revisions, validation, record layout,
 EEPROM addresses, bank selection, write order or readback verification.
+
+The library also owns pure ModuleSlot IDs/names, compatibility/provisioning result
+types and status names, InstanceUuid's version-4 bit conversion and the deterministic
+DuoRelay descriptor encoder. Compatibility evaluation, live module rediscovery and
+the module-provisioning policy service remain in the EnvNode application. Existing
+service headers include the shared result types for source compatibility.

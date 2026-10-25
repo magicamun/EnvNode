@@ -17,3 +17,18 @@ FirmwareWebRoutes owns `/firmware`, `/firmware/upload`, `/restart` and
 callback and localized number formatting. It does not expose its full
 configuration or runtime manager to this library. Explicit restart flushes the
 HTTP response before execution; successful OTA upload only stages the image.
+
+HardwareProvisioningWebRoutes owns GET `/hardware` plus the existing hardware/
+device aliases for board-identity and module-descriptor writes. It uses
+IProvisioningAdministration for profile metadata and writes; a separate callback
+renders the application-owned read-only hardware inventory. Random bytes are
+injected, so this module has no ESP-specific random API dependency. The existing
+DuoRelay form/template, manufacturing fields, UUID-v4 conversion, confirmation
+checks, statuses and restart choices are preserved.
+
+EnvNode keeps active-board/profile policy, module discovery and compatibility
+checks. Its small provisioning route object is created on the heap at web startup
+to avoid overflowing the ESP32 static DRAM segment; allocation failure is logged
+and leaves the remaining web routes running. `sendWebResult` in EnvNodeWeb keeps
+the common escaped success/error response identical across application, firmware
+and provisioning routes.

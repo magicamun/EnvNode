@@ -162,6 +162,14 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
+The shared hardware/provisioning web module uses IProvisioningAdministration for
+profile metadata and confirmed domain writes. EnvNode's adapter owns runtime
+identity, compatibility/discovery policy and the read-only live hardware inventory.
+The route module owns HTTP parsing, forms, UUID creation through injected random
+bytes, descriptor encoding and result presentation; it does not activate a board
+profile or execute a restart after provisioning. Pure status/result types live
+in EnvNodeIdentity; policy services remain application-owned.
+
 The shared `EnvNodeI2C` library accepts application-owned fixed bus/pin assignments
 and provides initialization/scanning plus 24LC32 transport through II2CBusProvider.
 The EnvNode I2CBusManager adapts board-profile resources to that controller; its

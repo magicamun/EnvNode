@@ -152,3 +152,18 @@ board profile or user-selectable pin configuration.
 Native bus/EEPROM checks run with `pio test -e native -f test_i2c_transport`.
 The Wire double emulates EEPROM page wrap to verify page splitting and exposes
 bus initialization, address transactions, NACKs, short transfers and ACK timeouts.
+
+## Provisioning HTTP boundary
+
+HardwareProvisioningWebRoutes in EnvNodeWebAdmin registers `/hardware` and the
+four existing board/module write URLs, including `/device/...` aliases. The
+application implements IProvisioningAdministration for current identity, available
+profile metadata and domain writes. EnvNode's read-only hardware inventory remains
+in WebService because it describes live module/device/resource compatibility.
+No application runtime or complete configuration service enters the shared route.
+
+`pio test -e native -f test_provisioning_web` covers forms/locale, Mini 0.8 board
+write/readback, both URL aliases, explicit confirmations, invalid inputs, module
+CBOR/manufacturing fields and UUID-v4 generation, and policy/storage errors.
+Shared WebResult rendering is also exercised by existing firmware HTTP tests.
+The EnvNode constructor and public domain-service APIs remain source-compatible.
