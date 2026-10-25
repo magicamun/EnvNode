@@ -1,5 +1,7 @@
 #include "TimeService.h"
 #include <time.h>
+#include <sys/time.h>
+#include <cstdlib>
 #include <esp_sntp.h>
 #include <Arduino.h>
 
@@ -11,7 +13,7 @@ constexpr const char* DefaultNtpServer1 = "pool.ntp.org";
 constexpr const char* DefaultNtpServer2 = "time.cloudflare.com";
 }
 
-TimeService::TimeService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService)
+TimeService::TimeService(ILogger& logger, ITimeConfiguration& configurationService, IWiFiService& wifiService)
     : logger_(logger)
     , configurationService_(configurationService)
     , wifiService_(wifiService) {
@@ -74,10 +76,10 @@ uint32_t TimeService::epoch() const {
 }
 
 void TimeService::startSynchronization() {
-    const Configuration& cfg = configurationService_.getConfiguration();
-    const char* timezone = cfg.time.timezone.isEmpty() ? DefaultTimezone : cfg.time.timezone.c_str();
-    const char* ntpServer1 = cfg.time.ntpServer1.isEmpty() ? DefaultNtpServer1 : cfg.time.ntpServer1.c_str();
-    const char* ntpServer2 = cfg.time.ntpServer2.isEmpty() ? DefaultNtpServer2 : cfg.time.ntpServer2.c_str();
+    const TimeConfiguration& cfg = configurationService_.getTimeConfiguration();
+    const char* timezone = cfg.timezone.isEmpty() ? DefaultTimezone : cfg.timezone.c_str();
+    const char* ntpServer1 = cfg.ntpServer1.isEmpty() ? DefaultNtpServer1 : cfg.ntpServer1.c_str();
+    const char* ntpServer2 = cfg.ntpServer2.isEmpty() ? DefaultNtpServer2 : cfg.ntpServer2.c_str();
 
     logger_.info("Time synchronization started");
     logger_.debugf("NTP servers: %s, %s", ntpServer1, ntpServer2);

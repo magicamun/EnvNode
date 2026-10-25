@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+constexpr size_t CONTENT_LENGTH_UNKNOWN = static_cast<size_t>(-1);
 enum HTTPMethod { HTTP_GET, HTTP_POST };
 enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END, UPLOAD_FILE_ABORTED };
 struct HTTPUpload { HTTPUploadStatus status = UPLOAD_FILE_START; String name, filename; uint8_t buf[2048] = {}; size_t currentSize = 0; };

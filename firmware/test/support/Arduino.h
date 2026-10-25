@@ -21,6 +21,10 @@ public:
     String(const char* value)
         : value_(value == nullptr ? "" : value) {
     }
+    String(char value) : value_(1, value) {}
+    String(int value) : value_(std::to_string(value)) {}
+    String(long value) : value_(std::to_string(value)) {}
+    String(unsigned long value) : value_(std::to_string(value)) {}
     String(unsigned int value)
         : value_(std::to_string(value)) {
     }

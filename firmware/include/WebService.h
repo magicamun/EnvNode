@@ -1,6 +1,7 @@
 #pragma once
 #include "FirmwareWebRoutes.h"
 #include "HardwareProvisioningWebRoutes.h"
+#include "CommonSettingsWebRoutes.h"
 
 #include <Arduino.h>
 #include <WebServer.h>
@@ -37,7 +38,7 @@
 
 namespace EnvNode {
 
-class WebService : public IWebService, private IWebRoutes, private IWebPagePresenter, private INetworkSaveObserver, private IProvisioningAdministration {
+class WebService : public IWebService, private IWebRoutes, private IWebPagePresenter, private INetworkSaveObserver, private IProvisioningAdministration, private IWebPageHeaderPresenter {
 public:
     WebService(
         ILogger& logger,
@@ -73,6 +74,7 @@ private:
     ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
         const uint8_t* payload, size_t size, bool confirmed) override;
     String renderHardwareOverview();
+    String renderDeviceExtras();
     void registerRoutes(WebServer& server) override;
     Locale webLocale() const override;
     void networkSettingsSaved(bool success) override;
@@ -109,9 +111,7 @@ private:
     void handleControllerStop();
     void handleControllerRuntimeOperation(bool start);
     void handleMqtt();
-    void handleTime();
     void handleUnits();
-    void handleDevice();
     void handleConfiguration();
     void handleConfigurationDownload();
     void handleConfigurationUploadData();
@@ -129,9 +129,7 @@ private:
     void handleI2CScan();
     void handleMqttSave();
     void handleDiscoveryRepublish();
-    void handleTimeSave();
     void handleUnitsSave();
-    void handleDeviceSave();
     void handleGeoPositionSave();
     void handlePressureReductionSave();
     void handleNotFound();
@@ -147,7 +145,7 @@ private:
         const char* failureMessage);
     const char* uiText(TextId id) const;
     String renderPageHeader(const char* title, const char* activeRoute,
-        bool wideContent = false) const;
+        bool wideContent = false) const override;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;
     const char* pendingActionMessage() const;
@@ -178,8 +176,9 @@ private:
     WebServer& server_;
     NetworkWebRoutes networkRoutes_;
     LogWebRoutes logRoutes_;
-    FirmwareWebRoutes firmwareRoutes_;
+    std::unique_ptr<FirmwareWebRoutes> firmwareRoutes_;
     std::unique_ptr<HardwareProvisioningWebRoutes> provisioningRoutes_;
+    std::unique_ptr<CommonSettingsWebRoutes> settingsRoutes_;
 };
 
 } // namespace EnvNode

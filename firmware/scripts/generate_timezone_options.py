@@ -46,7 +46,7 @@ def generate(directory, version):
     ]
     for name, rule in sorted(options.items()):
         lines.append(f'    {{{json.dumps(name)}, {json.dumps(rule)}}},')
-    destination = Path(__file__).resolve().parents[1] / 'include/TimezoneOptions.inc'
+    destination = Path(__file__).resolve().parents[1] / 'lib/EnvNodeWebAdmin/include/TimezoneOptions.inc'
     destination.write_text('\n'.join(lines) + '\n')
     print(f'{len(options)} zones written to {destination}')
 

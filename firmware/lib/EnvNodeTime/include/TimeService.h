@@ -1,8 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
+#include <time.h>
 #include "ITimeService.h"
-#include "IConfigurationService.h"
+#include "ITimeConfiguration.h"
 #include "IWiFiService.h"
 #include "Logger.h"
 
@@ -10,7 +11,7 @@ namespace EnvNode {
 
 class TimeService : public ITimeService {
 public:
-    TimeService(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService);
+    TimeService(ILogger& logger, ITimeConfiguration& configurationService, IWiFiService& wifiService);
 
     void begin() override;
     void loop() override;
@@ -28,7 +29,7 @@ private:
     String formatIso8601(time_t timestamp, bool local) const;
 
     ILogger& logger_;
-    IConfigurationService& configurationService_;
+    ITimeConfiguration& configurationService_;
     IWiFiService& wifiService_;
     bool syncStarted_ = false;
     bool synchronized_ = false;

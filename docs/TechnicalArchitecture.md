@@ -162,6 +162,14 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
+The shared EnvNodeTime service reads only ITimeConfiguration and IWiFiService;
+LocaleFormatter reads ILocaleConfiguration in EnvNodeBaseConfiguration. The
+application IConfigurationService adapts its complete model to these views and
+IBaseSettings without changing persistence. CommonSettingsWebRoutes owns the
+basic time/locale/device forms; application callbacks retain save/restart policy
+and EnvNode-only device-page sections. A separate header presenter preserves
+streamed timezone rendering without coupling the module to application framing.
+
 The shared hardware/provisioning web module uses IProvisioningAdministration for
 profile metadata and confirmed domain writes. EnvNode's adapter owns runtime
 identity, compatibility/discovery policy and the read-only live hardware inventory.

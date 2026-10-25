@@ -384,3 +384,51 @@ Validation on 2026-10-25:
   0.8, choose restart later, then explicitly restart and check identity/runtime.
   Module HTTP coverage is native; physical module provisioning needs a suitable
   module and slot and is not covered by Mini board provisioning alone.
+
+## Step 10: time, locale and basic device settings
+
+The user confirmed provisioning-web extraction on hardware after step 9.
+
+Read-only ITimeConfiguration and ILocaleConfiguration remove complete EnvNode
+configuration dependencies from TimeService and LocaleFormatter. IBaseSettings
+adds just device/time/locale settings access. IConfigurationService adapts the
+existing model to these interfaces, retaining setter behavior, Preferences keys,
+defaults, bank selection and caller construction sites. TimeService/ITimeService
+move to EnvNodeTime; LocaleFormatter moves to EnvNodeBaseConfiguration.
+
+CommonSettingsWebRoutes owns /time, /time/save, /device and /device/save. It uses
+base settings, time service, formatter and page/header presenters. EnvNode keeps
+configuration-save/runtime action decisions behind callbacks and provides the
+pressure-reduction, geolocation and hardware-summary device-page sections.
+The timezone selection is still streamed in bounded chunks, and custom values,
+locale selection, offline/render failure guards, form fields and sequential
+setter/partial-failure behavior are preserved. No settings migration or new
+configuration fields are introduced.
+
+Validation on 2026-10-25:
+
+- ESP32 application build and English/German browser checks pass. The additional
+  interfaces initially exceeded the constrained static DRAM segment by 16 bytes;
+  the existing firmware route object now uses checked heap allocation at web
+  startup, matching provisioning/settings routes. OTA/reset handlers and their
+  response/flush ordering remain unchanged. Final static RAM usage is 124488 bytes.
+- Full native run: 482 passing tests, the same pre-existing board-profile-count
+  failure, no new failures or compilation errors. Eleven new tests cover WiFi/SNTP
+  startup/defaults/restart order, fixed-timestamp timezone offsets, live DE/GB/US
+  formatting, streamed/custom timezone options, escaped inputs, offline/setup-AP
+  and failed-header paths, save change detection, invalid locale, sequential
+  short-circuit failures, device-page extras and save-result delegation.
+- The timezone catalog is byte-identical; its generator and documentation now
+  use the library path. URL/method inventory is unchanged. Translation inventory
+  reports zero missing or unwired entries.
+- LocaleFormatter differs only in the injected locale interface. TimeService
+  differs only in the narrow time-settings access and explicit system includes.
+  Preferences code, stored schema/defaults and backup format are untouched.
+- No device flash, setting change, reset or physical restart was performed.
+  Hardware follow-up: check synchronized time and localized date/numbers, save
+  locale/time and device name, restart and verify preserved values and normal
+  sensor/runtime operation. The previous provisioning runtime was confirmed.
+
+The remaining main boundaries are shared settings persistence and the application
+startup/loop composition; application-specific backup/restore must stay adapted
+to the appropriate configuration model. This step does not create test firmware.

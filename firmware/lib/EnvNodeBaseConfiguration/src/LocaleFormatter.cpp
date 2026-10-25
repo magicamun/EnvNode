@@ -5,7 +5,7 @@
 
 namespace EnvNode {
 
-LocaleFormatter::LocaleFormatter(IConfigurationService& configurationService)
+LocaleFormatter::LocaleFormatter(ILocaleConfiguration& configurationService)
     : configurationService_(configurationService) {
 }
 

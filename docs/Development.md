@@ -167,3 +167,24 @@ write/readback, both URL aliases, explicit confirmations, invalid inputs, module
 CBOR/manufacturing fields and UUID-v4 generation, and policy/storage errors.
 Shared WebResult rendering is also exercised by existing firmware HTTP tests.
 The EnvNode constructor and public domain-service APIs remain source-compatible.
+
+## Shared time, locale and basic settings
+
+TimeService/ITimeService are in EnvNodeTime, using ITimeConfiguration instead of
+the complete EnvNode IConfigurationService. LocaleFormatter is in
+EnvNodeBaseConfiguration and reads ILocaleConfiguration. IConfigurationService
+implements these narrow views and IBaseSettings using the unchanged EnvNode model
+and setters; configuration storage/defaults remain application-owned.
+
+CommonSettingsWebRoutes handles time/device pages and saves. EnvNode supplies its
+page header, pressure/location/hardware device sections and save outcome callbacks
+that preserve existing RuntimeManager actions and result messages. The timezone
+catalog moved unchanged to EnvNodeWebAdmin/include; its generator targets that
+path. Runtime timezone selection still streams in small chunks. Firmware and
+settings route objects use checked heap allocation at web startup to leave the
+ESP32 static DRAM segment room for application services.
+
+Native checks: `pio test -e native -f test_time_basis -f test_common_settings_web`.
+Physical follow-up: verify synchronized time and locale/date/number presentation,
+change device name and locale/time settings, then confirm persistence after reboot.
+No configuration migration, reset or physical upload is part of the refactoring.

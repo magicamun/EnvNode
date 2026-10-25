@@ -3,13 +3,13 @@
 #include <Arduino.h>
 #include <time.h>
 
-#include "IConfigurationService.h"
+#include "ILocaleConfiguration.h"
 
 namespace EnvNode {
 
 class LocaleFormatter {
 public:
-    explicit LocaleFormatter(IConfigurationService& configurationService);
+    explicit LocaleFormatter(ILocaleConfiguration& configurationService);
 
     String formatDateTime(const tm& localTime) const;
     String formatDate(const tm& localTime) const;
@@ -20,7 +20,7 @@ private:
     Locale locale() const;
     String groupedNumber(const char* normalized, char thousandsSeparator, char decimalSeparator) const;
 
-    IConfigurationService& configurationService_;
+    ILocaleConfiguration& configurationService_;
 };
 
 } // namespace EnvNode

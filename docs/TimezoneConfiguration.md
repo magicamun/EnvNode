@@ -44,7 +44,7 @@ python3 firmware/scripts/generate_timezone_options.py /tmp/envnode-zoneinfo 2026
 ```
 
 Use a fresh output directory to avoid retaining removed identifiers. Commit the
-generated `firmware/include/TimezoneOptions.inc`, update the version and count in
+generated `firmware/lib/EnvNodeWebAdmin/include/TimezoneOptions.inc`, update the version and count in
 this document, and build the firmware. No download occurs during a firmware build
 or at device runtime.
 

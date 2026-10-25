@@ -32,3 +32,11 @@ to avoid overflowing the ESP32 static DRAM segment; allocation failure is logged
 and leaves the remaining web routes running. `sendWebResult` in EnvNodeWeb keeps
 the common escaped success/error response identical across application, firmware
 and provisioning routes.
+
+CommonSettingsWebRoutes owns `/time`, `/time/save`, `/device` and `/device/save`.
+It depends on IBaseSettings, ITimeService, LocaleFormatter, page/header presenters
+and callbacks for save outcomes and application-specific device-page sections.
+The application retains restart decisions, persistence and extra device fields.
+The timezone catalog is streamed in bounded chunks as before, with identical
+options/custom-value handling. Offline/header-render failures keep their 503
+responses. The original setter order and short-circuit failure behavior remain.
