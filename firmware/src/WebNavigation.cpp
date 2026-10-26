@@ -15,7 +15,7 @@ String buildWebNavigationHtml(const char* activeRoute, Locale locale) {
         {"/mqtt", TextId::MQTT}, {"/time", TextId::LocaleTime}, {"/units", TextId::Units},
         {"/device", TextId::Device}, {"/configuration", TextId::Configuration},
         {"/hardware", TextId::Hardware}, {"/diagnostics", TextId::Diagnostics},
-        {"/logs", TextId::Logs}, {"/firmware", TextId::Firmware},
+        {"/sd-card", TextId::SdCard}, {"/logs", TextId::Logs}, {"/firmware", TextId::Firmware},
     };
     String html;
     html.reserve(620);

@@ -111,6 +111,18 @@ labels). See `Documentation/SD_Card_ERC_Rev0.1.txt` and
 `Documentation/SD_Card_DRC_Rev0.1.txt` for the recorded check settings/results.
 This is a CAD review, not a completed physical bring-up or field validation.
 
+## Initial SPI breakout diagnostic
+
+A one-shot Slot A read/write diagnostic is available in the explicit
+`esp32dev_sd_diagnostics` firmware environment. See the
+[SPI bring-up procedure](../../../../../docs/SdCardSpiBringup.md) for wiring,
+build selection, expected logs and limitations. Physical read/CD validation is
+confirmed, including the 4096-byte write/read comparison. The web directory page is
+physically validated. File download and confirmed deletion were also physically
+confirmed working on 2026-10-26. Explicitly confirmed FAT32 formatting is now
+available in the same lab build and was also confirmed working on the Mini on
+2026-10-26.
+
 ## Open work
 
 - [x] Create U1 and PCB parts in **InvenTree** and identify the existing standard parts.

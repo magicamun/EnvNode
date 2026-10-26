@@ -501,6 +501,12 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/configuration/cancel", HTTP_POST, [this]() {
         restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
     });
+    server.on("/sd-card/format", HTTP_GET, [this]() { handleSdFormatPreview(); });
+    server.on("/sd-card/format", HTTP_POST, [this]() { handleSdFormat(); });
+    server.on("/sd-card/download", HTTP_GET, [this]() { handleSdDownload(); });
+    server.on("/sd-card/delete", HTTP_GET, [this]() { handleSdDeletePreview(); });
+    server.on("/sd-card/delete", HTTP_POST, [this]() { handleSdDelete(); });
+    server.on("/sd-card", HTTP_GET, [this]() { handleSdCard(); });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
     server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
@@ -524,6 +530,18 @@ void WebService::registerRoutes(WebServer& server) {
 }
 
 void WebService::loop() {
+    if (sdFormat_) {
+        const auto state=sdFormat_->state();
+        if(state==SdFormatState::Running) return; // Other runtime services continue; HTTP/OTA/SD remain serialized.
+        sdFormatResult_=state;sdFormatResultAvailable_=true;
+        if(state==SdFormatState::Complete) logger_.info("SD format: PASS; FAT32 remounted and empty root verified");
+        else logger_.warnf("SD format failed: state=%u error=%d",static_cast<unsigned>(state),sdFormat_->errorCode());
+        sdFormat_.reset();
+    }
+    if (sdDownload_) {
+        if (!sdDownload_->service(millis())) sdDownload_.reset();
+        return; // Other runtime services still run; no overlapping SD/HTTP operations.
+    }
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }

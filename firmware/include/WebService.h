@@ -35,6 +35,8 @@
 #include "ModuleDescriptorProvisioningService.h"
 #include "ValueRuntime.h"
 #include "ModuleDeviceInventory.h"
+#include "SdFileTransfer.h"
+#include "SdCardFormat.h"
 
 namespace EnvNode {
 
@@ -125,6 +127,19 @@ private:
     uint32_t restorePreviewTime_ = 0;
     uint32_t restoreSequence_ = 0;
     String restoreToken_;
+    void handleSdCard();
+    void handleSdDownload();
+    void handleSdDeletePreview();
+    void handleSdDelete();
+    void handleSdFormatPreview();
+    void handleSdFormat();
+    void sdFileError(int status);
+    std::unique_ptr<ISdFormatJob> sdFormat_;
+    SdFormatTicket sdFormatTicket_;
+    bool sdFormatResultAvailable_=false;
+    SdFormatState sdFormatResult_=SdFormatState::Failed;
+    std::unique_ptr<ISdDownloadJob> sdDownload_;
+    SdDeleteTicket sdDeleteTicket_;
     void handleDiagnostics();
     void handleI2CScan();
     void handleMqttSave();

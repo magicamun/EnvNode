@@ -51,6 +51,9 @@
 #include "HardwareDescriptorStore.h"
 #include "ModuleDescriptorProvisioningService.h"
 #include "ModuleActuatorComposer.h"
+#if defined(ENVNODE_SD_DIAGNOSTICS)
+#include "SdCardSpiDiagnostic.h"
+#endif
 
 namespace EnvNode {
 namespace {
@@ -210,6 +213,11 @@ void setupEnvNodeFirmware() {
         logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
     }
+#if defined(ENVNODE_SD_DIAGNOSTICS)
+    // One-shot lab test before the normal loop; no SD work in the measurement loop.
+    runSdCardSpiDiagnostic(ModuleSlot::A, currentBoardProfile(), configuration,
+        moduleActuatorComposer.definitions(), moduleActuatorComposer.count(), logger);
+#endif
     normalRuntimeStarted = true;
 }
 
