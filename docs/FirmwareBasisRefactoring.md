@@ -624,3 +624,13 @@ Unity and platform doubles, without application headers/sources. A mechanical
 comparison confirms unchanged composition object order and bootstrap/loop bodies.
 ESP32 static RAM increases by 16 bytes and flash by 500 bytes versus the preceding
 restore fix. No device was flashed or restarted by the agent.
+
+
+## Runtime acceptance and integration release
+
+The user confirmed normal device operation after step 12 (399d102). Together with
+successful restore/restart and locale/timezone acceptance, the initial shared-basis
+extraction is complete. Release 0.8.0 integrates this work into main before further
+SD-Card or tester firmware development. The test-board firmware remains separate
+future work. Existing branch-local uncommitted PCB, binary and ignore-file changes
+are not part of the integration release.
