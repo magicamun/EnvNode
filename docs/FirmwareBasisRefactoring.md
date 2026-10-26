@@ -634,3 +634,32 @@ extraction is complete. Release 0.8.0 integrates this work into main before furt
 SD-Card or tester firmware development. The test-board firmware remains separate
 future work. Existing branch-local uncommitted PCB, binary and ignore-file changes
 are not part of the integration release.
+
+
+## First separate fixture application (2026-10-26)
+
+After release 0.8.0/main integration and SD-Card synchronization, the fixture gets
+its own `testboard` build target and source directory. EnvNode's existing target,
+version, configuration and behavior remain separate. Common ESP32 build/monitor
+settings are shared in PlatformIO; sensor and MQTT dependencies belong only to
+esp32dev. The generator selects version headers per environment: EnvNode 0.8.0,
+fixture 0.1.0. Default builds still select EnvNode explicitly through default_envs.
+
+The fixture composes shared services for WiFi setup, time/locale, base settings,
+logging, web administration, OTA/explicit restart and lifecycle. Its NVS namespaces
+and reset are independent of EnvNode's weather namespaces and cfg_nvs snapshots.
+Seven tests in testboard_native cover isolation, persistence/reboot/reset, actual
+route composition in setup mode, live locale, save failures and explicit restart,
+including firmware staging without automatic restart. No measurement/provisioning
+engine or I2C/MUX/ADC/DUT pin activation is introduced. Hardware follow-up remains
+pending; see TestBoardFirmware.md.
+
+
+Validation: both ESP32 targets build, browser checks pass in English/German, and
+all seven isolated fixture tests pass. EnvNode retains 515 passing native outcomes
+and the same known profile-count assertion failure. Generated headers select the
+correct application versions. The tester ELF has no symbols for EnvNode's
+ConfigurationService, SensorManager, ControllerRuntime, MqttService, DisplayService,
+BoardIdentityResolver, PubSubClient or U8G2. Initial measured footprint is about
+974 kB flash / 65 kB static RAM for the tester versus 1462 kB / 125 kB for EnvNode.
+No physical flash, restart or connected-board operation was performed.

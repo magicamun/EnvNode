@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- Independent `testboard` firmware build (initial version 0.1.0), with shared
+  network/setup, device/time/locale settings, logs, OTA and explicit restart.
+  Keep fixture settings/reset separate from EnvNode and select each application's
+  sources, dependencies and version header independently. Connector test and
+  EEPROM-provisioning engines remain future work.
+
 ### Documentation and repository maintenance
 
 - Remove the former central parts spreadsheet, legacy BOM files and local order
