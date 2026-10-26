@@ -4,7 +4,7 @@
 
 Die Zuordnung ist in [WebLocalization.md](WebLocalization.md) festgelegt.
 Alle erfassten Bedien-, Hilfe-, Bestätigungs- und Fehlertexte verwenden stabile
-Text-IDs im zentralen `firmware/include/WebTextCatalog.inc`. Die gespeicherte
+Text-IDs im zentralen `firmware/lib/EnvNodeWeb/include/WebTextCatalog.inc`. Die gespeicherte
 Locale wählt Deutsch oder den englischen Fallback. Browsertexte verwenden eine
 kleine, vom Server gelieferte Auswahl desselben Katalogs.
 
@@ -46,20 +46,20 @@ Keine Fundstellen in den geprüften Webansichten.
 Diese festen Texte bleiben bewusst unverändert. Sprachliche Beschriftungen
 neben ihnen werden übersetzt.
 
-- `firmware/src/PropertyPreviewWebView.cpp:71`: `Format`
-- `firmware/src/PropertyPreviewWebView.cpp:209`: `Format`
-- `firmware/src/WebService.cpp:705`: `EnvNode · v`
-- `firmware/src/WebService.cpp:745`: `Build`
-- `firmware/src/WebService.cpp:745`: `Flash`
-- `firmware/src/WebService.cpp:747`: `SSID`
-- `firmware/src/WebService.cpp:751`: `RSSI`
-- `firmware/src/WebService.cpp:784`: `DHCP`
-- `firmware/src/WebService.cpp:810`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:862`: `EEPROM`
-- `firmware/src/WebService.cpp:974`: `ENHD descriptor 0.1`
-- `firmware/src/WebService.cpp:977`: `EnvNode DuoRelay 0.3`
-- `firmware/src/WebService.cpp:1686`: `GPIO`
-- `firmware/src/WebService.cpp:1785`: `GPIO`
-- `firmware/src/WebService.cpp:2045`: `MCU`
-- `firmware/src/WebService.cpp:2045`: `WiFi`
-- `firmware/src/WebService.cpp:2053`: `SDA GPIO`
+- `firmware/lib/EnvNodeWebAdmin/src/HardwareProvisioningWebRoutes.cpp:33`: `ENHD descriptor 0.1`
+- `firmware/lib/EnvNodeWebAdmin/src/HardwareProvisioningWebRoutes.cpp:36`: `EnvNode DuoRelay 0.3`
+- `firmware/lib/EnvNodeWebAdmin/src/NetworkWebRoutes.cpp:21`: `DHCP`
+- `firmware/src/PropertyPreviewWebView.cpp:72`: `Format`
+- `firmware/src/PropertyPreviewWebView.cpp:210`: `Format`
+- `firmware/src/WebService.cpp:640`: `Build`
+- `firmware/src/WebService.cpp:640`: `Flash`
+- `firmware/src/WebService.cpp:642`: `SSID`
+- `firmware/src/WebService.cpp:646`: `RSSI`
+- `firmware/src/WebService.cpp:678`: `Home Assistant Discovery`
+- `firmware/src/WebService.cpp:792`: `MQTT`
+- `firmware/src/WebService.cpp:1537`: `GPIO`
+- `firmware/src/WebService.cpp:1636`: `GPIO`
+- `firmware/src/WebService.cpp:1896`: `MCU`
+- `firmware/src/WebService.cpp:1896`: `WiFi`
+- `firmware/src/WebService.cpp:1904`: `SDA GPIO`
+- `firmware/src/WebService.cpp:2457`: `EEPROM`

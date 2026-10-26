@@ -1,0 +1,9 @@
+{
+  "name": "EnvNodeLogging",
+  "version": "0.1.0",
+  "description": "Shared EnvNode logging interfaces, ring buffer, formatting and serial sink. See repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  }
+}

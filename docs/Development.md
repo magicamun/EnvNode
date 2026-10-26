@@ -43,3 +43,203 @@ running and restart later.
 
 Web OTA accepts firmware application binaries only. USB flashing remains the
 recovery path if a valid firmware cannot be uploaded through the running device.
+
+## Shared firmware basis: logging
+
+The first shared component lives in `firmware/lib/EnvNodeLogging`, as a local
+PlatformIO library. Both the ESP32 application and native tests consume the same
+sources. Existing includes such as `Logger.h` and `StructuredLogger.h` remain
+unchanged. Logging implementation files are no longer enumerated in the native
+application source filter.
+
+Application composition remains in `firmware/src/main.cpp`. The system-time
+adapter and web log view stay in the application for now. Network configuration,
+OTA, the central WebService and sensor APIs have not been changed. A second
+firmware application is deliberately deferred until the common basis is extracted.
+
+For the first extraction, compare the existing application build and all native
+tests before and after the move:
+
+```sh
+cd firmware
+pio run -e esp32dev
+pio test -e native
+```
+
+A hardware smoke test still needs to cover boot, serial logging, WiFi/AP fallback,
+configuration persistence, web pages, measurements/MQTT and OTA on an existing
+EnvNode board. A successful host build does not establish these hardware results.
+
+## Shared network and configuration types
+
+`firmware/lib/EnvNodeNetwork` contains WiFiService and its interface. Its only
+configuration dependency is INetworkConfiguration from
+`firmware/lib/EnvNodeBaseConfiguration`; a minimal application need not construct
+EnvNode sensor/actuator configuration to start WiFi.
+
+EnvNode Configuration.h still exposes the same field names and types, importing
+the shared base definitions. IConfigurationService forwards the narrow network
+view to its existing Configuration.network member. NVS storage and restore
+formats remain unchanged. See FirmwareBasisRefactoring.md for the scope and
+validation record.
+
+## Shared web host
+
+`firmware/lib/EnvNodeWeb` owns WebServer, the common page frame and stylesheet.
+Applications register IWebRoutes providers with WebHost before starting it. The
+current EnvNode WebService remains the application-level provider; existing URLs
+and pages are retained. Rendering takes the device/product metadata and trusted
+application fragments explicitly rather than depending on EnvNode Configuration.
+
+Changes in the shared header/streaming path need a browser smoke test as well as
+the native web-host tests, especially for large display forms. Existing runtime
+behavior before step 3 was confirmed by the user; this web change requires its
+own hardware check.
+
+## Administration route modules
+
+EnvNode WebService registers NetworkWebRoutes, LogWebRoutes and FirmwareWebRoutes from
+`firmware/lib/EnvNodeWebAdmin`. These modules use a page presenter and narrow
+settings/log interfaces rather than the complete application runtime. EnvNode
+still owns the result-page and restart decision after a network save.
+
+Shared translations are in `firmware/lib/EnvNodeWeb`; their public include names
+are unchanged. The JSON helper is in EnvNodeBaseConfiguration and remains
+independent of HTTP. Native administration tests run with `pio test -e native
+-f test_web_admin`; browser script tests run from the repository root with
+`node firmware/test/browser/page_editor_test.cjs`.
+
+## OTA and restart boundary
+
+The shared OTAService and platform restart executor are in
+`firmware/lib/EnvNodeLifecycle`. OTA requests restart through IDeviceRestart;
+EnvNode RuntimeManager retains pending-action priority and explicit execution.
+No new automatic restart is introduced. Firmware HTTP handlers live in EnvNodeWebAdmin; factory-reset storage policy
+remains application-owned through an injected callback. Native lifecycle tests run with
+`pio test -e native -f test_ota_lifecycle`; physical OTA/boot needs its own runtime
+check.
+
+## Identity and provisioning storage
+
+`firmware/lib/EnvNodeIdentity` contains the portable identity/descriptor codecs,
+CRC, storage interfaces, verified board provisioning and redundant descriptor
+bank store. Its ten implementation files are compiled as a local library in
+both native and ESP32 environments. Existing header names remain valid; board
+IDs and revisions are now declared in BoardIdentityTypes.h and included by
+BoardProfile.h. EEPROM wire transport, board fallback/selection, module discovery
+and compatibility policy remain application services.
+
+The existing native suites test_board_identity_codec, test_board_provisioning,
+test_hardware_descriptor_codec, test_hardware_descriptor_store,
+test_module_discovery and test_module_descriptor_provisioning cover this
+boundary. The library also compiles and links using only its own include
+folder and standard C++11, without application headers or Arduino.
+
+## Fixed I2C wiring and EEPROM transport
+
+`firmware/lib/EnvNodeI2C` owns I2CBusController, the II2CBusProvider interface,
+bus types and IdentityEeprom24LC32. Each application supplies its fixed bus/SDA/SCL
+constants during startup. No pin fields were added to web forms or NVS.
+EnvNodeIdentityI2C in `firmware/include/EnvNodeI2CConfiguration.h` remains I2C0
+on GPIO21/22; I2CBusManager is the EnvNode adapter for bootstrap and board-profile
+startup/scanAll. Normal I2C1 remains GPIO25/26 in the current board profiles.
+
+The EEPROM constructor accepts a provider, device address and optional bus ID.
+Existing calls default to I2C0; main.cpp passes EnvNodeIdentityI2C.bus explicitly.
+The test application will supply its own fixed wiring, without a new EnvNode
+board profile or user-selectable pin configuration.
+
+Native bus/EEPROM checks run with `pio test -e native -f test_i2c_transport`.
+The Wire double emulates EEPROM page wrap to verify page splitting and exposes
+bus initialization, address transactions, NACKs, short transfers and ACK timeouts.
+
+## Provisioning HTTP boundary
+
+HardwareProvisioningWebRoutes in EnvNodeWebAdmin registers `/hardware` and the
+four existing board/module write URLs, including `/device/...` aliases. The
+application implements IProvisioningAdministration for current identity, available
+profile metadata and domain writes. EnvNode's read-only hardware inventory remains
+in WebService because it describes live module/device/resource compatibility.
+No application runtime or complete configuration service enters the shared route.
+
+`pio test -e native -f test_provisioning_web` covers forms/locale, Mini 0.8 board
+write/readback, both URL aliases, explicit confirmations, invalid inputs, module
+CBOR/manufacturing fields and UUID-v4 generation, and policy/storage errors.
+Shared WebResult rendering is also exercised by existing firmware HTTP tests.
+The EnvNode constructor and public domain-service APIs remain source-compatible.
+
+## Shared time, locale and basic settings
+
+TimeService/ITimeService are in EnvNodeTime, using ITimeConfiguration instead of
+the complete EnvNode IConfigurationService. LocaleFormatter is in
+EnvNodeBaseConfiguration and reads ILocaleConfiguration. IConfigurationService
+implements these narrow views and IBaseSettings using the unchanged EnvNode model
+and setters; configuration storage/defaults remain application-owned.
+
+CommonSettingsWebRoutes handles time/device pages and saves. EnvNode supplies its
+page header, pressure/location/hardware device sections and save outcome callbacks
+that preserve existing RuntimeManager actions and result messages. The timezone
+catalog moved unchanged to EnvNodeWebAdmin/include; its generator targets that
+path. Runtime timezone selection still streams in small chunks. Firmware and
+settings route objects use checked heap allocation at web startup to leave the
+ESP32 static DRAM segment room for application services.
+
+Native checks: `pio test -e native -f test_time_basis -f test_common_settings_web`.
+Physical follow-up: verify synchronized time and locale/date/number presentation,
+change device name and locale/time settings, then confirm persistence after reboot.
+No configuration migration, reset or physical upload is part of the refactoring.
+
+## Shared configuration persistence
+
+EnvNodeConfigurationStorage contains ConfigurationStorage and BaseSettingsService.
+Storage receives a fixed application namespace layout; the base service borrows
+existing device/network/time/locale structs plus defaults. EnvNode's
+EnvNodeConfigurationStorage.h fixes the previous weather/weather0/weather1/
+weather_meta names. Its ConfigurationService delegates base operations and raw
+storage while retaining complete model validation and backup/snapshot encoding.
+
+No NVS key, default, configuration field or record schema is migrated. Opaque
+snapshot bytes, verification-before-bank-commit order, explicit empty overrides,
+ordinary-edit partial-failure semantics and factory-reset namespace erasure are
+preserved. The shared service stores no duplicate configuration model on the ESP32.
+A future test application can reuse it without any EnvNode sensor/slot types.
+
+Checks: `pio test -e native -f test_configuration_storage -f test_configuration_backup
+-f test_base_configuration` plus the full native suite and ESP32 build. Native
+fault tests cover initialization, staging/readback/metadata failure and namespace
+isolation. Physical follow-up should export a backup, save/reboot a base setting,
+restore the backup and verify credentials, settings and application slots survive.
+A factory reset is not required for that hardware smoke test.
+
+## Installing the dedicated configuration partition
+
+The partition table adds cfg_nvs (data/nvs, 0x390000, 0x40000), reducing the unused
+SPIFFS range to 0x3D0000/0x30000. nvs, otadata, app0 and app1 are unchanged.
+First save a configuration JSON backup. Perform a normal USB upload of esp32dev
+(including bootloader/partition table/application), without a full-flash erase.
+After boot verify existing settings, then retry the confirmed restore and reboot.
+Application-only Web OTA updates cannot introduce the partition table; after this
+one-time USB transition normal Web OTA continues to use the unchanged slots.
+
+The shared storage selects dedicated metadata only after a verified restore has
+committed it. Old NVS data remain readable until then. Native checks include
+`pio test -e native -f test_configuration_partition`, legacy backup tests and the
+full suite. Native partition doubles do not validate physical flash contents.
+The firmware does not auto-erase an unreadable dedicated partition; if initialization
+reports an error, diagnose that exact error before erasing anything.
+
+
+## Firmware runtime boundary
+
+Keep board-specific service composition in `EnvNodeFirmware.cpp`; Arduino entry
+points in `main.cpp` only delegate. Shared `EnvNodeFirmwareRuntime` may depend on
+shared service interfaces and application phases, never on EnvNode configuration,
+sensors or application policies. Board/configuration preparation belongs before
+runtime begin. New application behavior belongs in its own phase implementations.
+
+After changes run `pio run -e esp32dev`, `pio test -e native` and
+`node test/browser/page_editor_test.cjs`. The focused lifecycle suite is
+`pio test -e native -f test_firmware_runtime`. Before accepting a runtime refactor,
+flash and check startup, retained settings, measurements/controllers, MQTT, web
+and display. No configuration reset or new partition-table transition is needed
+for the startup/loop extraction.

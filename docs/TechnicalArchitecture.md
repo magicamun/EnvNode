@@ -162,6 +162,52 @@ Slot configuration using statically bounded placement storage. Disabled and None
 remain configurable but create no runtime Sensor. `BoardCapabilities` validates approved
 GPIO resources, and enabled physical GPIO Slots may not share one exclusive GPIO.
 
+EnvNodeConfigurationStorage separates typed Preferences access and opaque snapshot
+bank commits from application data models. BaseSettingsService persists borrowed
+base settings using fixed application defaults and namespace layout. EnvNode's
+ConfigurationService remains the owner of the complete model, its codecs/restore
+validation and application-specific keys; it delegates common base operations.
+The weather namespaces, key names, snapshot formats and override/commit ordering
+are preserved. Ordinary edits retain their existing partial-write behavior.
+
+A layout can specify a dedicated NVS snapshot partition. EnvNode uses cfg_nvs,
+a 256 KiB partition carved from the unused SPIFFS region, while preserving legacy
+NVS and OTA offsets. Boot stays on the legacy source until a verified restore
+commits dedicated metadata; then subsequent reads and edits use that partition.
+Factory reset clears both sources. The JSON/compact record codecs are unchanged.
+Installing the partition table requires USB once; application-only OTA is insufficient.
+
+The shared EnvNodeTime service reads only ITimeConfiguration and IWiFiService;
+LocaleFormatter reads ILocaleConfiguration in EnvNodeBaseConfiguration. The
+application IConfigurationService adapts its complete model to these views and
+IBaseSettings without changing persistence. CommonSettingsWebRoutes owns the
+basic time/locale/device forms; application callbacks retain save/restart policy
+and EnvNode-only device-page sections. A separate header presenter preserves
+streamed timezone rendering without coupling the module to application framing.
+
+The shared hardware/provisioning web module uses IProvisioningAdministration for
+profile metadata and confirmed domain writes. EnvNode's adapter owns runtime
+identity, compatibility/discovery policy and the read-only live hardware inventory.
+The route module owns HTTP parsing, forms, UUID creation through injected random
+bytes, descriptor encoding and result presentation; it does not activate a board
+profile or execute a restart after provisioning. Pure status/result types live
+in EnvNodeIdentity; policy services remain application-owned.
+
+The shared `EnvNodeI2C` library accepts application-owned fixed bus/pin assignments
+and provides initialization/scanning plus 24LC32 transport through II2CBusProvider.
+The EnvNode I2CBusManager adapts board-profile resources to that controller; its
+identity bootstrap uses the fixed EnvNodeIdentityI2C constant before a profile is
+known. EEPROM objects receive a bus provider, address and bus ID. A future test
+application uses the same transport with its own fixed wiring. Neither variant
+requires a web setting or persistent pin configuration.
+
+The shared `EnvNodeIdentity` library owns hardware identity data types, supported
+record validation, codecs/CRC, verified board provisioning and redundant descriptor
+storage through `IIdentityStorage`. It has no application or Arduino dependency.
+The application retains EEPROM transport, active-profile resolution, module discovery
+and firmware/resource compatibility policy. Board IDs, revision types, record
+formats and existing public include names are preserved across this boundary.
+
 The active typed `BoardProfile` is the single immutable description of physical board
 resources. `BoardCapabilities` derives its lookup and compatibility validation from that
 profile; it does not own a second pin map. The profile is selected once during boot by the
@@ -742,7 +788,9 @@ OTAService must never directly call:
 
     ESP.restart()
 
-The single device restart boundary remains inside RuntimeManager.
+RuntimeManager retains the pending-action gate. OTA accesses it through the
+shared IDeviceRestart interface; DeviceRestartExecutor owns the single platform
+restart call after RuntimeManager has authorized explicit execution.
 
 ---
 
@@ -814,12 +862,18 @@ The restart flow is:
     performPendingRestart()
           |
           v
+    DeviceRestartExecutor.execute()
+          |
+          v
     ESP.restart()
 
 
 There is exactly one executable restart boundary in the firmware.
 
-All components requiring a device restart request the action through RuntimeManager.
+All components requiring a device restart request it through IDeviceRestart
+(or the existing EnvNode RuntimeManager API). RuntimeManager implements the
+interface and retains action prioritization; shared OTA has no sensor/runtime
+dependency.
 
 No communication service, configuration service or Web handler may directly restart the device.
 
@@ -2727,3 +2781,26 @@ configured Locale at the Web boundary. `GeoPositionWebView` and
 `PressureReductionWebView` own this adaptation. Domain validation and storage codecs
 continue to accept only canonical input; changing the UI Locale does not reinterpret
 persisted coordinates or MQTT payloads.
+
+
+## Shared firmware startup and EnvNode composition
+
+`main.cpp` delegates to `EnvNodeFirmware.cpp`, the EnvNode composition root. That
+module owns static service wiring and performs board identity/profile checks,
+module discovery, configuration loading and sensor construction before starting
+Application. An unsupported identity still stops normal startup.
+
+`EnvNodeFirmwareRuntime` only depends on shared WiFi/time/web interfaces and
+`IFirmwareApplication`. Startup order is WiFi, time, application devices, web,
+application integrations. The loop order is WiFi, time, application measurements,
+web, application integrations. EnvNode's Application implements the four phases;
+its integrations retain MQTT, controller, publication, restart and display order.
+A future tester supplies its own application phases and composition. The runtime
+uses borrowed references and no dynamic allocation; configuration/storage formats
+and hardware pin policy are outside this library.
+
+Application firmware versions advance independently. A shared change is built and
+validated for each existing firmware target; affected released behavior gets a
+new version in each application. Internal refactors may ship with the next release.
+Build number and Git commit identify the exact shared source state. Firmware
+changes do not advance hardware revisions.

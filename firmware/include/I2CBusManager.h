@@ -1,49 +1,17 @@
+// EnvNode: see repository LICENSE.
 #pragma once
-
-#include <Wire.h>
-
-#include "HardwareResources.h"
-#include "Logger.h"
-
+#include "I2CBusController.h"
+#include "EnvNodeI2CConfiguration.h"
 namespace EnvNode {
-
-constexpr size_t MaximumI2CScanAddressCount = 0x77 - 0x08 + 1;
-
-enum class I2CScanStatus : uint8_t {
-    Complete,
-    CompleteWithProbeErrors,
-    BusUnavailable,
-};
-
-struct I2CScanResult {
-    explicit I2CScanResult(I2CBus busId = I2CBus::I2C0)
-        : bus(busId) {
-    }
-
-    I2CBus bus;
-    I2CScanStatus status = I2CScanStatus::BusUnavailable;
-    uint8_t addresses[MaximumI2CScanAddressCount] = {};
-    size_t addressCount = 0;
-    size_t probeErrorCount = 0;
-};
-
-class I2CBusManager {
+// EnvNode adapter: the shared controller does not select active board profiles.
+class I2CBusManager : public I2CBusController {
 public:
-    explicit I2CBusManager(ILogger& logger);
-
+    explicit I2CBusManager(ILogger& logger,
+        I2CBusConfiguration identityBus = EnvNodeIdentityI2C);
     bool beginIdentityBus();
     void begin();
-    TwoWire* wire(I2CBus bus);
-    bool available(I2CBus bus) const;
-    void scan(I2CBus bus, I2CScanResult& result);
     void scanAll();
-    const I2CScanResult* lastScan(I2CBus bus) const;
-
 private:
-    ILogger& logger_;
-    bool initialized_[2] = {false, false};
-    I2CScanResult lastScans_[2];
-    bool scanned_[2] = {false, false};
+    const I2CBusConfiguration identityBus_;
 };
-
-} // namespace EnvNode
+}

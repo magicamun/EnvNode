@@ -3,21 +3,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "BoardIdentityTypes.h"
 #include "HardwareResources.h"
 #include "ModuleSlot.h"
 
 namespace EnvNode {
-
-enum class BoardProfileId : uint8_t {
-    EnvNodeMainboard = 0,
-    EnvNodeWeather = 1,
-    EnvNodeMini = 2,
-};
-
-struct BoardRevision {
-    uint8_t major;
-    uint8_t minor;
-};
 
 struct BoardModuleSlotCapability {
     ModuleSlot slot;

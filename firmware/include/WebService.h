@@ -1,10 +1,18 @@
 #pragma once
+#include "FirmwareWebRoutes.h"
+#include "HardwareProvisioningWebRoutes.h"
+#include "CommonSettingsWebRoutes.h"
 
 #include <Arduino.h>
 #include <WebServer.h>
 #include <memory>
 #include "ConfigurationBackup.h"
 #include "IWebService.h"
+#include "IWebRoutes.h"
+#include "WebHost.h"
+#include "IWebPagePresenter.h"
+#include "NetworkWebRoutes.h"
+#include "LogWebRoutes.h"
 #include "IConfigurationService.h"
 #include "IWiFiService.h"
 #include "IMqttService.h"
@@ -25,13 +33,12 @@
 #include "BoardIdentityResolver.h"
 #include "BoardProvisioningService.h"
 #include "ModuleDescriptorProvisioningService.h"
-#include "DuoRelayDescriptor.h"
 #include "ValueRuntime.h"
 #include "ModuleDeviceInventory.h"
 
 namespace EnvNode {
 
-class WebService : public IWebService {
+class WebService : public IWebService, private IWebRoutes, private IWebPagePresenter, private INetworkSaveObserver, private IProvisioningAdministration, private IWebPageHeaderPresenter {
 public:
     WebService(
         ILogger& logger,
@@ -59,6 +66,18 @@ public:
     void loop() override;
 
 private:
+    BoardIdentity provisioningBoardIdentity() const override;
+    size_t provisioningProfileCount() const override;
+    bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
+    bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;
+    BoardProvisioningResult provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) override;
+    ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
+        const uint8_t* payload, size_t size, bool confirmed) override;
+    String renderHardwareOverview();
+    String renderDeviceExtras();
+    void registerRoutes(WebServer& server) override;
+    Locale webLocale() const override;
+    void networkSettingsSaved(bool success) override;
     void handleValues();
     void handleValueEdit();
     void handleValueSave();
@@ -91,12 +110,8 @@ private:
     void handleControllerStart();
     void handleControllerStop();
     void handleControllerRuntimeOperation(bool start);
-    void handleNetwork();
     void handleMqtt();
-    void handleTime();
     void handleUnits();
-    void handleDevice();
-    void handleHardware();
     void handleConfiguration();
     void handleConfigurationDownload();
     void handleConfigurationUploadData();
@@ -112,28 +127,15 @@ private:
     String restoreToken_;
     void handleDiagnostics();
     void handleI2CScan();
-    void handleLogs();
-    void handleLogData();
-    void handleFirmware();
-    void handleFirmwareUpload();
-    void handleFirmwareUploadData();
-    void handleStyle();
-    void handleNetworkSave();
     void handleMqttSave();
     void handleDiscoveryRepublish();
-    void handleTimeSave();
     void handleUnitsSave();
-    void handleDeviceSave();
     void handleGeoPositionSave();
     void handlePressureReductionSave();
-    void handleBoardProvisioning();
-    void handleModuleDescriptorProvisioning();
-    void handleRestart();
-    void handleFactoryReset();
     void handleNotFound();
 
     void sendPage(const char* title, const char* activeRoute, const String& content,
-        int status = 200, bool wideContent = false);
+        int status = 200, bool wideContent = false) override;
     void sendResult(const char* title, const char* activeRoute, const char* message, bool success);
     void sendConfigurationResult(
         const ConfigurationSaveResult& result,
@@ -143,12 +145,10 @@ private:
         const char* failureMessage);
     const char* uiText(TextId id) const;
     String renderPageHeader(const char* title, const char* activeRoute,
-        bool wideContent = false) const;
+        bool wideContent = false) const override;
     String currentLocalDateTime() const;
     String pendingRuntimeActionHtml() const;
-    String otaStatusHtml() const;
     const char* pendingActionMessage() const;
-    void performExplicitRestart();
     bool administrationAvailable() const;
     void renderDiagnostics();
 
@@ -163,18 +163,22 @@ private:
     ActuatorRuntime& actuatorRuntime_;
     ControllerRuntime& controllerRuntime_;
     MeasurementSnapshotCache& measurementSnapshotCache_;
-    const IRecentLogReader& logReader_;
     IDiscoveryPublisher& discoveryPublisher_;
     RuntimeManager& runtimeManager_;
+    IDeviceRestart& deviceRestart_;
     OTAService& otaService_;
     I2CBusManager& i2cBusManager_;
     const BoardIdentityResolution& boardIdentityResolution_;
     BoardProvisioningService& boardProvisioningService_;
     ModuleDiscoveryService& moduleDiscoveryService_;
     ModuleDescriptorProvisioningService& moduleDescriptorProvisioningService_;
-    WebServer server_{80};
-    bool firmwareUploadRequestAccepted_ = false;
-    String firmwareUploadRequestError_;
+    WebHost webHost_;
+    WebServer& server_;
+    NetworkWebRoutes networkRoutes_;
+    LogWebRoutes logRoutes_;
+    std::unique_ptr<FirmwareWebRoutes> firmwareRoutes_;
+    std::unique_ptr<HardwareProvisioningWebRoutes> provisioningRoutes_;
+    std::unique_ptr<CommonSettingsWebRoutes> settingsRoutes_;
 };
 
 } // namespace EnvNode

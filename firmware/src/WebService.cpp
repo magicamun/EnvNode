@@ -1,10 +1,12 @@
+#include "TextUpload.h"
+#include "WebResult.h"
+#include "InstanceUuidWebText.h"
 #include "HttpRedirect.h"
 #include "ControllerTargetIdentity.h"
 #include "WebService.h"
 #include "WebLocalization.h"
 #include "WebPresentationText.h"
 #include "HtmlEscaping.h"
-#include "LogWebView.h"
 #include "PropertyResolver.h"
 #include "PropertyPresentationReader.h"
 #include "SystemPropertyReader.h"
@@ -12,6 +14,7 @@
 #include "PropertyPreviewWebView.h"
 #include "PageEditorScript.h"
 #include "WebNavigation.h"
+#include "WebPageFrame.h"
 #include "ValueWebView.h"
 #include "MqttTopic.h"
 #include "BoardProfile.h"
@@ -39,8 +42,6 @@
 #include "ControllerWebSupport.h"
 #include "SelectorWebView.h"
 #include "ElapsedTimeFormatter.h"
-#include "DuoRelayDescriptor.h"
-#include "InstanceUuid.h"
 
 namespace EnvNode {
 namespace {
@@ -66,31 +67,6 @@ bool actuatorInfoById(const ActuatorRuntime& runtime, ActuatorId id, ActuatorRun
     return false;
 }
 
-const char SharedStyle[] PROGMEM = R"CSS(
-:root{--bg:#f5f5f5;--panel:#fff;--ink:#262626;--muted:#595959;--line:#d6d6d6;--brand:#9e6c00;--brand2:#805700;--good:#177245;--warn:#a55b00;--bad:#a32828}html,body,*,*::before,*::after{box-sizing:border-box}html,body{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif;overflow-x:hidden}.shell{min-height:100vh;min-width:0;display:grid;grid-template-columns:220px minmax(0,1fr)}.side{background:#262626;color:#fff;padding:22px 16px;min-width:0}.brand{font-weight:750;font-size:19px;margin:0 8px 4px;overflow-wrap:anywhere}.version{color:#d6d6d6;font-size:12px;margin:0 8px 20px}.nav a{display:block;color:#faf4e6;text-decoration:none;padding:9px 11px;border-radius:7px;margin:2px 0}.nav a:hover,.nav a.active{background:#9e6c00;color:#fff}.main{padding:28px;max-width:1100px;width:100%;min-width:0}.main.main-wide{max-width:none}.top{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px;min-width:0}h1{font-size:25px;margin:0;overflow-wrap:anywhere}h2{font-size:17px;margin:0 0 14px}p{margin:8px 0;overflow-wrap:anywhere}.muted,.help,.secondary{color:var(--muted)}.help,.secondary{font-size:13px}.secondary{display:block;margin-top:4px}.grid,.summary-grid{display:grid;gap:16px;min-width:0;max-width:100%;margin-bottom:16px}.grid{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}.summary-grid.primary{grid-template-columns:repeat(4,minmax(0,1fr))}.summary-grid.domain{grid-template-columns:repeat(3,minmax(0,1fr))}.grid>.card,.summary-grid>.card{margin-bottom:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #1122;min-width:0;max-width:100%;overflow:hidden}.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 14px;min-width:0;max-width:100%}.kv>span{min-width:0;max-width:100%;overflow-wrap:anywhere}.kv span:nth-child(odd){color:var(--muted)}.badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700;background:#faf4e6;max-width:100%;white-space:nowrap;overflow-wrap:normal}.badge.good{color:var(--good);background:#e2f4ea}.badge.warn{color:var(--warn);background:#fff0d7}.badge.bad{color:var(--bad);background:#fbe3e3}.notice{border-left:4px solid var(--warn);background:#fff8e9;padding:11px 13px;border-radius:5px;margin-bottom:16px;max-width:100%;overflow-wrap:anywhere}.success{border-left-color:var(--good);background:#eaf7ef}.error{border-left-color:var(--bad);background:#fdecec}label{display:block;font-weight:650;margin:0 0 14px;min-width:0;max-width:100%;overflow-wrap:anywhere}input,select{display:block;width:100%;max-width:520px;min-width:0;margin-top:5px;padding:9px 10px;border:1px solid #d6d6d6;border-radius:6px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox],input[type=radio]{display:inline;width:auto;margin:0 7px 0 0}.choice{font-weight:500;margin:7px 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;min-width:0}button,.button{border:0;border-radius:6px;padding:9px 15px;background:var(--brand);color:#fff;text-decoration:none;font:600 14px inherit;cursor:pointer;max-width:100%;white-space:nowrap}button:hover,.button:hover{background:var(--brand2)}button.danger{background:var(--bad)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em}.nowrap,.sensor-technical,.sensor-last-measurement,.sensor-actions{white-space:nowrap;overflow-wrap:normal}.sensor-technical,.sensor-last-measurement,.sensor-actions{width:1%}.table-scroll,.scroll{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}.table-actions{display:flex;gap:8px;align-items:center;justify-content:center;margin:0}.table-actions.vertical{flex-direction:column}.table-actions form{margin:0}.table-actions button,.table-action{min-width:max-content;white-space:nowrap}.measurement-table{min-width:620px}.measurement-table .measurement-name{width:auto}.measurement-table .measurement-value{min-width:130px;white-space:nowrap}.measurement-table .measurement-quality{min-width:90px;white-space:nowrap}.measurement-table .measurement-time{min-width:175px;white-space:nowrap}.actuator-table{min-width:1120px}.actuator-table th{white-space:nowrap;overflow-wrap:normal}.actuator-table td{vertical-align:middle}.actuator-table .actuator-slot{width:58px;white-space:nowrap}.actuator-table .actuator-name{min-width:145px}.actuator-table .actuator-configured{min-width:130px}.actuator-table .actuator-hardware{min-width:90px;white-space:nowrap}.actuator-table .actuator-runtime{min-width:175px}.actuator-table .actuator-initialization{min-width:120px;white-space:nowrap}.actuator-table .actuator-state{min-width:68px;white-space:nowrap}.actuator-table .actuator-controls{min-width:90px;text-align:center}.actuator-table .actuator-configure{min-width:112px;text-align:center}.actuator-table .actuator-controls button{min-width:58px}.controller-table{min-width:1320px}.controller-table th{white-space:nowrap;overflow-wrap:normal}.controller-table td{vertical-align:middle}.controller-table .controller-slot{width:58px;white-space:nowrap}.controller-table .controller-name{min-width:190px}.controller-table .controller-name .secondary{white-space:nowrap}.controller-table .controller-route{min-width:290px}.controller-table .controller-policy{min-width:210px}.controller-table .controller-runtime{min-width:150px}.controller-table .controller-diagnostics{min-width:245px}.controller-table .controller-controls{min-width:120px;text-align:center}.controller-table .controller-controls .table-actions{align-items:stretch}.controller-table .controller-controls button,.controller-table .controller-controls .button{width:100%}.diagnostic-stack{line-height:1.55}details{margin-top:12px;max-width:100%}summary{cursor:pointer;font-weight:650}h1,h2{color:var(--brand)}input[type=checkbox],input[type=radio]{accent-color:var(--brand)}:focus-visible{outline:2px solid var(--brand);outline-offset:3px}@media(max-width:900px){.summary-grid.primary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.shell{display:block}.side{padding:14px}.brand,.version{display:inline-block;margin:0 8px 10px 0}.nav{display:flex;overflow-x:auto;gap:3px}.nav a{white-space:nowrap}.main{padding:18px 13px}.top{display:block}.kv{grid-template-columns:minmax(0,1fr)}.kv span:nth-child(even){margin-bottom:7px}.card{padding:15px}.summary-grid.domain{grid-template-columns:1fr}}@media(max-width:480px){.summary-grid.primary{grid-template-columns:1fr}}
-)CSS" R"CSS(
-.log-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.log-summary .help{margin-bottom:0}.log-table{min-width:620px;table-layout:fixed}.log-table .log-seq{width:84px;white-space:nowrap;overflow-wrap:normal}.log-table .log-time{width:190px;white-space:nowrap;overflow-wrap:normal}.log-table .log-level-cell{width:86px;white-space:nowrap;overflow-wrap:normal}.log-table .log-message{white-space:normal;overflow-wrap:anywhere}.log-level.debug{color:var(--muted)}.log-level.info{color:var(--brand)}@media(max-width:480px){.log-summary{display:block}.log-summary .button{display:inline-block;margin-top:10px}}
-)CSS" R"CSS(
-.log-refresh-controls{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}.log-refresh-controls .choice{margin:0}.log-refresh-controls .help{white-space:nowrap}@media(max-width:480px){.log-refresh-controls{justify-content:flex-start;margin-top:12px}}
-)CSS" R"CSS(
-.measurement-topic{font-size:12px;white-space:normal;overflow-wrap:anywhere;user-select:text}
-)CSS";
-
-struct TimezoneOption { const char* label; const char* value; };
-const TimezoneOption TimezoneOptions[] = {
-#include "TimezoneOptions.inc"
-};
-
-const char* webOtaStateName(OTAState state, Locale locale) {
-    switch (state) {
-        case OTAState::Idle: return webText(locale, TextId::Idle);
-        case OTAState::Uploading: return webText(locale, TextId::Uploading);
-        case OTAState::Verifying: return webText(locale, TextId::Verifying);
-        case OTAState::FirmwareStaged: return webText(locale, TextId::FirmwareStaged);
-        case OTAState::Failed: return webText(locale, TextId::Failed);
-        default: return webText(locale, TextId::Unknown);
-    }
-}
 
 String badge(const char* text, const char* style) {
     return "<span class='badge " + String(style) + "'>" + text + "</span>";
@@ -117,17 +93,6 @@ String moduleActuatorLabel(const ModuleDiscoveryService& discovery,
     return webText(locale, TextId::ModuleDescriptor);
 }
 
-String descriptorUuid(const uint8_t (&value)[16]) {
-    static const char Hex[] = "0123456789abcdef";
-    String result;
-    result.reserve(36);
-    for (size_t index = 0; index < sizeof(value); ++index) {
-        if (index == 4 || index == 6 || index == 8 || index == 10) result += '-';
-        result += Hex[value[index] >> 4];
-        result += Hex[value[index] & 0x0F];
-    }
-    return result;
-}
 
 const char* sensorStateName(SensorState state, Locale locale) {
     switch (state) {
@@ -222,52 +187,6 @@ String lastMeasurementDisplay(
     return result;
 }
 
-void sendTimezoneSelect(WebServer& server, const String& current, Locale locale) {
-    // Keep the worldwide catalog out of contiguous page-sized heap allocations.
-    String chunk;
-    chunk.reserve(1200);
-    chunk = "<select name='timezone'>";
-    bool found = false;
-    for (const auto& option : TimezoneOptions) {
-        const bool selected = !found && current == option.value;
-        found = found || selected;
-        chunk += "<option value='" + escapeHtml(option.value) + "'" + (selected ? " selected" : "") + ">" + option.label + "</option>";
-        if (chunk.length() >= 1024) {
-            server.sendContent(chunk);
-            chunk = "";
-        }
-    }
-    if (!found && !current.isEmpty()) chunk += "<option value='" + escapeHtml(current) + (String("' selected>") + webText(locale, TextId::Custom) + " ") + escapeHtml(current) + "</option>";
-    chunk += "</select>";
-    server.sendContent(chunk);
-}
-
-String localeSelect(Locale current) {
-    const Locale supported[] = {
-        Locale::GermanGermany,
-        Locale::EnglishUnitedKingdom,
-        Locale::EnglishUnitedStates,
-    };
-    String html;
-    html.reserve(300);
-    html = "<select name='locale'>";
-    for (const Locale locale : supported) {
-        const char* key = localeKey(locale);
-        html += "<option value='";
-        html += key;
-        html += "'";
-        if (locale == current) html += " selected";
-        html += ">";
-        switch (locale) {
-            case Locale::GermanGermany: html += "Deutsch (de-DE)"; break;
-            case Locale::EnglishUnitedKingdom: html += "English (en-GB)"; break;
-            case Locale::EnglishUnitedStates: html += "English (en-US)"; break;
-        }
-        html += "</option>";
-    }
-    html += "</select>";
-    return html;
-}
 
 String unitSelect(const char* name, MeasurementType type, PresentationUnit current, Locale locale) {
     const MeasurementTypeMetadata& metadata = measurementTypeMetadata(type);
@@ -494,141 +413,134 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       sensorManager_(sensorManager), actuatorRuntime_(actuatorRuntime),
       controllerRuntime_(controllerRuntime),
       measurementSnapshotCache_(measurementSnapshotCache),
-      logReader_(logReader),
-      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), otaService_(otaService),
+      discoveryPublisher_(discoveryPublisher), runtimeManager_(runtimeManager), deviceRestart_(runtimeManager), otaService_(otaService),
       i2cBusManager_(i2cBusManager),
       boardIdentityResolution_(boardIdentityResolution),
       boardProvisioningService_(boardProvisioningService),
       moduleDiscoveryService_(moduleDiscoveryService),
-      moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService) {}
+      moduleDescriptorProvisioningService_(moduleDescriptorProvisioningService),
+      webHost_(logger, wifiService), server_(webHost_.server()),
+      networkRoutes_(webHost_, configurationService, wifiService, *this, *this),
+      logRoutes_(webHost_, *this, logReader) {}
 
 void WebService::begin() {
-    server_.on("/values", HTTP_GET, [this]() { handleValues(); });
-    server_.on("/values/edit", HTTP_GET, [this]() { handleValueEdit(); });
-    server_.on("/values/save", HTTP_POST, [this]() { handleValueSave(); });
-    server_.on("/values/set", HTTP_POST, [this]() { handleValueSet(); });
-    server_.on("/values/delete", HTTP_POST, [this]() { handleValueDelete(); });
-    server_.on("/", HTTP_GET, [this]() { handleStatus(); });
-    server_.on("/status", HTTP_GET, [this]() { handleStatus(); });
-    server_.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
-    server_.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
-    server_.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
-    server_.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
-    server_.on("/display", HTTP_GET, [this]() { handleDisplay(); });
-    server_.on("/display-editor.js", HTTP_GET, [this]() {
+    webHost_.registerRoutes(*this);
+    webHost_.registerRoutes(networkRoutes_);
+    webHost_.registerRoutes(logRoutes_);
+    if (!firmwareRoutes_) {
+        firmwareRoutes_.reset(new (std::nothrow) FirmwareWebRoutes(webHost_.server(), *this, otaService_, runtimeManager_,
+          {FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::CompactIdentity,
+           FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit,
+           FirmwareBuildInfo::GitBranch, FirmwareBuildInfo::BuildTimestampUtc,
+           FirmwareBuildInfo::SourceState, FirmwareBuildInfo::SourceDirty},
+          [this]() { return configurationService_.resetToDefaults(); },
+          [this](double value, uint8_t decimals) { return localeFormatter_.formatNumber(value, decimals); }));
+    }
+    if (firmwareRoutes_) webHost_.registerRoutes(*firmwareRoutes_);
+    else logger_.error("Insufficient memory to initialize firmware web routes");
+    // Keep this administration object out of the ESP32's constrained static DRAM.
+    if (!provisioningRoutes_) {
+        provisioningRoutes_.reset(new (std::nothrow) HardwareProvisioningWebRoutes(
+            server_, *this, logger_, *this,
+            [this]() { return renderHardwareOverview(); },
+            [](uint8_t* bytes, size_t size) { esp_fill_random(bytes, size); }));
+    }
+    if (provisioningRoutes_) webHost_.registerRoutes(*provisioningRoutes_);
+    else logger_.error("Insufficient memory to initialize provisioning web routes");
+    if (!settingsRoutes_) {
+        settingsRoutes_.reset(new (std::nothrow) CommonSettingsWebRoutes(webHost_, *this, *this,
+            configurationService_, timeService_, localeFormatter_,
+            [this]() { return renderDeviceExtras(); },
+            [this](bool success, bool localeChanged, bool timeChanged) {
+                sendConfigurationResult(configurationSaveResult(success, ConfigurationArea::Locale,
+                    localeChanged, ConfigurationArea::Time, timeChanged),
+                    uiText(TextId::LocaleAndTimeSaved), uiText(TextId::LocaleAndTimeSaveFailed),
+                    "/time", uiText(TextId::InvalidLocaleOrTimeConfiguration));
+            },
+            [this](bool success) {
+                sendConfigurationResult(configurationSaveResult(success, ConfigurationArea::Device),
+                    uiText(TextId::DeviceSettingsSaved), uiText(TextId::DeviceSaveFailed),
+                    "/device", uiText(TextId::InvalidDeviceName));
+            }));
+    }
+    if (settingsRoutes_) webHost_.registerRoutes(*settingsRoutes_);
+    else logger_.error("Insufficient memory to initialize base settings web routes");
+    webHost_.begin();
+}
+
+void WebService::registerRoutes(WebServer& server) {
+    server.on("/values", HTTP_GET, [this]() { handleValues(); });
+    server.on("/values/edit", HTTP_GET, [this]() { handleValueEdit(); });
+    server.on("/values/save", HTTP_POST, [this]() { handleValueSave(); });
+    server.on("/values/set", HTTP_POST, [this]() { handleValueSet(); });
+    server.on("/values/delete", HTTP_POST, [this]() { handleValueDelete(); });
+    server.on("/", HTTP_GET, [this]() { handleStatus(); });
+    server.on("/status", HTTP_GET, [this]() { handleStatus(); });
+    server.on("/sensors", HTTP_GET, [this]() { handleSensors(); });
+    server.on("/actuators", HTTP_GET, [this]() { handleActuators(); });
+    server.on("/controllers", HTTP_GET, [this]() { handleControllers(); });
+    server.on("/measurements", HTTP_GET, [this]() { handleMeasurements(); });
+    server.on("/display", HTTP_GET, [this]() { handleDisplay(); });
+    server.on("/display-editor.js", HTTP_GET, [this]() {
         // Stream static code directly from flash; never add it to the page's heap buffer.
         server_.sendHeader("Cache-Control", "no-store");
         server_.send_P(200, PSTR("application/javascript; charset=utf-8"), PageEditorScript, sizeof(PageEditorScript) - 1);
     });
-    server_.on("/display/outputs/save", HTTP_POST, [this]() { handleDisplayOutputsSave(); });
-    server_.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
-    server_.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
-    server_.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
-    server_.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
-    server_.on("/network", HTTP_GET, [this]() { handleNetwork(); });
-    server_.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
-    server_.on("/time", HTTP_GET, [this]() { handleTime(); });
-    server_.on("/units", HTTP_GET, [this]() { handleUnits(); });
-    server_.on("/device", HTTP_GET, [this]() { handleDevice(); });
-    server_.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
-    server_.on("/configuration", HTTP_GET, [this]() { handleConfiguration(); });
-    server_.on("/configuration/download", HTTP_POST, [this]() { handleConfigurationDownload(); });
-    server_.on("/configuration/preview", HTTP_POST,
+    server.on("/display/outputs/save", HTTP_POST, [this]() { handleDisplayOutputsSave(); });
+    server.on("/display/save", HTTP_POST, [this]() { handleDisplaySave(); });
+    server.on("/sensors/edit", HTTP_GET, [this]() { handleSensorEdit(); });
+    server.on("/actuators/edit", HTTP_GET, [this]() { handleActuatorEdit(); });
+    server.on("/controllers/edit", HTTP_GET, [this]() { handleControllerEdit(); });
+    server.on("/mqtt", HTTP_GET, [this]() { handleMqtt(); });
+    server.on("/units", HTTP_GET, [this]() { handleUnits(); });
+    server.on("/configuration", HTTP_GET, [this]() { handleConfiguration(); });
+    server.on("/configuration/download", HTTP_POST, [this]() { handleConfigurationDownload(); });
+    server.on("/configuration/preview", HTTP_POST,
         [this]() { handleConfigurationPreview(); }, [this]() { handleConfigurationUploadData(); });
-    server_.on("/configuration/restore", HTTP_POST, [this]() { handleConfigurationRestore(); });
-    server_.on("/configuration/cancel", HTTP_POST, [this]() {
+    server.on("/configuration/restore", HTTP_POST, [this]() { handleConfigurationRestore(); });
+    server.on("/configuration/cancel", HTTP_POST, [this]() {
         restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
     });
-    server_.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
-    server_.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
-    server_.on("/logs", HTTP_GET, [this]() { handleLogs(); });
-    server_.on("/logs/data", HTTP_GET, [this]() { handleLogData(); });
-    server_.on("/firmware", HTTP_GET, [this]() { handleFirmware(); });
-    server_.on("/firmware/upload", HTTP_POST,
-        [this]() { handleFirmwareUpload(); },
-        [this]() { handleFirmwareUploadData(); });
-    server_.on("/style.css", HTTP_GET, [this]() { handleStyle(); });
-    server_.on("/network/save", HTTP_POST, [this]() { handleNetworkSave(); });
-    server_.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
-    server_.on("/mqtt/discovery/republish", HTTP_POST,
+    server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
+    server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
+    server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
+    server.on("/mqtt/discovery/republish", HTTP_POST,
         [this]() { handleDiscoveryRepublish(); });
-    server_.on("/time/save", HTTP_POST, [this]() { handleTimeSave(); });
-    server_.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
-    server_.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
-    server_.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
-    server_.on("/device/save", HTTP_POST, [this]() { handleDeviceSave(); });
-    server_.on("/hardware/board-identity/write", HTTP_POST,
-        [this]() { handleBoardProvisioning(); });
-    server_.on("/device/board-identity/write", HTTP_POST,
-        [this]() { handleBoardProvisioning(); });
-    server_.on("/hardware/module-descriptor/write", HTTP_POST,
-        [this]() { handleModuleDescriptorProvisioning(); });
-    server_.on("/device/module-descriptor/write", HTTP_POST,
-        [this]() { handleModuleDescriptorProvisioning(); });
-    server_.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
-    server_.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
-    server_.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
-    server_.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
-    server_.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
-    server_.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
-    server_.on("/actuators/level", HTTP_POST, [this]() { handleActuatorLevel(); });
-    server_.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
-    server_.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
-    server_.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
-    server_.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
-    server_.on("/restart", HTTP_POST, [this]() { handleRestart(); });
-    server_.on("/factory-reset", HTTP_POST, [this]() { handleFactoryReset(); });
-    server_.onNotFound([this]() { handleNotFound(); });
-    server_.begin();
-    logger_.info("Web administration started");
+    server.on("/units/save", HTTP_POST, [this]() { handleUnitsSave(); });
+    server.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
+    server.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
+    server.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
+    server.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
+    server.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
+    server.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
+    server.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
+    server.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
+    server.on("/actuators/level", HTTP_POST, [this]() { handleActuatorLevel(); });
+    server.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
+    server.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
+    server.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
+    server.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
+    server.onNotFound([this]() { handleNotFound(); });
 }
 
 void WebService::loop() {
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }
-    server_.handleClient();
+    webHost_.loop();
 }
 
-bool WebService::administrationAvailable() const { return wifiService_.inSetupAccessPointMode() || wifiService_.connected(); }
+bool WebService::administrationAvailable() const { return webHost_.administrationAvailable(); }
 
 void WebService::sendPage(const char* title, const char* activeRoute, const String& content,
     int status, bool wideContent) {
-    if (!administrationAvailable()) {
-        server_.send(503, "text/plain", uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting));
-        return;
-    }
-    // Send the existing content without constructing a second full-page String.
-    // Large display forms otherwise need several simultaneous contiguous copies.
-    const String header = renderPageHeader(title, activeRoute, wideContent);
-    static const char footer[] = "</main></div></body></html>";
-    if (header.isEmpty() || content.isEmpty()) {
-        logger_.errorf("Web page rendering failed: header=%u content=%u heap=%u largest=%u",
-            static_cast<unsigned>(header.length()), static_cast<unsigned>(content.length()),
-            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
-        server_.send(503, "text/plain", uiText(TextId::PageRenderingFailedPleaseRetry));
-        return;
-    }
-    server_.setContentLength(header.length() + content.length() + sizeof(footer) - 1);
-    server_.send(status, "text/html; charset=utf-8", header);
-    server_.sendContent(content);
-    server_.sendContent(footer, sizeof(footer) - 1);
+    webHost_.sendPage([this, title, activeRoute, wideContent]() {
+        return renderPageHeader(title, activeRoute, wideContent);
+    }, content, status,
+        uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting),
+        uiText(TextId::PageRenderingFailedPleaseRetry));
 }
 
-void WebService::sendResult(const char* title, const char* route, const char* message, bool success) {
-    String content;
-    content.reserve(240 + strlen(title) + strlen(message) + strlen(route));
-    content = "<div class='notice ";
-    content += success ? "success" : "error";
-    content += "'><strong>";
-    content += escapeHtml(title);
-    content += "</strong><p>";
-    content += escapeHtml(message);
-    content += "</p></div><a class='button' href='";
-    content += route;
-    content += (String("'>") + uiText(TextId::Back) + "</a>");
-    sendPage(title, route, content, success ? 200 : 400);
-}
 
 void WebService::sendConfigurationResult(
     const ConfigurationSaveResult& result,
@@ -680,36 +592,6 @@ String WebService::pendingRuntimeActionHtml() const {
     return html;
 }
 
-String WebService::otaStatusHtml() const {
-    String html;
-    html.reserve(520);
-    html = (String("<div class='kv'><span>") + uiText(TextId::OTAState) + "</span><span>");
-    html += webOtaStateName(otaService_.state(), configurationService_.getLocale());
-    html += (String("</span><span>") + uiText(TextId::UploadStatus) + "</span><span>");
-    if (otaService_.totalBytesKnown()) {
-        html += localeFormatter_.formatNumber(otaService_.bytesReceived(), 0);
-        html += " / ";
-        html += localeFormatter_.formatNumber(otaService_.totalBytes(), 0);
-        html += (String(" ") + uiText(TextId::Bytes2));
-        html += localeFormatter_.formatNumber(otaService_.progressPercent(), 0);
-        html += "%)";
-    } else if (otaService_.bytesReceived() > 0) {
-        html += localeFormatter_.formatNumber(otaService_.bytesReceived(), 0);
-        html += (String(" ") + uiText(TextId::BytesReceived));
-    } else {
-        html += "—";
-    }
-    html += (String("</span><span>") + uiText(TextId::RestartRequired) + "</span><span>");
-    html += uiText(otaService_.restartRequired() ? TextId::Yes : TextId::No);
-    html += "</span>";
-    if (otaService_.state() == OTAState::Failed && !otaService_.lastError().isEmpty()) {
-        html += (String("<span>") + uiText(TextId::LastError) + "</span><span>");
-        html += escapeHtml(otaService_.lastError());
-        html += "</span>";
-    }
-    html += "</div>";
-    return html;
-}
 
 const char* WebService::uiText(TextId id) const {
     return webText(configurationService_.getLocale(), id);
@@ -718,29 +600,16 @@ const char* WebService::uiText(TextId id) const {
 String WebService::renderPageHeader(const char* title, const char* active,
     bool wideContent) const {
     const Configuration& cfg = configurationService_.getConfiguration();
-    String html;
-    if (!html.reserve(2048)) return String();
-    html = String("<!doctype html><html lang='") + webLanguageTag(cfg.locale.locale) + "'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>";
-    html += escapeHtml(title);
-    html += " · EnvNode</title><link rel='stylesheet' href='/style.css?build=";
-    html += FirmwareBuildInfo::BuildTimestampUtc;
-    html += "'>";
-    html += buildWebUiScript(cfg.locale.locale);
-    html += "</head><body><div class='shell'><aside class='side'><div class='brand'>";
-    html += escapeHtml(cfg.device.name);
-    html += "</div><div class='version'>EnvNode · v";
-    html += FirmwareBuildInfo::SemanticVersion;
-    html += "</div>";
-    html += buildWebNavigationHtml(active, cfg.locale.locale);
-    html += "</aside><main class='main";
-    if (wideContent) html += " main-wide";
-    html += "'><div class='top'><div><h1>";
-    html += escapeHtml(title);
-    html += "</h1>";
-    if (wifiService_.inSetupAccessPointMode()) html += (String("<p class='muted'>") + uiText(TextId::SetupAccessPointMode) + "</p>");
-    html += "</div></div>";
-    html += pendingRuntimeActionHtml();
-    return html;
+    const WebPageFrameData page = {
+        title, cfg.device.name, "EnvNode", FirmwareBuildInfo::SemanticVersion,
+        FirmwareBuildInfo::BuildTimestampUtc, webLanguageTag(cfg.locale.locale),
+        [this]() { return buildWebUiScript(configurationService_.getLocale()); },
+        [this, active]() { return buildWebNavigationHtml(active, configurationService_.getLocale()); },
+        [this]() { return pendingRuntimeActionHtml(); },
+        wifiService_.inSetupAccessPointMode(),
+        uiText(TextId::SetupAccessPointMode), wideContent
+    };
+    return buildWebPageHeader(page);
 }
 
 String WebService::currentLocalDateTime() const {
@@ -799,33 +668,6 @@ void WebService::handleStatus() {
     sendPage(uiText(TextId::Status), "/status", c);
 }
 
-void WebService::handleNetwork() {
-    const NetworkConfiguration& n = configurationService_.getConfiguration().network;
-    const bool isStatic = n.addressMode == NetworkAddressMode::Static;
-    String c;
-    c.reserve(2200);
-    c = (String("<section class='card'><h2>") + uiText(TextId::NetworkConfiguration) + "</h2><form method='post' action='/network/save' autocomplete='off'>");
-    c += (String("<label>") + uiText(TextId::Hostname) + "<input name='hostname' required value='") + escapeHtml(n.hostname) + (String("'></label><label>") + uiText(TextId::WiFiSSID) + "<input name='wifiSSID' required value='") + escapeHtml(n.wifiSSID) + "'></label>";
-    c += (String("<label class='choice'><input type='checkbox' name='changeWifiPassword' value='1'>") + uiText(TextId::ChangeWiFiPassword) + "</label><label>" + uiText(TextId::NewWiFiPassword) + "<input type='password' name='wifiPassword' autocomplete='new-password'></label>");
-    c += (String("<label>") + uiText(TextId::AddressMode) + "<select name='addressMode' id='addressMode' onchange='toggleStatic()'><option value='dhcp'") + String(!isStatic?" selected":"") + ">DHCP</option><option value='static'" + String(isStatic?" selected":"") + (String(">") + uiText(TextId::StaticIPv4) + "</option></select></label>");
-    const NetworkAddressSnapshot assigned = wifiService_.stationAddresses();
-    c += "<div id='dhcpFields'>";
-    c += String("<p class='help'>") + uiText(TextId::ActiveNetworkAddresses) + "</p>";
-    const auto assignedField = [&](TextId label, const String& value) {
-        c += String("<label>") + uiText(label) + "<input readonly value='";
-        c += value.isEmpty() || value == "0.0.0.0" ? String("—") : escapeHtml(value);
-        c += "'></label>";
-    };
-    assignedField(TextId::IPv4Address, assigned.ipAddress);
-    assignedField(TextId::SubnetMask, assigned.subnetMask);
-    assignedField(TextId::DefaultGateway, assigned.gateway);
-    assignedField(TextId::PrimaryDNS, assigned.dns1);
-    assignedField(TextId::SecondaryDNS, assigned.dns2);
-    c += "</div>";
-    c += (String("<div id='staticFields'><label>") + uiText(TextId::IPv4Address) + "<input name='ipv4Address' value='") + escapeHtml(n.ipv4Address) + (String("'></label><label>") + uiText(TextId::SubnetMask) + "<input name='subnetMask' value='") + escapeHtml(n.subnetMask) + (String("'></label><label>") + uiText(TextId::DefaultGateway) + "<input name='gateway' value='") + escapeHtml(n.gateway) + (String("'></label><label>") + uiText(TextId::PrimaryDNS) + "<input name='dns1' value='") + escapeHtml(n.dns1) + (String("'></label><label>") + uiText(TextId::SecondaryDNS) + " " + "<span class='help'>" + uiText(TextId::Optional) + "</span><input name='dns2' value='") + escapeHtml(n.dns2) + (String("'></label></div><div class='actions'><button>") + uiText(TextId::SaveNetworkSettings) + "</button></div></form></section>");
-    c += "<script>function toggleStatic(){var s=document.getElementById('addressMode').value==='static',d=document.getElementById('staticFields');d.hidden=!s;document.getElementById('dhcpFields').hidden=s;d.querySelectorAll('input').forEach(function(i){i.disabled=!s})}toggleStatic()</script>";
-    sendPage(uiText(TextId::Network), "/network", c);
-}
 
 void WebService::handleMqtt() {
     const MqttConfiguration& m = configurationService_.getConfiguration().mqtt;
@@ -837,32 +679,6 @@ void WebService::handleMqtt() {
     sendPage(uiText(TextId::MQTT), "/mqtt", c);
 }
 
-void WebService::handleTime() {
-    if (!administrationAvailable()) {
-        server_.send(503, "text/plain", uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting));
-        return;
-    }
-    const String header = renderPageHeader(uiText(TextId::LocaleTime), "/time", false);
-    if (header.isEmpty()) {
-        server_.send(503, "text/plain", uiText(TextId::PageRenderingFailedPleaseRetry));
-        return;
-    }
-    const TimeConfiguration& t = configurationService_.getConfiguration().time;
-    const Locale currentLocale = configurationService_.getLocale();
-    String c;
-    c.reserve(1300);
-    c = (String("<section class='card'><h2>") + uiText(TextId::RuntimeStatus) + "</h2><div class='kv'><span>" + uiText(TextId::Synchronization) + "</span><span>") + badge(uiText(timeService_.synchronized()?TextId::Synchronized:TextId::Synchronizing),timeService_.synchronized()?"good":"warn") + (String("</span><span>") + uiText(TextId::LocalTime) + "</span><span>") + (timeService_.synchronized()?escapeHtml(currentLocalDateTime()):"—") + (String("</span></div></section><form method='post' action='/time/save'><section class='card'><h2>") + uiText(TextId::Locale) + "</h2><label>" + uiText(TextId::Locale) + "") + localeSelect(currentLocale) + (String("</label></section><section class='card'><h2>") + uiText(TextId::Time) + "</h2>");
-    c += String("<label>") + uiText(TextId::Timezone);
-    server_.setContentLength(CONTENT_LENGTH_UNKNOWN);
-    server_.send(200, "text/html; charset=utf-8", header);
-    server_.sendContent(c);
-    c = "";
-    sendTimezoneSelect(server_, t.timezone, currentLocale);
-    c = (String("</label><label>") + uiText(TextId::NTPServer1) + "<input name='ntpServer1' value='") + escapeHtml(t.ntpServer1) + (String("'></label><label>") + uiText(TextId::NTPServer2) + "<input name='ntpServer2' value='") + escapeHtml(t.ntpServer2) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveLocaleAndTime) + "</button></div></section></form>");
-    server_.sendContent(c);
-    server_.sendContent("</main></div></body></html>");
-    server_.sendContent("");
-}
 
 void WebService::handleUnits() {
     const PresentationConfiguration& p = configurationService_.getConfiguration().presentation;
@@ -880,7 +696,7 @@ void WebService::handleConfiguration() {
         + "<input type='checkbox' name='includePasswords' value='1'>" + uiText(TextId::BackupPasswords)
         + "</label><button>" + uiText(TextId::BackupDownload) + "</button></form></section>"
         + "<section class='card'><h2>" + uiText(TextId::RestorePreview) + "</h2><p>"
-        + uiText(TextId::RestoreHelp) + "</p><form method='post' action='/configuration/preview' enctype='multipart/form-data'>"
+        + uiText(TextId::RestoreHelp) + "</p><form method='post' action='/configuration/preview' enctype='multipart/form-data' onsubmit='this.action=\"/configuration/preview?configurationSize=\"+this.elements.configuration.files[0].size'>"
         + "<input type='file' name='configuration' accept='.json,application/json' required><div class='actions'><button>"
         + uiText(TextId::RestoreUpload) + "</button></div></form></section>";
     sendPage(uiText(TextId::Configuration), "/configuration", c);
@@ -905,26 +721,57 @@ void WebService::handleConfigurationUploadData() {
         configurationUploadFailed_ = !configurationUpload_.isEmpty() || configurationUploadComplete_;
         restoreCandidate_.reset(); restoreToken_ = String();
         if (otaService_.busy() || upload.name != "configuration") configurationUploadFailed_ = true;
+        const String hint = server_.arg("configurationSize");
+        const TextUploadResult preparation = configurationUploadFailed_ ? TextUploadResult::InvalidSize
+            : prepareTextUpload(configurationUpload_, hint, MaxConfigurationBackupLength);
+        configurationUploadFailed_ = configurationUploadFailed_ || preparation != TextUploadResult::Success;
+        logger_.infof("Configuration backup upload started field=%s expected=%s result=%s heap=%u largest=%u",
+            upload.name.c_str(), hint.isEmpty() ? "unknown" : hint.c_str(), textUploadResultName(preparation),
+            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     } else if (upload.status == UPLOAD_FILE_WRITE && !configurationUploadFailed_) {
-        if (upload.currentSize > MaxConfigurationBackupLength - configurationUpload_.length()
-            || !configurationUpload_.concat(reinterpret_cast<const char*>(upload.buf), upload.currentSize)) {
+        const size_t offset = configurationUpload_.length();
+        const TextUploadResult result = appendTextUpload(configurationUpload_, upload.buf,
+            upload.currentSize, MaxConfigurationBackupLength);
+        if (result != TextUploadResult::Success) {
+            logger_.warnf("Configuration backup upload rejected result=%s offset=%u chunk=%u heap=%u largest=%u",
+                textUploadResultName(result), static_cast<unsigned>(offset), static_cast<unsigned>(upload.currentSize),
+                static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
             configurationUploadFailed_ = true; configurationUpload_ = String();
         }
     } else if (upload.status == UPLOAD_FILE_END) {
         configurationUploadComplete_ = true;
+        size_t expected = 0;
+        const String hint = server_.arg("configurationSize");
+        if (parseTextUploadSize(hint, MaxConfigurationBackupLength, expected) != TextUploadResult::Success
+            || (expected && expected != configurationUpload_.length())) configurationUploadFailed_ = true;
+        logger_.infof("Configuration backup upload complete bytes=%u rejected=%u heap=%u largest=%u",
+            static_cast<unsigned>(configurationUpload_.length()), configurationUploadFailed_ ? 1u : 0u,
+            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     } else if (upload.status == UPLOAD_FILE_ABORTED) {
+        logger_.warn("Configuration backup upload aborted by client");
         configurationUploadFailed_ = false; configurationUploadComplete_ = false; configurationUpload_ = String();
         restoreCandidate_.reset(); restoreToken_ = String();
     }
 }
 
 void WebService::handleConfigurationPreview() {
-    restoreCandidate_.reset(new (std::nothrow) Configuration);
+    const uint32_t startedAt = millis();
+    restoreCandidate_.reset();
+    logger_.infof("Configuration preview decoding bytes=%u heap=%u largest=%u",
+        static_cast<unsigned>(configurationUpload_.length()),
+        static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     bool valid = !otaService_.busy() && !configurationUploadFailed_ && configurationUploadComplete_
-        && restoreCandidate_ && decodeConfigurationBackup(configurationUpload_,
-            configurationService_.getConfiguration(), *restoreCandidate_, restoreIncludesPasswords_)
-        && configurationService_.validateRestore(*restoreCandidate_);
+        && decodeConfigurationBackupCandidate(configurationUpload_,
+            configurationService_.getConfiguration(), restoreCandidate_, restoreIncludesPasswords_);
+    // The candidate owns its strings. Release the uploaded JSON before domain
+    // validation and rendering, instead of keeping both representations alive.
     configurationUpload_ = String(); configurationUploadFailed_ = false; configurationUploadComplete_ = false;
+    logger_.infof("Configuration preview decoded=%u elapsed=%u heap=%u largest=%u",
+        valid ? 1u : 0u, static_cast<unsigned>(millis() - startedAt),
+        static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
+    if (valid) valid = configurationService_.validateRestore(*restoreCandidate_);
+    logger_.infof("Configuration preview validated=%u elapsed=%u", valid ? 1u : 0u,
+        static_cast<unsigned>(millis() - startedAt));
     if (!valid) {
         restoreCandidate_.reset(); restoreToken_ = String();
         sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::BackupInvalid), false); return;
@@ -965,11 +812,16 @@ void WebService::handleConfigurationPreview() {
         + uiText(TextId::CancelRestore) + "</button></form></section>";
     server_.sendHeader("Cache-Control", "no-store");
     sendPage(uiText(TextId::RestorePreview), "/configuration", html);
+    logger_.infof("Configuration preview response sent elapsed=%u heap=%u largest=%u",
+        static_cast<unsigned>(millis() - startedAt), static_cast<unsigned>(ESP.getFreeHeap()),
+        static_cast<unsigned>(ESP.getMaxAllocHeap()));
 }
 
 void WebService::handleConfigurationRestore() {
+    logger_.info("Configuration restore confirmation received");
     if (otaService_.busy() || !restoreCandidate_ || server_.arg("confirmRestore") != "1"
         || server_.arg("token") != restoreToken_ || millis() - restorePreviewTime_ > 300000UL) {
+        logger_.warn("Configuration restore confirmation rejected: missing, expired or mismatched preview");
         sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::RestoreExpired), false); return;
     }
     if (!restoreIncludesPasswords_) {
@@ -984,7 +836,7 @@ void WebService::handleConfigurationRestore() {
     if (!saved) {
         sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::RestoreSaveFailed), false); return;
     }
-    runtimeManager_.request(RuntimeAction::RestartDevice);
+    deviceRestart_.requestDeviceRestart();
     String html = "<div class='notice success'><strong>" + String(uiText(TextId::RestoreSaved))
         + "</strong><p>" + uiText(TextId::RestoreRestart)
         + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>"
@@ -993,192 +845,6 @@ void WebService::handleConfigurationRestore() {
     sendPage(uiText(TextId::RestoreSaved), "/configuration", html);
 }
 
-void WebService::handleDevice() {
-    String c;
-    c = (((String("<section class='card'><h2>") + uiText(TextId::DeviceIdentity) + "</h2><form method='post' action='/device/save'><label>")) + uiText(TextId::DeviceName) + "<input name='deviceName' required value='") + escapeHtml(configurationService_.getConfiguration().device.name) + (String("'></label><div class='actions'><button>") + uiText(TextId::SaveDeviceSettings) + "</button></div></form></section>");
-    c += buildPressureReductionConfigurationHtml(configurationService_.getConfiguration(), configurationService_.getLocale());
-    c += buildGeoPositionConfigurationHtml(configurationService_.getConfiguration().geoPosition,
-        configurationService_.getLocale());
-    c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
-        + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
-        + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
-        + escapeHtml(boardIdentityResolution_.identity.serialNumber.value) + "</span></div><div class='actions'><a class='button' href='/hardware'>"
-        + uiText(TextId::ViewHardware) + "</a></div></section>";
-    sendPage(uiText(TextId::Device), "/device", c);
-}
-
-void WebService::handleHardware() {
-    String c;
-    c.reserve(1500);
-    const BoardProfile& board = currentBoardProfile();
-    const BoardIdentity& identity = boardIdentityResolution_.identity;
-    const bool recordFormatKnown =
-        boardIdentityResolution_.recordStatus == BoardIdentityStatus::Valid
-        || boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial;
-    const String serialNumber = !isBoardSerialNumberAssigned(identity.serialNumber)
-        ? String(uiText(TextId::Unassigned))
-        : String(identity.serialNumber.value);
-    c = String();
-    c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
-    c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
-    c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
-    c += (String("<span>") + uiText(TextId::BoardProfile) + "</span><span>") + escapeHtml(board.displayName) + "</span>";
-    c += (String("<span>") + uiText(TextId::BoardProfileId) + "</span><span>") + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
-    c += (String("<span>") + uiText(TextId::HardwareRevision) + "</span><span>") + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";
-    c += (String("<span>") + uiText(TextId::SerialNumber) + "</span><span>") + serialNumber + "</span>";
-    c += (String("<span>") + uiText(TextId::EEPROMFormat) + "</span><span>") + String(recordFormatKnown ? "1" : "—") + "</span>";
-    c += (String("<span>") + uiText(TextId::NormalRuntime) + "</span><span>") + String(boardIdentityResolution_.normalRuntimeAllowed ? uiText(TextId::Allowed) : uiText(TextId::Blocked)) + "</span>";
-    c += "</div>";
-    if (boardIdentityResolution_.source == BoardIdentitySource::BuildFallback) {
-        c += (String("<div class='notice'>") + uiText(TextId::NoUsableEEPROMBoardIdentityWasSelectedThis) + "</div>");
-    }
-    if (boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial) {
-        c += (String("<div class='notice'>") + uiText(TextId::TheEEPROMBoardIdentityIsValidButIts) + "</div>");
-    }
-    c += "</section>";
-    c += (((String("<section class='card'><h2>") + uiText(TextId::ModuleIdentity) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>EEPROM</th><th>")) + uiText(TextId::Source) + (String("</th><th>") + uiText(TextId::Status) + "</th><th>" + uiText(TextId::Module) + "</th><th>" + uiText(TextId::Revision) + "</th><th>" + uiText(TextId::InstanceUUID) + "</th><th>" + uiText(TextId::SerialNumber) + "</th><th>" + uiText(TextId::ProductionBatch) + "</th><th>" + uiText(TextId::ProductionDate) + "</th></tr></thead><tbody>"));
-    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
-        const ModuleSlot slot = static_cast<ModuleSlot>(index);
-        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
-        if (module == nullptr) continue;
-        const bool descriptor = module->source == ModuleDiscoverySource::Descriptor;
-        const String moduleName = descriptor
-            ? escapeHtml(descriptorText(module->descriptorName.empty()
-                ? module->descriptorTypeId : module->descriptorName))
-            : String("—");
-        const String revision = descriptor && module->identified()
-            ? String(module->descriptorRevision.major) + "." + String(module->descriptorRevision.minor)
-            : String("—");
-        const String moduleSerial = descriptor
-            ? (module->descriptorSerialNumber.empty()
-                ? String(uiText(TextId::Unassigned)) : escapeHtml(descriptorText(module->descriptorSerialNumber)))
-            : String("—");
-        const String instanceId = descriptor && module->descriptorHasInstanceId
-            ? descriptorUuid(module->descriptorInstanceId) : String("—");
-        const String productionBatch = descriptor
-            && !module->descriptorProductionBatch.empty()
-            ? escapeHtml(descriptorText(module->descriptorProductionBatch)) : String("—");
-        const String productionDate = descriptor
-            && !module->descriptorProductionDate.empty()
-            ? escapeHtml(descriptorText(module->descriptorProductionDate)) : String("—");
-        const char* status = descriptor
-            ? (module->descriptorStoreStatus == HardwareDescriptorStoreStatus::Valid
-                ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
-                : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus))
-            : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus);
-        c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
-        if (module->eepromAddress < 0x10) c += "0";
-        c += String(module->eepromAddress, HEX) + "</td><td>";
-        c += moduleDiscoverySourceName(module->source);
-        c += "</td><td>";
-        c += status;
-        c += "</td><td>" + moduleName + "</td><td>" + revision;
-        c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
-        c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
-    }
-    c += "</tbody></table></div></section>";
-    c += (((String("<section class='card'><h2>") + uiText(TextId::DiscoveredModuleDevices) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>")) + uiText(TextId::Device) + (String("</th><th>") + uiText(TextId::Kind) + "</th><th>" + uiText(TextId::Driver) + "</th><th>" + uiText(TextId::Capability) + "</th><th>" + uiText(TextId::Binding) + "</th><th>" + uiText(TextId::BoardResource) + "</th><th>" + uiText(TextId::Parameters) + "</th><th>" + uiText(TextId::Status) + "</th></tr></thead><tbody>"));
-    // Keep the large inventory off both static DRAM and the HTTP task stack.
-    std::unique_ptr<ModuleDeviceInventoryEntry[]> moduleDeviceInventory(
-        new (std::nothrow) ModuleDeviceInventoryEntry[MaximumDescriptorDevices]);
-    bool hasModuleDevices = false;
-    for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
-        const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
-        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
-        if (module == nullptr || !module->identified()
-            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
-            continue;
-        }
-        size_t entryCount = 0;
-        if (!moduleDeviceInventory || !deriveModuleDeviceInventory(
-                module->descriptor, currentBoardProfile(), slot,
-                moduleDeviceInventory.get(), MaximumDescriptorDevices, entryCount)) {
-            continue;
-        }
-        for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
-            hasModuleDevices = true;
-            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory[entryIndex];
-            String bindingText;
-            String resourceText;
-            for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {
-                const ModuleDeviceBindingResolution& binding = entry.bindings[bindingIndex];
-                if (bindingIndex > 0) { bindingText += "<br>"; resourceText += "<br>"; }
-                bindingText += escapeHtml(descriptorText(binding.name));
-                bindingText += " → ";
-                bindingText += escapeHtml(descriptorText(binding.logicalResource.empty()
-                    ? binding.target : binding.logicalResource));
-                if (!binding.resolved) resourceText += "—";
-                else if (binding.kind == HardwareDescriptorResourceKind::Gpio) {
-                    resourceText += "GPIO";
-                    resourceText += String(binding.gpio.number);
-                } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
-                    resourceText += i2cBusName(binding.i2cBus);
-                } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
-                    resourceText += "+5V";
-                } else resourceText += uiText(TextId::Resolved);
-            }
-            String parameters = "—";
-            if (entry.hasActiveLevel || entry.hasSafeLevel) {
-                parameters = "active=";
-                parameters += entry.hasActiveLevel
-                    ? (entry.activeLevelHigh ? "high" : "low") : "—";
-                parameters += ", safe=";
-                parameters += entry.hasSafeLevel
-                    ? (entry.safeLevelHigh ? "high" : "low") : "—";
-            }
-            const String capability = entry.capabilities.contains(
-                HardwareDescriptorCapabilityCode::ActuatorOnOff)
-                ? String("actuator.on-off") : String("—");
-            c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
-            c += escapeHtml(descriptorText(entry.id));
-            c += "</td><td>" + String((entry.kind == HardwareDescriptorDeviceKind::Sensor ? uiText(TextId::Sensor) : entry.kind == HardwareDescriptorDeviceKind::Actuator ? uiText(TextId::Actuator) : uiText(TextId::Infrastructure)));
-            c += "</td><td>" + String(moduleDeviceDriverName(entry.driver));
-            c += " v" + String(entry.driver.apiVersion);
-            c += "</td><td>" + capability + "</td><td>" + bindingText;
-            c += "</td><td>" + resourceText + "</td><td>" + parameters;
-            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
-            c += "</td></tr>";
-        }
-    }
-    if (!moduleDeviceInventory) {
-        c += (String("<tr><td colspan='9'>") + uiText(TextId::InsufficientMemoryToRenderModuleDeviceInventory) + "</td></tr>");
-    } else if (!hasModuleDevices) {
-        c += (String("<tr><td colspan='9'>") + uiText(TextId::NoCompatibleDescriptorDefinedDevicesDiscovered) + "</td></tr>");
-    }
-    moduleDeviceInventory.reset();
-    c += (String("</tbody></table></div><p class='help'>") + uiText(TextId::ThisIsAReadOnlyInventoryDerivedFrom) + "</p></section>");
-    c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");
-    c += (String("<div class='notice'><strong>ENHD descriptor 0.1</strong><p>") + uiText(TextId::ThisCreatesTheDeterministicDuoRelay03CBOR) + "</p></div>");
-    c += "<form method='post' action='/hardware/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
-    c += (String("<label>") + uiText(TextId::ModuleSlot) + "<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>");
-    c += (String("<label>") + uiText(TextId::DescriptorTemplate) + "<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>");
-    c += (String("<p class='help'>") + uiText(TextId::APersistentUUIDVersion4IsGeneratedAutomatically) + "</p>");
-    c += (String("<label>") + uiText(TextId::SerialNumberOptional) + "<input name='descriptorSerialNumber' maxlength='64'></label>");
-    c += (String("<label>") + uiText(TextId::ProductionBatchOptional) + "<input name='descriptorProductionBatch' maxlength='64'></label>");
-    c += (String("<label>") + uiText(TextId::ProductionDateOptional) + "<input type='date' name='descriptorProductionDate'></label>");
-    c += (String("<label class='choice'><input type='checkbox' name='confirmModuleDescriptorProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesASelfDescribing) + "</label>");
-    c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteDuoRelayDescriptor) + "</button></div></form></section>");
-    c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionBoardIdentity) + "</h2>");
-    c += (String("<div class='notice'><strong>") + uiText(TextId::AdvancedOperation) + "</strong><p>" + uiText(TextId::ThisWritesPermanentPhysicalBoardIdentityDataThe) + "</p></div>");
-    c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
-    c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileId' required>");
-    for (size_t index = 0; index < boardProfileCount(); ++index) {
-        const BoardProfile* profile = boardProfileAt(index);
-        if (profile == nullptr) continue;
-        c += "<option value='" + String(encodeBoardProfileId(profile->id)) + "'";
-        if (profile->id == identity.profileId) c += " selected";
-        c += ">" + escapeHtml(profile->displayName) + " "
-            + String(profile->revision.major) + "." + String(profile->revision.minor)
-            + "</option>";
-    }
-    c += "</select></label>";
-    c += (String("<p class='help'>") + uiText(TextId::TheSelectedBoardNameIsStoredAsIts) + "</p>");
-    c += (String("<label>") + uiText(TextId::BoardSerialNumber) + "<input name='serialNumber' maxlength='") + String(MaxBoardSerialNumberLength) + "' pattern='[A-Za-z0-9._-]*' value='" + escapeHtml(identity.serialNumber.value) + "'></label>";
-    c += (String("<p class='help'>") + uiText(TextId::SerialNumber0ExplicitlyMeansUnassigned) + "</p>");
-    c += (String("<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesManufacturingIdentityData) + "</label>");
-    c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteBoardIdentity) + "</button></div></form></section>");
-    sendPage(uiText(TextId::Hardware), "/hardware", c);
-}
 
 void WebService::handleSensors() {
     String c;
@@ -2315,110 +1981,6 @@ void WebService::renderDiagnostics() {
     sendPage(uiText(TextId::Diagnostics), "/diagnostics", c);
 }
 
-void WebService::handleLogs() {
-    sendPage(uiText(TextId::Logs), "/logs", buildRecentLogHtml(logReader_, configurationService_.getLocale()));
-}
-
-void WebService::handleLogData() {
-    if (!administrationAvailable()) {
-        server_.send(503, "application/json", "{\"error\":\"Administration unavailable\"}");
-        return;
-    }
-    server_.send(200, "application/json; charset=utf-8", buildRecentLogJson(logReader_));
-}
-
-void WebService::handleFirmware() {
-    String c;
-    c.reserve(2000);
-    const char* sourceStyle = FirmwareBuildInfo::SourceDirty ? "warn"
-        : String(FirmwareBuildInfo::SourceState) == "clean" ? "good" : "warn";
-    c = (String("<section class='card'><h2>") + uiText(TextId::RunningFirmware) + "</h2><div class='kv'><span>" + uiText(TextId::FirmwareVersion) + "</span><span>") + String(FirmwareBuildInfo::SemanticVersion) + (String("</span><span>") + uiText(TextId::BuildIdentity) + "</span><span>") + FirmwareBuildInfo::CompactIdentity + (String("</span><span>") + uiText(TextId::BuildNumber) + "</span><span>") + FirmwareBuildInfo::BuildNumber + (String("</span><span>") + uiText(TextId::GitCommit) + "</span><span>") + FirmwareBuildInfo::GitCommit + (String("</span><span>") + uiText(TextId::GitBranch) + "</span><span>") + escapeHtml(FirmwareBuildInfo::GitBranch) + (String("</span><span>") + uiText(TextId::BuildTimestamp) + "</span><span>") + FirmwareBuildInfo::BuildTimestampUtc + (String("</span><span>") + uiText(TextId::SourceState) + "</span><span>") + badge(FirmwareBuildInfo::SourceDirty ? uiText(TextId::Dirty) : String(FirmwareBuildInfo::SourceState) == "clean" ? uiText(TextId::Clean) : uiText(TextId::Unknown), sourceStyle) + (String("</span><span>") + uiText(TextId::StagedFirmware) + "</span><span>")+(otaService_.firmwareStaged()?uiText(TextId::ReadyForActivation):"—")+"</span></div>";
-    if (otaService_.firmwareStaged()) c += (String("<p class='help'>") + uiText(TextId::StagedFirmwareVersionMetadataIsNotYetAvailable) + "</p>");
-    c += (String("</section><section class='card'><h2>") + uiText(TextId::FirmwareUpdateStatus) + "</h2>") + otaStatusHtml() + "</section>";
-    if (!otaService_.firmwareStaged() && !otaService_.busy()) {
-        c += (String("<section class='card'><h2>") + uiText(TextId::UploadFirmware) + (String("</h2><p class='help'>") + uiText(TextId::BuildWith) + " " + "<code>pio run</code>" + uiText(TextId::ThenUpload) + " " + "<code>.pio/build/&lt;environment&gt;/firmware.bin</code>.</p><form method='post' action='/firmware/upload' enctype='multipart/form-data' onsubmit='document.getElementById(\"firmwareSize\").value=document.getElementById(\"firmwareFile\").files[0].size'><input type='hidden' id='firmwareSize' name='firmwareSize' value='0'><label>" + uiText(TextId::FirmwareBinary) + "<input id='firmwareFile' type='file' name='firmware' accept='.bin,application/octet-stream' required></label><div class='actions'><button>") + uiText(TextId::UploadFirmware) + "</button></div></form></section>");
-    }
-    c += (String("<section class='card'><h2>") + uiText(TextId::Restart) + (String("</h2><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>") + uiText(TextId::RestartNow) + "</button></form></section><section class='card'><h2>") + uiText(TextId::FactoryReset) + (String("</h2><p>") + uiText(TextId::ThisPermanentlyRemovesAllStoredConfigurationAndRestarts) + "</p><form method='post' action='/factory-reset' onsubmit='return confirm(globalThis.EnvNodeUi.EraseALLConfigurationAndRestart)'><button class='danger'>") + uiText(TextId::FactoryReset) + "</button></form></section>");
-    sendPage(uiText(TextId::Firmware), "/firmware", c);
-}
-
-void WebService::handleFirmwareUploadData() {
-    HTTPUpload& upload = server_.upload();
-    if (upload.status == UPLOAD_FILE_START) {
-        firmwareUploadRequestAccepted_ = false;
-        firmwareUploadRequestError_ = String();
-        if (otaService_.busy()) {
-            firmwareUploadRequestError_ = uiText(TextId::AnotherFirmwareUploadIsAlreadyActive);
-            return;
-        }
-        if (otaService_.firmwareStaged()) {
-            firmwareUploadRequestError_ = uiText(TextId::FirmwareIsAlreadyStagedAndAwaitingRestart);
-            return;
-        }
-        if (upload.name != "firmware" || upload.filename.isEmpty()
-            || !upload.filename.endsWith(".bin")) {
-            firmwareUploadRequestError_ = uiText(TextId::SelectAValidPlatformIOFirmwareBinFile);
-            otaService_.rejectUpload(firmwareUploadRequestError_.c_str());
-            return;
-        }
-        const size_t expectedSize = static_cast<size_t>(server_.arg("firmwareSize").toInt());
-        firmwareUploadRequestAccepted_ = otaService_.beginUpload(expectedSize);
-        if (!firmwareUploadRequestAccepted_) {
-            firmwareUploadRequestError_ = otaService_.lastError().isEmpty()
-                ? String(uiText(TextId::FirmwareUploadCouldNotBeStarted)) : otaService_.lastError();
-        }
-        return;
-    }
-    if (!firmwareUploadRequestAccepted_) return;
-    if (upload.status == UPLOAD_FILE_WRITE) {
-        if (!otaService_.writeChunk(upload.buf, upload.currentSize)) {
-            firmwareUploadRequestAccepted_ = false;
-            firmwareUploadRequestError_ = otaService_.lastError();
-        }
-    } else if (upload.status == UPLOAD_FILE_END) {
-        if (!otaService_.finishUpload()) {
-            firmwareUploadRequestAccepted_ = false;
-            firmwareUploadRequestError_ = otaService_.lastError();
-        }
-    } else if (upload.status == UPLOAD_FILE_ABORTED) {
-        otaService_.abortUpload(uiText(TextId::FirmwareUploadWasAbortedBeforeCompletion));
-        firmwareUploadRequestAccepted_ = false;
-        firmwareUploadRequestError_ = otaService_.lastError();
-    }
-}
-
-void WebService::handleFirmwareUpload() {
-    if (firmwareUploadRequestAccepted_ && otaService_.firmwareStaged()) {
-        String content;
-        content.reserve(520);
-        content = (String("<div class='notice success'><strong>") + uiText(TextId::FirmwareUploadedSuccessfully) + "</strong><p>" + uiText(TextId::FirmwareIsStaged) + "</p><p>" + uiText(TextId::DeviceRestartIsRequiredToActivateTheNew) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/firmware'>" + uiText(TextId::RestartLater) + "</a>");
-        sendPage(uiText(TextId::FirmwareStaged), "/firmware", content);
-        return;
-    }
-    const String reason = !firmwareUploadRequestError_.isEmpty()
-        ? firmwareUploadRequestError_ : otaService_.lastError();
-    String content;
-    content.reserve(480 + reason.length());
-    content = (String("<div class='notice error'><strong>") + uiText(TextId::FirmwareUpdateFailed2) + "</strong><p>");
-    content += escapeHtml(reason.isEmpty() ? String(uiText(TextId::InvalidFirmwareUploadRequest)) : reason);
-    content += (((String("</p><p>") + uiText(TextId::TheCurrentlyRunningFirmwareRemainsActive) + "</p></div><a class='button' href='/firmware'>")) + uiText(TextId::Back) + "</a>");
-    sendPage(uiText(TextId::FirmwareUpdateFailed), "/firmware", content, 400);
-}
-
-void WebService::handleStyle() {
-    const size_t styleLength = strlen_P(SharedStyle);
-    server_.sendHeader("Cache-Control", "public, max-age=86400");
-    server_.send_P(200, PSTR("text/css"), SharedStyle, styleLength);
-}
-
-void WebService::handleNetworkSave() {
-    NetworkConfiguration n = configurationService_.getConfiguration().network;
-    n.hostname=server_.arg("hostname"); n.wifiSSID=server_.arg("wifiSSID"); n.addressMode=server_.arg("addressMode")=="static"?NetworkAddressMode::Static:NetworkAddressMode::Dhcp;
-    n.ipv4Address=server_.arg("ipv4Address"); n.subnetMask=server_.arg("subnetMask"); n.gateway=server_.arg("gateway"); n.dns1=server_.arg("dns1"); n.dns2=server_.arg("dns2");
-    const bool updatePassword=server_.arg("changeWifiPassword")=="1"; if(updatePassword)n.wifiPassword=server_.arg("wifiPassword");
-    const ConfigurationSaveResult result=configurationSaveResult(configurationService_.setNetworkConfiguration(n,updatePassword),ConfigurationArea::Network);
-    sendConfigurationResult(result,uiText(TextId::NetworkSettingsSaved),uiText(TextId::NetworkSaveFailed),"/network",uiText(TextId::InvalidNetworkSettingsStaticModeRequiresAValid));
-}
 
 void WebService::handleMqttSave() {
     const String portText=server_.arg("port"); const long port=portText.toInt();
@@ -2445,7 +2007,6 @@ void WebService::handleDiscoveryRepublish() {
     }
 }
 
-void WebService::handleTimeSave() { const Configuration& current=configurationService_.getConfiguration(); Locale locale; bool ok=parseLocaleKey(server_.arg("locale").c_str(),locale); const bool localeChanged=ok&&locale!=current.locale.locale; const bool timeChanged=server_.arg("timezone")!=current.time.timezone||server_.arg("ntpServer1")!=current.time.ntpServer1||server_.arg("ntpServer2")!=current.time.ntpServer2; if(ok)ok=configurationService_.setLocale(locale)&&configurationService_.setTimezone(server_.arg("timezone"))&&configurationService_.setNtpServer1(server_.arg("ntpServer1"))&&configurationService_.setNtpServer2(server_.arg("ntpServer2")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Locale,localeChanged,ConfigurationArea::Time,timeChanged),uiText(TextId::LocaleAndTimeSaved),uiText(TextId::LocaleAndTimeSaveFailed),"/time",uiText(TextId::InvalidLocaleOrTimeConfiguration)); }
 
 void WebService::handleUnitsSave() {
     PresentationUnit t,p,s,r; bool ok=parseUnit(server_.arg("temperature"),MeasurementType::Temperature,t)&&parseUnit(server_.arg("pressure"),MeasurementType::AtmosphericPressure,p)&&parseUnit(server_.arg("solarTemperature"),MeasurementType::SolarCellTemperature,s)&&parseUnit(server_.arg("rainLevel"),MeasurementType::RainDetectorLevel,r);
@@ -2474,179 +2035,7 @@ void WebService::handleGeoPositionSave() {
         "/device", uiText(TextId::InvalidGeoPosition));
 }
 
-void WebService::handleDeviceSave() { const bool ok=configurationService_.setDeviceName(server_.arg("deviceName")); sendConfigurationResult(configurationSaveResult(ok,ConfigurationArea::Device),uiText(TextId::DeviceSettingsSaved),uiText(TextId::DeviceSaveFailed),"/device",uiText(TextId::InvalidDeviceName)); }
 
-void WebService::handleBoardProvisioning() {
-    const String profileText = server_.arg("boardProfileId");
-    char* profileEnd = nullptr;
-    const unsigned long parsedProfile = strtoul(profileText.c_str(), &profileEnd, 10);
-    BoardProfileId profileId = BoardProfileId::EnvNodeMainboard;
-    const bool profileValid = !profileText.isEmpty()
-        && profileEnd != profileText.c_str()
-        && *profileEnd == '\0'
-        && parsedProfile <= UINT16_MAX
-        && decodeBoardProfileId(static_cast<uint16_t>(parsedProfile), profileId);
-    const BoardProfile* requestedProfile = profileValid ? boardProfile(profileId) : nullptr;
-    const String serialText = server_.arg("serialNumber");
-    const bool serialValid = isValidBoardSerialNumber(serialText.c_str());
-    if (requestedProfile == nullptr || !serialValid) {
-        sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware",
-            uiText(TextId::TheSelectedBoardProfileOrBoardSerialNumber), false);
-        return;
-    }
-
-    BoardIdentity requested = {
-        requestedProfile->id,
-        requestedProfile->revision,
-        {},
-    };
-    setBoardSerialNumber(requested.serialNumber, serialText.c_str());
-    const bool confirmed = server_.hasArg("confirmProvisioning")
-        && server_.arg("confirmProvisioning") == "1";
-    const BoardProvisioningResult result =
-        boardProvisioningService_.provision(requested, confirmed);
-    logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%s",
-        boardProvisioningStatusName(result.status),
-        static_cast<unsigned int>(requested.profileId),
-        requested.revision.major,
-        requested.revision.minor,
-        requested.serialNumber.value);
-
-    if (result.status == BoardProvisioningStatus::Success) {
-        String content;
-        content.reserve(600);
-        content = (String("<div class='notice success'><strong>") + uiText(TextId::BoardIdentityWrittenAndVerified) + "</strong><p>" + uiText(TextId::TheActiveBoardProfileIsUnchangedForThisBoot) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/hardware'>" + uiText(TextId::RestartLater) + "</a>");
-        sendPage(uiText(TextId::BoardIdentityProvisioned), "/hardware", content);
-        return;
-    }
-
-    const char* message = uiText(TextId::BoardIdentityCouldNotBeWrittenAndVerified);
-    switch (result.status) {
-        case BoardProvisioningStatus::ConfirmationRequired:
-            message = uiText(TextId::ExplicitConfirmationIsRequiredNoEEPROMDataWas);
-            break;
-        case BoardProvisioningStatus::InvalidIdentity:
-            message = uiText(TextId::TheRequestedBoardIdentityIsNotSupportedNo);
-            break;
-        case BoardProvisioningStatus::WriteFailed:
-            message = uiText(TextId::TheEEPROMDidNotAcceptTheWriteIt);
-            break;
-        case BoardProvisioningStatus::ReadbackFailed:
-            message = uiText(TextId::TheEEPROMWriteCouldNotBeReadBack);
-            break;
-        case BoardProvisioningStatus::ReadbackInvalid:
-            message = uiText(TextId::TheEEPROMReadbackFailedRecordValidationProvisioningWas);
-            break;
-        case BoardProvisioningStatus::ReadbackMismatch:
-            message = uiText(TextId::TheEEPROMReadbackDidNotExactlyMatchThe);
-            break;
-        default:
-            break;
-    }
-    sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware", message, false);
-}
-
-void WebService::handleModuleDescriptorProvisioning() {
-    const String slotText = server_.arg("descriptorModuleSlot");
-    ModuleSlot slot = ModuleSlot::A;
-    const bool slotValid = slotText == "A" || slotText == "B";
-    if (slotText == "B") slot = ModuleSlot::B;
-    const bool templateValid =
-        server_.arg("descriptorTemplate") == "duo-relay-0.3";
-
-    DuoRelayDescriptorManufacturingData manufacturing;
-    const String serialNumber = server_.arg("descriptorSerialNumber");
-    const String productionBatch = server_.arg("descriptorProductionBatch");
-    const String productionDate = server_.arg("descriptorProductionDate");
-    const bool manufacturingValid = serialNumber.length() <= 64
-        && productionBatch.length() <= 64
-        && productionDate.length() <= 10;
-    if (!slotValid || !templateValid || !manufacturingValid) {
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
-            uiText(TextId::TheSlotDescriptorTemplateOrManufacturingDataIs),
-            false);
-        return;
-    }
-    esp_fill_random(manufacturing.instanceId, sizeof(manufacturing.instanceId));
-    InstanceUuid::makeVersion4(manufacturing.instanceId);
-    manufacturing.serialNumber = serialNumber.c_str();
-    manufacturing.productionBatch = productionBatch.c_str();
-    manufacturing.productionDate = productionDate.c_str();
-    std::unique_ptr<uint8_t[]> payload(new (std::nothrow) uint8_t[DuoRelayDescriptor::MaximumEncodedSize]);
-    if (!payload) {
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
-            uiText(TextId::PageRenderingFailedPleaseRetry), false);
-        return;
-    }
-    size_t payloadSize = 0;
-    const CompactCborStatus encodeStatus = DuoRelayDescriptor::encode(
-        manufacturing, payload.get(), DuoRelayDescriptor::MaximumEncodedSize, payloadSize);
-    if (encodeStatus != CompactCborStatus::Success) {
-        logger_.errorf("DuoRelay descriptor encoding failed status=%s",
-            compactCborStatusName(encodeStatus));
-        sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware",
-            uiText(TextId::TheDuoRelayDescriptorCouldNotBeEncodedNo),
-            false);
-        return;
-    }
-
-    const bool confirmed = server_.hasArg("confirmModuleDescriptorProvisioning")
-        && server_.arg("confirmModuleDescriptorProvisioning") == "1";
-    const ModuleDescriptorProvisioningResult result =
-        moduleDescriptorProvisioningService_.provision(
-            slot, payload.get(), payloadSize, confirmed);
-    logger_.infof(
-        "Module descriptor provisioning result=%s slot=%s uuid=%s bytes=%u bank=%u generation=%lu decode=%s compatibility=%s",
-        moduleDescriptorProvisioningStatusName(result.status), moduleSlotName(slot),
-        descriptorUuid(manufacturing.instanceId).c_str(),
-        static_cast<unsigned int>(payloadSize),
-        static_cast<unsigned int>(result.bank),
-        static_cast<unsigned long>(result.generation),
-        hardwareDescriptorDecodeStatusName(result.decodeStatus),
-        hardwareDescriptorCompatibilityStatusName(result.compatibilityStatus));
-
-    if (result.status == ModuleDescriptorProvisioningStatus::Success) {
-        const char* bank = result.bank == HardwareDescriptorBank::B ? "B" : "A";
-        String message = (String(uiText(TextId::TheDuoRelayDescriptorWasEncodedValidatedWrittenTo)) + " ");
-        message += bank;
-        message += (String(uiText(TextId::VerifiedAndRediscoveredWithInstanceUuid)) + " ");
-        message += descriptorUuid(manufacturing.instanceId);
-        message += uiText(TextId::NoRestartRequired);
-        sendResult(uiText(TextId::ModuleDescriptorProvisioned), "/hardware", message.c_str(), true);
-        return;
-    }
-
-    const char* message = uiText(TextId::TheModuleDescriptorCouldNotBeWrittenAnd);
-    switch (result.status) {
-        case ModuleDescriptorProvisioningStatus::ConfirmationRequired:
-            message = uiText(TextId::ExplicitConfirmationIsRequiredNoEEPROMDataWas);
-            break;
-        case ModuleDescriptorProvisioningStatus::InvalidSlot:
-            message = uiText(TextId::TheSelectedModuleSlotIsInvalidNoEEPROM);
-            break;
-        case ModuleDescriptorProvisioningStatus::InvalidDescriptor:
-            message = uiText(TextId::TheGeneratedDescriptorFailedSemanticValidationNoEEPROM);
-            break;
-        case ModuleDescriptorProvisioningStatus::IncompatibleDescriptor:
-            message = uiText(TextId::TheDescriptorIsNotCompatibleWithTheActive);
-            break;
-        case ModuleDescriptorProvisioningStatus::StorageUnavailable:
-            message = uiText(TextId::TheSelectedModuleEEPROMIsUnavailableCheckThat);
-            break;
-        case ModuleDescriptorProvisioningStatus::WriteFailed:
-            message = uiText(TextId::TheSelectedModuleEEPROMDidNotAcceptThe);
-            break;
-        case ModuleDescriptorProvisioningStatus::VerificationFailed:
-            message = uiText(TextId::TheDescriptorWriteFailedAtomicBankReadbackVerification);
-            break;
-        case ModuleDescriptorProvisioningStatus::RediscoveryFailed:
-            message = uiText(TextId::TheDescriptorWasWrittenAndVerifiedButSemantic);
-            break;
-        default:
-            break;
-    }
-    sendResult(uiText(TextId::ModuleDescriptorProvisioningFailed), "/hardware", message, false);
-}
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();
     const SensorImplementationMetadata* metadata =
@@ -3022,9 +2411,193 @@ void WebService::handleControllerRuntimeOperation(bool start) {
     }
     sendSeeOther(server_, "/controllers");
 }
-void WebService::handleRestart() { if(otaService_.busy()){sendResult(uiText(TextId::RestartUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult(uiText(TextId::Restarting),"/firmware",uiText(TextId::TheDeviceIsRestartingNow),true); performExplicitRestart(); }
-void WebService::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!configurationService_.resetToDefaults()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} runtimeManager_.request(RuntimeAction::RestartDevice); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }
-void WebService::handleNotFound() { server_.send(404,"text/plain",uiText(TextId::NotFound)); }
-void WebService::performExplicitRestart() { server_.client().flush(); runtimeManager_.performPendingRestart(); }
 
+
+void WebService::handleNotFound() { server_.send(404,"text/plain",uiText(TextId::NotFound)); }
+
+
+Locale WebService::webLocale() const { return configurationService_.getLocale(); }
+void WebService::networkSettingsSaved(bool success) {
+    const ConfigurationSaveResult result = configurationSaveResult(success, ConfigurationArea::Network);
+    sendConfigurationResult(result, uiText(TextId::NetworkSettingsSaved), uiText(TextId::NetworkSaveFailed),
+        "/network", uiText(TextId::InvalidNetworkSettingsStaticModeRequiresAValid));
+}
+
+void WebService::sendResult(const char* title, const char* route, const char* message, bool success) { sendWebResult(*this, title, route, message, success); }
+
+String WebService::renderHardwareOverview() {
+    String c;
+    c.reserve(1500);
+    const BoardProfile& board = currentBoardProfile();
+    const BoardIdentity& identity = boardIdentityResolution_.identity;
+    const bool recordFormatKnown =
+        boardIdentityResolution_.recordStatus == BoardIdentityStatus::Valid
+        || boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial;
+    const String serialNumber = !isBoardSerialNumberAssigned(identity.serialNumber)
+        ? String(uiText(TextId::Unassigned))
+        : String(identity.serialNumber.value);
+    c = String();
+    c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
+    c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
+    c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
+    c += (String("<span>") + uiText(TextId::BoardProfile) + "</span><span>") + escapeHtml(board.displayName) + "</span>";
+    c += (String("<span>") + uiText(TextId::BoardProfileId) + "</span><span>") + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
+    c += (String("<span>") + uiText(TextId::HardwareRevision) + "</span><span>") + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";
+    c += (String("<span>") + uiText(TextId::SerialNumber) + "</span><span>") + serialNumber + "</span>";
+    c += (String("<span>") + uiText(TextId::EEPROMFormat) + "</span><span>") + String(recordFormatKnown ? "1" : "—") + "</span>";
+    c += (String("<span>") + uiText(TextId::NormalRuntime) + "</span><span>") + String(boardIdentityResolution_.normalRuntimeAllowed ? uiText(TextId::Allowed) : uiText(TextId::Blocked)) + "</span>";
+    c += "</div>";
+    if (boardIdentityResolution_.source == BoardIdentitySource::BuildFallback) {
+        c += (String("<div class='notice'>") + uiText(TextId::NoUsableEEPROMBoardIdentityWasSelectedThis) + "</div>");
+    }
+    if (boardIdentityResolution_.recordStatus == BoardIdentityStatus::UnassignedSerial) {
+        c += (String("<div class='notice'>") + uiText(TextId::TheEEPROMBoardIdentityIsValidButIts) + "</div>");
+    }
+    c += "</section>";
+    c += (((String("<section class='card'><h2>") + uiText(TextId::ModuleIdentity) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>EEPROM</th><th>")) + uiText(TextId::Source) + (String("</th><th>") + uiText(TextId::Status) + "</th><th>" + uiText(TextId::Module) + "</th><th>" + uiText(TextId::Revision) + "</th><th>" + uiText(TextId::InstanceUUID) + "</th><th>" + uiText(TextId::SerialNumber) + "</th><th>" + uiText(TextId::ProductionBatch) + "</th><th>" + uiText(TextId::ProductionDate) + "</th></tr></thead><tbody>"));
+    for (size_t index = 0; index < ModuleDiscoveryService::SlotCount; ++index) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(index);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
+        if (module == nullptr) continue;
+        const bool descriptor = module->source == ModuleDiscoverySource::Descriptor;
+        const String moduleName = descriptor
+            ? escapeHtml(descriptorText(module->descriptorName.empty()
+                ? module->descriptorTypeId : module->descriptorName))
+            : String("—");
+        const String revision = descriptor && module->identified()
+            ? String(module->descriptorRevision.major) + "." + String(module->descriptorRevision.minor)
+            : String("—");
+        const String moduleSerial = descriptor
+            ? (module->descriptorSerialNumber.empty()
+                ? String(uiText(TextId::Unassigned)) : escapeHtml(descriptorText(module->descriptorSerialNumber)))
+            : String("—");
+        const String instanceId = descriptor && module->descriptorHasInstanceId
+            ? descriptorUuid(module->descriptorInstanceId) : String("—");
+        const String productionBatch = descriptor
+            && !module->descriptorProductionBatch.empty()
+            ? escapeHtml(descriptorText(module->descriptorProductionBatch)) : String("—");
+        const String productionDate = descriptor
+            && !module->descriptorProductionDate.empty()
+            ? escapeHtml(descriptorText(module->descriptorProductionDate)) : String("—");
+        const char* status = descriptor
+            ? (module->descriptorStoreStatus == HardwareDescriptorStoreStatus::Valid
+                ? hardwareDescriptorDecodeStatusName(module->descriptorStatus)
+                : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus))
+            : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus);
+        c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>0x";
+        if (module->eepromAddress < 0x10) c += "0";
+        c += String(module->eepromAddress, HEX) + "</td><td>";
+        c += moduleDiscoverySourceName(module->source);
+        c += "</td><td>";
+        c += status;
+        c += "</td><td>" + moduleName + "</td><td>" + revision;
+        c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
+        c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
+    }
+    c += "</tbody></table></div></section>";
+    c += (((String("<section class='card'><h2>") + uiText(TextId::DiscoveredModuleDevices) + "</h2><div class='scroll'><table><thead><tr><th>" + uiText(TextId::Slot) + "</th><th>")) + uiText(TextId::Device) + (String("</th><th>") + uiText(TextId::Kind) + "</th><th>" + uiText(TextId::Driver) + "</th><th>" + uiText(TextId::Capability) + "</th><th>" + uiText(TextId::Binding) + "</th><th>" + uiText(TextId::BoardResource) + "</th><th>" + uiText(TextId::Parameters) + "</th><th>" + uiText(TextId::Status) + "</th></tr></thead><tbody>"));
+    // Keep the large inventory off both static DRAM and the HTTP task stack.
+    std::unique_ptr<ModuleDeviceInventoryEntry[]> moduleDeviceInventory(
+        new (std::nothrow) ModuleDeviceInventoryEntry[MaximumDescriptorDevices]);
+    bool hasModuleDevices = false;
+    for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
+        const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
+        const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
+        if (module == nullptr || !module->identified()
+            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
+            continue;
+        }
+        size_t entryCount = 0;
+        if (!moduleDeviceInventory || !deriveModuleDeviceInventory(
+                module->descriptor, currentBoardProfile(), slot,
+                moduleDeviceInventory.get(), MaximumDescriptorDevices, entryCount)) {
+            continue;
+        }
+        for (size_t entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
+            hasModuleDevices = true;
+            const ModuleDeviceInventoryEntry& entry = moduleDeviceInventory[entryIndex];
+            String bindingText;
+            String resourceText;
+            for (size_t bindingIndex = 0; bindingIndex < entry.bindingCount; ++bindingIndex) {
+                const ModuleDeviceBindingResolution& binding = entry.bindings[bindingIndex];
+                if (bindingIndex > 0) { bindingText += "<br>"; resourceText += "<br>"; }
+                bindingText += escapeHtml(descriptorText(binding.name));
+                bindingText += " → ";
+                bindingText += escapeHtml(descriptorText(binding.logicalResource.empty()
+                    ? binding.target : binding.logicalResource));
+                if (!binding.resolved) resourceText += "—";
+                else if (binding.kind == HardwareDescriptorResourceKind::Gpio) {
+                    resourceText += "GPIO";
+                    resourceText += String(binding.gpio.number);
+                } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
+                    resourceText += i2cBusName(binding.i2cBus);
+                } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
+                    resourceText += "+5V";
+                } else resourceText += uiText(TextId::Resolved);
+            }
+            String parameters = "—";
+            if (entry.hasActiveLevel || entry.hasSafeLevel) {
+                parameters = "active=";
+                parameters += entry.hasActiveLevel
+                    ? (entry.activeLevelHigh ? "high" : "low") : "—";
+                parameters += ", safe=";
+                parameters += entry.hasSafeLevel
+                    ? (entry.safeLevelHigh ? "high" : "low") : "—";
+            }
+            const String capability = entry.capabilities.contains(
+                HardwareDescriptorCapabilityCode::ActuatorOnOff)
+                ? String("actuator.on-off") : String("—");
+            c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
+            c += escapeHtml(descriptorText(entry.id));
+            c += "</td><td>" + String((entry.kind == HardwareDescriptorDeviceKind::Sensor ? uiText(TextId::Sensor) : entry.kind == HardwareDescriptorDeviceKind::Actuator ? uiText(TextId::Actuator) : uiText(TextId::Infrastructure)));
+            c += "</td><td>" + String(moduleDeviceDriverName(entry.driver));
+            c += " v" + String(entry.driver.apiVersion);
+            c += "</td><td>" + capability + "</td><td>" + bindingText;
+            c += "</td><td>" + resourceText + "</td><td>" + parameters;
+            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
+            c += "</td></tr>";
+        }
+    }
+    if (!moduleDeviceInventory) {
+        c += (String("<tr><td colspan='9'>") + uiText(TextId::InsufficientMemoryToRenderModuleDeviceInventory) + "</td></tr>");
+    } else if (!hasModuleDevices) {
+        c += (String("<tr><td colspan='9'>") + uiText(TextId::NoCompatibleDescriptorDefinedDevicesDiscovered) + "</td></tr>");
+    }
+    moduleDeviceInventory.reset();
+    c += (String("</tbody></table></div><p class='help'>") + uiText(TextId::ThisIsAReadOnlyInventoryDerivedFrom) + "</p></section>");
+    return c;
+}
+BoardIdentity WebService::provisioningBoardIdentity() const { return boardIdentityResolution_.identity; }
+size_t WebService::provisioningProfileCount() const { return boardProfileCount(); }
+bool WebService::provisioningProfileAt(size_t index, ProvisioningBoardProfile& result) const {
+    const BoardProfile* profile = boardProfileAt(index);
+    if (profile == nullptr) return false;
+    result = {profile->id, profile->displayName, profile->revision};
+    return true;
+}
+bool WebService::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& result) const {
+    const BoardProfile* profile = boardProfile(id);
+    if (profile == nullptr) return false;
+    result = {profile->id, profile->displayName, profile->revision};
+    return true;
+}
+BoardProvisioningResult WebService::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
+    return boardProvisioningService_.provision(identity, confirmed);
+}
+ModuleDescriptorProvisioningResult WebService::provisionModuleDescriptor(ModuleSlot slot,
+    const uint8_t* payload, size_t size, bool confirmed) {
+    return moduleDescriptorProvisioningService_.provision(slot, payload, size, confirmed);
+}
+String WebService::renderDeviceExtras() {
+    String c;
+    c += buildPressureReductionConfigurationHtml(configurationService_.getConfiguration(), configurationService_.getLocale());
+    c += buildGeoPositionConfigurationHtml(configurationService_.getConfiguration().geoPosition,
+        configurationService_.getLocale());
+    c += "<section class='card'><h2>" + String(uiText(TextId::Hardware)) + "</h2><div class='kv'><span>"
+        + uiText(TextId::BoardProfile) + "</span><span>" + escapeHtml(currentBoardProfile().displayName)
+        + "</span><span>" + uiText(TextId::SerialNumber) + "</span><span>"
+        + escapeHtml(boardIdentityResolution_.identity.serialNumber.value) + "</span></div><div class='actions'><a class='button' href='/hardware'>"
+        + uiText(TextId::ViewHardware) + "</a></div></section>";
+    return c;
+}
 } // namespace EnvNode

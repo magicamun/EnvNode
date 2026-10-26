@@ -22,11 +22,13 @@ RuntimeManager::RuntimeManager(
     ILogger& logger,
     ISensorRuntime* sensorRuntime,
     ActuatorRuntime* actuatorRuntime,
-    ControllerRuntime* controllerRuntime)
+    ControllerRuntime* controllerRuntime,
+    IDeviceRestartDriver* restartDriver)
     : logger_(logger)
     , sensorRuntime_(sensorRuntime)
     , actuatorRuntime_(actuatorRuntime)
-    , controllerRuntime_(controllerRuntime) {
+    , controllerRuntime_(controllerRuntime)
+    , restartExecutor_(logger, restartDriver) {
 }
 
 void RuntimeManager::request(RuntimeAction action) {
@@ -116,10 +118,13 @@ bool RuntimeManager::applyPendingControllerChanges(
 
 void RuntimeManager::performPendingRestart() {
     if (pendingAction_ != RuntimeAction::RestartDevice) return;
-    logger_.info("Device restart executed");
-#if defined(ARDUINO_ARCH_ESP32)
-    ESP.restart();
-#endif
+    restartExecutor_.execute();
 }
+
+void RuntimeManager::requestDeviceRestart() { request(RuntimeAction::RestartDevice); }
+bool RuntimeManager::deviceRestartPending() const {
+    return pendingAction_ == RuntimeAction::RestartDevice;
+}
+void RuntimeManager::performDeviceRestart() { performPendingRestart(); }
 
 } // namespace EnvNode

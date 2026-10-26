@@ -27,7 +27,7 @@
 	(fp_line (start 17.5 7.35) (end 17.5 7.65) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
 	(fp_line (start 17.5 7.65) (end -17.5 7.65) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
 	(fp_line (start -17.5 7.65) (end -17.5 7.35) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
-	(fp_circle (center -17.8 0) (end -17.4 0) (stroke (width 0.15) (type default)) (fill no) (layer "F.SilkS"))
+	(fp_circle (center -17.0 0) (end -16.6 0) (stroke (width 0.15) (type default)) (fill no) (layer "F.SilkS"))
 	(fp_text user "ORING POWER MODULE 39 x 15 mm" (at 0 0 0) (layer "F.Fab")
 		(effects (font (size 0.8 0.8) (thickness 0.12)))
 	)

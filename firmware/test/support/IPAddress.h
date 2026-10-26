@@ -21,6 +21,13 @@ public:
         return true;
     }
 
+    String toString() const {
+        char value[16];
+        std::snprintf(value, sizeof(value), "%u.%u.%u.%u",
+            bytes_[0], bytes_[1], bytes_[2], bytes_[3]);
+        return String(value);
+    }
+
     uint8_t operator[](size_t index) const { return bytes_[index]; }
 
     explicit operator uint32_t() const {

@@ -182,12 +182,6 @@ const BoardModuleSlotCapability* boardModuleSlot(
     return nullptr;
 }
 
-const char* moduleSlotName(ModuleSlot slot) {
-    switch (slot) {
-        case ModuleSlot::A: return "A";
-        case ModuleSlot::B: return "B";
-        default: return "unknown";
-    }
-}
+
 
 } // namespace EnvNode

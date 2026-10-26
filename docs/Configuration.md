@@ -15,10 +15,31 @@ Legacy `weather` configuration remains readable until the first successful resto
 ordinary configuration changes use the active bank. Factory reset clears the active bank, inactive snapshots and legacy credentials.
 
 The Web UI separates Device settings, Configuration backup/restore and Hardware provisioning.
-The compact internal snapshot omits JSON field names to conserve NVS space. Both active and
-staging banks share the existing 20 KiB partition. If there is insufficient space, restoration
-fails without activating the candidate; the file size limit is not a guarantee of available NVS
-capacity. Existing partition offsets remain unchanged.
+The compact internal snapshot omits JSON field names. New partition tables provide
+`cfg_nvs`, a dedicated 256 KiB NVS partition at 0x390000. The original 20 KiB
+`nvs`, OTA metadata and both application slot offsets/sizes are preserved. The
+previously unused SPIFFS range is reduced to 192 KiB at 0x3D0000; this firmware
+does not mount or use SPIFFS. Available NVS capacity still includes bookkeeping
+and garbage-collection overhead; file size alone is not a capacity guarantee.
+
+Installing the new partition table requires one normal USB firmware upload,
+including the partition table. Application-only web OTA cannot install it. Export
+and retain the configuration JSON first; do not use a full-flash erase for this
+transition. A normal USB upload retains the original NVS bytes. No device flash
+or erase is performed by the source change itself.
+
+On first boot after USB upload, existing legacy/snapshot data in the default NVS
+remain authoritative. Normal edits continue there. Only an explicitly confirmed,
+verified restore commits the active-bank pointer in `cfg_nvs`; after that, normal
+edits and subsequent boots use the dedicated partition. The previous partition's
+data are retained during migration. Failed staging/commit leaves the original
+configuration authoritative. Factory reset clears both partitions' configuration
+namespaces, preventing legacy credentials from returning.
+
+With an old partition table, normal operation remains compatible, but a restore
+requiring `cfg_nvs` fails without changing current data. Older firmware without
+this feature reads the retained old NVS configuration, not subsequent edits in
+`cfg_nvs`. No JSON or compact-record schema migration is involved.
 
 Restore requests a device restart; the user can restart immediately or later. Installation network
 settings from a backup become effective after restart and can change how the device is reached.
@@ -71,3 +92,38 @@ Locale (German commas, English points), without thousands separators. The Web
 boundary converts these strings to neutral numeric input; application configuration,
 NVS, backups and MQTT remain independent of the UI Locale. No format migration is
 needed. Restore previews and temperature-age diagnostics are localized too.
+
+## Restore preview memory and diagnostics
+
+The upload/preview stage does not write NVS. It decodes and validates a candidate;
+only the later explicitly confirmed restore stages/commits a bank. A browser
+connection reset during upload/preview does not by itself identify a storage fault.
+
+The JSON decoder validates/counts fields before allocating an exact-size index
+with checked nothrow allocation. It no longer grows an unchecked vector while the
+uploaded JSON occupies heap. The web preview takes ownership of the single decoded
+Configuration rather than keeping an additional full destination model, and frees
+the JSON before domain validation/rendering. The existing decoder API remains
+available; format versions, input limits, validation and credential handling remain.
+
+INFO diagnostics mark upload start/completion, preview decode, domain validation
+and response completion, including bytes, elapsed time, free heap and largest
+free block. They contain no uploaded credentials or configuration contents.
+A simulated index-allocation failure is covered natively; physical constrained
+heap/network behavior still requires the device retry and these phase logs.
+
+The configuration upload form sends the file length as a query argument before
+the multipart body. The handler reserves that capacity once at upload start,
+rather than repeatedly growing/reallocating the String alongside TCP buffers.
+It still enforces the maximum and checks received length; clients omitting the
+hint retain the bounded incremental path. Text chunks are copied with an explicit
+terminator to avoid relying on String::concat reading past the supplied chunk.
+Upload rejection logs now identify invalid size, memory allocation or size limits.
+
+A confirmed restore logs request validation, snapshot encoding, target partition/
+bank, inactive-bank clear, write, readback verification, metadata commit, reopen
+and memory activation. The readback allocation is explicitly checked; failure
+leaves the previously committed bank authoritative. Missing cfg_nvs is reported
+as requiring a USB partition-table update. These messages contain no credentials.
+
+Restore diagnosis (2026-10-26): Build 378 reached preview validation but aborted while growing the compact snapshot vector, before persistence. Restore now counts compact bytes first and uses one exact-size, checked allocation. Allocation failure rejects the restore and retains the previous configuration. Locale and timezone from the backup take effect only after a successful restore and restart.

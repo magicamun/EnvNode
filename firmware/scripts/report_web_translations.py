@@ -12,7 +12,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 LITERAL = re.compile(r'"(?:\\.|[^"\\])*"')
-CATALOG = ROOT / 'firmware/include/WebTextCatalog.inc'
+CATALOG = ROOT / 'firmware/lib/EnvNodeWeb/include/WebTextCatalog.inc'
 entries = {json.loads(m.group(1)) for m in re.finditer(
     r'^ENVNODE_WEB_TEXT\(\w+, ("(?:\\.|[^"\\])*"),', CATALOG.read_text(), re.M)}
 TECHNICAL = {'Status', 'MQTT', 'WiFi', 'SSID', 'RSSI', 'MAC', 'IP', 'OTA',
@@ -23,6 +23,7 @@ TECHNICAL = {'Status', 'MQTT', 'WiFi', 'SSID', 'RSSI', 'MAC', 'IP', 'OTA',
 files = sorted((ROOT / 'firmware/src').glob('*WebView.cpp'))
 files += sorted((ROOT / 'firmware/src').glob('WebService*.cpp'))
 files += [ROOT / 'firmware/src/ControllerWebSupport.cpp']
+files += sorted((ROOT / 'firmware/lib/EnvNodeWebAdmin/src').glob('*.cpp'))
 rows = {}
 
 def add(path, offset, text):
@@ -119,7 +120,7 @@ report = """<!-- SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribut
 
 Die Zuordnung ist in [WebLocalization.md](WebLocalization.md) festgelegt.
 Alle erfassten Bedien-, Hilfe-, Bestätigungs- und Fehlertexte verwenden stabile
-Text-IDs im zentralen `firmware/include/WebTextCatalog.inc`. Die gespeicherte
+Text-IDs im zentralen `firmware/lib/EnvNodeWeb/include/WebTextCatalog.inc`. Die gespeicherte
 Locale wählt Deutsch oder den englischen Fallback. Browsertexte verwenden eine
 kleine, vom Server gelieferte Auswahl desselben Katalogs.
 

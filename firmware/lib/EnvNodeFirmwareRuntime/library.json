@@ -1,0 +1,16 @@
+{
+  "name": "EnvNodeFirmwareRuntime",
+  "version": "0.1.0",
+  "description": "Shared network, time and web lifecycle with application phases; see repository LICENSE.",
+  "dependencies": [
+    {
+      "name": "EnvNodeNetwork"
+    },
+    {
+      "name": "EnvNodeTime"
+    },
+    {
+      "name": "EnvNodeWeb"
+    }
+  ]
+}

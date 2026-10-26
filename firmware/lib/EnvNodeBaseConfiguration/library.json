@@ -1,0 +1,9 @@
+{
+  "name": "EnvNodeBaseConfiguration",
+  "version": "0.1.0",
+  "description": "Shared device, network, time and locale types and validation. See repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  }
+}

@@ -5,6 +5,12 @@
 - Status: Accepted
 - Date: 2026-08-07
 
+Implementation note (2026-10-25): the EnvNode restart policy and explicit
+activation model remain unchanged. Shared OTA now requests restart through
+IDeviceRestart, implemented by RuntimeManager. The single platform restart call
+is in DeviceRestartExecutor; RuntimeManager remains the pending-action gate.
+See FirmwareBasisRefactoring.md for the staged extraction and validation.
+
 ---
 
 ## Context

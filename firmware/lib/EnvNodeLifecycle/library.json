@@ -1,0 +1,14 @@
+{
+  "name": "EnvNodeLifecycle",
+  "version": "0.1.0",
+  "description": "Shared OTA and explicit device restart execution; see repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeLogging"
+    }
+  ]
+}

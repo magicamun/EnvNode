@@ -4,6 +4,16 @@
 #include <cstdint>
 #include <string>
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+#ifndef PSTR
+#define PSTR(value) (value)
+#endif
+inline size_t strlen_P(const char* value) { return std::strlen(value); }
 
 class String {
 public:
@@ -11,6 +21,10 @@ public:
     String(const char* value)
         : value_(value == nullptr ? "" : value) {
     }
+    String(char value) : value_(1, value) {}
+    String(int value) : value_(std::to_string(value)) {}
+    String(long value) : value_(std::to_string(value)) {}
+    String(unsigned long value) : value_(std::to_string(value)) {}
     String(unsigned int value)
         : value_(std::to_string(value)) {
     }
@@ -34,6 +48,12 @@ public:
         return value_.empty();
     }
 
+    long toInt() const { return std::strtol(value_.c_str(), nullptr, 10); }
+    bool endsWith(const char* suffix) const {
+        const size_t length = std::strlen(suffix);
+        return value_.size() >= length && value_.compare(value_.size()-length, length, suffix) == 0;
+    }
+
     size_t length() const {
         return value_.length();
     }
@@ -46,8 +66,17 @@ public:
         return value_[index];
     }
 
-    void reserve(size_t size) {
+    static size_t& reservationLimit() { static size_t limit = static_cast<size_t>(-1); return limit; }
+    bool reserve(size_t size) {
+        if (size <= value_.capacity()) return true;
+        if (size > reservationLimit()) return false;
         value_.reserve(size);
+        return true;
+    }
+
+    bool concat(const char* data, size_t size) {
+        if (!reserve(value_.size()+size)) return false;
+        value_.append(data,size); return true;
     }
 
     String& operator+=(const String& value) {
@@ -120,9 +149,15 @@ extern HardwareSerial Serial;
 
 class EspClass {
 public:
+    uint32_t getFreeHeap() const { return 200000; }
+    uint32_t getMaxAllocHeap() const { return 100000; }
     uint64_t getEfuseMac() const { return 0x001122334455ULL; }
 };
 
 static EspClass ESP;
 
-inline uint32_t millis() { return 0; }
+// Controllable host clock; defaults preserve the previous zero-time stub.
+inline uint32_t& arduinoTestMillis() { static uint32_t value = 0; return value; }
+inline uint32_t millis() { return arduinoTestMillis(); }
+
+inline void delay(unsigned long duration) { arduinoTestMillis() += duration; }
