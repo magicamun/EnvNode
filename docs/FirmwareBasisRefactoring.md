@@ -579,3 +579,48 @@ The additional live-export probe passes separately and is not a committed test.
 No device firmware upload, confirmed restore, NVS write or restart was performed.
 
 Restore runtime follow-up (2026-10-26): Build 378 preview succeeded, but confirmation aborted in compact snapshot vector growth before storage. The restore encoder now counts bytes and allocates a checked exact-size buffer. Compact bytes are verified against the existing codec. Snapshot-allocation and readback-allocation failure tests retain the active and persisted configuration. Validation: 26 relevant native tests pass; ESP32 build passes. Device restore/restart confirmation remains pending.
+
+
+## Step 12: startup and main loop composition (2026-10-26)
+
+The user confirmed successful configuration restore, restart, locale and timezone
+with commit 1145e76. The restore blocker is resolved on the physical Mini 0.8.
+
+EnvNodeFirmwareRuntime now owns the common startup/service order through narrow
+WiFi, time and web interfaces and IFirmwareApplication. Configuration and board
+identity must be ready before begin. Device initialization precedes web startup;
+application integrations follow it. Each loop services WiFi/time, measurements,
+web, then application integrations. Startup does not wait for network or time
+synchronization. A loop before begin does nothing; a second begin does not restart
+services. The application hooks retain the existing sensor/actuator/controller,
+MQTT, discovery, restart and display ordering.
+
+main.cpp now only delegates Arduino entry points. EnvNodeFirmware.cpp owns the
+EnvNode composition, identity/profile gate, module discovery, configuration,
+automatic actuator setup and sensor runtime construction. Object lifetime and
+construction order remain static and unchanged. Application's public setup/loop
+API remains available. The tester can supply its own composition and hooks without
+linking the EnvNode model, sensors, MQTT integrations or module policy.
+
+Dependency review: all eleven shared libraries were checked for includes of
+application headers, declared direct shared dependencies and cycles. None includes
+an application header; all observed direct dependencies are declared; no cycles
+were found. Full configuration/backup codecs, board profiles, module compatibility,
+sensor/controller policy, MQTT and application route assembly intentionally remain
+in the EnvNode application. No tester application is introduced in this step.
+
+Runtime acceptance still requires flashing this step and checking existing startup,
+measurements/controllers, MQTT, web and display. After that the initial extraction
+is complete; future tester-specific adapters/build environment are separate work.
+
+
+Validation of step 12: ESP32 build and both browser-language checks pass. The full
+native run has 512 passing tests and the existing profile-count failure; the new
+lifecycle suite initially missed the GPIO stubs required by the native application
+source set. With those supplied all three lifecycle tests pass (515 maintained
+passing outcomes in total, one known profile-count failure). The same three tests
+also compile and run standalone with only shared interface headers, runtime source,
+Unity and platform doubles, without application headers/sources. A mechanical
+comparison confirms unchanged composition object order and bootstrap/loop bodies.
+ESP32 static RAM increases by 16 bytes and flash by 500 bytes versus the preceding
+restore fix. No device was flashed or restarted by the agent.

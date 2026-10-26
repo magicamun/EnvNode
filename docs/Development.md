@@ -227,3 +227,19 @@ committed it. Old NVS data remain readable until then. Native checks include
 full suite. Native partition doubles do not validate physical flash contents.
 The firmware does not auto-erase an unreadable dedicated partition; if initialization
 reports an error, diagnose that exact error before erasing anything.
+
+
+## Firmware runtime boundary
+
+Keep board-specific service composition in `EnvNodeFirmware.cpp`; Arduino entry
+points in `main.cpp` only delegate. Shared `EnvNodeFirmwareRuntime` may depend on
+shared service interfaces and application phases, never on EnvNode configuration,
+sensors or application policies. Board/configuration preparation belongs before
+runtime begin. New application behavior belongs in its own phase implementations.
+
+After changes run `pio run -e esp32dev`, `pio test -e native` and
+`node test/browser/page_editor_test.cjs`. The focused lifecycle suite is
+`pio test -e native -f test_firmware_runtime`. Before accepting a runtime refactor,
+flash and check startup, retained settings, measurements/controllers, MQTT, web
+and display. No configuration reset or new partition-table transition is needed
+for the startup/loop extraction.

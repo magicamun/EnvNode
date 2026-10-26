@@ -2781,3 +2781,26 @@ configured Locale at the Web boundary. `GeoPositionWebView` and
 `PressureReductionWebView` own this adaptation. Domain validation and storage codecs
 continue to accept only canonical input; changing the UI Locale does not reinterpret
 persisted coordinates or MQTT payloads.
+
+
+## Shared firmware startup and EnvNode composition
+
+`main.cpp` delegates to `EnvNodeFirmware.cpp`, the EnvNode composition root. That
+module owns static service wiring and performs board identity/profile checks,
+module discovery, configuration loading and sensor construction before starting
+Application. An unsupported identity still stops normal startup.
+
+`EnvNodeFirmwareRuntime` only depends on shared WiFi/time/web interfaces and
+`IFirmwareApplication`. Startup order is WiFi, time, application devices, web,
+application integrations. The loop order is WiFi, time, application measurements,
+web, application integrations. EnvNode's Application implements the four phases;
+its integrations retain MQTT, controller, publication, restart and display order.
+A future tester supplies its own application phases and composition. The runtime
+uses borrowed references and no dynamic allocation; configuration/storage formats
+and hardware pin policy are outside this library.
+
+Application firmware versions advance independently. A shared change is built and
+validated for each existing firmware target; affected released behavior gets a
+new version in each application. Internal refactors may ship with the next release.
+Build number and Git commit identify the exact shared source state. Firmware
+changes do not advance hardware revisions.

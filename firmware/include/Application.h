@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FirmwareRuntime.h"
 #include "IConfigurationService.h"
 #include "IWebService.h"
 #include "IWiFiService.h"
@@ -23,7 +24,7 @@
 
 namespace EnvNode {
 
-class Application {
+class Application : private IFirmwareApplication {
 public:
     Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher, MqttDescriptionPublisher& descriptionPublisher, DisplayService& displayService, ValueMqttAdapter& valueMqttAdapter, ValueStatePublisher& valueStatePublisher);
 
@@ -31,12 +32,14 @@ public:
     void loop();
 
 private:
+    void initializeDevices() override;
+    void beginIntegrations() override;
+    void serviceMeasurements() override;
+    void serviceIntegrations() override;
+    FirmwareRuntime firmwareRuntime_;
     ILogger& logger_;
     IConfigurationService& configurationService_;
-    IWiFiService& wifiService_;
-    IWebService& webService_;
     IMqttService& mqttService_;
-    ITimeService& timeService_;
     SensorManager& sensorManager_;
     ActuatorRuntime& actuatorRuntime_;
     ControllerRuntime& controllerRuntime_;
