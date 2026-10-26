@@ -663,3 +663,27 @@ ConfigurationService, SensorManager, ControllerRuntime, MqttService, DisplayServ
 BoardIdentityResolver, PubSubClient or U8G2. Initial measured footprint is about
 974 kB flash / 65 kB static RAM for the tester versus 1462 kB / 125 kB for EnvNode.
 No physical flash, restart or connected-board operation was performed.
+
+
+## Guided fixture simulation (testboard 0.2.0)
+
+The user requested defining and building application logic while the physical
+fixture is unavailable. Fixture channel routing, DUT revision profiles, logical
+measurement backend and guided/browser flow are separate. The first real profile
+is derived from Weather 0.2 / PCB 0.2.1; it has 19 connectors, 38 socket pads and
+3268 comparisons. KiCad coordinates and a source SHA-256 accompany the mapping.
+
+The PCB exposes +3V3_SYS at the connectors but +3V3_DEVKIT at socket pad 1. The
+user explicitly chose to mark these contacts as not fully testable for now.
+All 19 corresponding contacts remain incomplete; a nominal simulated run cannot
+produce a full-board pass. No rail aliases are invented. A logical probe test
+also independently checks GPIO16 against ground pads 14/32/38, +5V pad 19 and
+signal pad 27. Future physical backend routing remains unpopulated.
+
+The guided runner uses explicit connect/start/review/next/abort states and a
+bounded nonblocking sample interface; the browser shows a KiCad view with LEDs
+and incremental JSON status. A simulator supplies nominal/open/extra-connection
+cases. Fifteen native fixture tests and both ESP32 builds pass. Existing browser
+editor checks still pass in English/German. Local browser testing uses the same
+native C++ classes behind a loopback-only development adapter, with no ESP access.
+See TestBoardApplication.md for the agreed boundaries, caveats and extension path.

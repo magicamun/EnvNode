@@ -16,6 +16,7 @@ public:
     TestBoardWeb(WebHost& host, TestBoardSettings& settings, IWiFiService& wifi,
         ITimeService& time, LocaleFormatter& formatter, OTAService& ota,
         IDeviceRestart& restart, const IRecentLogReader& logs, FirmwareWebBuildInfo build);
+    void attachTestRoutes(IWebRoutes& routes) { testRoutes_ = &routes; }
     void begin() override;
     void loop() override;
     Locale webLocale() const override;
@@ -39,5 +40,6 @@ private:
     CommonSettingsWebRoutes commonRoutes_;
     FirmwareWebRoutes firmwareRoutes_;
     LogWebRoutes logRoutes_;
+    IWebRoutes* testRoutes_ = nullptr;
 };
 }

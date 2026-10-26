@@ -4,6 +4,12 @@
 
 ### Added
 
+- Guided simulated connector testing in testboard firmware 0.2.0: load Weather
+  0.2 / PCB 0.2.1, confirm one pigtail connection at a time, compare each contact
+  against all 38 socket pads and show board LEDs plus a full result matrix.
+  Derive direct-net expectations and positions reproducibly from KiCad. Mark
+  unmatched +3V3_SYS contacts as incomplete coverage instead of passing them.
+
 - Independent `testboard` firmware build (initial version 0.1.0), with shared
   network/setup, device/time/locale settings, logs, OTA and explicit restart.
   Keep fixture settings/reset separate from EnvNode and select each application's

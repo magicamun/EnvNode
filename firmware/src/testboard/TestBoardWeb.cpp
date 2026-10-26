@@ -28,6 +28,7 @@ void TestBoardWeb::begin() {
     host_.registerRoutes(commonRoutes_);
     host_.registerRoutes(firmwareRoutes_);
     host_.registerRoutes(logRoutes_);
+    if (testRoutes_) host_.registerRoutes(*testRoutes_);
     host_.begin();
 }
 void TestBoardWeb::loop() { host_.loop(); }
@@ -44,6 +45,7 @@ String TestBoardWeb::navigation(const char* active) const {
         html += String(">") + escapeHtml(label) + "</a>";
     };
     link("/", testerText("Prüfboard", "Test board"));
+    if (testRoutes_) link("/test", testerText("Anschlussprüfung", "Connector test"));
     link("/network", text(TextId::Network));
     link("/time", text(TextId::LocaleTime));
     link("/device", text(TextId::Device));
@@ -79,7 +81,9 @@ void TestBoardWeb::home() {
     content += testerText("Netzwerk, Geräteeinstellungen, Sprache/Zeit, Protokolle und Firmwareverwaltung sind verfügbar.",
         "Network, device settings, locale/time, logs and firmware administration are available.");
     content += "</p><p>";
-    content += testerText("Anschlussprüfungen und EEPROM-Provisioning sind noch nicht implementiert.",
+    if (testRoutes_) content += testerText("Die geführte Anschlussprüfung steht als Simulation bereit. Reale Messung und EEPROM-Provisioning folgen später.",
+        "Guided connector testing is available in simulation. Physical measurement and EEPROM provisioning follow later.");
+    else content += testerText("Anschlussprüfungen und EEPROM-Provisioning sind noch nicht implementiert.",
         "Connector tests and EEPROM provisioning are not implemented yet.");
     content += "</p></section>";
     sendPage(testerText("Prüfboard", "Test board"), "/", content);

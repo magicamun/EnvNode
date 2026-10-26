@@ -1,0 +1,203 @@
+// EnvNode: see repository LICENSE.
+#include <unity.h>
+#include <cstring>
+#include "TestBoardSettings.h"
+#include "TestBoardRestart.h"
+#include "TestBoardWeb.h"
+#include "RecentLogStore.h"
+#include "Update.h"
+#include "testing/TestWebRoutes.h"
+#include <vector>
+using namespace EnvNode::Testing;
+using namespace EnvNode;
+UpdateClass Update;
+HardwareSerial Serial;
+void HardwareSerial::begin(unsigned long) {}
+void HardwareSerial::println(const char*) {}
+size_t HardwareSerial::write(const uint8_t*, size_t n) { return n; }
+struct Logger : ILogger {
+    void begin(unsigned long) override {}
+    void println(const char*) override {}
+    void printf(const char*, ...) override {}
+};
+struct Wifi : IWiFiService {
+    void begin() override {} void loop() override {}
+    bool connected() const override { return false; }
+    bool inSetupAccessPointMode() const override { return true; }
+    String ipAddress() const override { return "192.168.4.1"; }
+    String hostname() const override { return "EnvNode-Testboard"; }
+    int32_t rssi() const override { return 0; }
+};
+struct Time : ITimeService {
+    void begin() override {} void loop() override {}
+    bool synchronized() const override { return false; }
+    time_t now() const override { return 0; }
+    bool localCivilTime(tm&) const override { return false; }
+    String iso8601Utc() const override { return {}; }
+    String iso8601Local() const override { return {}; }
+    String iso8601Local(time_t) const override { return {}; }
+    uint32_t epoch() const override { return 0; }
+};
+struct RestartDriver : IDeviceRestartDriver {
+    int calls = 0;
+    void restart() override { ++calls; }
+};
+struct Fixture {
+    Logger logger; TestBoardSettings settings; Wifi wifi; Time time;
+    LocaleFormatter formatter{settings.base()}; RecentLogStore logs;
+    RestartDriver driver; TestBoardRestart restart{logger, &driver}; OTAService ota{logger, restart};
+    WebHost host{logger, wifi};
+    TestBoardWeb web{host, settings, wifi, time, formatter, ota, restart, logs,
+        {"0.2.0", "0.2.0+test", "1", "abc", "testboard", "now", "clean", false}};
+    SimulatedFixture fixture;
+    TestRunner runner{fixture};
+    TestWebRoutes routes{host, web, runner, fixture};
+    Fixture() { settings.load(); web.attachTestRoutes(routes); web.begin(); }
+    WebServer& server() { return host.server(); }
+};
+void setUp() {
+    Preferences::failBeginNamespace() = String(); Preferences::failClearNamespace() = String();
+    Preferences::failStringWrites() = false; Preferences::failUIntKey() = String();
+    Update = UpdateClass();
+    arduinoTestMillis() = 0;
+    for (const char* name : {"testboard", "testboard0", "testboard1", "test_meta", "weather", "weather_meta"}) {
+        Preferences p; p.begin(name); p.clear();
+    }
+}
+void tearDown() {}
+void finish(TestRunner& runner, uint32_t& now) {
+    for (size_t i = 0; runner.phase() == Phase::Running && i < 600; ++i) {
+        now += 20; runner.tick(now);
+    }
+    TEST_ASSERT_EQUAL(Phase::Review, runner.phase());
+}
+struct IndependentProbe : ITestFixture {
+    std::vector<std::pair<unsigned, unsigned>> paths;
+    bool selected = false, busy = false, selectOk = true;
+    uint8_t contact = 0, socket = 0; unsigned releases = 0;
+    bool select(Pigtail type, uint8_t c, uint8_t s) override {
+        TEST_ASSERT_EQUAL(Pigtail::Gpio, type);
+        contact = c; socket = s; paths.push_back({c,s}); selected = selectOk; return selectOk;
+    }
+    Sample read(bool& connected) override {
+        if (busy) return Sample::Busy;
+        connected = contact == 1 ? socket == 14 || socket == 32 || socket == 38
+            : contact == 2 ? socket == 19 : contact == 3 && socket == 27;
+        return Sample::Ready;
+    }
+    void release() override { selected = false; ++releases; }
+};
+void test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered() {
+    const auto& board = weatherBoard();
+    TEST_ASSERT_EQUAL(19, board.count);
+    const auto& gpio = board.connectors[0];
+    TEST_ASSERT_EQUAL_STRING("GPIO16", gpio.id);
+    TEST_ASSERT_EQUAL_UINT64((1ULL << 13) | (1ULL << 31) | (1ULL << 37), gpio.contacts[0].expected);
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 26, gpio.contacts[2].expected);
+    TEST_ASSERT_EQUAL_UINT64(0, gpio.contacts[3].expected);
+    TEST_ASSERT_EQUAL_STRING("+3V3_DEVKIT", board.socket[0].net);
+    TEST_ASSERT_EQUAL_STRING("+3V3_SYS", gpio.contacts[3].net);
+}
+void test_all_152_pairs_use_logical_pin_numbers_and_wait_for_operator() {
+    IndependentProbe probe; TestRunner runner(probe); uint32_t now = 0;
+    TEST_ASSERT_FALSE(runner.start(now)); TEST_ASSERT_FALSE(runner.next());
+    TEST_ASSERT_TRUE(runner.load(weatherBoard())); TEST_ASSERT_TRUE(runner.start(now));
+    TEST_ASSERT_FALSE(runner.start(now)); TEST_ASSERT_FALSE(runner.next());
+    finish(runner, now);
+    TEST_ASSERT_EQUAL(152, runner.completed()); TEST_ASSERT_EQUAL(152, probe.paths.size());
+    for (size_t i = 0; i < 152; ++i) {
+        TEST_ASSERT_EQUAL(i / 38 + 1, probe.paths[i].first);
+        TEST_ASSERT_EQUAL(i % 38 + 1, probe.paths[i].second);
+    }
+    TEST_ASSERT_FALSE(probe.selected);
+    TEST_ASSERT_EQUAL(Result::Connected, runner.result(13));
+    TEST_ASSERT_EQUAL(Result::Connected, runner.result(31));
+    TEST_ASSERT_EQUAL(Result::Connected, runner.result(37));
+    TEST_ASSERT_EQUAL(Result::Isolated, runner.result(0));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(0));
+    TEST_ASSERT_EQUAL(Verdict::Passed, runner.contactVerdict(0, 0));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(0, 3));
+    runner.tick(now + 10000); TEST_ASSERT_EQUAL(0, runner.step());
+    TEST_ASSERT_TRUE(runner.next()); TEST_ASSERT_EQUAL(Phase::AwaitingConnection, runner.phase());
+}
+void test_open_and_unexpected_connections_are_failures() {
+    for (auto fault : {SimulatedFault::OpenContact, SimulatedFault::ExtraConnection}) {
+        SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0;
+        runner.load(weatherBoard()); fixture.connect(weatherBoard(), 0, fault); runner.start(now); finish(runner, now);
+        TEST_ASSERT_EQUAL(Verdict::Failed, runner.verdict(0));
+        TEST_ASSERT_EQUAL(Verdict::Failed, runner.contactVerdict(0, 0));
+        TEST_ASSERT_EQUAL(fault == SimulatedFault::OpenContact ? Result::Open : Result::Connected, runner.result(13));
+        if (fault == SimulatedFault::ExtraConnection) TEST_ASSERT_EQUAL(Result::Unexpected, runner.result(0));
+    }
+}
+void test_complete_plan_includes_module_532_pairs_without_false_full_pass() {
+    SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0; size_t total = 0;
+    runner.load(weatherBoard());
+    for (size_t step = 0; step < weatherBoard().count; ++step) {
+        TEST_ASSERT_EQUAL(Phase::AwaitingConnection, runner.phase());
+        fixture.connect(weatherBoard(), step, SimulatedFault::None); runner.start(now); finish(runner, now);
+        total += runner.completed();
+        if (step == 18) TEST_ASSERT_EQUAL(532, runner.completed());
+        TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(step)); runner.next();
+    }
+    TEST_ASSERT_EQUAL(3268, total); TEST_ASSERT_EQUAL(Phase::Complete, runner.phase());
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.overall()); TEST_ASSERT_FALSE(runner.next());
+}
+void test_abort_releases_fixture_and_reload_clears_previous_results() {
+    IndependentProbe fixture; TestRunner runner(fixture); runner.load(weatherBoard()); runner.start(0); runner.tick(20);
+    runner.abort(); TEST_ASSERT_FALSE(fixture.selected); TEST_ASSERT_EQUAL(Phase::Aborted, runner.phase());
+    const auto paths = fixture.paths.size(); runner.tick(5000); TEST_ASSERT_EQUAL(paths, fixture.paths.size());
+    TEST_ASSERT_FALSE(runner.start(5000)); runner.load(weatherBoard());
+    TEST_ASSERT_EQUAL(0, runner.completed()); TEST_ASSERT_EQUAL(Verdict::Untested, runner.verdict(0));
+}
+void test_busy_backend_times_out_and_select_error_never_reads_a_stale_path() {
+    IndependentProbe fixture; fixture.busy = true; TestRunner runner(fixture); runner.load(weatherBoard()); runner.start(0);
+    runner.tick(20); TEST_ASSERT_EQUAL(0, runner.completed());
+    runner.tick(2000); TEST_ASSERT_EQUAL(1, runner.completed()); TEST_ASSERT_EQUAL(Result::Error, runner.result(0));
+    runner.abort(); fixture.busy = false; fixture.selectOk = false; runner.load(weatherBoard()); runner.start(0);
+    runner.tick(20); TEST_ASSERT_EQUAL(Result::Error, runner.result(0));
+}
+void test_stale_and_invalid_web_actions_do_not_advance_the_session() {
+    Fixture f;
+    f.server().arguments = {{"action", "load"}, {"generation", "0"}, {"board", weatherBoard().id}};
+    TEST_ASSERT_TRUE(f.server().request("/test/action", HTTP_POST)); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    f.server().arguments = {{"action", "start"}, {"generation", "0"}, {"fault", "none"}};
+    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    TEST_ASSERT_EQUAL(Phase::AwaitingConnection, f.runner.phase());
+    f.server().request("/test/state", HTTP_GET);
+    TEST_ASSERT_EQUAL('}', f.server().responseBody.back());
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"verdicts\":[0,0"));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"contacts\":\"000"));
+    f.server().arguments["generation"] = String(f.runner.generation()); f.server().arguments["fault"] = "invalid";
+    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(400, f.server().responseStatus);
+    f.server().arguments["fault"] = "none";
+    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    TEST_ASSERT_EQUAL(Phase::Running, f.runner.phase());
+    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    TEST_ASSERT_EQUAL(0, f.runner.completed());
+}
+void test_actual_test_page_and_definition_apis_are_simulation_only() {
+    Fixture f; f.server().request("/test", HTTP_GET);
+    TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "SIMULATION"));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "/test/ui.js"));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "test-matrix"));
+    f.server().request("/test/definition", HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "weather-0.2-pcb0.2.1"));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"covered\":false"));
+    f.server().request("/test/state", HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"simulation\":true"));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"phase\":0"));
+}
+int main() {
+    UNITY_BEGIN();
+    RUN_TEST(test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered);
+    RUN_TEST(test_all_152_pairs_use_logical_pin_numbers_and_wait_for_operator);
+    RUN_TEST(test_open_and_unexpected_connections_are_failures);
+    RUN_TEST(test_complete_plan_includes_module_532_pairs_without_false_full_pass);
+    RUN_TEST(test_abort_releases_fixture_and_reload_clears_previous_results);
+    RUN_TEST(test_busy_backend_times_out_and_select_error_never_reads_a_stale_path);
+    RUN_TEST(test_stale_and_invalid_web_actions_do_not_advance_the_session);
+    RUN_TEST(test_actual_test_page_and_definition_apis_are_simulation_only);
+    return UNITY_END();
+}

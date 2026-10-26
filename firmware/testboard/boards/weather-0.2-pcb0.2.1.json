@@ -1,0 +1,1223 @@
+{
+  "schema": 1,
+  "id": "weather-0.2-pcb0.2.1",
+  "name": "EnvNode Weather",
+  "identityRevision": "0.2",
+  "pcbRevision": "0.2.1",
+  "source": "hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
+  "sha256": "03522844fad0329562dca237da38add60c2cfe2100cccc07ab42ce9277234f69",
+  "bounds": [
+    55.23,
+    49.14,
+    115.0,
+    95.0
+  ],
+  "socket": [
+    {
+      "number": 1,
+      "net": "+3V3_DEVKIT",
+      "x": 79.248,
+      "y": 60.706
+    },
+    {
+      "number": 2,
+      "net": "unconnected-(U3-CHIP_PU-Pad2)",
+      "x": 79.248,
+      "y": 63.246
+    },
+    {
+      "number": 3,
+      "net": "ADC3",
+      "x": 79.248,
+      "y": 65.786
+    },
+    {
+      "number": 4,
+      "net": "ADC4",
+      "x": 79.248,
+      "y": 68.326
+    },
+    {
+      "number": 5,
+      "net": "ADC1",
+      "x": 79.248,
+      "y": 70.866
+    },
+    {
+      "number": 6,
+      "net": "ADC2",
+      "x": 79.248,
+      "y": 73.406
+    },
+    {
+      "number": 7,
+      "net": "GPIO32",
+      "x": 79.248,
+      "y": 75.946
+    },
+    {
+      "number": 8,
+      "net": "GPIO33",
+      "x": 79.248,
+      "y": 78.486
+    },
+    {
+      "number": 9,
+      "net": "I2C1_SDA",
+      "x": 79.248,
+      "y": 81.026
+    },
+    {
+      "number": 10,
+      "net": "I2C1_SCL",
+      "x": 79.248,
+      "y": 83.566
+    },
+    {
+      "number": 11,
+      "net": "GPIO27",
+      "x": 79.248,
+      "y": 86.106
+    },
+    {
+      "number": 12,
+      "net": "GPIO14",
+      "x": 79.248,
+      "y": 88.646
+    },
+    {
+      "number": 13,
+      "net": "unconnected-(U3-MTDI{slash}GPIO12{slash}ADC2_CH5-Pad13)",
+      "x": 79.248,
+      "y": 91.186
+    },
+    {
+      "number": 14,
+      "net": "GND",
+      "x": 79.248,
+      "y": 93.726
+    },
+    {
+      "number": 15,
+      "net": "GPIO13",
+      "x": 79.248,
+      "y": 96.266
+    },
+    {
+      "number": 16,
+      "net": "unconnected-(U3-SD_DATA2{slash}GPIO9-Pad16)",
+      "x": 79.248,
+      "y": 98.806
+    },
+    {
+      "number": 17,
+      "net": "unconnected-(U3-SD_DATA3{slash}GPIO10-Pad17)",
+      "x": 79.248,
+      "y": 101.346
+    },
+    {
+      "number": 18,
+      "net": "unconnected-(U3-CMD-Pad18)",
+      "x": 79.248,
+      "y": 103.886
+    },
+    {
+      "number": 19,
+      "net": "+5V",
+      "x": 79.248,
+      "y": 106.426
+    },
+    {
+      "number": 20,
+      "net": "unconnected-(U3-SD_CLK{slash}GPIO6-Pad20)",
+      "x": 104.64432,
+      "y": 106.42328
+    },
+    {
+      "number": 21,
+      "net": "unconnected-(U3-SD_DATA0{slash}GPIO7-Pad21)",
+      "x": 104.64432,
+      "y": 103.88328
+    },
+    {
+      "number": 22,
+      "net": "unconnected-(U3-SD_DATA1{slash}GPIO8-Pad22)",
+      "x": 104.648,
+      "y": 101.346
+    },
+    {
+      "number": 23,
+      "net": "unconnected-(U3-MTDO{slash}GPIO15{slash}ADC2_CH3-Pad23)",
+      "x": 104.648,
+      "y": 98.806
+    },
+    {
+      "number": 24,
+      "net": "unconnected-(U3-ADC2_CH2{slash}GPIO2-Pad24)",
+      "x": 104.648,
+      "y": 96.266
+    },
+    {
+      "number": 25,
+      "net": "unconnected-(U3-GPIO0{slash}BOOT{slash}ADC2_CH1-Pad25)",
+      "x": 104.648,
+      "y": 93.726
+    },
+    {
+      "number": 26,
+      "net": "GPIO4",
+      "x": 104.648,
+      "y": 91.186
+    },
+    {
+      "number": 27,
+      "net": "GPIO16",
+      "x": 104.648,
+      "y": 88.646
+    },
+    {
+      "number": 28,
+      "net": "GPIO17",
+      "x": 104.648,
+      "y": 86.106
+    },
+    {
+      "number": 29,
+      "net": "CS",
+      "x": 104.648,
+      "y": 83.566
+    },
+    {
+      "number": 30,
+      "net": "SCK",
+      "x": 104.648,
+      "y": 81.026
+    },
+    {
+      "number": 31,
+      "net": "MISO",
+      "x": 104.648,
+      "y": 78.486
+    },
+    {
+      "number": 32,
+      "net": "GND",
+      "x": 104.648,
+      "y": 75.946
+    },
+    {
+      "number": 33,
+      "net": "I2C0_SDA",
+      "x": 104.648,
+      "y": 73.406
+    },
+    {
+      "number": 34,
+      "net": "unconnected-(U3-U0RXD{slash}GPIO3-Pad34)",
+      "x": 104.648,
+      "y": 70.866
+    },
+    {
+      "number": 35,
+      "net": "unconnected-(U3-U0TXD{slash}GPIO1-Pad35)",
+      "x": 104.648,
+      "y": 68.326
+    },
+    {
+      "number": 36,
+      "net": "I2C0_SCL",
+      "x": 104.648,
+      "y": 65.786
+    },
+    {
+      "number": 37,
+      "net": "MOSI",
+      "x": 104.648,
+      "y": 63.246
+    },
+    {
+      "number": 38,
+      "net": "GND",
+      "x": 104.648,
+      "y": 60.706
+    }
+  ],
+  "connectors": [
+    {
+      "id": "GPIO16",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 120.926,
+          "y": 55.23,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 120.926,
+          "y": 57.23,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "GPIO16",
+          "x": 120.926,
+          "y": 59.23,
+          "expected": [
+            27
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 120.926,
+          "y": 61.23,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "GPIO14",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 113.16,
+          "y": 55.23,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 113.16,
+          "y": 57.23,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "GPIO14",
+          "x": 113.16,
+          "y": 59.23,
+          "expected": [
+            12
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 113.16,
+          "y": 61.23,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "GPIO17",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 128.692,
+          "y": 55.23,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 128.692,
+          "y": 57.23,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "GPIO17",
+          "x": 128.692,
+          "y": 59.23,
+          "expected": [
+            28
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 128.692,
+          "y": 61.23,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "GPIO27",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 136.458,
+          "y": 55.23,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 136.458,
+          "y": 57.23,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "GPIO27",
+          "x": 136.458,
+          "y": 59.23,
+          "expected": [
+            11
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 136.458,
+          "y": 61.23,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "GPIO32",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 144.224,
+          "y": 55.23,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 144.224,
+          "y": 57.23,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "GPIO32",
+          "x": 144.224,
+          "y": 59.23,
+          "expected": [
+            7
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 144.224,
+          "y": 61.23,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "GPIO4",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 151.99,
+          "y": 55.23,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 151.99,
+          "y": 57.23,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "GPIO4",
+          "x": 151.99,
+          "y": 59.23,
+          "expected": [
+            26
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 151.99,
+          "y": 61.23,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "ADC1",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 68.17,
+          "y": 101.35925,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 66.17,
+          "y": 101.35925,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "ADC1",
+          "x": 64.17,
+          "y": 101.35925,
+          "expected": [
+            5
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 62.17,
+          "y": 101.35925,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "ADC2",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 68.17,
+          "y": 92.60258,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 66.17,
+          "y": 92.60258,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "ADC2",
+          "x": 64.17,
+          "y": 92.60258,
+          "expected": [
+            6
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 62.17,
+          "y": 92.60258,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "ADC3",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 68.17,
+          "y": 83.84592,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 66.17,
+          "y": 83.84592,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "ADC3",
+          "x": 64.17,
+          "y": 83.84592,
+          "expected": [
+            3
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 62.17,
+          "y": 83.84592,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "ADC4",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 68.17,
+          "y": 75.08925,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 66.17,
+          "y": 75.08925,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "ADC4",
+          "x": 64.17,
+          "y": 75.08925,
+          "expected": [
+            4
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 62.17,
+          "y": 75.08925,
+          "expected": [],
+          "covered": false
+        }
+      ]
+    },
+    {
+      "id": "I2C0_1",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 68.78,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 68.78,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C0_SDA",
+          "x": 162.23,
+          "y": 68.78,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C0_SCL",
+          "x": 163.23,
+          "y": 68.78,
+          "expected": [
+            36
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C0_2",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 77.11857,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 77.11857,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C0_SDA",
+          "x": 162.23,
+          "y": 77.11857,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C0_SCL",
+          "x": 163.23,
+          "y": 77.11857,
+          "expected": [
+            36
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C0_3",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 85.45714,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 85.45714,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C0_SDA",
+          "x": 162.23,
+          "y": 85.45714,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C0_SCL",
+          "x": 163.23,
+          "y": 85.45714,
+          "expected": [
+            36
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C0_4",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 93.79571,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 93.79571,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C0_SDA",
+          "x": 162.23,
+          "y": 93.79571,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C0_SCL",
+          "x": 163.23,
+          "y": 93.79571,
+          "expected": [
+            36
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C1_1",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 102.13429,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 102.13429,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C1_SDA",
+          "x": 162.23,
+          "y": 102.13429,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C1_SCL",
+          "x": 163.23,
+          "y": 102.13429,
+          "expected": [
+            10
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C1_2",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 110.47286,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 110.47286,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C1_SDA",
+          "x": 162.23,
+          "y": 110.47286,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C1_SCL",
+          "x": 163.23,
+          "y": 110.47286,
+          "expected": [
+            10
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C1_3",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 118.81143,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 118.81143,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C1_SDA",
+          "x": 162.23,
+          "y": 118.81143,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C1_SCL",
+          "x": 163.23,
+          "y": 118.81143,
+          "expected": [
+            10
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "I2C1_4",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 160.23,
+          "y": 127.15,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 161.23,
+          "y": 127.15,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "I2C1_SDA",
+          "x": 162.23,
+          "y": 127.15,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C1_SCL",
+          "x": 163.23,
+          "y": 127.15,
+          "expected": [
+            10
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J1",
+      "pigtail": "module",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 126.69,
+          "y": 81.19,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 126.69,
+          "y": 83.73,
+          "expected": [],
+          "covered": false
+        },
+        {
+          "number": 3,
+          "net": "GND",
+          "x": 129.23,
+          "y": 81.19,
+          "expected": [
+            14,
+            32,
+            38
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+5V",
+          "x": 129.23,
+          "y": 83.73,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 5,
+          "net": "I2C0_SDA",
+          "x": 131.77,
+          "y": 81.19,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 6,
+          "net": "I2C0_SCL",
+          "x": 131.77,
+          "y": 83.73,
+          "expected": [
+            36
+          ],
+          "covered": true
+        },
+        {
+          "number": 7,
+          "net": "I2C1_SDA",
+          "x": 134.31,
+          "y": 81.19,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 8,
+          "net": "I2C1_SCL",
+          "x": 134.31,
+          "y": 83.73,
+          "expected": [
+            10
+          ],
+          "covered": true
+        },
+        {
+          "number": 9,
+          "net": "GPIO33",
+          "x": 136.85,
+          "y": 81.19,
+          "expected": [
+            8
+          ],
+          "covered": true
+        },
+        {
+          "number": 10,
+          "net": "GPIO13",
+          "x": 136.85,
+          "y": 83.73,
+          "expected": [
+            15
+          ],
+          "covered": true
+        },
+        {
+          "number": 11,
+          "net": "MOSI",
+          "x": 139.39,
+          "y": 81.19,
+          "expected": [
+            37
+          ],
+          "covered": true
+        },
+        {
+          "number": 12,
+          "net": "MISO",
+          "x": 139.39,
+          "y": 83.73,
+          "expected": [
+            31
+          ],
+          "covered": true
+        },
+        {
+          "number": 13,
+          "net": "SCK",
+          "x": 141.93,
+          "y": 81.19,
+          "expected": [
+            30
+          ],
+          "covered": true
+        },
+        {
+          "number": 14,
+          "net": "CS",
+          "x": 141.93,
+          "y": 83.73,
+          "expected": [
+            29
+          ],
+          "covered": true
+        }
+      ]
+    }
+  ]
+}

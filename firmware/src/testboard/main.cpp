@@ -10,6 +10,7 @@
 #include "SerialLogger.h"
 #include "WiFiService.h"
 #include "TimeService.h"
+#include "testing/TestWebRoutes.h"
 namespace EnvNode {
 namespace {
 class TestBoardLogTime : public ILogTimeProvider {
@@ -22,19 +23,20 @@ public:
 };
 class TestBoardApplication : public IFirmwareApplication {
 public:
-    explicit TestBoardApplication(ILogger& logger) : logger_(logger) {}
+    TestBoardApplication(ILogger& logger, Testing::TestRunner& tests) : logger_(logger), tests_(tests) {}
     // Hardware is not driven until the fixture test engine is implemented.
     void initializeDevices() override {}
     void beginIntegrations() override {
         logger_.infof("Testboard firmware version: %s", FirmwareBuildInfo::SemanticVersion);
         logger_.infof("Build: %s", FirmwareBuildInfo::BuildNumber);
         logger_.infof("Git commit: %s", FirmwareBuildInfo::GitCommit);
-        logger_.info("Testboard base ready; measurement and provisioning inactive");
+        logger_.info("Testboard base ready; simulated connector tests ready; physical I/O inactive");
     }
-    void serviceMeasurements() override {}
+    void serviceMeasurements() override { tests_.tick(millis()); }
     void serviceIntegrations() override {}
 private:
     ILogger& logger_;
+    Testing::TestRunner& tests_;
 };
 TestBoardLogTime logTime;
 RecentLogStore recentLogs;
@@ -51,13 +53,17 @@ TestBoardWeb web(host, settings, wifi, time, formatter, ota, restart, recentLogs
     {FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::CompactIdentity,
      FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::GitBranch,
      FirmwareBuildInfo::BuildTimestampUtc, FirmwareBuildInfo::SourceState, FirmwareBuildInfo::SourceDirty});
-TestBoardApplication application(logger);
+Testing::SimulatedFixture fixture;
+Testing::TestRunner tests(fixture);
+Testing::TestWebRoutes testRoutes(host, web, tests, fixture);
+TestBoardApplication application(logger, tests);
 FirmwareRuntime runtime(wifi, time, web, application);
 }
 void setupTestBoard() {
     logger.begin(115200);
     delay(500);
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
+    web.attachTestRoutes(testRoutes);
     runtime.begin();
 }
 void loopTestBoard() { runtime.loop(); }
