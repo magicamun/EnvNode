@@ -77,7 +77,7 @@ static ModuleDescriptorProvisioningService moduleDescriptorProvisioningService(
     slotAHardwareDescriptorStore, slotBHardwareDescriptorStore,
     moduleDiscoveryService);
 static ModuleActuatorComposer moduleActuatorComposer;
-static ConfigurationService configurationService;
+static ConfigurationService configurationService(&logger);
 static ValueRuntime valueRuntime(configurationService);
 static WiFiService wifiService(logger, configurationService);
 static TimeService timeService(logger, configurationService, wifiService);

@@ -111,3 +111,17 @@ and response completion, including bytes, elapsed time, free heap and largest
 free block. They contain no uploaded credentials or configuration contents.
 A simulated index-allocation failure is covered natively; physical constrained
 heap/network behavior still requires the device retry and these phase logs.
+
+The configuration upload form sends the file length as a query argument before
+the multipart body. The handler reserves that capacity once at upload start,
+rather than repeatedly growing/reallocating the String alongside TCP buffers.
+It still enforces the maximum and checks received length; clients omitting the
+hint retain the bounded incremental path. Text chunks are copied with an explicit
+terminator to avoid relying on String::concat reading past the supplied chunk.
+Upload rejection logs now identify invalid size, memory allocation or size limits.
+
+A confirmed restore logs request validation, snapshot encoding, target partition/
+bank, inactive-bank clear, write, readback verification, metadata commit, reopen
+and memory activation. The readback allocation is explicitly checked; failure
+leaves the previously committed bank authoritative. Missing cfg_nvs is reported
+as requiring a USB partition-table update. These messages contain no credentials.

@@ -66,9 +66,17 @@ public:
         return value_[index];
     }
 
+    static size_t& reservationLimit() { static size_t limit = static_cast<size_t>(-1); return limit; }
     bool reserve(size_t size) {
+        if (size <= value_.capacity()) return true;
+        if (size > reservationLimit()) return false;
         value_.reserve(size);
         return true;
+    }
+
+    bool concat(const char* data, size_t size) {
+        if (!reserve(value_.size()+size)) return false;
+        value_.append(data,size); return true;
     }
 
     String& operator+=(const String& value) {

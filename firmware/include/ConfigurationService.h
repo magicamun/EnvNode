@@ -10,6 +10,7 @@ class IOnOffActuatorResolver;
 
 class ConfigurationService : public IConfigurationService {
 public:
+    explicit ConfigurationService(ILogger* logger = nullptr) : logger_(logger) {}
     void setActuatorResolver(const IOnOffActuatorResolver* resolver) { actuatorResolver_ = resolver; }
     void loadConfiguration() override;
     const Configuration& getConfiguration() const override;
@@ -93,6 +94,7 @@ private:
         const DisplayConfiguration* display = nullptr) const;
 
     const IOnOffActuatorResolver* actuatorResolver_ = nullptr;
+    ILogger* logger_ = nullptr;
     Configuration configuration_;
     ConfigurationStorage storage_{EnvNodeConfigurationStorage};
 };

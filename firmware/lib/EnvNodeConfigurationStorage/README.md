@@ -46,3 +46,9 @@ EnvNode selects cfg_nvs (256 KiB) through its fixed layout; installation require
 the matching partition table by USB. The layout and label strings must remain
 alive for the lifetime of the store. The partition-aware native Preferences double
 and migration tests cover both old flat keys and old-bank snapshots.
+
+Snapshot replacement accepts an optional ILogger for phase diagnostics. Existing
+callers may omit it. The readback buffer uses checked nothrow allocation; if it
+cannot be allocated, metadata are not committed. EnvNode injects its logger into
+ConfigurationService so device logs distinguish validation, encoding, write,
+verification, commit and activation without printing any configuration contents.

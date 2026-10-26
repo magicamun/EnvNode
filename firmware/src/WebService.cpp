@@ -1,3 +1,4 @@
+#include "TextUpload.h"
 #include "WebResult.h"
 #include "InstanceUuidWebText.h"
 #include "HttpRedirect.h"
@@ -695,7 +696,7 @@ void WebService::handleConfiguration() {
         + "<input type='checkbox' name='includePasswords' value='1'>" + uiText(TextId::BackupPasswords)
         + "</label><button>" + uiText(TextId::BackupDownload) + "</button></form></section>"
         + "<section class='card'><h2>" + uiText(TextId::RestorePreview) + "</h2><p>"
-        + uiText(TextId::RestoreHelp) + "</p><form method='post' action='/configuration/preview' enctype='multipart/form-data'>"
+        + uiText(TextId::RestoreHelp) + "</p><form method='post' action='/configuration/preview' enctype='multipart/form-data' onsubmit='this.action=\"/configuration/preview?configurationSize=\"+this.elements.configuration.files[0].size'>"
         + "<input type='file' name='configuration' accept='.json,application/json' required><div class='actions'><button>"
         + uiText(TextId::RestoreUpload) + "</button></div></form></section>";
     sendPage(uiText(TextId::Configuration), "/configuration", c);
@@ -720,18 +721,34 @@ void WebService::handleConfigurationUploadData() {
         configurationUploadFailed_ = !configurationUpload_.isEmpty() || configurationUploadComplete_;
         restoreCandidate_.reset(); restoreToken_ = String();
         if (otaService_.busy() || upload.name != "configuration") configurationUploadFailed_ = true;
-        logger_.info("Configuration backup upload started");
+        const String hint = server_.arg("configurationSize");
+        const TextUploadResult preparation = configurationUploadFailed_ ? TextUploadResult::InvalidSize
+            : prepareTextUpload(configurationUpload_, hint, MaxConfigurationBackupLength);
+        configurationUploadFailed_ = configurationUploadFailed_ || preparation != TextUploadResult::Success;
+        logger_.infof("Configuration backup upload started field=%s expected=%s result=%s heap=%u largest=%u",
+            upload.name.c_str(), hint.isEmpty() ? "unknown" : hint.c_str(), textUploadResultName(preparation),
+            static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     } else if (upload.status == UPLOAD_FILE_WRITE && !configurationUploadFailed_) {
-        if (upload.currentSize > MaxConfigurationBackupLength - configurationUpload_.length()
-            || !configurationUpload_.concat(reinterpret_cast<const char*>(upload.buf), upload.currentSize)) {
+        const size_t offset = configurationUpload_.length();
+        const TextUploadResult result = appendTextUpload(configurationUpload_, upload.buf,
+            upload.currentSize, MaxConfigurationBackupLength);
+        if (result != TextUploadResult::Success) {
+            logger_.warnf("Configuration backup upload rejected result=%s offset=%u chunk=%u heap=%u largest=%u",
+                textUploadResultName(result), static_cast<unsigned>(offset), static_cast<unsigned>(upload.currentSize),
+                static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
             configurationUploadFailed_ = true; configurationUpload_ = String();
         }
     } else if (upload.status == UPLOAD_FILE_END) {
         configurationUploadComplete_ = true;
+        size_t expected = 0;
+        const String hint = server_.arg("configurationSize");
+        if (parseTextUploadSize(hint, MaxConfigurationBackupLength, expected) != TextUploadResult::Success
+            || (expected && expected != configurationUpload_.length())) configurationUploadFailed_ = true;
         logger_.infof("Configuration backup upload complete bytes=%u rejected=%u heap=%u largest=%u",
             static_cast<unsigned>(configurationUpload_.length()), configurationUploadFailed_ ? 1u : 0u,
             static_cast<unsigned>(ESP.getFreeHeap()), static_cast<unsigned>(ESP.getMaxAllocHeap()));
     } else if (upload.status == UPLOAD_FILE_ABORTED) {
+        logger_.warn("Configuration backup upload aborted by client");
         configurationUploadFailed_ = false; configurationUploadComplete_ = false; configurationUpload_ = String();
         restoreCandidate_.reset(); restoreToken_ = String();
     }
@@ -801,8 +818,10 @@ void WebService::handleConfigurationPreview() {
 }
 
 void WebService::handleConfigurationRestore() {
+    logger_.info("Configuration restore confirmation received");
     if (otaService_.busy() || !restoreCandidate_ || server_.arg("confirmRestore") != "1"
         || server_.arg("token") != restoreToken_ || millis() - restorePreviewTime_ > 300000UL) {
+        logger_.warn("Configuration restore confirmation rejected: missing, expired or mismatched preview");
         sendResult(uiText(TextId::RestoreFailed), "/configuration", uiText(TextId::RestoreExpired), false); return;
     }
     if (!restoreIncludesPasswords_) {

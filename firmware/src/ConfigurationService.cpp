@@ -1,3 +1,4 @@
+#include "Logger.h"
 #include "ControllerTargetIdentity.h"
 #include "ConfigurationService.h"
 #include "ConfigurationBackup.h"
@@ -1167,11 +1168,16 @@ bool ConfigurationService::setNtpServer2(const String& server) { return baseSett
 bool ConfigurationService::setLocale(Locale locale) { return baseSettings().setLocale(locale); }
 
 bool ConfigurationService::restoreConfiguration(const Configuration& candidate) {
+    if (logger_) logger_->info("Configuration restore validating candidate");
     if (!validateRestore(candidate)) return false;
+    if (logger_) logger_->info("Configuration restore encoding snapshot");
     std::vector<uint8_t> encoded;
-    if (!encodeConfigurationRecord(candidate, encoded)
-        || !storage_.replaceSnapshot(encoded.data(), encoded.size())) return false;
+    if (!encodeConfigurationRecord(candidate, encoded)) return false;
+    if (logger_) logger_->infof("Configuration restore snapshot encoded bytes=%u", static_cast<unsigned>(encoded.size()));
+    if (!storage_.replaceSnapshot(encoded.data(), encoded.size(), logger_)) return false;
+    if (logger_) logger_->info("Configuration restore activating in-memory candidate");
     configuration_ = candidate;
+    if (logger_) logger_->info("Configuration restore candidate activated");
     return true;
 }
 bool ConfigurationService::resetToDefaults() {

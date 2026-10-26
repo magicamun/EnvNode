@@ -1,6 +1,7 @@
 // EnvNode: see repository LICENSE.
 #pragma once
 #include <Preferences.h>
+class ILogger;
 namespace EnvNode {
 struct ConfigurationStorageLayout {
     const char* legacy;
@@ -25,7 +26,7 @@ public:
     bool persistString(const char* key, const String& value);
     bool persistUInt(const char* key, uint32_t value);
     bool persistFloat(const char* key, float value);
-    bool replaceSnapshot(const uint8_t* data, size_t size);
+    bool replaceSnapshot(const uint8_t* data, size_t size, ILogger* logger = nullptr);
     bool clearAll();
 private:
     const ConfigurationStorageLayout& layout_;

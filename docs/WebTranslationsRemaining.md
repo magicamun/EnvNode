@@ -51,15 +51,15 @@ neben ihnen werden übersetzt.
 - `firmware/lib/EnvNodeWebAdmin/src/NetworkWebRoutes.cpp:21`: `DHCP`
 - `firmware/src/PropertyPreviewWebView.cpp:72`: `Format`
 - `firmware/src/PropertyPreviewWebView.cpp:210`: `Format`
-- `firmware/src/WebService.cpp:639`: `Build`
-- `firmware/src/WebService.cpp:639`: `Flash`
-- `firmware/src/WebService.cpp:641`: `SSID`
-- `firmware/src/WebService.cpp:645`: `RSSI`
-- `firmware/src/WebService.cpp:677`: `Home Assistant Discovery`
-- `firmware/src/WebService.cpp:775`: `MQTT`
-- `firmware/src/WebService.cpp:1518`: `GPIO`
-- `firmware/src/WebService.cpp:1617`: `GPIO`
-- `firmware/src/WebService.cpp:1877`: `MCU`
-- `firmware/src/WebService.cpp:1877`: `WiFi`
-- `firmware/src/WebService.cpp:1885`: `SDA GPIO`
-- `firmware/src/WebService.cpp:2438`: `EEPROM`
+- `firmware/src/WebService.cpp:640`: `Build`
+- `firmware/src/WebService.cpp:640`: `Flash`
+- `firmware/src/WebService.cpp:642`: `SSID`
+- `firmware/src/WebService.cpp:646`: `RSSI`
+- `firmware/src/WebService.cpp:678`: `Home Assistant Discovery`
+- `firmware/src/WebService.cpp:792`: `MQTT`
+- `firmware/src/WebService.cpp:1537`: `GPIO`
+- `firmware/src/WebService.cpp:1636`: `GPIO`
+- `firmware/src/WebService.cpp:1896`: `MCU`
+- `firmware/src/WebService.cpp:1896`: `WiFi`
+- `firmware/src/WebService.cpp:1904`: `SDA GPIO`
+- `firmware/src/WebService.cpp:2457`: `EEPROM`

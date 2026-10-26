@@ -541,3 +541,39 @@ ranges; PlatformIO also builds its binary successfully. No physical flash or
 erase was performed. Next: retain JSON backup, normal USB upload including table,
 verify previous settings, then preview/confirm restore and reboot. Physical NVS
 capacity and previous flash contents still require that hardware check.
+
+## Upload reception and confirmed-restore trace follow-up (2026-10-26)
+
+The user reported a stall on confirmation. Read-only live inspection showed the
+node was still serving HTTP and running controllers. Export without passwords
+succeeded (31722 bytes / 901 fields). Two preview-only uploads returned HTTP 400
+after roughly 11/13 seconds, logging bytes=0/rejected=1 before decoding. No
+confirmed restore, NVS write, reset or flash was performed by the agent. A local
+native probe decoded and validated the real exported Mini 0.8 file successfully;
+the file was not committed to the repository.
+
+The upload now reserves the declared file size at START, using a query hint set
+by the form before multipart processing. Length limits and final length are
+checked; absent hints remain backward-compatible. A shared TextUpload helper
+uses terminated bounded chunks rather than handing raw full upload buffers to
+an Arduino concat implementation that copies length+1 bytes. The handler now
+logs specific preparation/append/abort rejection reasons and heap figures.
+
+ConfigurationService accepts an optional logger (existing default construction
+remains valid). Main injects the current logger; restore and storage log each
+validation/encoding/write/verify/commit/reopen/activation stage. Readback uses a
+checked nothrow allocation instead of an unchecked vector allocation. No storage
+layout, backup schema, settings or automatic-restart policy was changed.
+
+The live failure establishes upload rejection, not the cause of every reported
+confirmation stall. The allocation improvement and phase logs require a new
+physical firmware run before the full user issue can be marked resolved.
+
+Validation: ESP32 build and both browser checks pass. The full native run retained
+505 previous/new passing tests and the known board-profile failure; the new upload
+suite initially lacked native pinMode/digitalWrite stubs. After adding the same
+stubs as the existing suites, all six upload tests pass. A final focused rerun of
+all 29 affected upload/preview/storage/partition tests passes. Combined maintained
+suite outcomes are 511 passes and the same pre-existing board-profile failure.
+The additional live-export probe passes separately and is not a committed test.
+No device firmware upload, confirmed restore, NVS write or restart was performed.

@@ -9,6 +9,9 @@
   "dependencies": [
     {
       "name": "EnvNodeBaseConfiguration"
+    },
+    {
+      "name": "EnvNodeLogging"
     }
   ]
 }

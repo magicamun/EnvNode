@@ -93,10 +93,21 @@ void test_owned_preview_preserves_password_omission_and_roundtrip_format(){
     TEST_ASSERT_TRUE(encodeConfigurationBackup(legacy,true,"",fromLegacy));
     TEST_ASSERT_EQUAL_STRING(fromLegacy.c_str(),fromOwned.c_str());
 }
+void test_readback_buffer_allocation_failure_does_not_commit_restore(){
+    ConfigurationService service;service.loadConfiguration();service.setDeviceName("Keep active");
+    Configuration candidate=service.getConfiguration();candidate.device.name="Not committed";
+    rejectIndexAllocation=true;
+    const bool saved=service.restoreConfiguration(candidate);
+    rejectIndexAllocation=false;
+    TEST_ASSERT_FALSE(saved);TEST_ASSERT_EQUAL_STRING("Keep active",service.getConfiguration().device.name.c_str());
+    ConfigurationService rebooted;rebooted.loadConfiguration();
+    TEST_ASSERT_EQUAL_STRING("Keep active",rebooted.getConfiguration().device.name.c_str());
+}
 int main(){UNITY_BEGIN();
     RUN_TEST(test_owned_preview_decodes_with_one_checked_model_allocation);
     RUN_TEST(test_index_allocation_failure_returns_without_changing_candidate_or_credentials_flag);
     RUN_TEST(test_legacy_decoder_also_handles_index_allocation_failure);
     RUN_TEST(test_excess_fields_are_rejected_before_index_allocation);
     RUN_TEST(test_owned_preview_preserves_password_omission_and_roundtrip_format);
+    RUN_TEST(test_readback_buffer_allocation_failure_does_not_commit_restore);
     return UNITY_END();}
