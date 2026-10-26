@@ -118,3 +118,5 @@
 - Keep the Device page's Hardware and Provisioning button below the hardware
   details with consistent spacing, preventing overlap with the serial number.
 - Correct the timezone documentation link on the published setup page.
+
+- Testboard 0.2.2: Mini 0.8 / PCB 0.8.1 als eigenständiges Prüfprofil, inklusive expliziter Net-Ties und revisionsabhängiger Zeichnung. 21 native Tests und ESP32-Build erfolgreich.

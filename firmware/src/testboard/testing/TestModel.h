@@ -13,6 +13,10 @@ struct BoardDefinition {
     const SocketContact* socket; const Connector* connectors; size_t count;
 };
 const BoardDefinition& weatherBoard();
+const BoardDefinition& miniBoard();
+size_t boardCount();
+const BoardDefinition* boardAt(size_t index);
+const BoardDefinition* findBoard(const char* id);
 // Fixture routing belongs to the fixture revision, never to a DUT profile.
 struct MuxAddress { uint8_t device; uint8_t channel; };
 struct FixtureRouting {

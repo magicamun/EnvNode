@@ -5,6 +5,7 @@
   "identityRevision": "0.2",
   "pcbRevision": "0.2.1",
   "source": "hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
+  "netTies": [],
   "sha256": "03522844fad0329562dca237da38add60c2cfe2100cccc07ab42ce9277234f69",
   "bounds": [
     55.23,
@@ -245,6 +246,7 @@
   "connectors": [
     {
       "id": "GPIO16",
+      "label": "GPIO16",
       "pigtail": "gpio",
       "pins": [
         {
@@ -291,6 +293,7 @@
     },
     {
       "id": "GPIO14",
+      "label": "GPIO14",
       "pigtail": "gpio",
       "pins": [
         {
@@ -337,6 +340,7 @@
     },
     {
       "id": "GPIO17",
+      "label": "GPIO17",
       "pigtail": "gpio",
       "pins": [
         {
@@ -383,6 +387,7 @@
     },
     {
       "id": "GPIO27",
+      "label": "GPIO27",
       "pigtail": "gpio",
       "pins": [
         {
@@ -429,6 +434,7 @@
     },
     {
       "id": "GPIO32",
+      "label": "GPIO32",
       "pigtail": "gpio",
       "pins": [
         {
@@ -475,6 +481,7 @@
     },
     {
       "id": "GPIO4",
+      "label": "GPIO4",
       "pigtail": "gpio",
       "pins": [
         {
@@ -521,6 +528,7 @@
     },
     {
       "id": "ADC1",
+      "label": "ADC1",
       "pigtail": "gpio",
       "pins": [
         {
@@ -567,6 +575,7 @@
     },
     {
       "id": "ADC2",
+      "label": "ADC2",
       "pigtail": "gpio",
       "pins": [
         {
@@ -613,6 +622,7 @@
     },
     {
       "id": "ADC3",
+      "label": "ADC3",
       "pigtail": "gpio",
       "pins": [
         {
@@ -659,6 +669,7 @@
     },
     {
       "id": "ADC4",
+      "label": "ADC4",
       "pigtail": "gpio",
       "pins": [
         {
@@ -705,6 +716,7 @@
     },
     {
       "id": "I2C0_1",
+      "label": "I2C0_1",
       "pigtail": "i2c",
       "pins": [
         {
@@ -751,6 +763,7 @@
     },
     {
       "id": "I2C0_2",
+      "label": "I2C0_2",
       "pigtail": "i2c",
       "pins": [
         {
@@ -797,6 +810,7 @@
     },
     {
       "id": "I2C0_3",
+      "label": "I2C0_3",
       "pigtail": "i2c",
       "pins": [
         {
@@ -843,6 +857,7 @@
     },
     {
       "id": "I2C0_4",
+      "label": "I2C0_4",
       "pigtail": "i2c",
       "pins": [
         {
@@ -889,6 +904,7 @@
     },
     {
       "id": "I2C1_1",
+      "label": "I2C1_1",
       "pigtail": "i2c",
       "pins": [
         {
@@ -935,6 +951,7 @@
     },
     {
       "id": "I2C1_2",
+      "label": "I2C1_2",
       "pigtail": "i2c",
       "pins": [
         {
@@ -981,6 +998,7 @@
     },
     {
       "id": "I2C1_3",
+      "label": "I2C1_3",
       "pigtail": "i2c",
       "pins": [
         {
@@ -1027,6 +1045,7 @@
     },
     {
       "id": "I2C1_4",
+      "label": "I2C1_4",
       "pigtail": "i2c",
       "pins": [
         {
@@ -1073,6 +1092,7 @@
     },
     {
       "id": "J1",
+      "label": "J1",
       "pigtail": "module",
       "pins": [
         {

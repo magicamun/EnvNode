@@ -189,3 +189,7 @@ JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
 gegen eine lokale native Instanz derselben C++-Klassen geprüft; diese Vorschau
 verwendet keinen ESP und keine echte Messhardware. Eine solche Desktop-Vorschau
 ist ein Entwicklungsprüfmittel, kein zusätzlicher Produkt-Build.
+
+## Mini 0.8 / PCB 0.8.1
+
+Der Katalog enthält Weather und Mini. Profile und Zeichnungen werden revisionsbezogen geladen; ein Boardwechsel verwirft den vorherigen Lauf. Mini umfasst acht Anschlüsse und 1976 Vergleiche. Explizite KiCad-Net-Ties werden aufgelöst: Slot A Adresse liegt auf GND, Slot B auf 3V3_SYS. Letzterer Kontakt und die acht Versorgungsanschlüsse bleiben ohne zusätzlichen Referenzabgriff unvollständig prüfbar. Andere Bauteile werden nicht als direkte Verbindungen interpretiert.

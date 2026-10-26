@@ -48,7 +48,7 @@ struct Fixture {
     RestartDriver driver; TestBoardRestart restart{logger, &driver}; OTAService ota{logger, restart};
     WebHost host{logger, wifi};
     TestBoardWeb web{host, settings, wifi, time, formatter, ota, restart, logs,
-        {"0.2.1", "0.2.1+test", "1", "abc", "testboard", "now", "clean", false}};
+        {"0.2.2", "0.2.2+test", "1", "abc", "testboard", "now", "clean", false}};
     SimulatedFixture fixture;
     TestRunner runner{fixture};
     TestWebRoutes routes{host, web, runner, fixture};
@@ -260,6 +260,56 @@ void test_web_selection_and_retest_are_strict_and_locked_while_running() {
     select("0", f.runner.generation()); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
     TEST_ASSERT_EQUAL(18, f.runner.step()); TEST_ASSERT_EQUAL(Phase::Running, f.runner.phase());
 }
+void test_mini_profile_has_independent_slot_wiring_and_explicit_address_ties() {
+    const auto& board = miniBoard();
+    TEST_ASSERT_EQUAL(2, boardCount()); TEST_ASSERT_EQUAL(8, board.count);
+    TEST_ASSERT_EQUAL_PTR(&board, findBoard("mini-0.8-pcb0.8.1"));
+    TEST_ASSERT_NULL(findBoard("unknown")); TEST_ASSERT_NULL(boardAt(2));
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 4, board.connectors[0].contacts[2].expected);
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 5, board.connectors[1].contacts[2].expected);
+    const auto& a = board.connectors[6]; const auto& b = board.connectors[7];
+    TEST_ASSERT_EQUAL_STRING("J1", a.id); TEST_ASSERT_EQUAL_STRING("J2", b.id);
+    TEST_ASSERT_EQUAL_UINT64((1ULL << 13) | (1ULL << 31) | (1ULL << 37), a.contacts[2].expected);
+    TEST_ASSERT_EQUAL_UINT64(0, b.contacts[2].expected);
+    TEST_ASSERT_EQUAL_STRING("EEPROM_A0_B", b.contacts[2].net);
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 7, a.contacts[8].expected);
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 6, b.contacts[8].expected);
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 28, a.contacts[13].expected);
+    TEST_ASSERT_EQUAL_UINT64(1ULL << 10, b.contacts[13].expected);
+}
+void test_mini_plan_has_1976_comparisons_and_nine_uncovered_contacts() {
+    SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0; size_t total = 0, uncovered = 0;
+    runner.load(miniBoard());
+    for (size_t i = 0; i < miniBoard().count; ++i) {
+        fixture.connect(miniBoard(), i, SimulatedFault::None); runner.start(now); finish(runner, now);
+        total += runner.completed();
+        for (size_t p = 0; p < miniBoard().connectors[i].count; ++p)
+            uncovered += miniBoard().connectors[i].contacts[p].expected == 0;
+        runner.next();
+    }
+    TEST_ASSERT_EQUAL(1976, total); TEST_ASSERT_EQUAL(9, uncovered);
+    TEST_ASSERT_EQUAL(Phase::Complete, runner.phase()); TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.overall());
+}
+void test_catalog_profile_assets_and_board_switch_never_mix_results() {
+    Fixture f; f.server().request("/test/catalog", HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), weatherBoard().id));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), miniBoard().id));
+    f.runner.load(weatherBoard()); f.fixture.connect(weatherBoard(), 0, SimulatedFault::None);
+    f.runner.start(0); uint32_t now = 0; finish(f.runner, now);
+    f.server().arguments = {{"action", "load"}, {"board", miniBoard().id}, {"generation", String(f.runner.generation())}};
+    f.server().request("/test/action", HTTP_POST);
+    TEST_ASSERT_EQUAL(200, f.server().responseStatus); TEST_ASSERT_EQUAL_PTR(&miniBoard(), f.runner.board());
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"board\":\"mini-0.8-pcb0.8.1\""));
+    TEST_ASSERT_EQUAL(0, f.runner.completed()); TEST_ASSERT_EQUAL(Verdict::Untested, f.runner.verdict(0));
+    f.server().arguments.clear(); f.server().request("/test/definition", HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "Slot B"));
+    f.server().arguments["board"] = "unknown";
+    f.server().request("/test/definition", HTTP_GET); TEST_ASSERT_EQUAL(404, f.server().responseStatus);
+    f.server().arguments["board"] = miniBoard().id;
+    f.server().request("/test/board.svg", HTTP_GET); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    TEST_ASSERT_EQUAL_HEX8(0x1f, static_cast<uint8_t>(f.server().responseBody[0]));
+    TEST_ASSERT_EQUAL_HEX8(0x8b, static_cast<uint8_t>(f.server().responseBody[1]));
+}
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered);
@@ -273,5 +323,8 @@ int main() {
     RUN_TEST(test_free_selection_preserves_matrices_and_retest_replaces_only_selected_result);
     RUN_TEST(test_out_of_order_completion_next_untested_and_selection_after_completion);
     RUN_TEST(test_web_selection_and_retest_are_strict_and_locked_while_running);
+    RUN_TEST(test_mini_profile_has_independent_slot_wiring_and_explicit_address_ties);
+    RUN_TEST(test_mini_plan_has_1976_comparisons_and_nine_uncovered_contacts);
+    RUN_TEST(test_catalog_profile_assets_and_board_switch_never_mix_results);
     return UNITY_END();
 }

@@ -3,10 +3,17 @@
 #include "BoardAssets.h"
 #include "TestPage.h"
 #include <cstring>
+#include "JsonWriter.h"
 #include <limits>
 namespace EnvNode { namespace Testing {
 #include "TestPageScript.inc"
 namespace {
+const BoardAsset* requestedAsset(WebServer& server, const TestRunner& runner) {
+    String id = server.arg("board");
+    if (id.isEmpty()) id = runner.board() ? runner.board()->id : weatherBoard().id;
+    for (const auto& asset : BoardAssets) if (id == asset.id) return &asset;
+    return nullptr;
+}
 bool unsignedValue(const String& input, uint32_t& value) {
     if (!input.length()) return false;
     value = 0;
@@ -22,14 +29,32 @@ TestWebRoutes::TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner
     : host_(host), pages_(pages), fixture_(fixture), runner_(runner) {}
 void TestWebRoutes::registerRoutes(WebServer& server) {
     server.on("/test", HTTP_GET, [this]() { page(); });
+    server.on("/test/catalog", HTTP_GET, [this]() {
+        String json("[");
+        for (size_t i = 0; i < boardCount(); ++i) {
+            if (i) json += ',';
+            const auto& board = *boardAt(i);
+            json += "{\"id\":"; appendJsonString(json, board.id);
+            json += ",\"name\":"; appendJsonString(json, board.name);
+            json += ",\"identityRevision\":"; appendJsonString(json, board.identityRevision);
+            json += ",\"pcbRevision\":"; appendJsonString(json, board.pcbRevision);
+            json += '}';
+        }
+        json += ']';
+        host_.server().send(200, "application/json; charset=utf-8", json);
+    });
     server.on("/test/definition", HTTP_GET, [this]() {
+        const auto* asset = requestedAsset(host_.server(), runner_);
+        if (!asset) { host_.server().send(404, "application/json", "{\"error\":\"Unknown board\"}"); return; }
         host_.server().sendHeader("Cache-Control", "no-store");
-        host_.server().send_P(200, "application/json; charset=utf-8", WeatherDefinitionJson, sizeof(WeatherDefinitionJson) - 1);
+        host_.server().send_P(200, "application/json; charset=utf-8", asset->json, asset->jsonSize);
     });
     server.on("/test/board.svg", HTTP_GET, [this]() {
+        const auto* asset = requestedAsset(host_.server(), runner_);
+        if (!asset) { host_.server().send(404, "text/plain", "Unknown board"); return; }
         host_.server().sendHeader("Content-Encoding", "gzip");
         host_.server().sendHeader("Cache-Control", "no-cache");
-        host_.server().send_P(200, "image/svg+xml", reinterpret_cast<const char*>(WeatherSvgGzip), sizeof(WeatherSvgGzip));
+        host_.server().send_P(200, "image/svg+xml", reinterpret_cast<const char*>(asset->svg), asset->svgSize);
     });
     server.on("/test/ui.js", HTTP_GET, [this]() {
         host_.server().sendHeader("Cache-Control", "no-cache");
@@ -48,7 +73,9 @@ void TestWebRoutes::state() {
         host_.server().send(503, "application/json", "{\"error\":\"Status buffer unavailable\"}");
         return;
     }
-    json = String("{\"simulation\":true,\"generation\":") + runner_.generation()
+    json = "{\"simulation\":true,\"board\":";
+    appendJsonString(json, runner_.board() ? runner_.board()->id : "");
+    json += String(",\"generation\":") + runner_.generation()
         + ",\"phase\":" + static_cast<unsigned>(runner_.phase())
         + ",\"step\":" + static_cast<unsigned>(runner_.step())
         + ",\"completed\":" + static_cast<unsigned>(runner_.completed())
@@ -76,8 +103,10 @@ void TestWebRoutes::action() {
     }
     const String command = server.arg("action");
     bool ok = false;
-    if (command == "load" && server.arg("board") == weatherBoard().id) ok = runner_.load(weatherBoard());
-    else if (command == "start" && (runner_.phase() == Phase::AwaitingConnection || runner_.phase() == Phase::Review)) {
+    if (command == "load") {
+        const auto* board = findBoard(server.arg("board").c_str());
+        ok = board && runner_.load(*board);
+    } else if (command == "start" && (runner_.phase() == Phase::AwaitingConnection || runner_.phase() == Phase::Review)) {
         const String fault = server.arg("fault");
         if (fault != "none" && fault != "open" && fault != "short") {
             server.send(400, "application/json", "{\"error\":\"Unknown simulation fault\"}"); return;
