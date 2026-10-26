@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.0) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.2.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.2.1) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -78,13 +78,14 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Fifteen tests exercise configuration isolation,
+composition and shared libraries. Eighteen tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
-open/extra connections and incomplete coverage. The existing EnvNode native environment excludes this
+open/extra connections, incomplete coverage, free connector selection, result history
+and isolated retesting. The existing EnvNode native environment excludes this
 fixture suite. Its previously known board-profile-count assertion is unrelated.
 
 Before accepting the baseline on hardware, flash `testboard` onto the fixture
 ESP or a spare devkit, check setup access point/network save/restart, locale/time,
 name, logs and a same-product OTA update. Confirm that the start log identifies
-Testboard 0.2.0. No physical device was flashed or restarted during implementation.
+Testboard 0.2.1. No physical device was flashed or restarted during implementation.

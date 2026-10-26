@@ -68,6 +68,12 @@ Im Weather-PCB liegt Sockelpin 1 auf `+3V3_DEVKIT`, die Anschlussversorgung auf
 `+3V3_SYS`. Diese Netze werden nicht gleichgesetzt. Der Nutzer hat ausdrücklich
 festgelegt, diesen Punkt vorerst als nicht vollständig prüfbar auszuweisen.
 Die aktuelle Definition hat dadurch 19 unvollständig abgedeckte Kontakte.
+Für eine kommende Hardware-Revision ist ein zweipoliger JST-PH-Abgriff mit GND
+und +3V3_SYS auf dem Zielboard vereinbart. Beide Kontakte erhalten separat
+schaltbare Prüfboard-Eingänge; GND wird nicht fest mit Prüfboard-GND verbunden.
++5V bleibt beim Weather über Sockelpin 19 prüfbar. Diese Referenzkontakte sind
+im aktuellen 38-Pin-Profil und in der Simulation noch nicht enthalten.
+
 Verbindungen durch Bauteile, Schutzschaltungen und Pull-ups werden aus einem
 Netznamenvergleich nicht abgeleitet. Analoge Schwellen und die Interpretation
 solcher Pfade bleiben Teil der späteren physischen Validierung.
@@ -106,8 +112,12 @@ stateDiagram-v2
     Empty --> AwaitingConnection: Board laden
     AwaitingConnection --> Running: Verbindung bestätigen / Start
     Running --> Review: alle Kontakte × 38 geprüft
-    Review --> AwaitingConnection: nächster Anschluss
-    Review --> Complete: nach letztem Anschluss weiter
+    Review --> AwaitingConnection: nächster ungeprüfter Anschluss
+    Review --> Running: ausdrücklich erneut prüfen
+    Review --> Review: geprüften Anschluss auswählen
+    AwaitingConnection --> Review: geprüften Anschluss auswählen
+    Complete --> Review: geprüften Anschluss auswählen
+    Review --> Complete: alle Anschlüsse geprüft / weiter
     AwaitingConnection --> Aborted: Abbruch
     Running --> Aborted: Abbruch
     Review --> Aborted: Abbruch
@@ -115,6 +125,14 @@ stateDiagram-v2
     Aborted --> AwaitingConnection: Board laden / neuer Lauf
 ```
 
+- Die Anschlussliste dient zugleich als Auswahlliste. Sobald kein Test läuft,
+  können beliebige Anschlüsse gewählt werden, auch nach Abschluss oder Abbruch.
+  Geprüfte Anschlüsse zeigen sofort ihre gespeicherte Detailmatrix; „Erneut prüfen“
+  startet nach ausdrücklicher Bestätigung eine neue Messung dieses Anschlusses.
+  Die Liste ist während einer laufenden Messung im Browser und in der API gesperrt.
+- „Nächster Anschluss“ wählt den nächsten ungeprüften Anschluss und springt bei
+  Bedarf zum Anfang der Liste. Erst wenn alle Anschlüsse geprüft sind, führt
+  dieser Button zum Abschluss. Eine freie Auswahl überspringt keine offenen Prüfungen.
 - Start und Weiter sind nur im passenden Zustand zulässig. Kein Anschluss startet
   automatisch, und kein automatischer Schritt behauptet, der Pigtail sei umgesteckt.
 - Jeder GPIO-/I²C-Anschluss erzeugt 4 × 38 = **152** Vergleiche, J1 erzeugt
@@ -131,9 +149,11 @@ stateDiagram-v2
   liegen auf dem ESP. Browser-Neuladen startet keinen neuen Lauf. Ein neuer Lauf
   wird ausdrücklich über „Board laden / neuer Testlauf“ angelegt.
 - Ergebnisse liegen im RAM. Anschluss- und Kontaktergebnisse bleiben im Lauf
-  erhalten; die detaillierte 38er-Matrix zeigt den aktuellen Anschluss.
-  Persistente Prüfberichte und erneutes Prüfen einzelner früherer Anschlüsse
-  sind noch nicht implementiert.
+  erhalten; vollständige Detailmatrizen und Fortschritt werden pro Anschluss
+  gespeichert und beim Auswählen wieder angezeigt. Der Start einer Wiederholung
+  verwirft nur das bisherige Ergebnis dieses Anschlusses; andere Ergebnisse bleiben
+  erhalten. Eine abgebrochene Wiederholung bleibt ungeprüft statt das alte Ergebnis
+  als neue Messung auszugeben. Persistente Prüfberichte sind noch nicht implementiert.
 
 ## Darstellung und Statusübertragung
 
@@ -162,7 +182,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-15 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+18 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich

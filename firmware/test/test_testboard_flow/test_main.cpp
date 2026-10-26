@@ -48,7 +48,7 @@ struct Fixture {
     RestartDriver driver; TestBoardRestart restart{logger, &driver}; OTAService ota{logger, restart};
     WebHost host{logger, wifi};
     TestBoardWeb web{host, settings, wifi, time, formatter, ota, restart, logs,
-        {"0.2.0", "0.2.0+test", "1", "abc", "testboard", "now", "clean", false}};
+        {"0.2.1", "0.2.1+test", "1", "abc", "testboard", "now", "clean", false}};
     SimulatedFixture fixture;
     TestRunner runner{fixture};
     TestWebRoutes routes{host, web, runner, fixture};
@@ -189,6 +189,77 @@ void test_actual_test_page_and_definition_apis_are_simulation_only() {
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"simulation\":true"));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"phase\":0"));
 }
+void test_free_selection_preserves_matrices_and_retest_replaces_only_selected_result() {
+    SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0;
+    TEST_ASSERT_FALSE(runner.selectConnector(0));
+    runner.load(weatherBoard()); fixture.connect(weatherBoard(), 0, SimulatedFault::OpenContact);
+    runner.start(now); finish(runner, now);
+    TEST_ASSERT_EQUAL(Verdict::Failed, runner.verdict(0));
+    TEST_ASSERT_EQUAL(Result::Open, runner.result(13));
+    TEST_ASSERT_TRUE(runner.selectConnector(1));
+    fixture.connect(weatherBoard(), 1, SimulatedFault::None); runner.start(now); finish(runner, now);
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(1));
+    TEST_ASSERT_TRUE(runner.selectConnector(0));
+    TEST_ASSERT_EQUAL(Phase::Review, runner.phase());
+    TEST_ASSERT_EQUAL(152, runner.completed());
+    TEST_ASSERT_EQUAL(Result::Open, runner.result(13));
+    fixture.connect(weatherBoard(), 0, SimulatedFault::None);
+    TEST_ASSERT_TRUE(runner.start(now));
+    TEST_ASSERT_EQUAL(Verdict::Untested, runner.verdict(0));
+    TEST_ASSERT_EQUAL(Result::Pending, runner.result(13));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(1));
+    finish(runner, now);
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(0));
+    TEST_ASSERT_EQUAL(Result::Connected, runner.result(13));
+    runner.selectConnector(1);
+    TEST_ASSERT_EQUAL(152, runner.completed());
+    TEST_ASSERT_EQUAL(Result::Connected, runner.result(13));
+    TEST_ASSERT_EQUAL(Verdict::Passed, runner.contactVerdict(1, 0));
+}
+void test_out_of_order_completion_next_untested_and_selection_after_completion() {
+    SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0;
+    runner.load(weatherBoard()); runner.selectConnector(18);
+    fixture.connect(weatherBoard(), 18, SimulatedFault::None); runner.start(now); finish(runner, now);
+    TEST_ASSERT_TRUE(runner.next()); TEST_ASSERT_EQUAL(0, runner.step());
+    TEST_ASSERT_EQUAL(Phase::AwaitingConnection, runner.phase());
+    for (size_t i = 18; i-- > 0;) {
+        TEST_ASSERT_TRUE(runner.selectConnector(i));
+        fixture.connect(weatherBoard(), i, SimulatedFault::None); runner.start(now); finish(runner, now);
+    }
+    TEST_ASSERT_EQUAL(0, runner.step());
+    TEST_ASSERT_TRUE(runner.next()); TEST_ASSERT_EQUAL(Phase::Complete, runner.phase());
+    TEST_ASSERT_TRUE(runner.selectConnector(18));
+    TEST_ASSERT_EQUAL(Phase::Review, runner.phase()); TEST_ASSERT_EQUAL(532, runner.completed());
+    const auto generation = runner.generation();
+    TEST_ASSERT_FALSE(runner.selectConnector(weatherBoard().count));
+    TEST_ASSERT_EQUAL(generation, runner.generation());
+    runner.abort(); TEST_ASSERT_TRUE(runner.selectConnector(0));
+    TEST_ASSERT_EQUAL(Result::Connected, runner.result(13));
+}
+void test_web_selection_and_retest_are_strict_and_locked_while_running() {
+    Fixture f;
+    f.runner.load(weatherBoard());
+    auto select = [&](const char* index, uint32_t generation) {
+        f.server().arguments = {{"action", "select"}, {"connector", index}, {"generation", String(generation)}};
+        f.server().request("/test/action", HTTP_POST);
+    };
+    select("18", f.runner.generation());
+    TEST_ASSERT_EQUAL(200, f.server().responseStatus); TEST_ASSERT_EQUAL(18, f.runner.step());
+    const auto generation = f.runner.generation();
+    for (const char* index : {"-1", "19", "xyz", "42949672960"}) {
+        select(index, generation); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+        TEST_ASSERT_EQUAL(18, f.runner.step());
+    }
+    select("0", generation - 1); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    f.fixture.connect(weatherBoard(), 18, SimulatedFault::None); f.runner.start(0);
+    uint32_t now = 0; finish(f.runner, now);
+    f.server().arguments = {{"action", "start"}, {"generation", String(f.runner.generation())}, {"fault", "none"}};
+    f.server().request("/test/action", HTTP_POST);
+    TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    TEST_ASSERT_EQUAL(Verdict::Untested, f.runner.verdict(18));
+    select("0", f.runner.generation()); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    TEST_ASSERT_EQUAL(18, f.runner.step()); TEST_ASSERT_EQUAL(Phase::Running, f.runner.phase());
+}
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered);
@@ -199,5 +270,8 @@ int main() {
     RUN_TEST(test_busy_backend_times_out_and_select_error_never_reads_a_stale_path);
     RUN_TEST(test_stale_and_invalid_web_actions_do_not_advance_the_session);
     RUN_TEST(test_actual_test_page_and_definition_apis_are_simulation_only);
+    RUN_TEST(test_free_selection_preserves_matrices_and_retest_replaces_only_selected_result);
+    RUN_TEST(test_out_of_order_completion_next_untested_and_selection_after_completion);
+    RUN_TEST(test_web_selection_and_retest_are_strict_and_locked_while_running);
     return UNITY_END();
 }

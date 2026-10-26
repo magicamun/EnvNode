@@ -77,7 +77,7 @@ void TestWebRoutes::action() {
     const String command = server.arg("action");
     bool ok = false;
     if (command == "load" && server.arg("board") == weatherBoard().id) ok = runner_.load(weatherBoard());
-    else if (command == "start" && runner_.phase() == Phase::AwaitingConnection) {
+    else if (command == "start" && (runner_.phase() == Phase::AwaitingConnection || runner_.phase() == Phase::Review)) {
         const String fault = server.arg("fault");
         if (fault != "none" && fault != "open" && fault != "short") {
             server.send(400, "application/json", "{\"error\":\"Unknown simulation fault\"}"); return;
@@ -85,6 +85,9 @@ void TestWebRoutes::action() {
         fixture_.connect(*runner_.board(), runner_.step(), fault == "open" ? SimulatedFault::OpenContact
             : fault == "short" ? SimulatedFault::ExtraConnection : SimulatedFault::None);
         ok = runner_.start(millis());
+    } else if (command == "select") {
+        uint32_t connector;
+        ok = unsignedValue(server.arg("connector"), connector) && runner_.selectConnector(connector);
     } else if (command == "next") ok = runner_.next();
     else if (command == "abort" && runner_.phase() != Phase::Empty && runner_.phase() != Phase::Complete && runner_.phase() != Phase::Aborted) {
         runner_.abort(); ok = true;

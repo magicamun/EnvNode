@@ -4,6 +4,11 @@
 
 ### Added
 
+- Testboard 0.2.1: use the connector list to select and inspect any connector
+  whenever measurement is idle, retain full per-connector matrices, and retest
+  individual connectors without clearing other results. Lock selection while
+  running and let Next continue with the next untested connector.
+
 - Guided simulated connector testing in testboard firmware 0.2.0: load Weather
   0.2 / PCB 0.2.1, confirm one pigtail connection at a time, compare each contact
   against all 38 socket pads and show board LEDs plus a full result matrix.

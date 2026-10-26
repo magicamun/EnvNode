@@ -687,3 +687,24 @@ cases. Fifteen native fixture tests and both ESP32 builds pass. Existing browser
 editor checks still pass in English/German. Local browser testing uses the same
 native C++ classes behind a loopback-only development adapter, with no ESP access.
 See TestBoardApplication.md for the agreed boundaries, caveats and extension path.
+
+
+## Free connector selection (testboard 0.2.1)
+
+The connector list now selects any connector outside an active measurement,
+including after completion/abort. Full result matrices/progress stay in RAM per
+connector; retest clears only the selected connector at start. Previous results
+are restored for inspection on selection. Next wraps to the next untested
+connector and only completes after all have been measured. Both runner/API reject
+selection during a test; start from Review explicitly performs a retest. Eighteen
+native fixture tests cover result preservation/replacement, out-of-order completion,
+strict/stale selection inputs, running locks and the Web retest path. Physical
+routing, rail coverage and EnvNode behavior remain unchanged.
+
+
+Validation of 0.2.1: ESP32 testboard build and all 18 native fixture tests pass.
+Local browser acceptance confirms selection locks while running, a direct jump
+from GPIO16 to ADC1, restoration of GPIO16's 152 stored comparisons, and explicit
+retest from Review. Static RAM is 83004 bytes (25.3%); flash is 1083145 bytes.
+No device was flashed or restarted by the agent. The agreed future switched
+GND/+3V3_SYS reference connector remains a separate hardware/profile revision.

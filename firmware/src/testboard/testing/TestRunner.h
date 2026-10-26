@@ -11,6 +11,7 @@ public:
     bool load(const BoardDefinition& board);
     bool start(uint32_t now);
     bool next();
+    bool selectConnector(size_t index);
     void abort();
     void tick(uint32_t now);
     Phase phase() const { return phase_; }
@@ -32,7 +33,8 @@ private:
     size_t step_ = 0, completed_ = 0;
     uint32_t lastSample_ = 0, generation_ = 0;
     bool pathReady_ = false;
-    Result results_[MaxContacts * SocketPins] = {};
+    Result results_[MaxConnectors][MaxContacts * SocketPins] = {};
+    uint16_t completedByConnector_[MaxConnectors] = {};
     Verdict verdicts_[MaxConnectors] = {};
     Verdict contactVerdicts_[MaxConnectors][MaxContacts] = {};
 };
