@@ -4,10 +4,10 @@ EnvNode Weather ist das Mainboard für eine fest installierte Wetterstation.
 Es kombiniert ein ESP32-DevKitC mit einem Modulslot, zwei I²C-Bussen und
 zusätzlichen direkten Sensoranschlüssen. Diese Seite beschreibt **PCB-Revision 0.2.1**.
 
-[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.2.1)](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf){ .md-button }
-
 Dokumentstand: **18. Oktober 2026**, mit aktuellen Renderings des PCB-Stands **0.2.1**.
 Die Board Identity bleibt bei **0.2**; bisherige Prüfprotokolle behalten ihren historischen Stand.
+
+[Bestückung und Bring-up](assembly.md){ .md-button }
 
 ## Überblick
 
@@ -114,7 +114,6 @@ H1 und H2 sind M2,5-Stützbohrungen für das Modul; H3 bis H6 sind die
 4,5-mm-Gehäusebefestigungsbohrungen. Prüfe Steckerzugang, Abstandshalter und
 Kabelführung vor dem Einbau.
 
-
 ## Anschlussdetails als Referenz
 
 Die folgenden Detailbilder zeigen die vierpoligen Anschlüsse **ADC1 (JST-PH,
@@ -159,12 +158,47 @@ Die abgebildeten Beschriftungen stammen vom Mini. Weather ergänzt den entsprech
 Silkscreen mit Beschriftungsstand 0.2.1; Position und Einbaurichtung richten sich
 weiterhin nach dem tatsächlichen Weather-Anschluss.
 
-Die PDF-Anleitung enthält dieselben Anschlussreferenzen als Ergänzung vom
+### Modulconnector: 2×7 Kontakte
+
+![Modulbuchse: Schrägansicht mit markiertem Pin 1](../../assets/images/module-interface/module-oblique-annotated.png)
+
+![Modulbuchse: vollständige 2×7-Pinbelegung](../../assets/images/module-interface/module-pinout.png)
+
+Die Bilder zeigen als Referenz die Mainboard-Buchse J1 am Mini von der
+Bestückungsseite. Pin 1 liegt in der dargestellten Orientierung links oben;
+die obere Reihe führt die ungeraden, die untere die geraden Pins.
+Am tatsächlichen Anschluss stets Pin 1 zuordnen; der Modul-Gegenstecker sitzt
+auf der Modulunterseite und darf nicht ungeprüft aus dieser Ansicht abgeleitet werden.
+
+| Pin | Signal | Pin | Signal |
+| --- | --- | --- | --- |
+| 1 | GND | 2 | +3V3_SYS |
+| 3 | EEPROM_A0 | 4 | +5V |
+| 5 | I2C0_SDA | 6 | I2C0_SCL |
+| 7 | I2C1_SDA | 8 | I2C1_SCL |
+| 9 | AUX_GPIO1 | 10 | AUX_GPIO2 |
+| 11 | SPI_MOSI | 12 | SPI_MISO |
+| 13 | SPI_SCK | 14 | SPI_CS |
+
+I²C und die SPI-Daten-/Taktleitungen sind gemeinsame Busse. AUX_GPIO1,
+AUX_GPIO2 und SPI_CS werden dem jeweiligen Slot zugeordnet; ihre tatsächlichen
+ESP32-Pins stehen in der Modultabelle dieser Boardseite. EEPROM_A0 legt das
+slotabhängige Adressbit der Modulidentifikation fest und ist kein freier GPIO.
+5 V dienen der Versorgung, nicht als Signalpegel; die Schnittstelle führt keine 24 V.
+Module nur bei ausgeschalteter Versorgung einsetzen oder entfernen.
+
+[Alle Hardware-Schnittstellen im Überblick](../../interfaces/index.md) ·
+[Modulschnittstelle im Detail](../../concepts/module-interface.md)
+
+Diese Modulbuchsen-Abbildung ist eine Mini-Referenz. Weather besitzt einen Slot A;
+Einbaulage und Pin-1-Markierung sind an der Weather-Platine zu prüfen.
+
+Die Aufbauanleitung enthält dieselben Anschlussreferenzen als Ergänzung vom
 18. Oktober 2026. Hardware-Revision und historische Prüfstände bleiben unverändert.
 
 ## Bestückung und erste Inbetriebnahme
 
-Die [PDF-Anleitung](../../assets/downloads/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.1.pdf)
+Die Aufbauanleitung
 enthält den detaillierten Bestückungs- und Prüfablauf.
 
 1. Platinenrevision und Anleitung abgleichen.
@@ -192,7 +226,6 @@ sind damit nicht nachgewiesen.
 ## Mit der Firmware verwenden
 
 [Weather 0.2 provisionieren](../../firmware/provisioning.md#weather-revision-02-provisionierung).
-
 
 [Erste Inbetriebnahme](../../firmware/configuration.md),
 [Board Identity](../../firmware/provisioning.md) und

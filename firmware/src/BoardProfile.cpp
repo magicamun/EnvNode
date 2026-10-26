@@ -80,9 +80,47 @@ const BoardProfile EnvNodeWeatherProfile = {
     sizeof(EnvNodeWeatherModuleSlots) / sizeof(EnvNodeWeatherModuleSlots[0]),
 };
 
+const BoardGpioCapability EnvNodeMiniGpios[] = {
+    {GpioResource(4), "GPIO4", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(5), "GPIO5", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(13), "GPIO13", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(14), "GPIO14", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(15), "GPIO15", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(16), "GPIO16", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(17), "GPIO17", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(18), "GPIO18", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(19), "GPIO19", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(23), "GPIO23", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(27), "GPIO27", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
+    {GpioResource(32), "GPIO32", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
+    {GpioResource(33), "GPIO33", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
+    {GpioResource(34), "GPIO34", GpioCapability::AnalogInput},
+    {GpioResource(35), "GPIO35", GpioCapability::AnalogInput},
+    {GpioResource(36), "GPIO36", GpioCapability::AnalogInput},
+    {GpioResource(39), "GPIO39", GpioCapability::AnalogInput},
+};
+
+const BoardModuleSlotCapability EnvNodeMiniModuleSlots[] = {
+    {ModuleSlot::A, 0x52, GpioResource(33), GpioResource(13), GpioResource(5), true},
+    {ModuleSlot::B, 0x53, GpioResource(32), GpioResource(14), GpioResource(27), true},
+};
+
+const BoardProfile EnvNodeMiniProfile = {
+    BoardProfileId::EnvNodeMini,
+    "EnvNode Mini",
+    {0, 8},
+    EnvNodeMiniGpios,
+    sizeof(EnvNodeMiniGpios) / sizeof(EnvNodeMiniGpios[0]),
+    EnvNodeMainboardI2CBuses,
+    sizeof(EnvNodeMainboardI2CBuses) / sizeof(EnvNodeMainboardI2CBuses[0]),
+    EnvNodeMiniModuleSlots,
+    sizeof(EnvNodeMiniModuleSlots) / sizeof(EnvNodeMiniModuleSlots[0]),
+};
+
 const BoardProfile* const BoardProfiles[] = {
     &EnvNodeMainboardProfile,
     &EnvNodeWeatherProfile,
+    &EnvNodeMiniProfile,
 };
 
 const BoardProfile* selectedProfile = nullptr;
@@ -144,12 +182,6 @@ const BoardModuleSlotCapability* boardModuleSlot(
     return nullptr;
 }
 
-const char* moduleSlotName(ModuleSlot slot) {
-    switch (slot) {
-        case ModuleSlot::A: return "A";
-        case ModuleSlot::B: return "B";
-        default: return "unknown";
-    }
-}
+
 
 } // namespace EnvNode

@@ -32,7 +32,12 @@ hooks:
   - tools/docs_assets.py
 nav:
   - Start: index.md
-  - Grundlagen: concepts/index.md
+  - Dein erstes EnvNode: getting-started/index.md
+  - Grundlagen:
+      - Gesamtübersicht: concepts/index.md
+  - Hardware-Schnittstellen:
+      - Übersicht und Pinouts: interfaces/index.md
+      - Modulschnittstelle im Detail: concepts/module-interface.md
   - Kompatibilität: compatibility.md
   - Mainboards:
       - Übersicht: mainboards/index.md
@@ -65,5 +70,16 @@ nav:
       - Beispiele:
           - Mini mit SHT4x: firmware/example-measurement.md
           - DuoRelay mit Blink: firmware/example-relay.md
+  - Aufbauanleitungen:
+      - Übersicht: guides/index.md
+      - DuoRelay: modules/duo-relay/assembly.md
+      - EnvNode Mini: mainboards/mini/assembly.md
+      - Weatherstation: mainboards/weatherstation/assembly.md
+      - ORing Power: mainboards/oring-power/assembly.md
+      - AnalogHydroPressure: modules/analog-hydro-pressure/assembly.md
+      - RainDetectorController: sensors/rain-detector-controller/assembly.md
+      - RainDetectorHead: sensors/rain-detector-head/assembly.md
+      - SCT013Head: sensors/sct013-head/assembly.md
+      - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
   - Bausätze und Aufbau: kits/index.md
   - Lizenz und Nutzung: license.md

@@ -60,11 +60,12 @@ void test_time_is_unavailable_until_synchronized_and_local_time_valid() {
 void test_build_sources_work_without_time_sync() {
     ConfigurationService config; config.loadConfiguration(); LocaleFormatter locale(config);
     Time time; time.synced = false;
-    SystemPropertyReader reader(time, locale, "0.5.0", "312", "abcdef0", "0.5.0+312.gabcdef0");
-    TEST_ASSERT_EQUAL_STRING("0.5.0", formatPropertyText(reader,{PropertyComponentKind::System,1,"version"},"%s").text);
+    SystemPropertyReader reader(time, locale, "0.7.0", "312", "abcdef0", "feature/mini", "0.7.0+312.gabcdef0");
+    TEST_ASSERT_EQUAL_STRING("0.7.0", formatPropertyText(reader,{PropertyComponentKind::System,1,"version"},"%s").text);
     TEST_ASSERT_EQUAL_STRING("312", formatPropertyText(reader,{PropertyComponentKind::System,1,"build"},"%s").text);
     TEST_ASSERT_EQUAL_STRING("abcdef0", formatPropertyText(reader,{PropertyComponentKind::System,1,"git_commit"},"%s").text);
-    TEST_ASSERT_EQUAL_STRING("0.5.0+312.gabcdef0", formatPropertyText(reader,{PropertyComponentKind::System,1,"build_identity"},"%s").text);
+    TEST_ASSERT_EQUAL_STRING("feature/mini", formatPropertyText(reader,{PropertyComponentKind::System,1,"git_branch"},"%s").text);
+    TEST_ASSERT_EQUAL_STRING("0.7.0+312.gabcdef0", formatPropertyText(reader,{PropertyComponentKind::System,1,"build_identity"},"%s").text);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyFormatStatus::NoValue),static_cast<int>(formatPropertyText(reader,{PropertyComponentKind::System,1,"date"},"%s").status));
     PropertyDescription description;
     TEST_ASSERT_FALSE(reader.describe({PropertyComponentKind::System,2,"version"},description));
@@ -84,7 +85,7 @@ struct WiFiStub : IWiFiService {
 void test_device_sources_are_live_and_snapshots_own_text() {
     ConfigurationService config; config.loadConfiguration(); config.setDeviceName("Garden");
     LocaleFormatter locale(config); Time time; time.synced = false; WiFiStub wifi;
-    SystemPropertyReader reader(time, locale, "1", "2", "abc", "1+2", &config, &wifi);
+    SystemPropertyReader reader(time, locale, "1", "2", "abc", "main", "1+2", &config, &wifi);
     TEST_ASSERT_EQUAL_STRING("Garden", formatPropertyText(reader,{PropertyComponentKind::System,1,"device_name"},"%s").text);
     TEST_ASSERT_EQUAL_STRING("envnode-test", formatPropertyText(reader,{PropertyComponentKind::System,1,"hostname"},"%s").text);
     PropertySnapshot first, second;

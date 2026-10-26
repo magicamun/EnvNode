@@ -1,0 +1,17 @@
+{
+  "name": "EnvNodeConfigurationStorage",
+  "version": "0.1.0",
+  "description": "Shared Preferences bank storage and base settings persistence; see repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeBaseConfiguration"
+    },
+    {
+      "name": "EnvNodeLogging"
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include "I2CBusTypes.h"
 
 namespace EnvNode {
 
@@ -27,11 +28,6 @@ struct GpioResource {
     }
 
     uint8_t number;
-};
-
-enum class I2CBus : uint8_t {
-    I2C0 = 0,
-    I2C1 = 1,
 };
 
 struct I2CResource {
@@ -139,8 +135,6 @@ private:
     const BoardI2CBusCapability* i2cBuses_;
     size_t i2cBusCount_;
 };
-
-const char* i2cBusName(I2CBus bus);
 
 bool exclusiveHardwareResourceConflict(
     const HardwareResourceAssignment& first,

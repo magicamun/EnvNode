@@ -5,6 +5,9 @@ Schalten, Anzeige und MQTT. Sie beschreibt den Firmware-Quellstand vom
 14. Oktober 2026 (Firmware 0.6.1). Die Sprache der Oberfläche ist einstellbar; englische
 Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
+Du beginnst gerade mit EnvNode? [Der Einstieg](../getting-started/index.md) erklärt
+auch die benötigte Hardware und verbindet die einzelnen Einrichtungsschritte.
+
 ## Orientierung in der Weboberfläche
 
 Die Navigation links führt durch die Bedienbereiche; rechts stehen die Inhalte

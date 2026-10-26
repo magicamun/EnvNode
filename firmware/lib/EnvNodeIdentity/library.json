@@ -1,0 +1,9 @@
+{
+  "name": "EnvNodeIdentity",
+  "version": "0.1.0",
+  "description": "Shared hardware identity codecs and verified provisioning storage; see repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  }
+}

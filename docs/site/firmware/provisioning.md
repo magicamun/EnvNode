@@ -26,7 +26,9 @@ bestätigt noch keinen gültigen Datensatz.
 
 1. Mainboard und reale PCB-Revision anhand der Platine feststellen.
 2. Unter **Hardware** das passende angebotene Boardprofil auswählen.
-3. Die Seriennummer als gültige Zahl eintragen.
+3. Die Seriennummer eintragen. Erlaubt sind bis zu 17 Buchstaben, Ziffern sowie
+   `-`, `_` und `.`; ein leeres Feld kennzeichnet eine noch nicht zugewiesene
+   Seriennummer.
 4. Profil, zugehörige Revision und Seriennummer überprüfen.
 5. Die ausdrückliche Schreibbestätigung setzen und den Vorgang ausführen.
 6. Nur eine erfolgreiche Schreib- und Rückleseprüfung als Erfolg werten.
@@ -74,8 +76,8 @@ zuerst eine Firmware mit Weather-Profil bauen und installieren. Das ältere
    Profil kann bis zur Provisionierung aus `BuildFallback` stammen.
 2. I2C0 prüfen: das Board-EEPROM muss bei `0x50` antworten.
 3. Unter **Hardware** **EnvNode Weather / 0.2** auswählen. Eine für dieses Board
-   vergebene, dauerhaft dokumentierte Seriennummer von 1 bis 4294967295 eintragen.
-   Null bedeutet noch nicht zugewiesen (`UnassignedSerial`).
+   vergebene, dauerhaft dokumentierte alphanumerische Seriennummer eintragen.
+   Ein leeres Feld bedeutet noch nicht zugewiesen (`UnassignedSerial`).
 4. Schreibbestätigung setzen, provisionieren und erfolgreiche Rückleseprüfung abwarten.
 5. Neustarten. Erwartung: Status `Valid`, Quelle `EEPROM`, Profil **EnvNode Weather**,
    Revision **0.2**, eigene Seriennummer, genau **Slot A**.
@@ -83,3 +85,12 @@ zuerst eine Firmware mit Weather-Profil bauen und installieren. Das ältere
 
 Erst nach diesen Prüfungen weitere Hardware anschließen. WLAN/MQTT-Konfiguration
 in NVS und Board Identity im EEPROM sind getrennte Datenbestände.
+
+## Mini Revision 0.8: Provisionierung
+
+Mini-PCBs `0.8.x` verwenden dasselbe Firmwareprofil und dieselbe Board Identity
+**EnvNode Mini 0.8**. Der Patchstand wird nicht im EEPROM gespeichert. Unter
+**Hardware** das Profil **EnvNode Mini / 0.8** auswählen, eine Seriennummer
+eintragen, schreiben und rücklesen lassen und anschließend neu starten. Danach
+müssen Quelle `EEPROM`, Status `Valid`, Profil **EnvNode Mini**, Revision `0.8`
+und zwei Modulslots angezeigt werden.

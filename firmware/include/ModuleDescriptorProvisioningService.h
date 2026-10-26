@@ -1,34 +1,11 @@
 #pragma once
 
 #include "HardwareDescriptorCompatibility.h"
+#include "ModuleDescriptorProvisioningTypes.h"
 #include "HardwareDescriptorStore.h"
 #include "ModuleDiscoveryService.h"
 
 namespace EnvNode {
-
-enum class ModuleDescriptorProvisioningStatus : uint8_t {
-    Success,
-    ConfirmationRequired,
-    InvalidSlot,
-    InvalidDescriptor,
-    IncompatibleDescriptor,
-    StorageUnavailable,
-    WriteFailed,
-    VerificationFailed,
-    RediscoveryFailed,
-};
-
-struct ModuleDescriptorProvisioningResult {
-    ModuleDescriptorProvisioningStatus status =
-        ModuleDescriptorProvisioningStatus::InvalidDescriptor;
-    ModuleSlot slot = ModuleSlot::A;
-    HardwareDescriptorDecodeStatus decodeStatus =
-        HardwareDescriptorDecodeStatus::InvalidCbor;
-    HardwareDescriptorCompatibilityStatus compatibilityStatus =
-        HardwareDescriptorCompatibilityStatus::UnsupportedPlatform;
-    HardwareDescriptorBank bank = HardwareDescriptorBank::None;
-    uint32_t generation = 0;
-};
 
 class ModuleDescriptorProvisioningService {
 public:
@@ -51,7 +28,5 @@ private:
     HardwareDescriptor descriptorScratch_ = {};
 };
 
-const char* moduleDescriptorProvisioningStatusName(
-    ModuleDescriptorProvisioningStatus status);
 
 } // namespace EnvNode

@@ -3,7 +3,7 @@
 DuoRelay ist ein FullSize-Modul mit zwei unabhängig gesteuerten 5-V-Wechslerrelais.
 Diese Seite beschreibt **Revision 0.3**.
 
-[Bestückungs- und Bring-up-Anleitung (PDF)](../../assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf){ .md-button }
+[Bestückungs- und Bring-up-Anleitung im Web](assembly.md){ .md-button }
 
 ## Überblick
 
@@ -72,7 +72,7 @@ Ein gültiger Identifikationsdatensatz erzeugt keine Relais-Aktoren automatisch.
 
 ## Bestückung und Inbetriebnahme
 
-Die [PDF-Anleitung](../../assets/downloads/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf)
+Die Aufbauanleitung
 enthält die Bauteilwerte und den vollständigen Ablauf.
 
 1. Dioden, LEDs und Transistoren polaritätsrichtig bestücken; U2 und C1 bestücken und J1 von unten montieren.

@@ -472,7 +472,7 @@ controls continue to follow the selected source type.
 ## Firmware identity sources
 
 The Display source selection includes `system/1/version`, `system/1/build`,
-`system/1/git_commit` and `system/1/build_identity`. All four are read-only text
+`system/1/git_commit`, `system/1/git_branch` and `system/1/build_identity`. All five are read-only text
 properties formatted with `%s`, available before clock synchronization. They use
 the running firmware's generated build metadata. Example: `EnvNode %s` with
 `system/1/version`, or `Build %s` with `system/1/build`. These are system sources,

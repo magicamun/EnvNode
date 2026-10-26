@@ -25,8 +25,8 @@ vollständiger Hardwarequalifikation.
 | Mainboard | Hardwarestand | Firmware-Zuordnung | Betriebsnachweis | Mindeststand Firmware | Kommentar |
 | --- | --- | --- | --- | --- | --- |
 | Mini 0.3 | Bestehender Aufbau | Boardprofil EnvNode Mainboard 0.3 | Nutzeraufbau bestätigt | 0.5.0 ab `d85e005` (Boardprofil); Beispielgerät 0.5.0+329 | DuoRelay 0.3, zwei SSD1309 und BME280 in Betrieb; SHTC3 konfiguriert, deaktiviert. |
-| [Mini 0.8.1](mainboards/mini/index.md) | Aktuell dokumentierte Hardware | Kein eigenes 0.8-Profil im geprüften Quellstand | Nicht durch den 0.3-Aufbau belegt | Nicht festgelegt: passendes Profil fehlt | Slot-GPIOs unterscheiden sich vom Firmwareprofil; vor Modulbetrieb Profil und Ressourcen abgleichen. |
-| [Weather 0.2.1](mainboards/weatherstation/index.md) | Aktuell dokumentierte Hardware | Kein eigenes Weather-0.2-Profil im geprüften Quellstand | Hier nicht bestätigt | Nicht festgelegt: passendes Profil fehlt | Ein realer Modulslot; vorhandenes Profil beschreibt zwei Slots und andere GPIOs. Keine pauschale Freigabe ableiten. |
+| [Mini 0.8.1](mainboards/mini/index.md) | Aktuell dokumentierte Hardware | Boardprofil EnvNode Mini 0.8 | Nutzeraufbau von Mini 0.8 technisch und funktional bestätigt | Quellstand mit Profil `EnvNodeMini = 2` | Alle PCB-Patchstände 0.8.x verwenden Identity 0.8; Slot A GPIO33/GPIO13/GPIO5, Slot B GPIO32/GPIO14/GPIO27. |
+| [Weather 0.2.1](mainboards/weatherstation/index.md) | Aktuell dokumentierte Hardware | Boardprofil EnvNode Weather 0.2 | Hier nicht bestätigt | Quellstand mit Profil `EnvNodeWeather = 1` | Ein realer Modulslot mit GPIO33/GPIO13/GPIO5. |
 | [ORing Power 0.1.1](mainboards/oring-power/index.md) | Versorgungsbaustein | Kein Firmware-Treiber erforderlich | Elektrische Prüfung je Aufbau | Keine eigene Firmware erforderlich | Keine USB-Datenverbindung; Versorgung und Belastbarkeit nach Hardwareanleitung prüfen. |
 
 ### Nicht zu verwendende Hardwarestände
@@ -40,10 +40,10 @@ Diese Kennzeichnung betrifft die Hardwarestände. Ein neuer Firmwarestand allein
 macht daraus keine bestätigte Kombination. Die Übersicht führt Mini 0.3 als
 bestehenden bestätigten Aufbau und Mini 0.8.1 als aktuellen Dokumentationsstand.
 
-Das aktuell registrierte Profil beschreibt Slot A mit AUX_GPIO1=GPIO4 und
-AUX_GPIO2=GPIO13, Slot B mit GPIO14 und GPIO16.
-Mini 0.8.1 verwendet dagegen Slot A GPIO33/GPIO13 und Slot B GPIO32/GPIO14;
-Weather 0.2.1 verwendet Slot A GPIO33/GPIO13. Die Board Identity muss eine
+Das historische Profil EnvNode Mainboard 0.3 beschreibt Slot A mit
+AUX_GPIO1=GPIO4 und AUX_GPIO2=GPIO13, Slot B mit GPIO14 und GPIO16.
+Mini 0.8 verwendet ein eigenes Profil mit Slot A GPIO33/GPIO13 und Slot B
+GPIO32/GPIO14; Weather 0.2 verwendet Slot A GPIO33/GPIO13. Die Board Identity muss eine
 unterstützte reale Belegung beschreiben; eine beliebige Revisionsangabe ändert
 die Ressourcentabelle nicht automatisch.
 
@@ -64,7 +64,7 @@ die Ressourcentabelle nicht automatisch.
 | AM2302 / DHT22 | Geeigneter GPIO | Vorhanden | Hier nicht bestätigt | 0.5.0 Basis | Eigenes Einleitungsprotokoll, kein I²C; Temperatur und Feuchte. |
 | Rain Gauge / Kippwaage | Geeigneter GPIO-Interrupt | Vorhanden | Hier nicht bestätigt | 0.5.0 Basis | Entprellung und Millimeter pro Kippung konfigurieren; nicht mit RainDetector verwechseln. |
 | [RainDetectorController 0.3 + Head 0.1](sensors/rain-detector.md) | Frequenzeingang und Heiz-Steuerausgang | Separate PCNT-Laborfirmware; kein registrierter produktiver Sensor | WIP | Keine integrierte Mindestversion; separates Lab-Projekt | Mechanik, Heizung und Wasserausschluss noch zu prüfen; Laborfirmware ohne MQTT und Heizautomation. |
-| [SCT013 / SCT013Head 0.1](sensors/sct013.md) | ADC, passende Variante mit Spannungsausgang | Kein registrierter SCT013-Treiber | WIP | Noch kein integrierter Treiber | Signalaufbereitung, Teileliste und Kalibrierung abgleichen; kein pauschaler Anschluss beliebiger SCT013-Varianten. |
+| [SCT013 / SCT013Head 0.1](sensors/sct013.md) | ADC, passende Variante mit Spannungsausgang | Kein registrierter SCT013-Treiber | WIP | Noch kein integrierter Treiber | [Aufbau und Erstprüfung](sensors/sct013-head/assembly.md) dokumentiert; reale Erprobung und Kalibrierung offen. Nur Spannungsausgang mit integrierter Bürde. |
 | Simulierte Temperatur / Feuchte / Druck | Keine externe Hardware | Vorhanden | Im Beispielaufbau aktiv | 0.5.0 Basis | Prüft Softwareabläufe, keine physische Sensorfunktion. |
 
 [Details zu I²C-Anschlüssen und Treibern](sensors/i2c.md)

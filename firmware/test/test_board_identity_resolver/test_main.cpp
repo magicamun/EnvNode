@@ -52,18 +52,18 @@ BoardIdentityResolution resolve(MemoryStorage& storage) {
 
 void test_valid_eeprom_identity_wins() {
     MemoryStorage storage;
-    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
+    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, {"MB-12"}});
     const BoardIdentityResolution result = resolve(storage);
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentitySource::EEPROM),
         static_cast<int>(result.source));
     TEST_ASSERT_TRUE(result.normalRuntimeAllowed);
-    TEST_ASSERT_EQUAL_UINT32(12, result.identity.serialNumber);
+    TEST_ASSERT_EQUAL_STRING("MB-12", result.identity.serialNumber.value);
 }
 
 void test_unassigned_serial_remains_usable_eeprom_identity() {
     MemoryStorage storage;
-    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 0});
+    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, {""}});
     const BoardIdentityResolution result = resolve(storage);
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityStatus::UnassignedSerial),
@@ -96,7 +96,7 @@ void test_blank_unavailable_and_corrupt_records_use_visible_fallback() {
         static_cast<int>(result.recordStatus));
 
     MemoryStorage corrupt;
-    corrupt.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
+    corrupt.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, {"MB-12"}});
     corrupt.bytes[10] ^= 1;
     result = resolve(corrupt);
     TEST_ASSERT_EQUAL_INT(
@@ -109,7 +109,7 @@ void test_blank_unavailable_and_corrupt_records_use_visible_fallback() {
 
 void test_unknown_profile_and_unsupported_revision_never_fall_back() {
     MemoryStorage unknown;
-    unknown.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
+    unknown.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, {"MB-12"}});
     unknown.bytes[6] = 0xFE;
     const uint32_t unknownCrc = BoardIdentityCodec::calculateCrc32(unknown.bytes, 28);
     for (size_t index = 0; index < 4; ++index) {
@@ -125,7 +125,7 @@ void test_unknown_profile_and_unsupported_revision_never_fall_back() {
     TEST_ASSERT_FALSE(result.normalRuntimeAllowed);
 
     MemoryStorage unsupported;
-    unsupported.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
+    unsupported.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, {"MB-12"}});
     unsupported.bytes[9] = 1;
     const uint32_t revisionCrc = BoardIdentityCodec::calculateCrc32(unsupported.bytes, 28);
     for (size_t index = 0; index < 4; ++index) {
@@ -143,7 +143,7 @@ void test_resolution_is_read_and_frozen_once() {
     BoardIdentityStore store(storage);
     BoardIdentityResolver resolver(store, BoardProfileId::EnvNodeMainboard);
     const BoardIdentityResolution& first = resolver.resolve();
-    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, 12});
+    storage.setIdentity({BoardProfileId::EnvNodeMainboard, {0, 3}, {"MB-12"}});
     const BoardIdentityResolution& second = resolver.resolve();
     TEST_ASSERT_EQUAL_UINT32(1, storage.reads);
     TEST_ASSERT_EQUAL_INT(
@@ -154,7 +154,7 @@ void test_resolution_is_read_and_frozen_once() {
 
 void test_weather_eeprom_identity_wins_over_mainboard_fallback() {
     MemoryStorage storage;
-    storage.setIdentity({BoardProfileId::EnvNodeWeather, {0, 2}, 42});
+    storage.setIdentity({BoardProfileId::EnvNodeWeather, {0, 2}, {"WS-42"}});
     const auto result = resolve(storage);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(BoardIdentitySource::EEPROM),
         static_cast<int>(result.source));

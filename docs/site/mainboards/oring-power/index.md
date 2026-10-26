@@ -4,12 +4,12 @@ ORing Power ist der aufgelötete Versorgungsbaustein für EnvNode-Mainboards.
 Er verbindet einen 5-V-Eingang, einen 3,3-V-Regler und die Zusammenführung zweier
 3,3-V-Quellen auf einer **39 × 15 mm** großen Tochterplatine. Diese Seite beschreibt **PCB-Revision 0.1.1**.
 
-[Bestückungs- und Bring-up-Anleitung herunterladen (PDF, PCB 0.1.1)](../../assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.1.pdf){ .md-button }
-
 Dokumentstand: **18. Oktober 2026**, für PCB **0.1.1**. Die Basisanleitung 0.1
 mit ergänzter Prüfpunktseite gilt für diesen Beschriftungsstand. Er ergänzt Titel, Revision und die
 5-V-/GND-Beschriftung am JST-PH-Eingang; Elektrik und Mechanik bleiben unverändert.
 Es ist keine Neuprovisionierung erforderlich.
+
+[Bestückung und Bring-up](assembly.md){ .md-button }
 
 ## Überblick
 
@@ -75,7 +75,7 @@ Die Systemversorgung wird über `+3V3_SYS` geführt.
 | J3 | 5-V-USB-C-Eingang | GCT USB4125-GF-A-0190 |
 
 Die detaillierte Zuordnung, Orientierung und Prüfung stehen in der
-[PDF-Anleitung](../../assets/downloads/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.1.pdf).
+Aufbauanleitung.
 Achte insbesondere auf die Polarität von Dioden, Elektrolyt- und Tantalkondensator.
 
 ## Montage
@@ -124,7 +124,7 @@ setzen. An U2.4 beim reinen 5-V-Test keinen festen 3,3-V-Sollwert voraussetzen.
 Für den getrennten DevKit-Pfadtest die 5-V-Versorgung vollständig trennen und eine
 strombegrenzte, potentialfreie 3,3-V-Quelle zwischen U2.4 und GND anschließen.
 An U2.5 werden dann 3,3 V abzüglich des Spannungsabfalls über D2 erwartet.
-Rückspeisung und alle weiteren Prüfungen gemäß PDF-Anleitung kontrollieren.
+Rückspeisung und alle weiteren Prüfungen gemäß Aufbauanleitung kontrollieren.
 Die Übersicht ist dort als zusätzliche Prüfpunktseite enthalten.
 
 ## Prüfstand

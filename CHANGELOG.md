@@ -11,6 +11,36 @@
   control. Publish the user-facing connection-set wiring instructions in the
   hardware assembly documentation.
 
+## 0.8.0 — 2026-10-26
+
+### Changed
+
+- Separate the existing EnvNode application from shared libraries for logging,
+  base settings and persistence, WiFi, time/locale, web administration, OTA/restart,
+  identity/provisioning, I2C transport and firmware startup/service sequencing.
+- Keep EnvNode board policy, sensor/actuator/controller behavior, MQTT integrations
+  and complete configuration codecs in the application. The future test-board
+  firmware can reuse the shared basis; it is not part of this release.
+- Preserve existing configuration keys and backup formats. Add a dedicated
+  256 KiB configuration NVS partition with verified migration on confirmed restore.
+  Existing installations need one normal USB upload including the partition table
+  before using the dedicated storage; no full-flash erase is required. Bootloader,
+  original NVS and OTA application addresses remain unchanged.
+
+### Fixed
+
+- Bound and preallocate configuration uploads, reduce preview memory usage, and
+  use checked exact-size snapshot/readback buffers to prevent restore allocation
+  aborts. Failed staging retains the previous configuration.
+- Log restore validation, encoding, storage, verification and activation stages.
+
+### Validation
+
+- ESP32 build and both browser-language checks pass. Native regression outcomes:
+  515 passing tests and one pre-existing board-profile-count assertion failure.
+- EnvNode Mini 0.8 runtime confirmed: startup and normal operation, configuration
+  restore/restart, locale and timezone, and final startup/main-loop extraction.
+
 ## 0.6.2 — 2026-10-15
 
 ### Fixed

@@ -58,7 +58,7 @@ public:
 const BoardIdentity MainboardIdentity = {
     BoardProfileId::EnvNodeMainboard,
     {0, 3},
-    12,
+    {"MB-12"},
 };
 
 } // namespace
@@ -95,14 +95,14 @@ void test_write_invalidates_magic_writes_body_then_magic_and_reads_back() {
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityStatus::Valid),
         static_cast<int>(result.status));
-    TEST_ASSERT_EQUAL_UINT32(12, result.identity.serialNumber);
+    TEST_ASSERT_EQUAL_STRING("MB-12", result.identity.serialNumber.value);
 }
 
 void test_write_accepts_explicitly_unassigned_serial() {
     MemoryIdentityStorage storage;
     BoardIdentityStore store(storage);
     BoardIdentity identity = MainboardIdentity;
-    identity.serialNumber = 0;
+    identity.serialNumber.value[0] = '\0';
     TEST_ASSERT_EQUAL_INT(
         static_cast<int>(BoardIdentityWriteStatus::Success),
         static_cast<int>(store.write(identity)));

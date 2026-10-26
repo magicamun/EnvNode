@@ -68,3 +68,15 @@ Mini 0.8.1, Weather 0.2.1 und ORing Power 0.1.1. Der Asset-Hook stellt die
 PDFs zusätzlich unter diesen Patchnamen bereit; bisherige Download-URLs bleiben
 als identische Aliase erreichbar. Die Quelldateinamen im Hardwareverzeichnis
 bleiben unverändert. ORing enthält die Basisanleitung 0.1 samt Ergänzung für 0.1.1.
+
+### Lokale HTML-Vorschau ohne PDF-Systembibliotheken
+
+`mkdocs serve` verwendet dasselbe Website-Theme und dieselben Stylesheets wie
+`mkdocs build`, überspringt aber die PDF-Neuerzeugung. Dafür sind Pango und
+DejaVu-Systemschriften nicht erforderlich. PDF-Links zeigen in dieser lokalen
+Vorschau die bereits vorhandenen Referenz-PDFs, nicht die aktuelle Druckausgabe
+der Markdown-Seiten. Der Start meldet diesen Unterschied ausdrücklich.
+
+`mkdocs build` (auch für die Veröffentlichung) erzeugt weiterhin alle registrierten
+PDFs und bricht bei fehlenden Bibliotheken oder fehlerhafter PDF-Erzeugung ab.
+Der Vorschaumodus validiert daher das Weblayout, nicht das PDF-Drucklayout.

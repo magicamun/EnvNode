@@ -5,12 +5,10 @@
 namespace EnvNode {
 
 Application::Application(ILogger& logger, IConfigurationService& configurationService, IWiFiService& wifiService, IWebService& webService, IMqttService& mqttService, ITimeService& timeService, SensorManager& sensorManager, ActuatorRuntime& actuatorRuntime, ControllerRuntime& controllerRuntime, RuntimeManager& runtimeManager, IDiscoveryPublisher& discoveryPublisher, MqttMessageRouter& mqttMessageRouter, ActuatorMqttAdapter& actuatorMqttAdapter, ActuatorStatePublisher& actuatorStatePublisher, ControllerMqttAdapter& controllerMqttAdapter, ControllerStatePublisher& controllerStatePublisher, MqttDescriptionPublisher& descriptionPublisher, DisplayService& displayService, ValueMqttAdapter& valueMqttAdapter, ValueStatePublisher& valueStatePublisher)
-    : logger_(logger)
+    : firmwareRuntime_(wifiService, timeService, webService, *this)
+    , logger_(logger)
     , configurationService_(configurationService)
-    , wifiService_(wifiService)
-    , webService_(webService)
     , mqttService_(mqttService)
-    , timeService_(timeService)
     , sensorManager_(sensorManager)
     , actuatorRuntime_(actuatorRuntime)
     , controllerRuntime_(controllerRuntime)
@@ -28,15 +26,19 @@ Application::Application(ILogger& logger, IConfigurationService& configurationSe
 
 void Application::setup(bool configurationAlreadyLoaded) {
     if (!configurationAlreadyLoaded) configurationService_.loadConfiguration();
-    wifiService_.begin();
-    timeService_.begin();
+    firmwareRuntime_.begin();
+}
+
+void Application::initializeDevices() {
     sensorManager_.begin();
     actuatorRuntime_.initialize(configurationService_.getConfiguration().actuatorSlots);
     if (!controllerRuntime_.initialize(
             configurationService_.getConfiguration().controllerSlots)) {
         logger_.error("Controller runtime initialization failed");
     }
-    webService_.begin();
+}
+
+void Application::beginIntegrations() {
     mqttService_.begin();
     mqttMessageRouter_.begin();
     actuatorMqttAdapter_.begin();
@@ -58,11 +60,14 @@ void Application::setup(bool configurationAlreadyLoaded) {
 }
 
 void Application::loop() {
-    wifiService_.loop();
-    timeService_.loop();
+    firmwareRuntime_.loop();
+}
 
+void Application::serviceMeasurements() {
     sensorManager_.loop();
-    webService_.loop();
+}
+
+void Application::serviceIntegrations() {
     mqttService_.loop();
     actuatorMqttAdapter_.loop();
     controllerMqttAdapter_.loop();

@@ -1,0 +1,42 @@
+/* Fixed EnvNode PDF template v1; tokens are loaded from the web stylesheet. */
+@page {
+  size: A4; margin: 20mm 16mm 19mm;
+  @top-left { content: string(doc-title); color: var(--envnode-gold); font: 9pt 'DejaVu Sans', sans-serif; border-bottom: 0.5pt solid var(--envnode-accent); }
+  @bottom-left { content: 'EnvNode · PCB ' string(hw-revision) ' · ' string(doc-date); font: 8pt 'DejaVu Sans', sans-serif; color: var(--envnode-secondary); }
+  @bottom-right { content: counter(page) ' / ' counter(pages); font: 8pt 'DejaVu Sans', sans-serif; color: var(--envnode-secondary); }
+}
+@page :first { @top-left { content: none; } }
+body { font-family: 'DejaVu Sans', sans-serif; font-size: 9pt; line-height: 1.4; color: var(--envnode-text); }
+h1,h2,h3 { color: var(--envnode-gold); break-after: avoid; }
+h1 { font-size: 25pt; line-height: 1.15; margin-top: 12mm; }
+h2 { font-size: 17pt; break-before: page; margin: 0 0 5mm; }
+h3 { font-size: 11pt; margin: 5mm 0 2mm; }
+p { orphans: 3; widows: 3; }
+a { color: var(--envnode-gold); text-decoration: none; }
+.headerlink,.md-button,.print-hide { display:none; }
+table { width:100%; border-collapse:collapse; font-size:8pt; margin:3mm 0; table-layout:fixed; }
+thead { display: table-header-group; }
+tr { break-inside:avoid; }
+th { background:var(--envnode-info); color:var(--envnode-gold); border-bottom:1pt solid var(--envnode-accent); text-align:left; }
+td,th { padding:1.25mm; border:0.5pt solid var(--envnode-rule); overflow-wrap:anywhere; }
+tr:nth-child(even) td { background:var(--envnode-neutral); }
+img { max-width:100%; height:auto; }
+img.board-view { display:block; max-height:72mm; width:auto; margin:2mm auto; }
+.admonition { border-left:3pt solid var(--envnode-accent); background:var(--envnode-info); padding:3mm; break-inside:avoid; }
+.admonition-title { font-weight:bold; margin:0 0 2mm; }
+.warning { border-left-color:#B7431B; background:#FFF1E8; }
+li { margin:1.5mm 0; }
+code { font-family: "EnvNode Mono", monospace; font-size:7pt; overflow-wrap:anywhere; }
+.cover { break-after:page; }
+.cover-title { string-set:doc-title content(); }
+.hw-revision { string-set:hw-revision content(); }
+.doc-date { string-set:doc-date content(); }
+.cover .tag { color:var(--envnode-gold); border-top:5pt solid var(--envnode-cover); padding-top:8mm; font-weight:bold; }
+.cover dl { margin-top:15mm; }
+.cover dt { font-weight:bold; margin-top:4mm; }
+.cover dd { margin-left:0; }
+
+h4 { color: var(--envnode-gold); font-size: 10pt; break-after: avoid; }
+img.connector-view { display: inline-block; max-height: 45mm; max-width: 47%; width: auto; margin: 2mm; vertical-align: middle; }
+img.paired-board-view { display: inline-block; max-height: 55mm; max-width: 47%; width: auto; margin: 2mm; vertical-align: middle; }
+img.testpoint-view { display: block; max-height: 65mm; width: auto; height: auto; margin: 2mm auto; }
