@@ -4,6 +4,9 @@
 
 ### Added
 
+- Testboard 0.3.1: remove automatic Check all simulation and its API action;
+  retain operator-confirmed connector tests and Mini PCB 0.8.1.
+
 - Testboard 0.3.0: Check all for a complete simulated run, with automatic virtual
   reconnection, fixed fault selection, abort and preserved incomplete-coverage results.
 - Testboard 0.2.2: add Mini 0.8 / PCB 0.8.1 with revision-specific mapping, drawing

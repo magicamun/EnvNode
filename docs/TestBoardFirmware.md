@@ -78,7 +78,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Twenty-three tests exercise configuration isolation,
+composition and shared libraries. Twenty-two tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -88,15 +88,11 @@ fixture suite. Its previously known board-profile-count assertion is unrelated.
 Before accepting the baseline on hardware, flash `testboard` onto the fixture
 ESP or a spare devkit, check setup access point/network save/restart, locale/time,
 name, logs and a same-product OTA update. Confirm that the start log identifies
-Testboard 0.3.0. No physical device was flashed or restarted during implementation.
+Testboard 0.3.1. No physical device was flashed or restarted during implementation.
 
-## Mini and Check all (0.3.0)
+## Mini (0.3.1)
 
 The catalog also exposes Mini 0.8 / PCB 0.8.1 (eight connectors, 1976 comparisons).
 `GET /test/catalog` lists profiles; definition and SVG accept the `board` query.
-Check all starts a fresh simulated run of every connector, with automatic virtual
-pigtail reconnection. The selected fault applies to every connector; errors do
-not stop collection. Abort stops the run. Board selection, individual tests and
-connector selection are locked during the batch. The firmware advances the run;
-a browser reload reconnects to its status. Real hardware still requires guided
-operator reconnection and an implemented, validated physical measurement driver.
+Each connector requires explicit confirmation after moving the pigtail. There is no
+automatic whole-board run, including in simulation. The former `all` action is rejected.

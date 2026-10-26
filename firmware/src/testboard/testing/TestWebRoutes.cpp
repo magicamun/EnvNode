@@ -27,17 +27,6 @@ bool unsignedValue(const String& input, uint32_t& value) {
 }
 TestWebRoutes::TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner& runner, SimulatedFixture& fixture)
     : host_(host), pages_(pages), fixture_(fixture), runner_(runner) {}
-// Automatic reconnection is deliberately confined to this simulated fixture adapter.
-void TestWebRoutes::tick(uint32_t now) {
-    runner_.tick(now);
-    if (!batch_) return;
-    if (runner_.phase() == Phase::Review) runner_.next();
-    if (runner_.phase() == Phase::AwaitingConnection) {
-        fixture_.connect(*runner_.board(), runner_.step(), batchFault_);
-        if (!runner_.start(now)) { runner_.abort(); batch_ = false; }
-    }
-    if (runner_.phase() == Phase::Complete || runner_.phase() == Phase::Aborted) batch_ = false;
-}
 void TestWebRoutes::registerRoutes(WebServer& server) {
     server.on("/test", HTTP_GET, [this]() { page(); });
     server.on("/test/catalog", HTTP_GET, [this]() {
@@ -86,7 +75,6 @@ void TestWebRoutes::state() {
     }
     json = "{\"simulation\":true,\"board\":";
     appendJsonString(json, runner_.board() ? runner_.board()->id : "");
-    json += String(",\"batch\":") + (batch_ ? "true" : "false");
     json += String(",\"generation\":") + runner_.generation()
         + ",\"phase\":" + static_cast<unsigned>(runner_.phase())
         + ",\"step\":" + static_cast<unsigned>(runner_.step())
@@ -115,21 +103,7 @@ void TestWebRoutes::action() {
     }
     const String command = server.arg("action");
     bool ok = false;
-    if (batch_ && command != "abort") {
-        server.send(409, "application/json", "{\"error\":\"Simulation batch is running\"}"); return;
-    }
-    if (command == "all" && runner_.board() && runner_.phase() != Phase::Running) {
-        const String fault = server.arg("fault");
-        if (fault != "none" && fault != "open" && fault != "short") {
-            server.send(400, "application/json", "{\"error\":\"Unknown simulation fault\"}"); return;
-        }
-        batchFault_ = fault == "open" ? SimulatedFault::OpenContact
-            : fault == "short" ? SimulatedFault::ExtraConnection : SimulatedFault::None;
-        const auto* board = runner_.board();
-        ok = runner_.load(*board);
-        batch_ = ok;
-        if (ok) tick(millis());
-    } else if (command == "load") {
+    if (command == "load") {
         const auto* board = findBoard(server.arg("board").c_str());
         ok = board && runner_.load(*board);
     } else if (command == "start" && (runner_.phase() == Phase::AwaitingConnection || runner_.phase() == Phase::Review)) {
@@ -145,7 +119,7 @@ void TestWebRoutes::action() {
         ok = unsignedValue(server.arg("connector"), connector) && runner_.selectConnector(connector);
     } else if (command == "next") ok = runner_.next();
     else if (command == "abort" && runner_.phase() != Phase::Empty && runner_.phase() != Phase::Complete && runner_.phase() != Phase::Aborted) {
-        batch_ = false; runner_.abort(); ok = true;
+        runner_.abort(); ok = true;
     }
     if (!ok) { server.send(409, "application/json", "{\"error\":\"Action not allowed in current step\"}"); return; }
     state();

@@ -48,7 +48,7 @@ struct Fixture {
     RestartDriver driver; TestBoardRestart restart{logger, &driver}; OTAService ota{logger, restart};
     WebHost host{logger, wifi};
     TestBoardWeb web{host, settings, wifi, time, formatter, ota, restart, logs,
-        {"0.3.0", "0.3.0+test", "1", "abc", "testboard", "now", "clean", false}};
+        {"0.3.1", "0.3.1+test", "1", "abc", "testboard", "now", "clean", false}};
     SimulatedFixture fixture;
     TestRunner runner{fixture};
     TestWebRoutes routes{host, web, runner, fixture};
@@ -310,38 +310,18 @@ void test_catalog_profile_assets_and_board_switch_never_mix_results() {
     TEST_ASSERT_EQUAL_HEX8(0x1f, static_cast<uint8_t>(f.server().responseBody[0]));
     TEST_ASSERT_EQUAL_HEX8(0x8b, static_cast<uint8_t>(f.server().responseBody[1]));
 }
-void batchAction(Fixture& f, const char* action, const char* fault = "none") {
-    f.server().arguments["generation"] = String(f.runner.generation());
-    f.server().arguments["action"] = action;
-    f.server().arguments["fault"] = fault;
-    f.server().request("/test/action", HTTP_POST);
-}
-void test_simulation_batch_finishes_both_profiles_and_preserves_incomplete_coverage() {
-    for (const auto* board : {&miniBoard(), &weatherBoard()}) {
-        Fixture f; f.runner.load(*board);
-        batchAction(f, "all"); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
-        TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"batch\":true"));
-        batchAction(f, "select"); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
-        for (uint32_t now = 20; now < 100000 && f.runner.phase() != Phase::Complete; now += 20) f.routes.tick(now);
-        TEST_ASSERT_EQUAL(Phase::Complete, f.runner.phase());
-        TEST_ASSERT_EQUAL(Verdict::Incomplete, f.runner.overall());
-        for (size_t i = 0; i < board->count; ++i) TEST_ASSERT_NOT_EQUAL(Verdict::Untested, f.runner.verdict(i));
-        f.server().request("/test/state", HTTP_GET);
-        TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"batch\":false"));
-    }
-}
-void test_simulation_batch_faults_abort_and_restart() {
+void test_whole_board_action_is_removed_and_cannot_start_measurement() {
     Fixture f; f.runner.load(miniBoard());
-    batchAction(f, "all", "invalid"); TEST_ASSERT_EQUAL(400, f.server().responseStatus);
-    batchAction(f, "all", "open");
-    for (uint32_t now = 20; now < 100000 && f.runner.phase() != Phase::Complete; now += 20) f.routes.tick(now);
-    TEST_ASSERT_EQUAL(Verdict::Failed, f.runner.overall());
-    batchAction(f, "all"); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
-    batchAction(f, "abort"); TEST_ASSERT_EQUAL(Phase::Aborted, f.runner.phase());
-    f.routes.tick(200000); TEST_ASSERT_EQUAL(Phase::Aborted, f.runner.phase());
-    batchAction(f, "all"); TEST_ASSERT_EQUAL(Phase::Running, f.runner.phase());
-    TEST_ASSERT_EQUAL(0, f.runner.completed());
-    TEST_ASSERT_EQUAL(Verdict::Untested, f.runner.verdict(1));
+    f.server().arguments["generation"] = String(f.runner.generation());
+    f.server().arguments["action"] = "all";
+    f.server().arguments["fault"] = "none";
+    f.server().request("/test/action", HTTP_POST);
+    TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    TEST_ASSERT_EQUAL(Phase::AwaitingConnection, f.runner.phase());
+    f.server().request("/test", HTTP_GET);
+    TEST_ASSERT_NULL(strstr(f.server().responseBody.c_str(), "test-all"));
+    f.server().request("/test/ui.js", HTTP_GET);
+    TEST_ASSERT_NULL(strstr(f.server().responseBody.c_str(), "test-all"));
 }
 int main() {
     UNITY_BEGIN();
@@ -359,7 +339,6 @@ int main() {
     RUN_TEST(test_mini_profile_has_independent_slot_wiring_and_explicit_address_ties);
     RUN_TEST(test_mini_plan_has_1976_comparisons_and_nine_uncovered_contacts);
     RUN_TEST(test_catalog_profile_assets_and_board_switch_never_mix_results);
-    RUN_TEST(test_simulation_batch_finishes_both_profiles_and_preserves_incomplete_coverage);
-    RUN_TEST(test_simulation_batch_faults_abort_and_restart);
+    RUN_TEST(test_whole_board_action_is_removed_and_cannot_start_measurement);
     return UNITY_END();
 }

@@ -10,11 +10,9 @@ class TestWebRoutes : public IWebRoutes {
 public:
     TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner& runner, SimulatedFixture& fixture);
     void registerRoutes(WebServer& server) override;
-    void tick(uint32_t now);
+    void tick(uint32_t now) { runner_.tick(now); }
     const TestRunner& runner() const { return runner_; }
 private:
-    bool batch_ = false;
-    SimulatedFault batchFault_ = SimulatedFault::None;
     void page();
     void state();
     void action();
