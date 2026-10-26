@@ -13,6 +13,9 @@ bool decodeConfigurationBackup(const String& input, const Configuration& current
 // On failure, candidate and includesPasswords remain unchanged.
 bool decodeConfigurationBackupCandidate(const String& input, const Configuration& current,
     std::unique_ptr<Configuration>& candidate, bool& includesPasswords);
+// Checked, exact-size allocation for restore on memory-constrained devices.
+bool encodeConfigurationRecordBuffer(const Configuration& configuration,
+    std::unique_ptr<uint8_t[]>& output, size_t& size);
 // Compact, versioned NVS snapshot. Field names stay in the JSON download only.
 bool encodeConfigurationRecord(const Configuration& configuration, std::vector<uint8_t>& output);
 bool decodeConfigurationRecord(const std::vector<uint8_t>& input, const Configuration& current,

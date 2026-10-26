@@ -138,6 +138,11 @@ void test_compact_snapshot_preserves_full_configuration() {
     std::vector<uint8_t> record;
     TEST_ASSERT_TRUE(encodeConfigurationRecord(candidate, record));
     TEST_ASSERT_LESS_THAN(8000, record.size());
+    std::unique_ptr<uint8_t[]> checked;
+    size_t checkedSize = 0;
+    TEST_ASSERT_TRUE(encodeConfigurationRecordBuffer(candidate, checked, checkedSize));
+    TEST_ASSERT_EQUAL(record.size(), checkedSize);
+    TEST_ASSERT_EQUAL_MEMORY(record.data(), checked.get(), checkedSize);
     Configuration restored;
     TEST_ASSERT_TRUE(decodeConfigurationRecord(record, service.getConfiguration(), restored));
     String before, after;

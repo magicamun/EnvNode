@@ -577,3 +577,5 @@ all 29 affected upload/preview/storage/partition tests passes. Combined maintain
 suite outcomes are 511 passes and the same pre-existing board-profile failure.
 The additional live-export probe passes separately and is not a committed test.
 No device firmware upload, confirmed restore, NVS write or restart was performed.
+
+Restore runtime follow-up (2026-10-26): Build 378 preview succeeded, but confirmation aborted in compact snapshot vector growth before storage. The restore encoder now counts bytes and allocates a checked exact-size buffer. Compact bytes are verified against the existing codec. Snapshot-allocation and readback-allocation failure tests retain the active and persisted configuration. Validation: 26 relevant native tests pass; ESP32 build passes. Device restore/restart confirmation remains pending.

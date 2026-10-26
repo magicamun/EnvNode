@@ -1171,10 +1171,14 @@ bool ConfigurationService::restoreConfiguration(const Configuration& candidate) 
     if (logger_) logger_->info("Configuration restore validating candidate");
     if (!validateRestore(candidate)) return false;
     if (logger_) logger_->info("Configuration restore encoding snapshot");
-    std::vector<uint8_t> encoded;
-    if (!encodeConfigurationRecord(candidate, encoded)) return false;
-    if (logger_) logger_->infof("Configuration restore snapshot encoded bytes=%u", static_cast<unsigned>(encoded.size()));
-    if (!storage_.replaceSnapshot(encoded.data(), encoded.size(), logger_)) return false;
+    std::unique_ptr<uint8_t[]> encoded;
+    size_t encodedSize = 0;
+    if (!encodeConfigurationRecordBuffer(candidate, encoded, encodedSize)) {
+        if (logger_) logger_->warn("Configuration restore snapshot encoding failed; previous configuration retained");
+        return false;
+    }
+    if (logger_) logger_->infof("Configuration restore snapshot encoded bytes=%u", static_cast<unsigned>(encodedSize));
+    if (!storage_.replaceSnapshot(encoded.get(), encodedSize, logger_)) return false;
     if (logger_) logger_->info("Configuration restore activating in-memory candidate");
     configuration_ = candidate;
     if (logger_) logger_->info("Configuration restore candidate activated");

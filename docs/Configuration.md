@@ -125,3 +125,5 @@ bank, inactive-bank clear, write, readback verification, metadata commit, reopen
 and memory activation. The readback allocation is explicitly checked; failure
 leaves the previously committed bank authoritative. Missing cfg_nvs is reported
 as requiring a USB partition-table update. These messages contain no credentials.
+
+Restore diagnosis (2026-10-26): Build 378 reached preview validation but aborted while growing the compact snapshot vector, before persistence. Restore now counts compact bytes first and uses one exact-size, checked allocation. Allocation failure rejects the restore and retains the previous configuration. Locale and timezone from the backup take effect only after a successful restore and restart.

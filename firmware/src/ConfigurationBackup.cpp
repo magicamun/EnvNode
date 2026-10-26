@@ -157,6 +157,8 @@ private:
 };
 class Fields {
 public:
+    Fields(uint8_t* output, size_t capacity) : compactOutput_(output), compactCapacity_(capacity), compactMode_(true) {}
+    size_t compactSize() const { return compactPosition_; }
     Fields(String& output) : output_(&output) {}
     Fields(JsonObject& input) : input_(&input) {}
     Fields(std::vector<uint8_t>& output, bool) : recordOutput_(&output) {}
@@ -167,6 +169,18 @@ public:
     void text(const String& key, String& value) {
         if (!ok) return;
         if (input_) { ok = input_->get(key, value); return; }
+        if (compactMode_) {
+            const size_t size = value.length();
+            if (size > 30000 || strlen(value.c_str()) != size || compactPosition_ > MaxConfigurationBackupLength - 2 - size) { ok = false; return; }
+            if (compactOutput_) {
+                if (compactPosition_ + 2 + size > compactCapacity_) { ok = false; return; }
+                compactOutput_[compactPosition_] = static_cast<uint8_t>(size);
+                compactOutput_[compactPosition_ + 1] = static_cast<uint8_t>(size >> 8);
+                memcpy(compactOutput_ + compactPosition_ + 2, value.c_str(), size);
+            }
+            compactPosition_ += 2 + size;
+            return;
+        }
         if (recordOutput_) {
             if (value.length() > 30000 || strlen(value.c_str()) != value.length()) { ok = false; return; }
             recordOutput_->push_back(static_cast<uint8_t>(value.length()));
@@ -251,6 +265,10 @@ private:
         }
         return length;
     }
+    uint8_t* compactOutput_ = nullptr;
+    size_t compactCapacity_ = 0;
+    size_t compactPosition_ = 0;
+    bool compactMode_ = false;
     String* output_ = nullptr;
     JsonObject* input_ = nullptr;
     std::vector<uint8_t>* recordOutput_ = nullptr;
@@ -400,6 +418,22 @@ bool decodeConfigurationBackup(const String& input, const Configuration& current
     candidate = *decoded;
     includesPasswords = passwords;
     return true;
+}
+bool encodeConfigurationRecordBuffer(const Configuration& configuration,
+    std::unique_ptr<uint8_t[]>& output, size_t& size) {
+    std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
+    if (!copy) return false;
+    bool passwords = true; String firmware, version("3");
+    Fields count(nullptr, 0);
+    header(count, passwords, firmware, version); configurationFields(count, *copy, true, version);
+    if (!count.ok) return false;
+    const size_t required = count.compactSize();
+    std::unique_ptr<uint8_t[]> buffer(new (std::nothrow) uint8_t[required]);
+    if (!buffer) return false;
+    Fields writer(buffer.get(), required);
+    header(writer, passwords, firmware, version); configurationFields(writer, *copy, true, version);
+    if (!writer.ok || writer.compactSize() != required) return false;
+    output = std::move(buffer); size = required; return true;
 }
 bool encodeConfigurationRecord(const Configuration& configuration, std::vector<uint8_t>& output) {
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
