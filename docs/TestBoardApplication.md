@@ -193,3 +193,9 @@ ist ein Entwicklungsprüfmittel, kein zusätzlicher Produkt-Build.
 ## Mini 0.8 / PCB 0.8.1
 
 Der Katalog enthält Weather und Mini. Profile und Zeichnungen werden revisionsbezogen geladen; ein Boardwechsel verwirft den vorherigen Lauf. Mini umfasst acht Anschlüsse und 1976 Vergleiche. Explizite KiCad-Net-Ties werden aufgelöst: Slot A Adresse liegt auf GND, Slot B auf 3V3_SYS. Letzterer Kontakt und die acht Versorgungsanschlüsse bleiben ohne zusätzlichen Referenzabgriff unvollständig prüfbar. Andere Bauteile werden nicht als direkte Verbindungen interpretiert.
+
+## Später: zentral bereitgestellte Profile
+
+Boardprofile und Zeichnungen sollen perspektivisch über docs.envnode angeboten und vom Prüf-ESP32 geladen werden. Eingebaute Profile bleiben als Offline-Grundbestand verfügbar. Erforderlich wären ein versionierter Katalog, validierte Datenformate und unveränderliche Profile je Board-/PCB-Revision; optional später ein lokaler Cache. Dies ist vorgemerkt und derzeit nicht implementiert.
+
+Die Boardansichten blenden Bauteilwerte aus; Referenzbezeichnungen bleiben sichtbar. Der Generator entfernt die Werte ausschließlich aus einer temporären Exportkopie, die KiCad-Quelldateien bleiben unverändert.

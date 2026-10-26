@@ -53,6 +53,28 @@ def parse(text):
     assert end == len(tokens)
     return result
 
+def without_component_values(text):
+    """Remove value fields only in the temporary rendering copy, never the PCB source."""
+    pattern = r'\((?:property\s+"Value"|fp_text\s+value)(?=\s)'
+    for match in reversed(list(re.finditer(pattern, text))):
+        depth, quoted, escaped = 0, False, False
+        for end in range(match.start(), len(text)):
+            c = text[end]
+            if quoted:
+                if escaped: escaped = False
+                elif c == '\\': escaped = True
+                elif c == '"': quoted = False
+            elif c == '"': quoted = True
+            elif c == '(': depth += 1
+            elif c == ')':
+                depth -= 1
+                if depth == 0:
+                    text = text[:match.start()] + text[end + 1:]
+                    break
+        else:
+            raise ValueError('Unterminated component value field')
+    return text
+
 def pads(footprint):
     at = child(footprint, 'at')
     x, y = map(float, at[1:3])
@@ -124,9 +146,11 @@ def generate_profile(profile):
     cli = shutil.which('kicad-cli') or '/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli'
     with tempfile.TemporaryDirectory() as directory:
         output = Path(directory) / 'board.svg'
+        rendering_pcb = Path(directory) / 'render.kicad_pcb'
+        rendering_pcb.write_text(without_component_values(data.decode()))
         subprocess.run([cli, 'pcb', 'export', 'svg', '--layers', 'F.Silkscreen,F.Fab,Edge.Cuts',
             '--mode-single', '--page-size-mode', '1', '--exclude-drawing-sheet',
-            '--output', str(output), str(ROOT / source)], check=True, capture_output=True)
+            '--output', str(output), str(rendering_pcb)], check=True, capture_output=True)
         svg = output.read_text()
     svg = re.sub(r'<title>.*?</title>', f'<title>{profile["name"]} PCB {profile["pcb"]}; KiCad top view</title>', svg, flags=re.S)
     svg = re.sub(r'width="[^"]*" height="[^"]*" viewBox="[^"]*"',

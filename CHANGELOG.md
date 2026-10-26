@@ -4,6 +4,9 @@
 
 ### Added
 
+- Testboard 0.3.2: omit component values from rendered board views while keeping
+  reference designators; record centrally downloadable profiles as future work.
+
 - Testboard 0.3.1: remove automatic Check all simulation and its API action;
   retain operator-confirmed connector tests and Mini PCB 0.8.1.
 
