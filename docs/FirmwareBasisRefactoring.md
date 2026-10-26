@@ -708,3 +708,5 @@ from GPIO16 to ADC1, restoration of GPIO16's 152 stored comparisons, and explici
 retest from Review. Static RAM is 83004 bytes (25.3%); flash is 1083145 bytes.
 No device was flashed or restarted by the agent. The agreed future switched
 GND/+3V3_SYS reference connector remains a separate hardware/profile revision.
+
+Testboard 0.3.0 ergänzt Mini 0.8 / PCB 0.8.1 und den automatischen Simulationsdurchlauf. EnvNode bleibt bei 0.8.0; gemeinsame Basis wurde dafür nicht verändert. Validierung: 23 native Testboard-Tests und ESP32-Testboard-Build.

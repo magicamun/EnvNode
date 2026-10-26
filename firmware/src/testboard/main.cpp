@@ -23,7 +23,7 @@ public:
 };
 class TestBoardApplication : public IFirmwareApplication {
 public:
-    TestBoardApplication(ILogger& logger, Testing::TestRunner& tests) : logger_(logger), tests_(tests) {}
+    TestBoardApplication(ILogger& logger, Testing::TestWebRoutes& tests) : logger_(logger), tests_(tests) {}
     // Hardware is not driven until the fixture test engine is implemented.
     void initializeDevices() override {}
     void beginIntegrations() override {
@@ -36,7 +36,7 @@ public:
     void serviceIntegrations() override {}
 private:
     ILogger& logger_;
-    Testing::TestRunner& tests_;
+    Testing::TestWebRoutes& tests_;
 };
 TestBoardLogTime logTime;
 RecentLogStore recentLogs;
@@ -56,7 +56,7 @@ TestBoardWeb web(host, settings, wifi, time, formatter, ota, restart, recentLogs
 Testing::SimulatedFixture fixture;
 Testing::TestRunner tests(fixture);
 Testing::TestWebRoutes testRoutes(host, web, tests, fixture);
-TestBoardApplication application(logger, tests);
+TestBoardApplication application(logger, testRoutes);
 FirmwareRuntime runtime(wifi, time, web, application);
 }
 void setupTestBoard() {

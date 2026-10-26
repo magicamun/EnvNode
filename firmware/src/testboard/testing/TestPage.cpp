@@ -22,7 +22,7 @@ String buildTestPage(Locale locale) {
     html += de ? "Verbunden – Prüfung starten" : "Connected – start test";
     html += "</button><button id='test-next'>";
     html += de ? "Nächster Anschluss" : "Next connector";
-    html += "</button><button id='test-abort' class='danger'>";
+    html += "</button><button id='test-all'>Check all (Simulation)</button><button id='test-abort' class='danger'>";
     html += de ? "Abbrechen" : "Abort";
     html += "</button></div><progress id='test-progress' value='0' max='1' style='width:100%;margin-top:16px'></progress><p id='test-error' class='error' role='alert'></p></section>";
     html += "<div class='test-layout'><section class='card'><div id='test-drawing'></div><p class='help'>";
