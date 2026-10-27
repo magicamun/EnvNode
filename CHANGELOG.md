@@ -4,6 +4,11 @@
 
 ### Added
 
+- Split the fixture hardware into Test-Controller, Input-Adapter and Module-Adapter,
+  with verified cable/GPIO/multiplexer contracts in their READMEs. Retire the
+  monolithic Test-Provisioning project; preserve its final state in Git history.
+  Document the pending firmware extension from 38 socket inputs to 40 logical inputs.
+
 - Testboard 0.3.2: omit component values from rendered board views while keeping
   reference designators; record centrally downloadable profiles as future work.
 

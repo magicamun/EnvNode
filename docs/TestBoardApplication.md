@@ -3,6 +3,26 @@
 EnvNode-eigene Inhalte unterliegen der LICENSE im Repository
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
 
+## Hardwareaufteilung seit 2026-10-27
+
+Die drei Projekte [Test-Controller](../hardware/kicad/MainBoards/Test-Controller/README.md),
+[Input-Adapter](../hardware/kicad/MainBoards/Input-Adapter/README.md) und
+[Module-Adapter](../hardware/kicad/MainBoards/Module-Adapter/README.md) ersetzen das
+monolithische Test-Provisioning-Projekt. Die READMEs enthalten die aus den PCB-Daten
+geprüften Kabel-, GPIO- und Kanalzuordnungen.
+
+**Die nachfolgenden 38-Pin-Ablaufbeschreibungen dokumentieren den aktuellen
+Simulationsstand, noch nicht die umgebaute Hardware.** Diese benötigt 40 logische
+Eingänge: 1–38 bleiben Sockelpins, 39 ist MB_3V3_SYS (U6/I13), 40 MB_GND (U6/I14).
+IN_S0–S3: GPIO32/25/27/13; IN_EN1–3: GPIO14/26/33; COM_IN: GPIO34.
+Die Firmware muss dafür Datenmodell und FixtureRouting, Profilerzeugung und
+Abdeckung, Ergebnisindizierung, UI-Matrix und Tests gemeinsam erweitern.
+Die neuen Referenzen sind keine Sockelpins und benötigen eine eigene Darstellung.
+Bestehende Profile ohne Referenzabgriff bleiben unvollständig; eine bloße Erhöhung
+der Konstante SocketPins auf 40 würde unzulässig auf die 38-elementigen Tabellen
+zugreifen. Erwartete Pfade durch Schutzdioden müssen explizit modelliert werden.
+Die physische Multiplexersteuerung ist weiterhin nicht implementiert.
+
 ## Vereinbarte Schichten
 
 1. **Verdrahtung des Prüfboards:** `FixtureRouting` ordnet die logischen
