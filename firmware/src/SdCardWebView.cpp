@@ -61,11 +61,11 @@ String bytes(uint64_t value) {
     return String(buffer);
 }
 }
-String renderSdFormatConfirmation(const SdFileStamp& card,const String& token,Locale locale) {
+String renderSdFormatConfirmation(const SdFileStamp& card,const String& token,Locale locale,const char* slot) {
     const bool de=locale==Locale::GermanGermany;
     String html="<section class='card'><h2>";
     html+=de ? "SD-Karte formatieren" : "Format SD card";
-    html+="</h2><p>Slot A · "+bytes(card.bytes)+" Bytes</p><p><strong>";
+    html+="</h2><p>Slot "+escapeHtml(slot)+" · "+bytes(card.bytes)+" Bytes</p><p><strong>";
     html+=de ? "Alle Dateien und Partitionen auf dieser Karte werden gelöscht." : "All files and partitions on this card will be deleted.";
     html+="</strong></p><p>";
     html+=de ? "Die Karte wird als eine FAT32-Partition neu eingerichtet. Schnellformatierung, kein sicheres Löschen. Währenddessen Karte nicht entfernen, Gerät nicht ausschalten und keine Firmware aktualisieren. Bestätigung gilt 2 Minuten." : "The card will be recreated as one FAT32 partition. Quick format, not secure erasure. Do not remove the card, power off or update firmware during formatting. Confirmation expires after 2 minutes.";
@@ -82,11 +82,13 @@ String renderSdDirectory(const SdDirectorySnapshot& s, Locale locale) {
     String html;
     if (!html.reserve(12288)) return de ? String("<p>Zu wenig Speicher. Bitte erneut versuchen.</p>") : String("<p>Insufficient memory. Please retry.</p>");
     html = "<section class='card'><h2>";
-    html += de ? "SD-Karte — Slot A" : "SD card — Slot A";
+    html += de ? "SD-Karte — Slot " : "SD card — Slot ";
+    html += moduleSlotName(s.slot);
     html += "</h2><p>";
     if (s.status != SdDirectoryStatus::Ready) {
         switch (s.status) {
             case SdDirectoryStatus::Disabled: html += de ? "SD-Zugriff ist in diesem Firmware-Build nicht aktiviert." : "SD access is not enabled in this firmware build."; break;
+            case SdDirectoryStatus::Busy: html += de ? "SD-Karte wird verwendet oder eine Konfigurationsänderung wartet auf Übernahme/Neustart. Bitte erneut versuchen." : "SD card is busy or configuration changes await apply/restart. Please retry."; break;
             case SdDirectoryStatus::NoCard: html += de ? "Keine Karte erkannt." : "No card detected."; break;
             case SdDirectoryStatus::Conflict: html += de ? "Slot nicht verfügbar oder Pins anderweitig belegt." : "Slot unavailable or pins already in use."; break;
             case SdDirectoryStatus::MountFailed: html += de ? "Karte konnte nicht eingebunden werden. Bitte erneut versuchen und Systemlog prüfen." : "Could not mount card. Please retry and check the system log."; break;
@@ -107,9 +109,11 @@ String renderSdDirectory(const SdDirectorySnapshot& s, Locale locale) {
     html += de ? "Dateisystem (Bytes)" : "Filesystem (bytes)";
     html += "</span><span>" + bytes(s.info.filesystemBytes) + "</span><span>";
     html += de ? "Belegt (Bytes)" : "Used (bytes)";
-    html += "</span><span>" + bytes(s.info.usedBytes) + "</span><span>";
+    const String unavailable=de ? "Nicht verfügbar" : "Unavailable";
+    const String estimate=s.info.spaceUsageEstimated ? String("≈ ") : String();
+    html += "</span><span>" + (s.info.spaceUsageKnown ? estimate+bytes(s.info.usedBytes) : unavailable) + "</span><span>";
     html += de ? "Frei (Bytes)" : "Free (bytes)";
-    html += "</span><span>" + bytes(s.info.filesystemBytes >= s.info.usedBytes ? s.info.filesystemBytes-s.info.usedBytes : 0) + "</span></div></section>";
+    html += "</span><span>" + (s.info.spaceUsageKnown ? estimate+bytes(s.info.filesystemBytes >= s.info.usedBytes ? s.info.filesystemBytes-s.info.usedBytes : 0) : unavailable) + "</span></div></section>";
     html += "<section class='card'><h2 style='overflow-wrap:anywhere'>" + escapeHtml(s.path) + "</h2><p><a href='" + escapeHtml(sdDirectoryUrl(s.path, s.offset)) + "'>";
     html += de ? "Aktualisieren" : "Refresh";
     html += "</a> · <a href='/sd-card'>/</a>";
@@ -157,9 +161,14 @@ String renderSdDirectory(const SdDirectorySnapshot& s, Locale locale) {
         html += "<a href='" + escapeHtml(sdDirectoryUrl(s.path, s.offset>=SdDirectoryPageSize ? s.offset-SdDirectoryPageSize : 0)) + "'>";
         html += de ? "Zurück" : "Previous"; html += "</a> ";
     }
-    if ((s.more || renderedCount<s.count) && !s.limited && s.offset+renderedCount<=SdDirectoryMaxOffset) {
+    if ((s.more || renderedCount<s.count) && renderedCount>0 && !s.limited && s.offset+renderedCount<=SdDirectoryMaxOffset) {
         html += "<a href='" + escapeHtml(sdDirectoryUrl(s.path, s.offset+renderedCount)) + "'>";
         html += de ? "Weiter" : "Next"; html += "</a>";
+    }
+    if(s.timedOut) {
+        html+="<p>";
+        html+=de ? "Lesezeit für diese Seite erreicht. Weitere Einträge mit Weiter anzeigen; falls keine Einträge gelesen wurden, bitte aktualisieren." : "Read time limit reached for this page. Use Next for more entries; refresh if no entries were read.";
+        html+="</p>";
     }
     if (s.limited) { html += "<p>"; html += de ? "Anzeigegrenze erreicht. Bitte kleinere Unterverzeichnisse verwenden." : "Listing limit reached. Please use smaller subdirectories."; html += "</p>"; }
     return html + "</section>";
@@ -180,5 +189,38 @@ String renderSdDeleteConfirmation(const String& path,const SdFileStamp& stamp,co
     html+="</button></form><p><a href='"+escapeHtml(sdDirectoryUrl(sdParentPath(path)))+"'>";
     html+=de ? "Abbrechen" : "Cancel";
     return html+"</a></p></section>";
+}
+}
+
+namespace EnvNode {
+String renderSdRotationProgress(Locale locale) {
+    const bool de=locale==Locale::GermanGermany;
+    String html="<section class='card' id='sd-rotation-result' aria-live='polite'><p>";
+    html+=de ? "Rotationstest läuft. Karte eingesteckt lassen. Andere Seiten bleiben erreichbar." : "Rotation test running. Leave the card inserted. Other pages remain available.";
+    html+="</p><a href='/sd-card/rotation-test'>";
+    html+=de ? "Ergebnis anzeigen" : "Show result";
+    html+="</a></section>";
+    // Keep the current page visible while polling; never navigate during a response.
+    html+="<script>(()=>{const target=document.getElementById('sd-rotation-result');async function poll(){const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),5000);let complete=false;try{const response=await fetch('/sd-card/rotation-test?progress=1',{cache:'no-store',signal:controller.signal});if(response.status===200){const html=await response.text();if(html){target.outerHTML=html;complete=true}}}catch(error){}finally{clearTimeout(timeout);if(!complete)setTimeout(poll,2000)}}setTimeout(poll,2000)})();</script>";
+    return html;
+}
+String renderSdRotationResult(const SdRotationTestResult& r,Locale locale) {
+    const bool de=locale==Locale::GermanGermany;
+    String html="<section class='card'><h2>";
+    html+=de ? "SD-Rotationstest" : "SD rotation test";
+    html+="</h2><p><strong>";html+=r.passed() ? "PASS" : "FAIL";html+="</strong></p><ul>";
+    const char* deLabels[]={"Dateiwechsel","Speicherbudget / älteste Testdateien entfernt","Fremde Testdatei erhalten","Dateiinhalte geprüft","Testdateien aufgeräumt"};
+    const char* enLabels[]={"File rotation","Storage budget / oldest test files removed","Unmanaged test file preserved","File contents verified","Test files cleaned up"};
+    const bool results[]={r.rotation,r.pruning,r.foreignFile,r.content,r.cleanup};
+    for(unsigned i=0;i<5;++i) html+=String("<li>")+(de ? deLabels[i] : enLabels[i])+": "+(results[i] ? "PASS" : "FAIL")+"</li>";
+    html+="</ul>";
+    if(!r.passed()) {
+        html+="<p>";html+=de ? "Details im Systemlog prüfen." : "Check the system log for details.";
+        html+="</p>";
+        if(!r.cleanup && r.directory[0]) html+=String("<p>")+(de ? "Testreste: " : "Test leftovers: ")+escapeHtml(r.directory)+"</p>";
+    }
+    html+="<form method='post' action='/sd-card/rotation-test'><button type='submit'>";
+    html+=de ? "Erneut testen" : "Repeat test";
+    html+="</button></form><a href='/sd-card'>SD</a></section>";return html;
 }
 }

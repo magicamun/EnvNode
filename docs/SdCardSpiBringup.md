@@ -4,13 +4,16 @@ EnvNode: see repository LICENSE.
 
 ## Scope
 
-The explicit `esp32dev_sd_diagnostics` build runs a one-shot SD probe at startup,
-after board identity/configuration and application initialization, before the
-normal application loop starts. Normal `esp32dev` builds do not activate it.
-This is a lab diagnostic, not the future SD module/storage subsystem.
+SD support is now included in the normal `esp32dev` / Default build. There is no
+automatic startup write test. Open **SD-Karte**, enable SD access, select the
+physically wired breakout slot (A for the tested Mini) and save. Enable system-log
+recording separately when desired. These settings persist in NVS and configuration
+backup schema 4; older schemas restore with SD disabled. The previous
+`esp32dev_sd_diagnostics` environment remains only as a compatible build alias.
+The 4 KiB read/write test is now an explicit POST button on the SD page.
 
 It requires no module EEPROM. The board identity selects the board profile;
-Slot A supplies its CS and Card Detect GPIOs. Shared SPI wiring is currently
+The selected slot supplies its CS and Card Detect GPIOs. Shared SPI wiring is currently
 fixed to the EnvNode core mapping (SCK 18, MISO 19, MOSI 23).
 
 ## Wiring (power off while connecting)
@@ -33,8 +36,8 @@ Use short jumper wires. The initial transfer clock is 1 MHz.
 
 The tested setup must have no other SPI device on the shared bus. The probe
 rejects GPIO conflicts with enabled configured sensors/actuators and composed
-module actuators before touching its pins. It does not reserve pins against
-later web configuration changes: all SD resources are released after the probe.
+module actuators before touching its pins. An enabled SD configuration reserves SCK/MISO/MOSI, CS and CD against later
+sensor/actuator GPIO assignments. A nonblocking arbiter serializes all SD operations.
 The CD input/pull-up and inactive CS level remain configured until another owner
 or reboot changes them. This is not a general SPI bus/resource manager.
 
@@ -43,14 +46,13 @@ or reboot changes them. This is not a general SPI bus/resource manager.
 From `firmware/`:
 
 ```sh
-pio run -e esp32dev_sd_diagnostics
+pio run -e esp32dev
 ```
 
-Use `.pio/build/esp32dev_sd_diagnostics/firmware.bin` for the existing Web OTA
-workflow, then restart. USB upload is also possible with this environment and
-an explicitly verified upload port. Do not use the normal `esp32dev` binary for
-this test; it has no active SD probe. The firmware version remains 0.8.0; the
-build identity distinguishes this development build.
+Use `.pio/build/esp32dev/firmware.bin` for the existing Web OTA workflow. Default
+Build and Upload now include SD support. No EEPROM is required for the explicit
+breakout slot selection. The firmware version remains 0.8.0; its build identity
+distinguishes the development build.
 
 ## Test
 
@@ -92,9 +94,11 @@ no automatic repair/format is attempted. Card Detect only reports the mechanical
 contact and does not prove a successful SPI response. Removal during the probe
 can make it fail; no completed probe is claimed until read/write verification
 and cleanup succeed.
-Mounting/reading is synchronous at startup and can delay startup, especially
-when counting free FAT clusters. It runs once, not in the acquisition loop.
-Ongoing nonblocking recording and bounded download handling are later steps.
+The explicitly requested write/read test remains synchronous and may delay
+application servicing during driver retries. Directory reads now run in a
+separate task, without a full free-cluster scan.
+Automatic recording performs its I/O in the independent writer task; downloads
+stream cooperatively. No diagnostic runs automatically at startup.
 
 ## Memory budget
 
@@ -122,22 +126,24 @@ References: [Adafruit wiring](https://learn.adafruit.com/adafruit-micro-sd-break
 
 ## First SD web page
 
-The navigation entry **SD card / SD-Karte** opens `/sd-card`. In the explicit
-`esp32dev_sd_diagnostics` build it shows current card type/capacity, filesystem
-usage, file sizes and browsable directories. Other builds report that access is
-not enabled. The existing startup write/read test remains enabled in the lab build.
+The navigation entry **SD card / SD-Karte** opens `/sd-card`. Once enabled, it
+shows the selected slot, card type/capacity, filesystem usage, file sizes and
+browsable directories. The settings form remains available while SD is disabled.
+Recording status includes queue occupancy and cumulative queue overflow count.
 
-Each page request mounts the card, reads metadata and a directory page and then
-unmounts it. Refresh retries detection/mounting after inserting/changing a card;
+Directory requests start a background task, which mounts the card, reads
+metadata and a directory page, then unmounts it. The immediate HTTP response is
+a progress page that polls for the result; other web pages remain serviced. Refresh retries detection/mounting after inserting/changing a card;
 no continuous Card Detect polling or permanently mounted card is needed yet.
 Directory requests never run the write test. File download and confirmed deletion
-are described below; formatting is not implemented yet. GPIO conflicts are checked before access,
+are described below; confirmed formatting is described below. GPIO conflicts are checked before access,
 including the current configuration and runtime module actuators.
 
 Pages contain up to 32 entries in filesystem order. HTML output is also bounded
 to about 12 KiB; exceptionally long escaped names can reduce the entries on a page. Previous/Next links cover
-offsets through 1024; enumeration has an additional 150 ms scan budget. A
-visible limit message replaces further paging when those limits are reached.
+offsets through 1024; each background enumeration has a 2-second read budget.
+A partial page offers continuation at the count actually displayed. Only the
+hard offset bound stops paging; read-time exhaustion is reported separately.
 Changing directory contents between requests may change page order/offsets.
 Absolute directory paths are limited to 240 bytes; dot traversal, empty path
 segments, backslashes and control characters are rejected. Names and links are
@@ -242,7 +248,7 @@ Source: [ESP-IDF FAT fstat/stat](https://github.com/espressif/esp-idf/blob/v4.4.
 
 ## Explicit FAT32 formatting
 
-The lab build now offers **Karte formatieren / Format card**. The first version
+The normal build now offers **Karte formatieren / Format card**. The first version
 requires a readable FAT card with a nominal capacity of 4–32 GB (capacity guard:
 3.5 GB through 32 GiB). Unformatted/unreadable media and larger cards must still
 be prepared on a computer. This restriction is intentional for the first hardware
@@ -288,7 +294,7 @@ The user confirmed successful hardware formatting on the Mini with the SanDisk
 8 GB card on 2026-10-26. For repeat validation, first open
 format and cancel, verifying files remain. Reopen, type the confirmation and start.
 Wait for PASS, open the result and refresh the directory; it should be empty. Then
-restart: the existing 4096-byte startup write/read test should pass and remove its
+restart and run the explicit 4096-byte write/read test; it should pass and remove its
 own test file. Check normal measurements/MQTT/control alongside the operation.
 The device has not been remotely formatted during implementation.
 
@@ -305,3 +311,211 @@ Implementation validation on 2026-10-26: 35 native SD tests passed (including se
 new format policy/form tests), German/English page-editor browser checks passed,
 and `esp32dev_sd_diagnostics` built successfully. The user subsequently confirmed
 successful formatting on the physical Mini.
+
+
+## Buffered system-log recording
+
+See [SD storage architecture](SdStorageArchitecture.md). Select the correct slot,
+enable SD access and **Systemlog auf SD aufzeichnen**, then save. After the first
+batch (normally within five seconds), `/logs/system` appears. Each JSONL part
+starts with firmware/build/commit/board/session metadata; entries carry sequence,
+uptime in milliseconds, nullable UTC epoch seconds, severity and escaped message.
+No sensor diagnostics are enabled by this system-log option.
+
+Example path: `/logs/system/boot-0000000042-part-0001.jsonl`. The monotonic session
+counter lives in the separate `sd_log_meta` NVS namespace, advances once per boot,
+and is deliberately excluded from configuration restores. If that counter cannot
+be persisted, recording is disabled instead of risking filename reuse. Names are
+created exclusively. Part counters stop at 9999 until the next boot; existing
+names are skipped within a bounded search and never overwritten.
+
+The RAM queue holds 28 structured entries (7840 bytes on ESP32); the writer holds
+up to 4096 serialized bytes and uses a 12 KiB task stack. Serialization/storage
+runs on core 1 alongside the application task. Logger callbacks only copy into the
+queue under a short critical section; they do not wait for SPI, FAT or the network.
+Healthy recording writes and fsyncs after five seconds or a near-full batch.
+Popping stops when the pending batch is full. Overflow is counted and later
+reported by a single summarized log entry. On card/full/filesystem failures the
+pending batch is retained and retried after 30 seconds. Failed/partial writes
+start a new part on retry: the old file may have an incomplete last line and
+replayed entries may duplicate original sequence numbers. This is best-effort
+diagnostic logging, not transactional or exactly-once storage.
+
+Rotation limits parts to 1 MiB including metadata and managed data to 32 MiB.
+Only regular files matching `boot-` + ten digits + `-part-` + four digits +
+`.jsonl` inside `/logs/system` are counted/removed. The current part is protected;
+oldest names are removed first. Unknown files and other directories are untouched.
+Directory scans stop after 128 entries and pruning after 64 passes. A full card
+occupied by unrelated files results in an error, not deletion of those files.
+
+Each batch mounts and closes/releases the card. Web listing, tests, file access
+and format share the same exclusive arbiter. A short concurrent write may return
+**SD busy; retry**. A download retains the lease until completion, so the queue may
+overflow during a long transfer. Opening the active log for download or delete
+preview seals that part; recording resumes in a new part afterward. Confirmed
+formatting verifies an empty root before releasing its lease; when logging is
+enabled, `/logs/system` is then created again. Slot/enable changes discard pending
+RAM data and start a new part, without appending old batches to a different slot.
+Recording is not a hard real-time guarantee and physical validation is pending.
+
+First physical checks: enable Slot A and logging in the Default firmware; wait
+for a JSONL file, download and inspect it, then reboot and check a different boot
+name. Download the active file and ensure the next log entry appears in a new
+part. Remove/reinsert the card and check measurement/control continuity, error
+reporting/backoff and recovery. Rotation/full-card behavior is covered with fake
+storage natively but still requires physical qualification before field use.
+
+Pending runtime configuration changes pause SD access/recording until applied or
+restarted, so a stored GPIO assignment cannot be mistaken for the still-running
+sensor hardware. SDK messages printed directly to Serial are not mirrored by the
+structured EnvNode log sink.
+
+
+## Hotplug web correction — 2026-10-27
+
+The user confirmed system-log recording, download-triggered part rotation,
+automatic writing recovery after removal/reinsertion, and persisted settings/card
+contents across reset. However, the SD directory web page stopped responding.
+During that interval the controller reported stale measurements (up to 50 s) and
+MQTT publishing retried, so application servicing had also been delayed.
+
+The installed Arduino SD implementation calls `f_getfree` in both `totalBytes`
+and `usedBytes`. After each remount this may scan the entire FAT. Directory HTTP
+handling called those methods synchronously. All such calls have been removed:
+filesystem data capacity is derived from validated FAT12/16/32 boot geometry.
+Used/free values come only from an optional, signature/range-checked FAT32 FSInfo
+hint and are marked **≈**. Missing/unknown hints display **Nicht verfügbar /
+Unavailable** instead of triggering a scan or claiming zero usage. These values
+are estimates, not an authoritative full free-space count.
+
+SD listing now performs mount, metadata and directory I/O in a worker task. The
+main HTTP handler sends 202 with a polling link and preserves the requested path
+and offset. Polling only checks atomic completion; it does not touch SPI/FAT.
+Other web routes, measurements and integrations continue to be serviced. The
+worker releases its lease before publishing completion, even if the browser
+leaves the progress page. Results are bounded to one snapshot. No unsafe task
+termination is used during a driver retry; the progress page can stay visible
+until that retry returns. A pending read longer than three seconds is logged
+from the live web loop. Other explicit SD operations (manual test, file open/read,
+delete/format preview) retain their existing driver retry behavior.
+
+This correction addresses the concrete blocking path found in the listing; its
+physical hotplug retest is still pending. Reproduce with Slot A and logging on:
+open the SD directory, remove/reinsert the card, refresh, and navigate to the main
+page/logs while the SD read is pending. Verify normal measurement cadence and MQTT,
+continued log files, and no reset requirement. Do not format to test this fix.
+
+Software verification for the hotplug correction: Default esp32dev build passed;
+51 affected native tests passed, including five new FAT-geometry/FSInfo/UI tests.
+The SD lease test also checks explicit release at worker completion, repeated
+release and preservation of a subsequent owner's lock. Physical retest remains
+pending. The existing card/files have not been modified during development.
+
+On 2026-10-27 the user confirmed the hotplug web correction works. The remaining
+"Anzeigegrenze erreicht" message came from the original 150 ms directory budget,
+not a full card. The asynchronous listing now allows 2 seconds per read request;
+a time-limited partial page offers Next at the number of entries actually shown.
+A zero-entry timeout asks for refresh and cannot generate a zero-progress Next
+loop. The 1024-offset limit remains a separate hard listing bound.
+
+
+## Isolated physical rotation test
+
+The SD page offers **Rotation und Speicherbudget testen**, with an explanation
+page and explicit POST start. This is not a startup test. It uses the same
+`SpiSdLogStorage` append/rotation/pruning implementation as normal recording,
+with fixed internal test limits of 8 KiB per file and 24 KiB total. Production
+limits remain 1 MiB / 32 MiB. It does not fill the card or change configuration.
+
+A worker acquires the exclusive SD lease and creates the first absent
+`/envnode-rotation-test-00` through `-31` directory using exclusive mkdir.
+Preexisting directories are skipped. A media fingerprint is captured before
+creation and required before every batch, verification and cleanup. Keep the
+card inserted during the test; this fingerprint has the cloned-media limitation
+documented above. No other SD operation overlaps, while HTTP/main runtime remain
+serviced and normal log entries buffer in RAM (overflow counting still applies).
+
+The test writes 18 deterministic 2048-byte JSONL batches, 36 KiB of payload plus
+session headers. With the scaled limits this creates six parts, three batches per
+part. The oldest three must disappear, leaving exactly parts 4–6 within budget.
+It verifies their sizes, exact data bytes and EOF, and verifies an unmanaged
+`keep.txt` sentinel was not removed by pruning. It then removes only the bounded
+set of filenames this test could create, its own sentinel and its own directory.
+There is no recursive deletion, and production `/logs/system` is untouched.
+
+PASS requires file rotation, pruning, preserved sentinel, content verification
+and successful cleanup. No cleanup retry happens automatically after reboot or
+on a different card; if cleanup fails, the result reports the leftover test path.
+A card/filesystem failure reports FAIL. The test can run with SD access enabled
+and system-log recording disabled. Its result page polls atomically published
+completion, and a summary appears in the normal system log:
+
+```
+SD rotation test: PASS rotation=1 pruning=1 preserved=1 content=1 cleanup=1 ...
+```
+
+This qualifies rotation/pruning on real SPI/FAT media with small limits. It does
+not simulate a physically full card or replace prolonged testing at the full
+production budget. The first physical execution is still pending.
+
+Implementation verification: Default esp32dev builds passed; 56 affected native
+tests passed, including four new rotation-test fixture/policy/result tests.
+The four tests were repeated successfully after adding the repeat-test form.
+No test was remotely started on the device; physical execution is pending.
+
+
+### Rotation diagnostic mount correction — 2026-10-27
+
+The first physical rotation diagnostic created keep.txt and two complete
+6241-byte parts, then failed at a later FAT VFS registration with 0x101. The
+cleanup remount failed too. Verification had not run, so its result flags were
+still zero despite successful initial writes. The exact resource-pressure cause
+is not proven; 0x101 can indicate unavailable FAT contexts or allocator memory.
+The existing test directory remained readable afterward.
+
+The isolated diagnostic now owns one mount for workspace creation, all eighteen
+writes, inspection and cleanup. It reuses the same mounted append/pruning backend;
+normal recording retains its existing per-batch mount behavior. The mount is
+released once, after cleanup, including all error paths. Native lifecycle tests
+cover success, initial mount failure, workspace failure and simultaneous write/
+cleanup failure. A cleanup error no longer overwrites the primary failure stage.
+Failures also log start/finish heap and largest-allocation values for further
+hardware diagnosis. See the [SDK VFS registration implementation](https://github.com/espressif/esp-idf/blob/v4.4.7/components/fatfs/vfs/vfs_fat.c#L112).
+
+Default esp32dev build and 24 affected native tests passed after this correction.
+Physical retry passed all five checks on 2026-10-27. The existing /envnode-rotation-test-00 workspace is
+preserved; the retry chooses the next unused directory instead of reusing it.
+
+The physical result was initially visible only after a manual browser refresh.
+The progress page now polls a small status response every two seconds, replaces
+its result section on completion and retries temporary network errors without
+navigating away from the visible page. Manual result navigation remains available.
+This UI correction does not establish the cause of the observed 25-second stale
+measurement warning during the test; that remains a separate investigation.
+
+Refresh correction validation: 16 affected native tests passed; a JavaScript
+execution check covered running status, transient fetch failure, completion and
+stopping further polls. Default esp32dev firmware build passed. Physical browser
+verification of the new polling behavior passed on 2026-10-27: the result appears
+automatically without manual refresh.
+
+A subsequent physical run passed rotation but showed a transient FAT VFS
+registration error, a system-log retry and a 20-second measurement delay. These
+are not considered resolved by the rotation PASS. Diagnostic output now labels
+failed mount operations (including before/after heap and largest allocation),
+reports rotation phase durations and reports WebServer calls exceeding one
+second. This distinguishes background SD work from a blocking HTTP request
+without silently retrying or changing mount ownership.
+
+Diagnostic instrumentation validation: 16 affected native tests and the normal
+esp32dev build passed. The next hardware run is needed to localize the remaining
+mount failure and main-loop latency.
+
+Checkpoint before WebServer latency investigation (2026-10-27): the latest
+physical run passed all five rotation checks and automatic result display, with
+no mount or recording error in that run. Rotation itself took 3707 ms (mount
+54 ms, writes 2391 ms, verification 354 ms, cleanup 406 ms), whereas a WebServer
+handleClient call took 7911 ms. The route was empty after request handling, so
+this instrumentation does not yet identify the request or distinguish parsing,
+rendering and sending. Blocking HTTP latency remains open; the earlier sporadic
+FAT VFS registration failure is also not considered fixed by one clean run.

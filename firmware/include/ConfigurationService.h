@@ -16,6 +16,7 @@ public:
     const Configuration& getConfiguration() const override;
     Locale getLocale() const override;
 
+    bool setSdStorageConfiguration(const SdStorageConfiguration&) override;
     bool setPressureReduction(const PressureReductionConfiguration& configuration) override;
     bool setGeoPosition(const GeoPosition& position) override;
     bool setDeviceName(const String& deviceName) override;
@@ -91,7 +92,8 @@ private:
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots,
-        const DisplayConfiguration* display = nullptr) const;
+        const DisplayConfiguration* display = nullptr,
+        const SdStorageConfiguration* sdStorage = nullptr) const;
 
     const IOnOffActuatorResolver* actuatorResolver_ = nullptr;
     ILogger* logger_ = nullptr;

@@ -5,6 +5,8 @@
 #include "Logger.h"
 namespace EnvNode {
 struct SdCardDiagnosticInfo {
+    bool spaceUsageKnown=true;
+    bool spaceUsageEstimated=false;
     const char* type = "unknown";
     uint64_t cardBytes = 0;
     uint64_t filesystemBytes = 0;

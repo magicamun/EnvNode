@@ -82,9 +82,12 @@ SdCardDiagnosticResult runSdCardDiagnostic(ISdCardDiagnosticDevice& device, ILog
     const SdCardDiagnosticInfo info = device.information();
     logger.infof("SD diagnostic: type=%s card_bytes=%llu", info.type,
         static_cast<unsigned long long>(info.cardBytes));
-    logger.infof("SD diagnostic: filesystem_bytes=%llu used_bytes=%llu root=%s",
-        static_cast<unsigned long long>(info.filesystemBytes),
-        static_cast<unsigned long long>(info.usedBytes), info.rootReadable ? "readable" : "unreadable");
+    char used[40];
+    if(info.spaceUsageKnown) snprintf(used,sizeof(used),"%s%llu",info.spaceUsageEstimated ? "approx:" : "",
+        static_cast<unsigned long long>(info.usedBytes));
+    else strcpy(used,"unknown");
+    logger.infof("SD diagnostic: filesystem_bytes=%llu used_bytes=%s root=%s",
+        static_cast<unsigned long long>(info.filesystemBytes),used,info.rootReadable ? "readable" : "unreadable");
     const bool passed = info.cardBytes > 0 && info.filesystemBytes > 0
         && info.filesystemBytes <= info.cardBytes
         && info.usedBytes <= info.filesystemBytes && info.rootReadable;

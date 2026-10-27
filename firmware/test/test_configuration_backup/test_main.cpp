@@ -5,6 +5,7 @@
 #include "ConfigurationBackup.h"
 #include "ConfigurationService.h"
 #include "PressureReductionWebView.h"
+#include "BoardProfile.h"
 #include <string>
 using namespace EnvNode;
 HardwareSerial Serial;
@@ -55,7 +56,7 @@ void test_reject_malformed_and_incompatible() {
     String backup; Configuration candidate; bool passwords;
     TEST_ASSERT_TRUE(encodeConfigurationBackup(service.getConfiguration(), false, "", backup));
     for (const auto& input : {
-            replace(backup, "\"version\": \"3\"", "\"version\": \"4\""),
+            replace(backup, "\"version\": \"4\"", "\"version\": \"99\""),
             replace(backup, "\"boardProfile\": \"0\"", "\"boardProfile\": \"255\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"65536\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"-1\""),
@@ -254,7 +255,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
     auto end = legacy.find("\"device.name\"", begin);
     TEST_ASSERT_TRUE(begin != std::string::npos && end != std::string::npos);
     legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"3\"", "\"version\": \"1\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"4\"", "\"version\": \"1\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, decoded, passwords));
     TEST_ASSERT_FALSE(decoded.geoPosition.altitude.configured);
     TEST_ASSERT_FALSE(decoded.geoPosition.latitude.configured);
@@ -267,7 +268,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
         const size_t length = record[i] | (record[i + 1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data() + i), length); i += length;
     }
-    fields[1] = "1"; fields.erase(fields.begin() + 6, fields.begin() + 14);
+    fields[1] = "1"; fields.erase(fields.begin() + 6, fields.begin() + 17);
     record.clear();
     for (const auto& field : fields) {
         record.push_back(field.size() & 255); record.push_back(field.size() >> 8);
@@ -331,7 +332,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     TEST_ASSERT_EQUAL(1, rebooted.getConfiguration().pressureReduction.temperatureSensorId);
     std::string legacy(backup.c_str()); auto begin = legacy.find("\"pressure.temperatureSensorId\"");
     auto end = legacy.find("\"device.name\"", begin); legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"3\"", "\"version\": \"2\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"4\"", "\"version\": \"2\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, candidate, passwords));
     TEST_ASSERT_EQUAL(0, candidate.pressureReduction.temperatureSensorId);
     TEST_ASSERT_TRUE(candidate.geoPosition.altitude.configured); TEST_ASSERT_EQUAL_FLOAT(694, candidate.geoPosition.altitude.value);
@@ -341,7 +342,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
         size_t size = record[i] | (record[i+1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data()+i), size); i += size;
     }
-    fields[1] = "2"; fields.erase(fields.begin()+12, fields.begin()+14); record.clear();
+    fields[1] = "2"; fields.erase(fields.begin()+12, fields.begin()+17); record.clear();
     for (const auto& field : fields) {
         record.push_back(field.size() & 255); record.push_back(field.size() >> 8);
         record.insert(record.end(), field.begin(), field.end());
@@ -352,8 +353,53 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     current.sensorSlots[0].enabled = false; TEST_ASSERT_FALSE(service.validateRestore(current));
     TEST_ASSERT_TRUE(service.resetToDefaults()); TEST_ASSERT_EQUAL(0, service.getConfiguration().pressureReduction.temperatureSensorId);
 }
+void test_sd_claims_prevent_gpio_conflicts_in_both_directions() {
+    ConfigurationService service;service.loadConfiguration();
+    const auto* slot=boardModuleSlot(currentBoardProfile(),ModuleSlot::A);TEST_ASSERT_NOT_NULL(slot);
+    auto sensor=service.getConfiguration().sensorSlots[3];
+    sensor.hardware=HardwareResourceAssignment::gpioResource(GpioResource(23));
+    sensor.implementationConfiguration.am2302.gpio=GpioResource(23);
+    TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(sensor));
+    SdStorageConfiguration sd;sd.enabled=true;
+    TEST_ASSERT_FALSE(service.setSdStorageConfiguration(sd));
+    sensor.enabled=false;sensor.schedule.enabled=false;TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(sensor));
+    TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
+    sensor.enabled=true;sensor.schedule.enabled=true;TEST_ASSERT_FALSE(service.setSensorSlotConfiguration(sensor));
+    Configuration candidate=service.getConfiguration();candidate.sensorSlots[3]=sensor;
+    TEST_ASSERT_FALSE(service.validateRestore(candidate));
+}
+
+void test_sd_settings_persist_backup_and_fail_safely() {
+    ConfigurationService service;service.loadConfiguration();
+    TEST_ASSERT_FALSE(service.getConfiguration().sdStorage.enabled);
+    SdStorageConfiguration sd;sd.enabled=true;sd.slot=ModuleSlot::B;sd.systemLog=true;
+    TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
+    ConfigurationService rebooted;rebooted.loadConfiguration();
+    TEST_ASSERT_TRUE(rebooted.getConfiguration().sdStorage.enabled);
+    TEST_ASSERT_TRUE(rebooted.getConfiguration().sdStorage.systemLog);
+    TEST_ASSERT_EQUAL_INT(1,static_cast<int>(rebooted.getConfiguration().sdStorage.slot));
+    String backup;bool passwords;Configuration candidate;
+    TEST_ASSERT_TRUE(encodeConfigurationBackup(rebooted.getConfiguration(),true,"",backup));
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),candidate,passwords));
+    TEST_ASSERT_TRUE(candidate.sdStorage.enabled && candidate.sdStorage.systemLog);
+    TEST_ASSERT_TRUE(service.validateRestore(candidate));
+    std::string legacy(backup.c_str());
+    const auto first=legacy.find("\"sd.enabled\"");const auto end=legacy.find("\"device.name\"",first);
+    legacy.erase(first,end-first);
+    const String old=replace(String(legacy.c_str()),"\"version\": \"4\"","\"version\": \"3\"");
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(old,service.getConfiguration(),candidate,passwords));
+    TEST_ASSERT_FALSE(candidate.sdStorage.enabled);TEST_ASSERT_FALSE(candidate.sdStorage.systemLog);
+    Preferences::failUIntKey()="sdStorage";sd.enabled=false;
+    TEST_ASSERT_FALSE(service.setSdStorageConfiguration(sd));
+    TEST_ASSERT_TRUE(service.getConfiguration().sdStorage.enabled);
+    Preferences::failUIntKey()=String();
+    TEST_ASSERT_TRUE(service.resetToDefaults());TEST_ASSERT_FALSE(service.getConfiguration().sdStorage.enabled);
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_sd_settings_persist_backup_and_fail_safely);
+    RUN_TEST(test_sd_claims_prevent_gpio_conflicts_in_both_directions);
     RUN_TEST(test_pressure_temperature_configuration_validation_persistence_and_web_filter);
     RUN_TEST(test_temperature_settings_backup_v3_and_v2_migration);
     RUN_TEST(test_geoposition_validation_persistence_and_empty_override);

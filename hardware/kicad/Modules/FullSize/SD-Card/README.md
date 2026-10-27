@@ -113,15 +113,21 @@ This is a CAD review, not a completed physical bring-up or field validation.
 
 ## Initial SPI breakout diagnostic
 
-A one-shot Slot A read/write diagnostic is available in the explicit
-`esp32dev_sd_diagnostics` firmware environment. See the
+SD access is included in the normal `esp32dev` / Default firmware. Select and
+enable the wired slot on the SD page; the read/write diagnostic is an explicit
+button and no longer runs at startup. See the
 [SPI bring-up procedure](../../../../../docs/SdCardSpiBringup.md) for wiring,
 build selection, expected logs and limitations. Physical read/CD validation is
 confirmed, including the 4096-byte write/read comparison. The web directory page is
 physically validated. File download and confirmed deletion were also physically
 confirmed working on 2026-10-26. Explicitly confirmed FAT32 formatting is now
-available in the same lab build and was also confirmed working on the Mini on
+available and was also confirmed working on the Mini on
 2026-10-26.
+
+Buffered system-log recording and shared SD ownership are implemented in the
+Default build. Recording, download rotation, hotplug writing recovery and reset
+persistence have been physically confirmed. The hotplug directory-web correction
+from 2026-10-27 still awaits its physical retest.
 
 ## Open work
 

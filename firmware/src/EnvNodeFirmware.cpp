@@ -44,6 +44,8 @@
 #include "MqttDescriptionPublisher.h"
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
+#include "SdSystemLogService.h"
+#include "SdStorageArbiter.h"
 #include "SystemLogTimeProvider.h"
 #include "IdentityEeprom24LC32.h"
 #include "BoardIdentityResolver.h"
@@ -51,9 +53,6 @@
 #include "HardwareDescriptorStore.h"
 #include "ModuleDescriptorProvisioningService.h"
 #include "ModuleActuatorComposer.h"
-#if defined(ENVNODE_SD_DIAGNOSTICS)
-#include "SdCardSpiDiagnostic.h"
-#endif
 
 namespace EnvNode {
 namespace {
@@ -62,7 +61,13 @@ static ArduinoMonotonicClock monotonicClock;
 static SystemLogTimeProvider logTimeProvider(monotonicClock);
 static RecentLogStore recentLogStore;
 static SerialLogger serialLogSink;
-static StructuredLogger logger(recentLogStore, logTimeProvider, serialLogSink);
+class SystemLogOutputs : public ILogEntrySink {
+public:
+    void begin(unsigned long baud) override {serialLogSink.begin(baud);}
+    void write(const LogEntry& entry) override {serialLogSink.write(entry);enqueueSdSystemLog(entry);}
+};
+static SystemLogOutputs systemLogOutputs;
+static StructuredLogger logger(recentLogStore, logTimeProvider, systemLogOutputs);
 static ActuatorFactory actuatorFactory(logger);
 static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
 static I2CBusManager i2cBusManager(logger, EnvNodeIdentityI2C);
@@ -209,21 +214,20 @@ void setupEnvNodeFirmware() {
     const bool sensorsInitialized = sensorRuntime.initialize(
         activeSensorCount, sensorFailureReason);
     app.setup(true);
+    beginSdSystemLog(configuration,actuatorRuntime,recentLogStore,logger);
     if (!sensorsInitialized) {
         logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
     }
-#if defined(ENVNODE_SD_DIAGNOSTICS)
-    // One-shot lab test before the normal loop; no SD work in the measurement loop.
-    runSdCardSpiDiagnostic(ModuleSlot::A, currentBoardProfile(), configuration,
-        moduleActuatorComposer.definitions(), moduleActuatorComposer.count(), logger);
-#endif
+
     normalRuntimeStarted = true;
 }
 
 void loopEnvNodeFirmware() {
     if (normalRuntimeStarted) {
         app.loop();
+        setSdRuntimeStable(!runtimeManager.restartRequired());
+        serviceSdSystemLog(configurationService.getConfiguration(),actuatorRuntime,logger);
     }
 }
 

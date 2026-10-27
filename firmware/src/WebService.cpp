@@ -1,3 +1,4 @@
+#include "SdCardSpiDiagnostic.h"
 #include "TextUpload.h"
 #include "WebResult.h"
 #include "InstanceUuidWebText.h"
@@ -501,6 +502,10 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/configuration/cancel", HTTP_POST, [this]() {
         restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
     });
+    server.on("/sd-card/settings", HTTP_POST, [this]() { handleSdSettings(); });
+    server.on("/sd-card/rotation-test", HTTP_GET, [this]() { handleSdRotationPreview(); });
+    server.on("/sd-card/rotation-test", HTTP_POST, [this]() { handleSdRotationStart(); });
+    server.on("/sd-card/test", HTTP_POST, [this]() { handleSdTest(); });
     server.on("/sd-card/format", HTTP_GET, [this]() { handleSdFormatPreview(); });
     server.on("/sd-card/format", HTTP_POST, [this]() { handleSdFormat(); });
     server.on("/sd-card/download", HTTP_GET, [this]() { handleSdDownload(); });
@@ -530,6 +535,23 @@ void WebService::registerRoutes(WebServer& server) {
 }
 
 void WebService::loop() {
+    if(sdRotationTest_ && sdRotationTest_->done() && !sdRotationTestReported_) {
+        sdRotationTestReported_=true;
+        const auto& r=sdRotationTest_->result();
+        logger_.infof("SD rotation test: %s rotation=%u pruning=%u preserved=%u content=%u cleanup=%u step=%s errno=%d directory=%s",
+            r.passed() ? "PASS" : "FAIL",r.rotation,r.pruning,r.foreignFile,r.content,r.cleanup,r.stage,r.error,r.directory);
+        logger_.infof("SD rotation timing: elapsed_ms=%lu mount_ms=%lu write_ms=%lu verify_ms=%lu cleanup_ms=%lu",
+            static_cast<unsigned long>(r.elapsedMs),static_cast<unsigned long>(r.mountMs),
+            static_cast<unsigned long>(r.writeMs),static_cast<unsigned long>(r.verifyMs),static_cast<unsigned long>(r.cleanupMs));
+        if(!r.passed()) logger_.warnf("SD rotation memory: start_heap=%u start_largest=%u finish_heap=%u finish_largest=%u cleanup_errno=%d",
+            static_cast<unsigned>(r.startHeap),static_cast<unsigned>(r.startLargest),
+            static_cast<unsigned>(r.finishHeap),static_cast<unsigned>(r.finishLargest),r.cleanupError);
+    }
+    if(sdDirectory_ && !sdDirectory_->done() && !sdDirectorySlowReported_ && millis()-sdDirectoryStarted_>=3000) {
+        sdDirectorySlowReported_=true;
+        logger_.warnf("SD directory read slow: elapsed_ms=%lu done=%u; web loop remains active",
+            static_cast<unsigned long>(millis()-sdDirectoryStarted_),sdDirectory_->done());
+    }
     if (sdFormat_) {
         const auto state=sdFormat_->state();
         if(state==SdFormatState::Running) return; // Other runtime services continue; HTTP/OTA/SD remain serialized.
@@ -545,7 +567,12 @@ void WebService::loop() {
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }
+    const uint32_t started=millis();
     webHost_.loop();
+    const uint32_t elapsed=millis()-started;
+    if(elapsed>=1000) logger_.warnf("Web request slow: elapsed_ms=%lu route=%s heap=%u largest=%u",
+        static_cast<unsigned long>(elapsed),server_.uri().c_str(),
+        static_cast<unsigned>(ESP.getFreeHeap()),static_cast<unsigned>(ESP.getMaxAllocHeap()));
 }
 
 bool WebService::administrationAvailable() const { return webHost_.administrationAvailable(); }

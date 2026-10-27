@@ -64,7 +64,20 @@ void test_parent_limit_and_navigation() {
     const String nav=buildWebNavigationHtml("/sd-card",Locale::GermanGermany);
     TEST_ASSERT_NOT_NULL(strstr(nav.c_str(),"href='/sd-card' class='active'"));
 }
+void test_time_limit_allows_continuation_after_partial_page() {
+    SdDirectorySnapshot s;s.status=SdDirectoryStatus::Ready;s.timedOut=true;s.more=true;s.count=3;
+    s.entries[0].name="one";s.entries[1].name="two";s.entries[2].name="three";
+    const String html=renderSdDirectory(s,Locale::GermanGermany);
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"offset=3"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"Lesezeit"));
+    TEST_ASSERT_NULL(strstr(html.c_str(),"kleinere Unterverzeichnisse"));
+    s.count=0;s.more=false;
+    const String empty=renderSdDirectory(s,Locale::EnglishUnitedStates);
+    TEST_ASSERT_NULL(strstr(empty.c_str(),">Next<"));
+    TEST_ASSERT_NOT_NULL(strstr(empty.c_str(),"refresh"));
+}
 int main() { UNITY_BEGIN();
+    RUN_TEST(test_time_limit_allows_continuation_after_partial_page);
     RUN_TEST(test_mount_path_fits_legacy_fat_vfs_unregister_storage);
     RUN_TEST(test_paths_reject_traversal_and_controls);
     RUN_TEST(test_urls_encode_names_without_turning_them_into_query_parameters);
