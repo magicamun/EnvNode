@@ -64,8 +64,9 @@ Provisioning and continuity are separate operating phases.
 
 The `testboard` PlatformIO target currently provides a guided simulation; physical
 mux/ADC control and provisioning operations are not yet implemented. The split
-fixture requires 40 logical inputs (38 socket pads plus two references), the J8
-GPIO assignments above, and matching board-revision profiles. Do not equate
+fixture mapping and J8 GPIO assignments above are implemented in firmware 0.4.0.
+Its simulation supports profiles with 38 or 40 inputs (38 socket pads plus two
+references); new reference-aware mainboard profiles remain to be added. Do not equate
 MB_GND with supply GND or MB_3V3_SYS with DevKit 3V3. Measurement thresholds,
 diode effects and settling times require validation on assembled hardware.
 

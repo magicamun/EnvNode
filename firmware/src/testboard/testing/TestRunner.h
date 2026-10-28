@@ -33,7 +33,8 @@ private:
     size_t step_ = 0, completed_ = 0;
     uint32_t lastSample_ = 0, generation_ = 0;
     bool pathReady_ = false;
-    Result results_[MaxConnectors][MaxContacts * SocketPins] = {};
+    size_t inputCount() const { return board_ ? board_->inputCount : 0; }
+    Result results_[MaxConnectors][MaxContacts * MaxInputs] = {};
     uint16_t completedByConnector_[MaxConnectors] = {};
     Verdict verdicts_[MaxConnectors] = {};
     Verdict contactVerdicts_[MaxConnectors][MaxContacts] = {};

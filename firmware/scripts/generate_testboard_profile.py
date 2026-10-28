@@ -174,7 +174,7 @@ def generate_profile(profile):
         model += f'    {{"{c["id"]}", Pigtail::{kind}, {len(c["pins"])}, {symbol}Contacts{i}}},\n'
     model += f'}};\nstatic const BoardDefinition {symbol}Board{{'
     model += ', '.join(json.dumps(definition[k]) for k in ('id', 'name', 'identityRevision', 'pcbRevision'))
-    model += f', {symbol}Socket, {symbol}Connectors, sizeof({symbol}Connectors) / sizeof({symbol}Connectors[0])}};\n'
+    model += f', {symbol}Socket, {symbol}Connectors, sizeof({symbol}Connectors) / sizeof({symbol}Connectors[0]), SocketPins}};\n'
     assets = f'static const char {symbol}DefinitionJson[] PROGMEM = R"BOARD(' + json.dumps(definition, separators=(',', ':')) + ')BOARD";\n'
     assets += f'static const uint8_t {symbol}SvgGzip[] PROGMEM = {{\n'
     assets += '\n'.join(','.join(str(n) for n in zipped[i:i+32]) + ',' for i in range(0, len(zipped), 32))

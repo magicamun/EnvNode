@@ -5,27 +5,28 @@ namespace EnvNode { namespace Testing {
 const Connector* TestRunner::connector() const {
     return board_ && step_ < board_->count ? &board_->connectors[step_] : nullptr;
 }
-Result TestRunner::result(size_t i) const { return step_ < MaxConnectors && i < MaxContacts * SocketPins ? results_[step_][i] : Result::Error; }
+Result TestRunner::result(size_t i) const { return step_ < MaxConnectors && i < MaxContacts * MaxInputs ? results_[step_][i] : Result::Error; }
 Verdict TestRunner::verdict(size_t i) const { return i < MaxConnectors ? verdicts_[i] : Verdict::Failed; }
 bool TestRunner::load(const BoardDefinition& board) {
-    if (phase_ == Phase::Running || !board.socket || !board.connectors || !board.count || board.count > MaxConnectors) return false;
+    if (phase_ == Phase::Running || !board.socket || !board.connectors || !board.count || board.count > MaxConnectors
+        || (board.inputCount != SocketPins && board.inputCount != MaxInputs)) return false;
     for (size_t i = 0; i < board.count; ++i) {
         const auto& c = board.connectors[i];
         if (!c.contacts || c.count != (c.pigtail == Pigtail::Module ? MaxContacts : 4)) return false;
         for (size_t p = 0; p < c.count; ++p)
-            if (c.contacts[p].number != p + 1 || (c.contacts[p].expected >> SocketPins)) return false;
+            if (c.contacts[p].number != p + 1 || (c.contacts[p].expected >> board.inputCount)) return false;
     }
-    for (size_t p = 0; p < SocketPins; ++p) if (board.socket[p].number != p + 1) return false;
+    for (size_t p = 0; p < board.inputCount; ++p) if (board.socket[p].number != p + 1) return false;
     for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(contactVerdicts_[i], MaxContacts, Verdict::Untested);
     fixture_.release(); board_ = &board; step_ = completed_ = 0;
-    for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(results_[i], MaxContacts * SocketPins, Result::Pending);
+    for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(results_[i], MaxContacts * MaxInputs, Result::Pending);
     std::fill_n(completedByConnector_, MaxConnectors, 0);
     std::fill_n(verdicts_, MaxConnectors, Verdict::Untested);
     phase_ = Phase::AwaitingConnection; ++generation_; return true;
 }
 bool TestRunner::start(uint32_t now) {
     if ((phase_ != Phase::AwaitingConnection && phase_ != Phase::Review) || !connector()) return false;
-    std::fill_n(results_[step_], MaxContacts * SocketPins, Result::Pending);
+    std::fill_n(results_[step_], MaxContacts * MaxInputs, Result::Pending);
     std::fill_n(contactVerdicts_[step_], MaxContacts, Verdict::Untested);
     verdicts_[step_] = Verdict::Untested;
     completedByConnector_[step_] = 0;
@@ -33,8 +34,8 @@ bool TestRunner::start(uint32_t now) {
     pathReady_ = select(); return true;
 }
 bool TestRunner::select() {
-    const bool selected = fixture_.select(connector()->pigtail, static_cast<uint8_t>(completed_ / SocketPins + 1),
-        static_cast<uint8_t>(completed_ % SocketPins + 1));
+    const bool selected = fixture_.select(connector()->pigtail, static_cast<uint8_t>(completed_ / inputCount() + 1),
+        static_cast<uint8_t>(completed_ % inputCount() + 1));
     if (!selected) fixture_.release();
     return selected;
 }
@@ -47,12 +48,12 @@ void TestRunner::tick(uint32_t now) {
         sample = ITestFixture::Sample::Error;
     }
     if (sample == ITestFixture::Sample::Error) fixture_.release();
-    const bool expected = (connector()->contacts[completed_ / SocketPins].expected >> (completed_ % SocketPins)) & 1;
+    const bool expected = (connector()->contacts[completed_ / inputCount()].expected >> (completed_ % inputCount())) & 1;
     results_[step_][completed_] = sample == ITestFixture::Sample::Error ? Result::Error
         : connected ? (expected ? Result::Connected : Result::Unexpected)
                     : (expected ? Result::Open : Result::Isolated);
     ++completed_; completedByConnector_[step_] = completed_; lastSample_ = now;
-    if (completed_ == connector()->count * SocketPins) finish();
+    if (completed_ == connector()->count * inputCount()) finish();
     else pathReady_ = select();
 }
 void TestRunner::finish() {
@@ -62,7 +63,7 @@ void TestRunner::finish() {
     for (size_t i = 0; i < connector()->count; ++i) incomplete |= connector()->contacts[i].expected == 0;
     for (size_t p = 0; p < connector()->count; ++p) {
         bool rowFailed = false;
-        for (size_t s = 0; s < SocketPins; ++s) rowFailed |= results_[step_][p * SocketPins + s] >= Result::Unexpected;
+        for (size_t s = 0; s < inputCount(); ++s) rowFailed |= results_[step_][p * inputCount() + s] >= Result::Unexpected;
         contactVerdicts_[step_][p] = rowFailed ? Verdict::Failed
             : connector()->contacts[p].expected ? Verdict::Passed : Verdict::Incomplete;
     }

@@ -7,6 +7,7 @@
 #include "RecentLogStore.h"
 #include "Update.h"
 #include "testing/TestWebRoutes.h"
+#include "testing/FixtureRouting.h"
 #include <vector>
 using namespace EnvNode::Testing;
 using namespace EnvNode;
@@ -323,8 +324,77 @@ void test_whole_board_action_is_removed_and_cannot_start_measurement() {
     f.server().request("/test/ui.js", HTTP_GET);
     TEST_ASSERT_NULL(strstr(f.server().responseBody.c_str(), "test-all"));
 }
+
+void test_fixture_revision01_resolves_all_physical_channels_and_gpio_controls() {
+    const auto& f = fixtureRevision01();
+    const uint8_t select[] = {32,25,27,13}, enables[] = {14,26,33};
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(select, f.inputSelect, 4);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(enables, f.inputEnable, 3);
+    const uint8_t outSelect[] = {18,19,21,22}, outEnable[] = {23,4};
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(outSelect, f.outputSelect, 4);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(outEnable, f.outputEnable, 2);
+    TEST_ASSERT_EQUAL(34, f.sense); TEST_ASSERT_EQUAL(17, f.drive);
+    TEST_ASSERT_EQUAL(16, f.provisioningSda); TEST_ASSERT_EQUAL(5, f.provisioningScl);
+    const uint8_t device[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,0,0,0,0,0,0,0,0,2,2};
+    const uint8_t channel[] = {7,6,5,4,3,2,1,0,7,6,5,4,3,2,7,6,5,4,3,12,11,10,9,8,13,12,11,10,9,8,15,14,13,12,11,10,9,8,13,14};
+    bool used[3][16] = {};
+    for (size_t i = 0; i < MaxInputs; ++i) {
+        MuxAddress source{}, destination{};
+        TEST_ASSERT_TRUE(resolveFixturePath(Pigtail::Gpio, 1, i+1, source, destination));
+        TEST_ASSERT_EQUAL(0, source.device); TEST_ASSERT_EQUAL(8, source.channel);
+        TEST_ASSERT_EQUAL(device[i], destination.device); TEST_ASSERT_EQUAL(channel[i], destination.channel);
+        TEST_ASSERT_FALSE(used[destination.device][destination.channel]);
+        used[destination.device][destination.channel] = true;
+    }
+    for (uint8_t p = 1; p <= 4; ++p) {
+        MuxAddress source{}, destination{};
+        TEST_ASSERT_TRUE(resolveFixturePath(Pigtail::I2c, p, 39, source, destination));
+        TEST_ASSERT_EQUAL(0, source.device); TEST_ASSERT_EQUAL(8-p, source.channel);
+    }
+    for (uint8_t p = 1; p <= 14; ++p) {
+        MuxAddress source{}, destination{};
+        TEST_ASSERT_TRUE(resolveFixturePath(Pigtail::Module, p, 40, source, destination));
+        TEST_ASSERT_EQUAL(1, source.device); TEST_ASSERT_EQUAL(p <= 7 ? 8-p : 22-p, source.channel);
+    }
+    MuxAddress source{9,9}, destination{9,9};
+    TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Gpio, 5, 1, source, destination));
+    TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Module, 0, 1, source, destination));
+    TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Module, 15, 1, source, destination));
+    TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Gpio, 1, 0, source, destination));
+    TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Gpio, 1, 41, source, destination));
+    TEST_ASSERT_FALSE(resolveFixturePath(static_cast<Pigtail>(255), 1, 1, source, destination));
+    TEST_ASSERT_EQUAL(9, source.device); TEST_ASSERT_EQUAL(9, destination.device);
+}
+void test_40_input_profile_checks_references_without_reading_past_old_socket_tables() {
+    SocketContact inputs[MaxInputs];
+    for (size_t i=0; i<SocketPins; ++i) inputs[i]=weatherBoard().socket[i];
+    inputs[38] = {39, "MB_3V3_SYS", 0, 0}; inputs[39] = {40, "MB_GND", 0, 0};
+    Contact contacts[4];
+    for (size_t i=0; i<4; ++i) contacts[i]=weatherBoard().connectors[0].contacts[i];
+    contacts[0].expected |= 1ULL << 39;
+    contacts[3].expected = 1ULL << 38;
+    const Connector connector{"GPIO16",Pigtail::Gpio,4,contacts};
+    BoardDefinition board = weatherBoard(); board.socket=inputs; board.connectors=&connector;
+    board.count=1; board.inputCount=40;
+    SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now=0;
+    TEST_ASSERT_TRUE(runner.load(board)); fixture.connect(board,0,SimulatedFault::None);
+    TEST_ASSERT_TRUE(runner.start(now)); finish(runner,now);
+    TEST_ASSERT_EQUAL(160,runner.completed()); TEST_ASSERT_EQUAL(Verdict::Passed,runner.overall());
+    TEST_ASSERT_EQUAL(Result::Connected,runner.result(39));
+    TEST_ASSERT_EQUAL(Result::Connected,runner.result(3*40+38));
+    BoardDefinition invalid = board; invalid.inputCount=39;
+    TEST_ASSERT_FALSE(runner.load(invalid)); invalid.inputCount=41;
+    TEST_ASSERT_FALSE(runner.load(invalid)); invalid=board; contacts[3].expected=1ULL<<40;
+    TEST_ASSERT_FALSE(runner.load(invalid));
+    TEST_ASSERT_TRUE(runner.load(weatherBoard()));
+    fixture.connect(weatherBoard(),0,SimulatedFault::None); runner.start(now); finish(runner,now);
+    TEST_ASSERT_EQUAL(152,runner.completed()); TEST_ASSERT_EQUAL(Verdict::Incomplete,runner.overall());
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_fixture_revision01_resolves_all_physical_channels_and_gpio_controls);
+    RUN_TEST(test_40_input_profile_checks_references_without_reading_past_old_socket_tables);
     RUN_TEST(test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered);
     RUN_TEST(test_all_152_pairs_use_logical_pin_numbers_and_wait_for_operator);
     RUN_TEST(test_open_and_unexpected_connections_are_failures);

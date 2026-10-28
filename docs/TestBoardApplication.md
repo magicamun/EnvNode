@@ -11,27 +11,38 @@ Die drei Projekte [Test-Controller](../hardware/kicad/MainBoards/Test-Controller
 monolithische Test-Provisioning-Projekt. Die READMEs enthalten die aus den PCB-Daten
 geprüften Kabel-, GPIO- und Kanalzuordnungen.
 
-**Die nachfolgenden 38-Pin-Ablaufbeschreibungen dokumentieren den aktuellen
-Simulationsstand, noch nicht die umgebaute Hardware.** Diese benötigt 40 logische
-Eingänge: 1–38 bleiben Sockelpins, 39 ist MB_3V3_SYS (U6/I13), 40 MB_GND (U6/I14).
-IN_S0–S3: GPIO32/25/27/13; IN_EN1–3: GPIO14/26/33; COM_IN: GPIO34.
-Die Firmware muss dafür Datenmodell und FixtureRouting, Profilerzeugung und
-Abdeckung, Ergebnisindizierung, UI-Matrix und Tests gemeinsam erweitern.
-Die neuen Referenzen sind keine Sockelpins und benötigen eine eigene Darstellung.
-Bestehende Profile ohne Referenzabgriff bleiben unvollständig; eine bloße Erhöhung
-der Konstante SocketPins auf 40 würde unzulässig auf die 38-elementigen Tabellen
-zugreifen. Erwartete Pfade durch Schutzdioden müssen explizit modelliert werden.
-Die physische Multiplexersteuerung ist weiterhin nicht implementiert.
+Seit Testboard-Firmware **0.4.0** unterstützt der Ablauf Profile mit 38 oder 40
+logischen Eingängen. 1–38 bleiben Sockelpins, 39 ist MB_3V3_SYS (U6/I13),
+40 MB_GND (U6/I14). IN_S0–S3: GPIO32/25/27/13; IN_EN1–3: GPIO14/26/33;
+COM_IN: GPIO34. Ergebnisindizierung, Simulation und Browsermatrix verwenden die
+Eingangszahl des geladenen Profils. Alte Profile bleiben bei 38 Eingängen.
+
+`FixtureRouting` enthält jetzt die aus den drei gespeicherten Revision-0.1-PCBs
+abgeleitete Zuordnung aller 40 Eingänge und 22 Ausgangskontakte sowie die GPIOs.
+Die erzeugte Datei `firmware/testboard/fixture-rev0.1.json` dokumentiert die
+Quelldateien einschließlich SHA-256; Multiplexerindizes sind nullbasiert.
+
+```sh
+python3 firmware/scripts/generate_fixture_routing.py
+python3 firmware/scripts/generate_fixture_routing.py --check
+```
+
+Die vorhandenen Weather-0.2- und Mini-0.8-Profile bleiben unverändert bei 38
+Eingängen. Die nachfolgenden Zahlen und Abdeckungsaussagen beziehen sich auf
+diese alten Profile. Neue Profile für Mini 0.9 und Weather 0.3 müssen die
+Referenzkontakte und die gerichteten Schutzdiodenpfade ausdrücklich modellieren.
+Ein gleicher Netzname allein bildet diese Pfade nicht ab. Die physische
+Multiplexersteuerung und ADC-Auswertung sind weiterhin nicht implementiert.
 
 ## Vereinbarte Schichten
 
 1. **Verdrahtung des Prüfboards:** `FixtureRouting` ordnet die logischen
-   Sockelpins 1–38 sowie die Kontakte des GPIO-, I²C- und Modul-Pigtails jeweils
+   Eingänge 1–40 sowie die Kontakte des GPIO-, I²C- und Modul-Pigtails jeweils
    einem Multiplexer und Kanal zu. Diese Tabelle gehört zur Revision des
    Prüfboards. Die Leiterbahnführung bestimmt die Zuordnung; fortlaufende
    Kanäle oder symmetrische Verdrahtung werden nicht vorausgesetzt.
 2. **Definition des Prüflings:** Eine `BoardDefinition` gehört zu einem Boardtyp
-   und einer elektrischen Mainboard-Revision. Sie enthält die 38 Sockelkontakte,
+   und einer elektrischen Mainboard-Revision. Sie enthält die 38 Sockelkontakte und gegebenenfalls zwei Referenzkontakte,
    die Anschlussliste mit Pigtail-Typ und Kontaktzahl, Netznamen, erwartete
    Verbindungen und Darstellungspositionen. Der PCB-Patch und eine Prüfsumme
    dokumentieren den exakten Quelldatenstand. Diese Definition enthält keine
@@ -54,10 +65,9 @@ asynchrone Ausführung, ohne Netzwerk und Browser zu blockieren. Ein Messpfad oh
 Ergebnis läuft nach zwei Sekunden in einen Messfehler. Fehlgeschlagene Auswahl,
 Messfehler, Abschluss und Abbruch geben den Prüfpfad frei.
 
-Die physische Routingtabelle wird noch nicht ausgefüllt oder angesteuert. Sie
-muss aus dem finalen Prüfboard-PCB abgeleitet und gegen dessen Revision geprüft
-werden. Die vorhandenen uncommitteten Layoutänderungen werden nicht als finale
-Verdrahtung übernommen. Der Simulator schreibt keine GPIOs und startet kein I²C.
+Die physische Routingtabelle ist hinterlegt und wird bei der simulierten
+Pfadauswahl auf gültige Kontakte geprüft. Der Simulator schreibt keine GPIOs und
+startet kein I²C. Dies ersetzt keine Validierung der aufgebauten Hardware.
 
 ## Sollwerte und Abdeckung
 
@@ -202,7 +212,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-18 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+24 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
@@ -219,3 +229,18 @@ Der Katalog enthält Weather und Mini. Profile und Zeichnungen werden revisionsb
 Boardprofile und Zeichnungen sollen perspektivisch über docs.envnode angeboten und vom Prüf-ESP32 geladen werden. Eingebaute Profile bleiben als Offline-Grundbestand verfügbar. Erforderlich wären ein versionierter Katalog, validierte Datenformate und unveränderliche Profile je Board-/PCB-Revision; optional später ein lokaler Cache. Dies ist vorgemerkt und derzeit nicht implementiert.
 
 Die Boardansichten blenden Bauteilwerte aus; Referenzbezeichnungen bleiben sichtbar. Der Generator entfernt die Werte ausschließlich aus einer temporären Exportkopie, die KiCad-Quelldateien bleiben unverändert.
+
+## Nächste Ausbauschritte
+
+Nach der Routing-/40-Eingangs-Basis folgt die Übernahme der gemeinsamen
+Provisioning-Dienste und Webrouten über den dedizierten Bus GPIO16/5. Danach
+folgen die neuen Mainboardprofile und Remote-Profile. Boardwahl und Darstellung
+sollen von Prüfung und Provisioning gemeinsam verwendet werden.
+
+Remote-Profile sind noch nicht implementiert. Vorgesehen sind ein versioniertes
+Format, eingebaute Offline-Profile und eine Signaturprüfung mit fest eingebettetem
+Public Key. Eine gültige Signatur bestätigt Herkunft und Unverändertheit; zusätzliche
+Schema-, Revisions- und Werteprüfungen bleiben erforderlich. Ein Bildpfad und ein
+signierter Bild-Hash können die Darstellung an das Profil binden. Der Browser lädt
+das Bild direkt; der ESP braucht es nicht im RAM zwischenzuspeichern. Profil-Downloads
+sollen begrenzt und zunächst in Flash zwischengespeichert und validiert werden.

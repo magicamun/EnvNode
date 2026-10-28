@@ -11,6 +11,7 @@ public:
     void release() override { selected_ = false; }
 private:
     const Connector* connector_ = nullptr;
+    size_t inputCount_ = 0;
     SimulatedFault fault_ = SimulatedFault::None;
     uint8_t contact_ = 0, socket_ = 0;
     bool selected_ = false;

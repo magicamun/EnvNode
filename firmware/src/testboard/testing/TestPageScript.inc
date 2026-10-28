@@ -21,8 +21,8 @@ function drawing(){
 function matrix(c){
  shown=state.step;cells=[];$('test-matrix').replaceChildren();if(!c)return;
  const head=document.createElement('tr'), label=document.createElement('th');label.textContent=tr('Kontakt / Netz','Contact / net');head.appendChild(label);
- for(let p=1;p<=38;p++){const th=document.createElement('th');th.textContent=p;head.appendChild(th);}$('test-matrix').appendChild(head);
- c.pins.forEach(p=>{const row=document.createElement('tr'),th=document.createElement('th');th.textContent=`${p.number} · ${p.net}${p.covered?'':' ⚠'}`;row.appendChild(th);for(let n=1;n<=38;n++){const td=document.createElement('td');td.textContent='·';td.title=`${c.id}/${p.number} → ${n}: ${p.expected.includes(n)?tr('Durchgang erwartet','continuity expected'):tr('Trennung erwartet','isolation expected')}`;row.appendChild(td);cells.push(td);}$('test-matrix').appendChild(row);});
+ for(let p=1;p<=board.socket.length;p++){const th=document.createElement('th');th.textContent=board.socket[p-1].label||p;head.appendChild(th);}$('test-matrix').appendChild(head);
+ c.pins.forEach(p=>{const row=document.createElement('tr'),th=document.createElement('th');th.textContent=`${p.number} · ${p.net}${p.covered?'':' ⚠'}`;row.appendChild(th);for(let n=1;n<=board.socket.length;n++){const td=document.createElement('td');td.textContent='·';td.title=`${c.id}/${p.number} → ${n}: ${p.expected.includes(n)?tr('Durchgang erwartet','continuity expected'):tr('Trennung erwartet','isolation expected')}`;row.appendChild(td);cells.push(td);}$('test-matrix').appendChild(row);});
 }
 function paint(){
  const c=board.connectors[state.step], phase=state.phase, pendingBoard=$('test-board').value!==board.id;
@@ -31,18 +31,18 @@ function paint(){
  const active=[1,2,3].includes(phase)&&c;
  if(active){const xs=c.pins.map(p=>p.x),ys=c.pins.map(p=>p.y);for(const[k,v]of Object.entries({x:Math.min(...xs)-2,y:Math.min(...ys)-2,width:Math.max(...xs)-Math.min(...xs)+4,height:Math.max(...ys)-Math.min(...ys)+4,visibility:'visible'}))activeMarker.setAttribute(k,v);}else activeMarker.setAttribute('visibility','hidden');
  $('test-instruction').textContent=phase===3&&c?c.id+tr(' – Prüfung abgeschlossen',' – test complete'):active?tr(`Verbinde den ${kind[c.pigtail]}-Pigtail mit ${c.label||c.id} von ${board.name}.`,`Connect the ${kind[c.pigtail]} pigtail to ${c.label||c.id} on ${board.name}.`):phase===4?tr('Testlauf abgeschlossen','Session complete'):phase===5?tr('Testlauf abgebrochen','Session aborted'):tr('Board laden, um zu beginnen','Load a board to begin');
- $('test-summary').textContent=pendingBoard?tr('Bitte das ausgewählte Board laden.','Load the selected board.'):phase===2?tr(`Prüfung läuft: ${state.completed} / ${c.pins.length*38}`,`Test running: ${state.completed} / ${c.pins.length*38}`):phase===3?tr(`Anschluss: ${verdicts[state.verdicts[state.step]]}. Für den nächsten Schritt den Pigtail umstecken.`,`Connector: ${verdicts[state.verdicts[state.step]]}. Move the pigtail for the next step.`):phase===4?tr(`Gesamtergebnis: ${verdicts[state.overall]} – Simulation.`,`Overall result: ${verdicts[state.overall]} – simulation.`):tr('Jeder Anschluss muss vor seinem Test ausdrücklich bestätigt werden.','Confirm the connection before each connector test.');
- $('test-progress').max=c?c.pins.length*38:1;$('test-progress').value=phase===4?$('test-progress').max:state.completed;
+ $('test-summary').textContent=pendingBoard?tr('Bitte das ausgewählte Board laden.','Load the selected board.'):phase===2?tr(`Prüfung läuft: ${state.completed} / ${c.pins.length*board.socket.length}`,`Test running: ${state.completed} / ${c.pins.length*board.socket.length}`):phase===3?tr(`Anschluss: ${verdicts[state.verdicts[state.step]]}. Für den nächsten Schritt den Pigtail umstecken.`,`Connector: ${verdicts[state.verdicts[state.step]]}. Move the pigtail for the next step.`):phase===4?tr(`Gesamtergebnis: ${verdicts[state.overall]} – Simulation.`,`Overall result: ${verdicts[state.overall]} – simulation.`):tr('Jeder Anschluss muss vor seinem Test ausdrücklich bestätigt werden.','Confirm the connection before each connector test.');
+ $('test-progress').max=c?c.pins.length*board.socket.length:1;$('test-progress').value=phase===4?$('test-progress').max:state.completed;
  portItems.forEach((li,i)=>{li.textContent=`${board.connectors[i].label||board.connectors[i].id} · ${verdicts[state.verdicts[i]||0]}`;li.disabled=busy||pendingBoard||phase===0||phase===2;li.setAttribute('aria-pressed',String(!!active&&i===state.step));li.parentElement.classList.toggle('current',!!active&&i===state.step);});
  board.connectors.forEach((port,i)=>contactLeds[i].forEach((led,p)=>{let color=verdictColors[Number((state.contacts||'')[i*14+p])||0];if(!port.pins[p].covered&&color!==verdictColors[2])color='#ffbf42';led.setAttribute('fill',color);}));
  socketLeds.forEach(el=>el.setAttribute('fill',colors[0]));
  if(!c)return;
  const values=Array.from(state.results,Number), symbols=['·','○','●','!','×','E'];
  values.forEach((v,i)=>{if(cells[i]){cells[i].textContent=symbols[v];cells[i].style.color=v>=3?'#a32828':v?'#177245':'#777';}});
- c.pins.forEach((p,i)=>{const row=values.slice(i*38,(i+1)*38),done=row.every(v=>v>0),fail=row.some(v=>v>=3);contactLeds[state.step][i].setAttribute('fill',fail?'#ff4747':!p.covered?'#ffbf42':done?'#35dc73':colors[0]);});
- const currentRow=Math.min(c.pins.length-1,Math.floor(Math.max(0,state.completed-(phase===2?0:1))/38));
- for(let i=0;i<38;i++)socketLeds[i].setAttribute('fill',colors[values[currentRow*38+i]||0]);
- if(phase===2&&state.completed<c.pins.length*38){socketLeds[state.completed%38].setAttribute('fill','#57baff');contactLeds[state.step][Math.floor(state.completed/38)].setAttribute('fill','#57baff');}
+ c.pins.forEach((p,i)=>{const row=values.slice(i*board.socket.length,(i+1)*board.socket.length),done=row.every(v=>v>0),fail=row.some(v=>v>=3);contactLeds[state.step][i].setAttribute('fill',fail?'#ff4747':!p.covered?'#ffbf42':done?'#35dc73':colors[0]);});
+ const currentRow=Math.min(c.pins.length-1,Math.floor(Math.max(0,state.completed-(phase===2?0:1))/board.socket.length));
+ for(let i=0;i<board.socket.length;i++)socketLeds[i].setAttribute('fill',colors[values[currentRow*board.socket.length+i]||0]);
+ if(phase===2&&state.completed<c.pins.length*board.socket.length){socketLeds[state.completed%board.socket.length].setAttribute('fill','#57baff');contactLeds[state.step][Math.floor(state.completed/board.socket.length)].setAttribute('fill','#57baff');}
 }
 async function command(action, extra={}){
  if(busy||!state)return;busy=true;paint();$('test-error').textContent='';

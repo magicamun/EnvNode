@@ -81,7 +81,7 @@ void TestWebRoutes::state() {
         + ",\"completed\":" + static_cast<unsigned>(runner_.completed())
         + ",\"overall\":" + static_cast<unsigned>(runner_.overall()) + ",\"results\":\"";
     const auto* connector = runner_.connector();
-    if (connector) for (size_t i = 0; i < connector->count * SocketPins; ++i)
+    if (connector) for (size_t i = 0; i < connector->count * runner_.board()->inputCount; ++i)
         json += static_cast<char>('0' + static_cast<unsigned>(runner_.result(i)));
     json += "\",\"verdicts\":[";
     if (runner_.board()) for (size_t i = 0; i < runner_.board()->count; ++i) {

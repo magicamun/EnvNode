@@ -184,4 +184,4 @@ static const Connector WeatherConnectors[] = {
     {"I2C1_4", Pigtail::I2c, 4, WeatherContacts17},
     {"J1", Pigtail::Module, 14, WeatherContacts18},
 };
-static const BoardDefinition WeatherBoard{"weather-0.2-pcb0.2.1", "EnvNode Weather", "0.2", "0.2.1", WeatherSocket, WeatherConnectors, sizeof(WeatherConnectors) / sizeof(WeatherConnectors[0])};
+static const BoardDefinition WeatherBoard{"weather-0.2-pcb0.2.1", "EnvNode Weather", "0.2", "0.2.1", WeatherSocket, WeatherConnectors, sizeof(WeatherConnectors) / sizeof(WeatherConnectors[0]), SocketPins};

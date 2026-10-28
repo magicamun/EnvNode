@@ -8,7 +8,7 @@ Three CD74HC4067 multiplexers select one of **40 independent measurement inputs*
 
 - **J4:** DUT test plug, 2 × 19 pins, 2.54 mm pitch, 25.40 mm row spacing. From the
   top, left pins run 1–19 and right pins run 38–20. Remove the DUT ESP32 before use.
-- **J7:** two-pin header for the reference pigtail: pin 1 MB_3V3_SYS, pin 2 MB_GND.
+- **TP1:** two-pin header for the reference pigtail: pin 1 MB_GND, pin 2 MB_3V3_SYS.
   The cable terminates in the agreed two-pin JST-PH on a suitably revised mainboard.
   Both are measurement contacts, not adapter supply connections.
 - **J1:** 2 × 5 IDC header, 2.54 mm pitch. Connect pin-for-pin to Controller J8.
@@ -36,7 +36,7 @@ Three CD74HC4067 multiplexers select one of **40 independent measurement inputs*
 
 ## Input routing contract
 
-Logical inputs 1–38 retain the DUT socket numbering. Proposed logical inputs 39 and
+Logical inputs 1–38 retain the DUT socket numbering. Logical inputs 39 and
 40 are the added reference contacts; these are not additional ESP32 socket pins.
 I0–I15 denote analog multiplexer channels; S0 is the least-significant address bit.
 The table records the saved PCB wiring, not a presumed sequential layout.
@@ -81,8 +81,8 @@ The table records the saved PCB wiring, not a presumed sequential layout.
 | 36 | J4.36 | R03 | U4 | I10 | 21 |
 | 37 | J4.37 | R02 | U4 | I9 | 22 |
 | 38 | J4.38 | R01 | U4 | I8 | 23 |
-| 39 | J7.1 | MB_3V3_SYS | U6 | I13 | 18 |
-| 40 | J7.2 | MB_GND | U6 | I14 | 17 |
+| 39 | TP1.2 | MB_3V3_SYS | U6 | I13 | 18 |
+| 40 | TP1.1 | MB_GND | U6 | I14 | 17 |
 
 ## Operation and firmware status
 
@@ -91,8 +91,10 @@ provisioning cable disconnected. Connect the reference pigtail only to a compati
 DUT revision. Mainboard-side series protection diodes make the reference paths
 unidirectional; thresholds and test current direction require physical validation.
 
-The current test firmware still simulates 38 socket inputs. Extending its model,
-profile data, comparisons, UI and tests to 40 inputs remains a firmware task.
+Test firmware 0.4.0 supports 38- or 40-input profiles in its model, simulation,
+comparisons and UI. The revision-0.1 fixture mapping is generated from the three
+PCBs by `firmware/scripts/generate_fixture_routing.py`. Bundled legacy profiles
+still use 38 inputs; new reference-aware mainboard profiles remain to be added.
 The new references must not be silently treated as present on old mainboards.
 Physical I/O, switching sequence and ADC settling/thresholds remain unvalidated.
 

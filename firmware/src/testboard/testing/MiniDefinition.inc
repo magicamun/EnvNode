@@ -117,4 +117,4 @@ static const Connector MiniConnectors[] = {
     {"J1", Pigtail::Module, 14, MiniContacts6},
     {"J2", Pigtail::Module, 14, MiniContacts7},
 };
-static const BoardDefinition MiniBoard{"mini-0.8-pcb0.8.1", "EnvNode Mini", "0.8", "0.8.1", MiniSocket, MiniConnectors, sizeof(MiniConnectors) / sizeof(MiniConnectors[0])};
+static const BoardDefinition MiniBoard{"mini-0.8-pcb0.8.1", "EnvNode Mini", "0.8", "0.8.1", MiniSocket, MiniConnectors, sizeof(MiniConnectors) / sizeof(MiniConnectors[0]), SocketPins};
