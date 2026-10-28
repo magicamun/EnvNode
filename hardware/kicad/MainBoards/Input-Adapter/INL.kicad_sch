@@ -2098,7 +2098,7 @@
 		(uuid "5365879d-4a37-4396-a5e2-f2a76a59a665")
 	)
 	(label "MB_GND"
-		(at 257.81 124.46 90)
+		(at 260.35 124.46 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2638,7 +2638,7 @@
 		(uuid "fdde0641-6380-4448-8eb7-9434cd5bb8d5")
 	)
 	(label "MB_3V3_SYS"
-		(at 260.35 124.46 90)
+		(at 257.81 124.46 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4200,7 +4200,7 @@
 		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "f71e725a-9497-46c6-8802-1d7265d1afb6")
-		(property "Reference" "J7"
+		(property "Reference" "TP1"
 			(at 261.62 127.6349 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4264,7 +4264,7 @@
 		(instances
 			(project "Input-Adapter"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/c22affd4-39f0-4e4c-b4aa-0abccd112ed3"
-					(reference "J7")
+					(reference "TP1")
 					(unit 1)
 				)
 			)
