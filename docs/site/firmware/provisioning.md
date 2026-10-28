@@ -22,6 +22,21 @@ bestätigt noch keinen gültigen Datensatz.
 | Modul Slot A | I2C0 | 0x52 |
 | Modul Slot B, wenn vorhanden | I2C0 | 0x53 |
 
+## Unterstützte Mainboard-Revisionen
+
+Ab **EnvNode 0.8.2** und **Testboard 0.7.0** sind diese Identitäten auswählbar:
+
+| Board | Hardware-Identität | Beispiel-PCB |
+| --- | --- | --- |
+| EnvNode Mainboard | 0.3 | ältere Mainboard-Ausführung |
+| EnvNode Weather | 0.2 oder 0.3 | 0.2.1 bzw. 0.3.0 |
+| EnvNode Mini | 0.8 oder 0.9 | 0.8.1 bzw. 0.9.0 |
+
+Die tatsächliche Revision auswählen. Vorhandene EEPROM-Daten werden durch ein
+Firmwareupdate weder migriert noch automatisch auf eine neue Hardware-Revision
+umgeschrieben. Die normale Firmware verwendet nach dem Neustart die gespeicherte
+Revision und deren Ressourcen.
+
 ## Mainboard schreiben
 
 1. Mainboard und reale PCB-Revision anhand der Platine feststellen.
@@ -94,3 +109,27 @@ Mini-PCBs `0.8.x` verwenden dasselbe Firmwareprofil und dieselbe Board Identity
 eintragen, schreiben und rücklesen lassen und anschließend neu starten. Danach
 müssen Quelle `EEPROM`, Status `Valid`, Profil **EnvNode Mini**, Revision `0.8`
 und zwei Modulslots angezeigt werden.
+
+## Separate Tester-Firmware
+
+Das PlatformIO-Ziel `testboard` ist eine eigene Anwendung mit eigener
+Konfiguration. Sein Menü **Provisioning** schreibt ein extern angeschlossenes
+Mainboard-EEPROM; dafür ist **kein Neustart des Testers** erforderlich. Ein leeres
+oder nicht erkanntes EEPROM setzt keine Revision voraus: Board und Revision
+müssen ausdrücklich gewählt werden. Die passende Boardansicht dient zur Kontrolle.
+
+Der separate Bus verwendet **SDA GPIO16 / SCL GPIO5**, das Board-EEPROM Adresse
+`0x50`. ESP32 des Prüflings entfernen und andere Versorgungen, Mess-Pigtails und
+Input-Adapter trennen, bevor der Provisioning-Stecker angeschlossen wird. Das
+Kabel vor einer passiven Durchgangsprüfung wieder abziehen; die Firmware schaltet
+dessen Versorgung nicht ab.
+
+Die **Anschlussprüfung ist derzeit eine Simulation**. Das Provisioning greift
+dagegen auf das echte EEPROM zu und muss mit der fertigen Tester-Hardware noch
+physisch validiert werden. Eine laufende Anschlussprüfung sperrt Provisioning.
+Modul-Provisioning ist in der Tester-Anwendung noch nicht freigeschaltet.
+
+Die Prüfprofile und Boardbilder werden über docs.envnode.de bereitgestellt.
+Eingebaute Profile bleiben ohne Netz verfügbar. Die unabhängige Signaturprüfung
+ist noch nicht implementiert; der aktuelle Abruf nutzt geprüftes HTTPS und
+SHA-256-Inhaltsprüfungen.
