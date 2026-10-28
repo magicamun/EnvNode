@@ -24,3 +24,6 @@ types and status names, InstanceUuid's version-4 bit conversion and the determin
 DuoRelay descriptor encoder. Compatibility evaluation, live module rediscovery and
 the module-provisioning policy service remain in the EnvNode application. Existing
 service headers include the shared result types for source compatibility.
+
+`boardIdentityStatusName` is shared here with the status type; the application
+resolver retains only source selection/status naming specific to resolution.

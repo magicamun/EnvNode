@@ -212,7 +212,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-24 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+32 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
@@ -232,8 +232,9 @@ Die Boardansichten blenden Bauteilwerte aus; Referenzbezeichnungen bleiben sicht
 
 ## Nächste Ausbauschritte
 
-Nach der Routing-/40-Eingangs-Basis folgt die Übernahme der gemeinsamen
-Provisioning-Dienste und Webrouten über den dedizierten Bus GPIO16/5. Danach
+Die gemeinsamen Provisioning-Dienste und Webrouten verwenden den dedizierten
+Bus GPIO16/5. Provisioning ist seit 0.5.0 für externe Board-Identitäten integriert
+(siehe [Betriebsphasen und unterstützte Revisionen](TestBoardFirmware.md#external-board-provisioning-050)). Danach
 folgen die neuen Mainboardprofile und Remote-Profile. Boardwahl und Darstellung
 sollen von Prüfung und Provisioning gemeinsam verwendet werden.
 

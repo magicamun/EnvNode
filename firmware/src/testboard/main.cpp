@@ -11,6 +11,11 @@
 #include "WiFiService.h"
 #include "TimeService.h"
 #include "testing/TestWebRoutes.h"
+#include "testing/FixtureRouting.h"
+#include "provisioning/ProvisioningI2C.h"
+#include "IdentityEeprom24LC32.h"
+#include "HardwareProvisioningWebRoutes.h"
+#include "provisioning/ProvisioningPage.h"
 namespace EnvNode {
 namespace {
 class TestBoardLogTime : public ILogTimeProvider {
@@ -24,13 +29,13 @@ public:
 class TestBoardApplication : public IFirmwareApplication {
 public:
     TestBoardApplication(ILogger& logger, Testing::TestRunner& tests) : logger_(logger), tests_(tests) {}
-    // Hardware is not driven until the fixture test engine is implemented.
+    // No GPIO or I²C activity at boot; provisioning connects per operation.
     void initializeDevices() override {}
     void beginIntegrations() override {
         logger_.infof("Testboard firmware version: %s", FirmwareBuildInfo::SemanticVersion);
         logger_.infof("Build: %s", FirmwareBuildInfo::BuildNumber);
         logger_.infof("Git commit: %s", FirmwareBuildInfo::GitCommit);
-        logger_.info("Testboard base ready; simulated connector tests ready; physical I/O inactive");
+        logger_.info("Testboard base ready; simulated connector tests ready; measurement I/O inactive; EEPROM provisioning ready on SDA16/SCL5");
     }
     void serviceMeasurements() override { tests_.tick(millis()); }
     void serviceIntegrations() override {}
@@ -56,6 +61,22 @@ TestBoardWeb web(host, settings, wifi, time, formatter, ota, restart, recentLogs
 Testing::SimulatedFixture fixture;
 Testing::TestRunner tests(fixture);
 Testing::TestWebRoutes testRoutes(host, web, tests, fixture);
+ProvisioningI2C provisioningBus(Testing::fixtureRevision01().provisioningSda,
+    Testing::fixtureRevision01().provisioningScl);
+IdentityEeprom24LC32 targetEeprom(provisioningBus, 0x50);
+BoardIdentityStore targetStore(targetEeprom);
+TestBoardProvisioning provisioning(provisioningBus, targetStore,
+    []() { return tests.phase() != Testing::Phase::Running; });
+ProvisioningWebOptions provisioningOptions() {
+    ProvisioningWebOptions options;
+    options.externalTarget = true;
+    options.modules = false;
+    options.available = []() { return provisioning.available(); };
+    return options;
+}
+HardwareProvisioningWebRoutes provisioningRoutes(host.server(), web, logger, provisioning,
+    []() { return buildProvisioningOverview(provisioning, web.webLocale()); },
+    [](uint8_t*, size_t) {}, provisioningOptions());
 TestBoardApplication application(logger, tests);
 FirmwareRuntime runtime(wifi, time, web, application);
 }
@@ -64,6 +85,7 @@ void setupTestBoard() {
     delay(500);
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
     web.attachTestRoutes(testRoutes);
+    web.attachProvisioningRoutes(provisioningRoutes);
     runtime.begin();
 }
 void loopTestBoard() { runtime.loop(); }

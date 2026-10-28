@@ -1,6 +1,6 @@
 # EnvNodeWebAdmin
 
-Network and log administration route modules used by the existing EnvNode firmware. No second application or tester behavior is introduced.
+Shared administration route modules used by EnvNode and the testboard application.
 
 NetworkWebRoutes registers GET /network and POST /network/save. It requires only INetworkSettings, IWiFiService, IWebPagePresenter, INetworkSaveObserver and WebHost. The settings service owns validation/persistence. The observer reports the outcome to the application, which retains its existing RuntimeManager action and result-page wording. Existing password-checkbox semantics and form fields are preserved.
 
@@ -40,3 +40,10 @@ The application retains restart decisions, persistence and extra device fields.
 The timezone catalog is streamed in bounded chunks as before, with identical
 options/custom-value handling. Offline/header-render failures keep their 503
 responses. The original setter order and short-circuit failure behavior remain.
+
+`ProvisioningWebOptions` preserves the EnvNode defaults (local target, module
+forms/routes enabled). The tester selects an external target and disables module
+provisioning routes/forms. External success returns without a restart form or
+active-runtime-profile wording. An optional availability callback guards the
+hardware page and board-write aliases before any overview or write callback;
+the tester uses it to reject provisioning during an active connector test.

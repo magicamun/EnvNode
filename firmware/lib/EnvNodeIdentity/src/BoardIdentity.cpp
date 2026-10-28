@@ -86,4 +86,22 @@ bool isBoardSerialNumberAssigned(const BoardSerialNumber& serialNumber) {
     return serialNumber.value[0] != '\0';
 }
 
+const char* boardIdentityStatusName(BoardIdentityStatus status) {
+    switch (status) {
+        case BoardIdentityStatus::Valid: return "Valid";
+        case BoardIdentityStatus::StorageUnavailable: return "StorageUnavailable";
+        case BoardIdentityStatus::NotProvisioned: return "NotProvisioned";
+        case BoardIdentityStatus::InvalidMagic: return "InvalidMagic";
+        case BoardIdentityStatus::UnsupportedFormat: return "UnsupportedFormat";
+        case BoardIdentityStatus::InvalidLength: return "InvalidLength";
+        case BoardIdentityStatus::InvalidCRC: return "InvalidCRC";
+        case BoardIdentityStatus::UnknownBoardProfile: return "UnknownBoardProfile";
+        case BoardIdentityStatus::InvalidRevision: return "InvalidRevision";
+        case BoardIdentityStatus::UnsupportedRevision: return "UnsupportedRevision";
+        case BoardIdentityStatus::InvalidSerial: return "InvalidSerial";
+        case BoardIdentityStatus::UnassignedSerial: return "UnassignedSerial";
+        default: return "Unknown";
+    }
+}
+
 } // namespace EnvNode

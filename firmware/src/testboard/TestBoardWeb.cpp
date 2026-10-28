@@ -28,6 +28,7 @@ void TestBoardWeb::begin() {
     host_.registerRoutes(commonRoutes_);
     host_.registerRoutes(firmwareRoutes_);
     host_.registerRoutes(logRoutes_);
+    if (provisioningRoutes_) host_.registerRoutes(*provisioningRoutes_);
     if (testRoutes_) host_.registerRoutes(*testRoutes_);
     host_.begin();
 }
@@ -46,6 +47,7 @@ String TestBoardWeb::navigation(const char* active) const {
     };
     link("/", testerText("Prüfboard", "Test board"));
     if (testRoutes_) link("/test", testerText("Anschlussprüfung", "Connector test"));
+    if (provisioningRoutes_) link("/hardware", "Provisioning");
     link("/network", text(TextId::Network));
     link("/time", text(TextId::LocaleTime));
     link("/device", text(TextId::Device));
@@ -81,10 +83,13 @@ void TestBoardWeb::home() {
     content += testerText("Netzwerk, Geräteeinstellungen, Sprache/Zeit, Protokolle und Firmwareverwaltung sind verfügbar.",
         "Network, device settings, locale/time, logs and firmware administration are available.");
     content += "</p><p>";
-    if (testRoutes_) content += testerText("Die geführte Anschlussprüfung steht als Simulation bereit. Reale Messung und EEPROM-Provisioning folgen später.",
-        "Guided connector testing is available in simulation. Physical measurement and EEPROM provisioning follow later.");
-    else content += testerText("Anschlussprüfungen und EEPROM-Provisioning sind noch nicht implementiert.",
-        "Connector tests and EEPROM provisioning are not implemented yet.");
+    if (testRoutes_) content += testerText("Die geführte Anschlussprüfung steht als Simulation bereit. Reale Messung folgt später.",
+        "Guided connector testing is available in simulation. Physical measurement follows later.");
+    else content += testerText("Die Anschlussprüfung ist nicht eingebunden.",
+        "Connector testing is not attached.");
+    if (provisioningRoutes_) content += testerText(
+        "</p><p>Board-Provisioning über den separaten I²C-Anschluss ist verfügbar. Es schreibt das reale EEPROM des angeschlossenen Prüflings.",
+        "</p><p>Board provisioning uses the separate I²C connector and writes the connected target’s real EEPROM.");
     content += "</p></section>";
     sendPage(testerText("Prüfboard", "Test board"), "/", content);
 }

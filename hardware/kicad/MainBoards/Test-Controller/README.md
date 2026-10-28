@@ -63,7 +63,10 @@ Provisioning and continuity are separate operating phases.
 ## Firmware and validation status
 
 The `testboard` PlatformIO target currently provides a guided simulation; physical
-mux/ADC control and provisioning operations are not yet implemented. The split
+mux/ADC control is not yet implemented. Firmware 0.5.0 provides real external
+board-identity provisioning via GPIO16/5 and EEPROM address 0x50, with explicit
+write confirmation, readback and no tester reboot. It does not switch DUT power.
+Mini 0.9/Weather 0.3 and module provisioning are not supported yet. The split
 fixture mapping and J8 GPIO assignments above are implemented in firmware 0.4.0.
 Its simulation supports profiles with 38 or 40 inputs (38 socket pads plus two
 references); new reference-aware mainboard profiles remain to be added. Do not equate

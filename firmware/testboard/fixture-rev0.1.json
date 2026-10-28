@@ -3,7 +3,7 @@
   "id": "controller0.1-input0.1-module0.1",
   "sources": {
     "hardware/kicad/MainBoards/Input-Adapter/Input-Adapter.kicad_pcb": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c",
-    "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb": "bb6f4f2f0c016539785691c14dda86cc97bd94ba72e7a92f6113fda60ea6bf07",
+    "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb": "02de5753f6aeed2a2e279fe1020e3f776eaeb421dad584734bd90faf1a5e017b",
     "hardware/kicad/MainBoards/Module-Adapter/Module-Adapter.kicad_pcb": "92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1"
   },
   "channelNumbering": "zero-based; device indexes input U4/U5/U6, output U1/U2",

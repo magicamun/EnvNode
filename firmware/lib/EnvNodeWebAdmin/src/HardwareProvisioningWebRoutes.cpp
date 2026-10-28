@@ -11,15 +11,17 @@
 namespace EnvNode {
 HardwareProvisioningWebRoutes::HardwareProvisioningWebRoutes(WebServer& server,
     IWebPagePresenter& pages, ILogger& logger, IProvisioningAdministration& administration,
-    Overview overview, Random random)
+    Overview overview, Random random, ProvisioningWebOptions options)
     : server_(server), pages_(pages), logger_(logger), administration_(administration),
-      overview_(overview), random_(random) {}
+      overview_(overview), random_(random), options_(options) {}
 void HardwareProvisioningWebRoutes::registerRoutes(WebServer& server) {
     server.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
     server.on("/hardware/board-identity/write", HTTP_POST, [this]() { handleBoardProvisioning(); });
     server.on("/device/board-identity/write", HTTP_POST, [this]() { handleBoardProvisioning(); });
-    server.on("/hardware/module-descriptor/write", HTTP_POST, [this]() { handleModuleDescriptorProvisioning(); });
-    server.on("/device/module-descriptor/write", HTTP_POST, [this]() { handleModuleDescriptorProvisioning(); });
+    if (options_.modules) {
+        server.on("/hardware/module-descriptor/write", HTTP_POST, [this]() { handleModuleDescriptorProvisioning(); });
+        server.on("/device/module-descriptor/write", HTTP_POST, [this]() { handleModuleDescriptorProvisioning(); });
+    }
 }
 const char* HardwareProvisioningWebRoutes::uiText(TextId id) const { return webText(pages_.webLocale(), id); }
 void HardwareProvisioningWebRoutes::sendPage(const char* title, const char* route,
@@ -27,22 +29,28 @@ void HardwareProvisioningWebRoutes::sendPage(const char* title, const char* rout
 void HardwareProvisioningWebRoutes::sendResult(const char* title, const char* route,
     const char* message, bool success) { sendWebResult(pages_, title, route, message, success); }
 void HardwareProvisioningWebRoutes::handleHardware() {
+    if (!operationAllowed()) return;
     String c = overview_();
     const BoardIdentity identity = administration_.provisioningBoardIdentity();
-    c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");
-    c += (String("<div class='notice'><strong>ENHD descriptor 0.1</strong><p>") + uiText(TextId::ThisCreatesTheDeterministicDuoRelay03CBOR) + "</p></div>");
-    c += "<form method='post' action='/hardware/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
-    c += (String("<label>") + uiText(TextId::ModuleSlot) + "<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>");
-    c += (String("<label>") + uiText(TextId::DescriptorTemplate) + "<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>");
-    c += (String("<p class='help'>") + uiText(TextId::APersistentUUIDVersion4IsGeneratedAutomatically) + "</p>");
-    c += (String("<label>") + uiText(TextId::SerialNumberOptional) + "<input name='descriptorSerialNumber' maxlength='64'></label>");
-    c += (String("<label>") + uiText(TextId::ProductionBatchOptional) + "<input name='descriptorProductionBatch' maxlength='64'></label>");
-    c += (String("<label>") + uiText(TextId::ProductionDateOptional) + "<input type='date' name='descriptorProductionDate'></label>");
-    c += (String("<label class='choice'><input type='checkbox' name='confirmModuleDescriptorProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesASelfDescribing) + "</label>");
-    c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteDuoRelayDescriptor) + "</button></div></form></section>");
+    if (options_.modules) {
+        c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");
+        c += (String("<div class='notice'><strong>ENHD descriptor 0.1</strong><p>") + uiText(TextId::ThisCreatesTheDeterministicDuoRelay03CBOR) + "</p></div>");
+        c += "<form method='post' action='/hardware/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
+        c += (String("<label>") + uiText(TextId::ModuleSlot) + "<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>");
+        c += (String("<label>") + uiText(TextId::DescriptorTemplate) + "<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>");
+        c += (String("<p class='help'>") + uiText(TextId::APersistentUUIDVersion4IsGeneratedAutomatically) + "</p>");
+        c += (String("<label>") + uiText(TextId::SerialNumberOptional) + "<input name='descriptorSerialNumber' maxlength='64'></label>");
+        c += (String("<label>") + uiText(TextId::ProductionBatchOptional) + "<input name='descriptorProductionBatch' maxlength='64'></label>");
+        c += (String("<label>") + uiText(TextId::ProductionDateOptional) + "<input type='date' name='descriptorProductionDate'></label>");
+        c += (String("<label class='choice'><input type='checkbox' name='confirmModuleDescriptorProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesASelfDescribing) + "</label>");
+        c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteDuoRelayDescriptor) + "</button></div></form></section>");
+    }
     c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionBoardIdentity) + "</h2>");
-    c += (String("<div class='notice'><strong>") + uiText(TextId::AdvancedOperation) + "</strong><p>" + uiText(TextId::ThisWritesPermanentPhysicalBoardIdentityDataThe) + "</p></div>");
-    c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
+    c += (String("<div class='notice'><strong>") + uiText(TextId::AdvancedOperation) + "</strong><p>" + uiText(options_.externalTarget ? TextId::ExternalBoardIdentityWriteNotice : TextId::ThisWritesPermanentPhysicalBoardIdentityDataThe) + "</p></div>");
+    if (options_.externalTarget)
+        c += "<form method='post' action='/hardware/board-identity/write'>";
+    else
+        c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
     c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileId' required>");
     for (size_t index = 0; index < administration_.provisioningProfileCount(); ++index) {
         ProvisioningBoardProfile profileData;
@@ -63,7 +71,14 @@ void HardwareProvisioningWebRoutes::handleHardware() {
     sendPage(uiText(TextId::Hardware), "/hardware", c);
 }
 
+bool HardwareProvisioningWebRoutes::operationAllowed() {
+    if (!options_.available || options_.available()) return true;
+    sendPage(uiText(TextId::Hardware), "/hardware",
+        String("<section class='card'>") + uiText(TextId::ProvisioningLockedDuringConnectorTest) + "</section>", 409);
+    return false;
+}
 void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
+    if (!operationAllowed()) return;
     const String profileText = server_.arg("boardProfileId");
     char* profileEnd = nullptr;
     const unsigned long parsedProfile = strtoul(profileText.c_str(), &profileEnd, 10);
@@ -102,6 +117,11 @@ void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
         requested.serialNumber.value);
 
     if (result.status == BoardProvisioningStatus::Success) {
+        if (options_.externalTarget) {
+            sendResult(uiText(TextId::BoardIdentityProvisioned), "/hardware",
+                uiText(TextId::ExternalBoardIdentityWritten), true);
+            return;
+        }
         String content;
         content.reserve(600);
         content = (String("<div class='notice success'><strong>") + uiText(TextId::BoardIdentityWrittenAndVerified) + "</strong><p>" + uiText(TextId::TheActiveBoardProfileIsUnchangedForThisBoot) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/hardware'>" + uiText(TextId::RestartLater) + "</a>");

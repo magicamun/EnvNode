@@ -772,3 +772,7 @@ ENVNODE_WEB_TEXT(PressureMethodStandard, "Standard atmosphere", "Standardatmosph
 ENVNODE_WEB_TEXT(PressureSettingsInvalid, "Select an enabled local temperature source and a positive maximum age. Clear this selection before disabling its sensor.", "Aktivierte lokale Temperaturquelle und positives Maximalalter wählen. Vor dem Deaktivieren des gewählten Sensors diese Auswahl entfernen.")
 
 ENVNODE_WEB_TEXT(DecimalInputHelp, "Use a decimal point, for example 48.137154. Do not use thousands separators.", "Dezimalzahlen mit Komma eingeben, zum Beispiel 48,137154. Keine Tausendertrennzeichen verwenden.")
+
+ENVNODE_WEB_TEXT(ExternalBoardIdentityWriteNotice, "Writes permanent identity data to the connected target EEPROM. The tester configuration remains unchanged.", "Schreibt dauerhafte Identitätsdaten in das EEPROM des angeschlossenen Prüflings. Die Konfiguration des Testers bleibt erhalten.")
+ENVNODE_WEB_TEXT(ExternalBoardIdentityWritten, "Target identity written and read back. No tester restart required.", "Identität des Prüflings geschrieben und zurückgelesen. Kein Neustart des Testers erforderlich.")
+ENVNODE_WEB_TEXT(ProvisioningLockedDuringConnectorTest, "Connector test running. Provisioning is locked until completion or abort.", "Anschlusstest läuft. Provisioning ist bis zum Ende oder Abbruch gesperrt.")

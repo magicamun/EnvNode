@@ -36,6 +36,5 @@ private:
 };
 
 const char* boardIdentitySourceName(BoardIdentitySource source);
-const char* boardIdentityStatusName(BoardIdentityStatus status);
 
 } // namespace EnvNode
