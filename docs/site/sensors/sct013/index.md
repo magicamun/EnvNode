@@ -3,7 +3,7 @@
 !!! note "Entwicklungsstand / WIP"
     Der SCT013Head ist eine passive Aufbereitung für einen Stromwandler mit
     Spannungsausgang. Ein SCT013-Treiber ist in der gemeinsamen Firmware noch
-    nicht registriert. Die [Aufbauanleitung für Rev. 0.1](sct013-head/assembly.md) beschreibt Bestückung und Erstprüfung; die Kalibrierung am realen Aufbau steht noch aus.
+    nicht registriert. Die [Aufbauanleitung für Rev. 0.1](../sct013-head/assembly.md) beschreibt Bestückung und Erstprüfung; die Kalibrierung am realen Aufbau steht noch aus.
 
 ## Aufgabe und unterstützter Sensortyp
 
@@ -40,6 +40,6 @@ Eine garantierte Überstromfestigkeit oder Schutzbeschaltung ist nicht nachgewie
 
 ## Aufbau und Erstprüfung
 
-Die [Bestückungs- und Bring-up-Anleitung Rev. 0.1](sct013-head/assembly.md) enthält die aktuelle Artikelzuordnung aus dem Artikelpool, die Pigtail-Belegung und Prüfungen ohne Klinkenbuchse und Sensor.
+Die [Bestückungs- und Bring-up-Anleitung Rev. 0.1](../sct013-head/assembly.md) enthält die aktuelle Artikelzuordnung aus dem Artikelpool, die Pigtail-Belegung und Prüfungen ohne Klinkenbuchse und Sensor.
 
 R1-R4 werden einheitlich mit 10 kΩ (ENP-00018, vier Stück) bestückt. Der ältere Vermerk zu R1 = 1 kΩ ist für diesen Aufbau überholt. Die reale elektrische Erprobung, Kalibrierung sowie die Passprobe von Buchse, Gehäusewand und Zugentlastung bleiben offen.

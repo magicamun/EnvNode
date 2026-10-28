@@ -68,7 +68,7 @@ die Ressourcentabelle nicht automatisch.
 | AM2302 / DHT22 | Geeigneter GPIO | Vorhanden | Hier nicht bestätigt | 0.5.0 Basis | Eigenes Einleitungsprotokoll, kein I²C; Temperatur und Feuchte. |
 | Rain Gauge / Kippwaage | Geeigneter GPIO-Interrupt | Vorhanden | Hier nicht bestätigt | 0.5.0 Basis | Entprellung und Millimeter pro Kippung konfigurieren; nicht mit RainDetector verwechseln. |
 | [RainDetectorController 0.3 + Head 0.1](sensors/rain-detector-controller/revisions/0.3.md) | Frequenzeingang und Heiz-Steuerausgang | Separate PCNT-Laborfirmware; kein registrierter produktiver Sensor | WIP | Keine integrierte Mindestversion; separates Lab-Projekt | Mechanik, Heizung und Wasserausschluss noch zu prüfen; Laborfirmware ohne MQTT und Heizautomation. |
-| [SCT013 / SCT013Head 0.1](sensors/sct013.md) | ADC, passende Variante mit Spannungsausgang | Kein registrierter SCT013-Treiber | WIP | Noch kein integrierter Treiber | [Aufbau und Erstprüfung](sensors/sct013-head/assembly.md) dokumentiert; reale Erprobung und Kalibrierung offen. Nur Spannungsausgang mit integrierter Bürde. |
+| [SCT013 / SCT013Head 0.1](sensors/sct013/index.md) | ADC, passende Variante mit Spannungsausgang | Kein registrierter SCT013-Treiber | WIP | Noch kein integrierter Treiber | [Aufbau und Erstprüfung](sensors/sct013-head/assembly.md) dokumentiert; reale Erprobung und Kalibrierung offen. Nur Spannungsausgang mit integrierter Bürde. |
 | Simulierte Temperatur / Feuchte / Druck | Keine externe Hardware | Vorhanden | Im Beispielaufbau aktiv | 0.5.0 Basis | Prüft Softwareabläufe, keine physische Sensorfunktion. |
 
 [Details zu I²C-Anschlüssen und Treibern](sensors/i2c.md)

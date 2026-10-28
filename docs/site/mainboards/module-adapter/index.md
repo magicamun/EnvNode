@@ -5,7 +5,7 @@ pdf:
   title: Modul-Adapter
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.1'
-  document_version: '1.1'
+  document_version: '1.2'
   document_date: '2026-10-28'
   source_document_date: '2026-10-28'
   status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
@@ -37,7 +37,7 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 | J4 | 1 | WSL 14G | ENP-00151 |
 | J1 | 1 | THT 2x7 auf Unterseite; keine Kabelbuchse | ENP-00059 |
 
-Artikelzuordnung aus dem vorhandenen lokalen BOM-Export vom 28.10.2026; kein neuer Lagerabgleich. ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
+ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
 J1 ist eine Bottom-Mount-THT-Stiftleiste auf der Unterseite, keine Kabelbuchse. Zum Test Controller gehört ein passendes kodiertes 14-poliges 1:1-IDC-Kabel. H1 ist 2,7 mm für M2,5; isolierende Abstützung passend zum realen Aufbau wählen.
 

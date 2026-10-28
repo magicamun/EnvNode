@@ -14,7 +14,7 @@
       "source": "modules/duo-relay/index.md",
       "pdf": "docs/pdf/reference/DuoRelay_Rev0.3_Anleitung.pdf",
       "pages": 13,
-      "sha256": "dc4f0f7c9bcb246a297489f87ae3e1a0fe634a636de61151526a8caec0d19826",
+      "sha256": "081084189ec12c0a3d3ed3f6f1adc62628c61634e2786bcb351134f5f5bacb22",
       "archive": false
     },
     {
@@ -35,7 +35,7 @@
       "source": "mainboards/oring-power/index.md",
       "pdf": "docs/pdf/reference/ORing_Power_Rev0.1.1_Anleitung.pdf",
       "pages": 12,
-      "sha256": "b24553a1fda324c98ddf56dd29adfad1b0ac07f2a717967d8dfec9736a80cf9a",
+      "sha256": "aa65cc59e065c9a45ff6900a49506173a6ad36cccec310893b7ab24c40dc85d9",
       "archive": false
     },
     {
@@ -70,14 +70,14 @@
       "source": "mainboards/mini/index.md",
       "pdf": "docs/pdf/reference/EnvNode_Mini_Rev0.9.0_Anleitung.pdf",
       "pages": 12,
-      "sha256": "98970baba6621aa7723e2248f6b43f637780b76b5e44d06c5415666d3576364f",
+      "sha256": "3c8debb79abdb460fc4cc07824127f51f1c45b4be53b7b3cf57a8617696b61c7",
       "archive": false
     },
     {
       "source": "mainboards/weatherstation/index.md",
       "pdf": "docs/pdf/reference/Weatherstation_Rev0.3.0_Anleitung.pdf",
       "pages": 13,
-      "sha256": "f4657406c3398455b9d7081c09bcde5b0ef52bf16b5f26cb2e43d0be0dfea294",
+      "sha256": "41fdf62059b4445734d8ba80220cb0ab0d8f2dccac7a9737a445a08b7cf36cc3",
       "archive": false
     },
     {
@@ -112,21 +112,21 @@
       "source": "mainboards/test-controller/index.md",
       "pdf": "docs/pdf/reference/Test_Controller_Rev0.1_Anleitung.pdf",
       "pages": 12,
-      "sha256": "cbac37aba3d235fb114c9b896dd3bf543361edaca3c0d9ccf5020daebdc4bf53",
+      "sha256": "4869ebd0100f5cf031f7abdb0f9b472aeb2c23ca2eecf0ebec2dcdff3ca76d11",
       "archive": false
     },
     {
       "source": "mainboards/input-adapter/index.md",
       "pdf": "docs/pdf/reference/Input_Adapter_Rev0.1_Anleitung.pdf",
       "pages": 12,
-      "sha256": "c245a0fad32e0b5383bd00ea2b5b9b534460e59c30dd19d53e47663d0f202f19",
+      "sha256": "491f23168b14dfcb89e1df689b85f08cd46922107e77ce780bdb41f33350f81d",
       "archive": false
     },
     {
       "source": "mainboards/module-adapter/index.md",
       "pdf": "docs/pdf/reference/Module_Adapter_Rev0.1_Anleitung.pdf",
       "pages": 12,
-      "sha256": "36b37d73618aa8f79839b2f443089b1159d92c92eae1dd9534ba0d7dff81d883",
+      "sha256": "cfd39306da881d2fa595a6e5dd8ed1f8385929f920c562543b35ad0919453223",
       "archive": false
     }
   ]

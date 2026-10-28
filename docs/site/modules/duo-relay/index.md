@@ -5,10 +5,10 @@ pdf:
   title: DuoRelay
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.3'
-  document_version: '1.2'
+  document_version: '1.3'
   document_date: '2026-10-28'
   source_document_date: '2026-10-17'
-  status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
+  status: Dokumentation abgeschlossen - Hardware im Betrieb erprobt
 ---
 
 # DuoRelay - Bestückung und Inbetriebnahme
@@ -22,7 +22,7 @@ Sichtprüfung und Erstinbetriebnahme mit sicherer Kleinspannung.
 [Produktübersicht](overview.md){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
 
-**Dokumentation abgeschlossen am 28. Oktober 2026.** Der dokumentierte Hardwareprüfstand bleibt separat ausgewiesen.
+**Dokumentation abgeschlossen am 28. Oktober 2026.** Die Hardware ist im praktischen Betrieb erprobt.
 
 ## 3D-Ansicht
 
@@ -243,30 +243,10 @@ Mainboard / Slot / Firmware: ______________________________________________
 | Kanäle beeinflussen sich | Gemeinsame 5-V-Versorgung, GPIO-Zuordnung, Treiber-Lötbrücken |
 | U2 nicht erreichbar | 3,3 V, I2C0, A0/A1, Orientierung, Adresse und Descriptor |
 
-## 9. Dokumentierter Stand und Quellen
+## 9. Entwicklungsstand und Einsatz
 
-PCB-Revision 0.3. Dokumentierter Quellenstand: 17. Oktober 2026.
+DuoRelay Revision 0.3 ist im praktischen Betrieb erprobt und funktioniert technisch einwandfrei. Das Board gehört zu den am weitesten ausgereiften EnvNode-Baugruppen. Diese Anleitung beschreibt den aktuellen Aufbau und die Inbetriebnahme.
 
-Der Netzlisten-/PCB-Abgleich vom 5. Oktober bestätigte J1.9 über R1 zu Kanal 1,
-J1.10 über R2 zu Kanal 2, J3.1/2/3 = NO1/COM1/NC1 und
-J4.1/2/3 = NC2/COM2/NO2. Die historischen ERC-/DRC-Ergebnisse der Revision 0.2
-(0 ERC-Fehler, 9 Warnungen; DRC ohne Verstöße, offene Verbindungen oder Footprintfehler)
-sind keine erneute Validierung der Revision 0.3. Vollständige erneute Prüfung,
-konkrete Klemmen-MPN, Lastqualifikation und anwendungsbezogene Freigaben bleiben offen.
+Für den eigenen Aufbau bleiben die beschriebenen Sicht-, Versorgungs- und Funktionstests maßgeblich. Die angeschlossene Last muss zu den eingesetzten Relais und Anschlussklemmen passen; beachte dazu die Angaben zu Spannung, Strom und Beschaltung in dieser Anleitung.
 
-Die Rückseitenabbildung vom 17. Oktober 2026 zeigt bestückte U2/C1.
-
-### Historische Quellenprüfsummen
-
-| Quelle | SHA-256 (historischer Nachweis, nicht neu berechnet) |
-| --- | --- |
-| DuoRelay.kicad_pcb | `9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac` |
-| DuoRelay.kicad_sch | `3a564f3eed7a305c5341b60f4a81d9b3a402525f4ef22cea43710eba0cd59500` |
-| DuoRelay.kicad_pro | `eb93d146a7427e1c61ed8eeafaa88f99cde2af8ecb35ecc9e019e2d9c2e67786` |
-| README.md | `45b007a3b056f707ef3534ba254772ac659239ed2dca2395581cab7c5eac2d22` |
-| EnvNode_Parts.xlsx | `4b908e5bf1f60eb7718d7ad450ac383838b4ab2b8eb72d8c8a33d34de5f85280` |
-
-KiCad-/README-Nachweise beziehen sich auf den gespeicherten Stand vom
-17. Oktober; der Artikelstamm-Nachweis bleibt historisch.
-EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0;
-Drittanbieterrechte bleiben unberührt. Siehe [Lizenz](../../license.md).
+[Erlaubte Nutzung und Lizenzbedingungen](../../license.md)

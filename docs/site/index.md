@@ -20,6 +20,8 @@ Weg der Daten bis zu einer externen Anwendung.
 
 ## Direkt zu den Details
 
+- [Hardwareübersicht](hardware/index.md): Mainboards, Module, Sensoren und Schnittstellen.
+
 - [Kompatibilität](compatibility.md): passende Hardware und Firmware auswählen.
 - [Mainboards](mainboards/index.md): Mini, Weatherstation und ORing Power.
 - [Aufbauanleitungen](guides/index.md): Bestückung und elektrische Prüfungen.

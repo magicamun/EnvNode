@@ -93,11 +93,9 @@ enthält die Bauteilwerte und den vollständigen Ablauf.
 | Relais zieht beim Boot an | Pull-down, Boot-Pegel und Aktorkonfiguration |
 | Kontaktzustand vertauscht | Gegensinnige Orientierung von J3 und J4 |
 
-## Prüfstand
+## Entwicklungsstand
 
-Die Anleitung wurde am 5. Oktober 2026 gegen Schaltplan-Netzliste und PCB-Padnetze
-abgeglichen. Dies war keine neue vollständige ERC/DRC- oder physische Prüfung.
-Lastqualifikation und anwendungsbezogene Freigaben sind in den Unterlagen noch offen.
+DuoRelay Revision 0.3 ist im praktischen Betrieb erprobt und funktioniert technisch einwandfrei. Es gehört zu den am weitesten ausgereiften EnvNode-Boards. Die Aufbauanleitung führt durch Bestückung und Funktionstest; wähle die angeschlossene Last passend zu Relais und Anschlussklemmen.
 
 [Mainboards](../../mainboards/index.md) · [Firmware](../../firmware/index.md)
 

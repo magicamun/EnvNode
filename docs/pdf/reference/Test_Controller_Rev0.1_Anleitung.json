@@ -5,7 +5,7 @@
     "title": "Test-Controller",
     "subtitle": "Bestückungs- und Bring-up-Anleitung",
     "hardware_revision": "0.1",
-    "document_version": "1.1",
+    "document_version": "1.2",
     "document_date": "2026-10-28",
     "source_document_date": "2026-10-28",
     "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
@@ -13,7 +13,7 @@
   "pages": 12,
   "source_pdf": null,
   "source_pdf_sha256": null,
-  "markdown_sha256": "61e151b0e490502c3fb0bb2ec3db34496ab12079f8d18f97b0b1ce13f5c97871",
+  "markdown_sha256": "9828fc41b99756c869a59ed1d681fa9f80e32060a21d65032bcb8fecdbf97edb",
   "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
   "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
   "palette": {
@@ -44,5 +44,5 @@
     "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
     "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
   },
-  "pdf_sha256": "cbac37aba3d235fb114c9b896dd3bf543361edaca3c0d9ccf5020daebdc4bf53"
+  "pdf_sha256": "4869ebd0100f5cf031f7abdb0f9b472aeb2c23ca2eecf0ebec2dcdff3ca76d11"
 }

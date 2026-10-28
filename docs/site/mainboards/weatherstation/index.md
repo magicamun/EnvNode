@@ -70,7 +70,7 @@ Die PCB-Geometrie ist für das BOX4U-Gehäuse 5U310700 vorgesehen.
 | H1-H2 | 2 | M2,5-Stützpunkte für Tochterplatinen |
 | H3-H6 | 4 | 4,5-mm-NPTH für BOX4U-Gehäuse |
 
-Standardartikel aus der bisherigen Anleitung; neue Referenzen und Artikel aus dem lokalen BOM-Export vom 28.10.2026. Kein neuer Lagerabgleich. Den tatsächlich bestückten ORing-Modulstand im Protokoll erfassen. Jumperleisten und Kappen sind Kaufteile; Net-Ties sind PCB-Strukturen. ESP32-Variante elektrisch und mechanisch prüfen. EnvNode-eigene Inhalte: siehe LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+Den tatsächlich bestückten ORing-Modulstand im Protokoll erfassen. Jumperleisten und Kappen sind Kaufteile; Net-Ties sind PCB-Strukturen. ESP32-Variante elektrisch und mechanisch prüfen. EnvNode-eigene Inhalte: siehe LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
 
 ## 2. Bestückungsübersicht
 

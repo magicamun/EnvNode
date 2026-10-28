@@ -16,3 +16,10 @@
 - Für SD-Card 0.1 danach die geprüfte Firmware-Mindestversion in Hardwareanleitung und Kompatibilität ergänzen.
 
 Vorgemerkt am 28.10.2026; Umsetzung als separater Schritt nach der Hardware-Dokumentation.
+
+## Dokumentation nach erfolgreicher Erprobung der Testhardware
+
+- [ ] Input-Adapter: Quellenstand-Hinweis aus der Benutzeranleitung entfernen, sobald Hardware und abgestimmte Test-Firmware gemeinsam erfolgreich erprobt sind.
+- [ ] Test-Firmware: Bei älteren Mainboards ohne TP1 das unverbundene zweipolige JST-PH-TestPin-Kabel berücksichtigen und das Testergebnis als „unvollständig“ ausweisen; Verhalten am Aufbau validieren.
+
+- [ ] Testhardware-Dokumentation (Test-Controller, Input-Adapter, Modul-Adapter) nach erfolgreicher Erprobung auf die tatsächliche Bedienung abstimmen und überholte Hinweise auf Firmware-Simulation und noch fehlende Firmware-Anbindung entfernen.

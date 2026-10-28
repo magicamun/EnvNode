@@ -5,7 +5,7 @@ pdf:
   title: Test-Controller
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.1'
-  document_version: '1.1'
+  document_version: '1.2'
   document_date: '2026-10-28'
   source_document_date: '2026-10-28'
   status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
@@ -49,7 +49,7 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 | J5,J6 | 4 | Rohmaterial: 2x 1x2, vier Kontaktpositionen | ENP-00145 |
 | J5,J6 | 2 | Abnehmbare Jumperkappen | ENP-00101 |
 
-Artikelzuordnung aus dem vorhandenen lokalen BOM-Export vom 28.10.2026; kein neuer Lagerabgleich. ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
+ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
 U1/U2 sind **CD74HC4067M**, SOIC-24W; kein ungeprüfter HCT-Ersatz. U3 sitzt in zwei auf je 19 Kontakte gekürzten Sockelleisten. U7 ist das fertig bestückte ORing-Power-Modul. Messmittel: Multimeter mit Diodentest, strombegrenzte Versorgung, Oszilloskop/Logikanalysator für spätere Multiplexerprüfung.
 

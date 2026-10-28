@@ -259,14 +259,6 @@ Revision 0.1 verwendet den power-only USB-C-Steckverbinder GCT USB4125-GF-A-0190
 
 Jede Änderung an Pinfolge, Platinenkontur, Castellated-Geometrie, Steckverbinder-Footprints, Regler, Diodentyp oder Kondensatorauslegung erfordert eine neue Prüfung und einen aktualisierten Revisionsnachweis.
 
-### Quellenabgleich vom 5. Oktober 2026
-
-Aktueller PCB-Stand: Commit 2864933. Gegenüber dem bisherigen Nachweis sind nur Plot-Einstellungen, ein leerer Einstellungsblock und die Reihenfolge unveränderter Leiterbahn-Einträge geändert. Geometrie, Bestückung und Netze bleiben gleich; die Referenzansicht bleibt gültig.
-
-Textkorrektur: D1 führt +3V3_EXT auf +3V3_SYS; D2 führt +3V3_DEVKIT auf +3V3_SYS. Die zuvor vertauschten Zuordnungen wurden im Funktions- und Prüfteil korrigiert. Der Abgleich der PCB-Padnetze mit der exportierten Schaltplan-Netzliste ergab keine Abweichungen.
-
-Die Bezeichnung Revision 0.1 wird aus der bisherigen Dokumentation übernommen; der PCB-Titelblock enthält keine formale Revision. Kein neuer vollständiger ERC-/DRC-Lauf und keine physische Prüfung im Rahmen dieser Aktualisierung.
-
 ## Prüfpunkte an der Außenkante
 
 Beschriftungsstand 0.1.1 vom 18. Oktober 2026.

@@ -12,6 +12,7 @@ theme:
   language: de
   features:
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - search.suggest
     - search.highlight
@@ -35,30 +36,39 @@ nav:
   - Dein erstes EnvNode: getting-started/index.md
   - Grundlagen:
       - Gesamtübersicht: concepts/index.md
-  - Hardware-Schnittstellen:
-      - Übersicht und Pinouts: interfaces/index.md
-      - Modulschnittstelle im Detail: concepts/module-interface.md
-  - Kompatibilität: compatibility.md
-  - Mainboards:
-      - Übersicht: mainboards/index.md
-      - EnvNode Mini 0.9.0: mainboards/mini/index.md
-      - Weatherstation 0.3.0: mainboards/weatherstation/index.md
-      - ORing Power 0.1.1: mainboards/oring-power/index.md
-  - Module:
-      - Übersicht: modules/index.md
-      - DuoRelay: modules/duo-relay/index.md
-      - AnalogHydroPressure 0.6: modules/analog-hydro-pressure/index.md
-      - SD-Card 0.1: modules/sd-card/index.md
-  - Testhardware:
-      - Test-Controller 0.1: mainboards/test-controller/index.md
-      - Input-Adapter 0.1: mainboards/input-adapter/index.md
-      - Modul-Adapter 0.1: mainboards/module-adapter/index.md
-  - Sensoren:
-      - Übersicht: sensors/index.md
-      - I²C-Sensoren: sensors/i2c.md
-      - RainDetectorController und Head: sensors/rain-detector.md
-      - SCT013: sensors/sct013.md
-  - Displays: displays/index.md
+  - Hardware:
+      - Übersicht: hardware/index.md
+      - Mainboards:
+          - Übersicht: mainboards/index.md
+          - Mini: mainboards/mini/index.md
+          - Weather: mainboards/weatherstation/index.md
+          - ORing Power: mainboards/oring-power/index.md
+      - Module:
+          - Übersicht: modules/index.md
+          - DuoRelay: modules/duo-relay/index.md
+          - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
+          - SD-Card: modules/sd-card/index.md
+          - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
+      - Sensoren:
+          - Übersicht: sensors/index.md
+          - I²C-Sensoren: sensors/i2c.md
+          - SCT013:
+              - Übersicht: sensors/sct013/index.md
+              - Head: sensors/sct013-head/assembly.md
+          - RainDetector:
+              - Übersicht: sensors/rain-detector/index.md
+              - Controller: sensors/rain-detector-controller/assembly.md
+              - Head: sensors/rain-detector-head/assembly.md
+      - Displays: displays/index.md
+      - HW-Schnittstellen:
+          - Übersicht & Pinouts: interfaces/index.md
+          - Modulschnittstelle im Detail: concepts/module-interface.md
+      - Kompatibilität: compatibility.md
+      - Testhardware:
+          - Übersicht: hardware/testhardware/index.md
+          - Test-Controller: mainboards/test-controller/index.md
+          - Input-Adapter: mainboards/input-adapter/index.md
+          - Modul-Adapter: mainboards/module-adapter/index.md
   - Firmware:
       - Bedienungsanleitung: firmware/index.md
       - Begriffe und Oberfläche: firmware/basics.md
@@ -80,9 +90,5 @@ nav:
       - Dokumentationsstand: guides/status.md
       - Bestückungspläne: guides/board-views.md
       - Alte Revisionen: guides/old-revisions.md
-      - RainDetectorController 0.4: sensors/rain-detector-controller/assembly.md
-      - RainDetectorHead 0.2: sensors/rain-detector-head/assembly.md
-      - SCT013Head: sensors/sct013-head/assembly.md
-      - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
   - Bausätze und Aufbau: kits/index.md
   - Lizenz und Nutzung: license.md

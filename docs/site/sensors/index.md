@@ -19,9 +19,9 @@ Die Liste folgt der Sensorregistry im dokumentierten Firmwarestand.
 
 ## Eigene Sensorhardware
 
-- [RainDetectorController und Head](rain-detector.md): kapazitive Sensorfläche,
+- [RainDetectorController und Head](rain-detector/index.md): kapazitive Sensorfläche,
   Frequenzauswertung und Heizung; Entwicklungsstand mit separater Laborfirmware.
-- [SCT013 und SCT013Head](sct013.md): Stromwandler mit Spannungsaufbereitung;
+- [SCT013 und SCT013Head](sct013/index.md): Stromwandler mit Spannungsaufbereitung;
   Entwicklungsstand ohne integrierten Firmware-Treiber. Die
   [Aufbauanleitung Rev. 0.1](sct013-head/assembly.md) beschreibt Bestückung und
   Erstprüfung, auch ohne Klinkenbuchse und Sensor.

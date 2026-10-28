@@ -5,7 +5,7 @@ pdf:
   title: Input-Adapter
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.1'
-  document_version: '1.1'
+  document_version: '1.2'
   document_date: '2026-10-28'
   source_document_date: '2026-10-28'
   status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
@@ -36,11 +36,11 @@ Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteil
 | U4,U5,U6 | 3 | SOIC-24W; kein HCT | ENP-00153 |
 | C1,C2,C3 | 3 | 100 nF X7R 1206 | ENP-00006 |
 | J1 | 1 | WSL 10G | ENP-00147 |
-| J4,TP1 | 40 | Rohmaterial in Kontaktpositionen: 2x 1x19 fuer Testplug und 1x2 fuer Referenzpigtail-Header | ENP-00145 |
+| J4,TP1 | 40 | Rohmaterial in Kontaktpositionen: 2× 1×19 für Testplug und 1×2 für Referenzpigtail-Anschluss | ENP-00145 |
 
-Artikelzuordnung aus dem vorhandenen lokalen BOM-Export vom 28.10.2026; kein neuer Lagerabgleich. ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
+ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
-Für J4 werden zwei gerade 1×19-Leisten im Reihenabstand **25,40 mm** benötigt. TP1 ist eine separate 1×2-Leiste. Aus 40 Kontaktpositionen entstehen diese drei Zuschnitte. Die beiden DUT-Referenzen dürfen weder mit Adapter-GND noch mit 3V3_SYS gebrückt werden.
+Für J4 werden zwei gerade 1×19-Leisten im Reihenabstand **25,40 mm** benötigt. TP1 ist der separate zweipolige Anschluss für das Referenzpigtail. Der **zweipolige JST-PH-Stecker sitzt am freien Kabelende in Richtung Prüfling**, nicht auf dem Input-Adapter. Die beiden DUT-Referenzen dürfen weder mit Adapter-GND noch mit 3V3_SYS gebrückt werden.
 
 ## 2. Bestückungsübersicht
 
@@ -62,7 +62,7 @@ Die Pinfolge folgt den tatsächlichen Padnummern. J4 von der Oberseite betrachte
 1. C1-C3 und anschließend U4-U6 ausrichten und bestücken; SOIC-24W-Pin 1 und feine Brücken prüfen.
 2. J1 mit korrekter IDC-Kodierung einsetzen und löten.
 3. Die beiden J4-Reihen in einer maßhaltigen Vorrichtung mit 25,40-mm-Abstand ausrichten; zunächst Endpins fixieren, Passprobe spannungsfrei durchführen und erst dann fertig löten.
-4. TP1 bestücken, Referenzpigtail eindeutig mit Pin 1/2 markieren und einzeln durchmessen.
+4. Den Pigtail-Kabelanschluss an TP1 herstellen. Den zweipoligen JST-PH-Stecker am Kabelende zum Prüfling mit Pin 1/2 eindeutig zuordnen und beide Adern einzeln durchmessen.
 5. Reinigen und Lötstellen sowie Abstände kontrollieren.
 
 ## 4. Anschlüsse und vollständige Kanalzuordnung
@@ -90,7 +90,7 @@ J1 verbindet sich 1:1 mit Test-Controller J8. Versorgung 3V3_SYS/GND dient nur d
 | TP1.1, MB_GND | Mainboard TP1.1, D1-Kathode | U6 I14 |
 | TP1.2, MB_3V3_SYS | Mainboard TP1.2, D2-Kathode | U6 I13 |
 
-Dies ist die Zuordnung des gespeicherten PCB-/Schaltplanstands. Ältere README-Angaben zu J7 und zur umgekehrten Referenzreihenfolge gelten hierfür nicht. Die Referenzen sind zusätzliche Messkontakte; eine Firmware-Nummerierung als 39/40 muss ausdrücklich zu dieser Tabelle passen.
+Die beiden Referenzen werden über das Pigtail zum TP1-Anschluss des Prüflings geführt. Sie sind zusätzliche Messkontakte und keine direkte Verbindung zur Versorgung des Testers.
 
 ### J4 / Multiplexer
 
@@ -152,7 +152,13 @@ Dies ist die Zuordnung des gespeicherten PCB-/Schaltplanstands. Ältere README-A
 3. Mit geeigneter Diagnosefirmware nacheinander genau einen Mux und einen Kanal wählen; unbenutzte Muxe deaktiviert lassen.
 4. Zuerst bekannte Prüfschleifen verwenden, jeden der 38 Sockelkontakte und beide TP1-Pfade einzeln erfassen; Querpfade und ausgeschaltete Kanäle kontrollieren.
 5. Die TP1-Diodenpfade des neuen Mainboards mit passender Stromrichtung prüfen. ADC-Schwellwerte und Einschwingzeit am Referenzaufbau bestimmen.
-6. Vor Kontaktierung eines DUT ausschalten; DUT-DevKit entfernen, alle DUT-Quellen und Provisioning trennen, Testplug und TP1 korrekt einstecken.
+6. Vor Kontaktierung eines DUT ausschalten; DUT-DevKit entfernen, alle DUT-Quellen und Provisioning trennen und den Testplug korrekt einstecken. Den JST-PH-Stecker des TestPin-Kabels nur bei Mainboards mit passendem TP1-Anschluss verbinden.
+
+### Firmware und Bedienung bei älteren Mainboards
+
+Bei älteren Mainboardrevisionen ohne TP1 bleibt das **zweipolige JST-PH-TestPin-Kabel unverbunden**. Der Test erfolgt dann über die 38 DevKit-Sockelkontakte; die beiden zusätzlichen Referenzmessungen stehen nicht zur Verfügung.
+
+Die Test-Firmware muss das Testergebnis in diesem Fall als **„unvollständig“** ausweisen. Ein vollständiger Test setzt die beiden angeschlossenen und geprüften TP1-Referenzpfade voraus. Diese Auswertung gehört zum noch zu validierenden Verhalten der Test-Firmware.
 
 ## 7. Messprotokoll
 
@@ -167,7 +173,7 @@ Dies ist die Zuordnung des gespeicherten PCB-/Schaltplanstands. Ältere README-A
 | Referenz-Diodenrichtung / Schaltschwellen | |
 | Mechanische Passprobe | |
 
-40 Messkontakte einzeln abhaken; für jeden Mux Adresse, COM-Messwert sowie ausgeschalteten Vergleichswert festhalten. Kontaktzählung, Versorgung und Referenzrichtung dürfen nicht aus dem alten 38-Kontakt-Simulationsmodell übernommen werden.
+Bei Mainboards mit TP1 alle 40 Messkontakte einzeln abhaken. Ohne TP1 die beiden Referenzmessungen als nicht durchgeführt und das Gesamtergebnis als „unvollständig“ protokollieren; für jeden Mux Adresse, COM-Messwert sowie ausgeschalteten Vergleichswert festhalten. Kontaktzählung, Versorgung und Referenzrichtung dürfen nicht aus dem alten 38-Kontakt-Simulationsmodell übernommen werden.
 
 ## 8. Fehlerbilder und Grenzen
 
@@ -178,7 +184,7 @@ Dies ist die Zuordnung des gespeicherten PCB-/Schaltplanstands. Ältere README-A
 | TP1-Messung fehlt | Referenzpigtail, Diodenrichtung und U6 I14/I13 |
 | Sockel passt nicht | 25,40-mm-Abstand, 19 Kontakte je Reihe, Reihenversatz |
 
-Die aktuelle Test-Firmware ist noch keine bestätigte physische 40-Kanal-Steuerung. Test Controller, Input-Adapter und Modul-Adapter gemeinsam mit einem abgestimmten Profil validieren. TP1 passt nur zu entsprechend ausgestatteten Mainboardrevisionen; ältere Mainboards nicht als automatisch kompatibel behandeln.
+Die aktuelle Test-Firmware ist noch keine bestätigte physische 40-Kanal-Steuerung. Test Controller, Input-Adapter und Modul-Adapter gemeinsam mit einem abgestimmten Profil validieren. Bei älteren Mainboards ohne TP1 bleibt das TestPin-Kabel unverbunden; die Prüfung bleibt ohne diese Referenzmessungen unvollständig (siehe „Firmware und Bedienung bei älteren Mainboards“).
 
 ## 9. Abschluss
 

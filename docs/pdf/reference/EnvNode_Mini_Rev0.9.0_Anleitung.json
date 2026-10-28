@@ -13,7 +13,7 @@
   "pages": 12,
   "source_pdf": null,
   "source_pdf_sha256": null,
-  "markdown_sha256": "87656dd0f8604277adc3d3e405c4db6142478d1b2a9723515d702e81216ed74a",
+  "markdown_sha256": "6a7264805c4a701e729b0269366086188afa548451e64d681175c3655f7ce446",
   "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
   "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
   "palette": {
@@ -42,5 +42,5 @@
     "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
     "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
   },
-  "pdf_sha256": "98970baba6621aa7723e2248f6b43f637780b76b5e44d06c5415666d3576364f"
+  "pdf_sha256": "3c8debb79abdb460fc4cc07824127f51f1c45b4be53b7b3cf57a8617696b61c7"
 }

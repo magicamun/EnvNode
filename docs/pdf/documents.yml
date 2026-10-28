@@ -10,7 +10,7 @@
   - Fehlerbilder
   - '0x52'
   - '0x53'
-  - 9c7e7d0384efa0a1
+  - im praktischen Betrieb erprobt
   preview: docs/pdf/reference/DuoRelay_Rev0.3_Anleitung.pdf
 - source: mainboards/mini/revisions/0.8.1.md
   target: assets/downloads/EnvNode_Mini_Rev0.8.1_Anleitung.pdf
