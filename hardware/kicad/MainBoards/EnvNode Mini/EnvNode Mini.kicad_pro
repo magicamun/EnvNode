@@ -86,6 +86,10 @@
           "EEPROM fits below ESP32"
         ],
         [
+          "courtyards_overlap|128705000|76192500|34b510d8-3742-4f3c-bca2-3955100c37ed|895cbf70-7f59-4610-aa4a-cc81a8e9b921",
+          ""
+        ],
+        [
           "silk_edge_clearance|118402120|72120425|c873bf01-5ff0-44aa-9ce1-8117c60efd05|b54b53e6-2317-4dcb-95e0-0730e4bdbb8a",
           ""
         ],
@@ -102,10 +106,6 @@
           ""
         ],
         [
-          "silk_over_copper|109372000|132740410|a396a93f-78bd-4a8a-8035-43acc7f9a5f0|c36a4ffc-d0c8-4b51-abf3-e4d92b027af8",
-          ""
-        ],
-        [
           "silk_over_copper|147048000|129414000|2895038a-28c3-41db-abdb-60388f030851|5f9511f1-65d0-4791-91d0-b2358ac2201b",
           ""
         ],
@@ -118,35 +118,35 @@
           ""
         ],
         [
-          "silk_over_copper|185048000|84495000|2895038a-28c3-41db-abdb-60388f030851|cb272a16-936a-49c7-a6de-ae295e24ae96",
+          "silk_over_copper|185048000|103150000|2895038a-28c3-41db-abdb-60388f030851|e1b06e8f-22dc-4095-b648-73085305f76c",
           ""
         ],
         [
-          "silk_over_copper|185048000|97972000|2895038a-28c3-41db-abdb-60388f030851|e1b06e8f-22dc-4095-b648-73085305f76c",
+          "silk_over_copper|185048000|93150000|2895038a-28c3-41db-abdb-60388f030851|cb272a16-936a-49c7-a6de-ae295e24ae96",
           ""
         ],
         [
-          "silk_over_copper|69696000|85795000|7f170d9d-fc20-41de-83f7-e612dfedeb27|dffabe10-18f3-435e-b442-978b662fa6cf",
+          "silk_over_copper|69696000|104450000|7f170d9d-fc20-41de-83f7-e612dfedeb27|3a86c17a-5b19-4e73-9d20-98b916c7dfb6",
           ""
         ],
         [
-          "silk_over_copper|69696000|99272000|7f170d9d-fc20-41de-83f7-e612dfedeb27|3a86c17a-5b19-4e73-9d20-98b916c7dfb6",
+          "silk_over_copper|69696000|94450000|7f170d9d-fc20-41de-83f7-e612dfedeb27|dffabe10-18f3-435e-b442-978b662fa6cf",
           ""
         ],
         [
-          "silk_overlap|185048000|100932000|2895038a-28c3-41db-abdb-60388f030851|7dc824df-b3aa-4ffa-b267-9baf952d43b7",
+          "silk_overlap|185048000|106110000|2895038a-28c3-41db-abdb-60388f030851|7dc824df-b3aa-4ffa-b267-9baf952d43b7",
           ""
         ],
         [
-          "silk_overlap|185048000|87455000|2895038a-28c3-41db-abdb-60388f030851|83da0fe6-90c7-4f62-b3ec-5ed4386fc3c0",
+          "silk_overlap|185048000|96110000|2895038a-28c3-41db-abdb-60388f030851|83da0fe6-90c7-4f62-b3ec-5ed4386fc3c0",
           ""
         ],
         [
-          "silk_overlap|69696000|100932000|7f170d9d-fc20-41de-83f7-e612dfedeb27|993bac9a-71b3-48e0-80e2-801ecf24f407",
+          "silk_overlap|69696000|106110000|7f170d9d-fc20-41de-83f7-e612dfedeb27|993bac9a-71b3-48e0-80e2-801ecf24f407",
           ""
         ],
         [
-          "silk_overlap|69696000|87455000|71985118-b989-4f19-945a-9a14ab827661|7f170d9d-fc20-41de-83f7-e612dfedeb27",
+          "silk_overlap|69696000|96110000|71985118-b989-4f19-945a-9a14ab827661|7f170d9d-fc20-41de-83f7-e612dfedeb27",
           ""
         ]
       ],
@@ -775,7 +775,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "ADC1-2,D1-4,#PWR1-28,NT1-2,J1-4,J6-8,U1-5,C1,C5-12,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
+    "used_designators": "ADC1-2,D1-4,#PWR1-28,NT1-2,J1-4,J6-11,U1-5,C1-2,C5-12,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
     "variants": []
   },
   "sheets": [
