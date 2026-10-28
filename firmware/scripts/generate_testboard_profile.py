@@ -1,7 +1,7 @@
 # EnvNode: see repository LICENSE.
 """Derive direct-net continuity expectations and display positions from a DUT PCB.
 
-Only explicit PCB net-tie groups join distinct net names; component paths are not inferred. A contact with no matching
+Only explicit PCB net-tie groups join distinct net names. New reference diode paths are checked individually; other component paths are not inferred. A contact with no matching
 socket net remains explicitly uncovered. KiCad sources are read-only inputs.
 """
 import argparse
@@ -13,6 +13,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import struct
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,6 +29,41 @@ PROFILES = [
          i2c=['J4', 'J5', 'J6', 'J7'], labels={'J4':'I2C0 · J4', 'J5':'I2C0 · J5',
              'J6':'I2C1 · J6', 'J7':'I2C1 · J7', 'J1':'Slot A · J1', 'J2':'Slot B · J2'}),
 ]
+
+# New revisions are pinned to their reviewed hardware commit; never read mutable
+# sibling checkouts when regenerating published profiles.
+PROFILES += [
+    dict(**{**PROFILES[0], 'symbol':'Weather03', 'id':'weather-0.3-pcb0.3.0',
+         'identity':'0.3', 'pcb':'0.3.0', 'commit':'98704fb', 'references':True}),
+    dict(**{**PROFILES[1], 'symbol':'Mini09', 'id':'mini-0.9-pcb0.9.0',
+         'identity':'0.9', 'pcb':'0.9.0', 'commit':'98704fb', 'references':True,
+         'refs':['ADC1','ADC2','J7','J8','J9','J10','J1','J2'],
+         'i2c':['J7','J8','J9','J10'], 'labels':{'J7':'I2C0 · J7','J8':'I2C0 · J8',
+         'J9':'I2C1 · J9','J10':'I2C1 · J10','J1':'Slot A · J1','J2':'Slot B · J2'}}),
+]
+
+def cbor(value):
+    def head(major,n):
+        if n < 24: return bytes([(major<<5)|n])
+        for tag,fmt,limit in [(24,'>B',256),(25,'>H',65536),(26,'>I',2**32),(27,'>Q',2**64)]:
+            if n < limit: return bytes([(major<<5)|tag])+struct.pack(fmt,n)
+        raise ValueError('CBOR integer too large')
+    if isinstance(value,int): return head(0,value)
+    if isinstance(value,float): return b'\xfb'+struct.pack('>d',value)
+    if isinstance(value,str):
+        data=value.encode(); return head(3,len(data))+data
+    if isinstance(value,list): return head(4,len(value))+b''.join(cbor(x) for x in value)
+    raise ValueError(type(value))
+
+def wire_profile(d,image):
+    return cbor([1,d['id'],d['name'],d['identityRevision'],d['pcbRevision'],d['sha256'],d['source'],
+        [float(n) for n in d['bounds']],
+        [[p['number'],p['net'],float(p['x']),float(p['y'])] for p in d['socket']],
+        [[c['id'],c['label'],['gpio','i2c','module'].index(c['pigtail']),
+          [[p['number'],p['net'],float(p['x']),float(p['y']),sum(1<<(n-1) for n in p['expected'])] for p in c['pins']]]
+         for c in d['connectors']],image,
+        [[p['input'],p['reference'],p['pin'],p['diode'],p['anode'],p['cathode']] for p in d.get('referencePaths',[])],
+        d.get('sourceCommit','')])
 
 def children(node, key):
     return [x for x in node if isinstance(x, list) and x and x[0] == key]
@@ -93,7 +129,7 @@ def pads(footprint):
 def generate_profile(profile):
     source = Path(profile['source'])
     symbol = profile['symbol']
-    data = (ROOT / source).read_bytes()
+    data = subprocess.check_output(['git','show',profile['commit']+':'+str(source)], cwd=ROOT) if profile.get('commit') else (ROOT / source).read_bytes()
     board = parse(data.decode())
     revision = child(child(board, 'title_block'), 'rev')
     assert revision == ['rev', profile['pcb']], 'PCB revision changed: create a new profile'
@@ -120,6 +156,16 @@ def generate_profile(profile):
             for net in nets[1:]:
                 parents[canonical(net)] = canonical(nets[0])
             net_ties.append(dict(reference=reference, nets=nets))
+    reference_paths = []
+    if profile.get('references'):
+        reference = {p['number']:p for p in pads(footprints['TP1'])}
+        for number, pin, diode, rail, label in [(39,2,'D2','+3V3_SYS','MB_3V3_SYS'),(40,1,'D1','GND','MB_GND')]:
+            diode_pads = {p['number']:p for p in pads(footprints[diode])}
+            assert diode_pads[2]['net'] == rail
+            assert diode_pads[1]['net'] == reference[pin]['net']
+            socket.append(dict(**{**reference[pin], 'number':number, 'label':label}))
+            reference_paths.append(dict(input=number, reference='TP1', pin=pin,
+                diode=diode, anode=rail, cathode=reference[pin]['net'], direction='output-to-input'))
     connectors = []
     for ref in refs:
         pins = pads(footprints[ref])
@@ -127,6 +173,9 @@ def generate_profile(profile):
         assert len(pins) == (14 if kind == 'module' else 4)
         for pin in pins:
             pin['expected'] = [s['number'] for s in socket if pin['net'] and canonical(s['net']) == canonical(pin['net'])]
+            for path in reference_paths:
+                if canonical(pin['net']) == canonical(path['anode']): pin['expected'].append(path['input'])
+            pin['expected'] = sorted(set(pin['expected']))
             pin['covered'] = bool(pin['expected'])
         connectors.append(dict(id=ref, label=profile['labels'].get(ref, ref), pigtail=kind, pins=pins))
     points = []
@@ -143,6 +192,9 @@ def generate_profile(profile):
         identityRevision=profile['identity'], pcbRevision=profile['pcb'], source=str(source), netTies=net_ties,
         sha256=hashlib.sha256(data).hexdigest(), bounds=bounds,
         socket=socket, connectors=connectors)
+    if reference_paths:
+        definition['referencePaths'] = reference_paths
+        definition['sourceCommit'] = subprocess.check_output(['git','rev-parse',profile['commit']], cwd=ROOT, text=True).strip()
     cli = shutil.which('kicad-cli') or '/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli'
     with tempfile.TemporaryDirectory() as directory:
         output = Path(directory) / 'board.svg'
@@ -174,28 +226,42 @@ def generate_profile(profile):
         model += f'    {{"{c["id"]}", Pigtail::{kind}, {len(c["pins"])}, {symbol}Contacts{i}}},\n'
     model += f'}};\nstatic const BoardDefinition {symbol}Board{{'
     model += ', '.join(json.dumps(definition[k]) for k in ('id', 'name', 'identityRevision', 'pcbRevision'))
-    model += f', {symbol}Socket, {symbol}Connectors, sizeof({symbol}Connectors) / sizeof({symbol}Connectors[0]), SocketPins}};\n'
+    model += f', {symbol}Socket, {symbol}Connectors, sizeof({symbol}Connectors) / sizeof({symbol}Connectors[0]), {len(socket)}}};\n'
     assets = f'static const char {symbol}DefinitionJson[] PROGMEM = R"BOARD(' + json.dumps(definition, separators=(',', ':')) + ')BOARD";\n'
     assets += f'static const uint8_t {symbol}SvgGzip[] PROGMEM = {{\n'
     assets += '\n'.join(','.join(str(n) for n in zipped[i:i+32]) + ',' for i in range(0, len(zipped), 32))
     assets += '\n};\n'
-    return definition, model, assets
+    return definition, model, assets, svg
 
 def generate():
     outputs = {}
     header = '// EnvNode: see repository LICENSE. Generated; do not edit.\n'
     assets = header + '#pragma once\n#include <Arduino.h>\nnamespace EnvNode { namespace Testing {\n'
+    catalog = []
     for profile in PROFILES:
-        definition, model, fragment = generate_profile(profile)
+        definition, model, fragment, svg = generate_profile(profile)
+        if not profile.get('references'): model = model.replace(', 38};', ', SocketPins};')
         outputs[f'firmware/testboard/boards/{profile["id"]}.json'] = json.dumps(definition, indent=2) + '\n'
         outputs[f'firmware/src/testboard/testing/{profile["symbol"]}Definition.inc'] = model
         assets += fragment
+        published_svg = svg.replace('</svg>', '<!-- EnvNode: see LICENSE.txt in this directory (LicenseRef-EnvNode-Use-and-Redistribution-1.0). --></svg>')
+        published_svg = '\n'.join(line.rstrip() for line in published_svg.splitlines())+'\n'
+        image = hashlib.sha256(published_svg.encode()).hexdigest()+'.svg'
+        binary = wire_profile(definition,image)
+        digest = hashlib.sha256(binary).hexdigest()
+        filename = definition['id']+'.'+digest+'.cbor'
+        prefix = 'docs/site/assets/testboard/v1/'
+        outputs[prefix+image] = published_svg
+        outputs[prefix+filename] = binary
+        catalog.append([definition['id'],definition['name'],definition['identityRevision'],definition['pcbRevision'],filename,len(binary),digest])
     assets += 'struct BoardAsset { const char* id; const char* json; size_t jsonSize; const uint8_t* svg; size_t svgSize; };\nstatic const BoardAsset BoardAssets[] = {\n'
     for profile in PROFILES:
         symbol = profile['symbol']
         assets += f'    {{"{profile["id"]}", {symbol}DefinitionJson, sizeof({symbol}DefinitionJson)-1, {symbol}SvgGzip, sizeof({symbol}SvgGzip)}},\n'
     assets += '};\n} }\n'
     outputs['firmware/src/testboard/testing/BoardAssets.h'] = assets
+    outputs['docs/site/assets/testboard/v1/catalog.cbor'] = cbor([1,catalog])
+    outputs['docs/site/assets/testboard/v1/LICENSE.txt'] = (ROOT/'LICENSE').read_text()
     return outputs
 
 if __name__ == '__main__':
@@ -205,8 +271,10 @@ if __name__ == '__main__':
     for name, content in generate().items():
         path = ROOT / name
         if args.check:
-            if not path.exists() or path.read_text() != content:
+            if not path.exists() or (path.read_bytes() if isinstance(content,bytes) else path.read_text()) != content:
                 raise SystemExit('Profile assets are out of date: ' + name)
         else:
-            path.write_text(content)
+            path.parent.mkdir(parents=True,exist_ok=True)
+            if isinstance(content,bytes): path.write_bytes(content)
+            else: path.write_text(content)
         print(('Checked ' if args.check else 'Generated ') + name)

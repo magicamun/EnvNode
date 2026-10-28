@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.1) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.5.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.6.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -79,7 +79,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Thirty-two tests exercise configuration isolation,
+composition and shared libraries. Forty-three tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -89,7 +89,7 @@ fixture suite. Its previously known board-profile-count assertion is unrelated.
 Before accepting the baseline on hardware, flash `testboard` onto the fixture
 ESP or a spare devkit, check setup access point/network save/restart, locale/time,
 name, logs and a same-product OTA update. Confirm that the start log identifies
-Testboard 0.5.0. No physical device was flashed or restarted during implementation.
+Testboard 0.6.0. No physical device was flashed or restarted during implementation.
 
 ## Mini (0.3.1)
 
@@ -141,3 +141,15 @@ Eight native integration tests use the real EEPROM transport against a Wire doub
 and cover bus release, missing devices, readback failures, preserved bytes,
 confirmation, aliases, hotplug state and mutual exclusion. Physical target
 provisioning still needs validation on assembled hardware.
+
+## Revision profiles and remote delivery (0.6.0)
+
+Mini 0.9 / PCB 0.9.0 and Weather 0.3 / PCB 0.3.0 add explicit protected reference
+paths and 40 measurement inputs. Their nominal simulated plans contain 2080 and
+3440 comparisons. Existing 38-input profiles remain available unchanged.
+The tester can obtain a bounded, validated catalog and compact profiles over
+verified HTTPS from docs.envnode.de. Matching built-in profiles provide fallback;
+the browser obtains the SVG directly. No publication is performed in this branch.
+See [remote profile format, operation and trust model](TestBoardRemoteProfiles.md).
+The independent signature check, new-revision provisioning and physical validation
+remain future work. EnvNode stays at 0.8.1; this step changes only the tester.

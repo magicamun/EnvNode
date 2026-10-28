@@ -263,9 +263,9 @@ void test_web_selection_and_retest_are_strict_and_locked_while_running() {
 }
 void test_mini_profile_has_independent_slot_wiring_and_explicit_address_ties() {
     const auto& board = miniBoard();
-    TEST_ASSERT_EQUAL(2, boardCount()); TEST_ASSERT_EQUAL(8, board.count);
+    TEST_ASSERT_EQUAL(4, boardCount()); TEST_ASSERT_EQUAL(8, board.count);
     TEST_ASSERT_EQUAL_PTR(&board, findBoard("mini-0.8-pcb0.8.1"));
-    TEST_ASSERT_NULL(findBoard("unknown")); TEST_ASSERT_NULL(boardAt(2));
+    TEST_ASSERT_NULL(findBoard("unknown")); TEST_ASSERT_NULL(boardAt(4));
     TEST_ASSERT_EQUAL_UINT64(1ULL << 4, board.connectors[0].contacts[2].expected);
     TEST_ASSERT_EQUAL_UINT64(1ULL << 5, board.connectors[1].contacts[2].expected);
     const auto& a = board.connectors[6]; const auto& b = board.connectors[7];

@@ -31,19 +31,38 @@ void TestWebRoutes::registerRoutes(WebServer& server) {
     server.on("/test", HTTP_GET, [this]() { page(); });
     server.on("/test/catalog", HTTP_GET, [this]() {
         String json("[");
-        for (size_t i = 0; i < boardCount(); ++i) {
+        const size_t count = profiles_ ? profiles_->count() : boardCount();
+        for (size_t i = 0; i < count; ++i) {
             if (i) json += ',';
-            const auto& board = *boardAt(i);
-            json += "{\"id\":"; appendJsonString(json, board.id);
-            json += ",\"name\":"; appendJsonString(json, board.name);
-            json += ",\"identityRevision\":"; appendJsonString(json, board.identityRevision);
-            json += ",\"pcbRevision\":"; appendJsonString(json, board.pcbRevision);
-            json += '}';
+            RemoteProfileEntry e{}; bool remote=false;
+            if (profiles_) { if (!profiles_->entryAt(i,e,remote)) continue; }
+            else {
+                const auto& b=*boardAt(i);
+                strncpy(e.id,b.id,sizeof(e.id)-1); strncpy(e.name,b.name,sizeof(e.name)-1);
+                strncpy(e.identity,b.identityRevision,sizeof(e.identity)-1); strncpy(e.pcb,b.pcbRevision,sizeof(e.pcb)-1);
+            }
+            json += "{\"id\":"; appendJsonString(json,e.id);
+            json += ",\"name\":"; appendJsonString(json,e.name);
+            json += ",\"identityRevision\":"; appendJsonString(json,e.identity);
+            json += ",\"pcbRevision\":"; appendJsonString(json,e.pcb);
+            json += remote ? ",\"origin\":\"remote\"}" : ",\"origin\":\"embedded\"}";
         }
         json += ']';
         host_.server().send(200, "application/json; charset=utf-8", json);
     });
     server.on("/test/definition", HTTP_GET, [this]() {
+        String id=host_.server().arg("board");
+        if(id.isEmpty()) id=runner_.board()?runner_.board()->id:weatherBoard().id;
+        const bool builtinActive=runner_.board() && runner_.board()==findBoard(id.c_str());
+        if(profiles_ && !builtinActive) {
+            const auto* p=profiles_->prepare(id.c_str(),runner_.phase()!=Phase::Running);
+            if(p) {
+                const String json=profileJson(*p);
+                if(json.isEmpty()) { host_.server().send(503,"application/json","{\"error\":\"Profile buffer unavailable\"}");return; }
+                host_.server().sendHeader("Cache-Control","no-store");
+                host_.server().send(200,"application/json; charset=utf-8",json);return;
+            }
+        }
         const auto* asset = requestedAsset(host_.server(), runner_);
         if (!asset) { host_.server().send(404, "application/json", "{\"error\":\"Unknown board\"}"); return; }
         host_.server().sendHeader("Cache-Control", "no-store");
@@ -92,7 +111,9 @@ void TestWebRoutes::state() {
     if (runner_.board()) for (size_t i = 0; i < runner_.board()->count; ++i)
         for (size_t p = 0; p < MaxContacts; ++p)
             json += static_cast<char>('0' + static_cast<unsigned>(runner_.contactVerdict(i, p)));
-    json += "\"}";
+    json += "\",\"profilesRevision\":" + String(profiles_?profiles_->revision():0);
+    json += ",\"profilesStatus\":";appendJsonString(json,profiles_?profiles_->status():"embedded");
+    json += "}";
     host_.server().sendHeader("Cache-Control", "no-store");
     host_.server().send(200, "application/json; charset=utf-8", json);
 }
@@ -105,7 +126,7 @@ void TestWebRoutes::action() {
     bool ok = false;
     if (command == "load") {
         const auto* board = findBoard(server.arg("board").c_str());
-        ok = board && runner_.load(*board);
+        ok = profiles_ ? profiles_->load(server.arg("board").c_str(),runner_) : board && runner_.load(*board);
     } else if (command == "start" && (runner_.phase() == Phase::AwaitingConnection || runner_.phase() == Phase::Review)) {
         const String fault = server.arg("fault");
         if (fault != "none" && fault != "open" && fault != "short") {
@@ -114,6 +135,8 @@ void TestWebRoutes::action() {
         fixture_.connect(*runner_.board(), runner_.step(), fault == "open" ? SimulatedFault::OpenContact
             : fault == "short" ? SimulatedFault::ExtraConnection : SimulatedFault::None);
         ok = runner_.start(millis());
+    } else if(command=="refresh" && profiles_ && runner_.phase()!=Phase::Running) {
+        profiles_->requestRefresh();ok=true;
     } else if (command == "select") {
         uint32_t connector;
         ok = unsignedValue(server.arg("connector"), connector) && runner_.selectConnector(connector);

@@ -29,8 +29,8 @@ python3 firmware/scripts/generate_fixture_routing.py --check
 
 Die vorhandenen Weather-0.2- und Mini-0.8-Profile bleiben unverändert bei 38
 Eingängen. Die nachfolgenden Zahlen und Abdeckungsaussagen beziehen sich auf
-diese alten Profile. Neue Profile für Mini 0.9 und Weather 0.3 müssen die
-Referenzkontakte und die gerichteten Schutzdiodenpfade ausdrücklich modellieren.
+diese alten Profile. Seit 0.6.0 modellieren die neuen Profile für Mini 0.9 und Weather 0.3 die
+Referenzkontakte und die gerichteten Schutzdiodenpfade ausdrücklich.
 Ein gleicher Netzname allein bildet diese Pfade nicht ab. Die physische
 Multiplexersteuerung und ADC-Auswertung sind weiterhin nicht implementiert.
 
@@ -212,7 +212,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-32 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+43 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
@@ -224,24 +224,21 @@ ist ein Entwicklungsprüfmittel, kein zusätzlicher Produkt-Build.
 
 Der Katalog enthält Weather und Mini. Profile und Zeichnungen werden revisionsbezogen geladen; ein Boardwechsel verwirft den vorherigen Lauf. Mini umfasst acht Anschlüsse und 1976 Vergleiche. Explizite KiCad-Net-Ties werden aufgelöst: Slot A Adresse liegt auf GND, Slot B auf 3V3_SYS. Letzterer Kontakt und die acht Versorgungsanschlüsse bleiben ohne zusätzlichen Referenzabgriff unvollständig prüfbar. Andere Bauteile werden nicht als direkte Verbindungen interpretiert.
 
-## Später: zentral bereitgestellte Profile
+## Zentral bereitgestellte Profile seit 0.6.0
 
-Boardprofile und Zeichnungen sollen perspektivisch über docs.envnode angeboten und vom Prüf-ESP32 geladen werden. Eingebaute Profile bleiben als Offline-Grundbestand verfügbar. Erforderlich wären ein versionierter Katalog, validierte Datenformate und unveränderliche Profile je Board-/PCB-Revision; optional später ein lokaler Cache. Dies ist vorgemerkt und derzeit nicht implementiert.
+Mini 0.9 / PCB 0.9.0 und Weather 0.3 / PCB 0.3.0 ergänzen den Katalog mit 40
+Eingängen und expliziten Diodenpfaden. Alte Profile bleiben bei 38 Eingängen.
+Remote-Katalog und Profile werden bei Bedarf über geprüftes HTTPS geladen;
+passende eingebaute Profile dienen als Rückfall. Das Bild lädt der Browser direkt.
+Details, Veröffentlichungsablauf und Grenzen stehen in
+[TestBoardRemoteProfiles.md](TestBoardRemoteProfiles.md).
 
-Die Boardansichten blenden Bauteilwerte aus; Referenzbezeichnungen bleiben sichtbar. Der Generator entfernt die Werte ausschließlich aus einer temporären Exportkopie, die KiCad-Quelldateien bleiben unverändert.
+Die Boardansichten blenden Bauteilwerte aus; Referenzbezeichnungen bleiben sichtbar.
+KiCad-Quelldateien werden nicht verändert. Die neuen Hardwarequellen sind an einen
+Git-Commit gebunden. Ein geladener Prüflauf behält seine eigene Definition.
 
-## Nächste Ausbauschritte
+## Weitere Schritte
 
-Die gemeinsamen Provisioning-Dienste und Webrouten verwenden den dedizierten
-Bus GPIO16/5. Provisioning ist seit 0.5.0 für externe Board-Identitäten integriert
-(siehe [Betriebsphasen und unterstützte Revisionen](TestBoardFirmware.md#external-board-provisioning-050)). Danach
-folgen die neuen Mainboardprofile und Remote-Profile. Boardwahl und Darstellung
-sollen von Prüfung und Provisioning gemeinsam verwendet werden.
-
-Remote-Profile sind noch nicht implementiert. Vorgesehen sind ein versioniertes
-Format, eingebaute Offline-Profile und eine Signaturprüfung mit fest eingebettetem
-Public Key. Eine gültige Signatur bestätigt Herkunft und Unverändertheit; zusätzliche
-Schema-, Revisions- und Werteprüfungen bleiben erforderlich. Ein Bildpfad und ein
-signierter Bild-Hash können die Darstellung an das Profil binden. Der Browser lädt
-das Bild direkt; der ESP braucht es nicht im RAM zwischenzuspeichern. Profil-Downloads
-sollen begrenzt und zunächst in Flash zwischengespeichert und validiert werden.
+Die Public-Key-Signaturprüfung, neue ENID-/Provisioning-Revisionen und eine
+Boarddarstellung im Provisioning folgen separat. GPIO16/5 bleiben unverändert;
+die elektrische Provisioning- und Messvalidierung wartet auf die Testhardware.
