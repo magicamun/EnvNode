@@ -634,3 +634,81 @@ extraction is complete. Release 0.8.0 integrates this work into main before furt
 SD-Card or tester firmware development. The test-board firmware remains separate
 future work. Existing branch-local uncommitted PCB, binary and ignore-file changes
 are not part of the integration release.
+
+
+## First separate fixture application (2026-10-26)
+
+After release 0.8.0/main integration and SD-Card synchronization, the fixture gets
+its own `testboard` build target and source directory. EnvNode's existing target,
+version, configuration and behavior remain separate. Common ESP32 build/monitor
+settings are shared in PlatformIO; sensor and MQTT dependencies belong only to
+esp32dev. The generator selects version headers per environment: EnvNode 0.8.0,
+fixture 0.1.0. Default builds still select EnvNode explicitly through default_envs.
+
+The fixture composes shared services for WiFi setup, time/locale, base settings,
+logging, web administration, OTA/explicit restart and lifecycle. Its NVS namespaces
+and reset are independent of EnvNode's weather namespaces and cfg_nvs snapshots.
+Seven tests in testboard_native cover isolation, persistence/reboot/reset, actual
+route composition in setup mode, live locale, save failures and explicit restart,
+including firmware staging without automatic restart. No measurement/provisioning
+engine or I2C/MUX/ADC/DUT pin activation is introduced. Hardware follow-up remains
+pending; see TestBoardFirmware.md.
+
+
+Validation: both ESP32 targets build, browser checks pass in English/German, and
+all seven isolated fixture tests pass. EnvNode retains 515 passing native outcomes
+and the same known profile-count assertion failure. Generated headers select the
+correct application versions. The tester ELF has no symbols for EnvNode's
+ConfigurationService, SensorManager, ControllerRuntime, MqttService, DisplayService,
+BoardIdentityResolver, PubSubClient or U8G2. Initial measured footprint is about
+974 kB flash / 65 kB static RAM for the tester versus 1462 kB / 125 kB for EnvNode.
+No physical flash, restart or connected-board operation was performed.
+
+
+## Guided fixture simulation (testboard 0.2.0)
+
+The user requested defining and building application logic while the physical
+fixture is unavailable. Fixture channel routing, DUT revision profiles, logical
+measurement backend and guided/browser flow are separate. The first real profile
+is derived from Weather 0.2 / PCB 0.2.1; it has 19 connectors, 38 socket pads and
+3268 comparisons. KiCad coordinates and a source SHA-256 accompany the mapping.
+
+The PCB exposes +3V3_SYS at the connectors but +3V3_DEVKIT at socket pad 1. The
+user explicitly chose to mark these contacts as not fully testable for now.
+All 19 corresponding contacts remain incomplete; a nominal simulated run cannot
+produce a full-board pass. No rail aliases are invented. A logical probe test
+also independently checks GPIO16 against ground pads 14/32/38, +5V pad 19 and
+signal pad 27. Future physical backend routing remains unpopulated.
+
+The guided runner uses explicit connect/start/review/next/abort states and a
+bounded nonblocking sample interface; the browser shows a KiCad view with LEDs
+and incremental JSON status. A simulator supplies nominal/open/extra-connection
+cases. Fifteen native fixture tests and both ESP32 builds pass. Existing browser
+editor checks still pass in English/German. Local browser testing uses the same
+native C++ classes behind a loopback-only development adapter, with no ESP access.
+See TestBoardApplication.md for the agreed boundaries, caveats and extension path.
+
+
+## Free connector selection (testboard 0.2.1)
+
+The connector list now selects any connector outside an active measurement,
+including after completion/abort. Full result matrices/progress stay in RAM per
+connector; retest clears only the selected connector at start. Previous results
+are restored for inspection on selection. Next wraps to the next untested
+connector and only completes after all have been measured. Both runner/API reject
+selection during a test; start from Review explicitly performs a retest. Eighteen
+native fixture tests cover result preservation/replacement, out-of-order completion,
+strict/stale selection inputs, running locks and the Web retest path. Physical
+routing, rail coverage and EnvNode behavior remain unchanged.
+
+
+Validation of 0.2.1: ESP32 testboard build and all 18 native fixture tests pass.
+Local browser acceptance confirms selection locks while running, a direct jump
+from GPIO16 to ADC1, restoration of GPIO16's 152 stored comparisons, and explicit
+retest from Review. Static RAM is 83004 bytes (25.3%); flash is 1083145 bytes.
+No device was flashed or restarted by the agent. The agreed future switched
+GND/+3V3_SYS reference connector remains a separate hardware/profile revision.
+
+Testboard 0.3.0 ergänzt Mini 0.8 / PCB 0.8.1 und den automatischen Simulationsdurchlauf. EnvNode bleibt bei 0.8.0; gemeinsame Basis wurde dafür nicht verändert. Validierung: 23 native Testboard-Tests und ESP32-Testboard-Build.
+
+Testboard 0.3.1 entfernt Check all wieder: Jeder Anschluss wird nach manuellem Umstecken einzeln bestätigt. Mini-Profil bleibt erhalten.

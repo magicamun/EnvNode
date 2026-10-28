@@ -1,4 +1,5 @@
 #include "BoardProfile.h"
+#include <initializer_list>
 
 namespace EnvNode {
 namespace {
@@ -117,6 +118,21 @@ const BoardProfile EnvNodeMiniProfile = {
     sizeof(EnvNodeMiniModuleSlots) / sizeof(EnvNodeMiniModuleSlots[0]),
 };
 
+// New revisions change reference/power protection and decoupling, not GPIO resources.
+// Keep the original objects/API defaults so old callers and board identities survive.
+const BoardProfile EnvNodeWeather03Profile = {
+    BoardProfileId::EnvNodeWeather, "EnvNode Weather", {0,3},
+    EnvNodeWeatherGpios, sizeof(EnvNodeWeatherGpios)/sizeof(EnvNodeWeatherGpios[0]),
+    EnvNodeMainboardI2CBuses, sizeof(EnvNodeMainboardI2CBuses)/sizeof(EnvNodeMainboardI2CBuses[0]),
+    EnvNodeWeatherModuleSlots, sizeof(EnvNodeWeatherModuleSlots)/sizeof(EnvNodeWeatherModuleSlots[0])
+};
+const BoardProfile EnvNodeMini09Profile = {
+    BoardProfileId::EnvNodeMini, "EnvNode Mini", {0,9},
+    EnvNodeMiniGpios, sizeof(EnvNodeMiniGpios)/sizeof(EnvNodeMiniGpios[0]),
+    EnvNodeMainboardI2CBuses, sizeof(EnvNodeMainboardI2CBuses)/sizeof(EnvNodeMainboardI2CBuses[0]),
+    EnvNodeMiniModuleSlots, sizeof(EnvNodeMiniModuleSlots)/sizeof(EnvNodeMiniModuleSlots[0])
+};
+
 const BoardProfile* const BoardProfiles[] = {
     &EnvNodeMainboardProfile,
     &EnvNodeWeatherProfile,
@@ -149,6 +165,14 @@ const BoardProfile* boardProfile(BoardProfileId id) {
     return nullptr;
 }
 
+const BoardProfile* boardProfile(BoardProfileId id, BoardRevision revision) {
+    const auto* legacy=boardProfile(id);
+    if(legacy && legacy->revision.major==revision.major && legacy->revision.minor==revision.minor)return legacy;
+    for(const auto* p:{&EnvNodeWeather03Profile,&EnvNodeMini09Profile})
+        if(p->id==id && p->revision.major==revision.major && p->revision.minor==revision.minor)return p;
+    return nullptr;
+}
+
 size_t boardProfileCount() {
     return sizeof(BoardProfiles) / sizeof(BoardProfiles[0]);
 }
@@ -171,6 +195,12 @@ bool selectCurrentBoardProfile(BoardProfileId id) {
     selectedProfile = profile;
     selectionFrozen = true;
     return true;
+}
+
+bool selectCurrentBoardProfile(BoardProfileId id, BoardRevision revision) {
+    const BoardProfile* profile=boardProfile(id,revision);
+    if(!profile || selectionFrozen)return false;
+    selectedProfile=profile;selectionFrozen=true;return true;
 }
 
 const BoardModuleSlotCapability* boardModuleSlot(

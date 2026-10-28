@@ -1821,7 +1821,7 @@
 			(uuid "be50d5de-ed0f-4453-8e97-d2e7157bb68d")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/eebae76a-aa64-4c65-ae24-1421919b4d0d"
 					(reference "J3")
 					(unit 1)
@@ -1970,7 +1970,7 @@
 			(uuid "86adeb59-1228-4453-90c1-3b3815430931")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/eebae76a-aa64-4c65-ae24-1421919b4d0d"
 					(reference "U2")
 					(unit 1)
@@ -2052,7 +2052,7 @@
 			(uuid "8e49e220-3844-4a89-8d0f-934a97951494")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/eebae76a-aa64-4c65-ae24-1421919b4d0d"
 					(reference "C4")
 					(unit 1)
@@ -2130,7 +2130,7 @@
 			(uuid "9058f0cb-9a80-4261-905b-3b4a14a6a5ec")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/eebae76a-aa64-4c65-ae24-1421919b4d0d"
 					(reference "#PWR02")
 					(unit 1)
@@ -2208,7 +2208,7 @@
 			(uuid "43af0e39-f6fc-40f2-9941-d231aa97a94f")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/eebae76a-aa64-4c65-ae24-1421919b4d0d"
 					(reference "#PWR010")
 					(unit 1)

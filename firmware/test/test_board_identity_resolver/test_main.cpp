@@ -4,6 +4,8 @@
 #include <unity.h>
 
 #include "BoardIdentityResolver.h"
+#include "BoardProfile.h"
+#include <initializer_list>
 
 using namespace EnvNode;
 
@@ -163,6 +165,18 @@ void test_weather_eeprom_identity_wins_over_mainboard_fallback() {
     TEST_ASSERT_TRUE(result.normalRuntimeAllowed);
 }
 
+void test_new_revision_identity_is_kept_and_runtime_selection_is_exact() {
+    for(const auto identity:{BoardIdentity{BoardProfileId::EnvNodeMini,{0,9},{"MINI-09"}},
+        BoardIdentity{BoardProfileId::EnvNodeWeather,{0,3},{"WEATHER-03"}}}) {
+        MemoryStorage storage;storage.setIdentity(identity);const auto result=resolve(storage);
+        TEST_ASSERT_EQUAL(BoardIdentitySource::EEPROM,result.source);TEST_ASSERT_TRUE(result.normalRuntimeAllowed);
+        TEST_ASSERT_EQUAL(identity.revision.minor,result.identity.revision.minor);
+    }
+    TEST_ASSERT_TRUE(selectCurrentBoardProfile(BoardProfileId::EnvNodeMini,{0,9}));
+    TEST_ASSERT_EQUAL(9,currentBoardProfile().revision.minor);
+    TEST_ASSERT_FALSE(selectCurrentBoardProfile(BoardProfileId::EnvNodeWeather,{0,3}));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
     RUN_TEST(test_valid_eeprom_identity_wins);
@@ -171,5 +185,6 @@ int main(int, char**) {
     RUN_TEST(test_unknown_profile_and_unsupported_revision_never_fall_back);
     RUN_TEST(test_resolution_is_read_and_frozen_once);
     RUN_TEST(test_weather_eeprom_identity_wins_over_mainboard_fallback);
+    RUN_TEST(test_new_revision_identity_is_kept_and_runtime_selection_is_exact);
     return UNITY_END();
 }

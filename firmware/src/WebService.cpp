@@ -1,3 +1,4 @@
+#include "BoardIdentityProfiles.h"
 #include "TextUpload.h"
 #include "WebResult.h"
 #include "InstanceUuidWebText.h"
@@ -2568,18 +2569,20 @@ String WebService::renderHardwareOverview() {
     return c;
 }
 BoardIdentity WebService::provisioningBoardIdentity() const { return boardIdentityResolution_.identity; }
-size_t WebService::provisioningProfileCount() const { return boardProfileCount(); }
+size_t WebService::provisioningProfileCount() const { return boardIdentityProfileCount(); }
 bool WebService::provisioningProfileAt(size_t index, ProvisioningBoardProfile& result) const {
-    const BoardProfile* profile = boardProfileAt(index);
-    if (profile == nullptr) return false;
-    result = {profile->id, profile->displayName, profile->revision};
-    return true;
+    const auto* p=boardIdentityProfileAt(index);
+    if(!p)return false;
+    result={p->id,p->displayName,p->revision};return true;
 }
 bool WebService::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& result) const {
-    const BoardProfile* profile = boardProfile(id);
-    if (profile == nullptr) return false;
-    result = {profile->id, profile->displayName, profile->revision};
-    return true;
+    const auto* p=defaultBoardIdentityProfile(id);
+    return p && provisioningProfile(id,p->revision,result);
+}
+bool WebService::provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& result) const {
+    const auto* p=boardIdentityProfile(id,revision);
+    if(!p || !boardProfile(id,revision))return false;
+    result={p->id,p->displayName,p->revision};return true;
 }
 BoardProvisioningResult WebService::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
     return boardProvisioningService_.provision(identity, confirmed);

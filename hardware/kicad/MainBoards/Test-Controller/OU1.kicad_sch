@@ -1383,7 +1383,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "03989062-76fb-420c-b5d9-87afa22269c2")
 		(property "Reference" "J1"
@@ -1454,7 +1454,7 @@
 			(uuid "a5f01ad6-9473-4444-b3e3-56948b7e80e9")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "J1")
 					(unit 1)
@@ -1536,7 +1536,7 @@
 			(uuid "ca4d1ed1-00fd-46e8-84f2-6ef43883ff00")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "C5")
 					(unit 1)
@@ -1553,7 +1553,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "3029f677-7c8a-4824-9b3a-4b9cc70a9718")
 		(property "Reference" "J2"
@@ -1624,7 +1624,7 @@
 			(uuid "8fc883ef-61a5-4a2e-95f2-cd75f595352f")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "J2")
 					(unit 1)
@@ -1702,7 +1702,7 @@
 			(uuid "1b211ef5-bb47-483d-948b-42272ee1edd3")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "#PWR011")
 					(unit 1)
@@ -1780,7 +1780,7 @@
 			(uuid "dcc43acb-e2ac-4b1f-b652-9debabf31bad")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "#PWR01")
 					(unit 1)
@@ -1929,7 +1929,7 @@
 			(uuid "796a8934-8257-45ec-a481-f52273aeb136")
 		)
 		(instances
-			(project "Test-Provisioning"
+			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "U1")
 					(unit 1)

@@ -7,13 +7,18 @@
 #include "WebLocalization.h"
 #include "Logger.h"
 namespace EnvNode {
+struct ProvisioningWebOptions {
+    bool externalTarget = false;
+    bool modules = true;
+    std::function<bool()> available;
+};
 class HardwareProvisioningWebRoutes : public IWebRoutes {
 public:
     using Overview = std::function<String()>;
     using Random = std::function<void(uint8_t*, size_t)>;
     HardwareProvisioningWebRoutes(WebServer& server, IWebPagePresenter& pages,
         ILogger& logger, IProvisioningAdministration& administration,
-        Overview overview, Random random);
+        Overview overview, Random random, ProvisioningWebOptions options = {});
     void registerRoutes(WebServer& server) override;
 private:
     const char* uiText(TextId id) const;
@@ -28,5 +33,7 @@ private:
     IProvisioningAdministration& administration_;
     Overview overview_;
     Random random_;
+    ProvisioningWebOptions options_;
+    bool operationAllowed();
 };
 }
