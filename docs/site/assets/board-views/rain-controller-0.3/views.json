@@ -1,0 +1,225 @@
+{
+  "id": "rain-controller-0.3",
+  "guide": "sensors/rain-detector-controller/revisions/0.3.md",
+  "pcb_source": "ff906605036ccac222eda68e9d515e630a9cae6c:hardware/kicad/Sensors/RainDetectorController/RainDetectorController.kicad_pcb",
+  "pcb_sha256": "3f664c0ba8eff0be254e0d38d4aedced9a44d7f3a09e9f7640c9339b8c96e7b3",
+  "back_components": [
+    "J1",
+    "J2"
+  ],
+  "hero": {
+    "front": "assets/images/rain-controller-assembly/page-01-view-1.png",
+    "back": "assets/images/rain-controller-assembly/page-03-view-1.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/rain-controller-0.3/assembly-front.png",
+      "png_size_px": [
+        2260,
+        1648
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/rain-controller-0.3/assembly-back.png",
+      "png_size_px": [
+        2260,
+        1649
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        71.49,
+        52.45
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U1",
+      "value": "ICM7555xB",
+      "side": "F.Cu",
+      "position_mm": [
+        110.265,
+        73.905
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        126.25,
+        52.45
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R3",
+      "value": "10kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        111.515,
+        68.7
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R1",
+      "value": "100Ohm",
+      "side": "F.Cu",
+      "position_mm": [
+        88.14,
+        76.78
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J4",
+      "value": "RAIN_SIGNAL",
+      "side": "F.Cu",
+      "position_mm": [
+        106.75,
+        89.21
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "H3",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        126.25,
+        89.21
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R4",
+      "value": "100kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        105.15,
+        68.7
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R2",
+      "value": "100kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        88.14,
+        72.34
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        102.84,
+        75.8
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J3",
+      "value": "HEATER_CTRL",
+      "side": "F.Cu",
+      "position_mm": [
+        83.37,
+        89.21
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "H4",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        71.49,
+        89.21
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "Q1",
+      "value": "AO3400A",
+      "side": "F.Cu",
+      "position_mm": [
+        82.82,
+        74.65
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x02_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        123.715,
+        69.56
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "J2",
+      "value": "Conn_02x02_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        76.565,
+        69.56
+      ],
+      "rotation_deg": 90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 11,
+  "asset_sha256": {
+    "assets/board-views/rain-controller-0.3/assembly-front.png": "7c0917c1f2a2ad0eb9e13709a2a75fa2582ff8a6b9f7c08ced7a5903f195ba7c",
+    "assets/board-views/rain-controller-0.3/assembly-back.png": "5e53c8486e33e9f4077ed8e33d0c6532f37fb6262df825d796d3fb6468322ba2",
+    "assets/images/rain-controller-assembly/page-01-view-1.png": "143645b12518a00f6c1ea3bb328a51227bc0ef8bc5c0c5080c5ecc637c8707d1",
+    "assets/images/rain-controller-assembly/page-03-view-1.png": "311a71926bcb1bd2d9feff0b8dd948a47026b808aceea774863470ef790c761c"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

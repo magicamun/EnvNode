@@ -1,0 +1,346 @@
+{
+  "id": "analog-0.6",
+  "guide": "modules/analog-hydro-pressure/index.md",
+  "pcb_source": "analog-hydro-pressure/hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb",
+  "pcb_sha256": "922c80698c3d7b888f5c7f905ecb3e3dfc0098ac6227a8902e95c6f52a30463a",
+  "back_components": [
+    "C1",
+    "J3",
+    "U1"
+  ],
+  "hero": {
+    "front": "assets/images/analog-0.6/top.png",
+    "back": "assets/images/analog-0.6/bottom.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/analog-0.6/assembly-front.png",
+      "png_size_px": [
+        1400,
+        2256
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/analog-0.6/assembly-back.png",
+      "png_size_px": [
+        1400,
+        2256
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        91.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J6",
+      "value": "Conn_02x04_Odd_Even",
+      "side": "F.Cu",
+      "position_mm": [
+        128.26,
+        48.99
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R6",
+      "value": "220kO, 1%",
+      "side": "F.Cu",
+      "position_mm": [
+        139.26,
+        63.62
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C3",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        129.27,
+        64.54
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "U2",
+      "value": "ADS1115IDGS",
+      "side": "F.Cu",
+      "position_mm": [
+        124.99,
+        64.54
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C4",
+      "value": "4,7uF/10V",
+      "side": "F.Cu",
+      "position_mm": [
+        150.5725,
+        72.475
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "D1",
+      "value": "BAT54S",
+      "side": "F.Cu",
+      "position_mm": [
+        127.01,
+        71.38
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "D2",
+      "value": "D_Schottky",
+      "side": "F.Cu",
+      "position_mm": [
+        144.89,
+        66.95
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U3",
+      "value": "LT8330S6",
+      "side": "F.Cu",
+      "position_mm": [
+        145.45,
+        71.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_01x03_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        124.91,
+        37.342
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        59.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C5",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        150.57,
+        69.875
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J5",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        152.85,
+        93.17
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "C2",
+      "value": "1uF",
+      "side": "F.Cu",
+      "position_mm": [
+        127.01,
+        81.62
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "J2",
+      "value": "Conn_01x03_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        120.64,
+        37.342
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R4",
+      "value": "71,5kO, 1%",
+      "side": "F.Cu",
+      "position_mm": [
+        140.78,
+        69.905
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "R5",
+      "value": "100kO, 1%",
+      "side": "F.Cu",
+      "position_mm": [
+        140.78,
+        72.63
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "L1",
+      "value": "0,68uH",
+      "side": "F.Cu",
+      "position_mm": [
+        146.279,
+        52.45
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R2",
+      "value": "4,7kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        122.59,
+        71.38
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C7",
+      "value": "4,7uF, 50V",
+      "side": "F.Cu",
+      "position_mm": [
+        144.8675,
+        63.71
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C6",
+      "value": "1uF/10V",
+      "side": "F.Cu",
+      "position_mm": [
+        147.0125,
+        75.53
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R1",
+      "value": "150Ohm, 0,1% <= 25ppm/K, >0,125W",
+      "side": "F.Cu",
+      "position_mm": [
+        122.61,
+        75.58
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "J4",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        122.73,
+        92.62
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R3",
+      "value": "1MO, 1%",
+      "side": "F.Cu",
+      "position_mm": [
+        139.33,
+        66.95
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        34.18
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U1",
+      "value": "24LC32",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        38.6795
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J3",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        129.159,
+        37.342
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 24,
+  "asset_sha256": {
+    "assets/board-views/analog-0.6/assembly-front.png": "ae5c9ad644a27bf7539b76c3734d8b5ef21c53d04e3ae2b10c7ccf6e5967030f",
+    "assets/board-views/analog-0.6/assembly-back.png": "9403403a639de56118335ee5e49581830bd6125480a8578f04214ec8d7166b51",
+    "assets/images/analog-0.6/top.png": "56f0be2973b4e8672cb2e193c9b39fc551bf6e07f901e6a9dabf09be2c67bc78",
+    "assets/images/analog-0.6/bottom.png": "c0031bb36d0fef4eddd50435d0cc007da5d77447be446424ca9b2c07f7d24520"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

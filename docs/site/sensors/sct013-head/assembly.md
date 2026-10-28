@@ -5,8 +5,8 @@ pdf:
   title: SCT013Head
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.1'
-  document_version: '1.1'
-  document_date: '2026-10-24'
+  document_version: '1.2'
+  document_date: '2026-10-28'
   source_document_date: '2026-10-24'
   status: Nullmessung am Mini geprüft - Sensorbetrieb und Mechanik offen
 ---
@@ -17,6 +17,13 @@ Kompakter passiver Sensorkopf für SCT013-Stromwandler mit integrierter Bürde u
 
 !!! note "Jetzt aufbauen, Buchse später ergänzen"
     R1-R4, C1, C2 und das Pigtail werden jetzt bestückt. J1 bleibt zunächst vollständig frei. Der ADC-Ausgang erhält über R4 trotzdem seine Vorspannung; für diesen Test ist keine Brücke an J1 erforderlich. Ein fehlender Sensor wird von dieser Schaltung nicht automatisch erkannt.
+
+## 3D-Ansicht
+
+![sct013-head-0.1: 3D-Vorderseite](../../assets/images/sct013-assembly/top.png){ .hero-paired-view }
+![sct013-head-0.1: 3D-Rückseite](../../assets/images/sct013-assembly/bottom.png){ .hero-paired-view }
+
+Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
 ## 1. Teile und Vorbereitung
 
@@ -43,14 +50,26 @@ Feine Lötspitze, geeignetes Lötzinn und Flussmittel, Pinzette, Lupe, Multimete
 
 Nur die Kleinspannungsseite gehört an den Head. Spätere Strommessungen erfolgen mit dem Wandler um einen einzelnen isolierten Leiter; Netzspannung wird niemals an J1 oder ADC1 angeschlossen. Unterstützt sind ausschließlich Spannungsausgangsvarianten mit integrierter Bürde.
 
-## 2. Ansichten und Bestückung
+## 2. Bestückungsübersicht
 
-![SCT013Head Rev. 0.1, Oberseite aus KiCad](../../assets/images/sct013-assembly/top.png){ .paired-board-view }
-![SCT013Head Rev. 0.1, Unterseite aus KiCad](../../assets/images/sct013-assembly/bottom.png){ .paired-board-view }
+### Vorderseite: Bestückungsplan
 
-Die sechs SMD-Bauteile sitzen auf der Unterseite. J1 wird später von oben eingesetzt. Die Ansichten zeigen den unveränderten PCB-Datenstand: Für J1 fehlt ein 3D-Modell; ADC1 erscheint mit dem hinterlegten Stiftleistenmodell. **Für den Pigtail-Aufbau wird dort keine Stiftleiste bestückt.** Die vier Pads werden als Lötaugen verwendet. Pin 1 hat ein rechteckiges Pad; die Blickrichtung der Unterseite kehrt links und rechts gegenüber der Oberseite um.
+![sct013-head-0.1: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/sct013-head-0.1/assembly-front.png){ .assembly-plan }
 
-### Löt-Reihenfolge
+[Plan als PNG](../../assets/board-views/sct013-head-0.1/assembly-front.png){ .md-button }
+
+### Rückseite: Bestückungsplan
+
+![sct013-head-0.1: senkrechter Bestückungsplan Rückseite](../../assets/board-views/sct013-head-0.1/assembly-back.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/sct013-head-0.1/assembly-back.png){ .md-button }
+
+Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
+
+
+Die sechs SMD-Bauteile sitzen auf der Unterseite. J1 wird später von oben eingesetzt. Die 3D-Ansichten oben zeigen den unveränderten PCB-Datenstand: Für J1 fehlt ein 3D-Modell; ADC1 erscheint mit dem hinterlegten Stiftleistenmodell. **Für den Pigtail-Aufbau wird dort keine Stiftleiste bestückt.** Die vier Pads werden als Lötaugen verwendet. Pin 1 hat ein rechteckiges Pad; die Blickrichtung der Unterseite kehrt links und rechts gegenüber der Oberseite um.
+
+## Löt-Reihenfolge
 
 1. Platine auf Schäden, leitende Fremdkörper und lesbare Referenzen prüfen. J1 und ADC1 zunächst frei lassen.
 2. R1-R4 bestücken: je einen Anschluss fixieren, Lage prüfen, zweiten Anschluss löten und erste Lötstelle nacharbeiten. Alle vier Werte sind 10 kΩ.

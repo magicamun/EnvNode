@@ -1,0 +1,523 @@
+{
+  "checkout": "analog-hydro-pressure",
+  "name": "AnalogHydroPressure",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'AnalogHydroPressure'], [Symbol('date'), '2026-10-22'], [Symbol('rev'), '0.6']]",
+  "components": [
+    {
+      "ref": "H2",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5_DIN965",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        136.779,
+        91.262
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J6",
+      "value": "Conn_02x04_Odd_Even",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "/Analog/ADC_ADDR",
+        "3": "+3V3_SYS",
+        "4": "/Analog/ADC_ADDR",
+        "5": "/SDA",
+        "6": "/Analog/ADC_ADDR",
+        "7": "/SCL",
+        "8": "/Analog/ADC_ADDR"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x04_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        128.26,
+        48.99,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R6",
+      "value": "220kO, 1%",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "GND",
+        "2": "/+24V"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        139.26,
+        63.62
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C3",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        129.27,
+        64.54,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U2",
+      "value": "ADS1115IDGS",
+      "footprint": "Package_SO:TSSOP-10_3x3mm_P0.5mm",
+      "pads": {
+        "1": "/Analog/ADC_ADDR",
+        "2": "unconnected-(U2-ALERT{slash}RDY-Pad2)",
+        "3": "GND",
+        "4": "/Analog/AIN0",
+        "5": "unconnected-(U2-AIN1-Pad5)",
+        "6": "unconnected-(U2-AIN2-Pad6)",
+        "7": "unconnected-(U2-AIN3-Pad7)",
+        "8": "+3V3_SYS",
+        "9": "/SDA",
+        "10": "/SCL"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/TSSOP-10_3x3mm_P0.5mm.step"
+      ],
+      "at": [
+        124.99,
+        64.54,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C4",
+      "value": "4,7uF/10V",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+5V",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        150.5725,
+        72.475
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "D1",
+      "value": "BAT54S",
+      "footprint": "Package_TO_SOT_SMD:SOT-23",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "/Analog/AIN0"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-23.step"
+      ],
+      "at": [
+        127.01,
+        71.38,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "D2",
+      "value": "D_Schottky",
+      "footprint": "Diode_SMD:D_SOD-123F",
+      "pads": {
+        "1": "/+24V",
+        "2": "/24VBoost/SW"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SOD-123F.step"
+      ],
+      "at": [
+        144.89,
+        66.95
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U3",
+      "value": "LT8330S6",
+      "footprint": "Package_TO_SOT_SMD:SOT-23-6",
+      "pads": {
+        "1": "/24VBoost/SW",
+        "2": "GND",
+        "3": "Net-(U3-FBX)",
+        "4": "/AUX_GPIO2",
+        "5": "Net-(U3-INTVCC)",
+        "6": "+5V"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-23-6.step"
+      ],
+      "at": [
+        145.45,
+        71.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_01x03_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "pads": {
+        "1": "I2C0_SDA",
+        "2": "/SDA",
+        "3": "/I2C1_SDA"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x03_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        124.91,
+        37.342
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5_DIN965",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        136.779,
+        59.262
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C5",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+5V",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        150.57,
+        69.875
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J5",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "/+24V",
+        "3": "/Analog/LOOP_RETURN",
+        "4": "/Analog/AIN0"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        152.85,
+        93.17,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C2",
+      "value": "1uF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "/Analog/AIN0",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        127.01,
+        81.62,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J2",
+      "value": "Conn_01x03_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "pads": {
+        "1": "I2C0_SCL",
+        "2": "/SCL",
+        "3": "/I2C1_SCL"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x03_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        120.64,
+        37.342
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R4",
+      "value": "71,5kO, 1%",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(U3-FBX)",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        140.78,
+        69.905,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R5",
+      "value": "100kO, 1%",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/AUX_GPIO2",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        140.78,
+        72.63,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "L1",
+      "value": "0,68uH",
+      "footprint": "EnvNode-Footprints:L_Bourns_SDR1005_HandSolder",
+      "pads": {
+        "1": "/24VBoost/SW",
+        "2": "+5V"
+      },
+      "models": [],
+      "at": [
+        146.279,
+        52.45,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R2",
+      "value": "4,7kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/Analog/LOOP_RETURN",
+        "2": "/Analog/AIN0"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        122.59,
+        71.38,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C7",
+      "value": "4,7uF, 50V",
+      "footprint": "Capacitor_SMD:C_1210_3225Metric_Pad1.33x2.70mm_HandSolder",
+      "pads": {
+        "1": "/+24V",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1210_3225Metric.step"
+      ],
+      "at": [
+        144.8675,
+        63.71
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C6",
+      "value": "1uF/10V",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "Net-(U3-INTVCC)",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        147.0125,
+        75.53
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R1",
+      "value": "150Ohm, 0,1% <= 25ppm/K, >0,125W",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "pads": {
+        "1": "/Analog/LOOP_RETURN",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_THT.3dshapes/R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.step"
+      ],
+      "at": [
+        122.61,
+        75.58,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J4",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical",
+      "pads": {
+        "1": "/+24V",
+        "2": "/Analog/LOOP_RETURN"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        122.73,
+        92.62
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R3",
+      "value": "1MO, 1%",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/+24V",
+        "2": "Net-(U3-FBX)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        139.33,
+        66.95,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        151.16,
+        34.18,
+        180
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "U1",
+      "value": "24LC32",
+      "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+      "pads": {
+        "1": "/EEPROM_A0",
+        "2": "+3V3_SYS",
+        "3": "GND",
+        "4": "GND",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "GND",
+        "8": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step"
+      ],
+      "at": [
+        151.16,
+        38.6795,
+        180
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "J3",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "EnvNode-Footprints:PinHeader_2x07_P2.54mm_Vertical_Bottom",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "/EEPROM_A0",
+        "4": "+5V",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "/I2C1_SDA",
+        "8": "/I2C1_SCL",
+        "9": "/AUX_GPIO1",
+        "10": "/AUX_GPIO2",
+        "11": "/SPI_MOSI",
+        "12": "/SPI_MISO",
+        "13": "/SPI_SCK",
+        "14": "/SPI_CS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        129.159,
+        37.342,
+        -90
+      ],
+      "layer": "B.Cu"
+    }
+  ],
+  "source_sha256": {
+    "24VBoost.kicad_sch": "cd0a84deb00eb290ab596b9604f476b06d50300694f4aedb86c46addc5f0420d",
+    "Analog.kicad_sch": "447e8534e54cfb9ef02fb16d72f3351dadf1a94b8d307a0a62f713d6e4933ac3",
+    "AnalogHydroPressure.kicad_pcb": "922c80698c3d7b888f5c7f905ecb3e3dfc0098ac6227a8902e95c6f52a30463a",
+    "AnalogHydroPressure.kicad_pro": "30fa158903dace3d5a136cffc23a9f3cca427e2d56e63312cce7ec86b020b512",
+    "AnalogHydroPressure.kicad_sch": "abdc9c851af5464fd9510fa227b51d634a789c2d216f9b1fe4f82aaa6f35f55a"
+  },
+  "commit": "22a23bd7c2d1eeedc8284dd62a1c876d9f3fd786"
+}

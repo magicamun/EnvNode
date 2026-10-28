@@ -1,21 +1,34 @@
 ---
-title: RainDetectorController - Bestückung und Inbetriebnahme
+title: RainDetectorController 0.4 - Bestückung und Inbetriebnahme
 pdf:
-  id: rain-controller-0.3
+  id: rain-controller-0.4
   title: RainDetectorController
   subtitle: Bestückungs- und Bring-up-Anleitung
-  hardware_revision: '0.3'
-  document_version: '1.0'
-  document_date: '2026-10-22'
-  source_document_date: '2026-10-17'
-  status: Entwicklungsstand - keine Produktionsfreigabe
+  hardware_revision: '0.4'
+  document_version: '1.1'
+  document_date: '2026-10-28'
+  source_document_date: '2026-10-28'
+  status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
 ---
 
-# RainDetectorController - Bestückung und Inbetriebnahme
+# RainDetectorController 0.4 - Bestückung und Inbetriebnahme
 
-Controller für den separaten RainDetectorHead: ICM7555-Frequenzsignal mit 3,3 V und schaltbare 5-V-Heizung. Entwurf: reale Funktions-, Temperatur- und Umweltprüfungen stehen aus. Stücklistenstand: 17. Oktober 2026. Die Prüf- und Quellennachweise sind jeweils datiert.
+Controller für den separaten RainDetectorHead mit 3,3-V-Frequenzausgang und schaltbarer 5-V-Heizung.
 
-[Anleitung als PDF](../../assets/downloads/RainDetectorController_Rev0.3_Anleitung.pdf){ .md-button }
+**Dokumentation abgeschlossen am 28. Oktober 2026.** Der Fertigungs- und Erprobungsstand wird im Abschlusskapitel getrennt geführt.
+
+[Anleitung als PDF](../../assets/downloads/RainDetectorController_Rev0.4_Anleitung.pdf){ .md-button }
+[Alte Revisionen](old-revisions.md){ .md-button }
+### Änderungen und Geltungsbereich
+
+Aktuelle Paarung: **RainDetectorController 0.4 (ENP-00138)** mit **RainDetectorHead 0.2 (ENP-00139)**. Beide Konturen messen **62,12 × 54,52 mm** an der Mittellinie von Edge.Cuts. Die neue Form berücksichtigt die Gehäusedichtung und versetzte Montagebohrungen. Keine neue Firmware-Mindestversion folgt allein aus dieser mechanischen Revision.
+
+## 3D-Ansicht
+
+![rain-controller-0.4: 3D-Vorderseite](../../assets/images/rain-controller-0.4/top.png){ .hero-paired-view }
+![rain-controller-0.4: 3D-Rückseite](../../assets/images/rain-controller-0.4/bottom.png){ .hero-paired-view }
+
+Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
 ## 1. Teile und Vorbereitung
 
@@ -30,32 +43,48 @@ Controller für den separaten RainDetectorHead: ICM7555-Frequenzsignal mit 3,3 V
 | J1, J2 | 2 | BKL 10120957, Buchsenleiste 2x2 | ENP-00116 | 2,54 mm; THT; B.Cu |
 | Q1 | 1 | AO3400A, N-Kanal-MOSFET | ENP-00013 | SOT-23 |
 | U1 | 1 | ICM7555IBAZ, CMOS-Timer | ENP-00020 | SOIC-8 |
-| PCB | 1 | RainDetectorController PCB Rev. 0.3 | ENP-00114 | 62,12 x 44,12 mm |
+| PCB | 1 | RainDetectorController PCB Rev. 0.4 | ENP-00138 | 62,12 × 54,52 mm |
 
-Bausatz ENK-00006, PCB-Revision 0.3. Die Mengen beziehen sich auf den Lieferumfang des Bausatzes.
+Die Tabelle nennt den Bedarf pro Platine. Die bisherige Kitnummer bestätigt keine auf den neuen PCB-Artikel umgestellte Kit-BOM.
 
-J3/J4 bleiben DNP: Die beiden 1x4-Anschlusspositionen gehören nicht als bestückte Stecker zum Bausatz ENK-00006. Anschlussvariante und zugentlastete Kontaktierung separat festlegen. Pigtails und Montagematerial sind hier nicht enthalten.
+J3/J4 bleiben DNP: Die beiden 1x4-Anschlusspositionen werden in dieser Bestückungsvariante nicht als Stecker bestückt. Anschlussvariante und zugentlastete Kontaktierung separat festlegen. Pigtails und Montagematerial sind hier nicht enthalten.
 
 R2 und R4 sind als zwei Stück desselben Artikels zusammengefasst. J1/J2 sind konkrete BKL-2x2-Buchsen; Steckhöhe und mechanische Paarung mit dem Head separat prüfen.
 
 ### 1.2 Vorbereitung
 
-Feinlötkolben, Flussmittel, Vergrößerung und ESD-Arbeitsplatz bereitlegen. Multimeter sowie Oszilloskop oder Frequenzzähler verwenden. Strombegrenzte 3,3-V- und 5-V-Versorgung mit gemeinsamer Masse, Head Rev. 0.1, isolierte Prüfleitungen und Temperaturmessung vorbereiten.
+Feinlötkolben, Flussmittel, Vergrößerung und ESD-Arbeitsplatz bereitlegen. Multimeter sowie Oszilloskop oder Frequenzzähler verwenden. Strombegrenzte 3,3-V- und 5-V-Versorgung mit gemeinsamer Masse, Head Rev. 0.2, isolierte Prüfleitungen und Temperaturmessung vorbereiten.
 
 5 V dürfen weder an HEATER_EN noch an RAIN_FREQ oder die 3,3-V-Schiene gelangen. Die Versorgung erst nach den spannungsfreien Prüfungen einschalten.
 
 ### 1.3 Artikel- und Dokumentstand
 
-Quelle: inventory/assemblies.rain.draft.json und inventory/parts-preview.json (Artikelstand 15.10.2026), abgeglichen am 17.10.2026. Mengen sind Kit-Kaufmengen; kein neuer Hardwaretest oder ERC/DRC-Lauf.
+Bauteilwerte und Anschlusszuordnung wurden aus dem aktuellen KiCad-Stand übernommen. Standardartikel stammen aus der bisherigen Anleitung; die neuen PCB-Artikel ENP-00138/ENP-00139 sind im mechanischen Projektstand vom 21.10.2026 dokumentiert. Keine neue Lager- oder Kit-BOM-Prüfung wird behauptet.
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe LICENSE im Repository. Drittanbieterrechte bleiben unberührt.
 
-## 2. Orientierung und Montage
+## 2. Bestückungsübersicht
 
-![RainDetectorController 0.3: Ansicht aus der aktuellen PDF, Seite 1](../../assets/images/rain-controller-assembly/page-01-view-1.png){ .paired-board-view }
-![RainDetectorController 0.3: Ansicht aus der aktuellen PDF, Seite 3](../../assets/images/rain-controller-assembly/page-03-view-1.png){ .paired-board-view }
+### Vorderseite: Bestückungsplan
+
+![rain-controller-0.4: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/rain-controller-0.4/assembly-front.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/rain-controller-0.4/assembly-front.png){ .md-button }
+
+### Rückseite: Bestückungsplan
+
+![rain-controller-0.4: senkrechter Bestückungsplan Rückseite](../../assets/board-views/rain-controller-0.4/assembly-back.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/rain-controller-0.4/assembly-back.png){ .md-button }
+
+Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
+
+
+## Montagehinweise
 
 Unterseite B.Cu: J1/J2 zeigen zum Head. Beide Platinen stehen mit B.Cu zueinander; die Controller-Bauteile auf F.Cu bleiben vom Gehäuseinneren erreichbar. Ansichten der Unterseite erscheinen gegenüber der Oberseite gespiegelt.
+
+Die Bestückungspläne zeigen die Leiterplatte senkrecht zur jeweiligen Seite. Bestückungsdruck und Referenzen folgen der PCB-Quelle; eine Rückseitenansicht ist keine Kontaktansicht eines Kabelsteckers.
 
 ### Empfohlene Reihenfolge
 
@@ -78,7 +107,7 @@ U1-Pin 1 liegt an GND; U1.8 und U1.4 an +3V3. Q1.1 = Gate, Q1.2 = Source/GND, Q1
 
 Die Versorgungspins von J3 und J4 sind direkt gemeinsam verbunden. Eine eindeutige Einspeisung wählen; unabhängige Netzteile nicht über diese Pins parallel schalten. Pins 2/3 an J1/J2 sind elektrisch unbeschaltet und dienen der mechanischen Abstützung.
 
-### Zuordnung zum Head Rev. 0.1
+### Zuordnung zum Head Rev. 0.2
 
 | Head-Kontakt | Funktion | Controller-Kontakt |
 | --- | --- | --- |
@@ -165,34 +194,20 @@ Seriell: 115200 Baud, 8N1. Felder: timestamp_ms, pulse_count, frequency_hz. Nomi
 
 Keine Frequenz: 3,3 V, U1-Orientierung, R3/R4, SENSE-Kontakt und Head prüfen. Heizung bleibt aus: 5 V, Enable-Pegel, R1, Q1 und Heizpfad prüfen. Heizung bleibt an: Steuersignal trennen; R2, Gate-Brücken und Q1 prüfen. Instabile Frequenz: Versorgung, Kontaktierung, Feuchtigkeit, Montage und Referenzmessung kontrollieren.
 
-## 7. Quellen- und Revisionsnachweis
+## 7. Abschluss und Revisionsnachweis
 
-Dokumentstand: 5. Oktober 2026. PCB-Titelblock: Revision 0.3 vom 14. September 2026. PCB-Commit: 0d3a50b102bfd82d65a3e7f37754b254dc936960. Die folgenden SHA-256-Prüfsummen beziehen sich auf die gespeicherten Quellen.
+Dokumentation abgeschlossen für Controller 0.4 / Head 0.2. Die vergrößerte Kontur schafft Platz für die Gehäusedichtung; Bohrungen wurden mit der Kontur verschoben. Die Kontaktachsen von J1/J2 und die elektrische Netzzuordnung bleiben gegenüber dem unmittelbar vorherigen gespeicherten PCB unverändert. Beim Head ist die aktive Struktur im aktuellen Footprint 44,78 × 37,25 mm mit 0,51-mm-Raster dokumentiert; der frühere Guide mit 48,86 mm benennt den aktuellen Footprint nicht korrekt.
 
-RainDetectorController.kicad_pcb
+Quellvergleich und neue Renderings belegen keine gefertigte Dichtung, mechanische Passprobe, Beschichtung, Via-Abdichtung oder reale Heiz-/Regenprüfung. Es wird hier kein neuer bestandener vollständiger ERC-/DRC-Lauf behauptet. Die alten Bring-ups stehen unter [Alte Revisionen](old-revisions.md).
 
-`3f664c0ba8eff0be254e0d38d4aedced9a44d7f3a09e9f7640c9339b8c96e7b3`
+### Quellenstand
 
-RainDetectorController.kicad_sch
+Dokumentiert ist der gespeicherte KiCad-Stand aus `rain-detector`, Projekt `RainDetectorController`, Basiscommit `e3ecde6c66d24c26fbb0352b686f2d3f10469c72`. Die Prüfsummen bestimmen den tatsächlichen Arbeitsstand einschließlich lokaler Änderungen; der Commit allein beschreibt diese nicht.
 
-`5546327c7d2770689e58bca02692a1a5e798d623826888b6d008aa5ac2dc6cbf`
+| Quelle | SHA-256 |
+| --- | --- |
+| RainDetectorController.kicad_pcb | `b793f10c10ec03b201e0514d98e5ed5e4c8befd761ada973139d5f0c5d8845b4` |
+| RainDetectorController.kicad_pro | `26e426bc5880f282176b3c91a39e0b19007f7901302b2eec7733e9f4338928f0` |
+| RainDetectorController.kicad_sch | `5546327c7d2770689e58bca02692a1a5e798d623826888b6d008aa5ac2dc6cbf` |
 
-RainDetectorController.kicad_pro
-
-`26e426bc5880f282176b3c91a39e0b19007f7901302b2eec7733e9f4338928f0`
-
-RainDetectorController.csv
-
-`451760a0ae55876d4e8cbea5e91dd9535be395ab869465206a2068cbd8022e82`
-
-Weitere Grundlagen: RainDetectorController/README.md, RainDetectorHead/README.md und lab/RainDetector-PCNT/README.md. Bestückung aus CSV und Schaltplan; Anschlüsse gegen exportierte Schaltplan-Netzliste und PCB-Padnetze abgeglichen. Die gemeinsamen Bauteilpins stimmen in ihrer Netzzuordnung überein.
-
-Ansichten: Aus dem aktuellen Controller-PCB neu gerendert. ORing-Kamerawinkel: Oberseite -25/0/5 Grad, Unterseite -25/0/-5 Grad, perspektivisch. Proportional eingepasst. Modelle können DNP-Positionen darstellen; verbindlich sind Schaltplan und gewählte Bestückungsvariante.
-
-Historischer Prüfstand vom 14. September 2026: Laut Projekt-README bestanden Controller und Head ERC/DRC ohne Fehler oder Warnungen, offene Verbindungen oder Schaltplan-PCB-Abweichungen. Projektseitig deaktivierte Prüfungen bleiben dabei deaktiviert. Die nachfolgende Layoutänderung vom 15. September (2x2-Steckverbinder und breitere Kontur) ist damit nicht erneut validiert. Diese Ergebnisse sind keine Fertigungsfreigabe.
-
-Prüfumfang dieser Dokumentaktualisierung: Quellen-, Stücklisten- und Netzabgleich sowie visuelle PDF-Prüfung. Kein neuer vollständiger ERC-/DRC-Lauf, kein Flashen und keine reale Hardwaremessung. Steckverbinder-Auswahl, Montagehöhe, Heizverhalten, Witterungsbeständigkeit und produktive Integration bleiben zu qualifizieren.
-
-### Lizenz
-
-EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.
+[Rendernachweis](../../assets/images/rain-controller-0.4/provenance.json). Dokumentation: LicenseRef-EnvNode-Use-and-Redistribution-1.0, siehe [Lizenz](../../license.md). Drittanbieterrechte an KiCad-Modellen und Bibliotheken bleiben bestehen.

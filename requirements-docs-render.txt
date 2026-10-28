@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
+# Optional authoring tools; production MkDocs builds use checked-in image assets.
+-r requirements-docs.txt
+sexpdata==1.0.2
+Pillow==13.0.0

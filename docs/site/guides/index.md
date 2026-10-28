@@ -1,19 +1,24 @@
 # Aufbauanleitungen
 
-Die jeweils aktuelle Bestückungs-, Bring-up- oder Jumper-Anleitung steht jetzt als durchsuchbare Webseite bereit. Die aus bisherigen PDFs übernommenen Anleitungen bieten zusätzlich einen PDF-Download. Die **PDF-Ausgabe wird automatisch aus derselben Markdown-Quelle** mit der gemeinsamen EnvNode-Druckvorlage erzeugt.
+Die vollständige Dokumentation steht direkt unter dem jeweiligen Boardlink. Alle folgenden vollständigen Anleitungen sind redaktionell **abgeschlossen**; Fertigung, reale Erprobung und Firmware-Zuordnung werden darin getrennt ausgewiesen.
 
-| Baugruppe | PCB-Stand | Anleitung |
+| Board | Revision | Dokumentation |
 | --- | --- | --- |
-| DuoRelay | 0.3 | [Lesen](../modules/duo-relay/assembly.md) |
-| EnvNode Mini | 0.8.1 | [Lesen](../mainboards/mini/assembly.md) |
-| Weatherstation | 0.2.1 | [Lesen](../mainboards/weatherstation/assembly.md) |
-| ORing Power | 0.1.1 | [Lesen](../mainboards/oring-power/assembly.md) |
-| AnalogHydroPressure | 0.5 | [Lesen](../modules/analog-hydro-pressure/assembly.md) |
-| RainDetectorController | 0.3 | [Lesen](../sensors/rain-detector-controller/assembly.md) |
-| RainDetectorHead | 0.1 | [Lesen](../sensors/rain-detector-head/assembly.md) |
-| SCT013Head | 0.1 | [Lesen](../sensors/sct013-head/assembly.md) |
-| I2C Carrier HalfSize | 0.1 | [Lesen](../modules/i2c-carrier/assembly.md) |
+| DuoRelay | 0.3 | [Web](../modules/duo-relay/index.md) |
+| ORing Power | 0.1.1 | [Web](../mainboards/oring-power/index.md) |
+| EnvNode Mini | 0.9.0 | [Web](../mainboards/mini/index.md) |
+| Weatherstation | 0.3.0 | [Web](../mainboards/weatherstation/index.md) |
+| AnalogHydroPressure | 0.6 | [Web](../modules/analog-hydro-pressure/index.md) |
+| SD-Card | 0.1 | [Web](../modules/sd-card/index.md) |
+| RainDetectorController | 0.4 | [Web](../sensors/rain-detector-controller/assembly.md) |
+| RainDetectorHead | 0.2 | [Web](../sensors/rain-detector-head/assembly.md) |
+| Test-Controller | 0.1 | [Web](../mainboards/test-controller/index.md) |
+| Input-Adapter | 0.1 | [Web](../mainboards/input-adapter/index.md) |
+| Modul-Adapter | 0.1 | [Web](../mainboards/module-adapter/index.md) |
 
-Bei Mini 0.8.1 und Weatherstation 0.2.1 unterscheiden sich PCB-Beschriftungsstand und Board-Identity-Revision: Die Identity bleibt 0.8 beziehungsweise 0.2. Die ORing-Anleitung enthält die Prüfpunktergänzung für Beschriftungsstand 0.1.1. Die I²C-Carrier-Anleitung beschreibt Montage und Jumper-Konfiguration; ein vollständiger Bring-up ist darin nicht beschrieben.
+## Teilanleitungen
 
-RainDetectorController und Head bleiben Entwicklungsstände. Die neue SCT013Head-Anleitung liegt zunächst als Markdown/Webseite vor und enthält den Erstaufbau ohne Buchse und Sensor; eine PDF-Ausgabe ist noch nicht registriert.
+- [SCT013Head 0.1](../sensors/sct013-head/assembly.md): Erstaufbau und Nullmessung; Sensorbetrieb und Buchsenmechanik offen.
+- [I²C Carrier 0.1](../modules/i2c-carrier/assembly.md): Montage und Jumper, kein vollständiger Bring-up.
+
+[Alte Revisionen](old-revisions.md) · [Dokumentationsstand und fehlende Anleitungen](status.md)

@@ -40,3 +40,15 @@ h4 { color: var(--envnode-gold); font-size: 10pt; break-after: avoid; }
 img.connector-view { display: inline-block; max-height: 45mm; max-width: 47%; width: auto; margin: 2mm; vertical-align: middle; }
 img.paired-board-view { display: inline-block; max-height: 55mm; max-width: 47%; width: auto; margin: 2mm; vertical-align: middle; }
 img.testpoint-view { display: block; max-height: 65mm; width: auto; height: auto; margin: 2mm auto; }
+
+/* Component tables: reference, quantity, value, article, package/mounting. */
+table.parts-table th:nth-child(1) { width: 12%; }
+table.parts-table th:nth-child(2) { width: 6%; }
+table.parts-table th:nth-child(3) { width: 29%; }
+table.parts-table th:nth-child(4) { width: 17%; }
+table.parts-table th:nth-child(5) { width: 36%; }
+
+/* The 3D chapter precedes the parts list; placement plans remain flat and readable. */
+img.hero-board-view { display: block; width: auto; max-width: 100%; max-height: 105mm; margin: 3mm auto; }
+img.hero-paired-view { display: inline-block; width: auto; max-width: 47%; max-height: 88mm; margin: 3mm 1%; vertical-align: middle; }
+img.assembly-plan { display: block; width: 100%; height: auto; max-width: 100%; max-height: 175mm; object-fit: contain; margin: 3mm auto; }

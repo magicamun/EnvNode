@@ -1,0 +1,154 @@
+{
+  "checkout": "sd-card",
+  "name": "SD-Card",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'SD-Card'], [Symbol('date'), '2026-10-20'], [Symbol('rev'), '0.1']]",
+  "components": [
+    {
+      "ref": "H2",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5_DIN965",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        136.779,
+        91.262
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R1",
+      "value": "10kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "/AUX_GPIO1"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        124.659,
+        41.83,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5_DIN965",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        136.779,
+        59.262
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U1",
+      "value": "Adafruit_254_MicroSD",
+      "footprint": "Adafruit-Breakouts:Adafruit_254_MicroSD",
+      "pads": {
+        "": "NC",
+        "1": "/+5V",
+        "2": "unconnected-(U1-3V3_REG-Pad2)",
+        "3": "GND",
+        "4": "/SPI_SCK",
+        "5": "/SPI_MISO",
+        "6": "/SPI_MOSI",
+        "7": "/SPI_CS",
+        "8": "/AUX_GPIO1"
+      },
+      "models": [],
+      "at": [
+        145.779,
+        46.69,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        151.16,
+        34.18,
+        180
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "U2",
+      "value": "24LC32",
+      "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+      "pads": {
+        "1": "/EEPROM_A0",
+        "2": "+3V3_SYS",
+        "3": "GND",
+        "4": "GND",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "GND",
+        "8": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step"
+      ],
+      "at": [
+        151.16,
+        38.6795,
+        180
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "EnvNode-Footprints:PinHeader_2x07_P2.54mm_Vertical_Bottom",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "/EEPROM_A0",
+        "4": "/+5V",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "/I2C1_SDA",
+        "8": "/I2C1_SCL",
+        "9": "/AUX_GPIO1",
+        "10": "/AUX_GPIO2",
+        "11": "/SPI_MOSI",
+        "12": "/SPI_MISO",
+        "13": "/SPI_SCK",
+        "14": "/SPI_CS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        129.159,
+        37.342,
+        -90
+      ],
+      "layer": "B.Cu"
+    }
+  ],
+  "source_sha256": {
+    "SD-Card.kicad_pcb": "921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263",
+    "SD-Card.kicad_pro": "a6a0ad3618d6b37a8107e90e379fb8352f686f7dfbcc59cbfb1007bd9ea17790",
+    "SD-Card.kicad_sch": "5b895697d2029cb90ace31d83af0bd9834d58d8a03e8c1bf3db7c6a96964d22c"
+  },
+  "commit": "282c399b9bef1744dfd031a46b8cad6a5ce633d4"
+}

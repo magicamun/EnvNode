@@ -1,0 +1,47 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "oring-0.1.1",
+    "title": "ORing Power",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.1.1",
+    "document_version": "1.2",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-18",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 12,
+  "source_pdf": "hardware/kicad/Power/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf",
+  "source_pdf_sha256": "c639ab2ee56d111362b37ea55c7cc0956377e437c53a00d370e161ed2dcbe3b3",
+  "markdown_sha256": "28165697747ba1616003f3081828d3e3b4def4fd8052cc6d8ba082267e0ef8fb",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/board-views/oring-power-0.1.1/3d-front.png": "e08bc8ed84b8d6d2b9a5784e6e6faf931de5364ae5c4171269b833fd147ecb49",
+    "assets/board-views/oring-power-0.1.1/assembly-front.png": "9eb4f57749af2cee37d5849fc2f445bf26d1f5f5ea22a631cc4702ee81bc5d1a",
+    "assets/images/oring-assembly/page-12-view-1.png": "981ff724ce19a9a3b413080e11bd49129c53e906e7cdfb0e16bd1a73fb2d5606"
+  },
+  "images": {
+    "page-01-view-1.png": "6190cb645ecfd6a39715456f02e2205aec8f2c4843f3fc7cba88f7cecaf798a6",
+    "page-12-view-1.png": "981ff724ce19a9a3b413080e11bd49129c53e906e7cdfb0e16bd1a73fb2d5606"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "b24553a1fda324c98ddf56dd29adfad1b0ac07f2a717967d8dfec9736a80cf9a"
+}

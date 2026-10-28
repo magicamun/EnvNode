@@ -1,0 +1,814 @@
+{
+  "checkout": "main",
+  "name": "Weatherstation",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'EnvNode Weather'], [Symbol('date'), '2026-10-27'], [Symbol('rev'), '0.3.0']]",
+  "components": [
+    {
+      "ref": "R3",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "I2C1_SCL",
+        "2": "Net-(J4-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        144.365,
+        73.81
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J5",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "Net-(J5-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        151.55,
+        68.17,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R2",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(J3-Pin_1)",
+        "2": "I2C0_SDA"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        124.305,
+        73.82
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C0_2",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        75.793571
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "Connector_PinSocket_2.54mm:PinSocket_2x07_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "GND",
+        "4": "+5V",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "I2C1_SDA",
+        "8": "I2C1_SCL",
+        "9": "GPIO33",
+        "10": "GPIO13",
+        "11": "MOSI",
+        "12": "MISO",
+        "13": "SCK",
+        "14": "CS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        126.69,
+        81.19,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H5",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        161.73,
+        54.94
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J3",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "Net-(J3-Pin_1)",
+        "2": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        119.61,
+        73.81,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H2",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        134.31,
+        135.11
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "GPIO14",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "GPIO14",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        113.16,
+        55.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C1_3",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C1_SDA",
+        "4": "I2C1_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        117.486429
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "ADC1",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "ADC1",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        68.17,
+        101.35925,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U2",
+      "value": "24LC32",
+      "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+      "pads": {
+        "1": "GND",
+        "2": "GND",
+        "3": "GND",
+        "4": "GND",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "GND",
+        "8": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step"
+      ],
+      "at": [
+        91.948,
+        69.599759
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+5V",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        84.694794,
+        106.474259
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H6",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        161.73,
+        138.34
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U3",
+      "value": "ESP32-DevKitC",
+      "footprint": "PCM_Espressif:ESP32-DevKitC",
+      "pads": {
+        "1": "+3V3_DEVKIT",
+        "2": "unconnected-(U3-CHIP_PU-Pad2)",
+        "3": "ADC3",
+        "4": "ADC4",
+        "5": "ADC1",
+        "6": "ADC2",
+        "7": "GPIO32",
+        "8": "GPIO33",
+        "9": "I2C1_SDA",
+        "10": "I2C1_SCL",
+        "11": "GPIO27",
+        "12": "GPIO14",
+        "13": "unconnected-(U3-MTDI{slash}GPIO12{slash}ADC2_CH5-Pad13)",
+        "14": "GND",
+        "15": "GPIO13",
+        "16": "unconnected-(U3-SD_DATA2{slash}GPIO9-Pad16)",
+        "17": "unconnected-(U3-SD_DATA3{slash}GPIO10-Pad17)",
+        "18": "unconnected-(U3-CMD-Pad18)",
+        "19": "+5V",
+        "20": "unconnected-(U3-SD_CLK{slash}GPIO6-Pad20)",
+        "21": "unconnected-(U3-SD_DATA0{slash}GPIO7-Pad21)",
+        "22": "unconnected-(U3-SD_DATA1{slash}GPIO8-Pad22)",
+        "23": "unconnected-(U3-MTDO{slash}GPIO15{slash}ADC2_CH3-Pad23)",
+        "24": "unconnected-(U3-ADC2_CH2{slash}GPIO2-Pad24)",
+        "25": "unconnected-(U3-GPIO0{slash}BOOT{slash}ADC2_CH1-Pad25)",
+        "26": "GPIO4",
+        "27": "GPIO16",
+        "28": "GPIO17",
+        "29": "CS",
+        "30": "SCK",
+        "31": "MISO",
+        "32": "GND",
+        "33": "I2C0_SDA",
+        "34": "unconnected-(U3-U0RXD{slash}GPIO3-Pad34)",
+        "35": "unconnected-(U3-U0TXD{slash}GPIO1-Pad35)",
+        "36": "I2C0_SCL",
+        "37": "MOSI",
+        "38": "GND"
+      },
+      "models": [],
+      "at": [
+        79.248,
+        60.706
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "ADC3",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "ADC3",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        68.17,
+        83.845917,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C0_1",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        67.455
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H3",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        63.73,
+        54.94
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "D2",
+      "value": "1N4148",
+      "footprint": "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(D2-K)",
+        "2": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Diode_SMD.3dshapes/D_1206_3216Metric.step"
+      ],
+      "at": [
+        62.89,
+        116.58,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "D1",
+      "value": "1N4148",
+      "footprint": "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(D1-K)",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Diode_SMD.3dshapes/D_1206_3216Metric.step"
+      ],
+      "at": [
+        67.45,
+        116.58,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "GPIO16",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "GPIO16",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        120.926,
+        55.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R1",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "I2C0_SCL",
+        "2": "Net-(J2-Pin_1)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        124.305,
+        68.29,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "GPIO17",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "GPIO17",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        128.692,
+        55.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J4",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "Net-(J4-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        151.55,
+        73.81,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R4",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "I2C1_SDA",
+        "2": "Net-(J5-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        144.315,
+        68.17
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "TP1",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical",
+      "pads": {
+        "1": "Net-(D1-K)",
+        "2": "Net-(D2-K)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        66.17,
+        124.05,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C0_4",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        92.470714
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C2",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        95.96,
+        65.44
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C0_3",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        84.132143
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C1_1",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C1_SDA",
+        "4": "I2C1_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        100.809286
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H4",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        63.73,
+        138.34
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "ADC2",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "ADC2",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        68.17,
+        92.602583,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        134.31,
+        103.11
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C1_4",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C1_SDA",
+        "4": "I2C1_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        125.825
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "ADC4",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "ADC4",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        68.17,
+        75.08925,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J2",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "Net-(J2-Pin_1)",
+        "2": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        119.61,
+        68.25,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "GPIO27",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "GPIO27",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        136.458,
+        55.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "GPIO4",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "GPIO4",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        151.99,
+        55.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "GPIO32",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "GPIO32",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        144.224,
+        55.23,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "I2C1_2",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C1_SDA",
+        "4": "I2C1_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        161.73,
+        109.147857
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U1",
+      "value": "ORingPower_Module",
+      "footprint": "EnvNode-Footprints:ORingPower_Carrier",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "unconnected-(U1-+3V3_EXT-Pad3)",
+        "4": "+3V3_DEVKIT",
+        "5": "+3V3_SYS"
+      },
+      "models": [],
+      "at": [
+        91.795,
+        135.068
+      ],
+      "layer": "F.Cu"
+    }
+  ],
+  "source_sha256": {
+    "ESP32.kicad_sch": "3a6c5e3fd0234711286af83a08b76d0d6e98a0f4ce0a0a72be42c8b4101d6455",
+    "PCB.kicad_sch": "04b61087758ed3db550336a319e9a180bac551b3461eb8a1879add806ebccd1d",
+    "Power.kicad_sch": "1b1e36652d6621b422b7d9de3e1460a93c4376938a50cd0f9d70fc41bdb67155",
+    "SlotA.kicad_sch": "08575310281bf13715ff1b76f3a23dd3777e89d7fede6c446bf04f4076f1672e",
+    "Weatherstation.kicad_pcb": "283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf",
+    "Weatherstation.kicad_pro": "4d331a105813127bf69246b853b661cea702e263e69fb7d2d156a92b2ece0621",
+    "Weatherstation.kicad_sch": "8b30ca749ae622fc67e3b163461e802649d7ad9303f55385799cee3484acbacb",
+    "gpio.kicad_sch": "fef9f739a8ab8b702d6f67de3bc0a6f6af5e98d3c8eefef4a304895d4f398c16",
+    "qwiic.kicad_sch": "047540728d00ee9a955c5807119e125a0a1fada2133fdb335e175ead853fcb1e"
+  },
+  "commit": "ff906605036ccac222eda68e9d515e630a9cae6c"
+}

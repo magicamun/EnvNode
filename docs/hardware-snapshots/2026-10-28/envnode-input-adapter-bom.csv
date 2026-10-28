@@ -1,0 +1,6 @@
+IPN,Quantity,Reference,Note
+ENP-00156,1,PCB,Input-Adapter Rev.0.1
+ENP-00153,3,"U4,U5,U6",SOIC-24W; kein HCT
+ENP-00006,3,"C1,C2,C3",100 nF X7R 1206
+ENP-00147,1,J1,WSL 10G
+ENP-00145,40,"J4,TP1",Rohmaterial in Kontaktpositionen: 2x 1x19 fuer Testplug und 1x2 fuer Referenzpigtail-Header

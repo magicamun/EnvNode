@@ -65,3 +65,8 @@
 
 .md-typeset img.connector-view, .md-typeset img.paired-board-view { display: inline-block; max-height: 18rem; max-width: 46%; width: auto; margin: 1%; vertical-align: middle; }
 .md-typeset img.testpoint-view { display: block; width: 100%; height: auto; margin: 1rem auto; }
+
+/* Assembly manuals: 3D introduction, followed by orthographic placement plans. */
+.md-typeset img.hero-board-view { display: block; max-height: 28rem; max-width: 100%; width: auto; margin: 1rem auto; }
+.md-typeset img.hero-paired-view { display: inline-block; max-height: 23rem; max-width: 47%; width: auto; margin: 1rem 1%; vertical-align: middle; }
+.md-typeset img.assembly-plan { display: block; width: 100%; height: auto; max-width: 100%; max-height: 55rem; object-fit: contain; margin: 1rem auto; background: white; }

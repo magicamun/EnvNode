@@ -27,7 +27,7 @@ markdown_extensions:
   - pymdownx.superfences
   - tables
 extra_css:
-  - assets/stylesheets/envnode.css
+  - assets/stylesheets/envnode.css?v=20261028-board-views
 hooks:
   - tools/docs_assets.py
 nav:
@@ -41,13 +41,18 @@ nav:
   - Kompatibilität: compatibility.md
   - Mainboards:
       - Übersicht: mainboards/index.md
-      - EnvNode Mini 0.8.1: mainboards/mini/index.md
-      - Weatherstation 0.2.1: mainboards/weatherstation/index.md
+      - EnvNode Mini 0.9.0: mainboards/mini/index.md
+      - Weatherstation 0.3.0: mainboards/weatherstation/index.md
       - ORing Power 0.1.1: mainboards/oring-power/index.md
   - Module:
       - Übersicht: modules/index.md
       - DuoRelay: modules/duo-relay/index.md
-      - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
+      - AnalogHydroPressure 0.6: modules/analog-hydro-pressure/index.md
+      - SD-Card 0.1: modules/sd-card/index.md
+  - Testhardware:
+      - Test-Controller 0.1: mainboards/test-controller/index.md
+      - Input-Adapter 0.1: mainboards/input-adapter/index.md
+      - Modul-Adapter 0.1: mainboards/module-adapter/index.md
   - Sensoren:
       - Übersicht: sensors/index.md
       - I²C-Sensoren: sensors/i2c.md
@@ -72,13 +77,11 @@ nav:
           - DuoRelay mit Blink: firmware/example-relay.md
   - Aufbauanleitungen:
       - Übersicht: guides/index.md
-      - DuoRelay: modules/duo-relay/assembly.md
-      - EnvNode Mini: mainboards/mini/assembly.md
-      - Weatherstation: mainboards/weatherstation/assembly.md
-      - ORing Power: mainboards/oring-power/assembly.md
-      - AnalogHydroPressure: modules/analog-hydro-pressure/assembly.md
-      - RainDetectorController: sensors/rain-detector-controller/assembly.md
-      - RainDetectorHead: sensors/rain-detector-head/assembly.md
+      - Dokumentationsstand: guides/status.md
+      - Bestückungspläne: guides/board-views.md
+      - Alte Revisionen: guides/old-revisions.md
+      - RainDetectorController 0.4: sensors/rain-detector-controller/assembly.md
+      - RainDetectorHead 0.2: sensors/rain-detector-head/assembly.md
       - SCT013Head: sensors/sct013-head/assembly.md
       - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
   - Bausätze und Aufbau: kits/index.md

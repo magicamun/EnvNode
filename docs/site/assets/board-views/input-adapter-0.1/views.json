@@ -1,0 +1,135 @@
+{
+  "id": "input-adapter-0.1",
+  "guide": "mainboards/input-adapter/index.md",
+  "pcb_source": "test-provision-board/hardware/kicad/MainBoards/Input-Adapter/Input-Adapter.kicad_pcb",
+  "pcb_sha256": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c",
+  "back_components": [],
+  "hero": {
+    "front": "assets/images/input-adapter-0.1/top.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/input-adapter-0.1/assembly-front.png",
+      "png_size_px": [
+        1138,
+        2244
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "J4",
+      "value": "ESP32_DevKitC_TestPlug",
+      "side": "F.Cu",
+      "position_mm": [
+        119.99,
+        39.49
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "TP1",
+      "value": "Conn_01x02_Socket",
+      "side": "F.Cu",
+      "position_mm": [
+        145.39,
+        91.56
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U4",
+      "value": "CD74HC4067M",
+      "side": "F.Cu",
+      "position_mm": [
+        132.69,
+        46.233
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C3",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        136.14,
+        74.562
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        136.14,
+        36.72
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C2",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        136.14,
+        55.641
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U5",
+      "value": "CD74HC4067M",
+      "side": "F.Cu",
+      "position_mm": [
+        132.69,
+        65.154
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U6",
+      "value": "CD74HC4067M",
+      "side": "F.Cu",
+      "position_mm": [
+        132.69,
+        84.075
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x05_Odd_Even",
+      "side": "F.Cu",
+      "position_mm": [
+        137.77,
+        102.09
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 8,
+  "asset_sha256": {
+    "assets/board-views/input-adapter-0.1/assembly-front.png": "f18c7e7e73db5cd77adf3452ad394dba9cbeb335a84dde618155ec4dcc6b0611",
+    "assets/images/input-adapter-0.1/top.png": "b98aa9d80b530ecb2981f7114a98543102ccab6b3f81cda0d4f94945f61d9a87"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

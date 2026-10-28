@@ -20,13 +20,17 @@ die Tabelle nennt für den heutigen EnvNode-Einsatz bewusst die 0.5.0-Basis.
 Ein Mindestquellstand ist kein Nachweis eines geprüften Binär-Releases oder
 vollständiger Hardwarequalifikation.
 
+## Neue Hardwaredokumentation vom 28. Oktober 2026
+
+Aktuelle Anleitungen: [Mini 0.9.0](mainboards/mini/index.md), [Weather 0.3.0](mainboards/weatherstation/index.md), [AnalogHydroPressure 0.6](modules/analog-hydro-pressure/index.md), [SD-Card 0.1](modules/sd-card/index.md), [RainDetectorController 0.4](sensors/rain-detector-controller/assembly.md) und [Head 0.2](sensors/rain-detector-head/assembly.md). Der redaktionelle Abschluss bestätigt keine neue Firmware-/Hardwarekombination. Für SD-Card folgt die Firmware-Mindestversion später. Die nachfolgenden früheren Betriebsnachweise bleiben ihren jeweiligen Revisionen zugeordnet.
+
 ## Mainboards und Firmware
 
 | Mainboard | Hardwarestand | Firmware-Zuordnung | Betriebsnachweis | Mindeststand Firmware | Kommentar |
 | --- | --- | --- | --- | --- | --- |
 | Mini 0.3 | Bestehender Aufbau | Boardprofil EnvNode Mainboard 0.3 | Nutzeraufbau bestätigt | 0.5.0 ab `d85e005` (Boardprofil); Beispielgerät 0.5.0+329 | DuoRelay 0.3, zwei SSD1309 und BME280 in Betrieb; SHTC3 konfiguriert, deaktiviert. |
-| [Mini 0.8.1](mainboards/mini/index.md) | Aktuell dokumentierte Hardware | Boardprofil EnvNode Mini 0.8 | Nutzeraufbau von Mini 0.8 technisch und funktional bestätigt | Quellstand mit Profil `EnvNodeMini = 2` | Alle PCB-Patchstände 0.8.x verwenden Identity 0.8; Slot A GPIO33/GPIO13/GPIO5, Slot B GPIO32/GPIO14/GPIO27. |
-| [Weather 0.2.1](mainboards/weatherstation/index.md) | Aktuell dokumentierte Hardware | Boardprofil EnvNode Weather 0.2 | Hier nicht bestätigt | Quellstand mit Profil `EnvNodeWeather = 1` | Ein realer Modulslot mit GPIO33/GPIO13/GPIO5. |
+| [Mini 0.8.1](mainboards/mini/revisions/0.8.1.md) | Historischer dokumentierter Stand | Boardprofil EnvNode Mini 0.8 | Nutzeraufbau von Mini 0.8 technisch und funktional bestätigt | Quellstand mit Profil `EnvNodeMini = 2` | Alle PCB-Patchstände 0.8.x verwenden Identity 0.8; Slot A GPIO33/GPIO13/GPIO5, Slot B GPIO32/GPIO14/GPIO27. |
+| [Weather 0.2.1](mainboards/weatherstation/revisions/0.2.1.md) | Historischer dokumentierter Stand | Boardprofil EnvNode Weather 0.2 | Hier nicht bestätigt | Quellstand mit Profil `EnvNodeWeather = 1` | Ein realer Modulslot mit GPIO33/GPIO13/GPIO5. |
 | [ORing Power 0.1.1](mainboards/oring-power/index.md) | Versorgungsbaustein | Kein Firmware-Treiber erforderlich | Elektrische Prüfung je Aufbau | Keine eigene Firmware erforderlich | Keine USB-Datenverbindung; Versorgung und Belastbarkeit nach Hardwareanleitung prüfen. |
 
 ### Nicht zu verwendende Hardwarestände
@@ -38,7 +42,7 @@ vollständiger Hardwarequalifikation.
 
 Diese Kennzeichnung betrifft die Hardwarestände. Ein neuer Firmwarestand allein
 macht daraus keine bestätigte Kombination. Die Übersicht führt Mini 0.3 als
-bestehenden bestätigten Aufbau und Mini 0.8.1 als aktuellen Dokumentationsstand.
+bestehenden bestätigten Aufbau und Mini 0.8.1 mit seinem historischen Betriebsnachweis.
 
 Das historische Profil EnvNode Mainboard 0.3 beschreibt Slot A mit
 AUX_GPIO1=GPIO4 und AUX_GPIO2=GPIO13, Slot B mit GPIO14 und GPIO16.
@@ -52,7 +56,7 @@ die Ressourcentabelle nicht automatisch.
 | Modul | Hardware-Anschluss | Firmware-Unterstützung | Betriebsnachweis | Mindeststand Firmware | Kommentar |
 | --- | --- | --- | --- | --- | --- |
 | [DuoRelay 0.3](modules/duo-relay/index.md) | EnvNode-Modulslot, 5 V und AUX_GPIO1/2 | On/Off; Descriptor-basierter Module-On/Off-Pfad vorhanden | Mini 0.3, Slot A bestätigt | GPIO: 0.5.0 Basis; Modulaktoren: ab `4cd8519` | Bei neueren Mainboards GPIO-Abgleich nötig. Identity-EEPROM U2 mit C1; erkannter Descriptor im Beispielaufbau vorhanden. |
-| [AnalogHydroPressure 0.5](modules/analog-hydro-pressure/index.md) | Modulslot, ADC über I²C und Boost über AUX_GPIO2 | Kein registrierter ADS1115-Drucksensorpfad | Vollständiger Messbetrieb hier nicht bestätigt | Nicht verfügbar als vollständiger Messpfad | JP5/JP6 synchron auf I2C0 oder I2C1; genau einen Adressjumper setzen. Hardwareanleitung ist keine fertige Firmwareintegration. |
+| [AnalogHydroPressure 0.5](modules/analog-hydro-pressure/revisions/0.5.md) | Modulslot, ADC über I²C und Boost über AUX_GPIO2 | Kein registrierter ADS1115-Drucksensorpfad | Vollständiger Messbetrieb hier nicht bestätigt | Nicht verfügbar als vollständiger Messpfad | JP5/JP6 synchron auf I2C0 oder I2C1; genau einen Adressjumper setzen. Hardwareanleitung ist keine fertige Firmwareintegration. |
 
 ## Sensoren
 
@@ -63,7 +67,7 @@ die Ressourcentabelle nicht automatisch.
 | SHTC3 | I2C0 oder I2C1, 0x70 | Vorhanden | Konfiguriert, aber deaktiviert | 0.5.0 ab `91fb839` | Deaktivierter Eintrag erzeugt keine Messungen und belegt keinen aktuellen Funktionstest. |
 | AM2302 / DHT22 | Geeigneter GPIO | Vorhanden | Hier nicht bestätigt | 0.5.0 Basis | Eigenes Einleitungsprotokoll, kein I²C; Temperatur und Feuchte. |
 | Rain Gauge / Kippwaage | Geeigneter GPIO-Interrupt | Vorhanden | Hier nicht bestätigt | 0.5.0 Basis | Entprellung und Millimeter pro Kippung konfigurieren; nicht mit RainDetector verwechseln. |
-| [RainDetectorController 0.3 + Head 0.1](sensors/rain-detector.md) | Frequenzeingang und Heiz-Steuerausgang | Separate PCNT-Laborfirmware; kein registrierter produktiver Sensor | WIP | Keine integrierte Mindestversion; separates Lab-Projekt | Mechanik, Heizung und Wasserausschluss noch zu prüfen; Laborfirmware ohne MQTT und Heizautomation. |
+| [RainDetectorController 0.3 + Head 0.1](sensors/rain-detector-controller/revisions/0.3.md) | Frequenzeingang und Heiz-Steuerausgang | Separate PCNT-Laborfirmware; kein registrierter produktiver Sensor | WIP | Keine integrierte Mindestversion; separates Lab-Projekt | Mechanik, Heizung und Wasserausschluss noch zu prüfen; Laborfirmware ohne MQTT und Heizautomation. |
 | [SCT013 / SCT013Head 0.1](sensors/sct013.md) | ADC, passende Variante mit Spannungsausgang | Kein registrierter SCT013-Treiber | WIP | Noch kein integrierter Treiber | [Aufbau und Erstprüfung](sensors/sct013-head/assembly.md) dokumentiert; reale Erprobung und Kalibrierung offen. Nur Spannungsausgang mit integrierter Bürde. |
 | Simulierte Temperatur / Feuchte / Druck | Keine externe Hardware | Vorhanden | Im Beispielaufbau aktiv | 0.5.0 Basis | Prüft Softwareabläufe, keine physische Sensorfunktion. |
 

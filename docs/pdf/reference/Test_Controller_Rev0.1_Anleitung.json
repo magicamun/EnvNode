@@ -1,0 +1,48 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "test-controller-0.1",
+    "title": "Test-Controller",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.1",
+    "document_version": "1.1",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-28",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 12,
+  "source_pdf": null,
+  "source_pdf_sha256": null,
+  "markdown_sha256": "61e151b0e490502c3fb0bb2ec3db34496ab12079f8d18f97b0b1ce13f5c97871",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/test-controller-0.1/top.png": "12d0b656ec780f92d54313363ed0c089256209d6aaec53eb8a534fa2a5fec029",
+    "assets/images/test-controller-0.1/bottom.png": "70d304eb7fd7f9c94c37de7bc84dc8a7db295a058216ecd7cfcdc136fda97c11",
+    "assets/board-views/test-controller-0.1/assembly-front.png": "b0266f71874fe8ab07d659a91962281b5e941f83e60f4781e8fbdc43414cd6f2",
+    "assets/board-views/test-controller-0.1/assembly-back.png": "f6c3faf7d449bece7bf1d5db0c940ef7e51b8b334926f81ee9804f4cc2cb96b8"
+  },
+  "images": {
+    "top.png": "12d0b656ec780f92d54313363ed0c089256209d6aaec53eb8a534fa2a5fec029",
+    "bottom.png": "70d304eb7fd7f9c94c37de7bc84dc8a7db295a058216ecd7cfcdc136fda97c11"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "cbac37aba3d235fb114c9b896dd3bf543361edaca3c0d9ccf5020daebdc4bf53"
+}

@@ -1,0 +1,48 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "duorelay-0.3",
+    "title": "DuoRelay",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.3",
+    "document_version": "1.2",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-17",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 13,
+  "source_pdf": "hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf",
+  "source_pdf_sha256": "818b5da6aa98cd1e33229e0a8bfe331cabfb10e21d240046288cc4d91afb338f",
+  "markdown_sha256": "98869df10898769b8c1731e877d8a40706573be8ba69c079ec2737dc79361507",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/duorelay-assembly/top.png": "c221cc38afa51da54e90cbd2c2cc3e06ceee4732985c2e7b68ef14a6060555e4",
+    "assets/images/duorelay-assembly/bottom.png": "d78eb0b599241970198c66ba4d67a7f8c306331c572f65858d5f5d09eae88710",
+    "assets/board-views/duo-relay-0.3/assembly-front.png": "f1e5df1ce2c86fa2943a8c2faf555f9defef6b937719b867e3b1368bdd7af8b3",
+    "assets/board-views/duo-relay-0.3/assembly-back.png": "ee3e14500bec14cceb6a8580825f8d9b04a627b775b469cd35dfa5b0454804c7"
+  },
+  "images": {
+    "top.png": "c221cc38afa51da54e90cbd2c2cc3e06ceee4732985c2e7b68ef14a6060555e4",
+    "bottom.png": "d78eb0b599241970198c66ba4d67a7f8c306331c572f65858d5f5d09eae88710"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "dc4f0f7c9bcb246a297489f87ae3e1a0fe634a636de61151526a8caec0d19826"
+}

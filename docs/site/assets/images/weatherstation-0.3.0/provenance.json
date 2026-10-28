@@ -1,0 +1,28 @@
+{
+  "board": "Weatherstation",
+  "hardware_revision": "0.3.0",
+  "checkout": "main",
+  "commit": "ff906605036ccac222eda68e9d515e630a9cae6c",
+  "source_sha256": {
+    "ESP32.kicad_sch": "3a6c5e3fd0234711286af83a08b76d0d6e98a0f4ce0a0a72be42c8b4101d6455",
+    "PCB.kicad_sch": "04b61087758ed3db550336a319e9a180bac551b3461eb8a1879add806ebccd1d",
+    "Power.kicad_sch": "1b1e36652d6621b422b7d9de3e1460a93c4376938a50cd0f9d70fc41bdb67155",
+    "SlotA.kicad_sch": "08575310281bf13715ff1b76f3a23dd3777e89d7fede6c446bf04f4076f1672e",
+    "Weatherstation.kicad_pcb": "283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf",
+    "Weatherstation.kicad_pro": "4d331a105813127bf69246b853b661cea702e263e69fb7d2d156a92b2ece0621",
+    "Weatherstation.kicad_sch": "8b30ca749ae622fc67e3b163461e802649d7ad9303f55385799cee3484acbacb",
+    "gpio.kicad_sch": "fef9f739a8ab8b702d6f67de3bc0a6f6af5e98d3c8eefef4a304895d4f398c16",
+    "qwiic.kicad_sch": "047540728d00ee9a955c5807119e125a0a1fada2133fdb335e175ead853fcb1e"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "f7e9a5c2f7ac507b6001edfd8eb1c92fa6326e6b66e832e1dd8563be64b582d2",
+    "bottom.png": "2c5f50030c3b3720e9d33f85e7cf19339376fc24c0d4b35f26950bce7febb41e"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

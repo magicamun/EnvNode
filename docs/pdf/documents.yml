@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
-# Explicitly selected latest guides only; never discover PDFs by revision sorting.
-- source: modules/duo-relay/assembly.md
+# Explicit current and archived guides; revision selection is editorial.
+- source: modules/duo-relay/index.md
   target: assets/downloads/DuoRelay_Rev0.3_Anleitung.pdf
   original: hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf
   images: docs/site/assets/images/duorelay-assembly
@@ -11,7 +11,8 @@
   - '0x52'
   - '0x53'
   - 9c7e7d0384efa0a1
-- source: mainboards/mini/assembly.md
+  preview: docs/pdf/reference/DuoRelay_Rev0.3_Anleitung.pdf
+- source: mainboards/mini/revisions/0.8.1.md
   target: assets/downloads/EnvNode_Mini_Rev0.8.1_Anleitung.pdf
   original: hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf
   images: docs/site/assets/images/mini-assembly
@@ -23,7 +24,9 @@
   - BoardProfileId
   - CRC / Read-back geprüft
   - Provisioniert am / durch
-- source: mainboards/weatherstation/assembly.md
+  archive: true
+  preview: docs/pdf/reference/EnvNode_Mini_Rev0.8.1_Anleitung.pdf
+- source: mainboards/weatherstation/revisions/0.2.1.md
   target: assets/downloads/Weatherstation_Rev0.2.1_Anleitung.pdf
   original: hardware/kicad/MainBoards/Weatherstation/Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.2.pdf
   images: docs/site/assets/images/weather-assembly
@@ -35,7 +38,9 @@
   - BoardProfileId
   - CRC / Read-back geprüft
   - Provisioniert am / durch
-- source: mainboards/oring-power/assembly.md
+  archive: true
+  preview: docs/pdf/reference/Weatherstation_Rev0.2.1_Anleitung.pdf
+- source: mainboards/oring-power/index.md
   target: assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf
   original: hardware/kicad/Power/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf
   images: docs/site/assets/images/oring-assembly
@@ -44,7 +49,8 @@
   - D1
   - Rückspeisung
   - U2.1
-- source: modules/analog-hydro-pressure/assembly.md
+  preview: docs/pdf/reference/ORing_Power_Rev0.1.1_Anleitung.pdf
+- source: modules/analog-hydro-pressure/revisions/0.5.md
   target: assets/downloads/AnalogHydroPressure_Rev0.5_Anleitung.pdf
   original: hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf
   images: docs/site/assets/images/analog-assembly
@@ -54,7 +60,9 @@
   - 0,600 V
   - J1.10
   - U3
-- source: sensors/rain-detector-controller/assembly.md
+  archive: true
+  preview: docs/pdf/reference/AnalogHydroPressure_Rev0.5_Anleitung.pdf
+- source: sensors/rain-detector-controller/revisions/0.3.md
   target: assets/downloads/RainDetectorController_Rev0.3_Anleitung.pdf
   original: hardware/kicad/Sensors/RainDetectorController/Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf
   images: docs/site/assets/images/rain-controller-assembly
@@ -63,7 +71,9 @@
   - RAIN_FREQ
   - '417'
   - ENP-00116
-- source: sensors/rain-detector-head/assembly.md
+  archive: true
+  preview: docs/pdf/reference/RainDetectorController_Rev0.3_Anleitung.pdf
+- source: sensors/rain-detector-head/revisions/0.1.md
   target: assets/downloads/RainDetectorHead_Rev0.1_Anleitung.pdf
   original: hardware/kicad/Sensors/RainDetectorHead/Documentation/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.1.pdf
   images: docs/site/assets/images/rain-head-assembly
@@ -72,6 +82,8 @@
   - J2.4
   - 12 Ohm
   - ENP-00111
+  archive: true
+  preview: docs/pdf/reference/RainDetectorHead_Rev0.1_Anleitung.pdf
 - source: modules/i2c-carrier/assembly.md
   target: assets/downloads/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf
   original: hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/EnvNode_I2C_Carrier_HalfSize_Jumper_Dokumentation_Rev0.1.pdf
@@ -81,3 +93,89 @@
   - JP4
   - '0x52'
   - '0x53'
+  preview: docs/pdf/reference/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf
+- source: mainboards/mini/index.md
+  target: assets/downloads/EnvNode_Mini_Rev0.9.0_Anleitung.pdf
+  preview: docs/pdf/reference/EnvNode_Mini_Rev0.9.0_Anleitung.pdf
+  images: docs/site/assets/images/mini-0.9.0
+  required_text:
+  - 0.9.0
+  - TP1
+  - C2
+  - J3-J6
+  - BoardProfileId
+- source: mainboards/weatherstation/index.md
+  target: assets/downloads/Weatherstation_Rev0.3.0_Anleitung.pdf
+  preview: docs/pdf/reference/Weatherstation_Rev0.3.0_Anleitung.pdf
+  images: docs/site/assets/images/weatherstation-0.3.0
+  required_text:
+  - 0.3.0
+  - TP1
+  - C2
+  - J2-J5
+  - GPIO33
+- source: modules/analog-hydro-pressure/index.md
+  target: assets/downloads/AnalogHydroPressure_Rev0.6_Anleitung.pdf
+  preview: docs/pdf/reference/AnalogHydroPressure_Rev0.6_Anleitung.pdf
+  images: docs/site/assets/images/analog-0.6
+  required_text:
+  - '0.6'
+  - J6
+  - '0x4B'
+  - 0,600 V
+  - SDR1005-R68ML
+- source: modules/sd-card/index.md
+  target: assets/downloads/SD_Card_Rev0.1_Anleitung.pdf
+  preview: docs/pdf/reference/SD_Card_Rev0.1_Anleitung.pdf
+  images: docs/site/assets/images/sd-card-0.1
+  required_text:
+  - '0.1'
+  - ENP-00137
+  - 3V3_REG
+  - Firmware-Mindestversion
+- source: sensors/rain-detector-controller/assembly.md
+  target: assets/downloads/RainDetectorController_Rev0.4_Anleitung.pdf
+  preview: docs/pdf/reference/RainDetectorController_Rev0.4_Anleitung.pdf
+  images: docs/site/assets/images/rain-controller-0.4
+  required_text:
+  - '0.4'
+  - 54,52
+  - ENP-00138
+  - HEATER_EN
+- source: sensors/rain-detector-head/assembly.md
+  target: assets/downloads/RainDetectorHead_Rev0.2_Anleitung.pdf
+  preview: docs/pdf/reference/RainDetectorHead_Rev0.2_Anleitung.pdf
+  images: docs/site/assets/images/rain-head-0.2
+  required_text:
+  - '0.2'
+  - 44.78x37.25
+  - ENP-00139
+  - 12 Ohm
+- source: mainboards/test-controller/index.md
+  target: assets/downloads/Test_Controller_Rev0.1_Anleitung.pdf
+  preview: docs/pdf/reference/Test_Controller_Rev0.1_Anleitung.pdf
+  images: docs/site/assets/images/test-controller-0.1
+  required_text:
+  - CD74HC4067
+  - GPIO34
+  - R9
+  - Simulation
+- source: mainboards/input-adapter/index.md
+  target: assets/downloads/Input_Adapter_Rev0.1_Anleitung.pdf
+  preview: docs/pdf/reference/Input_Adapter_Rev0.1_Anleitung.pdf
+  images: docs/site/assets/images/input-adapter-0.1
+  required_text:
+  - 25,40
+  - TP1.1
+  - I14
+  - I13
+  - '40'
+- source: mainboards/module-adapter/index.md
+  target: assets/downloads/Module_Adapter_Rev0.1_Anleitung.pdf
+  preview: docs/pdf/reference/Module_Adapter_Rev0.1_Anleitung.pdf
+  images: docs/site/assets/images/module-adapter-0.1
+  required_text:
+  - J4.n
+  - J1.n
+  - Bottom-Mount
+  - '1:1'

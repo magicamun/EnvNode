@@ -38,4 +38,4 @@ zur verfügbaren Firmware-Implementierung passen. Der
 [Einstieg mit Mini und BME280](../getting-started/index.md) verbindet Anschluss,
 Einrichtung und lokale Messwertprüfung.
 
-[Anschlüsse des EnvNode Mini](../mainboards/mini/index.md#i2c-anschlusse)
+[Anschlüsse des EnvNode Mini](../mainboards/mini/index.md#41-i2c-qwiic)

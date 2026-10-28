@@ -1,0 +1,25 @@
+{
+  "board": "Test-Controller",
+  "hardware_revision": "0.1",
+  "checkout": "test-provision-board",
+  "commit": "08f55b1810812b1deb1e877ef2f7853d0797d5ad",
+  "source_sha256": {
+    "INL.kicad_sch": "d997c7a458d4028ab6709aa2018255b760285d3a5f047a7abdc2853ecb74905c",
+    "OU1.kicad_sch": "f744029b4555ac6727b4ee6516dcf553085af52931c4f0180e8048643995efac",
+    "OUT2.kicad_sch": "4a0550655b79f2b7135092b2bef4404ae10aa8281a209b2fcd528be4e2088701",
+    "Test-Controller.kicad_pcb": "bb6f4f2f0c016539785691c14dda86cc97bd94ba72e7a92f6113fda60ea6bf07",
+    "Test-Controller.kicad_pro": "d2c7d29bfff9455a5a17e456aaad0f98b935e4786765ad76c5d2d755c411c514",
+    "Test-Controller.kicad_sch": "15768ca5fb11fd62738d2707c869b4fbdd0c709248c94a1deb1ab3aad009ba01"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "12d0b656ec780f92d54313363ed0c089256209d6aaec53eb8a534fa2a5fec029",
+    "bottom.png": "70d304eb7fd7f9c94c37de7bc84dc8a7db295a058216ecd7cfcdc136fda97c11"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

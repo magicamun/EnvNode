@@ -1,0 +1,22 @@
+{
+  "board": "RainDetectorController",
+  "hardware_revision": "0.4",
+  "checkout": "rain-detector",
+  "commit": "e3ecde6c66d24c26fbb0352b686f2d3f10469c72",
+  "source_sha256": {
+    "RainDetectorController.kicad_pcb": "b793f10c10ec03b201e0514d98e5ed5e4c8befd761ada973139d5f0c5d8845b4",
+    "RainDetectorController.kicad_pro": "26e426bc5880f282176b3c91a39e0b19007f7901302b2eec7733e9f4338928f0",
+    "RainDetectorController.kicad_sch": "5546327c7d2770689e58bca02692a1a5e798d623826888b6d008aa5ac2dc6cbf"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "4af58b681819f63ba914845f6e1bec41efef637c323ced380e29383aa6751198",
+    "bottom.png": "c67dd05ebc87c422f124c6a6d6f743db6b392a0fb6223d19c664cdae47a7db69"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

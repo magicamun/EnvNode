@@ -8,12 +8,14 @@
 [Controller: Bestückung und Bring-up](rain-detector-controller/assembly.md){ .md-button }
 [Head: Bestückung und Bring-up](rain-detector-head/assembly.md){ .md-button }
 
+Dokumentation abgeschlossen für die neue Kontur **62,12 × 54,52 mm** mit Platz für die Dichtung. Die bisherigen Bring-ups stehen unter [Controller: Alte Revisionen](rain-detector-controller/old-revisions.md) und [Head: Alte Revisionen](rain-detector-head/old-revisions.md).
+
 ## Zwei getrennte Baugruppen
 
 | Baugruppe | Revision | Aufgabe |
 | --- | --- | --- |
-| RainDetectorController | 0.3 | ICM7555-Frequenzfront-end und AO3400A-Heizschalter |
-| RainDetectorHead | 0.1 | Passive kapazitive Sensorfläche und Heizwiderstände |
+| RainDetectorController | 0.4 | ICM7555-Frequenzfront-end und AO3400A-Heizschalter |
+| RainDetectorHead | 0.2 | Passive kapazitive Sensorfläche und Heizwiderstände |
 
 Die Sensorfläche besitzt zwei von Lötstopplack bedeckte, ineinandergreifende
 Kupferelektroden. Der Controller wandelt das Sensorsignal in einen digitalen

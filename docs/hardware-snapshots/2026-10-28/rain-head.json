@@ -1,0 +1,485 @@
+{
+  "checkout": "rain-detector",
+  "name": "RainDetectorHead",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'RainDetectorHead'], [Symbol('date'), '2026-10-20'], [Symbol('rev'), '0.2']]",
+  "components": [
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        159.676955,
+        88.476955
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H2",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        214.443045,
+        88.476955
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H3",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        214.443045,
+        135.643045
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "RainGatter",
+      "footprint": "EnvNode-Footprints:RainDetector_Interdigitated_44.78x37.25mm_P0.51mm",
+      "pads": {
+        "1": "/SENSE",
+        "2": "GND"
+      },
+      "models": [],
+      "at": [
+        187.315,
+        112.06
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H4",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        159.676955,
+        135.643045
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R13",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/HEATER+",
+        "2": "/R13_R14"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        196.016,
+        98.0912,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R3",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R3_R3",
+        "2": "/R3_R4"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        169.148,
+        116.7163,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R8",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R7_R8",
+        "2": "/HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        178.104,
+        126.0288,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R10",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R9_R10",
+        "2": "/R10_R11"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        187.06,
+        107.4037,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R20",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R19_R20",
+        "2": "/HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        204.972,
+        126.0288,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R12",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R11_R12",
+        "2": "/HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        187.06,
+        126.0288,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R4",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R3_R4",
+        "2": "/HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        169.148,
+        126.0288,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R6",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R5_R6",
+        "2": "/R6_R7"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        178.104,
+        107.4037,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R7",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R6_R7",
+        "2": "/R7_R8"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        178.104,
+        116.7163,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R18",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R17_R18",
+        "2": "/R18_R19"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        204.972,
+        107.4037,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R14",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R13_R14",
+        "2": "/R14_R15"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        196.016,
+        107.4037,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "J2",
+      "value": "Conn_02x02_Odd_Even",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical_SMD",
+      "pads": {
+        "1": "/SENSE",
+        "2": "unconnected-(J2-Pin_2-Pad2)",
+        "3": "unconnected-(J2-Pin_3-Pad3)",
+        "4": "/HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x02_P2.54mm_Vertical_SMD.step"
+      ],
+      "at": [
+        210.635,
+        112.06,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R16",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R15_R16",
+        "2": "/HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        196.016,
+        126.0288,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R19",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R18_R19",
+        "2": "/R19_R20"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        204.972,
+        116.7163,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x02_Odd_Even",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical_SMD",
+      "pads": {
+        "1": "/HEATER+",
+        "2": "unconnected-(J1-Pin_2-Pad2)",
+        "3": "unconnected-(J1-Pin_3-Pad3)",
+        "4": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x02_P2.54mm_Vertical_SMD.step"
+      ],
+      "at": [
+        163.485,
+        112.06,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R17",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/HEATER+",
+        "2": "/R17_R18"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        204.972,
+        98.0912,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R9",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/HEATER+",
+        "2": "/R9_R10"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        187.06,
+        98.0912,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R5",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/HEATER+",
+        "2": "/R5_R6"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        178.104,
+        98.0912,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R1",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/HEATER+",
+        "2": "/R1_R2"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        169.148,
+        98.0912,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R15",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R14_R15",
+        "2": "/R15_R16"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        196.016,
+        116.7163,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R2",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R1_R2",
+        "2": "/R3_R3"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        169.148,
+        107.4037,
+        -90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "R11",
+      "value": "15Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "/R10_R11",
+        "2": "/R11_R12"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        187.06,
+        116.7163,
+        -90
+      ],
+      "layer": "B.Cu"
+    }
+  ],
+  "source_sha256": {
+    "RainDetectorHead.kicad_dru": "1203b82235c87187154b35954664d914d52d4b1e6ea8024e5ddf9a524a09af13",
+    "RainDetectorHead.kicad_pcb": "6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438",
+    "RainDetectorHead.kicad_pro": "af1e22e6e6ffbad3b409b996fbc377dfea7da8e643027662e977fe79b5bd77ce",
+    "RainDetectorHead.kicad_sch": "82bface8c81a513f7d1c88ebcdf12783961440fefcb477361c4d102ed4f36cfe"
+  },
+  "commit": "e3ecde6c66d24c26fbb0352b686f2d3f10469c72"
+}

@@ -1,0 +1,48 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "sd-card-0.1",
+    "title": "SD-Card",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.1",
+    "document_version": "1.1",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-28",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 12,
+  "source_pdf": null,
+  "source_pdf_sha256": null,
+  "markdown_sha256": "cf1d5bb24d863f0b85669e4d72fef42619e2fd38a25fc1735e5fa2a76b63c5cc",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/sd-card-0.1/top.png": "b86cfd4e9f2a3d42fc2e9f891ac1b1a8e6ef471baff23da0e6d51cd486991a9d",
+    "assets/images/sd-card-0.1/bottom.png": "e5684977ba3f3100efa970df98305636bd970b225f2ada627869976406f826ed",
+    "assets/board-views/sd-card-0.1/assembly-front.png": "ecf432ceb76e8e960ec60839a2d61c1c9166102e83927afcf1e224ffa517dca5",
+    "assets/board-views/sd-card-0.1/assembly-back.png": "682084a73a83a3faf7abb7e9967ed9636d7da94aca3e7016b0dc9728c2c94b5e"
+  },
+  "images": {
+    "top.png": "b86cfd4e9f2a3d42fc2e9f891ac1b1a8e6ef471baff23da0e6d51cd486991a9d",
+    "bottom.png": "e5684977ba3f3100efa970df98305636bd970b225f2ada627869976406f826ed"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "82d0801b3c6c3ef3f8f96c0ad981220f986d501aece1f05aef89469c395f32f8"
+}

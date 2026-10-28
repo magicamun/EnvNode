@@ -30,8 +30,8 @@ Weg der Daten bis zu einer externen Anwendung.
 
 ## Umfang dieser Dokumentation
 
-Die erste Fassung umfasst EnvNode Mini, Weatherstation, ORing Power,
-AnalogHydroPressure, DuoRelay, die Anbindung normaler I²C-Sensoren und die Firmware.
+Die Dokumentation umfasst EnvNode Mini, Weatherstation, ORing Power,
+AnalogHydroPressure, DuoRelay, SD-Card, die dreiteilige Testhardware, die Anbindung normaler I²C-Sensoren und die Firmware.
 Mini, Weatherstation, ORing Power, DuoRelay und AnalogHydroPressure besitzen ausgearbeitete Produktseiten.
 Sensor- und Displayübersichten sowie eine Firmware-Anleitung ergänzen die Produktseiten.
 
@@ -43,3 +43,5 @@ Weitere Entwicklungen werden erst nach Einzelfallprüfung aufgenommen.
 [Erlaubte Nutzung und Lizenzbedingungen](license.md)
 
 [Hardware-Schnittstellen und Pinbelegungen](interfaces/index.md)
+
+[Dokumentationsstand und fehlende Anleitungen](guides/status.md) · [Alte Revisionen](guides/old-revisions.md)

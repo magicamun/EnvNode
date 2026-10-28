@@ -1,0 +1,277 @@
+{
+  "checkout": "rain-detector",
+  "name": "RainDetectorController",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'RainDetectorController'], [Symbol('date'), '2026-10-21'], [Symbol('rev'), '0.4']]",
+  "components": [
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        71.49,
+        47.25
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U1",
+      "value": "ICM7555xB",
+      "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+      "pads": {
+        "1": "GND",
+        "2": "SENSE",
+        "3": "RAIN_FREQ",
+        "4": "+3V3",
+        "5": "unconnected-(U1-CONT-Pad5)",
+        "6": "SENSE",
+        "7": "Net-(U1-DISCH)",
+        "8": "+3V3"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step"
+      ],
+      "at": [
+        110.265,
+        73.905
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H2",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        126.25,
+        47.25
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R3",
+      "value": "10kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(U1-DISCH)",
+        "2": "+3V3"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        111.515,
+        68.7
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R1",
+      "value": "100Ohm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(Q1-G)",
+        "2": "HEATER_EN"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        88.14,
+        76.78
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J4",
+      "value": "RAIN_SIGNAL",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "RAIN_FREQ",
+        "4": "+3V3"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        106.75,
+        89.21,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H3",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        126.25,
+        94.51
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R4",
+      "value": "100kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "SENSE",
+        "2": "Net-(U1-DISCH)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        105.15,
+        68.7
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R2",
+      "value": "100kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(Q1-G)",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        88.14,
+        72.34
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+3V3",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        102.84,
+        75.8,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J3",
+      "value": "HEATER_CTRL",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "HEATER_EN",
+        "4": "+3V3"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        83.37,
+        89.21,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H4",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        71.49,
+        94.51
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "Q1",
+      "value": "AO3400A",
+      "footprint": "Package_TO_SOT_SMD:SOT-23",
+      "pads": {
+        "1": "Net-(Q1-G)",
+        "2": "GND",
+        "3": "HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-23.step"
+      ],
+      "at": [
+        82.82,
+        74.65,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x02_Odd_Even",
+      "footprint": "Connector_PinSocket_2.54mm:PinSocket_2x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+5V",
+        "2": "unconnected-(J1-Pin_2-Pad2)",
+        "3": "unconnected-(J1-Pin_3-Pad3)",
+        "4": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        123.715,
+        69.56,
+        90
+      ],
+      "layer": "B.Cu"
+    },
+    {
+      "ref": "J2",
+      "value": "Conn_02x02_Odd_Even",
+      "footprint": "Connector_PinSocket_2.54mm:PinSocket_2x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "SENSE",
+        "2": "unconnected-(J2-Pin_2-Pad2)",
+        "3": "unconnected-(J2-Pin_3-Pad3)",
+        "4": "HEATER-"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        76.565,
+        69.56,
+        90
+      ],
+      "layer": "B.Cu"
+    }
+  ],
+  "source_sha256": {
+    "RainDetectorController.kicad_pcb": "b793f10c10ec03b201e0514d98e5ed5e4c8befd761ada973139d5f0c5d8845b4",
+    "RainDetectorController.kicad_pro": "26e426bc5880f282176b3c91a39e0b19007f7901302b2eec7733e9f4338928f0",
+    "RainDetectorController.kicad_sch": "5546327c7d2770689e58bca02692a1a5e798d623826888b6d008aa5ac2dc6cbf"
+  },
+  "commit": "e3ecde6c66d24c26fbb0352b686f2d3f10469c72"
+}

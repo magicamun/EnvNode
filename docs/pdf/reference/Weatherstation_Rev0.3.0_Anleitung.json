@@ -1,0 +1,46 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "weather-0.3.0",
+    "title": "Weatherstation",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.3.0",
+    "document_version": "1.1",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-28",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 13,
+  "source_pdf": null,
+  "source_pdf_sha256": null,
+  "markdown_sha256": "2eff82c54b0bf0752fc30fd7b1644db0d60f89361932768deb808140c28ea9c2",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/weatherstation-0.3.0/top.png": "f7e9a5c2f7ac507b6001edfd8eb1c92fa6326e6b66e832e1dd8563be64b582d2",
+    "assets/board-views/weatherstation-0.3.0/assembly-front.png": "7966689f5fa801ba2837f05dc8b7c2b8583d8501669f0c4f28d7f06fc4b65790"
+  },
+  "images": {
+    "top.png": "f7e9a5c2f7ac507b6001edfd8eb1c92fa6326e6b66e832e1dd8563be64b582d2",
+    "bottom.png": "2c5f50030c3b3720e9d33f85e7cf19339376fc24c0d4b35f26950bce7febb41e"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "f4657406c3398455b9d7081c09bcde5b0ef52bf16b5f26cb2e43d0be0dfea294"
+}

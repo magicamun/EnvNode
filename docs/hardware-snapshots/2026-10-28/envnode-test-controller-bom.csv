@@ -1,0 +1,16 @@
+IPN,Quantity,Reference,Note
+ENP-00155,1,PCB,Test-Controller Rev.0.1
+ENP-00153,2,"U1,U2",SOIC-24W
+ENP-00006,3,"C4,C5,C6",100 nF X7R 1206
+ENP-00094,5,"R1,R2,R3,R4,R5",10 kOhm 1206 Enable-Pullups
+ENP-00099,1,R6,1 kOhm 1206
+ENP-00154,1,R9,"2,2 kOhm 1206"
+ENP-00005,2,"R7,R8","4,7 kOhm 1206"
+ENP-00010,1,U3,ESP32 DevKitC 38 Pins
+ENP-00004,2,U3-Sockel,Je auf 19 Kontakte gekuerzt
+ENK-00021,1,U7,ORing-Power Rev.0.1 bestueckt
+ENP-00147,1,J8,WSL 10G
+ENP-00151,1,J3,WSL 14G
+ENP-00108,3,"J1,J2,I2C0",Stiftleisten 1x4; externe Pigtails nicht enthalten
+ENP-00145,4,"J5,J6","Rohmaterial: 2x 1x2, vier Kontaktpositionen"
+ENP-00101,2,"J5,J6",Abnehmbare Jumperkappen

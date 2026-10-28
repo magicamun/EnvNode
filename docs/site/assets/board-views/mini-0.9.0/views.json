@@ -1,0 +1,385 @@
+{
+  "id": "mini-0.9.0",
+  "guide": "mainboards/mini/index.md",
+  "pcb_source": "main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
+  "pcb_sha256": "dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105",
+  "back_components": [],
+  "hero": {
+    "front": "assets/images/mini-0.9.0/top.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/mini-0.9.0/assembly-front.png",
+      "png_size_px": [
+        2207,
+        1203
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "D1",
+      "value": "1N4148",
+      "side": "F.Cu",
+      "position_mm": [
+        181.935,
+        88.31
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J5",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        110.63,
+        80.17
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H5",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        66.622,
+        77.120425
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        166.048,
+        131.39
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "ADC2",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        66.234,
+        122.322
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "H4",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        88.696,
+        131.39
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C2",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        129.85,
+        78.6675
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "H3",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        88.696,
+        99.39
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        166.048,
+        99.39
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "TP1",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        189.6175,
+        86
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J10",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        66.784,
+        105
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        120.118794,
+        122.174
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J2",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "F.Cu",
+      "position_mm": [
+        81.076,
+        77.47
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R1",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        161.824,
+        73.66
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J8",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        187.96,
+        95
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J6",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        110.63,
+        76.21
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "R2",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        161.824,
+        84.074
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U1",
+      "value": "24LC32",
+      "side": "F.Cu",
+      "position_mm": [
+        127.372,
+        85.2995
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J7",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        187.96,
+        105
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H6",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        66.622,
+        135.120425
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U3",
+      "value": "ESP32-DevKitC",
+      "side": "F.Cu",
+      "position_mm": [
+        114.672,
+        76.405741
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J4",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        144.11,
+        80.17
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R4",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        87.148,
+        73.66
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J9",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        66.784,
+        95
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "D2",
+      "value": "1N4148",
+      "side": "F.Cu",
+      "position_mm": [
+        181.935,
+        84.7
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U2",
+      "value": "ORingPower_Module",
+      "side": "F.Cu",
+      "position_mm": [
+        127.372,
+        132.394
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "F.Cu",
+      "position_mm": [
+        158.428,
+        77.47
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "ADC1",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        188.51,
+        116.332
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "H7",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        188.122,
+        77.120425
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H8",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        188.122,
+        135.120425
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J3",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        144.11,
+        76.21
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "NT1",
+      "value": "NetTie_2",
+      "side": "F.Cu",
+      "position_mm": [
+        155.73,
+        77.47
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R3",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        87.122,
+        84.074
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "NT2",
+      "value": "NetTie_2",
+      "side": "B.Cu",
+      "position_mm": [
+        78.82,
+        77.74
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 22,
+  "asset_sha256": {
+    "assets/board-views/mini-0.9.0/assembly-front.png": "db2004e208b9fd503856e9358a5a53097e88719f9a443a2e81a404a52fa940a8",
+    "assets/images/mini-0.9.0/top.png": "65a28dfd3eefcefa2b5fb0accdf6f33b68f7e3aa1ff1ed01a5ff0a2159941585"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

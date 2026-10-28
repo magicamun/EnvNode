@@ -1,0 +1,175 @@
+{
+  "id": "oring-power-0.1.1",
+  "guide": "mainboards/oring-power/index.md",
+  "pcb_source": "main/hardware/kicad/Power/ORing Power/ORing Power.kicad_pcb",
+  "pcb_sha256": "df83af34ffdeca74bf51baeb2a5b21115ba8f441d49b31c917e56db63b5332e1",
+  "back_components": [],
+  "hero": {
+    "front": "assets/board-views/oring-power-0.1.1/3d-front.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/oring-power-0.1.1/assembly-front.png",
+      "png_size_px": [
+        2316,
+        1020
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "U2",
+      "value": "ORingPower_Module",
+      "side": "F.Cu",
+      "position_mm": [
+        128.582,
+        100.898
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C4",
+      "value": "47uF",
+      "side": "F.Cu",
+      "position_mm": [
+        140.5475,
+        100.37
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "C2",
+      "value": "10uF",
+      "side": "F.Cu",
+      "position_mm": [
+        133.9325,
+        96.335
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        140.95,
+        95.915
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R2",
+      "value": "5,1kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        121.1,
+        96.34
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "D2",
+      "value": "SS14",
+      "side": "F.Cu",
+      "position_mm": [
+        145.19,
+        96.98
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R1",
+      "value": "5,1kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        127.04,
+        96.34
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J3",
+      "value": "USB_C_Receptacle_PowerOnly_6P",
+      "side": "F.Cu",
+      "position_mm": [
+        124.966,
+        105.02
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_01x02_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        114.398,
+        103.624
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "D1",
+      "value": "SS14",
+      "side": "F.Cu",
+      "position_mm": [
+        145.19,
+        104.82
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "U1",
+      "value": "LM3940IMP-3.3/NOPB",
+      "side": "F.Cu",
+      "position_mm": [
+        134.224,
+        103.92
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C3",
+      "value": "10uF",
+      "side": "F.Cu",
+      "position_mm": [
+        114.398,
+        96.34
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C5",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        140.95,
+        105.84
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 12,
+  "asset_sha256": {
+    "assets/board-views/oring-power-0.1.1/assembly-front.png": "9eb4f57749af2cee37d5849fc2f445bf26d1f5f5ea22a631cc4702ee81bc5d1a",
+    "assets/board-views/oring-power-0.1.1/3d-front.png": "e08bc8ed84b8d6d2b9a5784e6e6faf931de5364ae5c4171269b833fd147ecb49"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

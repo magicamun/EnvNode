@@ -5,8 +5,8 @@ pdf:
   title: I2C Carrier HalfSize
   subtitle: Montage- und Jumper-Anleitung
   hardware_revision: '0.1'
-  document_version: '1.0'
-  document_date: '2026-10-22'
+  document_version: '1.1'
+  document_date: '2026-10-28'
   source_document_date: Stand der letzten PDF; ohne Datumsangabe
   status: Entwicklungsstand - keine Produktionsfreigabe
 ---
@@ -17,9 +17,29 @@ Das HalfSize-Modul nimmt zwei kleine I²C-Platinen auf. Jeder Carrier-Steckplatz
 
 [Anleitung als PDF](../../assets/downloads/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf){ .md-button }
 
-## 1. Orientierung und Jumper
+## 3D-Ansicht
 
-![I2C Carrier HalfSize: Oberseite mit JP1 bis JP4](../../assets/images/i2c-carrier-assembly/page-01-view-1.png){ .board-view }
+![i2c-carrier-0.1: 3D-Vorderseite](../../assets/images/i2c-carrier-assembly/page-01-view-1.png){ .hero-paired-view }
+![i2c-carrier-0.1: 3D-Rückseite](../../assets/board-views/i2c-carrier-0.1/3d-back.png){ .hero-paired-view }
+
+Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
+
+## 1. Bestückungsübersicht
+
+### Vorderseite: Bestückungsplan
+
+![i2c-carrier-0.1: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/i2c-carrier-0.1/assembly-front.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/i2c-carrier-0.1/assembly-front.png){ .md-button }
+
+### Rückseite: Bestückungsplan
+
+![i2c-carrier-0.1: senkrechter Bestückungsplan Rückseite](../../assets/board-views/i2c-carrier-0.1/assembly-back.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/i2c-carrier-0.1/assembly-back.png){ .md-button }
+
+Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
+
 
 | Carrier | Anschluss | SCL | SDA |
 | --- | --- | --- | --- |

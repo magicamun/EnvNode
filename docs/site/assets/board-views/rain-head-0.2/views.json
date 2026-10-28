@@ -1,0 +1,365 @@
+{
+  "id": "rain-head-0.2",
+  "guide": "sensors/rain-detector-head/assembly.md",
+  "pcb_source": "rain-detector/hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb",
+  "pcb_sha256": "6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438",
+  "back_components": [
+    "J1",
+    "J2",
+    "R1",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R14",
+    "R15",
+    "R16",
+    "R17",
+    "R18",
+    "R19",
+    "R2",
+    "R20",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8",
+    "R9"
+  ],
+  "hero": {
+    "front": "assets/images/rain-head-0.2/top.png",
+    "back": "assets/images/rain-head-0.2/bottom.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/rain-head-0.2/assembly-front.png",
+      "png_size_px": [
+        2259,
+        2002
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/rain-head-0.2/assembly-back.png",
+      "png_size_px": [
+        2260,
+        2002
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        159.676955,
+        88.476955
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        214.443045,
+        88.476955
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H3",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        214.443045,
+        135.643045
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C1",
+      "value": "RainGatter",
+      "side": "F.Cu",
+      "position_mm": [
+        187.315,
+        112.06
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H4",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        159.676955,
+        135.643045
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R13",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        196.016,
+        98.0912
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R3",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        169.148,
+        116.7163
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R8",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        178.104,
+        126.0288
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R10",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        187.06,
+        107.4037
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R20",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        204.972,
+        126.0288
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R12",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        187.06,
+        126.0288
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R4",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        169.148,
+        126.0288
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R6",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        178.104,
+        107.4037
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R7",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        178.104,
+        116.7163
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R18",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        204.972,
+        107.4037
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R14",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        196.016,
+        107.4037
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "J2",
+      "value": "Conn_02x02_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        210.635,
+        112.06
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R16",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        196.016,
+        126.0288
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R19",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        204.972,
+        116.7163
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x02_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        163.485,
+        112.06
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R17",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        204.972,
+        98.0912
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R9",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        187.06,
+        98.0912
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R5",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        178.104,
+        98.0912
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R1",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        169.148,
+        98.0912
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R15",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        196.016,
+        116.7163
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R2",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        169.148,
+        107.4037
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R11",
+      "value": "15Ohm",
+      "side": "B.Cu",
+      "position_mm": [
+        187.06,
+        116.7163
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 22,
+  "asset_sha256": {
+    "assets/board-views/rain-head-0.2/assembly-front.png": "8435e9bed5a9da3132d75f5923e650e79e51c5541f323e62bc74cb467660a202",
+    "assets/board-views/rain-head-0.2/assembly-back.png": "dcd12be5ce3af30ae8bcb06b01c3bc98364e75d5df4d8029a34f09946b6c25c7",
+    "assets/images/rain-head-0.2/top.png": "9afbe262e7c9accaa3b62974df1ef8fd3cec38adf9edaa33210d450d90b03e7f",
+    "assets/images/rain-head-0.2/bottom.png": "e537950d1a963efc083c8ca9ba4ca99195893ce05515b62d3f2fcf0546db9054"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}
