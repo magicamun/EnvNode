@@ -212,7 +212,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-43 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+45 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
@@ -239,6 +239,7 @@ Git-Commit gebunden. Ein geladener Prüflauf behält seine eigene Definition.
 
 ## Weitere Schritte
 
-Die Public-Key-Signaturprüfung, neue ENID-/Provisioning-Revisionen und eine
-Boarddarstellung im Provisioning folgen separat. GPIO16/5 bleiben unverändert;
+Die neuen ENID-/Provisioning-Revisionen und eine Boarddarstellung im Tester-
+Provisioning sind seit 0.7.0 integriert. Die Public-Key-Signaturprüfung sowie
+Modul-Provisioning und Modulansichten folgen separat. GPIO16/5 bleiben unverändert;
 die elektrische Provisioning- und Messvalidierung wartet auf die Testhardware.

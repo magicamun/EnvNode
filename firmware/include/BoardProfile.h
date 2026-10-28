@@ -32,10 +32,12 @@ struct BoardProfile {
 
 const BoardProfile& currentBoardProfile();
 const BoardProfile* boardProfile(BoardProfileId id);
+const BoardProfile* boardProfile(BoardProfileId id, BoardRevision revision);
 size_t boardProfileCount();
 const BoardProfile* boardProfileAt(size_t index);
 BoardProfileId buildFallbackBoardProfileId();
 bool selectCurrentBoardProfile(BoardProfileId id);
+bool selectCurrentBoardProfile(BoardProfileId id, BoardRevision revision);
 const BoardModuleSlotCapability* boardModuleSlot(
     const BoardProfile& board,
     ModuleSlot slot);

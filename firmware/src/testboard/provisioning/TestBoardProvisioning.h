@@ -16,10 +16,12 @@ public:
         std::function<bool()> available);
     bool available() const { return available_(); }
     BoardIdentityReadResult refresh();
+    bool hasProvisioningBoardIdentity() const override;
     BoardIdentity provisioningBoardIdentity() const override;
     size_t provisioningProfileCount() const override;
     bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
     bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;
+    bool provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& profile) const override;
     BoardProvisioningResult provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) override;
     ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
         const uint8_t*, size_t, bool) override;

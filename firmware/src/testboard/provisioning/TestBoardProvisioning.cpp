@@ -1,14 +1,7 @@
 // EnvNode: see repository LICENSE.
 #include "TestBoardProvisioning.h"
+#include "BoardIdentityProfiles.h"
 namespace EnvNode {
-namespace {
-// Manufacturing metadata, independent of the running EnvNode hardware resources.
-const ProvisioningBoardProfile Profiles[] = {
-    {BoardProfileId::EnvNodeMini, "EnvNode Mini", {0, 8}},
-    {BoardProfileId::EnvNodeWeather, "EnvNode Weather", {0, 2}},
-    {BoardProfileId::EnvNodeMainboard, "EnvNode Mainboard", {0, 3}}
-};
-}
 TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection,
     BoardIdentityStore& store, std::function<bool()> available)
     : connection_(connection), store_(store), service_(store), available_(available) {}
@@ -19,20 +12,28 @@ BoardIdentityReadResult TestBoardProvisioning::refresh() {
     connection_.end();
     return current_;
 }
+bool TestBoardProvisioning::hasProvisioningBoardIdentity() const {
+    return current_.status==BoardIdentityStatus::Valid || current_.status==BoardIdentityStatus::UnassignedSerial;
+}
 BoardIdentity TestBoardProvisioning::provisioningBoardIdentity() const {
     if (current_.status == BoardIdentityStatus::Valid || current_.status == BoardIdentityStatus::UnassignedSerial)
         return current_.identity;
     return {BoardProfileId::EnvNodeMini, {0, 8}, {}};
 }
-size_t TestBoardProvisioning::provisioningProfileCount() const { return sizeof(Profiles) / sizeof(Profiles[0]); }
+size_t TestBoardProvisioning::provisioningProfileCount() const { return boardIdentityProfileCount(); }
 bool TestBoardProvisioning::provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const {
-    if (index >= provisioningProfileCount()) return false;
-    profile = Profiles[index]; return true;
+    const auto* p=boardIdentityProfileAt(index);
+    if(!p)return false;
+    profile={p->id,p->displayName,p->revision};return true;
 }
 bool TestBoardProvisioning::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const {
-    for (size_t i = 0; i < provisioningProfileCount(); ++i)
-        if (Profiles[i].id == id) return provisioningProfileAt(i, profile);
-    return false;
+    const auto* p=defaultBoardIdentityProfile(id);
+    return p && provisioningProfile(id,p->revision,profile);
+}
+bool TestBoardProvisioning::provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& profile) const {
+    const auto* p=boardIdentityProfile(id,revision);
+    if(!p)return false;
+    profile={p->id,p->displayName,p->revision};return true;
 }
 BoardProvisioningResult TestBoardProvisioning::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
     BoardProvisioningResult result;
@@ -40,7 +41,7 @@ BoardProvisioningResult TestBoardProvisioning::provisionBoardIdentity(const Boar
     if (!confirmed) { result.status = BoardProvisioningStatus::ConfirmationRequired; return result; }
     ProvisioningBoardProfile profile;
     const auto validation = validateBoardIdentity(identity);
-    if (!provisioningProfile(identity.profileId, profile)
+    if (!provisioningProfile(identity.profileId, identity.revision, profile)
         || identity.revision.major != profile.revision.major || identity.revision.minor != profile.revision.minor
         || (validation != BoardIdentityStatus::Valid && validation != BoardIdentityStatus::UnassignedSerial))
         return result;

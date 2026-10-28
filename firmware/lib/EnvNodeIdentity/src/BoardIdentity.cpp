@@ -1,4 +1,5 @@
 #include "BoardIdentity.h"
+#include "BoardIdentityProfiles.h"
 
 #include <cstring>
 
@@ -32,24 +33,8 @@ BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
         return BoardIdentityStatus::InvalidRevision;
     }
 
-    switch (identity.profileId) {
-        case BoardProfileId::EnvNodeMainboard:
-            if (identity.revision.major != 0 || identity.revision.minor != 3) {
-                return BoardIdentityStatus::UnsupportedRevision;
-            }
-            break;
-        case BoardProfileId::EnvNodeWeather:
-            if (identity.revision.major != 0 || identity.revision.minor != 2) {
-                return BoardIdentityStatus::UnsupportedRevision;
-            }
-            break;
-        case BoardProfileId::EnvNodeMini:
-            if (identity.revision.major != 0 || identity.revision.minor != 8) {
-                return BoardIdentityStatus::UnsupportedRevision;
-            }
-            break;
-        default:
-            return BoardIdentityStatus::UnknownBoardProfile;
+    if (!boardIdentityProfile(identity.profileId,identity.revision)) {
+        return BoardIdentityStatus::UnsupportedRevision;
     }
 
     if (!isValidBoardSerialNumber(identity.serialNumber.value)) {

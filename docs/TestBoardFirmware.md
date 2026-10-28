@@ -7,8 +7,8 @@ EnvNode-owned materials follow the repository LICENSE
 
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
-| `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.1) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.6.0) | `.pio/build/testboard/firmware.bin` |
+| `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -79,7 +79,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Forty-three tests exercise configuration isolation,
+composition and shared libraries. Forty-five tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -89,7 +89,7 @@ fixture suite. Its previously known board-profile-count assertion is unrelated.
 Before accepting the baseline on hardware, flash `testboard` onto the fixture
 ESP or a spare devkit, check setup access point/network save/restart, locale/time,
 name, logs and a same-product OTA update. Confirm that the start log identifies
-Testboard 0.6.0. No physical device was flashed or restarted during implementation.
+Testboard 0.7.0. No physical device was flashed or restarted during implementation.
 
 ## Mini (0.3.1)
 
@@ -115,9 +115,9 @@ Provisioning reuse is implemented in 0.5.0. Reference-aware Mini 0.9/Weather
 `HardwareProvisioningWebRoutes`, `BoardProvisioningService`, `BoardIdentityStore`
 and `IdentityEeprom24LC32` as EnvNode. The application adapter supplies manufacturing
 profile metadata without importing EnvNode sensor/runtime resource selection.
-Supported identities remain Mini 0.8, Weather 0.2 and Mainboard 0.3. Mini 0.9 and
-Weather 0.3 require a deliberate identity-catalog/compatibility update; they must
-not be written as older revisions. Module provisioning is not exposed yet.
+Since 0.7.0 supported identities include Mini 0.8/0.9, Weather 0.2/0.3 and
+Mainboard 0.3. Board and actual revision are selected explicitly; existing
+numeric-ID API calls retain their old revision. Module provisioning is not exposed yet.
 
 The dedicated connector is GND / 3V3_SYS / SDA16 / SCL5; target EEPROM address is
 0x50. Provisioning is real, even though `/test` remains a simulation. Remove the
@@ -149,7 +149,16 @@ paths and 40 measurement inputs. Their nominal simulated plans contain 2080 and
 3440 comparisons. Existing 38-input profiles remain available unchanged.
 The tester can obtain a bounded, validated catalog and compact profiles over
 verified HTTPS from docs.envnode.de. Matching built-in profiles provide fallback;
-the browser obtains the SVG directly. No publication is performed in this branch.
+the browser obtains the SVG directly. Publication uses main's regular Docs workflow.
 See [remote profile format, operation and trust model](TestBoardRemoteProfiles.md).
-The independent signature check, new-revision provisioning and physical validation
-remain future work. EnvNode stays at 0.8.1; this step changes only the tester.
+The independent signature check and physical validation remain future work.
+Revision-specific provisioning is included in 0.7.0 / EnvNode 0.8.2 below.
+
+## Revision-specific provisioning (0.7.0)
+
+Both applications share `BoardIdentityProfiles`; EnvNode 0.8.2 accepts the new
+identities and selects the exact recorded runtime revision. Existing identities,
+configuration and numeric-ID APIs retain their previous behavior. The tester adds
+a revision-specific board image using the same definition/image routes as testing.
+An unknown external EEPROM requires an explicit board/revision selection.
+See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).

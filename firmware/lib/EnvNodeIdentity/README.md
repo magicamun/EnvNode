@@ -27,3 +27,8 @@ service headers include the shared result types for source compatibility.
 
 `boardIdentityStatusName` is shared here with the status type; the application
 resolver retains only source selection/status naming specific to resolution.
+
+`BoardIdentityProfiles` owns the shared manufacturing revision catalog. It supports
+Mainboard 0.3, Weather 0.2/0.3 and Mini 0.8/0.9 without changing ENID storage.
+Default lookups preserve legacy revisions; explicit lookups select exact revisions.
+Runtime resources and frozen selection remain application-owned.

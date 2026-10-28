@@ -19,12 +19,12 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 PROFILES = [
     dict(symbol='Weather', id='weather-0.2-pcb0.2.1', name='EnvNode Weather', identity='0.2', pcb='0.2.1',
-         source='hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb',
+         source='hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb', commit='ff906605036ccac222eda68e9d515e630a9cae6c',
          refs=['GPIO16', 'GPIO14', 'GPIO17', 'GPIO27', 'GPIO32', 'GPIO4', 'ADC1', 'ADC2', 'ADC3', 'ADC4']
               + [f'I2C{bus}_{i}' for bus in (0, 1) for i in range(1, 5)] + ['J1'],
          modules=['J1'], i2c=[], labels={}),
     dict(symbol='Mini', id='mini-0.8-pcb0.8.1', name='EnvNode Mini', identity='0.8', pcb='0.8.1',
-         source='hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb',
+         source='hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb', commit='ff906605036ccac222eda68e9d515e630a9cae6c',
          refs=['ADC1', 'ADC2', 'J4', 'J5', 'J6', 'J7', 'J1', 'J2'], modules=['J1', 'J2'],
          i2c=['J4', 'J5', 'J6', 'J7'], labels={'J4':'I2C0 · J4', 'J5':'I2C0 · J5',
              'J6':'I2C1 · J6', 'J7':'I2C1 · J7', 'J1':'Slot A · J1', 'J2':'Slot B · J2'}),

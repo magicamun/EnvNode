@@ -54,7 +54,7 @@ python3 firmware/scripts/generate_testboard_profile.py --check
 ```
 
 Die Dateien liegen im vorhandenen MkDocs-Quellverzeichnis und werden vom normalen
-Dokumentations-Build kopiert. In diesem Branch wird nichts veröffentlicht.
+Dokumentations-Build kopiert. Feature-Branches veröffentlichen keine Änderungen; ein Push nach main nutzt den regulären Docs-Workflow.
 **Erst nach Übernahme nach main und erfolgreichem Docs-Deployment ist der neue
 öffentliche Pfad verfügbar.** Bis dahin ist HTTP 404 mit eingebautem Rückfall
 zu erwarten. Bei Veröffentlichungen müssen alle im Katalog referenzierten Dateien
@@ -126,8 +126,9 @@ aufgelöst. Beliebige Dioden, Pull-ups und andere Bauteile werden nicht automati
 als direkte Verbindungen interpretiert. Im Simulator bestehen Mini mit 2080 und
 Weather mit 3440 Vergleichen. Das ist keine elektrische Freigabe der Schwellen.
 
-Die neuen Definitionen sind **Prüfprofile**. Der ENID-/Provisioning-Katalog ist
-unverändert und akzeptiert weiterhin Mini 0.8, Weather 0.2 und Mainboard 0.3.
-Die neuen Revisionen dürfen nicht als ältere Revisionen provisioniert werden.
-Ihre Identitätsunterstützung einschließlich normaler EnvNode-Laufzeit bleibt ein
-separater Schritt. Bilddarstellung im Provisioning ist ebenfalls noch nicht ergänzt.
+Die Definitionen bleiben **Prüfprofile**; ENID-Identitätsrevisionen sind davon
+getrennt. Seit Testboard 0.7.0 / EnvNode 0.8.2 unterstützt der gemeinsame
+Identitätskatalog Mini 0.8/0.9 und Weather 0.2/0.3 sowie Mainboard 0.3.
+Die tatsächliche Revision wird ausdrücklich gewählt. Das Tester-Provisioning
+verwendet dieselben Definitionen und Bilder für die passende Boardansicht.
+Siehe [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).

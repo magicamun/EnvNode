@@ -51,13 +51,18 @@ void HardwareProvisioningWebRoutes::handleHardware() {
         c += "<form method='post' action='/hardware/board-identity/write'>";
     else
         c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
-    c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileId' required>");
+    c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileKey' required>");
+    const bool identityKnown=!options_.externalTarget || administration_.hasProvisioningBoardIdentity();
+    if(!identityKnown) c += pages_.webLocale()==Locale::GermanGermany
+        ? "<option value='' selected disabled>Board und Revision auswählen</option>"
+        : "<option value='' selected disabled>Select board and revision</option>";
     for (size_t index = 0; index < administration_.provisioningProfileCount(); ++index) {
         ProvisioningBoardProfile profileData;
         if (!administration_.provisioningProfileAt(index, profileData)) continue;
         const ProvisioningBoardProfile* profile = &profileData;
-        c += "<option value='" + String(encodeBoardProfileId(profile->id)) + "'";
-        if (profile->id == identity.profileId) c += " selected";
+        c += "<option value='" + String(encodeBoardProfileId(profile->id)) + ":" + String(profile->revision.major) + "." + String(profile->revision.minor) + "'";
+        if (identityKnown && profile->id == identity.profileId && profile->revision.major==identity.revision.major
+            && profile->revision.minor==identity.revision.minor) c += " selected";
         c += ">" + escapeHtml(profile->displayName) + " "
             + String(profile->revision.major) + "." + String(profile->revision.minor)
             + "</option>";
@@ -79,18 +84,35 @@ bool HardwareProvisioningWebRoutes::operationAllowed() {
 }
 void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
     if (!operationAllowed()) return;
-    const String profileText = server_.arg("boardProfileId");
-    char* profileEnd = nullptr;
-    const unsigned long parsedProfile = strtoul(profileText.c_str(), &profileEnd, 10);
-    BoardProfileId profileId = BoardProfileId::EnvNodeMainboard;
-    const bool profileValid = !profileText.isEmpty()
-        && profileEnd != profileText.c_str()
-        && *profileEnd == '\0'
-        && parsedProfile <= UINT16_MAX
-        && decodeBoardProfileId(static_cast<uint16_t>(parsedProfile), profileId);
     ProvisioningBoardProfile profile;
-    const ProvisioningBoardProfile* requestedProfile = profileValid
-        && administration_.provisioningProfile(profileId, profile) ? &profile : nullptr;
+    bool profileValid=false;
+    if(server_.hasArg("boardProfileKey")) {
+        // Explicit revision selection; never silently substitute a newer revision.
+        const String key=server_.arg("boardProfileKey");
+        uint16_t values[3]={};size_t part=0,digits=0;
+        bool valid=!key.isEmpty() && !server_.hasArg("boardProfileId");
+        for(size_t i=0;i<key.length() && valid;++i) {
+            const char c=key[i];
+            if(c>='0' && c<='9') {
+                const unsigned maximum=part?255:UINT16_MAX;
+                const unsigned next=static_cast<unsigned>(values[part])*10+(c-'0');
+                valid=++digits<=5 && next<=maximum;
+                if(valid)values[part]=next;
+            } else if(digits && ((part==0 && c==':') || (part==1 && c=='.'))) { ++part;digits=0; }
+            else valid=false;
+        }
+        BoardProfileId id=BoardProfileId::EnvNodeMainboard;
+        profileValid=valid && part==2 && digits && decodeBoardProfileId(values[0],id)
+            && administration_.provisioningProfile(id,{static_cast<uint8_t>(values[1]),static_cast<uint8_t>(values[2])},profile);
+    } else {
+        // Preserve the old API's original revision for integrations/older forms.
+        const String value=server_.arg("boardProfileId");char* end=nullptr;
+        const unsigned long parsed=strtoul(value.c_str(),&end,10);
+        BoardProfileId id=BoardProfileId::EnvNodeMainboard;
+        profileValid=!value.isEmpty() && end!=value.c_str() && !*end && parsed<=UINT16_MAX
+            && decodeBoardProfileId(static_cast<uint16_t>(parsed),id) && administration_.provisioningProfile(id,profile);
+    }
+    const ProvisioningBoardProfile* requestedProfile=profileValid?&profile:nullptr;
     const String serialText = server_.arg("serialNumber");
     const bool serialValid = isValidBoardSerialNumber(serialText.c_str());
     if (requestedProfile == nullptr || !serialValid) {

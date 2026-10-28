@@ -4,10 +4,20 @@
 
 ### Added
 
+- EnvNode 0.8.2 / Testboard 0.7.0: share manufacturing revision metadata, support
+  Mini 0.9 and Weather 0.3 beside their predecessors, select the exact EEPROM
+  revision at startup and provide explicit revision-specific provisioning forms.
+  Preserve numeric-ID API defaults and configuration; show the matching board
+  image in tester provisioning without writing on selection.
+- Testboard 0.6.0: add 40-input Mini 0.9/Weather 0.3 test profiles, verified HTTPS
+  remote catalogs and compact profiles, built-in fallback and browser-loaded SVGs.
+- Testboard 0.5.0: verified external board provisioning on dedicated GPIO16/5.
+- Testboard 0.4.0: split-fixture routing derived from PCB data and 40-input support.
+
 - Split the fixture hardware into Test-Controller, Input-Adapter and Module-Adapter,
   with verified cable/GPIO/multiplexer contracts in their READMEs. Retire the
   monolithic Test-Provisioning project; preserve its final state in Git history.
-  Document the pending firmware extension from 38 socket inputs to 40 logical inputs.
+  Support 38 socket contacts plus two independent protected reference inputs.
 
 - Testboard 0.3.2: omit component values from rendered board views while keeping
   reference designators; record centrally downloadable profiles as future work.

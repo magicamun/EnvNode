@@ -73,6 +73,9 @@ void test_overview_reads_only_external_address_then_releases_bus() {
     TEST_ASSERT_EQUAL(-1, pinModes[17]);
     for (const auto& tx : Wire.transmissions) { TEST_ASSERT_EQUAL(0x50, tx.address); TEST_ASSERT_EQUAL(2, tx.bytes.size()); }
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "NotProvisioned"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Select board and revision"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "provision-board-image"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "mini-0.9-pcb0.9.0"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Mini 0.8"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Weather 0.2"));
     TEST_ASSERT_NULL(strstr(f.pages.content.c_str(), "descriptorModuleSlot"));
@@ -85,7 +88,7 @@ void test_confirmation_and_invalid_identity_cannot_touch_i2c() {
     f.form(); f.server.arguments["serialNumber"] = "bad<value>";
     f.server.request("/device/board-identity/write", HTTP_POST);
     TEST_ASSERT_EQUAL(400, f.pages.status); TEST_ASSERT_EQUAL(0, Wire.begins);
-    auto identity = f.identity(); identity.revision.minor = 9;
+    auto identity = f.identity(); identity.revision.minor = 10;
     TEST_ASSERT_EQUAL(BoardProvisioningStatus::InvalidIdentity, f.administration.provisionBoardIdentity(identity, true).status);
     TEST_ASSERT_EQUAL(0, Wire.begins);
 }
@@ -156,6 +159,34 @@ void test_hotplug_read_failure_clears_previous_dut_and_status_is_localized() {
     TEST_ASSERT_NULL(strstr(f.pages.content.c_str(), "MINI-EXTERNAL"));
     TEST_ASSERT_EQUAL_STRING("", f.administration.provisioningBoardIdentity().serialNumber.value);
 }
+void test_explicit_revision_selection_preserves_legacy_and_supports_new_boards() {
+    struct Selection { const char* key; BoardProfileId id; uint8_t revision; };
+    const Selection cases[]={{"2:0.8",BoardProfileId::EnvNodeMini,8},{"2:0.9",BoardProfileId::EnvNodeMini,9},
+        {"1:0.2",BoardProfileId::EnvNodeWeather,2},{"1:0.3",BoardProfileId::EnvNodeWeather,3}};
+    for(const auto& c:cases) {
+        Fixture f;f.server.arguments={{"boardProfileKey",c.key},{"serialNumber","REV-TEST"},{"confirmProvisioning","1"}};
+        f.server.request("/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);
+        BoardIdentity read{};auto& data=Wire.storage(0x50);
+        TEST_ASSERT_EQUAL(BoardIdentityStatus::Valid,BoardIdentityCodec::decode(data.data(),32,read));
+        TEST_ASSERT_EQUAL(c.id,read.profileId);TEST_ASSERT_EQUAL(c.revision,read.revision.minor);
+        f.server.request("/hardware",HTTP_GET);
+        const String selected=String("value='")+c.key+"' selected";
+        TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),selected.c_str()));
+    }
+    Fixture legacy;legacy.form();legacy.server.request("/hardware/board-identity/write",HTTP_POST);
+    TEST_ASSERT_EQUAL(200,legacy.pages.status);TEST_ASSERT_EQUAL(8,legacy.administration.provisioningBoardIdentity().revision.minor);
+}
+void test_invalid_or_ambiguous_revision_keys_never_touch_the_bus() {
+    for(const char* key:{"","2","2:0","2:0.10","2:0.9x","2:-0.9","2:256.9","2:0.256","2:0.9.0","65536:0.9","1:0.9"}) {
+        Fixture f;f.server.arguments={{"boardProfileKey",key},{"serialNumber","INVALID"},{"confirmProvisioning","1"}};
+        const int before=Wire.begins;f.server.request("/hardware/board-identity/write",HTTP_POST);
+        TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(before,Wire.begins);
+    }
+    Fixture f;f.form();f.server.arguments["boardProfileKey"]="2:0.9";
+    const int before=Wire.begins;f.server.request("/hardware/board-identity/write",HTTP_POST);
+    TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(before,Wire.begins);
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_no_bus_at_boot_and_no_module_routes);
@@ -166,5 +197,7 @@ int main() {
     RUN_TEST(test_bus_initialization_failure_also_releases_connection);
     RUN_TEST(test_running_connector_test_blocks_reads_and_writes_including_alias);
     RUN_TEST(test_hotplug_read_failure_clears_previous_dut_and_status_is_localized);
+    RUN_TEST(test_explicit_revision_selection_preserves_legacy_and_supports_new_boards);
+    RUN_TEST(test_invalid_or_ambiguous_revision_keys_never_touch_the_bus);
     return UNITY_END();
 }

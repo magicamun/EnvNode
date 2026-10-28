@@ -156,7 +156,7 @@ void setupEnvNodeFirmware() {
         identityResolution.identity.revision.minor,
         identityResolution.identity.serialNumber.value);
     if (!identityResolution.normalRuntimeAllowed
-        || !selectCurrentBoardProfile(identityResolution.identity.profileId)) {
+        || !selectCurrentBoardProfile(identityResolution.identity.profileId, identityResolution.identity.revision)) {
         logger.error("Board identity unsupported; normal runtime initialization stopped");
         return;
     }

@@ -47,3 +47,9 @@ provisioning routes/forms. External success returns without a restart form or
 active-runtime-profile wording. An optional availability callback guards the
 hardware page and board-write aliases before any overview or write callback;
 the tester uses it to reject provisioning during an active connector test.
+
+Revision-aware forms post `boardProfileKey` (for example `2:0.9`). Exact revision
+lookup uses the compatible interface extension. Legacy `boardProfileId` requests
+retain their original revision; ambiguous keys and unsupported revisions are
+rejected before storage. External targets without a valid identity start with a
+required empty selection instead of assuming a manufacturing revision.
