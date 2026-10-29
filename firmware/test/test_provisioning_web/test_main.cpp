@@ -69,7 +69,7 @@ struct Fixture {
     void moduleForm(bool confirmed=true){server.arguments={{"descriptorModuleSlot","B"},{"descriptorTemplate","duo-relay-0.3"},{"descriptorSerialNumber","RELAY-1"},{"descriptorProductionBatch","batch-2"},{"descriptorProductionDate","2026-10-25"}};if(confirmed)server.arguments["confirmModuleDescriptorProvisioning"]="1";}
 };
 void test_hardware_page_preserves_forms_and_application_inventory() {
-    Fixture f;TEST_ASSERT_EQUAL(5,f.server.routes.size());
+    Fixture f;TEST_ASSERT_EQUAL(6,f.server.routes.size());
     TEST_ASSERT_TRUE(f.server.request("/hardware",HTTP_GET));
     TEST_ASSERT_EQUAL(200,f.pages.status);
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"application inventory"));
@@ -77,7 +77,7 @@ void test_hardware_page_preserves_forms_and_application_inventory() {
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"/hardware/board-identity/write"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"/hardware/module-descriptor/write"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"confirmRemoteProvisioning"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"MINI-TEST"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"provision-current-fields"));
     f.pages.locale=Locale::GermanGermany;f.server.request("/hardware",HTTP_GET);
     TEST_ASSERT_EQUAL_STRING(webText(f.pages.locale,TextId::Hardware),f.pages.title.c_str());
 }

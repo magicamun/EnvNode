@@ -191,3 +191,17 @@ Board-Charge und -Datum werden mit der Portzuordnung verifiziert gespeichert.
 Diese Erweiterung benötigt im Betrieb mindestens EnvNode 0.8.5, was die Anzeige
 während der Eingabe berücksichtigt. Bestehende Datensätze bleiben lesbar. Ohne
 Charge/Datum bleibt das bisherige Boardformat erhalten.
+
+## EEPROM-Inhalt prüfen ab EnvNode 0.8.6 / Tester 0.8.3
+
+**Aktuell im EEPROM** zeigt den frisch gelesenen Inhalt des gewählten Boards oder
+Modul-Slots einschließlich Lesestatus und Fertigungsdaten. **Neu zu schreiben**
+zeigt die geplanten Angaben und markiert Abweichungen in einer Zusammenfassung.
+**EEPROM erneut lesen** aktualisiert den Istzustand. Vorhandene Fertigungsdaten
+werden nur mit **Vorhandene Fertigungsdaten übernehmen** in die Eingaben kopiert.
+
+Vor dem Schreiben prüft die Firmware den EEPROM-Inhalt erneut. Bei Änderungen
+oder Lesefehlern wird nichts geschrieben; Eingaben bleiben erhalten und müssen
+nach erneutem Lesen neu bestätigt werden. Während einer Operation den Prüfling
+angeschlossen lassen. Ein anderer Prüfling mit exakt gleichem EEPROM-Inhalt lässt
+sich anhand des Inhalts allein nicht unterscheiden.

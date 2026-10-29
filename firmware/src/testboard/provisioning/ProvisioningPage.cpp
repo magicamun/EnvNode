@@ -1,14 +1,8 @@
 // EnvNode: see repository LICENSE.
 #include "ProvisioningPage.h"
-#include "HtmlEscaping.h"
-#include "JsonWriter.h"
-#include "BoardIdentityProfiles.h"
-#include "testing/TestModel.h"
-#include <cstring>
 namespace EnvNode {
-String buildProvisioningOverview(TestBoardProvisioning& provisioning, Locale locale) {
+String buildProvisioningOverview(TestBoardProvisioning&, Locale locale) {
     const bool german = locale == Locale::GermanGermany;
-    const auto current = provisioning.refresh();
     String c = "<section class='card'><h2>Provisioning</h2><p>";
     c += german ? "Ziel: extern angeschlossener Prüfling. Hardware auswählen, Fertigungsdaten ergänzen und EEPROM schreiben." : "Target: external device under test. Select hardware, enter manufacturing data and write EEPROM.";
     c += "</p><details><summary>";
@@ -19,17 +13,6 @@ String buildProvisioningOverview(TestBoardProvisioning& provisioning, Locale loc
         : "Real target EEPROM on I²C: SDA GPIO16, SCL GPIO5, board address 0x50, module addresses 0x52 (A) and 0x53 (B). Remove the target ESP32 and disconnect other supplies, measurement pigtails and Input Adapter before connecting the separate provisioning cable.";
     c += "</p><p>";
     c += german ? "Nach dem Provisioning das Kabel vor der Durchgangsprüfung wieder abziehen. Die Firmware schaltet die Versorgung nicht ab." : "Disconnect the cable again before continuity testing. Firmware does not switch off its supply.";
-    c += "</p></details><p>";
-    c += german ? "EEPROM-Status: " : "EEPROM status: ";
-    // Status strings are fixed diagnostics, not device-provided HTML.
-    c += boardIdentityStatusName(current.status);
-    if (current.status == BoardIdentityStatus::Valid || current.status == BoardIdentityStatus::UnassignedSerial) {
-        c += german ? " · Gelesene Identität: " : " · Read identity: ";
-        ProvisioningBoardProfile profile;
-        if (provisioning.provisioningProfile(current.identity.profileId, profile)) c += escapeHtml(profile.displayName);
-        c += " " + String(current.identity.revision.major) + "." + String(current.identity.revision.minor);
-        c += " · " + escapeHtml(current.identity.serialNumber.value);
-    }
-    return c + "</p></section>";
+    return c + "</p></details></section>";
 }
 }

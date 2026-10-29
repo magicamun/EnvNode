@@ -40,6 +40,8 @@ private:
     String remoteProfilesSection();
     void handleRemoteProfileWrite();
     void handleProfileState();
+    void handleEepromSnapshot();
+    bool verifySnapshot(bool module,ModuleSlot slot);
     bool remoteProfilesEnabled_ = false;
 };
 }

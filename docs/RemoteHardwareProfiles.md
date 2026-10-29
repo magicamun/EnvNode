@@ -1,4 +1,4 @@
-# Nachladbare Hardwareprofile — EnvNode 0.8.5 / Tester 0.8.2
+# Nachladbare Hardwareprofile — EnvNode 0.8.6 / Tester 0.8.3
 
 EnvNode-eigene Inhalte unterliegen der Repository-LICENSE
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
@@ -156,3 +156,35 @@ hashgebundene Dateien werden nicht überschrieben oder gelöscht.
 Siehe auch [ENPM/ENID](BoardIdentityRecord.md),
 [gemeinsame Hardwareprofile](UnifiedHardwareProfiles.md) und
 [bisherige Remote-Prüfprofile](TestBoardRemoteProfiles.md).
+
+## EEPROM-Istzustand und Schreibschutz ab 0.8.6 / Tester 0.8.3
+
+Der gemeinsame Dialog liest das ausgewählte Ziel beim Öffnen sowie beim Wechsel
+zwischen Board und Modul bzw. Slot A/B frisch aus dem EEPROM. **Aktuell im EEPROM**
+zeigt Lesestatus, Name/Revision, Seriennummer, Charge und Datum. Status unterscheiden
+sich in gültig, leer, beschädigt/nicht interpretierbar und nicht erreichbar.
+**EEPROM erneut lesen** aktualisiert ausschließlich die Anzeige, ohne Schreibzugriff
+oder Änderung der aktiven Laufzeitkonfiguration. Es gibt keinen Internetabruf dafür.
+
+**Neu zu schreiben** bleibt unabhängig: keine automatische Übernahme gelesener
+Fertigungsangaben. **Vorhandene Fertigungsdaten übernehmen** kopiert nur auf Wunsch
+Seriennummer, Charge und Datum eines gültigen Datensatzes. Abweichungen zwischen
+Anzeige und Eingaben stehen ausdrücklich in der Schreibzusammenfassung.
+Lesen, Übernahme, Änderungen an Angaben sowie Ziel-/Profilwechsel löschen die Bestätigung.
+
+Der Leser bildet eine begrenzte Momentaufnahme der gesamten 4096 Bytes und einen
+64-Bit-FNV-1a-Fingerabdruck mit Zielkennung (Board, Slot A oder Slot B). Derselbe
+Puffer liefert auch die dekodierte Anzeige; es werden keine Start-Caches verwendet.
+Vor dem Schreiben im gemeinsamen Dialog wird das ausgewählte EEPROM erneut gelesen.
+Fehlender/abweichender Fingerabdruck oder Lesefehler ergibt HTTP 409 ohne Schreibzugriff.
+Die Oberfläche liest dann erneut, behält die eingegebenen neuen Werte und verlangt
+eine neue Prüfung/Bestätigung. Bei nicht erreichbarem EEPROM bleibt Schreiben gesperrt;
+leere und beschädigte Datensätze dürfen bewusst neu provisioniert werden.
+
+Der Fingerabdruck dient der Erkennung geänderter Inhalte, nicht der Authentifizierung.
+Physisch verschiedene EEPROMs mit exakt gleichem Inhalt lassen sich damit nicht
+unterscheiden. Ein Wechsel während einer einzelnen Lese-/Schreiboperation ist
+nicht atomar ausschließbar; während einer Operation bleibt der Prüfling angeschlossen.
+Bestehende POST-Integrationen ohne `snapshotToken` behalten ihren bisherigen
+Bestätigungsvertrag. Der gemeinsame Dialog sendet das Feld immer; ein leerer Wert
+wird abgelehnt. Die Anschlussprüf-Sperre gilt auch für den neuen Leseendpunkt.

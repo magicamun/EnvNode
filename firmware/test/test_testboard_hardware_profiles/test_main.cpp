@@ -243,14 +243,63 @@ void test_shared_board_fields_persist_from_builtin_and_remote_forms() {
         f.server.arguments["remoteBatch"]="batch-42";f.server.arguments["remoteDate"]="2026-10-29";
         f.server.request(remote?"/hardware/profile/write":"/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);
         f.admin.refresh();TEST_ASSERT_EQUAL_STRING("batch-42",f.admin.provisioningBoardBatch());TEST_ASSERT_EQUAL_STRING("2026-10-29",f.admin.provisioningBoardDate());
-        f.server.request("/hardware",HTTP_GET);TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"batch-42"));
+        f.server.arguments={{"kind","board"}};f.server.request("/hardware/eeprom",HTTP_GET);TEST_ASSERT_NOT_NULL(strstr(f.server.responseBody.c_str(),"batch-42"));
     }
 }
 void test_shared_manufacturing_rejects_oversized_board_fields_without_i2c() {
     Fixture f(true);f.server.arguments={{"boardProfileKey","1:0.2"},{"confirmRemoteProvisioning","1"},{"remoteSerial","BOARD-NEW"},{"remoteBatch",String(std::string(65,'B').c_str())}};
     f.server.request("/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);
 }
+void test_snapshot_reports_empty_valid_corrupt_and_cannot_write_or_touch_other_targets() {
+    Fixture f(true);ProvisioningSnapshot snapshot;
+    const auto boardBefore=Wire.storage(0x50),aBefore=Wire.storage(0x52),bBefore=Wire.storage(0x53);
+    TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(false,ModuleSlot::A,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Empty,snapshot.status);TEST_ASSERT_EQUAL('b',snapshot.token[0]);
+    TEST_ASSERT_TRUE(boardBefore==Wire.storage(0x50));TEST_ASSERT_TRUE(aBefore==Wire.storage(0x52));TEST_ASSERT_TRUE(bBefore==Wire.storage(0x53));
+    f.server.arguments={{"boardProfileKey","2:0.9"},{"remoteSerial","READ-MINI"},{"remoteBatch","READ-BATCH"},{"remoteDate","2026-10-29"},{"confirmRemoteProvisioning","1"}};
+    f.server.request("/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);
+    TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(false,ModuleSlot::A,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Valid,snapshot.status);
+    TEST_ASSERT_EQUAL_STRING("EnvNode Mini",snapshot.name);TEST_ASSERT_EQUAL_STRING("READ-MINI",snapshot.serial);TEST_ASSERT_EQUAL_STRING("READ-BATCH",snapshot.batch);TEST_ASSERT_EQUAL_STRING("2026-10-29",snapshot.date);
+    f.server.arguments={{"kind","board"}};f.server.request("/hardware/eeprom",HTTP_GET);TEST_ASSERT_EQUAL(200,f.server.responseStatus);TEST_ASSERT_EQUAL_STRING("no-store",f.server.cacheControl.c_str());TEST_ASSERT_NOT_NULL(strstr(f.server.responseBody.c_str(),"READ-BATCH"));
+    {std::ofstream snapshot("/private/tmp/envnode-snapshot-preview.json");snapshot<<f.server.responseBody;}
+    Wire.storage(0x50)[0]^=1;TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(false,ModuleSlot::A,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Corrupt,snapshot.status);
+    f.locked=true;int begins=Wire.begins;f.server.request("/hardware/eeprom",HTTP_GET);TEST_ASSERT_EQUAL(409,f.pages.status);TEST_ASSERT_EQUAL(begins,Wire.begins);
+    f.locked=false;Wire.beginOk=false;TEST_ASSERT_FALSE(f.admin.readProvisioningSnapshot(false,ModuleSlot::A,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Unavailable,snapshot.status);TEST_ASSERT_EQUAL_STRING("",snapshot.token);
+}
+void test_changed_snapshot_stops_builtin_and_remote_board_writes_and_fresh_read_allows_retry() {
+    for(bool remote:{false,true}) {
+        Wire=TwoWire();Fixture f(true);ProvisioningSnapshot snapshot;
+        TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(false,ModuleSlot::A,snapshot));
+        if(remote){auto c=catalog();f.form(c->entries[1]);}
+        else f.server.arguments={{"boardProfileKey","1:0.2"},{"remoteSerial","NEW"},{"confirmRemoteProvisioning","1"}};
+        f.server.arguments["snapshotToken"]=snapshot.token;Wire.storage(0x50)[4095]^=1;
+        const auto expected=Wire.storage(0x50);
+        const char* endpoint=remote?"/hardware/profile/write":"/hardware/board-identity/write";
+        f.server.request(endpoint,HTTP_POST);TEST_ASSERT_EQUAL(409,f.pages.status);TEST_ASSERT_TRUE(expected==Wire.storage(0x50));
+        TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(false,ModuleSlot::A,snapshot));f.server.arguments["snapshotToken"]=snapshot.token;
+        f.server.request(endpoint,HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);TEST_ASSERT_FALSE(expected==Wire.storage(0x50));
+    }
+}
+void test_module_snapshot_binds_slot_and_reads_manufacturing_after_write() {
+    Fixture f(true);auto c=catalog();HardwareProfileEntry entry;for(size_t i=0;i<c->count;++i)if(c->entries[i].kind)entry=c->entries[i];
+    ProvisioningSnapshot snapshot;TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(true,ModuleSlot::A,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Empty,snapshot.status);
+    f.form(entry);f.server.arguments["snapshotToken"]=snapshot.token;f.server.arguments["remoteSlot"]="B";
+    const auto before=Wire.storage(0x53);f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(409,f.pages.status);TEST_ASSERT_TRUE(before==Wire.storage(0x53));
+    TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(true,ModuleSlot::B,snapshot));f.server.arguments["snapshotToken"]=snapshot.token;f.server.arguments["remoteBatch"]="MODULE-BATCH";
+    f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);
+    TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(true,ModuleSlot::B,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Valid,snapshot.status);TEST_ASSERT_EQUAL_STRING("MODULE-BATCH",snapshot.batch);TEST_ASSERT_EQUAL_STRING("PROFILE-TEST",snapshot.serial);
+    f.server.arguments={{"kind","module"},{"slot","B"}};f.server.request("/hardware/eeprom",HTTP_GET);{std::ofstream file("/private/tmp/envnode-module-snapshot-preview.json");file<<f.server.responseBody;}
+    TEST_ASSERT_TRUE(f.admin.readProvisioningSnapshot(true,ModuleSlot::A,snapshot));TEST_ASSERT_EQUAL(ProvisioningSnapshotStatus::Empty,snapshot.status);
+}
+void test_missing_initial_snapshot_and_invalid_target_cannot_write() {
+    Fixture f(true);f.server.arguments={{"boardProfileKey","2:0.9"},{"remoteSerial","NEW"},{"confirmRemoteProvisioning","1"},{"snapshotToken",""}};
+    const auto before=Wire.storage(0x50);f.server.request("/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(409,f.pages.status);TEST_ASSERT_TRUE(before==Wire.storage(0x50));
+    int begins=Wire.begins;f.server.arguments={{"kind","module"},{"slot","C"}};f.server.request("/hardware/eeprom",HTTP_GET);TEST_ASSERT_EQUAL(400,f.server.responseStatus);TEST_ASSERT_EQUAL(begins,Wire.begins);
+}
 int main(){UNITY_BEGIN();
+    RUN_TEST(test_snapshot_reports_empty_valid_corrupt_and_cannot_write_or_touch_other_targets);
+    RUN_TEST(test_changed_snapshot_stops_builtin_and_remote_board_writes_and_fresh_read_allows_retry);
+    RUN_TEST(test_module_snapshot_binds_slot_and_reads_manufacturing_after_write);
+    RUN_TEST(test_missing_initial_snapshot_and_invalid_target_cannot_write);
     RUN_TEST(test_shared_board_fields_persist_from_builtin_and_remote_forms);
     RUN_TEST(test_shared_manufacturing_rejects_oversized_board_fields_without_i2c);
     RUN_TEST(test_browser_script_is_hash_pinned_and_state_check_does_not_open_i2c);

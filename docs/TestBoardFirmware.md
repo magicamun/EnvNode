@@ -192,3 +192,14 @@ instructions are collapsible. Board batch/date use verified ENPM payload v2,
 read back in the dialog, and require runtime EnvNode 0.8.5 or later. Old v1 maps
 remain readable and keep v1 writes when no batch/date is entered. Legacy POST
 endpoints retain their existing argument names and confirmation requirements.
+
+## Live EEPROM comparison (0.8.3)
+
+The shared dialog reads the selected board/module slot directly, including all
+4096 EEPROM bytes, and shows valid/empty/corrupt/unavailable status and manufacturing
+fields. Refresh and adoption are explicit; read data never silently fills new
+manufacturing fields. Writes carrying the dialog snapshot token are preceded by
+a fresh target-bound fingerprint comparison. Changed/unavailable targets return
+409 without writes, preserve inputs and require reconfirmation. Normal EnvNode
+0.8.6 uses the same reader and UI, without changing its active boot configuration.
+Legacy POST callers retain their existing explicit-confirmation contract.

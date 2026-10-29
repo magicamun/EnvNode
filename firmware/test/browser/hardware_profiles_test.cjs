@@ -34,7 +34,7 @@ function transport(c) {
     state.calls.push({url, options});
     if (url === '/hardware/profile/state') return {ok: !state.locked, status: state.locked ? 409 : 200};
     if (url === '/hardware/profile/write') {
-      state.posts.push(options.body);return {ok: true, status: 200, text: async () => '<html>Provisioned</html>'};
+      state.posts.push(options.body);if(state.failPost)throw Error('NetworkLost');return {ok: true, status: 200, text: async () => '<html>Provisioned</html>'};
     }
     assert.ok(url.startsWith(base)); assert.equal(options.credentials, 'omit'); assert.equal(options.redirect, 'error');assert.equal(options.mode, 'cors');
     if (state.offline) throw Error('Offline');
@@ -143,6 +143,9 @@ async function test(name, run) { await run();++tests;console.log('PASS',name); }
   });
   await test('confirmation reset during download prevents any upload',async()=>{
     const c=context(),t=transport(c),u=ui(c,t);await idle(u);u.doc.items['remote-profile-confirm'].checked=true;t.onDownload=()=>{u.doc.items['remote-profile-confirm'].checked=false;};await u.doc.items['remote-profile-form'].fire('submit');assert.equal(t.posts.length,0);assert.match(u.doc.items['remote-profile-status'].textContent,/ConfirmationRequired/);
+  });
+  await test('lost POST response reports uncertain result instead of claiming no write',async()=>{
+    const c=context(),t=transport(c),u=ui(c,t);await idle(u);u.doc.items['remote-profile-confirm'].checked=true;t.failPost=true;await u.doc.items['remote-profile-form'].fire('submit');assert.equal(t.posts.length,1);assert.match(u.doc.items['remote-profile-status'].textContent,/Schreibergebnis unklar/);
   });
   await test('selection changes during download cannot write the wrong profile',async()=>{
     const c=context(),t=transport(c),u=ui(c,t);await idle(u);u.doc.items['remote-profile-confirm'].checked=true;t.onDownload=()=>{u.doc.items['remote-profile-key'].value='stale';};await u.doc.items['remote-profile-form'].fire('submit');assert.equal(t.posts.length,0);assert.match(u.doc.items['remote-profile-status'].textContent,/SelectionStale/);

@@ -14,6 +14,7 @@ struct ProvisioningBoardProfile {
 class IProvisioningAdministration {
 public:
     virtual ~IProvisioningAdministration() = default;
+    virtual bool readProvisioningSnapshot(bool,ModuleSlot,ProvisioningSnapshot&) { return false; }
     virtual bool hasProvisioningBoardIdentity() const { return true; }
     virtual BoardIdentity provisioningBoardIdentity() const = 0;
     virtual const char* provisioningBoardBatch() const { return ""; }

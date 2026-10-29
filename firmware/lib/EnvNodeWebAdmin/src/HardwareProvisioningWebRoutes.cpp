@@ -21,6 +21,7 @@ void HardwareProvisioningWebRoutes::registerRoutes(WebServer& server) {
         server.on("/hardware/profile/state", HTTP_GET, [this]() { handleProfileState(); });
         server.on("/hardware/profile/write", HTTP_POST, [this]() { handleRemoteProfileWrite(); });
     }
+    server.on("/hardware/eeprom", HTTP_GET, [this]() { handleEepromSnapshot(); });
     server.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
     server.on("/hardware/board-identity/write", HTTP_POST, [this]() { handleBoardProvisioning(); });
     server.on("/device/board-identity/write", HTTP_POST, [this]() { handleBoardProvisioning(); });
@@ -100,8 +101,9 @@ void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
         const auto* source=boardIdentityProfile(requested.profileId,requested.revision);BoardPortMap map;
         if(!source||!BoardPortMapCodec::decode(source->portMap,source->portMapSize,map)){sendResult("Provisioning","/hardware","InvalidBoardProfile",false);return;}
         map.serial=requested.serialNumber;memcpy(map.productionBatch,batch.c_str(),batch.length()+1);memcpy(map.productionDate,date.c_str(),date.length()+1);
+        if(confirmed&&!verifySnapshot(false,ModuleSlot::A))return;
         result=administration_.provisionBoardPortMap(map,confirmed);
-    } else result=administration_.provisionBoardIdentity(requested,confirmed);
+    } else {if(confirmed&&!verifySnapshot(false,ModuleSlot::A))return;result=administration_.provisionBoardIdentity(requested,confirmed);}
     logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%s",
         boardProvisioningStatusName(result.status),
         static_cast<unsigned int>(requested.profileId),
@@ -194,6 +196,7 @@ void HardwareProvisioningWebRoutes::handleModuleDescriptorProvisioning() {
 
     const bool confirmed = (server_.hasArg("confirmModuleDescriptorProvisioning")||server_.arg("confirmRemoteProvisioning")=="1")
         && (server_.arg("confirmModuleDescriptorProvisioning")=="1"||server_.arg("confirmRemoteProvisioning")=="1");
+    if(confirmed&&!verifySnapshot(true,slot))return;
     const ModuleDescriptorProvisioningResult result =
         administration_.provisionModuleDescriptor(
             slot, payload.get(), payloadSize, confirmed);

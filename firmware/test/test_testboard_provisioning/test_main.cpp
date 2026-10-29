@@ -61,7 +61,7 @@ void test_no_bus_at_boot_and_no_module_routes() {
     Fixture f;
     TEST_ASSERT_EQUAL(0, Wire.begins);
     TEST_ASSERT_NULL(f.bus.wire(I2CBus::I2C0));
-    TEST_ASSERT_EQUAL(3, f.server.routes.size());
+    TEST_ASSERT_EQUAL(4, f.server.routes.size());
     TEST_ASSERT_FALSE(f.server.request("/hardware/module-descriptor/write", HTTP_POST));
     TEST_ASSERT_FALSE(f.server.request("/device/module-descriptor/write", HTTP_POST));
     TEST_ASSERT_EQUAL(0, Wire.begins);
@@ -70,6 +70,8 @@ void test_overview_reads_only_external_address_then_releases_bus() {
     Fixture f;
     f.server.request("/hardware", HTTP_GET);
     TEST_ASSERT_EQUAL(200, f.pages.status);
+    TEST_ASSERT_EQUAL(0, Wire.begins);
+    f.server.arguments={{"kind","board"}};f.server.request("/hardware/eeprom",HTTP_GET);
     TEST_ASSERT_EQUAL(1, Wire.begins); TEST_ASSERT_EQUAL(1, Wire.ends);
     TEST_ASSERT_EQUAL(16, Wire.sda); TEST_ASSERT_EQUAL(5, Wire.scl);
     TEST_ASSERT_EQUAL(50, Wire.timeout);
@@ -78,7 +80,7 @@ void test_overview_reads_only_external_address_then_releases_bus() {
     TEST_ASSERT_EQUAL(INPUT, pinModes[16]); TEST_ASSERT_EQUAL(INPUT, pinModes[5]);
     TEST_ASSERT_EQUAL(-1, pinModes[17]);
     for (const auto& tx : Wire.transmissions) { TEST_ASSERT_EQUAL(0x50, tx.address); TEST_ASSERT_EQUAL(2, tx.bytes.size()); }
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "NotProvisioned"));
+    TEST_ASSERT_NOT_NULL(strstr(f.server.responseBody.c_str(), "Empty"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Select profile"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "remote-profile-image"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "mini-0.9.0/top.png"));
@@ -156,13 +158,12 @@ void test_hotplug_read_failure_clears_previous_dut_and_status_is_localized() {
     Fixture f;
     TEST_ASSERT_EQUAL(BoardProvisioningStatus::Success, f.administration.provisionBoardIdentity(f.identity(), true).status);
     f.pages.locale = Locale::GermanGermany;
-    f.server.request("/hardware", HTTP_GET);
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Gelesene Identität"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "MINI-EXTERNAL"));
+    f.server.arguments={{"kind","board"}};f.server.request("/hardware/eeprom",HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server.responseBody.c_str(), "MINI-EXTERNAL"));
     Wire.defaultResult = 2;
-    f.server.request("/hardware", HTTP_GET);
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "StorageUnavailable"));
-    TEST_ASSERT_NULL(strstr(f.pages.content.c_str(), "MINI-EXTERNAL"));
+    f.server.request("/hardware/eeprom", HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server.responseBody.c_str(), "Unavailable"));
+    TEST_ASSERT_NULL(strstr(f.server.responseBody.c_str(), "MINI-EXTERNAL"));
     TEST_ASSERT_EQUAL_STRING("", f.administration.provisioningBoardIdentity().serialNumber.value);
 }
 void test_explicit_revision_selection_preserves_legacy_and_supports_new_boards() {

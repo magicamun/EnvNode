@@ -66,6 +66,7 @@ public:
     void loop() override;
 
 private:
+    bool readProvisioningSnapshot(bool module,ModuleSlot slot,ProvisioningSnapshot& out) override { return module?moduleDescriptorProvisioningService_.snapshot(slot,out):boardProvisioningService_.snapshot(out); }
     BoardIdentity provisioningBoardIdentity() const override;
     const char* provisioningBoardBatch() const override { return boardIdentityResolution_.productionBatch; }
     const char* provisioningBoardDate() const override { return boardIdentityResolution_.productionDate; }

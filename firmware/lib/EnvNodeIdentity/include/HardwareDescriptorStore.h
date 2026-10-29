@@ -1,4 +1,6 @@
 #pragma once
+#include "ModuleSlot.h"
+#include "ProvisioningSnapshot.h"
 
 #include "HardwareDescriptorEnvelope.h"
 #include "IIdentityStorage.h"
@@ -45,6 +47,7 @@ public:
     explicit HardwareDescriptorStore(IIdentityStorage& storage);
 
     HardwareDescriptorReadResult read(uint8_t* payload, size_t capacity);
+    bool snapshot(ProvisioningSnapshot&, ModuleSlot);
     HardwareDescriptorWriteResult write(
         HardwareDescriptorObjectKind objectKind,
         const uint8_t* payload,

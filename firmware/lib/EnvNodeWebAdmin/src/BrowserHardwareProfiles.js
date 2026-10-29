@@ -106,7 +106,7 @@
     const report = message => { status.textContent = message; };
     root.dataset.remoteReady = '1';
     let busy = false;
-    function working(value) { busy = value; refresh.disabled = value; select.disabled = value; submit.disabled = value || !!(root.provisioning && !select.value); }
+    function working(value) { busy = value; refresh.disabled = value; select.disabled = value; submit.disabled = value || !!(root.provisioning && !root.provisioning.canWrite()); }
     function selected() {
       if (root.provisioning) return;
       const e = client.entries().find(e => e.key === select.value);
@@ -139,6 +139,8 @@
       if (busy || !form.reportValidity()) return;
       const key = select.value;
       working(true); report(de ? 'Profil wird im Browser geprüft …' : 'Checking profile in browser …');
+      if(root.provisioning)root.provisioning.report(de ? 'Profil und EEPROM werden geprüft …' : 'Checking profile and EEPROM …');
+      let posting=false;
       try {
         const {entry, bytes} = await client.prepare(key);
         if (select.value !== key) throw Error('SelectionStale');
@@ -147,10 +149,12 @@
         byId('remote-profile-data').value = hex(bytes);
         // Disabled controls are omitted by FormData; explicitly bind the selection.
         const body = new FormData(form); body.set('remoteProfileKey', key);
+        posting=true;
         const response = await global.fetch('/hardware/profile/write', {method: 'POST', body});
+        if (response.status === 409 && root.provisioning) { await root.provisioning.changed(); working(false); return; }
         const html = await response.text();
         root.ownerDocument.open(); root.ownerDocument.write(html); root.ownerDocument.close();
-      } catch (error) { report((de ? 'Nicht provisioniert: ' : 'Not provisioned: ') + error.message); working(false); }
+      } catch (error) { const message=(posting ? (de?'Schreibergebnis unklar. EEPROM erneut lesen: ':'Write result unknown. Read EEPROM again: ') : (de?'Nicht provisioniert: ':'Not provisioned: '))+error.message;report(message);if(root.provisioning){if(posting)root.provisioning.invalidate();root.provisioning.report(message);}working(false); }
     });
     update();
     return {client, update};

@@ -4,6 +4,13 @@
 
 ### Added
 
+- EnvNode 0.8.6 / Testboard 0.8.3: display freshly read board/module EEPROM
+  identity and manufacturing fields beside the planned write. Add explicit
+  refresh/adoption and a before/after summary. Re-read and compare the complete
+  selected EEPROM before dialog writes; refuse changed/unavailable targets with
+  HTTP 409, retain entered data and require review and confirmation again.
+
+
 - EnvNode 0.8.5 / Testboard 0.8.2: share one provisioning dialog with filtered
   Board/Module selection, matching image, common serial/batch/date fields and
   explicit target-specific write action. Merge matching online and built-in

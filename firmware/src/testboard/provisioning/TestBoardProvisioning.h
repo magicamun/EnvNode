@@ -17,6 +17,7 @@ public:
         HardwareDescriptorStore* slotB = nullptr, BoardPortMapStore* maps = nullptr);
     bool available() const { return available_(); }
     BoardIdentityReadResult refresh();
+    bool readProvisioningSnapshot(bool module,ModuleSlot slot,ProvisioningSnapshot&) override;
     bool hasProvisioningBoardIdentity() const override;
     BoardIdentity provisioningBoardIdentity() const override;
     const char* provisioningBoardBatch() const override { return batch_; }

@@ -11,6 +11,21 @@ TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection
     HardwareDescriptorStore* slotA, HardwareDescriptorStore* slotB, BoardPortMapStore* maps)
     : connection_(connection), store_(store), service_(store,maps), available_(available),
       moduleStores_{slotA, slotB}, maps_(maps) {}
+bool TestBoardProvisioning::readProvisioningSnapshot(bool module,ModuleSlot slot,ProvisioningSnapshot& out) {
+    out={};if(!module){current_={};batch_[0]=date_[0]=0;}if(!available()||(module&&slot!=ModuleSlot::A&&slot!=ModuleSlot::B))return false;
+    bool ok=false;
+    if(connection_.begin()) {
+        if(!module)ok=store_.snapshot(out);
+        else {auto* s=moduleStores_[static_cast<size_t>(slot)];if(s)ok=s->snapshot(out,slot);}
+    }
+    connection_.end();
+    if(!module&&ok&&out.status==ProvisioningSnapshotStatus::Valid){
+        current_.identity.profileId=static_cast<BoardProfileId>(out.profileId);current_.identity.revision=out.revision;
+        setBoardSerialNumber(current_.identity.serialNumber,out.serial);current_.status=validateBoardIdentityStructure(current_.identity);
+        strcpy(batch_,out.batch);strcpy(date_,out.date);
+    }
+    return ok;
+}
 BoardIdentityReadResult TestBoardProvisioning::refresh() {
     batch_[0]=date_[0]=0;
     current_ = {}; // Never retain another DUT's identity after a failed read.

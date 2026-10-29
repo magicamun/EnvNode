@@ -25,6 +25,7 @@ class BoardProvisioningService {
 public:
     explicit BoardProvisioningService(BoardIdentityStore& store, BoardPortMapStore* maps = nullptr);
 
+    bool snapshot(ProvisioningSnapshot& out) { return store_.snapshot(out); }
     BoardProvisioningResult provision(
         const BoardIdentity& identity,
         bool explicitlyConfirmed, const BoardPortMap* map = nullptr);
