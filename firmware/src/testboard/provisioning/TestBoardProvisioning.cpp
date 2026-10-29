@@ -1,10 +1,15 @@
 // EnvNode: see repository LICENSE.
 #include "TestBoardProvisioning.h"
 #include "BoardIdentityProfiles.h"
+#include "ModuleDescriptorWriter.h"
+#include <memory>
+#include <new>
 namespace EnvNode {
 TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection,
-    BoardIdentityStore& store, std::function<bool()> available)
-    : connection_(connection), store_(store), service_(store), available_(available) {}
+    BoardIdentityStore& store, std::function<bool()> available,
+    HardwareDescriptorStore* slotA, HardwareDescriptorStore* slotB)
+    : connection_(connection), store_(store), service_(store), available_(available),
+      moduleStores_{slotA, slotB} {}
 BoardIdentityReadResult TestBoardProvisioning::refresh() {
     current_ = {}; // Never retain another DUT's identity after a failed read.
     if (!available()) return current_;
@@ -58,9 +63,29 @@ BoardProvisioningResult TestBoardProvisioning::provisionBoardIdentity(const Boar
     return result;
 }
 ModuleDescriptorProvisioningResult TestBoardProvisioning::provisionModuleDescriptor(ModuleSlot slot,
-    const uint8_t*, size_t, bool) {
+    const uint8_t* payload, size_t size, bool confirmed) {
     ModuleDescriptorProvisioningResult result;
-    result.slot = slot; result.status = ModuleDescriptorProvisioningStatus::StorageUnavailable;
+    result.slot = slot;
+    if (slot != ModuleSlot::A && slot != ModuleSlot::B) {
+        result.status = ModuleDescriptorProvisioningStatus::InvalidSlot; return result;
+    }
+    if (!confirmed) {
+        result.status = ModuleDescriptorProvisioningStatus::ConfirmationRequired; return result;
+    }
+    if (!available() || moduleStores_[static_cast<size_t>(slot)] == nullptr) {
+        result.status = ModuleDescriptorProvisioningStatus::StorageUnavailable; return result;
+    }
+    std::unique_ptr<HardwareDescriptor> scratch(new (std::nothrow) HardwareDescriptor);
+    if (!scratch) { result.status = ModuleDescriptorProvisioningStatus::StorageUnavailable; return result; }
+    result = validateModuleProvisioningPayload(slot, payload, size, true, *scratch);
+    if (result.status != ModuleDescriptorProvisioningStatus::Success) return result;
+    if (connection_.begin())
+        result = writeModuleProvisioningPayload(*moduleStores_[static_cast<size_t>(slot)],
+            slot, payload, size, true, *scratch);
+    else result.status = ModuleDescriptorProvisioningStatus::StorageUnavailable;
+    connection_.end();
+    // The tester provisions hardware but does not operate module drivers.
+    result.compatibilityStatus = HardwareDescriptorCompatibilityStatus::MissingDriver;
     return result;
 }
 }

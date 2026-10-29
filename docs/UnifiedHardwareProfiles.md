@@ -85,7 +85,16 @@ logischen Anforderungen. Bild und Prüfdaten werden nicht ins EEPROM geschrieben
 Die vollständige Umsetzung nachladbarer Provisioning-Profile ist damit noch
 nicht abgeschlossen: Die normale Firmware importiert den neuen JSON-Katalog
 noch nicht zur Laufzeit. Der Tester lädt weiterhin den kompatiblen v1-Prüfkatalog;
-sein externes Provisioning unterstützt derzeit ENID-Boards, noch keine ENHD-Module.
+sein externes Provisioning unterstützt ENID-Boards und ENHD-Module an I²C0
+unter 0x50 bzw. 0x52/0x53.
+Beide Anwendungen verwenden für ENHD dieselbe Validierung und denselben verifizierten
+EEPROM-Schreibpfad (`ModuleDescriptorWriter`). Der Tester benötigt dafür keine
+Betriebstreiber und prüft die Mindestversion nicht als Schreibvoraussetzung. Er
+aktiviert den Provisioning-Bus nur für die gewählte Operation und gibt SDA/SCL
+danach wieder frei. Ein laufender Anschlusstest sperrt Board- und Moduloperationen,
+einschließlich der alten `/device/...`-Routen. Die UUID wird im Tester mit der
+ESP32-Zufallsquelle erzeugt; das Ziel-EEPROM gehört weiterhin zum externen Prüfling.
+
 Die Modulvorlage im gemeinsamen Webformular ist weiterhin DuoRelay 0.3.
 SD und SX1262-Remote sind keine erfundenen Produktprofile in diesem Katalog.
 

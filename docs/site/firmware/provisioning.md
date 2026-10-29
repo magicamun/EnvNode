@@ -114,12 +114,12 @@ und zwei Modulslots angezeigt werden.
 
 Das PlatformIO-Ziel `testboard` ist eine eigene Anwendung mit eigener
 Konfiguration. Sein Menü **Provisioning** schreibt ein extern angeschlossenes
-Mainboard-EEPROM; dafür ist **kein Neustart des Testers** erforderlich. Ein leeres
+Board- oder Modul-EEPROM; dafür ist **kein Neustart des Testers** erforderlich. Ein leeres
 oder nicht erkanntes EEPROM setzt keine Revision voraus: Board und Revision
 müssen ausdrücklich gewählt werden. Die passende Boardansicht dient zur Kontrolle.
 
 Der separate Bus verwendet **SDA GPIO16 / SCL GPIO5**, das Board-EEPROM Adresse
-`0x50`. ESP32 des Prüflings entfernen und andere Versorgungen, Mess-Pigtails und
+`0x50`, die Modul-EEPROMs `0x52` (A) und `0x53` (B). ESP32 des Prüflings entfernen und andere Versorgungen, Mess-Pigtails und
 Input-Adapter trennen, bevor der Provisioning-Stecker angeschlossen wird. Das
 Kabel vor einer passiven Durchgangsprüfung wieder abziehen; die Firmware schaltet
 dessen Versorgung nicht ab.
@@ -127,7 +127,11 @@ dessen Versorgung nicht ab.
 Die **Anschlussprüfung ist derzeit eine Simulation**. Das Provisioning greift
 dagegen auf das echte EEPROM zu und muss mit der fertigen Tester-Hardware noch
 physisch validiert werden. Eine laufende Anschlussprüfung sperrt Provisioning.
-Modul-Provisioning ist in der Tester-Anwendung noch nicht freigeschaltet.
+Für Module steht zunächst die DuoRelay-0.3-Vorlage zur Verfügung. Der Tester
+validiert und schreibt denselben ENHD-Datensatz wie die normale Firmware, ohne
+den Modulbetrieb zu unterstützen. Fehlende Treiber oder eine höhere erforderliche
+Betriebs-Firmwareversion verhindern das Provisioning nicht. Modulschreibvorgänge
+sind ebenfalls während einer Anschlussprüfung gesperrt.
 
 Die Prüfprofile und Boardbilder werden über docs.envnode.de bereitgestellt.
 Eingebaute Profile bleiben ohne Netz verfügbar. Die unabhängige Signaturprüfung

@@ -6,6 +6,8 @@
 #include "provisioning/ProvisioningPage.h"
 #include "IdentityEeprom24LC32.h"
 #include "Update.h"
+#include "DuoRelayDescriptor.h"
+#include "HardwareDescriptorCodec.h"
 #include "HardwareProvisioningWebRoutes.h"
 #include "testing/TestRunner.h"
 #include "testing/SimulatedFixture.h"
@@ -30,19 +32,22 @@ struct Pages : IWebPagePresenter {
     void sendPage(const char*, const char*, const String& c, int s, bool) override { content = c; status = s; }
 };
 struct Fixture {
+    bool moduleRoutes;
     Logger logger; Pages pages; WebServer server{80};
     Testing::SimulatedFixture simulation; Testing::TestRunner tests{simulation};
     ProvisioningI2C bus{16, 5}; IdentityEeprom24LC32 eeprom{bus, 0x50};
     BoardIdentityStore store{eeprom};
-    TestBoardProvisioning administration{bus, store, [this]() { return tests.phase() != Testing::Phase::Running; }};
+    IdentityEeprom24LC32 moduleAEeprom{bus, 0x52}, moduleBEeprom{bus, 0x53};
+    HardwareDescriptorStore moduleA{moduleAEeprom}, moduleB{moduleBEeprom};
+    TestBoardProvisioning administration{bus, store, [this]() { return tests.phase() != Testing::Phase::Running; }, &moduleA, &moduleB};
     HardwareProvisioningWebRoutes routes{server, pages, logger, administration,
         [this]() { return buildProvisioningOverview(administration, pages.locale); },
-        [](uint8_t*, size_t) {}, options()};
+        [](uint8_t* bytes, size_t size) { std::fill_n(bytes, size, 42); }, options()};
     ProvisioningWebOptions options() {
-        ProvisioningWebOptions o; o.modules = false; o.externalTarget = true;
+        ProvisioningWebOptions o; o.modules = moduleRoutes; o.externalTarget = true;
         o.available = [this]() { return administration.available(); }; return o;
     }
-    Fixture() { routes.registerRoutes(server); }
+    explicit Fixture(bool modules = false) : moduleRoutes(modules) { routes.registerRoutes(server); }
     void form(bool confirmed = true) {
         server.arguments = {{"boardProfileId", "2"}, {"serialNumber", "MINI-EXTERNAL"}};
         if (confirmed) server.arguments["confirmProvisioning"] = "1";
@@ -187,8 +192,88 @@ void test_invalid_or_ambiguous_revision_keys_never_touch_the_bus() {
     TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(before,Wire.begins);
 }
 
+void test_module_provisioning_is_available_without_operating_drivers() {
+    Fixture f(true);
+    f.server.arguments = {{"descriptorModuleSlot","B"},{"descriptorTemplate","duo-relay-0.3"},
+        {"descriptorSerialNumber","REMOTE-TEST"},{"confirmModuleDescriptorProvisioning","1"}};
+    const auto boardBefore = Wire.storage(0x50), otherBefore = Wire.storage(0x52);
+    TEST_ASSERT_TRUE(f.server.request("/hardware/module-descriptor/write", HTTP_POST));
+    TEST_ASSERT_EQUAL(200, f.pages.status);
+    TEST_ASSERT_EQUAL(1, Wire.begins); TEST_ASSERT_EQUAL(1, Wire.ends);
+    TEST_ASSERT_EQUAL(INPUT, pinModes[16]); TEST_ASSERT_EQUAL(INPUT, pinModes[5]);
+    TEST_ASSERT_TRUE(boardBefore == Wire.storage(0x50));
+    TEST_ASSERT_TRUE(otherBefore == Wire.storage(0x52));
+    for (const auto& tx : Wire.transmissions) TEST_ASSERT_EQUAL(0x53, tx.address);
+    TEST_ASSERT_TRUE(f.bus.begin());
+    uint8_t payload[2048];
+    const auto read = f.moduleB.read(payload,sizeof(payload));
+    f.bus.end();
+    TEST_ASSERT_EQUAL(HardwareDescriptorStoreStatus::Valid, read.status);
+    HardwareDescriptor descriptor;
+    TEST_ASSERT_EQUAL(HardwareDescriptorDecodeStatus::Valid,
+        HardwareDescriptorCodec::decode(payload,read.envelope.payloadLength,HardwareDescriptorObjectKind::Module,descriptor));
+    TEST_ASSERT_TRUE(descriptor.serialNumber.equals("REMOTE-TEST"));
+    TEST_ASSERT_EQUAL_HEX8(0x40, descriptor.instanceId[6]&0xf0);
+    TEST_ASSERT_EQUAL_HEX8(0x80, descriptor.instanceId[8]&0xc0);
+}
+void test_module_payload_validation_and_confirmation_precede_bus_access() {
+    Fixture f(true);
+    uint8_t payload[1024]; size_t size=0;
+    DuoRelayDescriptorManufacturingData data;
+    data.instanceId[0]=1;
+    TEST_ASSERT_EQUAL(CompactCborStatus::Success,DuoRelayDescriptor::encode(data,payload,sizeof(payload),size));
+    TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::ConfirmationRequired,
+        f.administration.provisionModuleDescriptor(ModuleSlot::A,payload,size,false).status);
+    TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::InvalidDescriptor,
+        f.administration.provisionModuleDescriptor(ModuleSlot::A,payload,1,true).status);
+    TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::InvalidSlot,
+        f.administration.provisionModuleDescriptor(static_cast<ModuleSlot>(8),payload,size,true).status);
+    TEST_ASSERT_EQUAL(0,Wire.begins);
+    Wire.beginOk=false;
+    TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::StorageUnavailable,
+        f.administration.provisionModuleDescriptor(ModuleSlot::A,payload,size,true).status);
+    TEST_ASSERT_EQUAL(1,Wire.ends);
+    TEST_ASSERT_EQUAL(INPUT,pinModes[16]); TEST_ASSERT_EQUAL(INPUT,pinModes[5]);
+}
+
+void test_running_connector_test_blocks_module_routes_and_direct_writer() {
+    Fixture f(true);
+    TEST_ASSERT_TRUE(f.tests.load(Testing::weatherBoard()));
+    f.simulation.connect(*f.tests.board(),0,Testing::SimulatedFault::None);
+    TEST_ASSERT_TRUE(f.tests.start(0));
+    f.server.arguments={{"descriptorModuleSlot","A"},{"descriptorTemplate","duo-relay-0.3"},
+        {"confirmModuleDescriptorProvisioning","1"}};
+    for (const char* route : {"/hardware/module-descriptor/write","/device/module-descriptor/write"}) {
+        TEST_ASSERT_TRUE(f.server.request(route,HTTP_POST));
+        TEST_ASSERT_EQUAL(409,f.pages.status);
+    }
+    TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::StorageUnavailable,
+        f.administration.provisionModuleDescriptor(ModuleSlot::A,nullptr,0,true).status);
+    TEST_ASSERT_EQUAL(0,Wire.begins);
+}
+void test_module_needing_future_firmware_can_be_written_and_bus_is_released() {
+    Fixture f(true); uint8_t payload[1024]; size_t size=0;
+    DuoRelayDescriptorManufacturingData data; data.instanceId[0]=1;
+    TEST_ASSERT_EQUAL(CompactCborStatus::Success,DuoRelayDescriptor::encode(data,payload,sizeof(payload),size));
+    const uint8_t version[]={15,0x83,0,5,0}; bool patched=false;
+    for(size_t i=0;i+sizeof(version)<=size;++i) {
+        if(!memcmp(payload+i,version,sizeof(version))) {payload[i+2]=9;patched=true;break;}
+    }
+    TEST_ASSERT_TRUE(patched);
+    const auto result=f.administration.provisionModuleDescriptor(ModuleSlot::A,payload,size,true);
+    TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::Success,result.status);
+    TEST_ASSERT_EQUAL(HardwareDescriptorCompatibilityStatus::MissingDriver,result.compatibilityStatus);
+    TEST_ASSERT_EQUAL(1,Wire.begins); TEST_ASSERT_EQUAL(1,Wire.ends);
+    for(const auto& tx:Wire.transmissions) TEST_ASSERT_EQUAL(0x52,tx.address);
+    TEST_ASSERT_NULL(f.bus.wire(I2CBus::I2C0));
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_running_connector_test_blocks_module_routes_and_direct_writer);
+    RUN_TEST(test_module_needing_future_firmware_can_be_written_and_bus_is_released);
+    RUN_TEST(test_module_provisioning_is_available_without_operating_drivers);
+    RUN_TEST(test_module_payload_validation_and_confirmation_precede_bus_access);
     RUN_TEST(test_no_bus_at_boot_and_no_module_routes);
     RUN_TEST(test_overview_reads_only_external_address_then_releases_bus);
     RUN_TEST(test_confirmation_and_invalid_identity_cannot_touch_i2c);

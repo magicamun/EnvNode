@@ -13,7 +13,8 @@ public:
 class TestBoardProvisioning : public IProvisioningAdministration {
 public:
     TestBoardProvisioning(IProvisioningConnection& connection, BoardIdentityStore& store,
-        std::function<bool()> available);
+        std::function<bool()> available, HardwareDescriptorStore* slotA = nullptr,
+        HardwareDescriptorStore* slotB = nullptr);
     bool available() const { return available_(); }
     BoardIdentityReadResult refresh();
     bool hasProvisioningBoardIdentity() const override;
@@ -31,5 +32,6 @@ private:
     BoardProvisioningService service_;
     std::function<bool()> available_;
     BoardIdentityReadResult current_;
+    HardwareDescriptorStore* moduleStores_[2];
 };
 }

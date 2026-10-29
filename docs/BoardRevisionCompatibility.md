@@ -52,7 +52,8 @@ Die Tester-Seite zeigt dazu die passende Boardansicht. Sie verwendet dieselben
 Prüfdefinitionen und Bildrouten wie die Anschlussprüfung und bevorzugt die darin
 angegebene Remote-Bildadresse. Bei Bildfehlern folgt die lokale Ansicht derselben
 Revision. Eine Bildauswahl löst keinen EEPROM-Schreibvorgang aus. Modulansichten
-und Modul-Provisioning im Tester folgen separat.
+folgen separat. Modul-Provisioning im Tester verwendet jetzt den gemeinsamen
+ENHD-Schreibpfad an 0x52/0x53, unabhängig von der Betriebsunterstützung.
 
 ## Abnahme
 

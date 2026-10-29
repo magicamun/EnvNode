@@ -117,23 +117,25 @@ and `IdentityEeprom24LC32` as EnvNode. The application adapter supplies manufact
 profile metadata without importing EnvNode sensor/runtime resource selection.
 Since 0.7.0 supported identities include Mini 0.8/0.9, Weather 0.2/0.3 and
 Mainboard 0.3. Board and actual revision are selected explicitly; existing
-numeric-ID API calls retain their old revision. Module provisioning is not exposed yet.
+numeric-ID API calls retain their old revision. Module provisioning uses the same
+shared descriptor writer as EnvNode, independently of runtime-driver support.
 
 The dedicated connector is GND / 3V3_SYS / SDA16 / SCL5; target EEPROM address is
-0x50. Provisioning is real, even though `/test` remains a simulation. Remove the
+0x50; module slot A/B EEPROMs use 0x52/0x53. Provisioning is real, even though `/test` remains a simulation. Remove the
 target ESP32 and disconnect other supplies, Input Adapter and measurement pigtails
 before connecting this cable. Disconnect it again before passive continuity tests. Its supply is wired;
 ending I2C does not turn target power off.
 
 Boot does not start I2C. Opening `/hardware` reads the current target once; a
 confirmed write uses the existing invalidation/write/CRC/readback procedure for
-bytes 0–31. Other EEPROM bytes are untouched. Every operation ends I2C and restores
+the ENID identity record. Other EEPROM bytes are untouched by board provisioning.
+Module writes use the ENHD A/B-bank procedure and only the selected module address. Every operation ends I2C and restores
 SDA/SCL to inputs, including failures. The bus has a 50 ms transaction timeout.
 Missing/unprovisioned/invalid targets show their actual status; a failed refresh
 clears any previous target identity. Writes still require server-side confirmation.
 There is no tester restart after a successful external write.
 
-While a connector test is running, GET `/hardware` and both board-write aliases
+While a connector test is running, GET `/hardware`, board-write and module-write aliases
 return HTTP 409 before I2C access. The service also rejects direct read/write
 attempts in that phase. There is no persistent provisioning session: synchronous
 HTTP operations release the bus before the next test action can execute.

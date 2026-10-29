@@ -1,5 +1,6 @@
 // EnvNode: see repository LICENSE.
 #include <Arduino.h>
+#include <esp_system.h>
 #include <ctime>
 #include "FirmwareBuildInfo.h"
 #include "TestBoardSettings.h"
@@ -70,18 +71,22 @@ ProvisioningI2C provisioningBus(Testing::fixtureRevision01().provisioningSda,
     Testing::fixtureRevision01().provisioningScl);
 IdentityEeprom24LC32 targetEeprom(provisioningBus, 0x50);
 BoardIdentityStore targetStore(targetEeprom);
+IdentityEeprom24LC32 moduleAEeprom(provisioningBus, 0x52), moduleBEeprom(provisioningBus, 0x53);
+HardwareDescriptorStore moduleAStore(moduleAEeprom), moduleBStore(moduleBEeprom);
 TestBoardProvisioning provisioning(provisioningBus, targetStore,
-    []() { return tests.phase() != Testing::Phase::Running; });
+    []() { return tests.phase() != Testing::Phase::Running; }, &moduleAStore, &moduleBStore);
 ProvisioningWebOptions provisioningOptions() {
     ProvisioningWebOptions options;
     options.externalTarget = true;
-    options.modules = false;
+    options.modules = true;
     options.available = []() { return provisioning.available(); };
     return options;
 }
 HardwareProvisioningWebRoutes provisioningRoutes(host.server(), web, logger, provisioning,
     []() { return buildProvisioningOverview(provisioning, web.webLocale()); },
-    [](uint8_t*, size_t) {}, provisioningOptions());
+    [](uint8_t* bytes, size_t size) {
+        for (size_t i = 0; i < size; ++i) bytes[i] = static_cast<uint8_t>(esp_random());
+    }, provisioningOptions());
 Testing::HttpsProfileTransport profileTransport(logger);
 Testing::ProfileRepository profiles(profileTransport);
 TestBoardApplication application(logger, tests, profiles, wifi, time);

@@ -241,5 +241,6 @@ Git-Commit gebunden. Ein geladener Prüflauf behält seine eigene Definition.
 
 Die neuen ENID-/Provisioning-Revisionen und eine Boarddarstellung im Tester-
 Provisioning sind seit 0.7.0 integriert. Die Public-Key-Signaturprüfung sowie
-Modul-Provisioning und Modulansichten folgen separat. GPIO16/5 bleiben unverändert;
+Modulansichten folgen separat. Modul-Provisioning nutzt inzwischen denselben
+ENHD-Schreibpfad wie EnvNode (EEPROM 0x52/0x53), ohne Betriebstreiber vorauszusetzen. GPIO16/5 bleiben unverändert;
 die elektrische Provisioning- und Messvalidierung wartet auf die Testhardware.

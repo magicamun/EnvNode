@@ -188,6 +188,7 @@ void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
     sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware", message, false);
 }
 void HardwareProvisioningWebRoutes::handleModuleDescriptorProvisioning() {
+    if (!operationAllowed()) return;
     const String slotText = server_.arg("descriptorModuleSlot");
     ModuleSlot slot = ModuleSlot::A;
     const bool slotValid = slotText == "A" || slotText == "B";
