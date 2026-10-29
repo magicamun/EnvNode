@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BoardIdentityStore.h"
+#include "BoardPortMap.h"
 
 namespace EnvNode {
 
@@ -22,14 +23,15 @@ struct BoardProvisioningResult {
 
 class BoardProvisioningService {
 public:
-    explicit BoardProvisioningService(BoardIdentityStore& store);
+    explicit BoardProvisioningService(BoardIdentityStore& store, BoardPortMapStore* maps = nullptr);
 
     BoardProvisioningResult provision(
         const BoardIdentity& identity,
-        bool explicitlyConfirmed);
+        bool explicitlyConfirmed, const BoardPortMap* map = nullptr);
 
 private:
     BoardIdentityStore& store_;
+    BoardPortMapStore* maps_;
 };
 
 const char* boardProvisioningStatusName(BoardProvisioningStatus status);

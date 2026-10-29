@@ -2,6 +2,7 @@
 #include "BoardIdentityProfiles.h"
 namespace EnvNode {
 namespace {
+#include "HardwarePortMaps.generated.inc"
 const BoardIdentityProfile Profiles[] = {
 #include "HardwareIdentityProfiles.generated.inc"
 };

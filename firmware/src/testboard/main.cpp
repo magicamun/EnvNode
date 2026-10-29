@@ -71,10 +71,11 @@ ProvisioningI2C provisioningBus(Testing::fixtureRevision01().provisioningSda,
     Testing::fixtureRevision01().provisioningScl);
 IdentityEeprom24LC32 targetEeprom(provisioningBus, 0x50);
 BoardIdentityStore targetStore(targetEeprom);
+BoardPortMapStore targetPortMaps(targetEeprom);
 IdentityEeprom24LC32 moduleAEeprom(provisioningBus, 0x52), moduleBEeprom(provisioningBus, 0x53);
 HardwareDescriptorStore moduleAStore(moduleAEeprom), moduleBStore(moduleBEeprom);
 TestBoardProvisioning provisioning(provisioningBus, targetStore,
-    []() { return tests.phase() != Testing::Phase::Running; }, &moduleAStore, &moduleBStore);
+    []() { return tests.phase() != Testing::Phase::Running; }, &moduleAStore, &moduleBStore, &targetPortMaps);
 ProvisioningWebOptions provisioningOptions() {
     ProvisioningWebOptions options;
     options.externalTarget = true;

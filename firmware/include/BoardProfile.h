@@ -6,6 +6,7 @@
 #include "BoardIdentityTypes.h"
 #include "HardwareResources.h"
 #include "ModuleSlot.h"
+#include "BoardPortMap.h"
 
 namespace EnvNode {
 
@@ -33,6 +34,8 @@ struct BoardProfile {
     GpioResource spiMosi;
 };
 
+bool boardPortMapRuntimeSupported(const BoardPortMap&, DescriptorSemanticVersion);
+bool selectCurrentBoardPortMap(const BoardPortMap&);
 const BoardProfile& currentBoardProfile();
 const BoardProfile* boardProfile(BoardProfileId id);
 const BoardProfile* boardProfile(BoardProfileId id, BoardRevision revision);

@@ -128,7 +128,10 @@ ending I2C does not turn target power off.
 
 Boot does not start I2C. Opening `/hardware` reads the current target once; a
 confirmed write uses the existing invalidation/write/CRC/readback procedure for
-the ENID identity record. Other EEPROM bytes are untouched by board provisioning.
+the ENID identity record. Board provisioning now also writes a self-contained
+ENPM port map in two banks at 0x0100/0x0800 before committing ENID. Bytes outside
+ENID and these banks are preserved. The target ESP32 can then reconstruct its
+resources without a downloaded profile or built-in revision table.
 Module writes use the ENHD A/B-bank procedure and only the selected module address. Every operation ends I2C and restores
 SDA/SCL to inputs, including failures. The bus has a 50 ms transaction timeout.
 Missing/unprovisioned/invalid targets show their actual status; a failed refresh

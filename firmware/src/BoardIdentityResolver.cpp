@@ -1,14 +1,17 @@
 #include "BoardIdentityResolver.h"
 
 #include "BoardProfile.h"
+#include "HardwareDescriptorCompatibility.h"
+#include <cstring>
+#include <new>
 
 namespace EnvNode {
 
 BoardIdentityResolver::BoardIdentityResolver(
     BoardIdentityStore& store,
-    BoardProfileId buildFallbackProfileId)
+    BoardProfileId buildFallbackProfileId, BoardPortMapStore* maps)
     : store_(store)
-    , buildFallbackProfileId_(buildFallbackProfileId) {
+    , buildFallbackProfileId_(buildFallbackProfileId), maps_(maps) {
 }
 
 const BoardIdentityResolution& BoardIdentityResolver::resolve() {
@@ -16,6 +19,36 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
         return resolution_;
     }
     resolved_ = true;
+
+    if (maps_) {
+        portMap_.reset(new (std::nothrow) BoardPortMap);
+        if (!portMap_) {
+            resolution_.source = BoardIdentitySource::InvalidPortMap;
+            resolution_.portMapStatus = BoardPortMapStatus::Unavailable;
+            return resolution_;
+        }
+        const auto mapResult = maps_->read(*portMap_);
+        resolution_.portMapStatus = mapResult.status;
+        if (mapResult.status != BoardPortMapStatus::NotProvisioned) {
+            const auto identity = store_.read(false);
+            resolution_.identity = identity.identity;
+            resolution_.recordStatus = identity.status;
+            const auto& map = *portMap_;
+            const bool matched = mapResult.status == BoardPortMapStatus::Valid
+                && (identity.status == BoardIdentityStatus::Valid
+                    || identity.status == BoardIdentityStatus::UnassignedSerial)
+                && map.profileId == encodeBoardProfileId(identity.identity.profileId)
+                && map.revision.major == identity.identity.revision.major
+                && map.revision.minor == identity.identity.revision.minor
+                && !strcmp(map.serial.value, identity.identity.serialNumber.value);
+            resolution_.normalRuntimeAllowed = matched
+                && boardPortMapRuntimeSupported(map, currentFirmwareDescriptorVersion());
+            resolution_.source = resolution_.normalRuntimeAllowed
+                ? BoardIdentitySource::PortMap : BoardIdentitySource::InvalidPortMap;
+            return resolution_;
+        }
+        portMap_.reset();
+    }
 
     const BoardIdentityReadResult readResult = store_.read();
     resolution_.recordStatus = readResult.status;
@@ -68,6 +101,8 @@ bool BoardIdentityResolver::fallbackAllowed(BoardIdentityStatus status) const {
 const char* boardIdentitySourceName(BoardIdentitySource source) {
     switch (source) {
         case BoardIdentitySource::EEPROM: return "EEPROM";
+        case BoardIdentitySource::PortMap: return "PortMap";
+        case BoardIdentitySource::InvalidPortMap: return "InvalidPortMap";
         case BoardIdentitySource::BuildFallback: return "BuildFallback";
         case BoardIdentitySource::UnsupportedIdentity: return "UnsupportedIdentity";
         default: return "UnsupportedIdentity";

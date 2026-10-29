@@ -40,12 +40,33 @@ def records():
                 raise ValueError('Image hash mismatch')
     return values
 
+def port_map_bytes(r):
+    spec = importlib.util.spec_from_file_location('test_cbor', ROOT/'firmware/scripts/generate_testboard_profile.py')
+    helper = importlib.util.module_from_spec(spec); spec.loader.exec_module(helper)
+    # The legacy test encoder distinguishes bools as integers; encode these explicitly.
+    def cbor(v):
+        if isinstance(v,bool): return b'\xf5' if v else b'\xf4'
+        if isinstance(v,list):
+            n=len(v)
+            head=bytes([0x80+n]) if n<24 else bytes([0x98,n])
+            return head+b''.join(cbor(x) for x in v)
+        return helper.cbor(v)
+    p=r['provisioning'];capabilities={'DigitalInput':1,'DigitalOutput':2,'Interrupt':4,'InternalPullup':8,'AnalogInput':16}
+    return cbor([1,r['boardProfileId'],[int(x) for x in r['identityRevision'].split('.')],r['name'],
+        [int(x) for x in r['minimumRuntimeFirmwareVersion'].split('.')],'',
+        [[g['gpio'],sum(capabilities[x.split('::')[1]] for x in g['capabilities'])] for g in p['gpios']],
+        [[int(b['bus'][-1]),b['sda'],b['scl']] for b in p['i2cBuses']],
+        [[0 if x['slot']=='A' else 1,x['identityAddress'],x['aux1'],x['aux2'],x['cs'],x['fiveVolt']] for x in p['moduleSlots']],
+        [p['spiBus'][k] for k in ('clock','miso','mosi')]])
+
 def generate():
-    runtime, identity = HEADER, HEADER
+    runtime, identity, maps = HEADER, HEADER, HEADER
     outputs, catalog = {}, []
+    resource_symbols = {}
     for i,r in enumerate(records()):
         symbol = f'Hardware{i}'
         p=r['provisioning']
+        resource_start=len(runtime)
         runtime+=f'const BoardGpioCapability {symbol}Gpios[] = {{\n'
         for g in p['gpios']:
             runtime+='    {GpioResource(%d), %s, %s},\n' % (g['gpio'],json.dumps(g['name']),' | '.join(g['capabilities']))
@@ -58,18 +79,31 @@ def generate():
         version='{'+r['minimumRuntimeFirmwareVersion'].replace('.',',')+'}'
         rev='{'+r['identityRevision'].replace('.',',')+'}'
         image=json.dumps(r['image']) if r['image'] else 'nullptr'
-        runtime+='};\n'+f'const BoardProfile {symbol}Profile = {{BoardProfileId::{r["boardProfile"]}, {json.dumps(r["name"])}, {rev}, {symbol}Gpios, {len(p["gpios"])}, {symbol}Buses, {len(p["i2cBuses"])}, {symbol}Slots, {len(p["moduleSlots"])}, GpioResource({p["spiBus"]["clock"]}), GpioResource({p["spiBus"]["miso"]}), GpioResource({p["spiBus"]["mosi"]})}};\n'
-        identity+=f'    {{BoardProfileId::{r["boardProfile"]},{json.dumps(r["name"])},{rev},{version},{image}}},\n'
+        runtime+='};\n'
+        resource_key=json.dumps(p,sort_keys=True)
+        if resource_key in resource_symbols:
+            runtime=runtime[:resource_start]
+        else:
+            resource_symbols[resource_key]=symbol
+        resource_symbol=resource_symbols[resource_key]
+        runtime+=f'const BoardProfile {symbol}Profile = {{BoardProfileId::{r["boardProfile"]}, {json.dumps(r["name"])}, {rev}, {resource_symbol}Gpios, {len(p["gpios"])}, {resource_symbol}Buses, {len(p["i2cBuses"])}, {resource_symbol}Slots, {len(p["moduleSlots"])}, GpioResource({p["spiBus"]["clock"]}), GpioResource({p["spiBus"]["miso"]}), GpioResource({p["spiBus"]["mosi"]})}};\n'
+        data=port_map_bytes(r)
+        maps+=f'const uint8_t {symbol}PortMap[] = {{'+','.join(str(b) for b in data)+'};\n'
+        map_hash=hashlib.sha256(data).hexdigest()
+        map_name=r['id']+'.'+map_hash+'.portmap.cbor'
+        outputs['docs/site/assets/hardware/v1/'+map_name]=data
+        identity+=f'    {{BoardProfileId::{r["boardProfile"]},{json.dumps(r["name"])},{rev},{version},{image},{symbol}PortMap,sizeof({symbol}PortMap)}} ,\n'
         public={k:v for k,v in r.items() if k!='testGeneration'}
         content=json.dumps(public,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n'
         digest=hashlib.sha256(content.encode()).hexdigest()
         name=r['id']+'.'+digest+'.json'
         outputs['docs/site/assets/hardware/v1/'+name]=content
-        catalog.append({'id':r['id'],'filename':name,'sha256':digest})
+        catalog.append({'id':r['id'],'filename':name,'sha256':digest,'portMap':map_name,'portMapSha256':map_hash,'portMapBytes':len(data)})
     runtime+='const BoardProfile* const BoardProfiles[] = {&Hardware0Profile,&Hardware1Profile,&Hardware2Profile};\n'
     runtime+='const BoardProfile* const RevisionProfiles[] = {'+','.join('&Hardware%dProfile'%i for i in range(len(catalog)))+'};\n'
     outputs['firmware/src/HardwareProfiles.generated.inc']=runtime
     outputs['firmware/lib/EnvNodeIdentity/src/HardwareIdentityProfiles.generated.inc']=identity
+    outputs['firmware/lib/EnvNodeIdentity/src/HardwarePortMaps.generated.inc']=maps
     outputs['docs/site/assets/hardware/v1/catalog.json']=json.dumps({'schemaVersion':1,'profiles':catalog},indent=2)+'\n'
     spec = importlib.util.spec_from_file_location('test_profiles', ROOT/'firmware/scripts/generate_testboard_profile.py')
     test_profiles = importlib.util.module_from_spec(spec)

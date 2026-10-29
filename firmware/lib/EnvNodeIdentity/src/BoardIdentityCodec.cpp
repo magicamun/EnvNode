@@ -48,12 +48,12 @@ bool allBytesEqual(const uint8_t* data, size_t size, uint8_t value) {
 BoardIdentityStatus BoardIdentityCodec::encode(
     const BoardIdentity& identity,
     uint8_t* output,
-    size_t outputSize) {
+    size_t outputSize, bool requireKnownProfile) {
     if (output == nullptr || outputSize != EncodedSize) {
         return BoardIdentityStatus::InvalidLength;
     }
 
-    const BoardIdentityStatus identityStatus = validateBoardIdentity(identity);
+    const BoardIdentityStatus identityStatus = requireKnownProfile ? validateBoardIdentity(identity) : validateBoardIdentityStructure(identity);
     if (identityStatus != BoardIdentityStatus::Valid
         && identityStatus != BoardIdentityStatus::UnassignedSerial) {
         return identityStatus;
@@ -76,7 +76,7 @@ BoardIdentityStatus BoardIdentityCodec::encode(
 BoardIdentityStatus BoardIdentityCodec::decode(
     const uint8_t* input,
     size_t inputSize,
-    BoardIdentity& identity) {
+    BoardIdentity& identity, bool requireKnownProfile) {
     if (input == nullptr || inputSize != EncodedSize) {
         return BoardIdentityStatus::InvalidLength;
     }
@@ -102,10 +102,11 @@ BoardIdentityStatus BoardIdentityCodec::decode(
     }
 
     const uint16_t encodedProfileId = readUint16LittleEndian(input + 6);
-    if (!decodeBoardProfileId(encodedProfileId, identity.profileId)) {
+    if (requireKnownProfile ? !decodeBoardProfileId(encodedProfileId, identity.profileId) : encodedProfileId > 254) {
         return BoardIdentityStatus::UnknownBoardProfile;
     }
 
+    identity.profileId = static_cast<BoardProfileId>(encodedProfileId);
     identity.revision.major = input[8];
     identity.revision.minor = input[9];
     std::memset(identity.serialNumber.value, 0, sizeof(identity.serialNumber.value));
@@ -129,7 +130,7 @@ BoardIdentityStatus BoardIdentityCodec::decode(
         }
         std::memcpy(identity.serialNumber.value, input + 11, serialLength);
     }
-    return validateBoardIdentity(identity);
+    return requireKnownProfile ? validateBoardIdentity(identity) : validateBoardIdentityStructure(identity);
 }
 
 uint32_t BoardIdentityCodec::calculateCrc32(const uint8_t* data, size_t size) {

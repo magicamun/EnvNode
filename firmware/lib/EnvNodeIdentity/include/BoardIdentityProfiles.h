@@ -9,6 +9,8 @@ struct BoardIdentityProfile {
     BoardRevision revision;
     DescriptorSemanticVersion minimumRuntimeFirmwareVersion;
     const char* imageUrl;
+    const uint8_t* portMap;
+    size_t portMapSize;
 };
 size_t boardIdentityProfileCount();
 const BoardIdentityProfile* boardIdentityProfileAt(size_t index);

@@ -7,8 +7,8 @@
 namespace EnvNode {
 TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection,
     BoardIdentityStore& store, std::function<bool()> available,
-    HardwareDescriptorStore* slotA, HardwareDescriptorStore* slotB)
-    : connection_(connection), store_(store), service_(store), available_(available),
+    HardwareDescriptorStore* slotA, HardwareDescriptorStore* slotB, BoardPortMapStore* maps)
+    : connection_(connection), store_(store), service_(store,maps), available_(available),
       moduleStores_{slotA, slotB} {}
 BoardIdentityReadResult TestBoardProvisioning::refresh() {
     current_ = {}; // Never retain another DUT's identity after a failed read.

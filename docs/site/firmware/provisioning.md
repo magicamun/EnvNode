@@ -94,7 +94,7 @@ zuerst eine Firmware mit Weather-Profil bauen und installieren. Das ältere
    vergebene, dauerhaft dokumentierte alphanumerische Seriennummer eintragen.
    Ein leeres Feld bedeutet noch nicht zugewiesen (`UnassignedSerial`).
 4. Schreibbestätigung setzen, provisionieren und erfolgreiche Rückleseprüfung abwarten.
-5. Neustarten. Erwartung: Status `Valid`, Quelle `EEPROM`, Profil **EnvNode Weather**,
+5. Neustarten. Erwartung: Status `Valid`, Quelle `PortMap` (bei alten ENID-only-Daten `EEPROM`), Profil **EnvNode Weather**,
    Revision **0.2**, eigene Seriennummer, genau **Slot A**.
 6. Aus- und wieder einschalten und dieselben Angaben erneut prüfen.
 
@@ -107,7 +107,7 @@ Mini-PCBs `0.8.x` verwenden dasselbe Firmwareprofil und dieselbe Board Identity
 **EnvNode Mini 0.8**. Der Patchstand wird nicht im EEPROM gespeichert. Unter
 **Hardware** das Profil **EnvNode Mini / 0.8** auswählen, eine Seriennummer
 eintragen, schreiben und rücklesen lassen und anschließend neu starten. Danach
-müssen Quelle `EEPROM`, Status `Valid`, Profil **EnvNode Mini**, Revision `0.8`
+müssen Quelle `PortMap` (bei alten ENID-only-Daten `EEPROM`), Status `Valid`, Profil **EnvNode Mini**, Revision `0.8`
 und zwei Modulslots angezeigt werden.
 
 ## Separate Tester-Firmware
@@ -137,3 +137,15 @@ Die Prüfprofile und Boardbilder werden über docs.envnode.de bereitgestellt.
 Eingebaute Profile bleiben ohne Netz verfügbar. Die unabhängige Signaturprüfung
 ist noch nicht implementiert; der aktuelle Abruf nutzt geprüftes HTTPS und
 SHA-256-Inhaltsprüfungen.
+
+## Selbstbeschreibende Portzuordnung
+
+Board-Provisioning schreibt zusätzlich zur bisherigen ENID-Identität die
+Portzuordnung **ENPM 1**. Das gilt für die normale Firmware und den separaten
+Tester. Beim nächsten Start liest die normale Firmware GPIOs, Busse und
+Modulslots daraus. Für gültige alte Identitäten ohne ENPM bleiben die eingebauten
+Boardtabellen verfügbar; ein Start allein verändert das EEPROM nicht.
+
+Bei beschädigtem ENPM, widersprüchlicher Identität oder nicht erfüllten
+Betriebsanforderungen wird keine GPIO-Zuordnung aktiviert. Diagnose und Bootlog
+weisen den ENPM-Status aus. Die Migration erfolgt durch erneutes Provisioning.

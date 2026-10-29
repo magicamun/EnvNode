@@ -77,10 +77,28 @@ per HTTPS, der Tester behält zusätzlich seine bestehende Offline-Bildansicht.
 
 ## EEPROM und noch ausstehende Integration
 
-Diese Änderung erhält ENID und ENHD 0.1. Der ENID-Boarddatensatz enthält weiterhin
-Profil-ID, Revision und Seriennummer; seine GPIO-Tabelle wird aus den gemeinsamen
-Quelldaten in die Firmware generiert. ENHD-Moduldatensätze enthalten bereits die
-logischen Anforderungen. Bild und Prüfdaten werden nicht ins EEPROM geschrieben.
+ENID und ENHD 0.1 bleiben erhalten. Zusätzlich speichert Board-Provisioning jetzt
+**ENPM 1** in zwei wechselweise geschriebenen Bereichen des Board-EEPROMs. ENPM
+enthält die konkrete Port-/GPIO-Zuordnung, I²C- und SPI-Pins, Modulslots,
+Boardfamilie, Revision, Seriennummer und Betriebsmindestversion. Bilder und
+Testdaten bleiben außerhalb des EEPROMs.
+
+Die normale Firmware liest ENPM beim Start über den festen Identitätsbus und
+rekonstruiert ihre Ressourcen daraus, auch für eine noch nicht eingebaute
+Boardfamilie oder Revision. Eine gültige bisherige ENID-Identität ohne ENPM nutzt
+weiter die eingebauten Tabellen. Der Start schreibt das EEPROM nicht automatisch
+um. Erneutes Provisioning über normale Firmware oder Tester schreibt zunächst
+ENPM, anschließend ENID; beide Datensätze müssen am Ende übereinstimmen.
+
+Eine beschädigte, unbekannte oder nicht zur Identität passende Portzuordnung
+sperrt den Hardwarestart. Ebenso werden physisch ungeeignete ESP32-Pins oder eine
+zu hohe Betriebsmindestversion erst beim Start abgelehnt; das Provisioning selbst
+benötigt diese Betriebsunterstützung nicht. Die normale GPIO-/Businitialisierung folgt erst nach erfolgreicher Prüfung;
+I²C0 wird vorher ausschließlich zum Lesen der Identität gestartet. Das ESP32-Laufzeitmodell kopiert alle Daten in
+eigenen Speicher und benötigt danach weder Download noch Profilpuffer.
+
+Format, Schreibreihenfolge und Ausfallverhalten sind in
+[ADR 0015](adr/0015-self-contained-board-port-map.md) festgelegt.
 
 Die vollständige Umsetzung nachladbarer Provisioning-Profile ist damit noch
 nicht abgeschlossen: Die normale Firmware importiert den neuen JSON-Katalog
@@ -98,10 +116,10 @@ ESP32-Zufallsquelle erzeugt; das Ziel-EEPROM gehört weiterhin zum externen Prü
 Die Modulvorlage im gemeinsamen Webformular ist weiterhin DuoRelay 0.3.
 SD und SX1262-Remote sind keine erfundenen Produktprofile in diesem Katalog.
 
-Als nächster Integrationsschritt werden ein gemeinsamer begrenzter Laufzeitdecoder,
-Profilrepository und generische EEPROM-Projektion benötigt. Neue Boardprofile
-benötigen außerdem eine stabile Identitäts-/GPIO-Repräsentation im EEPROM oder
-einen persistenten lokalen Profilbestand; ein neuer Download allein macht eine
-alte Firmware mit ausschließlich eingebauten ENID-Tabellen nicht kompatibel.
-Dieser Schritt muss die bestehenden EEPROM-Daten migrieren können und dieselben
-Validierungs-, Hash-, Offline- und Transaktionsregeln wie der Tester einhalten.
+Als nächster Integrationsschritt werden ein gemeinsamer begrenzter Laufzeitdecoder
+für den Remote-Katalog und ein Profilrepository benötigt. Die EEPROM-Projektion
+für Boards ist mit ENPM vorhanden. Der Generator veröffentlicht zusätzlich
+hashgebundene `.portmap.cbor`-Vorlagen und deren Dateinamen, SHA-256 und Länge im
+Hardwarekatalog. Beim Provisioning ergänzt der gemeinsame Schreibpfad die
+individuelle Seriennummer. Der Remote-Import muss die bestehenden Validierungs-,
+Hash-, Offline- und Transaktionsregeln des Testers einhalten.

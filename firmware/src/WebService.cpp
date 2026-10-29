@@ -1937,7 +1937,8 @@ void WebService::renderDiagnostics() {
                     }
                     if (bus.bus == I2CBus::I2C0 && result.addresses[addressIndex] == 0x50) {
                         c += uiText(TextId::MainboardEEPROM);
-                        if (boardIdentityResolution_.source == BoardIdentitySource::EEPROM) {
+                        if ((boardIdentityResolution_.source == BoardIdentitySource::EEPROM
+                            || boardIdentityResolution_.source == BoardIdentitySource::PortMap)) {
                             const BoardIdentity& identity = boardIdentityResolution_.identity;
                             c += "<br>" + escapeHtml(board.displayName)
                                 + (String(" · ") + uiText(TextId::Revision) + " ") + String(identity.revision.major) + "."
@@ -2443,6 +2444,7 @@ String WebService::renderHardwareOverview() {
     c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
     c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
     c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
+    c += "<span>ENPM</span><span>" + String(boardPortMapStatusName(boardIdentityResolution_.portMapStatus)) + "</span>";
     c += (String("<span>") + uiText(TextId::BoardProfile) + "</span><span>") + escapeHtml(board.displayName) + "</span>";
     c += (String("<span>") + uiText(TextId::BoardProfileId) + "</span><span>") + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
     c += (String("<span>") + uiText(TextId::HardwareRevision) + "</span><span>") + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";

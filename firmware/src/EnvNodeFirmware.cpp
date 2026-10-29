@@ -65,9 +65,10 @@ static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
 static I2CBusManager i2cBusManager(logger, EnvNodeIdentityI2C);
 static IdentityEeprom24LC32 boardIdentityEeprom(i2cBusManager, 0x50, EnvNodeIdentityI2C.bus);
 static BoardIdentityStore boardIdentityStore(boardIdentityEeprom);
+static BoardPortMapStore boardPortMapStore(boardIdentityEeprom);
 static BoardIdentityResolver boardIdentityResolver(
-    boardIdentityStore, buildFallbackBoardProfileId());
-static BoardProvisioningService boardProvisioningService(boardIdentityStore);
+    boardIdentityStore, buildFallbackBoardProfileId(), &boardPortMapStore);
+static BoardProvisioningService boardProvisioningService(boardIdentityStore, &boardPortMapStore);
 static IdentityEeprom24LC32 slotAModuleEeprom(
     i2cBusManager, ModuleDiscoveryService::SlotAEepromAddress, EnvNodeIdentityI2C.bus);
 static IdentityEeprom24LC32 slotBModuleEeprom(
@@ -155,8 +156,16 @@ void setupEnvNodeFirmware() {
         identityResolution.identity.revision.major,
         identityResolution.identity.revision.minor,
         identityResolution.identity.serialNumber.value);
+    logger.infof("Board port map status=%s",boardPortMapStatusName(identityResolution.portMapStatus));
+    if (boardIdentityResolver.portMap() && identityResolution.portMapStatus == BoardPortMapStatus::Valid) {
+        const auto& minimum = boardIdentityResolver.portMap()->minimumFirmware;
+        logger.infof("Board port map minimum firmware=%u.%u.%u runtime=%s",
+            minimum.major, minimum.minor, minimum.patch,
+            identityResolution.normalRuntimeAllowed ? "allowed" : "blocked");
+    }
     if (!identityResolution.normalRuntimeAllowed
-        || !selectCurrentBoardProfile(identityResolution.identity.profileId, identityResolution.identity.revision)) {
+        || !(boardIdentityResolver.portMap() ? selectCurrentBoardPortMap(*boardIdentityResolver.portMap())
+            : selectCurrentBoardProfile(identityResolution.identity.profileId, identityResolution.identity.revision))) {
         logger.error("Board identity unsupported; normal runtime initialization stopped");
         return;
     }

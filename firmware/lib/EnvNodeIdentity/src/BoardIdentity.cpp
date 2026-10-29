@@ -24,6 +24,14 @@ uint16_t encodeBoardProfileId(BoardProfileId profileId) {
     return static_cast<uint16_t>(profileId);
 }
 
+BoardIdentityStatus validateBoardIdentityStructure(const BoardIdentity& identity) {
+    if (!std::memchr(identity.serialNumber.value,0,sizeof(identity.serialNumber.value))) return BoardIdentityStatus::InvalidSerial;
+    if (encodeBoardProfileId(identity.profileId) > 254) return BoardIdentityStatus::UnknownBoardProfile;
+    if (identity.revision.major == 255 && identity.revision.minor == 255) return BoardIdentityStatus::InvalidRevision;
+    if (!isValidBoardSerialNumber(identity.serialNumber.value)) return BoardIdentityStatus::InvalidSerial;
+    return isBoardSerialNumberAssigned(identity.serialNumber) ? BoardIdentityStatus::Valid : BoardIdentityStatus::UnassignedSerial;
+}
+
 BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
     if (!isKnownBoardProfileId(encodeBoardProfileId(identity.profileId))) {
         return BoardIdentityStatus::UnknownBoardProfile;

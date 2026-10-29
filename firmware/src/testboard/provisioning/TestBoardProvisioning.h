@@ -14,7 +14,7 @@ class TestBoardProvisioning : public IProvisioningAdministration {
 public:
     TestBoardProvisioning(IProvisioningConnection& connection, BoardIdentityStore& store,
         std::function<bool()> available, HardwareDescriptorStore* slotA = nullptr,
-        HardwareDescriptorStore* slotB = nullptr);
+        HardwareDescriptorStore* slotB = nullptr, BoardPortMapStore* maps = nullptr);
     bool available() const { return available_(); }
     BoardIdentityReadResult refresh();
     bool hasProvisioningBoardIdentity() const override;

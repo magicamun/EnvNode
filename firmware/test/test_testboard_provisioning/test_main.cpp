@@ -32,14 +32,15 @@ struct Pages : IWebPagePresenter {
     void sendPage(const char*, const char*, const String& c, int s, bool) override { content = c; status = s; }
 };
 struct Fixture {
-    bool moduleRoutes;
+    bool moduleRoutes, mapWrites;
     Logger logger; Pages pages; WebServer server{80};
     Testing::SimulatedFixture simulation; Testing::TestRunner tests{simulation};
     ProvisioningI2C bus{16, 5}; IdentityEeprom24LC32 eeprom{bus, 0x50};
     BoardIdentityStore store{eeprom};
+    BoardPortMapStore maps{eeprom};
     IdentityEeprom24LC32 moduleAEeprom{bus, 0x52}, moduleBEeprom{bus, 0x53};
     HardwareDescriptorStore moduleA{moduleAEeprom}, moduleB{moduleBEeprom};
-    TestBoardProvisioning administration{bus, store, [this]() { return tests.phase() != Testing::Phase::Running; }, &moduleA, &moduleB};
+    TestBoardProvisioning administration{bus, store, [this]() { return tests.phase() != Testing::Phase::Running; }, &moduleA, &moduleB, mapWrites ? &maps : nullptr};
     HardwareProvisioningWebRoutes routes{server, pages, logger, administration,
         [this]() { return buildProvisioningOverview(administration, pages.locale); },
         [](uint8_t* bytes, size_t size) { std::fill_n(bytes, size, 42); }, options()};
@@ -47,7 +48,7 @@ struct Fixture {
         ProvisioningWebOptions o; o.modules = moduleRoutes; o.externalTarget = true;
         o.available = [this]() { return administration.available(); }; return o;
     }
-    explicit Fixture(bool modules = false) : moduleRoutes(modules) { routes.registerRoutes(server); }
+    explicit Fixture(bool modules = false, bool portMaps = false) : moduleRoutes(modules), mapWrites(portMaps) { routes.registerRoutes(server); }
     void form(bool confirmed = true) {
         server.arguments = {{"boardProfileId", "2"}, {"serialNumber", "MINI-EXTERNAL"}};
         if (confirmed) server.arguments["confirmProvisioning"] = "1";
@@ -268,8 +269,24 @@ void test_module_needing_future_firmware_can_be_written_and_bus_is_released() {
     TEST_ASSERT_NULL(f.bus.wire(I2CBus::I2C0));
 }
 
+void test_external_board_provisioning_writes_self_contained_map_and_identity() {
+    Fixture f(false,true);f.form();
+    auto& target=Wire.storage(0x50);std::fill(target.begin()+64,target.begin()+256,0x5a);
+    TEST_ASSERT_TRUE(f.server.request("/hardware/board-identity/write",HTTP_POST));
+    TEST_ASSERT_EQUAL(200,f.pages.status);TEST_ASSERT_EQUAL(1,Wire.begins);TEST_ASSERT_EQUAL(1,Wire.ends);
+    TEST_ASSERT_NULL(f.bus.wire(I2CBus::I2C0));
+    TEST_ASSERT_TRUE(f.bus.begin());BoardPortMap map;
+    TEST_ASSERT_EQUAL(BoardPortMapStatus::Valid,f.maps.read(map).status);
+    const auto enid=f.store.read();f.bus.end();
+    TEST_ASSERT_EQUAL(BoardIdentityStatus::Valid,enid.status);TEST_ASSERT_EQUAL_STRING("MINI-EXTERNAL",map.serial.value);
+    TEST_ASSERT_EQUAL(2,map.profileId);TEST_ASSERT_EQUAL(8,map.revision.minor);
+    TEST_ASSERT_EQUAL(2,map.slotCount);TEST_ASSERT_EQUAL(33,map.slots[0].aux1);
+    for(size_t i=64;i<256;++i)TEST_ASSERT_EQUAL_HEX8(0x5a,target[i]);
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_external_board_provisioning_writes_self_contained_map_and_identity);
     RUN_TEST(test_running_connector_test_blocks_module_routes_and_direct_writer);
     RUN_TEST(test_module_needing_future_firmware_can_be_written_and_bus_is_released);
     RUN_TEST(test_module_provisioning_is_available_without_operating_drivers);
