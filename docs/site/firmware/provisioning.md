@@ -155,7 +155,9 @@ weisen den ENPM-Status aus. Die Migration erfolgt durch erneutes Provisioning.
 In derselben Provisioning-Ansicht steht zusätzlich **Nachladbare Hardwareprofile**
 zur Verfügung. Einmalig werden die verfügbaren Boards und Module aus dem
 Dokumentationskatalog geladen; **Profile aktualisieren** wiederholt die Anfrage.
-Dafür müssen WLAN und Uhrzeit bereit sein. Die eingebauten Formulare bleiben
+Seit EnvNode 0.8.4 / Tester 0.8.1 übernimmt der Browser HTTPS und die
+SHA-256-Prüfung; er lädt die geprüfte Vorlage anschließend lokal zum Gerät hoch.
+Der Browser benötigt Internetzugang und eine Verbindung zum Gerät. Die eingebauten Formulare bleiben
 auch ohne Internet verwendbar.
 
 Profil, Revision und Board-/Modulbild dienen zur Auswahl. Die angezeigte

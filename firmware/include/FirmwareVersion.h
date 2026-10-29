@@ -2,6 +2,6 @@
 
 namespace EnvNode {
 
-constexpr const char* FirmwareVersion = "0.8.3";
+constexpr const char* FirmwareVersion = "0.8.4";
 
 } // namespace EnvNode

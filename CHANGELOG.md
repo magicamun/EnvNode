@@ -4,6 +4,12 @@
 
 ### Added
 
+- EnvNode 0.8.4 / Testboard 0.8.1: move provisioning HTTPS downloads and
+  SHA-256 verification into the browser, load its client with SRI, and validate
+  bounded local uploads before the existing EEPROM write. Recover normal
+  firmware flash by removing the provisioning TLS transport; preserve local
+  forms and the separate tester connection-profile downloader.
+
 - EnvNode 0.8.3 / Testboard 0.8.0: load one shared, hash-bound provisioning
   catalog for boards and modules over verified HTTPS. Preserve the separate
   tester menu and EnvNode hardware administration; show images and minimum

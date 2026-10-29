@@ -20,7 +20,6 @@ public:
     HardwareProvisioningWebRoutes(WebServer& server, IWebPagePresenter& pages,
         ILogger& logger, IProvisioningAdministration& administration,
         Overview overview, Random random, ProvisioningWebOptions options = {});
-    void attachProfiles(HardwareProfileRepository& profiles) { profiles_ = &profiles; }
     bool enableRemoteProfiles();
     void registerRoutes(WebServer& server) override;
 private:
@@ -40,9 +39,7 @@ private:
     bool operationAllowed();
     String remoteProfilesSection();
     void handleRemoteProfileWrite();
-    void handleProfileRefresh();
-    HardwareProfileRepository* profiles_ = nullptr;
-    std::unique_ptr<IHardwareProfileTransport> profileTransport_;
-    std::unique_ptr<HardwareProfileRepository> ownedProfiles_;
+    void handleProfileState();
+    bool remoteProfilesEnabled_ = false;
 };
 }

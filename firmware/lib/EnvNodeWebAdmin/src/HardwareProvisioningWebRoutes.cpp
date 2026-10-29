@@ -15,8 +15,8 @@ HardwareProvisioningWebRoutes::HardwareProvisioningWebRoutes(WebServer& server,
     : server_(server), pages_(pages), logger_(logger), administration_(administration),
       overview_(overview), random_(random), options_(options) {}
 void HardwareProvisioningWebRoutes::registerRoutes(WebServer& server) {
-    if(profiles_) {
-        server.on("/hardware/profiles/refresh", HTTP_POST, [this]() { handleProfileRefresh(); });
+    if(remoteProfilesEnabled_) {
+        server.on("/hardware/profile/state", HTTP_GET, [this]() { handleProfileState(); });
         server.on("/hardware/profile/write", HTTP_POST, [this]() { handleRemoteProfileWrite(); });
     }
     server.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
@@ -34,9 +34,8 @@ void HardwareProvisioningWebRoutes::sendResult(const char* title, const char* ro
     const char* message, bool success) { sendWebResult(pages_, title, route, message, success); }
 void HardwareProvisioningWebRoutes::handleHardware() {
     if (!operationAllowed()) return;
-    if(profiles_) profiles_->refreshOnce();
     String c = overview_();
-    if(profiles_) c += remoteProfilesSection();
+    if(remoteProfilesEnabled_) c += remoteProfilesSection();
     const BoardIdentity identity = administration_.provisioningBoardIdentity();
     if (options_.modules) {
         c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");

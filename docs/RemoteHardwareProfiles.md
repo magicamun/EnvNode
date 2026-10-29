@@ -1,4 +1,4 @@
-# Nachladbare Hardwareprofile — EnvNode 0.8.3 / Tester 0.8.0
+# Nachladbare Hardwareprofile — EnvNode 0.8.4 / Tester 0.8.1
 
 EnvNode-eigene Inhalte unterliegen der Repository-LICENSE
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
@@ -14,8 +14,8 @@ Die Slot-, Chargen- und Datumsfelder erscheinen für Module.
 
 Beim ersten Öffnen der Seite erfolgt ein begrenzter Abruf von
 `https://docs.envnode.de/assets/hardware/v1/provisioning-catalog.cbor`.
-**Profile aktualisieren** wiederholt den Abruf ausdrücklich. WLAN und eine
-synchronisierte Uhrzeit sind Voraussetzung für die TLS-Prüfung. Das gewählte
+**Profile aktualisieren** wiederholt den Abruf ausdrücklich. Der Browser benötigt
+Internetzugang und eine Verbindung zum Gerät; die Geräteuhr ist hierfür nicht nötig. Das gewählte
 Profil wird erst beim bestätigten Schreiben geladen; eine Bild-/Profilauswahl
 schreibt kein EEPROM. Ohne Bestätigung beginnt auch kein Profildownload.
 
@@ -35,9 +35,8 @@ keinen persistenten Downloadcache. Nach dem Provisioning benötigt die normale
 Firmware dank ENPM/ENHD beim Neustart kein Internet zur Portauflösung.
 
 Während einer laufenden Anschlussprüfung sperrt der Tester Katalogabruf,
-Profildownload und sämtliche Schreibpfade. HTTP-Abrufe sind synchron und zeitlich
-begrenzt; währenddessen kann die Oberfläche kurz verzögert reagieren. Es wird
-kein Hintergrundthread und kein Netzwerkabruf pro Messpunkt angelegt.
+Profildownload und sämtliche Schreibpfade. Der Browser prüft vor jedem Abruf den lokalen Sperrstatus. Downloads laufen
+asynchron mit Zeitlimit; der Schreibendpunkt prüft die Sperre erneut.
 
 ## Eine Quelle und zwei EEPROM-Projektionen
 
@@ -105,16 +104,27 @@ Diese Konfliktprüfung ist nicht über Neustarts hinweg persistent.
 
 ## Transport, Speicher und Veröffentlichung
 
-Der ESP prüft den festen HTTPS-Host gegen ISRG Root X1 und die Zertifikatszeit.
-Redirects sind ausgeschaltet; jede Vorlage wird gegen den Katalog-Hash geprüft.
-Die TLS-Verbindung und der Downloadpuffer werden vor dem EEPROM-Schreiben
-freigegeben. Katalog und geladenes Modell liegen begrenzt im Heap; es bleiben
-höchstens ein geladener Datensatz und ein vorbereiteter Ersatz erhalten.
-Der große Modul-Decoder wird nur während der jeweiligen Operation angelegt.
+Seit EnvNode 0.8.4 / Tester 0.8.1 lädt der Browser Katalog und Vorlagen über
+HTTPS mit anonymem CORS, ohne Redirects. Er prüft Länge und SHA-256 der Vorlage
+und sendet den ausgewählten CBOR-Katalogeintrag und die Vorlage an den lokalen
+Schreibendpunkt. Ein kleiner mitgelieferter SHA-256-Client funktioniert auch
+auf einer lokalen HTTP-Seite ohne Web Crypto. Bereits geprüfte Vorlagen bleiben
+für die Dauer der geöffneten Seite im Browser-RAM verfügbar.
 
-HTTPS und Hashbindung vertrauen dem Dokumentationshost. Eine davon unabhängige
-Public-Key-Signaturprüfung ist weiterhin nicht implementiert. Der Browser nutzt
-für Bilder HTTPS; er prüft deren Inhaltshash nicht zusätzlich.
+Der Browserclient selbst liegt unter einem hashgebundenen Dateinamen auf
+docs.envnode.de und wird asynchron mit Subresource Integrity geladen. Sein
+Ausfall blockiert die eingebauten lokalen Formulare nicht. Die MIT-Lizenz der
+verwendeten Bibliothek js-sha256 ist im veröffentlichten Client enthalten.
+
+Der ESP begrenzt Uploadgrößen und prüft CBOR-Struktur, Profil-ID, ausgewählten
+Hashschlüssel, Metadaten und EEPROM-Inhalt vor dem bestehenden verifizierten
+Schreibpfad. Er prüft den SHA-256 nicht erneut und authentifiziert die Herkunft
+des Uploads nicht unabhängig. Das Vertrauensmodell umfasst Browser, Docs-Host
+und die lokale Verbindung zum Gerät; eine Public-Key-Signaturprüfung ist nicht
+implementiert. Bilder lädt der Browser über HTTPS ohne zusätzliche Hashprüfung.
+Die normale Firmware benötigt dadurch keinen TLS-Client für Provisioning.
+Der getrennte Download von Anschlussprüfprofilen im Tester verwendet weiterhin
+dessen bisherigen HTTPS-Transport.
 
 Ein Push nach main veröffentlicht die Dateien über den bestehenden Docs-Workflow.
 Vor dessen erfolgreichem Abschluss kann der neue Endpunkt noch HTTP 404 liefern;

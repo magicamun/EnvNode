@@ -117,3 +117,8 @@ keine fest eingebaute Produktliste im Importer.
 
 Ablauf, Katalogformat, Offline-Verhalten, Vertrauensmodell und Veröffentlichung
 stehen in [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).
+
+Ab EnvNode 0.8.4 / Testboard 0.8.1 übernimmt der Browser den HTTPS-Abruf und
+die SHA-256-Prüfung. Die Firmware validiert den begrenzten Upload und schreibt
+weiterhin über dieselben EEPROM-Pfade. Der Browserclient wird mit SRI vom
+Dokumentationshost geladen; eingebaute Formulare bleiben lokal verfügbar.

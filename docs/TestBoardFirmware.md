@@ -175,3 +175,9 @@ Alongside the built-in forms it now loads the same hardware catalog as EnvNode
 0.8.3. Board maps and arbitrary module templates are downloaded with a verified
 SHA-256 and instantiated without runtime-driver checks. The existing connector
 profile repository remains compatible. See [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).
+
+Since tester 0.8.1 / EnvNode 0.8.4, shared provisioning downloads and SHA-256
+checks run in the browser. A bounded local upload is structurally validated
+before the existing EEPROM write. The browser client loads asynchronously with
+SRI; built-in forms remain available offline. The separate connector-test
+profile downloader retains its existing HTTPS transport.

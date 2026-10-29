@@ -62,6 +62,16 @@ void setFilename(HardwareProfileEntry& e,const char* id,char hash){
     strcpy(e.id,id);memset(e.sha256,hash,64);e.sha256[64]=0;
     snprintf(e.filename,sizeof(e.filename),"%s.%s.%s.cbor",id,e.sha256,e.kind?"module":"portmap");
 }
+String hexBytes(const std::vector<uint8_t>& bytes){
+    const char* digits="0123456789abcdef";std::string out;out.reserve(bytes.size()*2);
+    for(uint8_t byte:bytes){out+=digits[byte>>4];out+=digits[byte&15];}
+    return String(out.c_str());
+}
+std::vector<uint8_t> entryBytes(const HardwareProfileEntry& entry){
+    HardwareProfileCatalog c;c.count=1;c.entries[0]=entry;auto bytes=catalogBytes(c);
+    TEST_ASSERT_EQUAL_HEX8(0x82,bytes[0]);TEST_ASSERT_EQUAL_HEX8(1,bytes[1]);TEST_ASSERT_EQUAL_HEX8(0x81,bytes[2]);
+    return {bytes.begin()+3,bytes.end()};
+}
 struct Fixture {
     bool external,locked=false;Logger logger;Pages pages;WebServer server{80};Transport transport;HardwareProfileRepository repo{transport};
     ProvisioningI2C bus{16,5};IdentityEeprom24LC32 eeprom{bus,0x50},ea{bus,0x52},eb{bus,0x53};
@@ -72,8 +82,13 @@ struct Fixture {
         [this](){return String(external?"<section>Tester-Provisioning</section>":"<section>EnvNode-Hardwareverwaltung</section>");},
         [this](uint8_t* bytes,size_t size){memset(bytes,++nonce,size);},options()};
     ProvisioningWebOptions options(){ProvisioningWebOptions o;o.externalTarget=external;o.available=[this](){return !locked;};return o;}
-    explicit Fixture(bool tester=true):external(tester){routes.attachProfiles(repo);routes.registerRoutes(server);}
-    void form(const HardwareProfileEntry& e,bool confirmed=true){server.arguments={{"remoteProfileKey",String(e.id)+"|"+e.sha256},{"remoteSerial","PROFILE-TEST"},{"remoteSlot","A"}};if(confirmed)server.arguments["confirmRemoteProvisioning"]="1";}
+    explicit Fixture(bool tester=true):external(tester){routes.enableRemoteProfiles();routes.registerRoutes(server);}
+    void form(const HardwareProfileEntry& e,bool confirmed=true){
+        auto bytes=transport.overrides.count(e.filename)?transport.overrides[e.filename]:file(e.filename);
+        server.arguments={{"remoteProfileKey",String(e.id)+"|"+e.sha256},{"remoteSerial","PROFILE-TEST"},{"remoteSlot","A"},
+            {"remoteProfileEntry",hexBytes(entryBytes(e))},{"remoteProfileData",hexBytes(bytes)}};
+        if(confirmed)server.arguments["confirmRemoteProvisioning"]="1";
+    }
 };
 void setUp(){Wire=TwoWire();Wire1=TwoWire();}
 void tearDown(){}
@@ -111,7 +126,8 @@ void test_remote_selection_preserves_both_existing_ui_contexts_and_shows_images(
         TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),external?"Tester-Provisioning":"EnvNode-Hardwareverwaltung"));
         TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),external?"extern angeschlossener Prüfling":"dieser EnvNode"));
         TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"name='boardProfileKey'"));
-        TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"remoteProfileKey"));TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"https://docs.envnode.de/assets/"));
+        TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"remoteProfileKey"));TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"browser-profile-client."));
+        TEST_ASSERT_EQUAL(0,f.transport.calls);
         TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"remote-profile-image"));
     }
 }
@@ -121,7 +137,8 @@ void test_confirmation_stale_selection_and_test_lock_never_write_or_download(){
     f.form(e);f.server.arguments["remoteProfileKey"]=(std::string(e.id)+"|"+std::string(64,'0')).c_str();
     f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);TEST_ASSERT_EQUAL(calls,f.transport.calls);
     f.locked=true;f.form(e);
-    for(const char* path:{"/hardware/profile/write","/hardware/profiles/refresh"}){f.server.request(path,HTTP_POST);TEST_ASSERT_EQUAL(409,f.pages.status);}
+    TEST_ASSERT_TRUE(f.server.request("/hardware/profile/write",HTTP_POST));TEST_ASSERT_EQUAL(409,f.pages.status);
+    TEST_ASSERT_TRUE(f.server.request("/hardware/profile/state",HTTP_GET));TEST_ASSERT_EQUAL(409,f.pages.status);
     TEST_ASSERT_EQUAL(calls,f.transport.calls);TEST_ASSERT_EQUAL(0,Wire.begins);
 }
 void test_unknown_remote_board_with_higher_minimum_firmware_is_provisioned(){
@@ -151,10 +168,10 @@ void test_remote_module_template_generates_unique_instances_and_writes_selected_
         TEST_ASSERT_NOT_EQUAL(0,memcmp(previous,d.instanceId,16));memcpy(previous,d.instanceId,16);
     }
 }
-void test_hash_failure_and_invalid_serial_do_not_connect_eeprom(){
-    Fixture f;TEST_ASSERT_TRUE(f.repo.refresh());const auto e=*f.repo.at(0);f.form(e);f.transport.rejectDigest=true;
+void test_invalid_upload_and_invalid_serial_do_not_connect_eeprom(){
+    Fixture f;TEST_ASSERT_TRUE(f.repo.refresh());const auto e=*f.repo.at(0);f.form(e);f.server.arguments["remoteProfileData"]="00";
     f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);
-    f.transport.rejectDigest=false;f.form(e);f.server.arguments["remoteSerial"]="invalid<serial>";
+    f.form(e);f.server.arguments["remoteSerial"]="invalid<serial>";
     f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);
 }
 void test_remote_only_module_with_unknown_driver_and_future_firmware_is_written(){
@@ -193,7 +210,34 @@ void test_raw_cbor_copy_rejects_trailing_or_noncanonical_values(){
     TEST_ASSERT_EQUAL_UINT8_ARRAY(valid,output,sizeof(valid));
 }
 
+void test_browser_script_is_hash_pinned_and_state_check_does_not_open_i2c(){
+    Fixture f;
+    TEST_ASSERT_TRUE(f.server.request("/hardware",HTTP_GET));
+    TEST_ASSERT_EQUAL(200,f.pages.status);
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"https://docs.envnode.de/assets/hardware/v1/browser-profile-client."));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"integrity='sha256-"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"crossorigin='anonymous'"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"script async"));
+    TEST_ASSERT_TRUE(f.server.request("/hardware/profile/state",HTTP_GET));
+    TEST_ASSERT_EQUAL(200,f.server.responseStatus);TEST_ASSERT_EQUAL(0,Wire.begins);TEST_ASSERT_EQUAL(0,f.transport.calls);
+    TEST_ASSERT_FALSE(f.server.request("/hardware/profiles/refresh",HTTP_POST));
+    // Render an isolated browser smoke-test page; this never connects to a device.
+    std::ofstream preview("/private/tmp/envnode-browser-import-preview.html");
+    preview<<"<!doctype html><html><head><meta charset='utf-8'><title>EnvNode provisioning test</title></head><body>"<<f.pages.content.c_str()<<"</body></html>";
+}
+void test_oversized_and_malformed_metadata_uploads_never_touch_eeprom(){
+    Fixture f;TEST_ASSERT_TRUE(f.repo.refresh());const auto e=*f.repo.at(0);
+    for(const char* field:{"remoteProfileEntry","remoteProfileData"}){
+        f.form(e);f.server.arguments[field]=String(std::string(9000,'0').c_str());
+        TEST_ASSERT_TRUE(f.server.request("/hardware/profile/write",HTTP_POST));TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);
+        f.form(e);f.server.arguments[field]="invalid hex";
+        f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);
+    }
+}
+
 int main(){UNITY_BEGIN();
+    RUN_TEST(test_browser_script_is_hash_pinned_and_state_check_does_not_open_i2c);
+    RUN_TEST(test_oversized_and_malformed_metadata_uploads_never_touch_eeprom);
     RUN_TEST(test_remote_only_module_with_unknown_driver_and_future_firmware_is_written);
     RUN_TEST(test_module_template_preserves_unknown_fields_and_rejects_assigned_templates);
     RUN_TEST(test_raw_cbor_copy_rejects_trailing_or_noncanonical_values);
@@ -205,5 +249,5 @@ int main(){UNITY_BEGIN();
     RUN_TEST(test_confirmation_stale_selection_and_test_lock_never_write_or_download);
     RUN_TEST(test_unknown_remote_board_with_higher_minimum_firmware_is_provisioned);
     RUN_TEST(test_remote_module_template_generates_unique_instances_and_writes_selected_slot);
-    RUN_TEST(test_hash_failure_and_invalid_serial_do_not_connect_eeprom);
+    RUN_TEST(test_invalid_upload_and_invalid_serial_do_not_connect_eeprom);
     return UNITY_END();}

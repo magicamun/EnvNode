@@ -132,6 +132,9 @@ def generate():
     test_profiles = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(test_profiles)
     outputs.update(test_profiles.generate())
+    spec = importlib.util.spec_from_file_location('browser_profiles', ROOT/'firmware/scripts/generate_browser_profile_assets.py')
+    browser_profiles = importlib.util.module_from_spec(spec);spec.loader.exec_module(browser_profiles)
+    outputs.update({str(path.relative_to(ROOT)): content for path,content in browser_profiles.generate().items()})
     return outputs
 
 if __name__=='__main__':

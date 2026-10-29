@@ -28,31 +28,21 @@ bool same(const HardwareProfileEntry& a,const HardwareProfileEntry& b){
         &&a.minimumFirmware.major==b.minimumFirmware.major&&a.minimumFirmware.minor==b.minimumFirmware.minor&&a.minimumFirmware.patch==b.minimumFirmware.patch;
 }
 bool versionMatches(const DescriptorSemanticVersion& a,const DescriptorSemanticVersion& b){return a.major==b.major&&a.minor==b.minor&&a.patch==b.patch;}
-bool metadataMatches(const LoadedHardwareProfile& p){
-    const auto& e=p.entry;
+bool payloadMatches(const HardwareProfileEntry& e,const uint8_t* bytes,size_t size){
+    if(!bytes||size!=e.bytes)return false;
     if(e.kind==0){
         BoardPortMap map;
-        return BoardPortMapCodec::decode(p.bytes.get(),p.size,map)&&!map.serial.value[0]
+        return BoardPortMapCodec::decode(bytes,size,map)&&!map.serial.value[0]
             &&!strcmp(map.name,e.name)&&map.revision.major==e.revision.major&&map.revision.minor==e.revision.minor&&versionMatches(map.minimumFirmware,e.minimumFirmware);
     }
     std::unique_ptr<HardwareDescriptor> d(new(std::nothrow) HardwareDescriptor);
-    if(!d||HardwareDescriptorCodec::decode(p.bytes.get(),p.size,HardwareDescriptorObjectKind::Module,*d)!=HardwareDescriptorDecodeStatus::Valid)return false;
+    if(!d||HardwareDescriptorCodec::decode(bytes,size,HardwareDescriptorObjectKind::Module,*d)!=HardwareDescriptorDecodeStatus::Valid)return false;
     for(uint8_t byte:d->instanceId)if(byte)return false;
     return d->serialNumber.empty()&&d->productionBatch.empty()&&d->productionDate.empty()
         &&d->name.equals(e.name)&&d->hardwareRevision.major==e.revision.major&&d->hardwareRevision.minor==e.revision.minor&&versionMatches(d->compatibility.minimumFirmwareVersion,e.minimumFirmware);
 }
-}
-bool safeHardwareProfileFilename(const char* p){
-    if(!p||!*p||strlen(p)>175||*p=='.'||strstr(p,".."))return false;
-    for(;*p;++p)if(!(*p>='a'&&*p<='z')&&!(*p>='0'&&*p<='9')&&*p!='.'&&*p!='-')return false;
-    return true;
-}
-bool decodeHardwareProfileCatalog(const uint8_t* bytes,size_t size,HardwareProfileCatalog& catalog){
-    if(!bytes||!size||size>MaximumHardwareCatalogBytes)return false;
-    CompactCborReader r(bytes,size);uint64_t version=0;size_t count=0;
-    if(!array(r,2)||!number(r,1,version)||version!=1||!r.enterArray(count)||count>MaximumHardwareProfiles)return false;
-    catalog.count=0;
-    for(size_t i=0;i<count;++i){auto& e=catalog.entries[i];uint64_t n=0;
+bool parseEntry(CompactCborReader& r, HardwareProfileEntry& e){
+    uint64_t n=0;
         if(!array(r,9)||!text(r,e.id,sizeof(e.id))||!safeHardwareProfileFilename(e.id)||!text(r,e.name,sizeof(e.name))
             ||!number(r,1,n))return false;
         e.kind=n;
@@ -70,6 +60,30 @@ bool decodeHardwareProfileCatalog(const uint8_t* bytes,size_t size,HardwareProfi
         if(needed>sizeof(expected))return false;
         strcpy(expected,e.id);strcat(expected,".");strcat(expected,e.sha256);strcat(expected,suffix);
         if(strcmp(expected,e.filename))return false;
+    return true;
+}
+
+}
+bool safeHardwareProfileFilename(const char* p){
+    if(!p||!*p||strlen(p)>175||*p=='.'||strstr(p,".."))return false;
+    for(;*p;++p)if(!(*p>='a'&&*p<='z')&&!(*p>='0'&&*p<='9')&&*p!='.'&&*p!='-')return false;
+    return true;
+}
+bool decodeHardwareProfileEntry(const uint8_t* bytes,size_t size,HardwareProfileEntry& entry){
+    if(!bytes||!size||size>1024)return false;
+    CompactCborReader r(bytes,size);
+    return parseEntry(r,entry)&&!r.remaining();
+}
+bool validateHardwareProfilePayload(const HardwareProfileEntry& entry,const uint8_t* bytes,size_t size){
+    return payloadMatches(entry,bytes,size);
+}
+bool decodeHardwareProfileCatalog(const uint8_t* bytes,size_t size,HardwareProfileCatalog& catalog){
+    if(!bytes||!size||size>MaximumHardwareCatalogBytes)return false;
+    CompactCborReader r(bytes,size);uint64_t version=0;size_t count=0;
+    if(!array(r,2)||!number(r,1,version)||version!=1||!r.enterArray(count)||count>MaximumHardwareProfiles)return false;
+    catalog.count=0;
+    for(size_t i=0;i<count;++i){auto& e=catalog.entries[i];
+        if(!parseEntry(r,e))return false;
         for(size_t j=0;j<i;++j)if(!strcmp(e.id,catalog.entries[j].id))return false;
         ++catalog.count;
     }
@@ -97,7 +111,7 @@ const LoadedHardwareProfile* HardwareProfileRepository::load(const char* id,cons
     if(!next){status_="out-of-memory";return nullptr;}
     next->entry=*entry;
     if(!transport_.fetch(entry->filename,entry->bytes,entry->sha256,next->bytes,next->size)
-        ||next->size!=entry->bytes||!metadataMatches(*next)){status_="profile-invalid";return nullptr;}
+        ||next->size!=entry->bytes||!validateHardwareProfilePayload(next->entry,next->bytes.get(),next->size)){status_="profile-invalid";return nullptr;}
     loaded_=std::move(next);status_="ready";return loaded_.get();
 }
 }

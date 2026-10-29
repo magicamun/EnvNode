@@ -18,6 +18,8 @@ struct HardwareProfileCatalog {
     HardwareProfileEntry entries[MaximumHardwareProfiles];
 };
 bool safeHardwareProfileFilename(const char*);
+bool decodeHardwareProfileEntry(const uint8_t*, size_t, HardwareProfileEntry&);
+bool validateHardwareProfilePayload(const HardwareProfileEntry&, const uint8_t*, size_t);
 bool decodeHardwareProfileCatalog(const uint8_t*, size_t, HardwareProfileCatalog&);
 class IHardwareProfileTransport {
 public:
