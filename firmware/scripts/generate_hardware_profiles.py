@@ -33,12 +33,13 @@ def records():
         if test is not None:
             if test['id']!=r['id'] or test['name']!=r['name'] or test['identityRevision']!=r['identityRevision']:
                 raise ValueError('Test and provisioning identities differ')
-            image = r['image']
-            if not image or not image.startswith('https://docs.envnode.de/assets/testboard/v1/'):
-                raise ValueError('Invalid image origin')
-            image_path = ROOT/'docs/site/assets/testboard/v1'/image.rsplit('/',1)[1]
-            if hashlib.sha256(image_path.read_bytes()).hexdigest()+'.svg' != image_path.name:
-                raise ValueError('Image hash mismatch')
+        image = r['image']
+        if image:
+            origin = 'https://docs.envnode.de/assets/'
+            if not image.startswith(origin): raise ValueError('Invalid image origin')
+            relative = Path(image[len(origin):])
+            if '..' in relative.parts or relative.is_absolute(): raise ValueError('Invalid image path')
+            if not (ROOT/'docs/site/assets'/relative).is_file(): raise ValueError('Missing documentation image')
     return values
 
 def port_map_bytes(r):

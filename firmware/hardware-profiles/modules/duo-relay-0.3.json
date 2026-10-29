@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "duo-relay-0.3",
   "name": "EnvNode DuoRelay",
-  "image": "https://docs.envnode.de/assets/board-views/duo-relay-0.3/assembly-front.png",
+  "image": "https://docs.envnode.de/assets/images/duorelay-assembly/top.png",
   "testing": null,
   "provisioning": {
     "schemaVersion": "0.1",

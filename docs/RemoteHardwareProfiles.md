@@ -10,7 +10,9 @@ Tester behält sein eigenes Menü **Provisioning** für den externen Prüfling.
 Beide verwenden denselben Katalog, Decoder, Modul-Template-Encoder und verifizierte
 EEPROM-Schreibpfade. Die Auswahl zeigt Board-/Modulname, Revision, Bild und
 Betriebsmindestversion. Die Bilder lädt der Browser direkt von docs.envnode.de.
-Die Slot-, Chargen- und Datumsfelder erscheinen für Module.
+Die Slot-, Chargen- und Datumsfelder erscheinen für Module. Mini, Weather und
+DuoRelay verwenden dieselben revisionsbezogenen 3D-Vorderansichten wie die
+Hardwaredokumentation. Für Mainboard 0.3 liegt kein Doku-Rendering vor.
 
 Beim ersten Öffnen der Seite erfolgt ein begrenzter Abruf von
 `https://docs.envnode.de/assets/hardware/v1/provisioning-catalog.cbor`.

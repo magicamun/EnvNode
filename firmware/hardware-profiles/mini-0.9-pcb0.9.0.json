@@ -7,7 +7,7 @@
   "boardProfileId": 2,
   "identityRevision": "0.9",
   "minimumRuntimeFirmwareVersion": "0.8.2",
-  "image": "https://docs.envnode.de/assets/testboard/v1/4513f09e927e08294f4360a006591f87710e0f780f118acd196045b6b457c307.svg",
+  "image": "https://docs.envnode.de/assets/images/mini-0.9.0/top.png",
   "provisioning": {
     "identityBus": "I2C0",
     "identityAddress": 80,
