@@ -3,11 +3,7 @@
 namespace EnvNode {
 namespace {
 const BoardIdentityProfile Profiles[] = {
-    {BoardProfileId::EnvNodeMainboard,"EnvNode Mainboard",{0,3}},
-    {BoardProfileId::EnvNodeWeather,"EnvNode Weather",{0,2}},
-    {BoardProfileId::EnvNodeMini,"EnvNode Mini",{0,8}},
-    {BoardProfileId::EnvNodeWeather,"EnvNode Weather",{0,3}},
-    {BoardProfileId::EnvNodeMini,"EnvNode Mini",{0,9}}
+#include "HardwareIdentityProfiles.generated.inc"
 };
 }
 size_t boardIdentityProfileCount() { return sizeof(Profiles)/sizeof(Profiles[0]); }

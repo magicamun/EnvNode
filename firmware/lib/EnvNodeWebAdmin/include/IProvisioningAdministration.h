@@ -1,12 +1,15 @@
 // EnvNode: see repository LICENSE.
 #pragma once
 #include "BoardProvisioningService.h"
+#include "HardwareDescriptor.h"
 #include "ModuleDescriptorProvisioningTypes.h"
 namespace EnvNode {
 struct ProvisioningBoardProfile {
     BoardProfileId id;
     const char* displayName;
     BoardRevision revision;
+    DescriptorSemanticVersion minimumRuntimeFirmwareVersion;
+    const char* imageUrl;
 };
 class IProvisioningAdministration {
 public:

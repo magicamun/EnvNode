@@ -34,6 +34,14 @@ bleiben ausschließlich dem separaten Provisioning zugeordnet. Auf einem Mini l�
 sich der Prüfablauf weiterhin simulieren. Die analoge Prüfung einschließlich
 Diodenspannungsabfall wird erst mit der fertigen Testhardware validiert.
 
+## Gemeinsame Quelle mit Provisioning
+
+Die gepflegten Boarddatensätze liegen jetzt unter `firmware/hardware-profiles/`.
+`python3 firmware/scripts/generate_hardware_profiles.py` erzeugt daraus sowohl
+die Firmware-/Provisioningtabellen als auch die bestehenden Prüfarbeitsdaten.
+Details und der Stand der noch ausstehenden Laufzeitintegration stehen in
+[UnifiedHardwareProfiles.md](UnifiedHardwareProfiles.md).
+
 ## Dateien und Veröffentlichung
 
 `firmware/scripts/generate_testboard_profile.py` erzeugt in einem Durchlauf:

@@ -1509,7 +1509,8 @@ void WebService::handleSensorEdit() {
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
-        if (gpio == nullptr) continue;
+        if (gpio == nullptr || moduleDiscoveryService_.ownsHardware(
+                HardwareResourceAssignment::gpioResource(gpio->resource))) continue;
         if (gpioAssignedToOtherEnabledSlot(
                 configuration, slot.slotId, InvalidActuatorId, gpio->resource)) {
             continue;
@@ -1608,6 +1609,7 @@ void WebService::handleActuatorEdit() {
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
         if (gpio == nullptr
+            || moduleDiscoveryService_.ownsHardware(HardwareResourceAssignment::gpioResource(gpio->resource))
             || actuatorRuntime_.moduleOwnsHardware(HardwareResourceAssignment::gpioResource(gpio->resource))
             || gpioAssignedToOtherEnabledSlot(
                 configuration, InvalidSensorId, slot.slotId, gpio->resource)) {
@@ -2491,6 +2493,11 @@ String WebService::renderHardwareOverview() {
         c += moduleDiscoverySourceName(module->source);
         c += "</td><td>";
         c += status;
+        if (module->identified()) {
+            const auto& minimum = module->descriptor.compatibility.minimumFirmwareVersion;
+            c += " · " + String(hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility));
+            c += " · FW ≥ " + String(minimum.major) + "." + String(minimum.minor) + "." + String(minimum.patch);
+        }
         c += "</td><td>" + moduleName + "</td><td>" + revision;
         c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
         c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
@@ -2504,8 +2511,7 @@ String WebService::renderHardwareOverview() {
     for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
         const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
         const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
-        if (module == nullptr || !module->identified()
-            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
+        if (module == nullptr || !module->identified()) {
             continue;
         }
         size_t entryCount = 0;
@@ -2555,7 +2561,9 @@ String WebService::renderHardwareOverview() {
             c += " v" + String(entry.driver.apiVersion);
             c += "</td><td>" + capability + "</td><td>" + bindingText;
             c += "</td><td>" + resourceText + "</td><td>" + parameters;
-            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
+            c += "</td><td>" + String(module->descriptorCompatibility == HardwareDescriptorCompatibilityStatus::Compatible
+                ? moduleDeviceInventoryStatusName(entry.status)
+                : hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility));
             c += "</td></tr>";
         }
     }
@@ -2573,7 +2581,7 @@ size_t WebService::provisioningProfileCount() const { return boardIdentityProfil
 bool WebService::provisioningProfileAt(size_t index, ProvisioningBoardProfile& result) const {
     const auto* p=boardIdentityProfileAt(index);
     if(!p)return false;
-    result={p->id,p->displayName,p->revision};return true;
+    result={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
 }
 bool WebService::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& result) const {
     const auto* p=defaultBoardIdentityProfile(id);
@@ -2582,7 +2590,7 @@ bool WebService::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile
 bool WebService::provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& result) const {
     const auto* p=boardIdentityProfile(id,revision);
     if(!p || !boardProfile(id,revision))return false;
-    result={p->id,p->displayName,p->revision};return true;
+    result={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
 }
 BoardProvisioningResult WebService::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
     return boardProvisioningService_.provision(identity, confirmed);

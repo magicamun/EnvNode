@@ -63,11 +63,22 @@ void HardwareProvisioningWebRoutes::handleHardware() {
         c += "<option value='" + String(encodeBoardProfileId(profile->id)) + ":" + String(profile->revision.major) + "." + String(profile->revision.minor) + "'";
         if (identityKnown && profile->id == identity.profileId && profile->revision.major==identity.revision.major
             && profile->revision.minor==identity.revision.minor) c += " selected";
+        c += " data-image='" + escapeHtml(profile->imageUrl == nullptr ? "" : profile->imageUrl) + "'";
+        const auto& minimum = profile->minimumRuntimeFirmwareVersion;
+        c += " data-minimum='" + String(minimum.major) + "." + String(minimum.minor) + "." + String(minimum.patch) + "'";
         c += ">" + escapeHtml(profile->displayName) + " "
             + String(profile->revision.major) + "." + String(profile->revision.minor)
             + "</option>";
     }
     c += "</select></label>";
+    c += "<p id='profile-runtime-minimum'></p>";
+    if (!options_.externalTarget)
+        c += "<img id='hardware-profile-image' hidden style='max-width:100%;max-height:520px' alt=''>";
+    c += R"JS(<script>document.addEventListener('DOMContentLoaded',()=>{
+const s=document.querySelector('[name=boardProfileKey]'),p=document.getElementById('profile-runtime-minimum'),i=document.getElementById('hardware-profile-image');
+if(!s)return;function update(){const o=s.selectedOptions[0];p.textContent=o&&o.dataset.minimum?'Runtime firmware ≥ '+o.dataset.minimum:'';if(i){i.hidden=true;if(o&&o.dataset.image){i.alt=o.textContent;i.onload=()=>{i.hidden=false};i.onerror=()=>{i.hidden=true};i.src=o.dataset.image;}}}s.addEventListener('change',update);update();
+});</script>)JS";
+
     c += (String("<p class='help'>") + uiText(TextId::TheSelectedBoardNameIsStoredAsIts) + "</p>");
     c += (String("<label>") + uiText(TextId::BoardSerialNumber) + "<input name='serialNumber' maxlength='") + String(MaxBoardSerialNumberLength) + "' pattern='[A-Za-z0-9._-]*' value='" + escapeHtml(identity.serialNumber.value) + "'></label>";
     c += (String("<p class='help'>") + uiText(TextId::SerialNumber0ExplicitlyMeansUnassigned) + "</p>");

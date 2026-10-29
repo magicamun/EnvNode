@@ -24,7 +24,7 @@ size_t TestBoardProvisioning::provisioningProfileCount() const { return boardIde
 bool TestBoardProvisioning::provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const {
     const auto* p=boardIdentityProfileAt(index);
     if(!p)return false;
-    profile={p->id,p->displayName,p->revision};return true;
+    profile={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
 }
 bool TestBoardProvisioning::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const {
     const auto* p=defaultBoardIdentityProfile(id);
@@ -33,7 +33,7 @@ bool TestBoardProvisioning::provisioningProfile(BoardProfileId id, ProvisioningB
 bool TestBoardProvisioning::provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& profile) const {
     const auto* p=boardIdentityProfile(id,revision);
     if(!p)return false;
-    profile={p->id,p->displayName,p->revision};return true;
+    profile={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
 }
 BoardProvisioningResult TestBoardProvisioning::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
     BoardProvisioningResult result;

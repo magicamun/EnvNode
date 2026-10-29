@@ -192,6 +192,11 @@ void setupEnvNodeFirmware() {
                 hardwareDescriptorStoreStatusName(module->descriptorStoreStatus));
         }
     }
+    auto moduleOccupancy = [](const HardwareResourceAssignment& hardware) {
+        return moduleDiscoveryService.ownsHardware(hardware);
+    };
+    configurationService.setModuleHardwareResolver(moduleOccupancy);
+    actuatorRuntime.setModuleHardwareResolver(moduleOccupancy);
     configurationService.loadConfiguration();
     valueRuntime.begin();
     const Configuration& configuration = configurationService.getConfiguration();

@@ -59,10 +59,7 @@ ModuleDescriptorProvisioningResult ModuleDescriptorProvisioningService::provisio
             descriptorScratch_, currentFirmwareDescriptorVersion(),
             currentBoardProfile(), slot);
     result.compatibilityStatus = compatibility.status;
-    if (compatibility.status != HardwareDescriptorCompatibilityStatus::Compatible) {
-        result.status = ModuleDescriptorProvisioningStatus::IncompatibleDescriptor;
-        return result;
-    }
+    // Compatibility describes operation, never permission to write a valid profile.
 
     const HardwareDescriptorWriteResult write = selectedStore->write(
         HardwareDescriptorObjectKind::Module, payload, payloadSize);
@@ -83,9 +80,7 @@ ModuleDescriptorProvisioningResult ModuleDescriptorProvisioningService::provisio
     const ModuleDiscoveryResult* discovered = discoveryService_.result(slot);
     if (discovered == nullptr
         || discovered->source != ModuleDiscoverySource::Descriptor
-        || discovered->descriptorStatus != HardwareDescriptorDecodeStatus::Valid
-        || discovered->descriptorCompatibility
-            != HardwareDescriptorCompatibilityStatus::Compatible) {
+        || discovered->descriptorStatus != HardwareDescriptorDecodeStatus::Valid) {
         result.status = ModuleDescriptorProvisioningStatus::RediscoveryFailed;
         return result;
     }

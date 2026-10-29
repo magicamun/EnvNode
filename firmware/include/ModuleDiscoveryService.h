@@ -52,6 +52,8 @@ public:
         HardwareDescriptorStore& slotBDescriptorStore);
 
     void scan();
+    // Physical occupancy is independent of runtime compatibility.
+    bool ownsHardware(const HardwareResourceAssignment& hardware) const;
     const ModuleDiscoveryResult* result(ModuleSlot slot) const;
 
 private:

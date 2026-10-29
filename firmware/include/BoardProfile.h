@@ -28,6 +28,9 @@ struct BoardProfile {
     size_t i2cBusCount;
     const BoardModuleSlotCapability* moduleSlots;
     size_t moduleSlotCount;
+    GpioResource spiClock;
+    GpioResource spiMiso;
+    GpioResource spiMosi;
 };
 
 const BoardProfile& currentBoardProfile();

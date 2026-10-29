@@ -17,30 +17,12 @@ import struct
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILES = [
-    dict(symbol='Weather', id='weather-0.2-pcb0.2.1', name='EnvNode Weather', identity='0.2', pcb='0.2.1',
-         source='hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb', commit='ff906605036ccac222eda68e9d515e630a9cae6c',
-         refs=['GPIO16', 'GPIO14', 'GPIO17', 'GPIO27', 'GPIO32', 'GPIO4', 'ADC1', 'ADC2', 'ADC3', 'ADC4']
-              + [f'I2C{bus}_{i}' for bus in (0, 1) for i in range(1, 5)] + ['J1'],
-         modules=['J1'], i2c=[], labels={}),
-    dict(symbol='Mini', id='mini-0.8-pcb0.8.1', name='EnvNode Mini', identity='0.8', pcb='0.8.1',
-         source='hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb', commit='ff906605036ccac222eda68e9d515e630a9cae6c',
-         refs=['ADC1', 'ADC2', 'J4', 'J5', 'J6', 'J7', 'J1', 'J2'], modules=['J1', 'J2'],
-         i2c=['J4', 'J5', 'J6', 'J7'], labels={'J4':'I2C0 · J4', 'J5':'I2C0 · J5',
-             'J6':'I2C1 · J6', 'J7':'I2C1 · J7', 'J1':'Slot A · J1', 'J2':'Slot B · J2'}),
-]
-
-# New revisions are pinned to their reviewed hardware commit; never read mutable
-# sibling checkouts when regenerating published profiles.
-PROFILES += [
-    dict(**{**PROFILES[0], 'symbol':'Weather03', 'id':'weather-0.3-pcb0.3.0',
-         'identity':'0.3', 'pcb':'0.3.0', 'commit':'98704fb', 'references':True}),
-    dict(**{**PROFILES[1], 'symbol':'Mini09', 'id':'mini-0.9-pcb0.9.0',
-         'identity':'0.9', 'pcb':'0.9.0', 'commit':'98704fb', 'references':True,
-         'refs':['ADC1','ADC2','J7','J8','J9','J10','J1','J2'],
-         'i2c':['J7','J8','J9','J10'], 'labels':{'J7':'I2C0 · J7','J8':'I2C0 · J8',
-         'J9':'I2C1 · J9','J10':'I2C1 · J10','J1':'Slot A · J1','J2':'Slot B · J2'}}),
-]
+# One maintained hardware record supplies runtime, provisioning, test data and image.
+PROFILE_RECORDS = [json.loads(p.read_text()) for p in sorted((ROOT/'firmware/hardware-profiles').glob('*.json'))]
+PROFILES = [r['testGeneration'] for r in PROFILE_RECORDS if r['testing'] is not None]
+# Preserve the original built-in/catalog order and immutable v1 assets.
+_LEGACY_ORDER = ['Weather','Mini','Weather03','Mini09']
+PROFILES.sort(key=lambda p: _LEGACY_ORDER.index(p['symbol']) if p['symbol'] in _LEGACY_ORDER else len(_LEGACY_ORDER))
 
 def cbor(value):
     def head(major,n):
@@ -126,7 +108,7 @@ def pads(footprint):
             y=round(y - px * math.sin(angle) + py * math.cos(angle), 5)))
     return sorted(result, key=lambda p: p['number'])
 
-def generate_profile(profile):
+def extract_profile_from_pcb(profile):
     source = Path(profile['source'])
     symbol = profile['symbol']
     data = subprocess.check_output(['git','show',profile['commit']+':'+str(source)], cwd=ROOT) if profile.get('commit') else (ROOT / source).read_bytes()
@@ -207,6 +189,16 @@ def generate_profile(profile):
     svg = re.sub(r'<title>.*?</title>', f'<title>{profile["name"]} PCB {profile["pcb"]}; KiCad top view</title>', svg, flags=re.S)
     svg = re.sub(r'width="[^"]*" height="[^"]*" viewBox="[^"]*"',
         f'width="{width}mm" height="{height}mm" viewBox="{x} {y} {width} {height}"', svg, count=1)
+    return emit_test_profile(profile, definition, svg)
+
+def generate_profile(profile):
+    record = next(r for r in PROFILE_RECORDS if r['id'] == profile['id'])
+    svg = (ROOT/'firmware/hardware-profiles/images'/(record['id']+'.svg')).read_text()
+    return emit_test_profile(profile, record['testing'], svg)
+
+def emit_test_profile(profile, definition, svg):
+    symbol = profile['symbol']
+    socket, connectors = definition['socket'], definition['connectors']
     zipped = gzip.compress(svg.encode(), mtime=0)
     header = '// EnvNode: see repository LICENSE. Generated; do not edit.\n'
     model = header
