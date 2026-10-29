@@ -16,7 +16,8 @@ DuoRelay verwenden dieselben revisionsbezogenen 3D-Vorderansichten wie die
 Hardwaredokumentation. Für Mainboard 0.3 liegt kein Doku-Rendering vor.
 
 Seit EnvNode 0.8.5 / Tester 0.8.2 gibt es einen gemeinsamen Dialog: zuerst
-**Board** oder **Modul**, danach genau eine nach Typ gefilterte Profilauswahl.
+**Board** oder **Modul**, danach genau eine nach Typ gefilterte, alphabetisch sortierte Profilauswahl
+(mit natürlicher Sortierung der Revisionsnummern).
 Bild, Revision und Betriebsmindestversion stehen neben den Fertigungsfeldern;
 auf schmalen Displays untereinander. Onlineprofile ersetzen passende eingebaute
 Einträge derselben Art, Bezeichnung und Revision. Quelle und Offline-Rückfall

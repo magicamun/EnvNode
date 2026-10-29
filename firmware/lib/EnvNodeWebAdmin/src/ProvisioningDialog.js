@@ -112,7 +112,9 @@
       const key = previous && signature(previous);
       select.textContent = '';
       const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = de ? 'Profil auswählen' : 'Select profile'; select.appendChild(placeholder);
-      for (const entry of entries().filter(e => e.kind === Number(kind.value))) {
+      const profiles = entries().filter(e => e.kind === Number(kind.value));
+      profiles.sort((a,b) => (a.name + ' ' + a.revision.join('.')).localeCompare(b.name + ' ' + b.revision.join('.'), de ? 'de' : 'en', {numeric:true,sensitivity:'base'}));
+      for (const entry of profiles) {
         const option = document.createElement('option'); option.value = entry.key;
         option.textContent = entry.name + ' ' + entry.revision.join('.') + ' · ' + (entry.local ? (de ? 'eingebaut' : 'built-in') : 'online');
         select.appendChild(option); if (signature(entry) === key) select.value = entry.key;
