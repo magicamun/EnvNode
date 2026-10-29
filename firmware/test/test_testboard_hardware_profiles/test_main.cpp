@@ -235,7 +235,24 @@ void test_oversized_and_malformed_metadata_uploads_never_touch_eeprom(){
     }
 }
 
+void test_shared_board_fields_persist_from_builtin_and_remote_forms() {
+    for(bool remote:{false,true}) {
+        Fixture f(true);
+        if(remote){auto c=catalog();f.form(c->entries[1]);}
+        else f.server.arguments={{"boardProfileKey","1:0.2"},{"confirmRemoteProvisioning","1"},{"remoteSerial","BOARD-NEW"}};
+        f.server.arguments["remoteBatch"]="batch-42";f.server.arguments["remoteDate"]="2026-10-29";
+        f.server.request(remote?"/hardware/profile/write":"/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);
+        f.admin.refresh();TEST_ASSERT_EQUAL_STRING("batch-42",f.admin.provisioningBoardBatch());TEST_ASSERT_EQUAL_STRING("2026-10-29",f.admin.provisioningBoardDate());
+        f.server.request("/hardware",HTTP_GET);TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"batch-42"));
+    }
+}
+void test_shared_manufacturing_rejects_oversized_board_fields_without_i2c() {
+    Fixture f(true);f.server.arguments={{"boardProfileKey","1:0.2"},{"confirmRemoteProvisioning","1"},{"remoteSerial","BOARD-NEW"},{"remoteBatch",String(std::string(65,'B').c_str())}};
+    f.server.request("/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(0,Wire.begins);
+}
 int main(){UNITY_BEGIN();
+    RUN_TEST(test_shared_board_fields_persist_from_builtin_and_remote_forms);
+    RUN_TEST(test_shared_manufacturing_rejects_oversized_board_fields_without_i2c);
     RUN_TEST(test_browser_script_is_hash_pinned_and_state_check_does_not_open_i2c);
     RUN_TEST(test_oversized_and_malformed_metadata_uploads_never_touch_eeprom);
     RUN_TEST(test_remote_only_module_with_unknown_driver_and_future_firmware_is_written);

@@ -5,6 +5,8 @@
 #include "InstanceUuidWebText.h"
 #include "InstanceUuid.h"
 #include "DuoRelayDescriptor.h"
+#include "BoardIdentityProfiles.h"
+#include <cstring>
 #include <cstdlib>
 #include <memory>
 #include <new>
@@ -35,60 +37,7 @@ void HardwareProvisioningWebRoutes::sendResult(const char* title, const char* ro
 void HardwareProvisioningWebRoutes::handleHardware() {
     if (!operationAllowed()) return;
     String c = overview_();
-    if(remoteProfilesEnabled_) c += remoteProfilesSection();
-    const BoardIdentity identity = administration_.provisioningBoardIdentity();
-    if (options_.modules) {
-        c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionModuleDescriptor) + "</h2>");
-        c += (String("<div class='notice'><strong>ENHD descriptor 0.1</strong><p>") + uiText(TextId::ThisCreatesTheDeterministicDuoRelay03CBOR) + "</p></div>");
-        c += "<form method='post' action='/hardware/module-descriptor/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyTheDuorelayDescriptorInThe)'>";
-        c += (String("<label>") + uiText(TextId::ModuleSlot) + "<select name='descriptorModuleSlot' required><option value='A'>A</option><option value='B'>B</option></select></label>");
-        c += (String("<label>") + uiText(TextId::DescriptorTemplate) + "<select name='descriptorTemplate' required><option value='duo-relay-0.3'>EnvNode DuoRelay 0.3</option></select></label>");
-        c += (String("<p class='help'>") + uiText(TextId::APersistentUUIDVersion4IsGeneratedAutomatically) + "</p>");
-        c += (String("<label>") + uiText(TextId::SerialNumberOptional) + "<input name='descriptorSerialNumber' maxlength='64'></label>");
-        c += (String("<label>") + uiText(TextId::ProductionBatchOptional) + "<input name='descriptorProductionBatch' maxlength='64'></label>");
-        c += (String("<label>") + uiText(TextId::ProductionDateOptional) + "<input type='date' name='descriptorProductionDate'></label>");
-        c += (String("<label class='choice'><input type='checkbox' name='confirmModuleDescriptorProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesASelfDescribing) + "</label>");
-        c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteDuoRelayDescriptor) + "</button></div></form></section>");
-    }
-    c += (String("<section class='card'><h2>") + uiText(TextId::ProvisionBoardIdentity) + "</h2>");
-    c += (String("<div class='notice'><strong>") + uiText(TextId::AdvancedOperation) + "</strong><p>" + uiText(options_.externalTarget ? TextId::ExternalBoardIdentityWriteNotice : TextId::ThisWritesPermanentPhysicalBoardIdentityDataThe) + "</p></div>");
-    if (options_.externalTarget)
-        c += "<form method='post' action='/hardware/board-identity/write'>";
-    else
-        c += "<form method='post' action='/hardware/board-identity/write' onsubmit='return confirm(globalThis.EnvNodeUi.WriteAndVerifyThisBoardIdentityTheActive)'>";
-    c += (String("<label>") + uiText(TextId::BoardProfile) + "<select name='boardProfileKey' required>");
-    const bool identityKnown=!options_.externalTarget || administration_.hasProvisioningBoardIdentity();
-    if(!identityKnown) c += pages_.webLocale()==Locale::GermanGermany
-        ? "<option value='' selected disabled>Board und Revision auswählen</option>"
-        : "<option value='' selected disabled>Select board and revision</option>";
-    for (size_t index = 0; index < administration_.provisioningProfileCount(); ++index) {
-        ProvisioningBoardProfile profileData;
-        if (!administration_.provisioningProfileAt(index, profileData)) continue;
-        const ProvisioningBoardProfile* profile = &profileData;
-        c += "<option value='" + String(encodeBoardProfileId(profile->id)) + ":" + String(profile->revision.major) + "." + String(profile->revision.minor) + "'";
-        if (identityKnown && profile->id == identity.profileId && profile->revision.major==identity.revision.major
-            && profile->revision.minor==identity.revision.minor) c += " selected";
-        c += " data-image='" + escapeHtml(profile->imageUrl == nullptr ? "" : profile->imageUrl) + "'";
-        const auto& minimum = profile->minimumRuntimeFirmwareVersion;
-        c += " data-minimum='" + String(minimum.major) + "." + String(minimum.minor) + "." + String(minimum.patch) + "'";
-        c += ">" + escapeHtml(profile->displayName) + " "
-            + String(profile->revision.major) + "." + String(profile->revision.minor)
-            + "</option>";
-    }
-    c += "</select></label>";
-    c += "<p id='profile-runtime-minimum'></p>";
-    if (!options_.externalTarget)
-        c += "<img id='hardware-profile-image' hidden style='max-width:100%;max-height:520px' alt=''>";
-    c += R"JS(<script>document.addEventListener('DOMContentLoaded',()=>{
-const s=document.querySelector('[name=boardProfileKey]'),p=document.getElementById('profile-runtime-minimum'),i=document.getElementById('hardware-profile-image');
-if(!s)return;function update(){const o=s.selectedOptions[0];p.textContent=o&&o.dataset.minimum?'Runtime firmware ≥ '+o.dataset.minimum:'';if(i){i.hidden=true;if(o&&o.dataset.image){i.alt=o.textContent;i.onload=()=>{i.hidden=false};i.onerror=()=>{i.hidden=true};i.src=o.dataset.image;}}}s.addEventListener('change',update);update();
-});</script>)JS";
-
-    c += (String("<p class='help'>") + uiText(TextId::TheSelectedBoardNameIsStoredAsIts) + "</p>");
-    c += (String("<label>") + uiText(TextId::BoardSerialNumber) + "<input name='serialNumber' maxlength='") + String(MaxBoardSerialNumberLength) + "' pattern='[A-Za-z0-9._-]*' value='" + escapeHtml(identity.serialNumber.value) + "'></label>";
-    c += (String("<p class='help'>") + uiText(TextId::SerialNumber0ExplicitlyMeansUnassigned) + "</p>");
-    c += (String("<label class='choice'><input type='checkbox' name='confirmProvisioning' value='1' required>") + uiText(TextId::IUnderstandThatThisWritesManufacturingIdentityData) + "</label>");
-    c += (String("<div class='actions'><button class='danger' type='submit'>") + uiText(TextId::WriteBoardIdentity) + "</button></div></form></section>");
+    c += remoteProfilesSection();
     sendPage(uiText(TextId::Hardware), "/hardware", c);
 }
 
@@ -129,7 +78,7 @@ void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
             && decodeBoardProfileId(static_cast<uint16_t>(parsed),id) && administration_.provisioningProfile(id,profile);
     }
     const ProvisioningBoardProfile* requestedProfile=profileValid?&profile:nullptr;
-    const String serialText = server_.arg("serialNumber");
+    const String serialText = server_.hasArg("remoteSerial")?server_.arg("remoteSerial"):server_.arg("serialNumber");
     const bool serialValid = isValidBoardSerialNumber(serialText.c_str());
     if (requestedProfile == nullptr || !serialValid) {
         sendResult(uiText(TextId::BoardProvisioningFailed), "/hardware",
@@ -143,10 +92,16 @@ void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
         {},
     };
     setBoardSerialNumber(requested.serialNumber, serialText.c_str());
-    const bool confirmed = server_.hasArg("confirmProvisioning")
-        && server_.arg("confirmProvisioning") == "1";
-    const BoardProvisioningResult result =
-        administration_.provisionBoardIdentity(requested, confirmed);
+    const bool confirmed = server_.arg("confirmProvisioning")=="1"||server_.arg("confirmRemoteProvisioning")=="1";
+    BoardProvisioningResult result;
+    const String batch=server_.arg("remoteBatch"),date=server_.arg("remoteDate");
+    if(batch.length()>64||date.length()>10){sendResult("Provisioning","/hardware","InvalidManufacturingData",false);return;}
+    if(server_.hasArg("remoteBatch")||server_.hasArg("remoteDate")) {
+        const auto* source=boardIdentityProfile(requested.profileId,requested.revision);BoardPortMap map;
+        if(!source||!BoardPortMapCodec::decode(source->portMap,source->portMapSize,map)){sendResult("Provisioning","/hardware","InvalidBoardProfile",false);return;}
+        map.serial=requested.serialNumber;memcpy(map.productionBatch,batch.c_str(),batch.length()+1);memcpy(map.productionDate,date.c_str(),date.length()+1);
+        result=administration_.provisionBoardPortMap(map,confirmed);
+    } else result=administration_.provisionBoardIdentity(requested,confirmed);
     logger_.infof("Board provisioning result=%s profile=%u revision=%u.%u serial=%s",
         boardProvisioningStatusName(result.status),
         static_cast<unsigned int>(requested.profileId),
@@ -194,7 +149,7 @@ void HardwareProvisioningWebRoutes::handleBoardProvisioning() {
 }
 void HardwareProvisioningWebRoutes::handleModuleDescriptorProvisioning() {
     if (!operationAllowed()) return;
-    const String slotText = server_.arg("descriptorModuleSlot");
+    const String slotText = (server_.hasArg("remoteSlot")?server_.arg("remoteSlot"):server_.arg("descriptorModuleSlot"));
     ModuleSlot slot = ModuleSlot::A;
     const bool slotValid = slotText == "A" || slotText == "B";
     if (slotText == "B") slot = ModuleSlot::B;
@@ -202,9 +157,9 @@ void HardwareProvisioningWebRoutes::handleModuleDescriptorProvisioning() {
         server_.arg("descriptorTemplate") == "duo-relay-0.3";
 
     DuoRelayDescriptorManufacturingData manufacturing;
-    const String serialNumber = server_.arg("descriptorSerialNumber");
-    const String productionBatch = server_.arg("descriptorProductionBatch");
-    const String productionDate = server_.arg("descriptorProductionDate");
+    const String serialNumber = (server_.hasArg("remoteSerial")?server_.arg("remoteSerial"):server_.arg("descriptorSerialNumber"));
+    const String productionBatch = (server_.hasArg("remoteBatch")?server_.arg("remoteBatch"):server_.arg("descriptorProductionBatch"));
+    const String productionDate = (server_.hasArg("remoteDate")?server_.arg("remoteDate"):server_.arg("descriptorProductionDate"));
     const bool manufacturingValid = serialNumber.length() <= 64
         && productionBatch.length() <= 64
         && productionDate.length() <= 10;
@@ -237,8 +192,8 @@ void HardwareProvisioningWebRoutes::handleModuleDescriptorProvisioning() {
         return;
     }
 
-    const bool confirmed = server_.hasArg("confirmModuleDescriptorProvisioning")
-        && server_.arg("confirmModuleDescriptorProvisioning") == "1";
+    const bool confirmed = (server_.hasArg("confirmModuleDescriptorProvisioning")||server_.arg("confirmRemoteProvisioning")=="1")
+        && (server_.arg("confirmModuleDescriptorProvisioning")=="1"||server_.arg("confirmRemoteProvisioning")=="1");
     const ModuleDescriptorProvisioningResult result =
         administration_.provisionModuleDescriptor(
             slot, payload.get(), payloadSize, confirmed);

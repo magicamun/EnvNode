@@ -76,7 +76,7 @@ void test_hardware_page_preserves_forms_and_application_inventory() {
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"Mini &lt;test&gt; 0.8"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"/hardware/board-identity/write"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"/hardware/module-descriptor/write"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"confirmProvisioning"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"confirmRemoteProvisioning"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"MINI-TEST"));
     f.pages.locale=Locale::GermanGermany;f.server.request("/hardware",HTTP_GET);
     TEST_ASSERT_EQUAL_STRING(webText(f.pages.locale,TextId::Hardware),f.pages.title.c_str());

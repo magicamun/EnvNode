@@ -67,6 +67,8 @@ public:
 
 private:
     BoardIdentity provisioningBoardIdentity() const override;
+    const char* provisioningBoardBatch() const override { return boardIdentityResolution_.productionBatch; }
+    const char* provisioningBoardDate() const override { return boardIdentityResolution_.productionDate; }
     size_t provisioningProfileCount() const override;
     bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
     bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;

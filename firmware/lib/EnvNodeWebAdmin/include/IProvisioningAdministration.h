@@ -16,6 +16,8 @@ public:
     virtual ~IProvisioningAdministration() = default;
     virtual bool hasProvisioningBoardIdentity() const { return true; }
     virtual BoardIdentity provisioningBoardIdentity() const = 0;
+    virtual const char* provisioningBoardBatch() const { return ""; }
+    virtual const char* provisioningBoardDate() const { return ""; }
     virtual size_t provisioningProfileCount() const = 0;
     virtual bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const = 0;
     virtual bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const = 0;

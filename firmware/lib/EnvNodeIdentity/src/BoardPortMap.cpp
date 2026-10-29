@@ -3,6 +3,7 @@
 #include "CompactCborCodec.h"
 #include "IdentityRecordCrc.h"
 #include <cstring>
+#include <initializer_list>
 namespace EnvNode {
 namespace {
 bool array(CompactCborReader& r,size_t n) {size_t count=0;return r.enterArray(count)&&count==n;}
@@ -15,6 +16,9 @@ bool text(CompactCborReader& r,char* out,size_t capacity) {
 }
 bool valid(const BoardPortMap& p) {
     if(!memchr(p.name,0,sizeof(p.name))||!memchr(p.serial.value,0,sizeof(p.serial.value)))return false;
+    if(!memchr(p.productionBatch,0,sizeof(p.productionBatch))||!memchr(p.productionDate,0,sizeof(p.productionDate)))return false;
+    for(const char* field:{p.productionBatch,p.productionDate})
+        for(const char* c=field;*c;++c)if(static_cast<uint8_t>(*c)<32||*c==127)return false;
     if(p.profileId==255||!p.name[0]||!p.gpioCount||p.gpioCount>32||!p.busCount||p.busCount>2||p.slotCount>2
         ||(p.revision.major==255&&p.revision.minor==255)||!isValidBoardSerialNumber(p.serial.value))return false;
     uint8_t buses=0,slots=0;
@@ -38,9 +42,13 @@ bool valid(const BoardPortMap& p) {
 }
 bool BoardPortMapCodec::encode(const BoardPortMap& p,uint8_t* bytes,size_t capacity,size_t& size) {
     size=0;if(!valid(p))return false;
-    CompactCborWriter w(bytes,capacity);w.beginArray(10);w.writeUnsigned(1);w.writeUnsigned(p.profileId);
+    const bool manufacturing=p.productionBatch[0]||p.productionDate[0];
+    CompactCborWriter w(bytes,capacity);w.beginArray(manufacturing?11:10);w.writeUnsigned(manufacturing?2:1);w.writeUnsigned(p.profileId);
     w.beginArray(2);w.writeUnsigned(p.revision.major);w.writeUnsigned(p.revision.minor);
-    w.writeText(p.name);w.beginArray(3);w.writeUnsigned(p.minimumFirmware.major);w.writeUnsigned(p.minimumFirmware.minor);w.writeUnsigned(p.minimumFirmware.patch);
+    auto minimum=p.minimumFirmware;
+    // Payload v2 requires the reader introduced in EnvNode 0.8.5.
+    if(manufacturing&&minimum.major==0&&(minimum.minor<8||(minimum.minor==8&&minimum.patch<5)))minimum={0,8,5};
+    w.writeText(p.name);w.beginArray(3);w.writeUnsigned(minimum.major);w.writeUnsigned(minimum.minor);w.writeUnsigned(minimum.patch);
     w.writeText(p.serial.value);w.beginArray(p.gpioCount);
     for(size_t i=0;i<p.gpioCount;++i){w.beginArray(2);w.writeUnsigned(p.gpios[i].pin);w.writeUnsigned(p.gpios[i].capabilities);}
     w.beginArray(p.busCount);
@@ -48,12 +56,14 @@ bool BoardPortMapCodec::encode(const BoardPortMap& p,uint8_t* bytes,size_t capac
     w.beginArray(p.slotCount);
     for(size_t i=0;i<p.slotCount;++i){const auto& s=p.slots[i];w.beginArray(6);w.writeUnsigned(s.slot);w.writeUnsigned(s.address);w.writeUnsigned(s.aux1);w.writeUnsigned(s.aux2);w.writeUnsigned(s.cs);w.writeBoolean(s.fiveVolt);}
     w.beginArray(3);w.writeUnsigned(p.spiClock);w.writeUnsigned(p.spiMiso);w.writeUnsigned(p.spiMosi);
+    if(manufacturing){w.beginArray(2);w.writeText(p.productionBatch);w.writeText(p.productionDate);}
     size=w.size();return w.status()==CompactCborStatus::Success&&size<=MaximumBytes;
 }
 bool BoardPortMapCodec::decode(const uint8_t* bytes,size_t size,BoardPortMap& p) {
     if(!bytes||!size||size>MaximumBytes)return false;
     p=BoardPortMap();CompactCborReader r(bytes,size);uint64_t version=0;
-    if(!array(r,10)||!r.readUnsigned(version)||version!=1||!number(r,p.profileId)||!array(r,2)
+    size_t fields=0;
+    if(!r.enterArray(fields)||!r.readUnsigned(version)||!((version==1&&fields==10)||(version==2&&fields==11))||!number(r,p.profileId)||!array(r,2)
         ||!number(r,p.revision.major)||!number(r,p.revision.minor)||!text(r,p.name,sizeof(p.name))||!array(r,3))return false;
     uint16_t* versions[]={&p.minimumFirmware.major,&p.minimumFirmware.minor,&p.minimumFirmware.patch};
     for(auto* v:versions){uint64_t n=0;if(!r.readUnsigned(n)||n>65535)return false;*v=n;}
@@ -63,6 +73,8 @@ bool BoardPortMapCodec::decode(const uint8_t* bytes,size_t size,BoardPortMap& p)
     for(size_t i=0;i<p.busCount;++i)if(!array(r,3)||!number(r,p.buses[i].bus)||!number(r,p.buses[i].sda)||!number(r,p.buses[i].scl))return false;
     if(!r.enterArray(p.slotCount)||p.slotCount>2)return false;
     for(size_t i=0;i<p.slotCount;++i){auto& s=p.slots[i];if(!array(r,6)||!number(r,s.slot)||!number(r,s.address)||!number(r,s.aux1)||!number(r,s.aux2)||!number(r,s.cs)||!r.readBoolean(s.fiveVolt))return false;}
-    return array(r,3)&&number(r,p.spiClock)&&number(r,p.spiMiso)&&number(r,p.spiMosi)&&!r.remaining()&&valid(p);
+    if(!array(r,3)||!number(r,p.spiClock)||!number(r,p.spiMiso)||!number(r,p.spiMosi))return false;
+    if(version==2&&(!array(r,2)||!text(r,p.productionBatch,sizeof(p.productionBatch))||!text(r,p.productionDate,sizeof(p.productionDate))))return false;
+    return !r.remaining()&&valid(p);
 }
 }

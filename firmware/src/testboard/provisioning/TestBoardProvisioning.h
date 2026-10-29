@@ -19,6 +19,8 @@ public:
     BoardIdentityReadResult refresh();
     bool hasProvisioningBoardIdentity() const override;
     BoardIdentity provisioningBoardIdentity() const override;
+    const char* provisioningBoardBatch() const override { return batch_; }
+    const char* provisioningBoardDate() const override { return date_; }
     size_t provisioningProfileCount() const override;
     bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
     bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;
@@ -33,6 +35,7 @@ private:
     BoardProvisioningService service_;
     std::function<bool()> available_;
     BoardIdentityReadResult current_;
+    char batch_[65] = {}, date_[11] = {};
     HardwareDescriptorStore* moduleStores_[2];
     BoardPortMapStore* maps_;
 };

@@ -32,7 +32,7 @@ bool payloadMatches(const HardwareProfileEntry& e,const uint8_t* bytes,size_t si
     if(!bytes||size!=e.bytes)return false;
     if(e.kind==0){
         BoardPortMap map;
-        return BoardPortMapCodec::decode(bytes,size,map)&&!map.serial.value[0]
+        return BoardPortMapCodec::decode(bytes,size,map)&&!map.serial.value[0]&&!map.productionBatch[0]&&!map.productionDate[0]
             &&!strcmp(map.name,e.name)&&map.revision.major==e.revision.major&&map.revision.minor==e.revision.minor&&versionMatches(map.minimumFirmware,e.minimumFirmware);
     }
     std::unique_ptr<HardwareDescriptor> d(new(std::nothrow) HardwareDescriptor);

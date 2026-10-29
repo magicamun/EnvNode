@@ -257,3 +257,19 @@ selects a compiled profile. Older firmware retains its original strict ENID
 validation and rejects an unknown family/revision.
 
 See [ADR 0015](adr/0015-self-contained-board-port-map.md) for failure handling.
+
+### ENPM manufacturing extension (EnvNode 0.8.5)
+
+The bank header remains format 1. Payload version 2 is an eleven-element array:
+all version-1 fields in the same order, the first element changed to `2`, and
+`[productionBatch, productionDate]` appended. Batch is at most 64 bytes and date
+at most 10 bytes; both are optional, bounded, NUL-terminated in memory and reject
+control characters. Serial retains the ENID limit of 17 characters.
+
+Writers emit v2 only when batch or date is nonempty, raising the stored minimum
+firmware to at least 0.8.5. Otherwise they preserve byte-identical v1 encoding.
+New readers accept both shapes strictly; unsupported shapes/versions and trailing
+bytes fail closed. Earlier ENPM readers cannot operate a v2-provisioned board;
+use EnvNode 0.8.5 or newer. Existing v1 EEPROM data needs no migration. The dual-bank
+commit and full CRC/byte readback cover manufacturing data together with the map.
+Published board templates keep all individual manufacturing fields empty.

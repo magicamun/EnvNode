@@ -2,11 +2,14 @@
 #include "HardwareProvisioningWebRoutes.h"
 #include "ModuleProfileTemplate.h"
 #include "InstanceUuid.h"
+#include "HtmlEscaping.h"
 #include <cstring>
 #include <new>
 namespace EnvNode {
 namespace {
 #include "BrowserHardwareProfiles.generated.inc"
+#include "ProvisioningDialog.generated.inc"
+#include "ProvisioningModule.generated.inc"
 int hexDigit(char c) {
     if(c>='0'&&c<='9')return c-'0';
     if(c>='a'&&c<='f')return c-'a'+10;
@@ -34,30 +37,52 @@ String HardwareProvisioningWebRoutes::remoteProfilesSection(){
     const bool de=pages_.webLocale()==Locale::GermanGermany;
     String c="<section class='card' id='remote-hardware-profiles' data-de='";
     c+=de?"1":"0";c+="' data-modules='";c+=options_.modules?"1":"0";c+="'><h2>";
-    c+=de?"Nachladbare Hardwareprofile":"Downloadable hardware profiles";
-    c+="</h2><p>";
-    c+=options_.externalTarget
-        ? (de?"Ziel: extern angeschlossener Prüfling.":"Target: externally connected device under test.")
-        : (de?"Ziel: dieser EnvNode.":"Target: this EnvNode.");
-    c+="</p><p id='remote-profile-status'>";
-    c+=de?"Katalog wird im Browser geladen …":"Loading catalog in browser …";
-    c+="</p><button type='button' id='remote-profile-refresh'>";
-    c+=de?"Profile aktualisieren":"Refresh profiles";c+="</button>";
-    c+="<form method='post' action='/hardware/profile/write' id='remote-profile-form' hidden><label>";
+    c+=de?"Hardware provisionieren":"Provision hardware";
+    c+="</h2><style>.provisioning-details:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,1fr);gap:1.2rem;align-items:start}.provisioning-preview img{display:block;margin:auto;object-fit:contain}.provisioning-details fieldset{border:1px solid #8886;border-radius:8px;padding:1rem}@media(max-width:700px){.provisioning-details:not([hidden]){grid-template-columns:1fr}}</style><p>";
+    c+=options_.externalTarget?(de?"Ziel: extern angeschlossener Prüfling.":"Target: externally connected device under test."):(de?"Ziel: dieser EnvNode.":"Target: this EnvNode.");
+    c+="</p>";
+    if(administration_.hasProvisioningBoardIdentity()) {
+        c+="<details><summary>";c+=de?"Gelesene Board-Fertigungsdaten":"Read board manufacturing data";c+="</summary><dl>";
+        c+="<dt>"+String(de?"Seriennummer":"Serial number")+"</dt><dd>"+escapeHtml(administration_.provisioningBoardIdentity().serialNumber.value)+"</dd>";
+        c+="<dt>"+String(de?"Produktionscharge":"Production batch")+"</dt><dd>"+escapeHtml(administration_.provisioningBoardBatch())+"</dd>";
+        c+="<dt>"+String(de?"Fertigungsdatum":"Production date")+"</dt><dd>"+escapeHtml(administration_.provisioningBoardDate())+"</dd></dl></details>";
+    }
+    c+="<label>";c+=de?"Hardwaretyp":"Hardware type";
+    c+="<select id='provision-hardware-kind'><option value='0'>Board</option>";
+    if(options_.modules)c+="<option value='1'>"+String(de?"Modul":"Module")+"</option>";
+    c+="</select></label><details><summary>";c+=de?"Profilkatalog":"Profile catalog";c+="</summary><p id='remote-profile-status'>";
+    c+=de?"Eingebaute Profile verfügbar.":"Built-in profiles available.";
+    c+="</p>";
+    if(remoteProfilesEnabled_){c+="<button type='button' id='remote-profile-refresh'>";c+=de?"Online-Profile aktualisieren":"Refresh online profiles";c+="</button>";}
+    c+="</details><form method='post' action='/hardware/board-identity/write' id='remote-profile-form'><label>";
     c+=de?"Profil":"Profile";
-    c+="<select name='remoteProfileKey' id='remote-profile-key' required></select></label>";
-    c+="<input type='hidden' name='remoteProfileEntry' id='remote-profile-entry'>";
-    c+="<input type='hidden' name='remoteProfileData' id='remote-profile-data'>";
-    c+="<p id='remote-profile-minimum'></p><img id='remote-profile-image' hidden style='max-width:100%;max-height:520px' alt=''>";
-    c+="<div id='remote-module-fields'><label>Slot<select name='remoteSlot'><option>A</option><option>B</option></select></label>";
-    c+="<label>";c+=de?"Produktionscharge":"Production batch";
-    c+="<input name='remoteBatch' maxlength='64'></label><label>";c+=de?"Produktionsdatum":"Production date";
-    c+="<input name='remoteDate' type='date'></label></div><label>";c+=de?"Seriennummer (optional)":"Serial number (optional)";
-    c+="<input name='remoteSerial' id='remote-profile-serial' maxlength='17'></label>";
+    c+="<select name='remoteProfileKey' id='remote-profile-key' required><option value=''>";
+    c+=de?"Profil auswählen":"Select profile";c+="</option>";
+    for(size_t index=0;index<administration_.provisioningProfileCount();++index){
+        ProvisioningBoardProfile p;if(!administration_.provisioningProfileAt(index,p))continue;
+        const String revision=String(p.revision.major)+"."+String(p.revision.minor);
+        c+="<option value='board:"+String(encodeBoardProfileId(p.id))+":"+revision+"' data-kind='0' data-name='"+escapeHtml(p.displayName)+"' data-revision='"+revision+"' data-minimum='";
+        c+=String(p.minimumRuntimeFirmwareVersion.major)+"."+String(p.minimumRuntimeFirmwareVersion.minor)+"."+String(p.minimumRuntimeFirmwareVersion.patch);
+        c+="' data-image='"+escapeHtml(p.imageUrl?p.imageUrl:"")+"'>"+escapeHtml(p.displayName)+" "+revision+"</option>";
+    }
+    if(options_.modules)c+=ProvisioningBuiltinModule;
+    c+="</select></label><input type='hidden' name='boardProfileKey' id='provision-board-key'><input type='hidden' name='descriptorTemplate' value='duo-relay-0.3'>";
+    c+="<input type='hidden' name='remoteProfileEntry' id='remote-profile-entry'><input type='hidden' name='remoteProfileData' id='remote-profile-data'>";
+    c+="<div id='provision-details' class='provisioning-details' hidden><div class='provisioning-preview'><p id='remote-profile-minimum'></p><img id='remote-profile-image' hidden style='max-width:100%;max-height:360px' alt=''></div><div>";
+    c+="<div id='remote-module-fields' hidden><label>Slot<select name='remoteSlot' id='remote-profile-slot'><option>A</option><option>B</option></select></label>";
+    c+="</div><fieldset><legend>";c+=de?"Fertigungsdaten (optional)":"Manufacturing data (optional)";
+    c+="</legend><label>";c+=de?"Seriennummer":"Serial number";
+    c+="<input name='remoteSerial' id='remote-profile-serial' maxlength='17'></label><label>";
+    c+=de?"Produktionscharge":"Production batch";
+    c+="<input name='remoteBatch' id='remote-profile-batch' maxlength='64'></label><label>";
+    c+=de?"Fertigungsdatum":"Production date";
+    c+="<input name='remoteDate' id='remote-profile-date' type='date'></label></fieldset></div></div>";
     c+="<label class='choice'><input type='checkbox' name='confirmRemoteProvisioning' id='remote-profile-confirm' value='1' required>";
     c+=de?"Ich bestätige das Schreiben des ausgewählten Profils ins EEPROM.":"I confirm writing the selected profile to EEPROM.";
     c+="</label><button type='submit' id='remote-profile-submit'>";c+=de?"Provisionieren":"Provision";
-    c+="</button></form></section><script async crossorigin='anonymous' src='";
+    c+="</button></form></section><script>";c+=ProvisioningDialogScript;c+="</script>";
+    if(!remoteProfilesEnabled_)return c;
+    c+="<script async crossorigin='anonymous' src='";
     c+=BrowserHardwareProfilesUrl;c+="' integrity='";c+=BrowserHardwareProfilesIntegrity;
     c+="' onerror=\"document.getElementById('remote-profile-status').textContent='";
     c+=de?"Browsercode nicht geladen. Eingebaute Profile bleiben verfügbar.":"Browser code unavailable. Built-in profiles remain available.";
@@ -86,8 +111,11 @@ void HardwareProvisioningWebRoutes::handleRemoteProfileWrite(){
     // payload's format/metadata, individual identity and verified EEPROM write.
     const String serial=server_.arg("remoteSerial");
     if(entry.kind==0){
+        const String batch=server_.arg("remoteBatch"),date=server_.arg("remoteDate");
+        if(batch.length()>64||date.length()>10){fail("InvalidManufacturingData");return;}
         BoardPortMap map;
         if(!BoardPortMapCodec::decode(data.get(),size,map)||!setBoardSerialNumber(map.serial,serial.c_str())){fail("InvalidBoardData");return;}
+        memcpy(map.productionBatch,batch.c_str(),batch.length()+1);memcpy(map.productionDate,date.c_str(),date.length()+1);
         const auto result=administration_.provisionBoardPortMap(map,true);
         logger_.infof("Browser board provisioning profile=%s result=%s",id,boardProvisioningStatusName(result.status));
         if(result.status!=BoardProvisioningStatus::Success){fail(boardProvisioningStatusName(result.status));return;}

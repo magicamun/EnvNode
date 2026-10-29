@@ -172,3 +172,22 @@ Die neue Hardwarekonfiguration wird im normalen EnvNode nach einem Neustart
 Der Katalog enthält zunächst die vorhandenen fünf Boardrevisionen und DuoRelay
 0.3. SD und SX1262-Remote folgen mit geprüften Hardwareprofilen. Während einer
 laufenden Anschlussprüfung sind auch die neuen Remote-Aktionen gesperrt.
+
+## Gemeinsamer Dialog ab EnvNode 0.8.5 / Tester 0.8.2
+
+**Board** oder **Modul** auswählen, anschließend das konkrete Profil. Das Bild
+und die Betriebsmindestversion beziehen sich auf genau diese Auswahl. Passende
+Onlineprofile ersetzen eingebaute Listeneinträge; bei fehlendem Internet bleiben
+eingebaute Profile im selben Dialog verfügbar. Katalogaktionen und ausführliche
+Anschlusshinweise lassen sich aufklappen.
+
+Seriennummer, Produktionscharge und Fertigungsdatum sind für beide Typen optional;
+nur beim Modul wird zusätzlich der Slot gewählt. Nach Änderungen erneut das
+Schreiben bestätigen und **Board provisionieren** bzw. **Modul provisionieren**
+auslösen. Die Ziele bleiben getrennt: externer Prüfling beim Tester, eigene
+Hardware beim normalen EnvNode.
+
+Board-Charge und -Datum werden mit der Portzuordnung verifiziert gespeichert.
+Diese Erweiterung benötigt im Betrieb mindestens EnvNode 0.8.5, was die Anzeige
+während der Eingabe berücksichtigt. Bestehende Datensätze bleiben lesbar. Ohne
+Charge/Datum bleibt das bisherige Boardformat erhalten.

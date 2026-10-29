@@ -4,6 +4,15 @@
 
 ### Added
 
+- EnvNode 0.8.5 / Testboard 0.8.2: share one provisioning dialog with filtered
+  Board/Module selection, matching image, common serial/batch/date fields and
+  explicit target-specific write action. Merge matching online and built-in
+  profiles in one list while retaining offline provisioning and legacy POST APIs.
+- Store board batch/date in ENPM payload v2 with verified readback; retain v1
+  reads and byte-identical v1 writes without batch/date. Report the effective
+  minimum runtime version 0.8.5 when board manufacturing extensions are used.
+
+
 - EnvNode 0.8.4 / Testboard 0.8.1: move provisioning HTTPS downloads and
   SHA-256 verification into the browser, load its client with SRI, and validate
   bounded local uploads before the existing EEPROM write. Recover normal

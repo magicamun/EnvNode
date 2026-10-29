@@ -1,4 +1,4 @@
-# Nachladbare Hardwareprofile — EnvNode 0.8.4 / Tester 0.8.1
+# Nachladbare Hardwareprofile — EnvNode 0.8.5 / Tester 0.8.2
 
 EnvNode-eigene Inhalte unterliegen der Repository-LICENSE
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
@@ -10,13 +10,33 @@ Tester behält sein eigenes Menü **Provisioning** für den externen Prüfling.
 Beide verwenden denselben Katalog, Decoder, Modul-Template-Encoder und verifizierte
 EEPROM-Schreibpfade. Die Auswahl zeigt Board-/Modulname, Revision, Bild und
 Betriebsmindestversion. Die Bilder lädt der Browser direkt von docs.envnode.de.
-Die Slot-, Chargen- und Datumsfelder erscheinen für Module. Mini, Weather und
+Seriennummer, Produktionscharge und Fertigungsdatum stehen für Boards und Module
+gleichermaßen zur Verfügung; nur die Slotauswahl ist modulspezifisch. Mini, Weather und
 DuoRelay verwenden dieselben revisionsbezogenen 3D-Vorderansichten wie die
 Hardwaredokumentation. Für Mainboard 0.3 liegt kein Doku-Rendering vor.
 
+Seit EnvNode 0.8.5 / Tester 0.8.2 gibt es einen gemeinsamen Dialog: zuerst
+**Board** oder **Modul**, danach genau eine nach Typ gefilterte Profilauswahl.
+Bild, Revision und Betriebsmindestversion stehen neben den Fertigungsfeldern;
+auf schmalen Displays untereinander. Onlineprofile ersetzen passende eingebaute
+Einträge derselben Art, Bezeichnung und Revision. Quelle und Offline-Rückfall
+bleiben erkennbar; zusätzliche Onlineprodukte erscheinen ohne zweite Auswahl.
+Die Bestätigung wird bei Profilwechsel oder geänderten Fertigungsangaben gelöscht.
+Anschlusshinweise und Katalogaktionen sind aufklappbar. Der Tester adressiert
+weiterhin den externen Prüfling, die normale Firmware das eigene Board.
+
+Boardseriennummern behalten die ENID-Grenze von 17 Zeichen, Module bis zu 64;
+Charge ist auf 64 und das ISO-Datum auf 10 Bytes begrenzt. Alle Felder sind
+optional. Mit Board-Charge oder -Datum wird ENPM-Payload v2 geschrieben und die
+effektive Mindestversion auf mindestens EnvNode 0.8.5 angehoben. Die Anzeige
+berücksichtigt dies bereits während der Eingabe. Ohne diese Angaben bleibt
+Payload v1 erhalten; alte Datensätze werden weiterhin gelesen. Gelesene
+Board-Fertigungsdaten erscheinen zusammenhängend im Dialog. Die normale
+Firmware zeigt dabei den beim Start gelesenen Stand; Änderungen gelten nach Neustart.
+
 Beim ersten Öffnen der Seite erfolgt ein begrenzter Abruf von
 `https://docs.envnode.de/assets/hardware/v1/provisioning-catalog.cbor`.
-**Profile aktualisieren** wiederholt den Abruf ausdrücklich. Der Browser benötigt
+**Online-Profile aktualisieren** wiederholt den Abruf ausdrücklich. Der Browser benötigt
 Internetzugang und eine Verbindung zum Gerät; die Geräteuhr ist hierfür nicht nötig. Das gewählte
 Profil wird erst beim bestätigten Schreiben geladen; eine Bild-/Profilauswahl
 schreibt kein EEPROM. Ohne Bestätigung beginnt auch kein Profildownload.
@@ -30,7 +50,7 @@ seinen externen Prüfling nicht neu.
 
 Die neue Form bindet die Auswahl an Profil-ID **und** Inhalts-Hash. Ein veraltetes
 Formular darf daher nach einer Katalogänderung nicht unbemerkt etwas anderes
-schreiben. Die bisherigen eingebauten Formulare bleiben ohne Internet verfügbar.
+schreiben. Eingebaute Profile bleiben im gemeinsamen Dialog ohne Internet verfügbar.
 Ein bereits geladenes Profil wird innerhalb der Sitzung wiederverwendet; ein
 fehlgeschlagener Download oder Refresh ersetzt keine gültigen Daten. Es gibt
 keinen persistenten Downloadcache. Nach dem Provisioning benötigt die normale

@@ -104,9 +104,11 @@
     const form = byId('remote-profile-form'), select = byId('remote-profile-key'), refresh = byId('remote-profile-refresh');
     const status = byId('remote-profile-status'), image = byId('remote-profile-image'), submit = byId('remote-profile-submit');
     const report = message => { status.textContent = message; };
+    root.dataset.remoteReady = '1';
     let busy = false;
-    function working(value) { busy = value; refresh.disabled = value; select.disabled = value; submit.disabled = value; }
+    function working(value) { busy = value; refresh.disabled = value; select.disabled = value; submit.disabled = value || !!(root.provisioning && !select.value); }
     function selected() {
+      if (root.provisioning) return;
       const e = client.entries().find(e => e.key === select.value);
       if (!e) return;
       byId('remote-module-fields').hidden = e.kind !== 1;
@@ -121,6 +123,7 @@
       working(true); report(de ? 'Katalog wird im Browser geladen …' : 'Loading catalog in browser …');
       try {
         const entries = (await client.refresh()).filter(e => root.dataset.modules === '1' || !e.kind);
+        if (root.provisioning) { root.provisioning.online(entries); report(de ? 'Katalog bereit.' : 'Catalog ready.'); return; }
         const previous = select.value; select.textContent = '';
         for (const e of entries) { const option = root.ownerDocument.createElement('option'); option.value = e.key; option.textContent = e.name + ' ' + e.revision.join('.'); select.appendChild(option); }
         if (entries.some(e => e.key === previous)) select.value = previous;
@@ -131,6 +134,7 @@
     }
     select.addEventListener('change', selected); refresh.addEventListener('click', update);
     form.addEventListener('submit', async event => {
+      if (root.provisioning && !client.entries().some(e => e.key === select.value)) return;
       event.preventDefault();
       if (busy || !form.reportValidity()) return;
       const key = select.value;
@@ -138,6 +142,7 @@
       try {
         const {entry, bytes} = await client.prepare(key);
         if (select.value !== key) throw Error('SelectionStale');
+        if (!form.reportValidity()) throw Error('ConfirmationRequired');
         byId('remote-profile-entry').value = hex(entry.raw);
         byId('remote-profile-data').value = hex(bytes);
         // Disabled controls are omitted by FormData; explicitly bind the selection.

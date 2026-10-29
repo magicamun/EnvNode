@@ -79,9 +79,9 @@ void test_overview_reads_only_external_address_then_releases_bus() {
     TEST_ASSERT_EQUAL(-1, pinModes[17]);
     for (const auto& tx : Wire.transmissions) { TEST_ASSERT_EQUAL(0x50, tx.address); TEST_ASSERT_EQUAL(2, tx.bytes.size()); }
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "NotProvisioned"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Select board and revision"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "provision-board-image"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "mini-0.9-pcb0.9.0"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Select profile"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "remote-profile-image"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "mini-0.9.0/top.png"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Mini 0.8"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(), "Weather 0.2"));
     TEST_ASSERT_NULL(strstr(f.pages.content.c_str(), "descriptorModuleSlot"));
@@ -176,7 +176,7 @@ void test_explicit_revision_selection_preserves_legacy_and_supports_new_boards()
         TEST_ASSERT_EQUAL(BoardIdentityStatus::Valid,BoardIdentityCodec::decode(data.data(),32,read));
         TEST_ASSERT_EQUAL(c.id,read.profileId);TEST_ASSERT_EQUAL(c.revision,read.revision.minor);
         f.server.request("/hardware",HTTP_GET);
-        const String selected=String("value='")+c.key+"' selected";
+        const String selected=String("value='board:")+c.key+"'";
         TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),selected.c_str()));
     }
     Fixture legacy;legacy.form();legacy.server.request("/hardware/board-identity/write",HTTP_POST);

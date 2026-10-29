@@ -181,3 +181,14 @@ checks run in the browser. A bounded local upload is structurally validated
 before the existing EEPROM write. The browser client loads asynchronously with
 SRI; built-in forms remain available offline. The separate connector-test
 profile downloader retains its existing HTTPS transport.
+
+## Unified provisioning dialog (0.8.2)
+
+The tester and normal EnvNode 0.8.5 share the same dialog implementation:
+Board/Module, one filtered profile list, matching preview, serial/batch/date,
+optional module slot and explicit write confirmation. Online profiles replace
+matching built-in options; offline options remain in the same UI. Connector
+instructions are collapsible. Board batch/date use verified ENPM payload v2,
+read back in the dialog, and require runtime EnvNode 0.8.5 or later. Old v1 maps
+remain readable and keep v1 writes when no batch/date is entered. Legacy POST
+endpoints retain their existing argument names and confirmation requirements.

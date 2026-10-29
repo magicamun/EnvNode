@@ -1,5 +1,5 @@
 // EnvNode: see repository LICENSE.
 #pragma once
 namespace EnvNode {
-constexpr const char* FirmwareVersion = "0.8.1";
+constexpr const char* FirmwareVersion = "0.8.2";
 }

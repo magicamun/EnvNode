@@ -12,19 +12,20 @@ TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection
     : connection_(connection), store_(store), service_(store,maps), available_(available),
       moduleStores_{slotA, slotB}, maps_(maps) {}
 BoardIdentityReadResult TestBoardProvisioning::refresh() {
+    batch_[0]=date_[0]=0;
     current_ = {}; // Never retain another DUT's identity after a failed read.
     if (!available()) return current_;
     if (connection_.begin()) {
         current_ = store_.read();
-        if(maps_ && (current_.status==BoardIdentityStatus::UnsupportedRevision || current_.status==BoardIdentityStatus::UnknownBoardProfile)) {
-            BoardPortMap map;
-            const auto read=maps_->read(map);
-            const auto raw=store_.read(false);
+        if(maps_) {
+            BoardPortMap map;const auto read=maps_->read(map);const auto raw=store_.read(false);
             if(read.status==BoardPortMapStatus::Valid
                 &&(raw.status==BoardIdentityStatus::Valid||raw.status==BoardIdentityStatus::UnassignedSerial)
                 &&map.profileId==encodeBoardProfileId(raw.identity.profileId)
                 &&map.revision.major==raw.identity.revision.major&&map.revision.minor==raw.identity.revision.minor
-                &&!strcmp(map.serial.value,raw.identity.serialNumber.value))current_=raw;
+                &&!strcmp(map.serial.value,raw.identity.serialNumber.value)) {
+                current_=raw;memcpy(batch_,map.productionBatch,sizeof(batch_));memcpy(date_,map.productionDate,sizeof(date_));
+            }
         }
     }
     connection_.end();

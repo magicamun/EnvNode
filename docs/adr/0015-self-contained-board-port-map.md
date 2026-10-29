@@ -32,3 +32,11 @@ provisioning and rejected by the current runtime adapter. Physical port-contract
 changes require a new hardware revision/family; a published identity must never
 be reused with different bindings. This also prevents older firmware from using
 its compiled mapping for a different physical port contract.
+
+## Manufacturing extension, 2026-10-29
+
+ENPM payload v2 appends bounded batch/date while retaining the header, bank
+layout and transactional write path. New readers retain v1 compatibility;
+empty batch/date retain v1 writes. Nonempty fields require runtime 0.8.5 or
+newer and raise the record minimum accordingly. Earlier readers reject v2,
+so provisioning firmware compatibility remains separate from runtime support.

@@ -183,8 +183,30 @@ void test_runtime_owns_loaded_data_after_decode_buffer_is_released() {
     TEST_ASSERT_EQUAL(17,boardModuleSlot(currentBoardProfile(),ModuleSlot::A)->auxGpio1.number);
     TEST_ASSERT_EQUAL(42,encodeBoardProfileId(currentBoardProfile().id));
 }
+void test_board_manufacturing_survives_eeprom_and_boot_with_legacy_maps_unchanged() {
+    Memory memory;BoardIdentityStore identityStore(memory);BoardPortMapStore maps(memory);BoardProvisioningService service(identityStore,&maps);
+    auto map=mini();memset(map.productionBatch,'B',64);map.productionBatch[64]=0;strcpy(map.productionDate,"2026-10-29");
+    TEST_ASSERT_EQUAL(BoardProvisioningStatus::Success,service.provision(identity(map),true,&map).status);
+    BoardPortMap read;TEST_ASSERT_EQUAL(BoardPortMapStatus::Valid,maps.read(read).status);
+    TEST_ASSERT_EQUAL_STRING(map.productionBatch,read.productionBatch);TEST_ASSERT_EQUAL_STRING(map.productionDate,read.productionDate);
+    auto boot=resolve(memory);TEST_ASSERT_TRUE(boot.normalRuntimeAllowed);TEST_ASSERT_EQUAL_STRING(map.productionBatch,boot.productionBatch);TEST_ASSERT_EQUAL_STRING(map.productionDate,boot.productionDate);
+    uint8_t bytes[1024];size_t n=0;TEST_ASSERT_TRUE(BoardPortMapCodec::encode(map,bytes,sizeof(bytes),n));
+    TEST_ASSERT_EQUAL_HEX8(0x8b,bytes[0]);TEST_ASSERT_EQUAL(2,bytes[1]);
+    for(size_t cut=0;cut<n;++cut)TEST_ASSERT_FALSE(BoardPortMapCodec::decode(bytes,cut,read));
+    bytes[1]=3;TEST_ASSERT_FALSE(BoardPortMapCodec::decode(bytes,n,read));
+    map.productionBatch[0]=map.productionDate[0]=0;TEST_ASSERT_TRUE(BoardPortMapCodec::encode(map,bytes,sizeof(bytes),n));
+    TEST_ASSERT_EQUAL_HEX8(0x8a,bytes[0]);TEST_ASSERT_EQUAL(1,bytes[1]);TEST_ASSERT_TRUE(BoardPortMapCodec::decode(bytes,n,read));
+    TEST_ASSERT_EQUAL_STRING("",read.productionBatch);TEST_ASSERT_EQUAL_STRING("",read.productionDate);
+}
+void test_invalid_board_manufacturing_does_not_write() {
+    Memory memory;BoardPortMapStore maps(memory);auto map=mini();memset(map.productionBatch,'B',sizeof(map.productionBatch));
+    TEST_ASSERT_EQUAL(BoardPortMapStatus::InvalidMap,maps.write(map).status);TEST_ASSERT_EQUAL(0,memory.writes);
+    map=mini();strcpy(map.productionDate,"bad\nvalue");TEST_ASSERT_EQUAL(BoardPortMapStatus::InvalidMap,maps.write(map).status);TEST_ASSERT_EQUAL(0,memory.writes);
+}
 int main(int,char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_board_manufacturing_survives_eeprom_and_boot_with_legacy_maps_unchanged);
+    RUN_TEST(test_invalid_board_manufacturing_does_not_write);
     RUN_TEST(test_all_generated_maps_round_trip_with_original_pin_mappings);
     RUN_TEST(test_map_store_preserves_identity_and_unrelated_regions);
     RUN_TEST(test_each_interrupted_bank_write_keeps_previous_map);

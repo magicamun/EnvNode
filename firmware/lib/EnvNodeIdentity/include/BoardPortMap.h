@@ -12,6 +12,8 @@ struct BoardPortMap {
     BoardRevision revision = {};
     BoardSerialNumber serial = {};
     char name[96] = {};
+    char productionBatch[65] = {};
+    char productionDate[11] = {};
     DescriptorSemanticVersion minimumFirmware;
     PortMapGpio gpios[32]; size_t gpioCount = 0;
     PortMapI2c buses[2]; size_t busCount = 0;

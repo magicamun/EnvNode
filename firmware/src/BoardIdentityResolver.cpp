@@ -42,6 +42,7 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
                 && map.revision.major == identity.identity.revision.major
                 && map.revision.minor == identity.identity.revision.minor
                 && !strcmp(map.serial.value, identity.identity.serialNumber.value);
+            if(matched){memcpy(resolution_.productionBatch,map.productionBatch,sizeof(map.productionBatch));memcpy(resolution_.productionDate,map.productionDate,sizeof(map.productionDate));}
             resolution_.normalRuntimeAllowed = matched
                 && boardPortMapRuntimeSupported(map, currentFirmwareDescriptorVersion());
             resolution_.source = resolution_.normalRuntimeAllowed

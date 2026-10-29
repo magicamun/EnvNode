@@ -141,6 +141,9 @@ async function test(name, run) { await run();++tests;console.log('PASS',name); }
     const c=context(),t=transport(c),u=ui(c,t);await idle(u);t.corrupt=true;u.doc.items['remote-profile-confirm'].checked=true;await u.doc.items['remote-profile-form'].fire('submit');
     assert.equal(t.posts.length,0);assert.equal(u.doc.items['remote-profile-submit'].disabled,false);assert.match(u.doc.items['remote-profile-status'].textContent,/ProfileHashMismatch/);
   });
+  await test('confirmation reset during download prevents any upload',async()=>{
+    const c=context(),t=transport(c),u=ui(c,t);await idle(u);u.doc.items['remote-profile-confirm'].checked=true;t.onDownload=()=>{u.doc.items['remote-profile-confirm'].checked=false;};await u.doc.items['remote-profile-form'].fire('submit');assert.equal(t.posts.length,0);assert.match(u.doc.items['remote-profile-status'].textContent,/ConfirmationRequired/);
+  });
   await test('selection changes during download cannot write the wrong profile',async()=>{
     const c=context(),t=transport(c),u=ui(c,t);await idle(u);u.doc.items['remote-profile-confirm'].checked=true;t.onDownload=()=>{u.doc.items['remote-profile-key'].value='stale';};await u.doc.items['remote-profile-form'].fire('submit');assert.equal(t.posts.length,0);assert.match(u.doc.items['remote-profile-status'].textContent,/SelectionStale/);
   });

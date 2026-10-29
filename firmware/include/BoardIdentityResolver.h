@@ -18,6 +18,8 @@ struct BoardIdentityResolution {
     BoardIdentitySource source = BoardIdentitySource::UnsupportedIdentity;
     BoardIdentityStatus recordStatus = BoardIdentityStatus::StorageUnavailable;
     BoardIdentity identity = {};
+    char productionBatch[65] = {};
+    char productionDate[11] = {};
     bool normalRuntimeAllowed = false;
     BoardPortMapStatus portMapStatus = BoardPortMapStatus::NotProvisioned;
 };
