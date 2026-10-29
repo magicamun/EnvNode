@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "duo-relay-0.3",
+  "name": "EnvNode DuoRelay",
+  "image": "https://docs.envnode.de/assets/board-views/duo-relay-0.3/assembly-front.png",
+  "testing": null,
+  "provisioning": {
+    "schemaVersion": "0.1",
+    "objectKind": "module",
+    "identity": {
+      "typeId": "org.envnode.module.duo-relay",
+      "instanceId": "00000000-0000-0000-0000-000000000000",
+      "manufacturer": "org.envnode",
+      "hardwareRevision": {
+        "major": 0,
+        "minor": 3
+      }
+    },
+    "compatibility": {
+      "minimumFirmwareVersion": "0.5.0",
+      "platform": {
+        "id": "org.envnode.platform.any",
+        "apiVersion": 1
+      },
+      "safetyProfile": {
+        "id": "org.envnode.safety.module-interface",
+        "apiVersion": 1
+      },
+      "drivers": [
+        {
+          "id": "org.envnode.driver.gpio-on-off",
+          "apiVersion": 1
+        }
+      ],
+      "capabilities": [
+        "actuator.on-off"
+      ]
+    },
+    "description": {
+      "name": "EnvNode DuoRelay",
+      "summary": "Two independently controlled 5 V electromechanical changeover relays.",
+      "documentationUrl": "https://github.com/magicamun/EnvNode/tree/main/hardware/kicad/Modules/FullSize/DuoRelay"
+    },
+    "hardware": {
+      "interface": "org.envnode.interface.module-2x7",
+      "requirements": [
+        {
+          "id": "relay1-control",
+          "resource": "AUX_GPIO1",
+          "kind": "gpio",
+          "capabilities": [
+            "digital-output"
+          ]
+        },
+        {
+          "id": "relay2-control",
+          "resource": "AUX_GPIO2",
+          "kind": "gpio",
+          "capabilities": [
+            "digital-output"
+          ]
+        },
+        {
+          "id": "relay-supply",
+          "resource": "+5V",
+          "kind": "power",
+          "capabilities": [
+            "supply"
+          ],
+          "properties": {
+            "nominalMillivolts": 5000
+          }
+        }
+      ],
+      "devices": [
+        {
+          "id": "relay.1",
+          "kind": "actuator",
+          "driver": {
+            "id": "org.envnode.driver.gpio-on-off",
+            "apiVersion": 1
+          },
+          "bindings": {
+            "output": "relay1-control"
+          },
+          "parameters": {
+            "activeLevel": "high",
+            "safeLevel": "low"
+          },
+          "capabilities": [
+            "actuator.on-off"
+          ]
+        },
+        {
+          "id": "relay.2",
+          "kind": "actuator",
+          "driver": {
+            "id": "org.envnode.driver.gpio-on-off",
+            "apiVersion": 1
+          },
+          "bindings": {
+            "output": "relay2-control"
+          },
+          "parameters": {
+            "activeLevel": "high",
+            "safeLevel": "low"
+          },
+          "capabilities": [
+            "actuator.on-off"
+          ]
+        }
+      ]
+    },
+    "manufacturing": {
+      "serialNumber": null,
+      "productionBatch": null,
+      "productionDate": null
+    },
+    "calibration": []
+  },
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0"
+}

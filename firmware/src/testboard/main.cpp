@@ -99,6 +99,7 @@ void setupTestBoard() {
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
     testRoutes.attachProfiles(profiles);
     web.attachTestRoutes(testRoutes);
+    provisioningRoutes.enableRemoteProfiles();
     web.attachProvisioningRoutes(provisioningRoutes);
     runtime.begin();
 }

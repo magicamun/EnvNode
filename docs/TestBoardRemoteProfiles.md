@@ -140,3 +140,10 @@ Identitätskatalog Mini 0.8/0.9 und Weather 0.2/0.3 sowie Mainboard 0.3.
 Die tatsächliche Revision wird ausdrücklich gewählt. Das Tester-Provisioning
 verwendet dieselben Definitionen und Bilder für die passende Boardansicht.
 Siehe [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
+
+## Gemeinsamer Provisioning-Katalog seit Testboard 0.8.0
+
+Der bisherige v1-Prüfkatalog bleibt kompatibel. Zusätzlich verwenden normale
+Firmware und Tester denselben Provisioning-Katalog für ENPM-Boards und
+ENHD-Module. Beide Projektionen werden aus den gemeinsamen Hardwaredatensätzen
+erzeugt. Siehe [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).

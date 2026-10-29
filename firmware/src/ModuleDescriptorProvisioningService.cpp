@@ -2,6 +2,8 @@
 
 #include "BoardProfile.h"
 #include "ModuleDescriptorWriter.h"
+#include <memory>
+#include <new>
 
 namespace EnvNode {
 ModuleDescriptorProvisioningService::ModuleDescriptorProvisioningService(
@@ -30,12 +32,22 @@ ModuleDescriptorProvisioningResult ModuleDescriptorProvisioningService::provisio
         result.status = ModuleDescriptorProvisioningStatus::InvalidSlot;
         return result;
     }
+    if (!explicitlyConfirmed) {
+        result.status = ModuleDescriptorProvisioningStatus::ConfirmationRequired;
+        return result;
+    }
+    std::unique_ptr<HardwareDescriptor> scratch(new (std::nothrow) HardwareDescriptor);
+    if (!scratch) {
+        result.status = ModuleDescriptorProvisioningStatus::StorageUnavailable;
+        return result;
+    }
     result = writeModuleProvisioningPayload(*selectedStore, slot, payload, payloadSize,
-        explicitlyConfirmed, descriptorScratch_);
+        explicitlyConfirmed, *scratch);
     if (result.status != ModuleDescriptorProvisioningStatus::Success) return result;
     result.compatibilityStatus = evaluateModuleDescriptorCompatibility(
-        descriptorScratch_, currentFirmwareDescriptorVersion(), currentBoardProfile(), slot).status;
+        *scratch, currentFirmwareDescriptorVersion(), currentBoardProfile(), slot).status;
 
+    scratch.reset();
     discoveryService_.scan();
     const ModuleDiscoveryResult* discovered = discoveryService_.result(slot);
     if (discovered == nullptr

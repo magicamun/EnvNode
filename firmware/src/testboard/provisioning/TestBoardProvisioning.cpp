@@ -4,16 +4,29 @@
 #include "ModuleDescriptorWriter.h"
 #include <memory>
 #include <new>
+#include <cstring>
 namespace EnvNode {
 TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection,
     BoardIdentityStore& store, std::function<bool()> available,
     HardwareDescriptorStore* slotA, HardwareDescriptorStore* slotB, BoardPortMapStore* maps)
     : connection_(connection), store_(store), service_(store,maps), available_(available),
-      moduleStores_{slotA, slotB} {}
+      moduleStores_{slotA, slotB}, maps_(maps) {}
 BoardIdentityReadResult TestBoardProvisioning::refresh() {
     current_ = {}; // Never retain another DUT's identity after a failed read.
     if (!available()) return current_;
-    if (connection_.begin()) current_ = store_.read();
+    if (connection_.begin()) {
+        current_ = store_.read();
+        if(maps_ && (current_.status==BoardIdentityStatus::UnsupportedRevision || current_.status==BoardIdentityStatus::UnknownBoardProfile)) {
+            BoardPortMap map;
+            const auto read=maps_->read(map);
+            const auto raw=store_.read(false);
+            if(read.status==BoardPortMapStatus::Valid
+                &&(raw.status==BoardIdentityStatus::Valid||raw.status==BoardIdentityStatus::UnassignedSerial)
+                &&map.profileId==encodeBoardProfileId(raw.identity.profileId)
+                &&map.revision.major==raw.identity.revision.major&&map.revision.minor==raw.identity.revision.minor
+                &&!strcmp(map.serial.value,raw.identity.serialNumber.value))current_=raw;
+        }
+    }
     connection_.end();
     return current_;
 }
@@ -60,6 +73,21 @@ BoardProvisioningResult TestBoardProvisioning::provisionBoardIdentity(const Boar
         current_.identity = identity;
         current_.status = validateBoardIdentity(identity);
     }
+    return result;
+}
+BoardProvisioningResult TestBoardProvisioning::provisionBoardPortMap(const BoardPortMap& map,bool confirmed) {
+    BoardProvisioningResult result;
+    result.identity={static_cast<BoardProfileId>(map.profileId),map.revision,map.serial};
+    if(!confirmed){result.status=BoardProvisioningStatus::ConfirmationRequired;return result;}
+    // Validate before connecting the external bus, without runtime-driver checks.
+    uint8_t encoded[BoardPortMapCodec::MaximumBytes];size_t size=0;
+    if(!maps_||!BoardPortMapCodec::encode(map,encoded,sizeof(encoded),size))return result;
+    if(!available()){result.status=BoardProvisioningStatus::WriteFailed;return result;}
+    current_={};
+    if(connection_.begin())result=service_.provision(result.identity,true,&map);
+    else result.status=BoardProvisioningStatus::WriteFailed;
+    connection_.end();result.rebootRequired=false;
+    if(result.status==BoardProvisioningStatus::Success){current_.identity=result.identity;current_.status=validateBoardIdentityStructure(result.identity);}
     return result;
 }
 ModuleDescriptorProvisioningResult TestBoardProvisioning::provisionModuleDescriptor(ModuleSlot slot,

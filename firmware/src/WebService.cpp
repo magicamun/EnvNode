@@ -446,7 +446,10 @@ void WebService::begin() {
             [this]() { return renderHardwareOverview(); },
             [](uint8_t* bytes, size_t size) { esp_fill_random(bytes, size); }));
     }
-    if (provisioningRoutes_) webHost_.registerRoutes(*provisioningRoutes_);
+    if (provisioningRoutes_) {
+        provisioningRoutes_->enableRemoteProfiles();
+        webHost_.registerRoutes(*provisioningRoutes_);
+    }
     else logger_.error("Insufficient memory to initialize provisioning web routes");
     if (!settingsRoutes_) {
         settingsRoutes_.reset(new (std::nothrow) CommonSettingsWebRoutes(webHost_, *this, *this,
@@ -2593,6 +2596,10 @@ bool WebService::provisioningProfile(BoardProfileId id, BoardRevision revision, 
     const auto* p=boardIdentityProfile(id,revision);
     if(!p || !boardProfile(id,revision))return false;
     result={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
+}
+BoardProvisioningResult WebService::provisionBoardPortMap(const BoardPortMap& map, bool confirmed) {
+    const BoardIdentity identity={static_cast<BoardProfileId>(map.profileId),map.revision,map.serial};
+    return boardProvisioningService_.provision(identity,confirmed,&map);
 }
 BoardProvisioningResult WebService::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
     return boardProvisioningService_.provision(identity, confirmed);

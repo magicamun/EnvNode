@@ -149,3 +149,24 @@ Boardtabellen verfügbar; ein Start allein verändert das EEPROM nicht.
 Bei beschädigtem ENPM, widersprüchlicher Identität oder nicht erfüllten
 Betriebsanforderungen wird keine GPIO-Zuordnung aktiviert. Diagnose und Bootlog
 weisen den ENPM-Status aus. Die Migration erfolgt durch erneutes Provisioning.
+
+## Nachladbare Profile ab EnvNode 0.8.3 / Tester 0.8.0
+
+In derselben Provisioning-Ansicht steht zusätzlich **Nachladbare Hardwareprofile**
+zur Verfügung. Einmalig werden die verfügbaren Boards und Module aus dem
+Dokumentationskatalog geladen; **Profile aktualisieren** wiederholt die Anfrage.
+Dafür müssen WLAN und Uhrzeit bereit sein. Die eingebauten Formulare bleiben
+auch ohne Internet verwendbar.
+
+Profil, Revision und Board-/Modulbild dienen zur Auswahl. Die angezeigte
+Mindestversion gilt für den Betrieb; sie sperrt das Provisioning nicht. Für ein
+Modul zusätzlich den EEPROM-Slot A/B wählen und die individuellen
+Herstellungsdaten eintragen. Erst die Schreibbestätigung löst Download,
+Validierung und EEPROM-Schreiben aus. Ohne passende Treiber wird das Modul nach
+dem Neustart angezeigt, reserviert seine Ports und bleibt funktional inaktiv.
+Die neue Hardwarekonfiguration wird im normalen EnvNode nach einem Neustart
+übernommen; der Tester schreibt weiterhin den externen Prüfling.
+
+Der Katalog enthält zunächst die vorhandenen fünf Boardrevisionen und DuoRelay
+0.3. SD und SX1262-Remote folgen mit geprüften Hardwareprofilen. Während einer
+laufenden Anschlussprüfung sind auch die neuen Remote-Aktionen gesperrt.

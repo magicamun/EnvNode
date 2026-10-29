@@ -30,6 +30,7 @@ public:
     bool writeBoolean(bool value);
     bool writeNull();
     bool writeDouble(double value);
+    bool writeEncodedValue(const uint8_t* value, size_t size);
 
     CompactCborStatus status() const;
     size_t size() const;

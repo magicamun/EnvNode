@@ -6,6 +6,7 @@
 #include "IProvisioningAdministration.h"
 #include "WebLocalization.h"
 #include "Logger.h"
+#include "HardwareProfileRepository.h"
 namespace EnvNode {
 struct ProvisioningWebOptions {
     bool externalTarget = false;
@@ -19,6 +20,8 @@ public:
     HardwareProvisioningWebRoutes(WebServer& server, IWebPagePresenter& pages,
         ILogger& logger, IProvisioningAdministration& administration,
         Overview overview, Random random, ProvisioningWebOptions options = {});
+    void attachProfiles(HardwareProfileRepository& profiles) { profiles_ = &profiles; }
+    bool enableRemoteProfiles();
     void registerRoutes(WebServer& server) override;
 private:
     const char* uiText(TextId id) const;
@@ -35,5 +38,11 @@ private:
     Random random_;
     ProvisioningWebOptions options_;
     bool operationAllowed();
+    String remoteProfilesSection();
+    void handleRemoteProfileWrite();
+    void handleProfileRefresh();
+    HardwareProfileRepository* profiles_ = nullptr;
+    std::unique_ptr<IHardwareProfileTransport> profileTransport_;
+    std::unique_ptr<HardwareProfileRepository> ownedProfiles_;
 };
 }

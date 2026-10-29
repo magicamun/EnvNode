@@ -71,6 +71,7 @@ private:
     bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
     bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;
     bool provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& profile) const override;
+    BoardProvisioningResult provisionBoardPortMap(const BoardPortMap&, bool) override;
     BoardProvisioningResult provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) override;
     ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
         const uint8_t* payload, size_t size, bool confirmed) override;

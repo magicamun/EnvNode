@@ -1,6 +1,7 @@
 #include "BoardIdentityResolver.h"
 
 #include "BoardProfile.h"
+#include "BoardIdentityProfiles.h"
 #include "HardwareDescriptorCompatibility.h"
 #include <cstring>
 #include <new>
@@ -57,7 +58,11 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
     if (readResult.status == BoardIdentityStatus::Valid
         || readResult.status == BoardIdentityStatus::UnassignedSerial) {
         resolution_.source = BoardIdentitySource::EEPROM;
-        resolution_.normalRuntimeAllowed = true;
+        const auto* profile = boardIdentityProfile(readResult.identity.profileId, readResult.identity.revision);
+        BoardPortMap builtIn;
+        resolution_.normalRuntimeAllowed = profile
+            && BoardPortMapCodec::decode(profile->portMap,profile->portMapSize,builtIn)
+            && boardPortMapRuntimeSupported(builtIn,currentFirmwareDescriptorVersion());
         return resolution_;
     }
 

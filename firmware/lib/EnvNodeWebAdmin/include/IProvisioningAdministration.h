@@ -24,6 +24,9 @@ public:
         return provisioningProfile(id,profile) && profile.revision.major==revision.major && profile.revision.minor==revision.minor;
     }
     virtual BoardProvisioningResult provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) = 0;
+    virtual BoardProvisioningResult provisionBoardPortMap(const BoardPortMap&, bool) {
+        return BoardProvisioningResult{};
+    }
     virtual ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
         const uint8_t* payload, size_t size, bool confirmed) = 0;
 };

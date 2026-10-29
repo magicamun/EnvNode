@@ -25,7 +25,6 @@ private:
 
     HardwareDescriptorStore* stores_[ModuleDiscoveryService::SlotCount];
     ModuleDiscoveryService& discoveryService_;
-    HardwareDescriptor descriptorScratch_ = {};
 };
 
 

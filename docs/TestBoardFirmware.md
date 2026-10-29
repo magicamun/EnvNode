@@ -167,3 +167,11 @@ configuration and numeric-ID APIs retain their previous behavior. The tester add
 a revision-specific board image using the same definition/image routes as testing.
 An unknown external EEPROM requires an explicit board/revision selection.
 See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
+
+## Shared remote provisioning (0.8.0)
+
+The tester retains its separate Provisioning menu and external target bus.
+Alongside the built-in forms it now loads the same hardware catalog as EnvNode
+0.8.3. Board maps and arbitrary module templates are downloaded with a verified
+SHA-256 and instantiated without runtime-driver checks. The existing connector
+profile repository remains compatible. See [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).

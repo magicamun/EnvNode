@@ -4,6 +4,16 @@
 
 ### Added
 
+- EnvNode 0.8.3 / Testboard 0.8.0: load one shared, hash-bound provisioning
+  catalog for boards and modules over verified HTTPS. Preserve the separate
+  tester menu and EnvNode hardware administration; show images and minimum
+  runtime versions without gating EEPROM writes on driver support.
+- Persist self-contained board port maps in verified ENPM dual-bank storage,
+  preserve legacy ENID identities, and reserve module resources even when the
+  installed firmware cannot operate the module. Keep built-in provisioning
+  profiles available offline and derive the DuoRelay fallback from the same
+  source as its downloadable template.
+
 - EnvNode 0.8.2 / Testboard 0.7.0: share manufacturing revision metadata, support
   Mini 0.9 and Weather 0.3 beside their predecessors, select the exact EEPROM
   revision at startup and provide explicit revision-specific provisioning forms.

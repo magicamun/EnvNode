@@ -6,9 +6,11 @@
 namespace EnvNode {
 
 bool isKnownBoardProfileId(uint16_t encodedId) {
-    return encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMainboard)
-        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeWeather)
-        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMini);
+    for (size_t i = 0; i < boardIdentityProfileCount(); ++i) {
+        const auto* profile = boardIdentityProfileAt(i);
+        if (profile && encodedId == encodeBoardProfileId(profile->id)) return true;
+    }
+    return false;
 }
 
 bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId) {

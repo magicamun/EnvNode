@@ -100,26 +100,20 @@ eigenen Speicher und benötigt danach weder Download noch Profilpuffer.
 Format, Schreibreihenfolge und Ausfallverhalten sind in
 [ADR 0015](adr/0015-self-contained-board-port-map.md) festgelegt.
 
-Die vollständige Umsetzung nachladbarer Provisioning-Profile ist damit noch
-nicht abgeschlossen: Die normale Firmware importiert den neuen JSON-Katalog
-noch nicht zur Laufzeit. Der Tester lädt weiterhin den kompatiblen v1-Prüfkatalog;
-sein externes Provisioning unterstützt ENID-Boards und ENHD-Module an I²C0
-unter 0x50 bzw. 0x52/0x53.
-Beide Anwendungen verwenden für ENHD dieselbe Validierung und denselben verifizierten
-EEPROM-Schreibpfad (`ModuleDescriptorWriter`). Der Tester benötigt dafür keine
-Betriebstreiber und prüft die Mindestversion nicht als Schreibvoraussetzung. Er
-aktiviert den Provisioning-Bus nur für die gewählte Operation und gibt SDA/SCL
-danach wieder frei. Ein laufender Anschlusstest sperrt Board- und Moduloperationen,
-einschließlich der alten `/device/...`-Routen. Die UUID wird im Tester mit der
-ESP32-Zufallsquelle erzeugt; das Ziel-EEPROM gehört weiterhin zum externen Prüfling.
+## Gemeinsamer Remote-Import
 
-Die Modulvorlage im gemeinsamen Webformular ist weiterhin DuoRelay 0.3.
-SD und SX1262-Remote sind keine erfundenen Produktprofile in diesem Katalog.
+Seit EnvNode 0.8.3 / Testboard 0.8.0 importieren beide Anwendungen denselben
+binären Provisioning-Katalog. Der normale EnvNode behält seine Hardwareverwaltung,
+der Tester seinen eigenen Provisioning-Einstieg. Bilder, Mindestversionen und
+EEPROM-Vorlagen kommen aus den gemeinsamen Datensätzen. Bestehende eingebaute
+Formulare und der bisherige Tester-v1-Prüfkatalog bleiben verfügbar.
 
-Als nächster Integrationsschritt werden ein gemeinsamer begrenzter Laufzeitdecoder
-für den Remote-Katalog und ein Profilrepository benötigt. Die EEPROM-Projektion
-für Boards ist mit ENPM vorhanden. Der Generator veröffentlicht zusätzlich
-hashgebundene `.portmap.cbor`-Vorlagen und deren Dateinamen, SHA-256 und Länge im
-Hardwarekatalog. Beim Provisioning ergänzt der gemeinsame Schreibpfad die
-individuelle Seriennummer. Der Remote-Import muss die bestehenden Validierungs-,
-Hash-, Offline- und Transaktionsregeln des Testers einhalten.
+Der generische Modul-Encoder ergänzt nur die individuelle UUID und
+Herstellungsdaten; Produktdefinition, Treiberanforderungen und unbekannte
+Descriptor-Felder bleiben unverändert. Auch die eingebaute DuoRelay-Vorlage wird
+jetzt aus dem gemeinsamen Modulprofil erzeugt. SD und SX1262-Remote sind noch
+keine veröffentlichten Produktprofile; ihre zukünftigen Definitionen benötigen
+keine fest eingebaute Produktliste im Importer.
+
+Ablauf, Katalogformat, Offline-Verhalten, Vertrauensmodell und Veröffentlichung
+stehen in [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).
