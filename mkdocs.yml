@@ -70,6 +70,7 @@ nav:
           - Input-Adapter: mainboards/input-adapter/index.md
           - Modul-Adapter: mainboards/module-adapter/index.md
   - Firmware:
+      - Downloads und Änderungen: firmware/downloads.md
       - Bedienungsanleitung: firmware/index.md
       - Begriffe und Oberfläche: firmware/basics.md
       - Bauen und Aufspielen: firmware/installation.md

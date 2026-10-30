@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 
 
@@ -102,3 +103,22 @@ if not generated_header.exists() or generated_header.read_text(encoding="utf-8")
     generated_header.write_text(header, encoding="utf-8")
 
 env.Append(CPPPATH=[str(generated_dir), str(version_header.parent)])
+
+# Keep local builds and published OTA downloads consistently named.
+firmware_name = "tester" if env["PIOENV"] == "testboard" else "envnode"
+env.Replace(PROGNAME="{}-{}".format(firmware_name, version))
+
+
+# Export the two OTA targets to a Finder-visible directory after a successful build.
+if env["PIOENV"] in ("esp32dev", "testboard"):
+    def export_ota_binary(source, target, env):
+        binary = Path(env.subst("$BUILD_DIR/${PROGNAME}.bin"))
+        destination = project_dir / "bin" / binary.name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(binary, destination)
+        print("OTA image: {}".format(destination))
+
+    export_target = env.Alias(
+        "export_ota_binary", "$BUILD_DIR/${PROGNAME}.bin", export_ota_binary)
+    env.AlwaysBuild(export_target)
+    env.Default(export_target)

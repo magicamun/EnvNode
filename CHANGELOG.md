@@ -81,6 +81,11 @@
 
 ### Documentation and repository maintenance
 
+- Add versioned EnvNode and Tester OTA downloads to the documentation, with
+  curated release summaries, commit identity and SHA-256. Keep the latest build
+  per target/version in GitHub Releases and name local images by target/version.
+  Export normal local OTA builds to the visible firmware/bin directory.
+
 - Remove the former central parts spreadsheet, legacy BOM files and local order
   records. Article master data, purchasing, inventory and kit BOMs are maintained
   in an internally used solution.

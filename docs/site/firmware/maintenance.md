@@ -20,7 +20,7 @@ bleiben lesbar; fehlende Einstellungen werden als nicht konfiguriert übernommen
 
 ## Web-OTA
 
-1. Ein passendes `firmware.bin` für das ESP32-Ziel bauen.
+1. Ein passendes Anwendungsimage unter [Downloads](downloads.md) laden oder selbst bauen.
 2. In der Weboberfläche **Firmware** öffnen und das Anwendungsimage hochladen.
 3. Upload-Ergebnis prüfen. Ein erfolgreicher Upload stellt das Image bereit,
    startet das Gerät aber noch nicht neu.

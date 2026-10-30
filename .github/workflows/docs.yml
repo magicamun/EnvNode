@@ -1,9 +1,12 @@
-name: Publish documentation
+name: Publish documentation and firmware
 on:
   push:
     branches: [main]
     paths:
       - 'docs/site/**'
+      - 'docs/firmware-releases/**'
+      - 'firmware/**'
+      - 'tools/firmware_downloads.py'
       - 'docs/pdf/**'
       - 'tools/docs_pdf.py'
       - 'mkdocs.yml'
@@ -21,9 +24,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    permissions:
+      contents: write
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -33,6 +41,17 @@ jobs:
       - name: Install PDF system dependencies
         run: sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 fonts-dejavu-core
       - run: python -m pip install -r requirements-docs.txt
+      - name: Build firmware
+        run: |
+          python -m pip install platformio==6.1.18
+          pio run -d firmware -e esp32dev -e testboard
+      - name: Publish versioned firmware and generate download page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python tools/firmware_downloads.py publish --target envnode
+          python tools/firmware_downloads.py publish --target tester
+          python tools/firmware_downloads.py catalog
       - run: python -m mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:
