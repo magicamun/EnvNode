@@ -23,3 +23,5 @@ Vorgemerkt am 28.10.2026; Umsetzung als separater Schritt nach der Hardware-Doku
 - [ ] Test-Firmware: Bei älteren Mainboards ohne TP1 das unverbundene zweipolige JST-PH-TestPin-Kabel berücksichtigen und das Testergebnis als „unvollständig“ ausweisen; Verhalten am Aufbau validieren.
 
 - [ ] Testhardware-Dokumentation (Test-Controller, Input-Adapter, Modul-Adapter) nach erfolgreicher Erprobung auf die tatsächliche Bedienung abstimmen und überholte Hinweise auf Firmware-Simulation und noch fehlende Firmware-Anbindung entfernen.
+
+- [ ] Input-Adapter in KiCad: TP1-Stiftleiste auf DNP setzen; die Pigtail-Adern werden direkt an die Pads gelötet. In der Kaufteilliste nur die 38 J4-Kontaktpositionen als ENP-00145 zählen.

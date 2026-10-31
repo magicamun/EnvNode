@@ -27,7 +27,7 @@ Messadapter für den Test-Controller 0.1 mit drei CD74HC4067 und 40 voneinander 
 
 ![input-adapter-0.1: 3D-Vorderseite](../../assets/images/input-adapter-0.1/top.png){ .hero-board-view }
 
-Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteile. Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
+Gezeigt ist die Vorderseite. Die beiden Pinheader-Reihen J4 werden auf der **Rückseite** montiert; ihre Steckkontakte zeigen zum ESP32-Sockel des Prüflings. Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
 ## 1. Teile und Vorbereitung
 | Ref. | Anz. / Einheit | Wert / Funktion | Artikel |
@@ -36,11 +36,11 @@ Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteil
 | U4,U5,U6 | 3 | SOIC-24W; kein HCT | ENP-00153 |
 | C1,C2,C3 | 3 | 100 nF X7R 1206 | ENP-00006 |
 | J1 | 1 | WSL 10G | ENP-00147 |
-| J4,TP1 | 40 | Rohmaterial in Kontaktpositionen: 2× 1×19 für Testplug und 1×2 für Referenzpigtail-Anschluss | ENP-00145 |
+| J4 | 38 | Rohmaterial in Kontaktpositionen: 2× 1×19 für Testplug | ENP-00145 |
 
 ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
-Für J4 werden zwei gerade 1×19-Leisten im Reihenabstand **25,40 mm** benötigt. TP1 ist der separate zweipolige Anschluss für das Referenzpigtail. Der **zweipolige JST-PH-Stecker sitzt am freien Kabelende in Richtung Prüfling**, nicht auf dem Input-Adapter. Die beiden DUT-Referenzen dürfen weder mit Adapter-GND noch mit 3V3_SYS gebrückt werden.
+Für J4 werden zwei gerade 1×19-Pinheader im Reihenabstand **25,40 mm** benötigt. Beide werden auf der Rückseite montiert, damit der Adapter in den ESP32-Sockel des Prüflings gesteckt werden kann. An TP1 werden die beiden Adern des Referenzpigtails direkt angelötet. Eine 1×2-Stiftleiste wird dort nicht bestückt (DNP). Der **zweipolige JST-PH-Stecker sitzt am freien Kabelende in Richtung Prüfling**, nicht auf dem Input-Adapter. Die beiden DUT-Referenzen dürfen weder mit Adapter-GND noch mit 3V3_SYS gebrückt werden.
 
 ## 2. Bestückungsübersicht
 
@@ -61,8 +61,8 @@ Die Pinfolge folgt den tatsächlichen Padnummern. J4 von der Oberseite betrachte
 
 1. C1-C3 und anschließend U4-U6 ausrichten und bestücken; SOIC-24W-Pin 1 und feine Brücken prüfen.
 2. J1 mit korrekter IDC-Kodierung einsetzen und löten.
-3. Die beiden J4-Reihen in einer maßhaltigen Vorrichtung mit 25,40-mm-Abstand ausrichten; zunächst Endpins fixieren, Passprobe spannungsfrei durchführen und erst dann fertig löten.
-4. Den Pigtail-Kabelanschluss an TP1 herstellen. Den zweipoligen JST-PH-Stecker am Kabelende zum Prüfling mit Pin 1/2 eindeutig zuordnen und beide Adern einzeln durchmessen.
+3. Die beiden J4-Pinheader-Reihen auf der Rückseite mit den Steckkontakten zum Prüfling einsetzen und in einer maßhaltigen Vorrichtung mit 25,40-mm-Abstand ausrichten; zunächst Endpins fixieren, Passprobe spannungsfrei durchführen und erst dann fertig löten.
+4. Die beiden Pigtail-Adern direkt an TP1 anlöten; keine 1×2-Stiftleiste bestücken. Den zweipoligen JST-PH-Stecker am Kabelende zum Prüfling mit Pin 1/2 eindeutig zuordnen und beide Adern einzeln durchmessen.
 5. Reinigen und Lötstellen sowie Abstände kontrollieren.
 
 ## 4. Anschlüsse und vollständige Kanalzuordnung
