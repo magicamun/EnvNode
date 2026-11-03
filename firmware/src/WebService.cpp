@@ -2584,6 +2584,8 @@ String WebService::renderHardwareOverview() {
                     resourceText += String(binding.gpio.number);
                 } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
                     resourceText += i2cBusName(binding.i2cBus);
+                } else if (binding.kind == HardwareDescriptorResourceKind::SPI) {
+                    resourceText += "SPI (SCK=GPIO"+String(binding.spiClock.number)+", MISO=GPIO"+String(binding.spiMiso.number)+", MOSI=GPIO"+String(binding.spiMosi.number)+")";
                 } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
                     resourceText += "+5V";
                 } else resourceText += uiText(TextId::Resolved);
@@ -2597,9 +2599,11 @@ String WebService::renderHardwareOverview() {
                 parameters += entry.hasSafeLevel
                     ? (entry.safeLevelHigh ? "high" : "low") : "—";
             }
+            if(entry.kind==HardwareDescriptorDeviceKind::Infrastructure && !strcmp(moduleDeviceDriverName(entry.driver),"sd-spi"))
+                parameters=entry.hasActiveLevel ? (entry.activeLevelHigh ? "cardDetect=high" : "cardDetect=low") : "—";
             const String capability = entry.capabilities.contains(
                 HardwareDescriptorCapabilityCode::ActuatorOnOff)
-                ? String("actuator.on-off") : String("—");
+                ? String("actuator.on-off") : entry.capabilities.contains(HardwareDescriptorCapabilityCode::StorageSd) ? String("storage.sd") : String("—");
             c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
             c += escapeHtml(descriptorText(entry.id));
             c += "</td><td>" + String((entry.kind == HardwareDescriptorDeviceKind::Sensor ? uiText(TextId::Sensor) : entry.kind == HardwareDescriptorDeviceKind::Actuator ? uiText(TextId::Actuator) : uiText(TextId::Infrastructure)));

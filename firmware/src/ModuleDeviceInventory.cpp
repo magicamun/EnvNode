@@ -1,4 +1,5 @@
 #include "ModuleDeviceInventory.h"
+#include "SdModuleContract.h"
 
 #include <new>
 
@@ -33,6 +34,7 @@ const DescriptorRequirement* findRequirement(
 bool resolveRequirement(
     const DescriptorRequirement& requirement,
     const BoardModuleSlotCapability& slot,
+    const BoardProfile& board,
     ModuleDeviceBindingResolution& resolution) {
     resolution.logicalResource = requirement.resource;
     resolution.kind = requirement.kind;
@@ -50,6 +52,10 @@ bool resolveRequirement(
         else return false;
         resolution.resolved = true;
         return true;
+    }
+    if(requirement.kind==HardwareDescriptorResourceKind::SPI && requirement.resource.equals("SPI")) {
+        resolution.spiClock=board.spiClock;resolution.spiMiso=board.spiMiso;resolution.spiMosi=board.spiMosi;
+        resolution.resolved=true;return true;
     }
     if (requirement.kind == HardwareDescriptorResourceKind::Power
         && requirement.resource.equals("+5V")
@@ -104,7 +110,7 @@ bool deriveModuleDeviceInventory(
                 entry.status = ModuleDeviceInventoryStatus::UnknownBindingTarget;
                 continue;
             }
-            if (!resolveRequirement(*requirement, *slot, resolution)) {
+            if (!resolveRequirement(*requirement, *slot, board, resolution)) {
                 resourcesResolved = false;
                 entry.status = ModuleDeviceInventoryStatus::ResourceUnavailable;
             } else if (resolution.name.equals("output")
@@ -113,6 +119,18 @@ bool deriveModuleDeviceInventory(
             }
         }
 
+        if(device.kind==HardwareDescriptorDeviceKind::Infrastructure) {
+            if(device.driver.id.coded || !device.driver.id.text.equals("org.envnode.driver.sd-spi") || device.driver.apiVersion!=1)
+                entry.status=ModuleDeviceInventoryStatus::UnsupportedDriver;
+            else if(!device.capabilities.contains(HardwareDescriptorCapabilityCode::StorageSd))
+                entry.status=ModuleDeviceInventoryStatus::MissingCapability;
+            else if(!resourcesResolved) { /* Preserve the specific resolution failure. */ }
+            else if(!device.hasActiveLevel || !device.activeLevelHigh)
+                entry.status=ModuleDeviceInventoryStatus::InvalidParameters;
+            else if(!sdModuleContractSupported(descriptor)) entry.status=ModuleDeviceInventoryStatus::MissingBinding;
+            else entry.status=ModuleDeviceInventoryStatus::Ready;
+            continue;
+        }
         if (device.kind != HardwareDescriptorDeviceKind::Actuator) {
             entry.status = ModuleDeviceInventoryStatus::UnsupportedDeviceKind;
         } else if (!identifierMatches(
@@ -158,6 +176,7 @@ const char* moduleDeviceDriverName(const DescriptorContract& driver) {
             "org.envnode.driver.ads1115")) {
         return "ads1115";
     }
+    if(!driver.id.coded && driver.id.text.equals("org.envnode.driver.sd-spi")) return "sd-spi";
     return "unknown";
 }
 

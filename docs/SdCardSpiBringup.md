@@ -569,3 +569,26 @@ against the public endpoint after the documentation deployment succeeded.
 The physical EEPROM write and boot activation remain user-run acceptance tests.
 Existing intermittent FAT write/mount errors and WebServer latency remain open;
 this integration does not claim to fix them.
+
+### SD device inventory completion
+
+Physical screenshots confirm SD-Card 0.1 in slot A alongside DuoRelay in slot B,
+and a successful 4096-byte write/read/cleanup on the assembled module. The
+initial inventory still labelled the infrastructure device unknown/unsupported
+because its policy only covered on/off actuators.
+
+The inventory now recognizes `sd-spi` API 1 and `storage.sd`, resolves the SPI
+binding to the selected board's SCK/MISO/MOSI pins, and reports Ready only for
+the same validated SD contract used by automatic activation. Invalid bindings,
+capabilities, APIs or CD polarity retain explicit error states. The Web view
+shows cardDetect=high rather than implying an actuator safety output. Ready here
+means the descriptor contract is supported, not that a card is inserted or an
+I/O operation has succeeded. Module compatibility still overrides this display.
+The actuator composer explicitly accepts only actuator-kind entries; a Ready
+storage device cannot become an automatic relay output.
+
+Inventory validation: 37 affected native tests passed across descriptor decoding,
+module actuator configuration and SD/module provisioning. The new cases cover
+SPI resource resolution, SD-only composition with zero actuators, SD + DuoRelay
+with exactly two relay actuators, and specific invalid-contract statuses.
+Physical verification of the updated inventory display is pending flashing.

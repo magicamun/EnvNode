@@ -27,6 +27,7 @@ struct ModuleDeviceBindingResolution {
     bool resolved = false;
     GpioResource gpio = GpioResource();
     I2CBus i2cBus = I2CBus::I2C0;
+    GpioResource spiClock,spiMiso,spiMosi;
 };
 
 struct ModuleDeviceInventoryEntry {
