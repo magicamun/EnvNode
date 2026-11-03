@@ -1,0 +1,146 @@
+{
+  "id": "sd-card-0.1",
+  "guide": "modules/sd-card/index.md",
+  "pcb_source": "sd-card/hardware/kicad/Modules/FullSize/SD-Card/SD-Card.kicad_pcb",
+  "pcb_sha256": "921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263",
+  "back_components": [
+    "C1",
+    "J1",
+    "U2"
+  ],
+  "hero": {
+    "front": "assets/images/sd-card-0.1/top.png",
+    "back": "assets/images/sd-card-0.1/bottom.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/sd-card-0.1/assembly-front.png",
+      "png_size_px": [
+        1400,
+        2256
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/sd-card-0.1/assembly-back.png",
+      "png_size_px": [
+        1400,
+        2256
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        91.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R1",
+      "value": "10kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        124.659,
+        41.83
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        59.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U1",
+      "value": "Adafruit_254_MicroSD",
+      "side": "F.Cu",
+      "position_mm": [
+        145.779,
+        46.69
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        34.18
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U2",
+      "value": "24LC32",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        38.6795
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        129.159,
+        37.342
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 4,
+  "asset_sha256": {
+    "assets/board-views/sd-card-0.1/assembly-front.png": "ecf432ceb76e8e960ec60839a2d61c1c9166102e83927afcf1e224ffa517dca5",
+    "assets/board-views/sd-card-0.1/assembly-back.png": "682084a73a83a3faf7abb7e9967ed9636d7da94aca3e7016b0dc9728c2c94b5e",
+    "assets/images/sd-card-0.1/top.png": "b86cfd4e9f2a3d42fc2e9f891ac1b1a8e6ef471baff23da0e6d51cd486991a9d",
+    "assets/images/sd-card-0.1/bottom.png": "e5684977ba3f3100efa970df98305636bd970b225f2ada627869976406f826ed"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

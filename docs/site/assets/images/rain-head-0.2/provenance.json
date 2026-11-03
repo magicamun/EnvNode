@@ -1,0 +1,23 @@
+{
+  "board": "RainDetectorHead",
+  "hardware_revision": "0.2",
+  "checkout": "rain-detector",
+  "commit": "e3ecde6c66d24c26fbb0352b686f2d3f10469c72",
+  "source_sha256": {
+    "RainDetectorHead.kicad_dru": "1203b82235c87187154b35954664d914d52d4b1e6ea8024e5ddf9a524a09af13",
+    "RainDetectorHead.kicad_pcb": "6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438",
+    "RainDetectorHead.kicad_pro": "af1e22e6e6ffbad3b409b996fbc377dfea7da8e643027662e977fe79b5bd77ce",
+    "RainDetectorHead.kicad_sch": "82bface8c81a513f7d1c88ebcdf12783961440fefcb477361c4d102ed4f36cfe"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "9afbe262e7c9accaa3b62974df1ef8fd3cec38adf9edaa33210d450d90b03e7f",
+    "bottom.png": "e537950d1a963efc083c8ca9ba4ca99195893ce05515b62d3f2fcf0546db9054"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

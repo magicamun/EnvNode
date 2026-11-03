@@ -21,21 +21,21 @@ BoardIdentityStore::BoardIdentityStore(IBoardIdentityStorage& storage)
     : storage_(storage) {
 }
 
-BoardIdentityReadResult BoardIdentityStore::read() {
+BoardIdentityReadResult BoardIdentityStore::read(bool requireKnownProfile) {
     BoardIdentityReadResult result;
     uint8_t encoded[BoardIdentityCodec::EncodedSize];
     if (!storage_.read(RecordAddress, encoded, sizeof(encoded))) {
         return result;
     }
 
-    result.status = BoardIdentityCodec::decode(encoded, sizeof(encoded), result.identity);
+    result.status = BoardIdentityCodec::decode(encoded, sizeof(encoded), result.identity, requireKnownProfile);
     return result;
 }
 
-BoardIdentityWriteStatus BoardIdentityStore::write(const BoardIdentity& identity) {
+BoardIdentityWriteStatus BoardIdentityStore::write(const BoardIdentity& identity, bool requireKnownProfile) {
     uint8_t encoded[BoardIdentityCodec::EncodedSize];
     const BoardIdentityStatus encodeStatus =
-        BoardIdentityCodec::encode(identity, encoded, sizeof(encoded));
+        BoardIdentityCodec::encode(identity, encoded, sizeof(encoded), requireKnownProfile);
     if (encodeStatus != BoardIdentityStatus::Valid
         && encodeStatus != BoardIdentityStatus::UnassignedSerial) {
         return BoardIdentityWriteStatus::InvalidIdentity;
@@ -58,7 +58,7 @@ BoardIdentityWriteStatus BoardIdentityStore::write(const BoardIdentity& identity
 
     BoardIdentity decoded = {};
     const BoardIdentityStatus readbackStatus =
-        BoardIdentityCodec::decode(readback, sizeof(readback), decoded);
+        BoardIdentityCodec::decode(readback, sizeof(readback), decoded, requireKnownProfile);
     if (readbackStatus != encodeStatus) {
         return BoardIdentityWriteStatus::ReadbackInvalid;
     }

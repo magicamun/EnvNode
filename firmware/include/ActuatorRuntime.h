@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 
 #include "ActuatorFactory.h"
 #include "IOnOffActuatorResolver.h"
@@ -48,6 +49,9 @@ public:
         size_t count);
     void initialize(const ActuatorSlotConfiguration* slots);
     bool rebuild(const ActuatorSlotConfiguration* slots);
+    void setModuleHardwareResolver(std::function<bool(const HardwareResourceAssignment&)> resolver) {
+        moduleHardwareResolver_ = resolver;
+    }
     bool moduleOwnsHardware(const HardwareResourceAssignment& hardware) const;
     size_t runtimeCount() const;
     size_t availableCount() const;
@@ -96,6 +100,7 @@ private:
     size_t runtimeCount_ = 0;
     size_t availableCount_ = 0;
     bool initialized_ = false;
+    std::function<bool(const HardwareResourceAssignment&)> moduleHardwareResolver_;
 };
 
 } // namespace EnvNode

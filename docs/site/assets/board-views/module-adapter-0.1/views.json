@@ -1,0 +1,104 @@
+{
+  "id": "module-adapter-0.1",
+  "guide": "mainboards/module-adapter/index.md",
+  "pcb_source": "test-provision-board/hardware/kicad/MainBoards/Module-Adapter/Module-Adapter.kicad_pcb",
+  "pcb_sha256": "92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1",
+  "back_components": [
+    "J1"
+  ],
+  "hero": {
+    "front": "assets/images/module-adapter-0.1/top.png",
+    "back": "assets/images/module-adapter-0.1/bottom.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/module-adapter-0.1/assembly-front.png",
+      "png_size_px": [
+        2319,
+        1987
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/module-adapter-0.1/assembly-back.png",
+      "png_size_px": [
+        2320,
+        1987
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        59.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J4",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "F.Cu",
+      "position_mm": [
+        129.159,
+        51.74
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        129.159,
+        37.342
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 2,
+  "asset_sha256": {
+    "assets/board-views/module-adapter-0.1/assembly-front.png": "26a2a2906db5a702c2d197cd38c44788b1a629314e506c9573b2f69125ba2ed3",
+    "assets/board-views/module-adapter-0.1/assembly-back.png": "b42ac7677659f8d406b073863e43ebc80db5eea686f40b7e24353c18129ac54f",
+    "assets/images/module-adapter-0.1/top.png": "6e48d57f2b3faacbc9fa5447381a1ee7499ad699a1ed3bf5fec9987cdb28f5c7",
+    "assets/images/module-adapter-0.1/bottom.png": "3615620cfeb144060aec33e5f019e3d65c4817f867aba31766058751c3da3e97"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

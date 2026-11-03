@@ -12,7 +12,8 @@ from pypdf import PdfReader
 def render(config, document):
     root=Path(config.config_file_path).resolve().parent
     site=Path(config['site_dir']).resolve()
-    page=site/Path(document['source']).with_suffix('')/'index.html'
+    source_path=Path(document['source'])
+    page=site/source_path.parent/'index.html' if source_path.name == 'index.md' else site/source_path.with_suffix('')/'index.html'
     source=root/'docs/site'/document['source']
     import yaml
     meta=yaml.safe_load(source.read_text().split('---',2)[1])['pdf']
@@ -23,6 +24,11 @@ def render(config, document):
     article=soup.select_one('article.md-content__inner')
     if article is None:raise ValueError('MkDocs article missing')
     for elem in article.select('.headerlink,.md-button'):elem.decompose()
+    # Parts tables need room for values and mounting notes, not equal-width quantity columns.
+    for table in article.select('table'):
+        headers=table.select('thead th')
+        if len(headers)==5 and headers[0].get_text(strip=True) in ('Ref.', 'Ref'):
+            table['class']=[*table.get('class', []), 'parts-table']
     # Resolve URLs exactly as the generated page does, and forbid network fetches.
     for img in article.select('img[src]'):
         url=urljoin(page.as_uri(),img['src']); path=Path(unquote(urlparse(url).path))
@@ -35,6 +41,7 @@ def render(config, document):
             path=urlparse(urljoin(page.as_uri(),href)).path
             relative=Path(unquote(path)).relative_to(site)
             a['href']=config['site_url'].rstrip('/')+'/'+relative.as_posix()
+    image_assets={Path(unquote(urlparse(img['src']).path)).relative_to(site).as_posix(): hashlib.sha256(Path(unquote(urlparse(img['src']).path)).read_bytes()).hexdigest() for img in article.select('img[src]')}
     # Share the introductory source text with the generated cover, avoiding
     # an almost empty duplicate title page in the print edition.
     intro=BeautifulSoup('<div></div>','html.parser').div
@@ -69,9 +76,9 @@ def render(config, document):
     for required_text in document['required_text']:
         if required_text not in text:raise ValueError(f'PDF content missing: {required_text}')
     if not reader.pages or any(abs(float(p.mediabox.width)-595.276)>1 or abs(float(p.mediabox.height)-841.89)>1 for p in reader.pages):raise ValueError('PDF must use A4')
-    original=root/document['original']
+    original=root/document['original'] if document.get('original') else None
     digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
-    manifest={'generator':'WeasyPrint fixed-template v1','metadata':meta,'pages':len(reader.pages),'source_pdf':document['original'],'source_pdf_sha256':digest(original),'markdown_sha256':digest(source),'template_sha256':digest(template),'print_style_sha256':digest(style),'palette':colors,'renderer_version':__import__('weasyprint').__version__,'generator_sha256':digest(Path(__file__)), 'images':{img.name:digest(img) for img in (root/document['images']).glob('*.png')},'fonts':{p.name:digest(p) for p in fonts},'pdf_sha256':digest(out)}
+    manifest={'generator':'WeasyPrint fixed-template v1','metadata':meta,'pages':len(reader.pages),'source_pdf':document.get('original'),'source_pdf_sha256':digest(original) if original else None,'markdown_sha256':digest(source),'template_sha256':digest(template),'print_style_sha256':digest(style),'palette':colors,'renderer_version':__import__('weasyprint').__version__,'generator_sha256':digest(Path(__file__)), 'image_assets':image_assets,'images':{img.name:digest(img) for img in (root/document['images']).glob('*.png')},'fonts':{p.name:digest(p) for p in fonts},'pdf_sha256':digest(out)}
     out.with_suffix('.json').write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
     print(f'PDF: {out} ({len(reader.pages)} pages)')
 

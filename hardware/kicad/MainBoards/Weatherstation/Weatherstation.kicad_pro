@@ -39,9 +39,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.8,
-          "height": 2.0,
-          "width": 1.2
+          "drill": 0.0,
+          "height": 1.75,
+          "width": 1.3
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -86,7 +86,7 @@
           ""
         ],
         [
-          "silk_over_copper|73795000|135414410|2e540bae-0b76-49c3-ad47-fe06d73a362f|a9a805c1-79cf-4c58-a9cf-e4f253ac2b4c",
+          "courtyards_overlap|93485000|64295000|3d8bba24-c985-4370-8e74-f50ddf2a8f43|aa46e4d9-e50e-463e-b5d3-aa0b3d1b77d3",
           ""
         ]
       ],
@@ -715,7 +715,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "ADC1-7,GPIO1-6,GPIO13-19,GPIO32-36,GPIO39-40,JP_I2C1_SDA1,JP_I2C1_SCL1,I2C1_1-4,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-10,R1-10,JP1-8,I2C0_1-4,#FLG1-12,#PWR1-70,D1-6,C1,C5-17,U1-7,J1-7",
+    "used_designators": "TP1,ADC1-7,GPIO1-6,GPIO13-19,GPIO32-36,GPIO39-40,JP_I2C1_SDA1,JP_I2C1_SCL1,I2C1_1-4,JP_I2C0_SDA1,JP_I2C0_SCL1,H1-10,R1-10,JP1-8,I2C0_1-4,#FLG1-12,#PWR1-70,D1-6,C1-2,C5-17,U1-7,J1-7",
     "variants": []
   },
   "sheets": [

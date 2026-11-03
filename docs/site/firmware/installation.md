@@ -3,6 +3,9 @@
 Das reguläre Build-Ziel ist ein klassischer ESP32 mit dem PlatformIO-Environment
 `esp32dev`. Andere ESP32-Varianten dürfen nicht ungeprüft mit diesem Image verwendet werden.
 
+Fertige Anwendungsimages und die wesentlichen Änderungen stehen unter
+[Downloads und Änderungen](downloads.md).
+
 ## Voraussetzungen
 
 - EnvNode-Repository und PlatformIO, etwa über die PlatformIO-Erweiterung in VS Code.
@@ -20,11 +23,18 @@ Im Repository unter `firmware/`:
 pio run -e esp32dev
 ```
 
-Das Anwendungsimage entsteht unter:
+Das Anwendungsimage wird nach erfolgreichem Build automatisch in den sichtbaren
+Ordner `firmware/bin/` kopiert:
 
 ```text
-firmware/.pio/build/esp32dev/firmware.bin
+firmware/bin/envnode-<version>.bin
 ```
+
+Für den separaten Tester `pio run -e testboard` verwenden; dessen Image liegt unter
+`firmware/bin/tester-<version>.bin`. Ein erneuter Build derselben Version ersetzt
+die jeweilige Datei. Auch wenn das Image bereits aktuell ist, wird die Kopie erneuert.
+Die Zwischenprodukte bleiben zusätzlich unter `.pio/build/<environment>/`.
+Diagnosevarianten werden nicht in den OTA-Ordner exportiert.
 
 Das Image ist für Web-OTA geeignet. Beim ersten USB-Flash übernimmt PlatformIO
 auch die weiteren erforderlichen Flashbestandteile; nicht nur ein OTA-Image

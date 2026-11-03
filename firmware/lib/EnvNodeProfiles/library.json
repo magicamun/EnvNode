@@ -1,0 +1,1 @@
+{"name":"EnvNodeProfiles","version":"0.1.0","description":"Shared bounded hardware profile downloads and provisioning templates; see LICENSE.","build":{"includeDir":"include","srcDir":"src"}}

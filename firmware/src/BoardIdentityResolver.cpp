@@ -1,14 +1,18 @@
 #include "BoardIdentityResolver.h"
 
 #include "BoardProfile.h"
+#include "BoardIdentityProfiles.h"
+#include "HardwareDescriptorCompatibility.h"
+#include <cstring>
+#include <new>
 
 namespace EnvNode {
 
 BoardIdentityResolver::BoardIdentityResolver(
     BoardIdentityStore& store,
-    BoardProfileId buildFallbackProfileId)
+    BoardProfileId buildFallbackProfileId, BoardPortMapStore* maps)
     : store_(store)
-    , buildFallbackProfileId_(buildFallbackProfileId) {
+    , buildFallbackProfileId_(buildFallbackProfileId), maps_(maps) {
 }
 
 const BoardIdentityResolution& BoardIdentityResolver::resolve() {
@@ -17,6 +21,37 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
     }
     resolved_ = true;
 
+    if (maps_) {
+        portMap_.reset(new (std::nothrow) BoardPortMap);
+        if (!portMap_) {
+            resolution_.source = BoardIdentitySource::InvalidPortMap;
+            resolution_.portMapStatus = BoardPortMapStatus::Unavailable;
+            return resolution_;
+        }
+        const auto mapResult = maps_->read(*portMap_);
+        resolution_.portMapStatus = mapResult.status;
+        if (mapResult.status != BoardPortMapStatus::NotProvisioned) {
+            const auto identity = store_.read(false);
+            resolution_.identity = identity.identity;
+            resolution_.recordStatus = identity.status;
+            const auto& map = *portMap_;
+            const bool matched = mapResult.status == BoardPortMapStatus::Valid
+                && (identity.status == BoardIdentityStatus::Valid
+                    || identity.status == BoardIdentityStatus::UnassignedSerial)
+                && map.profileId == encodeBoardProfileId(identity.identity.profileId)
+                && map.revision.major == identity.identity.revision.major
+                && map.revision.minor == identity.identity.revision.minor
+                && !strcmp(map.serial.value, identity.identity.serialNumber.value);
+            if(matched){memcpy(resolution_.productionBatch,map.productionBatch,sizeof(map.productionBatch));memcpy(resolution_.productionDate,map.productionDate,sizeof(map.productionDate));}
+            resolution_.normalRuntimeAllowed = matched
+                && boardPortMapRuntimeSupported(map, currentFirmwareDescriptorVersion());
+            resolution_.source = resolution_.normalRuntimeAllowed
+                ? BoardIdentitySource::PortMap : BoardIdentitySource::InvalidPortMap;
+            return resolution_;
+        }
+        portMap_.reset();
+    }
+
     const BoardIdentityReadResult readResult = store_.read();
     resolution_.recordStatus = readResult.status;
     resolution_.identity = readResult.identity;
@@ -24,7 +59,11 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
     if (readResult.status == BoardIdentityStatus::Valid
         || readResult.status == BoardIdentityStatus::UnassignedSerial) {
         resolution_.source = BoardIdentitySource::EEPROM;
-        resolution_.normalRuntimeAllowed = true;
+        const auto* profile = boardIdentityProfile(readResult.identity.profileId, readResult.identity.revision);
+        BoardPortMap builtIn;
+        resolution_.normalRuntimeAllowed = profile
+            && BoardPortMapCodec::decode(profile->portMap,profile->portMapSize,builtIn)
+            && boardPortMapRuntimeSupported(builtIn,currentFirmwareDescriptorVersion());
         return resolution_;
     }
 
@@ -68,28 +107,13 @@ bool BoardIdentityResolver::fallbackAllowed(BoardIdentityStatus status) const {
 const char* boardIdentitySourceName(BoardIdentitySource source) {
     switch (source) {
         case BoardIdentitySource::EEPROM: return "EEPROM";
+        case BoardIdentitySource::PortMap: return "PortMap";
+        case BoardIdentitySource::InvalidPortMap: return "InvalidPortMap";
         case BoardIdentitySource::BuildFallback: return "BuildFallback";
         case BoardIdentitySource::UnsupportedIdentity: return "UnsupportedIdentity";
         default: return "UnsupportedIdentity";
     }
 }
 
-const char* boardIdentityStatusName(BoardIdentityStatus status) {
-    switch (status) {
-        case BoardIdentityStatus::Valid: return "Valid";
-        case BoardIdentityStatus::StorageUnavailable: return "StorageUnavailable";
-        case BoardIdentityStatus::NotProvisioned: return "NotProvisioned";
-        case BoardIdentityStatus::InvalidMagic: return "InvalidMagic";
-        case BoardIdentityStatus::UnsupportedFormat: return "UnsupportedFormat";
-        case BoardIdentityStatus::InvalidLength: return "InvalidLength";
-        case BoardIdentityStatus::InvalidCRC: return "InvalidCRC";
-        case BoardIdentityStatus::UnknownBoardProfile: return "UnknownBoardProfile";
-        case BoardIdentityStatus::InvalidRevision: return "InvalidRevision";
-        case BoardIdentityStatus::UnsupportedRevision: return "UnsupportedRevision";
-        case BoardIdentityStatus::InvalidSerial: return "InvalidSerial";
-        case BoardIdentityStatus::UnassignedSerial: return "UnassignedSerial";
-        default: return "Unknown";
-    }
-}
 
 } // namespace EnvNode

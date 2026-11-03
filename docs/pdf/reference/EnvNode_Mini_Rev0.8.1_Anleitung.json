@@ -1,0 +1,53 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "mini-0.8.1",
+    "title": "EnvNode Mini",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.8.1",
+    "document_version": "1.1",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-18",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 13,
+  "source_pdf": "hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.8.pdf",
+  "source_pdf_sha256": "4d020e530a3adf107f678953febb0b57705ab9d980feccf31845b37f8e25df90",
+  "markdown_sha256": "4544d5b972334860013fbb7c7b86012486d69c90ceeb6848e8fa52eaad1b4cbf",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/mini-assembly/page-03-view-1.png": "27170fcf82cc7b051f4f1f9b559d5ac2c2d3bc5f854f2a6ef67c9abe1f16faed",
+    "assets/board-views/mini-0.8.1/assembly-front.png": "c7b2afbdf465bf2e66cdb17221e99322e164becf95af682052af58aa44d7a5b6",
+    "assets/images/mini-assembly/page-11-view-1.png": "2fa5622f31b01ce0416aeace4a14bd3e7b6eb425dcb98eb17647cfda232b9488",
+    "assets/images/mini-assembly/page-11-view-2.png": "12c9ad6dea880edb194f66e10d7263796964e95c864ac70459f07adede14ed6e",
+    "assets/images/mini-assembly/page-12-view-1.png": "07ca68130f045fb564e0a94796cf1576f4f18ea2f283a54310b1050b8f5c6e89",
+    "assets/images/mini-assembly/page-12-view-2.png": "572f410fa8231efbfeff848dba4ae814f36809c3456e77d4a3f92d663d95aa87"
+  },
+  "images": {
+    "page-03-view-1.png": "27170fcf82cc7b051f4f1f9b559d5ac2c2d3bc5f854f2a6ef67c9abe1f16faed",
+    "page-11-view-1.png": "2fa5622f31b01ce0416aeace4a14bd3e7b6eb425dcb98eb17647cfda232b9488",
+    "page-11-view-2.png": "12c9ad6dea880edb194f66e10d7263796964e95c864ac70459f07adede14ed6e",
+    "page-12-view-1.png": "07ca68130f045fb564e0a94796cf1576f4f18ea2f283a54310b1050b8f5c6e89",
+    "page-12-view-2.png": "572f410fa8231efbfeff848dba4ae814f36809c3456e77d4a3f92d663d95aa87"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "f425180ac09ce2aa64d71c247a6a207cfbe0a2974d47433ea5b222ea9b3b2ec3"
+}

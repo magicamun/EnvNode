@@ -1,6 +1,6 @@
-# PDF-Erstellung: aktuelle Aufbauanleitungen
+# PDF-Erstellung: aktuelle und archivierte Aufbauanleitungen
 
-Jede Anleitung besitzt genau eine redaktionelle Markdown-Quelle. Die Auswahl der acht aktuellen Anleitungen steht in `documents.yml`. Die ursprünglichen PDFs bleiben unverändert, ihre Ansichten werden als Inhaltsbilder übernommen.
+Jede Anleitung besitzt genau eine redaktionelle Markdown-Quelle. Die Auswahl der aktuellen und archivierten Anleitungen steht in `documents.yml`. Frühere Original-PDFs bleiben unverändert; aktuelle Anleitungen verwenden neue native KiCad-Renderings mit Quellnachweis.
 
 ## Build
 
@@ -38,8 +38,24 @@ pflegen, nicht automatisch als neues Hardware-Prüfdatum ausgeben.
 
 ## Auswahl und Pflege der Anleitungen
 
-`documents.yml` registriert explizit jede Markdown-Quelle, die ursprüngliche letzte PDF, das Bildverzeichnis, den neuen PDF-Ausgabepfad und inhaltliche Pflichtmerkmale. Es gibt keine automatische Auswahl nach Dateinamen oder Revisionsnummer. Historische PDFs und Herstellerdatenblätter werden nicht migriert.
+`documents.yml` registriert explizit jede Markdown-Quelle, bei migrierten Quellen die ursprüngliche PDF, das Bildverzeichnis, den neuen PDF-Ausgabepfad und inhaltliche Pflichtmerkmale. Es gibt keine automatische Auswahl nach Dateinamen oder Revisionsnummer. Historische PDFs und Herstellerdatenblätter werden nicht migriert.
 
-Die zentrale Webübersicht liegt unter `docs/site/guides/index.md`. Änderungen werden künftig in der jeweiligen `assembly.md` gepflegt; beim MkDocs-Build entstehen HTML, PDF und JSON-Nachweis gemeinsam. Keine separate redaktionelle PDF-Quelle pflegen.
+Die zentrale Webübersicht liegt unter `docs/site/guides/index.md`. Änderungen werden künftig in der im Manifest benannten Markdownquelle (`index.md` oder `assembly.md`) gepflegt; beim MkDocs-Build entstehen HTML, PDF und JSON-Nachweis gemeinsam. Keine separate redaktionelle PDF-Quelle pflegen.
 
 Neue Anleitung: Markdown mit `pdf`-Metadaten anlegen, einen geprüften Eintrag in `documents.yml` ergänzen und in Übersicht sowie Produktseite verlinken. Anschließend `mkdocs build --strict` und die neu gerenderten PDF-Seiten prüfen. Die Manifestdatei wird von den bestehenden CI-Pfadfiltern `docs/pdf/**` erfasst.
+
+## Neue Web-Anleitungen und lokale Referenzen
+
+Für eine neue Markdown-Anleitung ist `original` optional. In diesem Fall speichert
+der JSON-Buildnachweis keine historische PDF-Prüfsumme; Markdown, Bilder, Fonts
+und Generator bleiben vollständig nachgewiesen.
+
+`preview` benennt eine geprüfte Referenz unter `docs/pdf/reference/`. Nach der
+visuellen Prüfung die erzeugte PDF und ihren JSON-Nachweis dorthin übernehmen.
+`mkdocs serve` verwendet diese Referenz ohne Pango; fehlt sie, bricht die Vorschau
+mit einem Hinweis auf den nötigen Produktionsbuild ab. Produktionsbuilds erzeugen
+die PDF immer neu und benötigen diese Referenz nicht.
+
+Archivierte Markdown-Anleitungen tragen `archive: true` und behalten ihre bisherigen
+PDF-Zielnamen. Eine Revision wird ausdrücklich archiviert; keine Sortierung oder
+automatische Hochstufung nach Revisionsnummern.

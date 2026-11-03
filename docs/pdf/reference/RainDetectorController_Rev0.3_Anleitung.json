@@ -1,0 +1,48 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "rain-controller-0.3",
+    "title": "RainDetectorController",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.3",
+    "document_version": "1.1",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-17",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 11,
+  "source_pdf": "hardware/kicad/Sensors/RainDetectorController/Documentation/RainDetectorController_Bestueckungs_und_Bringup_Rev0.3.pdf",
+  "source_pdf_sha256": "5599c51be7a4c8affa6cdd94e11996216f15fa7520e7e1d12f862723f2778f93",
+  "markdown_sha256": "5bd0d013e1c918865d7345f0f915f3788d226972c163979fc214deeb196e7567",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/rain-controller-assembly/page-01-view-1.png": "143645b12518a00f6c1ea3bb328a51227bc0ef8bc5c0c5080c5ecc637c8707d1",
+    "assets/images/rain-controller-assembly/page-03-view-1.png": "311a71926bcb1bd2d9feff0b8dd948a47026b808aceea774863470ef790c761c",
+    "assets/board-views/rain-controller-0.3/assembly-front.png": "7c0917c1f2a2ad0eb9e13709a2a75fa2582ff8a6b9f7c08ced7a5903f195ba7c",
+    "assets/board-views/rain-controller-0.3/assembly-back.png": "5e53c8486e33e9f4077ed8e33d0c6532f37fb6262df825d796d3fb6468322ba2"
+  },
+  "images": {
+    "page-01-view-1.png": "143645b12518a00f6c1ea3bb328a51227bc0ef8bc5c0c5080c5ecc637c8707d1",
+    "page-03-view-1.png": "311a71926bcb1bd2d9feff0b8dd948a47026b808aceea774863470ef790c761c"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "89332870d0114809a212aad2011ef5a5b5c20cdd373ac3767df0935fe78f09f0"
+}

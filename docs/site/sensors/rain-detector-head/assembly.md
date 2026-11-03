@@ -1,21 +1,34 @@
 ---
-title: RainDetectorHead - Bestückung und Inbetriebnahme
+title: RainDetectorHead 0.2 - Bestückung und Inbetriebnahme
 pdf:
-  id: rain-head-0.1
+  id: rain-head-0.2
   title: RainDetectorHead
   subtitle: Bestückungs- und Bring-up-Anleitung
-  hardware_revision: '0.1'
-  document_version: '1.0'
-  document_date: '2026-10-22'
-  source_document_date: '2026-10-17'
-  status: Entwicklungsstand - keine Produktionsfreigabe
+  hardware_revision: '0.2'
+  document_version: '1.1'
+  document_date: '2026-10-28'
+  source_document_date: '2026-10-28'
+  status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
 ---
 
-# RainDetectorHead - Bestückung und Inbetriebnahme
+# RainDetectorHead 0.2 - Bestückung und Inbetriebnahme
 
-Passiver kapazitiver Sensorkopf mit fünf parallelen Heizsträngen und insgesamt zwanzig 15-Ω-Widerständen. Entwurf: Der beschichtete Head wurde laut dokumentiertem Projektstand noch nicht gefertigt oder erprobt. Beschichtung, Via-Verschluss und Witterungsbeständigkeit bleiben zu qualifizieren. Stücklistenstand: 17. Oktober 2026. Die Prüf- und Quellennachweise sind jeweils datiert.
+Passiver kapazitiver Sensorkopf mit fünf parallelen Heizsträngen und insgesamt zwanzig 15-Ω-Widerständen.
 
-[Anleitung als PDF](../../assets/downloads/RainDetectorHead_Rev0.1_Anleitung.pdf){ .md-button }
+**Dokumentation abgeschlossen am 28. Oktober 2026.** Der Fertigungs- und Erprobungsstand wird im Abschlusskapitel getrennt geführt.
+
+[Anleitung als PDF](../../assets/downloads/RainDetectorHead_Rev0.2_Anleitung.pdf){ .md-button }
+[Alte Revisionen](old-revisions.md){ .md-button }
+### Änderungen und Geltungsbereich
+
+Aktuelle Paarung: **RainDetectorController 0.4 (ENP-00138)** mit **RainDetectorHead 0.2 (ENP-00139)**. Beide Konturen messen **62,12 × 54,52 mm** an der Mittellinie von Edge.Cuts. Die neue Form berücksichtigt die Gehäusedichtung und versetzte Montagebohrungen. Keine neue Firmware-Mindestversion folgt allein aus dieser mechanischen Revision.
+
+## 3D-Ansicht
+
+![rain-head-0.2: 3D-Vorderseite](../../assets/images/rain-head-0.2/top.png){ .hero-paired-view }
+![rain-head-0.2: 3D-Rückseite](../../assets/images/rain-head-0.2/bottom.png){ .hero-paired-view }
+
+Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
 ## 1. Teile und Vorbereitung
 
@@ -25,9 +38,9 @@ Passiver kapazitiver Sensorkopf mit fünf parallelen Heizsträngen und insgesamt
 | --- | --- | --- | --- | --- |
 | R1-R20 | 20 | 15 Ohm, 1 %, 250 mW; WR12X15R0FTL | ENP-00115 | 1206; B.Cu |
 | J1, J2 | 1 | 2x10-SMD-Leiste für zwei 2x2-Zuschnitte | ENP-00111 | 2,54 mm; B.Cu |
-| PCB | 1 | RainDetectorHead PCB Rev. 0.1 | ENP-00113 | 62,12 x 44,12 mm |
+| PCB | 1 | RainDetectorHead PCB Rev. 0.2 | ENP-00139 | 62,12 × 54,52 mm |
 
-Bausatz ENK-00005, PCB-Revision 0.1. Die Mengen beziehen sich auf den Lieferumfang des Bausatzes.
+Die Tabelle nennt den Bedarf pro Platine. Die bisherige Kitnummer bestätigt keine auf den neuen PCB-Artikel umgestellte Kit-BOM.
 
 Zuschnitt: Menge 1 bei ENP-00111 bezeichnet eine ganze SL 2X10G SMD2,54. Daraus entstehen zwei 2x2-Stecker für J1/J2. Je Zuschnitt drei Doppelkontaktpositionen einschließlich Schnittverlust vorsehen; Reststücke werden nicht gutgeschrieben.
 
@@ -35,7 +48,7 @@ C1 ist die gefertigte Kupfer-Sensorstruktur und kein zusätzliches Kauf- oder L�
 
 ### 1.2 Sensorfläche und Fertigung
 
-C1 nutzt RainDetector_Interdigitated_48.86x37.25mm_P0.51mm. Die Sensorpads haben keine F.Mask- oder F.Paste-Öffnungen. Der Mindestabstand 0,10 mm gilt nur zwischen Objekten von C1; sonst gelten die normalen Regeln.
+C1 nutzt RainDetector_Interdigitated_44.78x37.25mm_P0.51mm. Die Sensorpads haben keine F.Mask- oder F.Paste-Öffnungen. Der Mindestabstand 0,10 mm gilt nur zwischen Objekten von C1; sonst gelten die normalen Regeln.
 
 Die beiden Vias sind vorderseitig mit Plugging und Tenting versehen; Filling und Capping sind deaktiviert (Type-IV-a-Absicht). Verschlussprozess und Wasserausschluss mit dem Fertiger vereinbaren. Tenting allein garantiert keine Abdichtung.
 
@@ -43,18 +56,32 @@ Sensorfläche nicht freilegen, verzinnen oder mit Lötpaste versehen. Beschichtu
 
 ### 1.3 Artikel- und Dokumentstand
 
-Quelle: inventory/assemblies.rain.draft.json und inventory/parts-preview.json (Artikelstand 15.10.2026), abgeglichen am 17.10.2026. Mengen sind Kit-Kaufmengen; kein neuer Hardwaretest oder ERC/DRC-Lauf.
+Bauteilwerte und Anschlusszuordnung wurden aus dem aktuellen KiCad-Stand übernommen. Standardartikel stammen aus der bisherigen Anleitung; die neuen PCB-Artikel ENP-00138/ENP-00139 sind im mechanischen Projektstand vom 21.10.2026 dokumentiert. Keine neue Lager- oder Kit-BOM-Prüfung wird behauptet.
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe LICENSE im Repository. Drittanbieterrechte bleiben unberührt.
 
-## 2. Unterseite und Bestückung
+## 2. Bestückungsübersicht
 
-![RainDetectorHead 0.1: Ansicht aus der aktuellen PDF, Seite 1](../../assets/images/rain-head-assembly/page-01-view-1.png){ .paired-board-view }
-![RainDetectorHead 0.1: Ansicht aus der aktuellen PDF, Seite 3](../../assets/images/rain-head-assembly/page-03-view-1.png){ .paired-board-view }
+### Vorderseite: Bestückungsplan
+
+![rain-head-0.2: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/rain-head-0.2/assembly-front.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/rain-head-0.2/assembly-front.png){ .md-button }
+
+### Rückseite: Bestückungsplan
+
+![rain-head-0.2: senkrechter Bestückungsplan Rückseite](../../assets/board-views/rain-head-0.2/assembly-back.png){ .assembly-plan }
+
+[Plan als PNG](../../assets/board-views/rain-head-0.2/assembly-back.png){ .md-button }
+
+Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
+
+
+Die Bestückungspläne zeigen die Leiterplatte senkrecht zur jeweiligen Seite. Bestückungsdruck und Referenzen folgen der PCB-Quelle; eine Rückseitenansicht ist keine Kontaktansicht eines Kabelsteckers.
 
 B.Cu: Hier liegen alle Heizwiderstände sowie J1/J2. In der vorgesehenen Montage zeigen Head und Controller mit B.Cu zueinander. Auf der Controller-Seite sitzen die Buchsen; die aktiven Controller-Bauteile bleiben von innen zugänglich.
 
-### Löt-Reihenfolge
+## Löt-Reihenfolge
 
 1. Widerstände mit Messung oder belastbarer Kennzeichnung als 15 Ohm identifizieren.
 2. R1 bis R20 bestücken. Jeweils einen Heizstrang vollständig prüfen; keine Position auslassen.
@@ -66,7 +93,7 @@ Der Abstand zwischen den Platinen muss für Widerstände, Steckverbinder, Lötst
 
 ## 3. Kontakte und Heiznetzwerk
 
-| Head | Funktion | Controller Rev. 0.3 |
+| Head | Funktion | Controller Rev. 0.4 |
 | --- | --- | --- |
 | J1.1 | HEATER+ / +5V | J1.1 |
 | J1.4 | GND / Elektrode 2 | J1.4 |
@@ -142,38 +169,21 @@ Spannungsfrei gemäß Abschnitt 3 verbinden. Zuerst den Controller mit 3,3 V bei
 
 Keine festen Regen-Schwellwerte aus dieser Anleitung ableiten. Die Firmware soll Rohmesswerte bereitstellen; Interpretation und Automatisierung bleiben in höheren Softwareebenen. Die PCNT-Lab-Firmware steuert die Heizung nicht.
 
-## 6. Quellen- und Revisionsnachweis
+## 6. Abschluss und Revisionsnachweis
 
-Dokumentstand: 6. Oktober 2026. PCB-Titelblock: Revision 0.1 vom 14. September 2026. Aktueller PCB-Commit: 0d3a50b102bfd82d65a3e7f37754b254dc936960. Dieser Stand enthält die am 15. September geänderten Steckverbinder und die Kontur.
+Dokumentation abgeschlossen für Head 0.2 / Controller 0.4. Die vergrößerte Kontur schafft Platz für die Gehäusedichtung; Bohrungen wurden mit der Kontur verschoben. Die Kontaktachsen von J1/J2 und die elektrische Netzzuordnung bleiben gegenüber dem unmittelbar vorherigen gespeicherten PCB unverändert. Beim Head ist die aktive Struktur im aktuellen Footprint 44,78 × 37,25 mm mit 0,51-mm-Raster dokumentiert; der frühere Guide mit 48,86 mm benennt den aktuellen Footprint nicht korrekt.
 
-RainDetectorHead.kicad_pcb
+Quellvergleich und neue Renderings belegen keine gefertigte Dichtung, mechanische Passprobe, Beschichtung, Via-Abdichtung oder reale Heiz-/Regenprüfung. Es wird hier kein neuer bestandener vollständiger ERC-/DRC-Lauf behauptet. Die alten Bring-ups stehen unter [Alte Revisionen](old-revisions.md).
 
-`bce7ef51f4623b5106ef02c49918cc21bae779a78ca59a78d71062c690db6b50`
+### Quellenstand
 
-RainDetectorHead.kicad_sch
+Dokumentiert ist der gespeicherte KiCad-Stand aus `rain-detector`, Projekt `RainDetectorHead`, Basiscommit `e3ecde6c66d24c26fbb0352b686f2d3f10469c72`. Die Prüfsummen bestimmen den tatsächlichen Arbeitsstand einschließlich lokaler Änderungen; der Commit allein beschreibt diese nicht.
 
-`dcb780409b34e4d5d23e63504bc4cd22451d12b9b1ae8c23069d7170a8c44d87`
+| Quelle | SHA-256 |
+| --- | --- |
+| RainDetectorHead.kicad_dru | `1203b82235c87187154b35954664d914d52d4b1e6ea8024e5ddf9a524a09af13` |
+| RainDetectorHead.kicad_pcb | `6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438` |
+| RainDetectorHead.kicad_pro | `af1e22e6e6ffbad3b409b996fbc377dfea7da8e643027662e977fe79b5bd77ce` |
+| RainDetectorHead.kicad_sch | `82bface8c81a513f7d1c88ebcdf12783961440fefcb477361c4d102ed4f36cfe` |
 
-RainDetectorHead.kicad_pro
-
-`ae52a76ac7b7eff664a2cb8da327dec63438ae67435d33b22ef9d66d1c18618d`
-
-RainDetectorHead.kicad_dru
-
-`1203b82235c87187154b35954664d914d52d4b1e6ea8024e5ddf9a524a09af13`
-
-fp-lib-table
-
-`3612055830977f411c616fb189976cc2894768fbda91e6d8147380107a682fa6`
-
-Abgleich am 6. Oktober 2026: Schaltplan-Netzliste und PCB-Padnetze stimmen für die gemeinsamen Bauteilpins überein. Die Heiztopologie wurde als fünf parallele Stränge mit je vier Widerständen nachvollzogen. Kontakte, Via-Eigenschaften und die lokale C1-Abstandsregel wurden aus den Projektquellen geprüft.
-
-Weitere Grundlagen: RainDetectorHead/README.md und RainDetectorController/README.md sowie dessen neue Rev.-0.3-Anleitung. Die Ansichten stammen aus dem aktuellen Head-PCB und verwenden den gemeinsamen ORing-Winkel, proportional eingepasst. Sie belegen keinen realen Via-Verschluss oder Beschichtungszustand.
-
-Historischer Prüfstand: Laut Controller-README bestanden beide Projekte am 14. September 2026 ERC/DRC ohne Fehler, Warnungen, offene Verbindungen oder Paritätsabweichungen. Dieser Prüfstand liegt vor der Änderung vom 15. September und validiert sie nicht erneut.
-
-Offen: Vollständige erneute ERC-/DRC-Prüfung mit projektspezifischen Regeln, Fertigerbestätigung zu Sensorstruktur und Via-Verschluss, Auswahl und Passprobe der Steckverbinder, reale Heiz-, Beschichtungs- und Witterungsprüfungen. Im Rahmen dieser Dokumentation erfolgte kein neuer vollständiger ERC-/DRC-Lauf und keine Hardwaremessung.
-
-### Lizenz
-
-EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0; siehe [Lizenz](../../license.md). Rechte an Drittanbieter-Modellen und sonstigen Fremdinhalten bleiben bestehen.
+[Rendernachweis](../../assets/images/rain-head-0.2/provenance.json). Dokumentation: LicenseRef-EnvNode-Use-and-Redistribution-1.0, siehe [Lizenz](../../license.md). Drittanbieterrechte an KiCad-Modellen und Bibliotheken bleiben bestehen.

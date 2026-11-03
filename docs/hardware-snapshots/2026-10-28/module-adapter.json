@@ -1,0 +1,87 @@
+{
+  "checkout": "test-provision-board",
+  "name": "Module-Adapter",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'Module-Adapter'], [Symbol('date'), '2026-10-27'], [Symbol('rev'), '0.1']]",
+  "components": [
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5_DIN965",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        136.779,
+        59.262
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J4",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "Connector_IDC:IDC-Header_2x07_P2.54mm_Vertical",
+      "pads": {
+        "1": "/GND",
+        "2": "/+3V3_SYS",
+        "3": "/EEPROM_A0",
+        "4": "/+5V",
+        "5": "/I2C0_SDA",
+        "6": "/I2C0_SCL",
+        "7": "/I2C1_SDA",
+        "8": "/I2C1_SCL",
+        "9": "/AUX_GPIO1",
+        "10": "/AUX_GPIO2",
+        "11": "/SPI_MOSI",
+        "12": "/SPI_MISO",
+        "13": "/SPI_SCK",
+        "14": "/SPI_CS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_IDC.3dshapes/IDC-Header_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        129.159,
+        51.74,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "EnvNode-Footprints:PinHeader_2x07_P2.54mm_Vertical_Bottom",
+      "pads": {
+        "1": "/GND",
+        "2": "/+3V3_SYS",
+        "3": "/EEPROM_A0",
+        "4": "/+5V",
+        "5": "/I2C0_SDA",
+        "6": "/I2C0_SCL",
+        "7": "/I2C1_SDA",
+        "8": "/I2C1_SCL",
+        "9": "/AUX_GPIO1",
+        "10": "/AUX_GPIO2",
+        "11": "/SPI_MOSI",
+        "12": "/SPI_MISO",
+        "13": "/SPI_SCK",
+        "14": "/SPI_CS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        129.159,
+        37.342,
+        -90
+      ],
+      "layer": "B.Cu"
+    }
+  ],
+  "source_sha256": {
+    "Module-Adapter.kicad_pcb": "92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1",
+    "Module-Adapter.kicad_pro": "b05cd35e919ecc45781aa0d66b834ad57a318423e2fb8da1c2ea52c689cbae0a",
+    "Module-Adapter.kicad_sch": "e32ba198aa4b170ad6ad0eee55a2898b225467d8caefdfbe51abdc62552ece17"
+  },
+  "commit": "08f55b1810812b1deb1e877ef2f7853d0797d5ad"
+}

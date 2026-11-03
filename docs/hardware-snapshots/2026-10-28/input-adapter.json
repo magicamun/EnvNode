@@ -1,0 +1,277 @@
+{
+  "checkout": "test-provision-board",
+  "name": "Input-Adapter",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'EnvNode Test Input-Adapter'], [Symbol('date'), '2026-10-26'], [Symbol('rev'), '0.1']]",
+  "components": [
+    {
+      "ref": "J4",
+      "value": "ESP32_DevKitC_TestPlug",
+      "footprint": "EnvNode-Footprints:ESP32_DevKitC_TestPlug_2x19_P2.54mm_Row25.40mm",
+      "pads": {
+        "1": "/IN/L01",
+        "2": "/IN/L02",
+        "3": "/IN/L03",
+        "4": "/IN/L04",
+        "5": "/IN/L05",
+        "6": "/IN/L06",
+        "7": "/IN/L07",
+        "8": "/IN/L08",
+        "9": "/IN/L09",
+        "10": "/IN/L10",
+        "11": "/IN/L11",
+        "12": "/IN/L12",
+        "13": "/IN/L13",
+        "14": "/IN/L14",
+        "15": "/IN/L15",
+        "16": "/IN/L16",
+        "17": "/IN/L17",
+        "18": "/IN/L18",
+        "19": "/IN/L19",
+        "20": "/IN/R19",
+        "21": "/IN/R18",
+        "22": "/IN/R17",
+        "23": "/IN/R16",
+        "24": "/IN/R15",
+        "25": "/IN/R14",
+        "26": "/IN/R13",
+        "27": "/IN/R12",
+        "28": "/IN/R11",
+        "29": "/IN/R10",
+        "30": "/IN/R09",
+        "31": "/IN/R08",
+        "32": "/IN/R07",
+        "33": "/IN/R06",
+        "34": "/IN/R05",
+        "35": "/IN/R04",
+        "36": "/IN/R03",
+        "37": "/IN/R02",
+        "38": "/IN/R01"
+      },
+      "models": [],
+      "at": [
+        119.99,
+        39.49
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "TP1",
+      "value": "Conn_01x02_Socket",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "/IN/MB_GND",
+        "2": "/IN/MB_3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        145.39,
+        91.56,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U4",
+      "value": "CD74HC4067M",
+      "footprint": "Package_SO:SOIC-24W_7.5x15.4mm_P1.27mm",
+      "pads": {
+        "1": "/COM",
+        "2": "/IN/L01",
+        "3": "/IN/L02",
+        "4": "/IN/L03",
+        "5": "/IN/L04",
+        "6": "/IN/L05",
+        "7": "/IN/L06",
+        "8": "/IN/L07",
+        "9": "/IN/L08",
+        "10": "/IN_S0",
+        "11": "/IN_S1",
+        "12": "GND",
+        "13": "/IN_S3",
+        "14": "/IN_S2",
+        "15": "/IN_EN1",
+        "16": "/IN/R08",
+        "17": "/IN/R07",
+        "18": "/IN/R06",
+        "19": "/IN/R05",
+        "20": "/IN/R04",
+        "21": "/IN/R03",
+        "22": "/IN/R02",
+        "23": "/IN/R01",
+        "24": "3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-24W_7.5x15.4mm_P1.27mm.step"
+      ],
+      "at": [
+        132.69,
+        46.233
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C3",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "GND",
+        "2": "3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        136.14,
+        74.562
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "GND",
+        "2": "3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        136.14,
+        36.72
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C2",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "GND",
+        "2": "3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        136.14,
+        55.641
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U5",
+      "value": "CD74HC4067M",
+      "footprint": "Package_SO:SOIC-24W_7.5x15.4mm_P1.27mm",
+      "pads": {
+        "1": "/COM",
+        "2": "/IN/L09",
+        "3": "/IN/L10",
+        "4": "/IN/L11",
+        "5": "/IN/L12",
+        "6": "/IN/L13",
+        "7": "/IN/L14",
+        "8": "unconnected-(U5-I1-Pad8)",
+        "9": "unconnected-(U5-I0-Pad9)",
+        "10": "/IN_S0",
+        "11": "/IN_S1",
+        "12": "GND",
+        "13": "/IN_S3",
+        "14": "/IN_S2",
+        "15": "/IN_EN2",
+        "16": "unconnected-(U5-I15-Pad16)",
+        "17": "unconnected-(U5-I14-Pad17)",
+        "18": "/IN/R14",
+        "19": "/IN/R13",
+        "20": "/IN/R12",
+        "21": "/IN/R11",
+        "22": "/IN/R10",
+        "23": "/IN/R09",
+        "24": "3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-24W_7.5x15.4mm_P1.27mm.step"
+      ],
+      "at": [
+        132.69,
+        65.154
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U6",
+      "value": "CD74HC4067M",
+      "footprint": "Package_SO:SOIC-24W_7.5x15.4mm_P1.27mm",
+      "pads": {
+        "1": "/COM",
+        "2": "/IN/L15",
+        "3": "/IN/L16",
+        "4": "/IN/L17",
+        "5": "/IN/L18",
+        "6": "/IN/L19",
+        "7": "unconnected-(U6-I2-Pad7)",
+        "8": "unconnected-(U6-I1-Pad8)",
+        "9": "unconnected-(U6-I0-Pad9)",
+        "10": "/IN_S0",
+        "11": "/IN_S1",
+        "12": "GND",
+        "13": "/IN_S3",
+        "14": "/IN_S2",
+        "15": "/IN_EN3",
+        "16": "unconnected-(U6-I15-Pad16)",
+        "17": "/IN/MB_GND",
+        "18": "/IN/MB_3V3_SYS",
+        "19": "/IN/R19",
+        "20": "/IN/R18",
+        "21": "/IN/R17",
+        "22": "/IN/R16",
+        "23": "/IN/R15",
+        "24": "3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-24W_7.5x15.4mm_P1.27mm.step"
+      ],
+      "at": [
+        132.69,
+        84.075
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x05_Odd_Even",
+      "footprint": "Connector_IDC:IDC-Header_2x05_P2.54mm_Vertical",
+      "pads": {
+        "1": "3V3_SYS",
+        "2": "GND",
+        "3": "/IN_EN1",
+        "4": "/IN_S3",
+        "5": "/IN_EN2",
+        "6": "/IN_S2",
+        "7": "/IN_EN3",
+        "8": "/IN_S1",
+        "9": "/COM",
+        "10": "/IN_S0"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_IDC.3dshapes/IDC-Header_2x05_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        137.77,
+        102.09,
+        -90
+      ],
+      "layer": "F.Cu"
+    }
+  ],
+  "source_sha256": {
+    "INL.kicad_sch": "4b570360a9fd0dd4d0fed59df2594a2fb9191453079c9270894bd907ad8334fc",
+    "Input-Adapter.kicad_pcb": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c",
+    "Input-Adapter.kicad_pro": "c09950b3b0f4df092f76454debb5c8df3a2c1af04d029f4b354dd75a29616f59",
+    "Input-Adapter.kicad_sch": "ed28f15d0cce07d0d4c391dd75df6b1b31f5b2a0b2347c138b483ebb7045b686"
+  },
+  "commit": "08f55b1810812b1deb1e877ef2f7853d0797d5ad"
+}

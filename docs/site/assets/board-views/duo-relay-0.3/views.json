@@ -1,0 +1,286 @@
+{
+  "id": "duo-relay-0.3",
+  "guide": "modules/duo-relay/index.md",
+  "pcb_source": "main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb",
+  "pcb_sha256": "9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac",
+  "back_components": [
+    "C1",
+    "J1",
+    "U2"
+  ],
+  "hero": {
+    "front": "assets/images/duorelay-assembly/top.png",
+    "back": "assets/images/duorelay-assembly/bottom.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/duo-relay-0.3/assembly-front.png",
+      "png_size_px": [
+        1400,
+        2256
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/duo-relay-0.3/assembly-back.png",
+      "png_size_px": [
+        1400,
+        2257
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        91.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "K2",
+      "value": "FINDER-34.51.7.005.0010",
+      "side": "F.Cu",
+      "position_mm": [
+        152.85,
+        57.885
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "Q2",
+      "value": "BC817",
+      "side": "F.Cu",
+      "position_mm": [
+        144.34,
+        49.65
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "Q1",
+      "value": "BC817",
+      "side": "F.Cu",
+      "position_mm": [
+        129.01,
+        49.8
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "R4",
+      "value": "100k",
+      "side": "F.Cu",
+      "position_mm": [
+        140.07,
+        52.3
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "D3",
+      "value": "LED",
+      "side": "F.Cu",
+      "position_mm": [
+        121.85,
+        45.57
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R2",
+      "value": "1k",
+      "side": "F.Cu",
+      "position_mm": [
+        140.07,
+        47.16
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R5",
+      "value": "1,5kO",
+      "side": "F.Cu",
+      "position_mm": [
+        121.805,
+        49.86
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "K1",
+      "value": "FINDER-34.51.7.005.0010",
+      "side": "F.Cu",
+      "position_mm": [
+        123.07,
+        57.885
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        59.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R3",
+      "value": "100k",
+      "side": "F.Cu",
+      "position_mm": [
+        133.36,
+        52.3
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R1",
+      "value": "1k",
+      "side": "F.Cu",
+      "position_mm": [
+        133.36,
+        47.16
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "D1",
+      "value": "1N4148W",
+      "side": "F.Cu",
+      "position_mm": [
+        127.52,
+        55.05
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "D4",
+      "value": "LED",
+      "side": "F.Cu",
+      "position_mm": [
+        151.585,
+        45.57
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "R6",
+      "value": "1,5kO",
+      "side": "F.Cu",
+      "position_mm": [
+        151.6075,
+        49.86
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "D2",
+      "value": "1N4148W",
+      "side": "F.Cu",
+      "position_mm": [
+        145.84,
+        55.05
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "J4",
+      "value": "~",
+      "side": "F.Cu",
+      "position_mm": [
+        142.425,
+        90.0075
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J3",
+      "value": "~",
+      "side": "F.Cu",
+      "position_mm": [
+        120.97,
+        90.0075
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U2",
+      "value": "24LC32",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        38.6795
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        129.159,
+        37.342
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        34.18
+      ],
+      "rotation_deg": 180
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 19,
+  "asset_sha256": {
+    "assets/board-views/duo-relay-0.3/assembly-front.png": "f1e5df1ce2c86fa2943a8c2faf555f9defef6b937719b867e3b1368bdd7af8b3",
+    "assets/board-views/duo-relay-0.3/assembly-back.png": "ee3e14500bec14cceb6a8580825f8d9b04a627b775b469cd35dfa5b0454804c7",
+    "assets/images/duorelay-assembly/top.png": "c221cc38afa51da54e90cbd2c2cc3e06ceee4732985c2e7b68ef14a6060555e4",
+    "assets/images/duorelay-assembly/bottom.png": "d78eb0b599241970198c66ba4d67a7f8c306331c572f65858d5f5d09eae88710"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

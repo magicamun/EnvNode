@@ -392,6 +392,23 @@ private:
         if (ok() && (seen & required) != required) status_ = HardwareDescriptorDecodeStatus::MissingRequiredField;
     }
 
+    void parseRequirementProperties(DescriptorRequirement& requirement) {
+        size_t pairs = 0;
+        if (!reader_.enterMap(pairs)) { invalidCbor(); return; }
+        for (size_t i = 0; i < pairs && ok(); ++i) {
+            DescriptorTextView name;
+            if (!readText(name)) return;
+            if (name.equals("address")) {
+                uint64_t value = 0;
+                if (requirement.hasI2cAddress || !readUnsigned(value, 0x77) || value < 8) {
+                    status_ = HardwareDescriptorDecodeStatus::InvalidValue; return;
+                }
+                requirement.hasI2cAddress = true;
+                requirement.i2cAddress = static_cast<uint8_t>(value);
+            } else skip();
+        }
+    }
+
     void parseRequirement(DescriptorRequirement& requirement) {
         size_t pairs = 0;
         if (!reader_.enterMap(pairs)) { invalidCbor(); return; }
@@ -407,6 +424,7 @@ private:
                 uint64_t value = 0;
                 if (readUnsigned(value, 3)) requirement.kind = static_cast<HardwareDescriptorResourceKind>(value);
             } else if (key == static_cast<uint8_t>(Key::Capabilities)) parseCapabilitySet(requirement.capabilities);
+            else if (key == static_cast<uint8_t>(Key::Properties)) parseRequirementProperties(requirement);
             else skip();
         }
         const uint64_t required = bit(Key::Id) | bit(Key::Resource) | bit(Key::Kind) | bit(Key::Capabilities);

@@ -1,0 +1,901 @@
+{
+  "schema": 1,
+  "id": "mini-0.9-pcb0.9.0",
+  "name": "EnvNode Mini",
+  "identityRevision": "0.9",
+  "pcbRevision": "0.9.0",
+  "source": "hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
+  "netTies": [
+    {
+      "reference": "NT1",
+      "nets": [
+        "EEPROM_A0_A",
+        "GND"
+      ]
+    },
+    {
+      "reference": "NT2",
+      "nets": [
+        "+3V3_SYS",
+        "EEPROM_A0_B"
+      ]
+    }
+  ],
+  "sha256": "dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105",
+  "bounds": [
+    61.372,
+    71.12042,
+    132.0,
+    70.0
+  ],
+  "socket": [
+    {
+      "number": 1,
+      "net": "+3V3_DEVKIT",
+      "x": 114.672,
+      "y": 76.40574
+    },
+    {
+      "number": 2,
+      "net": "unconnected-(U3-CHIP_PU-Pad2)",
+      "x": 114.672,
+      "y": 78.94574
+    },
+    {
+      "number": 3,
+      "net": "/ESP32Core/ADC3",
+      "x": 114.672,
+      "y": 81.48574
+    },
+    {
+      "number": 4,
+      "net": "/ESP32Core/ADC4",
+      "x": 114.672,
+      "y": 84.02574
+    },
+    {
+      "number": 5,
+      "net": "/ADC/ADC1",
+      "x": 114.672,
+      "y": 86.56574
+    },
+    {
+      "number": 6,
+      "net": "/ADC/ADC2",
+      "x": 114.672,
+      "y": 89.10574
+    },
+    {
+      "number": 7,
+      "net": "/ESP32Core/GPIO32",
+      "x": 114.672,
+      "y": 91.64574
+    },
+    {
+      "number": 8,
+      "net": "/ESP32Core/GPIO33",
+      "x": 114.672,
+      "y": 94.18574
+    },
+    {
+      "number": 9,
+      "net": "I2C1_SDA",
+      "x": 114.672,
+      "y": 96.72574
+    },
+    {
+      "number": 10,
+      "net": "I2C1_SCL",
+      "x": 114.672,
+      "y": 99.26574
+    },
+    {
+      "number": 11,
+      "net": "/ESP32Core/GPIO27",
+      "x": 114.672,
+      "y": 101.80574
+    },
+    {
+      "number": 12,
+      "net": "/ESP32Core/GPIO14",
+      "x": 114.672,
+      "y": 104.34574
+    },
+    {
+      "number": 13,
+      "net": "unconnected-(U3-MTDI{slash}GPIO12{slash}ADC2_CH5-Pad13)",
+      "x": 114.672,
+      "y": 106.88574
+    },
+    {
+      "number": 14,
+      "net": "GND",
+      "x": 114.672,
+      "y": 109.42574
+    },
+    {
+      "number": 15,
+      "net": "/ESP32Core/GPIO13",
+      "x": 114.672,
+      "y": 111.96574
+    },
+    {
+      "number": 16,
+      "net": "unconnected-(U3-SD_DATA2{slash}GPIO9-Pad16)",
+      "x": 114.672,
+      "y": 114.50574
+    },
+    {
+      "number": 17,
+      "net": "unconnected-(U3-SD_DATA3{slash}GPIO10-Pad17)",
+      "x": 114.672,
+      "y": 117.04574
+    },
+    {
+      "number": 18,
+      "net": "unconnected-(U3-CMD-Pad18)",
+      "x": 114.672,
+      "y": 119.58574
+    },
+    {
+      "number": 19,
+      "net": "+5V",
+      "x": 114.672,
+      "y": 122.12574
+    },
+    {
+      "number": 20,
+      "net": "unconnected-(U3-SD_CLK{slash}GPIO6-Pad20)",
+      "x": 140.06832,
+      "y": 122.12302
+    },
+    {
+      "number": 21,
+      "net": "unconnected-(U3-SD_DATA0{slash}GPIO7-Pad21)",
+      "x": 140.06832,
+      "y": 119.58302
+    },
+    {
+      "number": 22,
+      "net": "unconnected-(U3-SD_DATA1{slash}GPIO8-Pad22)",
+      "x": 140.072,
+      "y": 117.04574
+    },
+    {
+      "number": 23,
+      "net": "unconnected-(U3-MTDO{slash}GPIO15{slash}ADC2_CH3-Pad23)",
+      "x": 140.072,
+      "y": 114.50574
+    },
+    {
+      "number": 24,
+      "net": "unconnected-(U3-ADC2_CH2{slash}GPIO2-Pad24)",
+      "x": 140.072,
+      "y": 111.96574
+    },
+    {
+      "number": 25,
+      "net": "unconnected-(U3-GPIO0{slash}BOOT{slash}ADC2_CH1-Pad25)",
+      "x": 140.072,
+      "y": 109.42574
+    },
+    {
+      "number": 26,
+      "net": "/ESP32Core/GPIO4",
+      "x": 140.072,
+      "y": 106.88574
+    },
+    {
+      "number": 27,
+      "net": "/ESP32Core/GPIO16",
+      "x": 140.072,
+      "y": 104.34574
+    },
+    {
+      "number": 28,
+      "net": "/ESP32Core/GPIO17",
+      "x": 140.072,
+      "y": 101.80574
+    },
+    {
+      "number": 29,
+      "net": "/ESP32Core/CS",
+      "x": 140.072,
+      "y": 99.26574
+    },
+    {
+      "number": 30,
+      "net": "/ESP32Core/SCK",
+      "x": 140.072,
+      "y": 96.72574
+    },
+    {
+      "number": 31,
+      "net": "/ESP32Core/MISO",
+      "x": 140.072,
+      "y": 94.18574
+    },
+    {
+      "number": 32,
+      "net": "GND",
+      "x": 140.072,
+      "y": 91.64574
+    },
+    {
+      "number": 33,
+      "net": "I2C0_SDA",
+      "x": 140.072,
+      "y": 89.10574
+    },
+    {
+      "number": 34,
+      "net": "unconnected-(U3-U0RXD{slash}GPIO3-Pad34)",
+      "x": 140.072,
+      "y": 86.56574
+    },
+    {
+      "number": 35,
+      "net": "unconnected-(U3-U0TXD{slash}GPIO1-Pad35)",
+      "x": 140.072,
+      "y": 84.02574
+    },
+    {
+      "number": 36,
+      "net": "I2C0_SCL",
+      "x": 140.072,
+      "y": 81.48574
+    },
+    {
+      "number": 37,
+      "net": "/ESP32Core/MOSI",
+      "x": 140.072,
+      "y": 78.94574
+    },
+    {
+      "number": 38,
+      "net": "GND",
+      "x": 140.072,
+      "y": 76.40574
+    },
+    {
+      "number": 39,
+      "net": "Net-(D2-K)",
+      "x": 187.6175,
+      "y": 86.0,
+      "label": "MB_3V3_SYS"
+    },
+    {
+      "number": 40,
+      "net": "Net-(D1-K)",
+      "x": 189.6175,
+      "y": 86.0,
+      "label": "MB_GND"
+    }
+  ],
+  "connectors": [
+    {
+      "id": "ADC1",
+      "label": "ADC1",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 188.51,
+          "y": 116.332,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 188.51,
+          "y": 118.332,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "/ADC/ADC1",
+          "x": 188.51,
+          "y": 120.332,
+          "expected": [
+            5
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 188.51,
+          "y": 122.332,
+          "expected": [
+            39
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "ADC2",
+      "label": "ADC2",
+      "pigtail": "gpio",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 66.234,
+          "y": 122.322,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+5V",
+          "x": 66.234,
+          "y": 120.322,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "/ADC/ADC2",
+          "x": 66.234,
+          "y": 118.322,
+          "expected": [
+            6
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+3V3_SYS",
+          "x": 66.234,
+          "y": 116.322,
+          "expected": [
+            39
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J7",
+      "label": "I2C0 \u00b7 J7",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 186.46,
+          "y": 106.325,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 187.46,
+          "y": 106.325,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "I2C0_SDA",
+          "x": 188.46,
+          "y": 106.325,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C0_SCL",
+          "x": 189.46,
+          "y": 106.325,
+          "expected": [
+            36
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J8",
+      "label": "I2C0 \u00b7 J8",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 186.46,
+          "y": 96.325,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 187.46,
+          "y": 96.325,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "I2C0_SDA",
+          "x": 188.46,
+          "y": 96.325,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C0_SCL",
+          "x": 189.46,
+          "y": 96.325,
+          "expected": [
+            36
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J9",
+      "label": "I2C1 \u00b7 J9",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 65.284,
+          "y": 96.325,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 66.284,
+          "y": 96.325,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "I2C1_SDA",
+          "x": 67.284,
+          "y": 96.325,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C1_SCL",
+          "x": 68.284,
+          "y": 96.325,
+          "expected": [
+            10
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J10",
+      "label": "I2C1 \u00b7 J10",
+      "pigtail": "i2c",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 65.284,
+          "y": 106.325,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 66.284,
+          "y": 106.325,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "I2C1_SDA",
+          "x": 67.284,
+          "y": 106.325,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "I2C1_SCL",
+          "x": 68.284,
+          "y": 106.325,
+          "expected": [
+            10
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J1",
+      "label": "Slot A \u00b7 J1",
+      "pigtail": "module",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 158.428,
+          "y": 77.47,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 158.428,
+          "y": 80.01,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "EEPROM_A0_A",
+          "x": 160.968,
+          "y": 77.47,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+5V",
+          "x": 160.968,
+          "y": 80.01,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 5,
+          "net": "I2C0_SDA",
+          "x": 163.508,
+          "y": 77.47,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 6,
+          "net": "I2C0_SCL",
+          "x": 163.508,
+          "y": 80.01,
+          "expected": [
+            36
+          ],
+          "covered": true
+        },
+        {
+          "number": 7,
+          "net": "I2C1_SDA",
+          "x": 166.048,
+          "y": 77.47,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 8,
+          "net": "I2C1_SCL",
+          "x": 166.048,
+          "y": 80.01,
+          "expected": [
+            10
+          ],
+          "covered": true
+        },
+        {
+          "number": 9,
+          "net": "/ESP32Core/GPIO33",
+          "x": 168.588,
+          "y": 77.47,
+          "expected": [
+            8
+          ],
+          "covered": true
+        },
+        {
+          "number": 10,
+          "net": "/ESP32Core/GPIO13",
+          "x": 168.588,
+          "y": 80.01,
+          "expected": [
+            15
+          ],
+          "covered": true
+        },
+        {
+          "number": 11,
+          "net": "/ESP32Core/MOSI",
+          "x": 171.128,
+          "y": 77.47,
+          "expected": [
+            37
+          ],
+          "covered": true
+        },
+        {
+          "number": 12,
+          "net": "/ESP32Core/MISO",
+          "x": 171.128,
+          "y": 80.01,
+          "expected": [
+            31
+          ],
+          "covered": true
+        },
+        {
+          "number": 13,
+          "net": "/ESP32Core/SCK",
+          "x": 173.668,
+          "y": 77.47,
+          "expected": [
+            30
+          ],
+          "covered": true
+        },
+        {
+          "number": 14,
+          "net": "/ESP32Core/CS",
+          "x": 173.668,
+          "y": 80.01,
+          "expected": [
+            29
+          ],
+          "covered": true
+        }
+      ]
+    },
+    {
+      "id": "J2",
+      "label": "Slot B \u00b7 J2",
+      "pigtail": "module",
+      "pins": [
+        {
+          "number": 1,
+          "net": "GND",
+          "x": 81.076,
+          "y": 77.47,
+          "expected": [
+            14,
+            32,
+            38,
+            40
+          ],
+          "covered": true
+        },
+        {
+          "number": 2,
+          "net": "+3V3_SYS",
+          "x": 81.076,
+          "y": 80.01,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 3,
+          "net": "EEPROM_A0_B",
+          "x": 83.616,
+          "y": 77.47,
+          "expected": [
+            39
+          ],
+          "covered": true
+        },
+        {
+          "number": 4,
+          "net": "+5V",
+          "x": 83.616,
+          "y": 80.01,
+          "expected": [
+            19
+          ],
+          "covered": true
+        },
+        {
+          "number": 5,
+          "net": "I2C0_SDA",
+          "x": 86.156,
+          "y": 77.47,
+          "expected": [
+            33
+          ],
+          "covered": true
+        },
+        {
+          "number": 6,
+          "net": "I2C0_SCL",
+          "x": 86.156,
+          "y": 80.01,
+          "expected": [
+            36
+          ],
+          "covered": true
+        },
+        {
+          "number": 7,
+          "net": "I2C1_SDA",
+          "x": 88.696,
+          "y": 77.47,
+          "expected": [
+            9
+          ],
+          "covered": true
+        },
+        {
+          "number": 8,
+          "net": "I2C1_SCL",
+          "x": 88.696,
+          "y": 80.01,
+          "expected": [
+            10
+          ],
+          "covered": true
+        },
+        {
+          "number": 9,
+          "net": "/ESP32Core/GPIO32",
+          "x": 91.236,
+          "y": 77.47,
+          "expected": [
+            7
+          ],
+          "covered": true
+        },
+        {
+          "number": 10,
+          "net": "/ESP32Core/GPIO14",
+          "x": 91.236,
+          "y": 80.01,
+          "expected": [
+            12
+          ],
+          "covered": true
+        },
+        {
+          "number": 11,
+          "net": "/ESP32Core/MOSI",
+          "x": 93.776,
+          "y": 77.47,
+          "expected": [
+            37
+          ],
+          "covered": true
+        },
+        {
+          "number": 12,
+          "net": "/ESP32Core/MISO",
+          "x": 93.776,
+          "y": 80.01,
+          "expected": [
+            31
+          ],
+          "covered": true
+        },
+        {
+          "number": 13,
+          "net": "/ESP32Core/SCK",
+          "x": 96.316,
+          "y": 77.47,
+          "expected": [
+            30
+          ],
+          "covered": true
+        },
+        {
+          "number": 14,
+          "net": "/ESP32Core/GPIO27",
+          "x": 96.316,
+          "y": 80.01,
+          "expected": [
+            11
+          ],
+          "covered": true
+        }
+      ]
+    }
+  ],
+  "referencePaths": [
+    {
+      "input": 39,
+      "reference": "TP1",
+      "pin": 2,
+      "diode": "D2",
+      "anode": "+3V3_SYS",
+      "cathode": "Net-(D2-K)",
+      "direction": "output-to-input"
+    },
+    {
+      "input": 40,
+      "reference": "TP1",
+      "pin": 1,
+      "diode": "D1",
+      "anode": "GND",
+      "cathode": "Net-(D1-K)",
+      "direction": "output-to-input"
+    }
+  ],
+  "sourceCommit": "98704fb24562baecc5ebb4e343ff43aa8d2e41db"
+}

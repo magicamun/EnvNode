@@ -32,7 +32,7 @@ vollständige Platinenkontur dar.
 | 4 | SCL | Taktleitung des ausgewählten Busses |
 
 Die seitlichen Metalllaschen sind mechanische Befestigungen, keine Signalpins.
-Die Referenz J5 zeigt I2C0 mit SDA0/SCL0. Für I2C1 gilt dieselbe Pinfolge.
+Die historische Bildreferenz J5 stammt vom Mini 0.8.1 und zeigt I2C0 mit SDA0/SCL0. Am Mini 0.9.0 heißen die I2C0-Stecker J7/J8; J5 ist dort ein Pull-up-Jumper. Für I2C1 gilt dieselbe Pinfolge.
 Mehrere Stecker desselben Busses sind parallele Anschlüsse, keine voneinander
 isolierten Schnittstellen. Adressen und Pull-ups für alle angeschlossenen Geräte
 gemeinsam planen. Zwei gleiche Adressen sind auf verschiedenen Bussen möglich.

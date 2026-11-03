@@ -1,0 +1,665 @@
+{
+  "checkout": "main",
+  "name": "EnvNode Mini",
+  "title_block": "[Symbol('title_block'), [Symbol('title'), 'EnvNode Mini'], [Symbol('date'), '2026-10-27'], [Symbol('rev'), '0.9.0']]",
+  "components": [
+    {
+      "ref": "D1",
+      "value": "1N4148",
+      "footprint": "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(D1-K)",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Diode_SMD.3dshapes/D_1206_3216Metric.step"
+      ],
+      "at": [
+        181.935,
+        88.31,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J5",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "Net-(J5-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        110.63,
+        80.17
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H5",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        66.622,
+        77.120425
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H2",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        166.048,
+        131.39
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "ADC2",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "/ADC/ADC2",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        66.234,
+        122.322,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H4",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        88.696,
+        131.39
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C2",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        129.85,
+        78.6675,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H3",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        88.696,
+        99.39
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H1",
+      "value": "MountingHole",
+      "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        166.048,
+        99.39
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "TP1",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical",
+      "pads": {
+        "1": "Net-(D1-K)",
+        "2": "Net-(D2-K)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        189.6175,
+        86,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J10",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C1_SDA",
+        "4": "I2C1_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        66.784,
+        105
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "C1",
+      "value": "100nF",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder",
+      "pads": {
+        "1": "+5V",
+        "2": "GND"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+      ],
+      "at": [
+        120.118794,
+        122.174
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J2",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "Connector_PinSocket_2.54mm:PinSocket_2x07_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "EEPROM_A0_B",
+        "4": "+5V",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "I2C1_SDA",
+        "8": "I2C1_SCL",
+        "9": "/ESP32Core/GPIO32",
+        "10": "/ESP32Core/GPIO14",
+        "11": "/ESP32Core/MOSI",
+        "12": "/ESP32Core/MISO",
+        "13": "/ESP32Core/SCK",
+        "14": "/ESP32Core/GPIO27"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        81.076,
+        77.47,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R1",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "I2C0_SCL",
+        "2": "Net-(J3-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        161.824,
+        73.66,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J8",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        187.96,
+        95
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J6",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "Net-(J6-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        110.63,
+        76.21,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R2",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "I2C0_SDA",
+        "2": "Net-(J4-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        161.824,
+        84.074,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U1",
+      "value": "24LC32",
+      "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+      "pads": {
+        "1": "GND",
+        "2": "GND",
+        "3": "GND",
+        "4": "GND",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "GND",
+        "8": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step"
+      ],
+      "at": [
+        127.372,
+        85.2995
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J7",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C0_SDA",
+        "4": "I2C0_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        187.96,
+        105
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H6",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        66.622,
+        135.120425
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U3",
+      "value": "ESP32-DevKitC",
+      "footprint": "PCM_Espressif:ESP32-DevKitC",
+      "pads": {
+        "1": "+3V3_DEVKIT",
+        "2": "unconnected-(U3-CHIP_PU-Pad2)",
+        "3": "/ESP32Core/ADC3",
+        "4": "/ESP32Core/ADC4",
+        "5": "/ADC/ADC1",
+        "6": "/ADC/ADC2",
+        "7": "/ESP32Core/GPIO32",
+        "8": "/ESP32Core/GPIO33",
+        "9": "I2C1_SDA",
+        "10": "I2C1_SCL",
+        "11": "/ESP32Core/GPIO27",
+        "12": "/ESP32Core/GPIO14",
+        "13": "unconnected-(U3-MTDI{slash}GPIO12{slash}ADC2_CH5-Pad13)",
+        "14": "GND",
+        "15": "/ESP32Core/GPIO13",
+        "16": "unconnected-(U3-SD_DATA2{slash}GPIO9-Pad16)",
+        "17": "unconnected-(U3-SD_DATA3{slash}GPIO10-Pad17)",
+        "18": "unconnected-(U3-CMD-Pad18)",
+        "19": "+5V",
+        "20": "unconnected-(U3-SD_CLK{slash}GPIO6-Pad20)",
+        "21": "unconnected-(U3-SD_DATA0{slash}GPIO7-Pad21)",
+        "22": "unconnected-(U3-SD_DATA1{slash}GPIO8-Pad22)",
+        "23": "unconnected-(U3-MTDO{slash}GPIO15{slash}ADC2_CH3-Pad23)",
+        "24": "unconnected-(U3-ADC2_CH2{slash}GPIO2-Pad24)",
+        "25": "unconnected-(U3-GPIO0{slash}BOOT{slash}ADC2_CH1-Pad25)",
+        "26": "/ESP32Core/GPIO4",
+        "27": "/ESP32Core/GPIO16",
+        "28": "/ESP32Core/GPIO17",
+        "29": "/ESP32Core/CS",
+        "30": "/ESP32Core/SCK",
+        "31": "/ESP32Core/MISO",
+        "32": "GND",
+        "33": "I2C0_SDA",
+        "34": "unconnected-(U3-U0RXD{slash}GPIO3-Pad34)",
+        "35": "unconnected-(U3-U0TXD{slash}GPIO1-Pad35)",
+        "36": "I2C0_SCL",
+        "37": "/ESP32Core/MOSI",
+        "38": "GND"
+      },
+      "models": [],
+      "at": [
+        114.672,
+        76.405741
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J4",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "Net-(J4-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        144.11,
+        80.17
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R4",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(J6-Pin_2)",
+        "2": "I2C1_SDA"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        87.148,
+        73.66,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J9",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "I2C1_SDA",
+        "4": "I2C1_SCL",
+        "MP": "NC"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical.step"
+      ],
+      "at": [
+        66.784,
+        95
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "D2",
+      "value": "1N4148",
+      "footprint": "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(D2-K)",
+        "2": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Diode_SMD.3dshapes/D_1206_3216Metric.step"
+      ],
+      "at": [
+        181.935,
+        84.7,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "U2",
+      "value": "ORingPower_Module",
+      "footprint": "EnvNode-Footprints:ORingPower_Carrier",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "unconnected-(U2-+3V3_EXT-Pad3)",
+        "4": "+3V3_DEVKIT",
+        "5": "+3V3_SYS"
+      },
+      "models": [],
+      "at": [
+        127.372,
+        132.394
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "footprint": "Connector_PinSocket_2.54mm:PinSocket_2x07_P2.54mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+3V3_SYS",
+        "3": "EEPROM_A0_A",
+        "4": "+5V",
+        "5": "I2C0_SDA",
+        "6": "I2C0_SCL",
+        "7": "I2C1_SDA",
+        "8": "I2C1_SCL",
+        "9": "/ESP32Core/GPIO33",
+        "10": "/ESP32Core/GPIO13",
+        "11": "/ESP32Core/MOSI",
+        "12": "/ESP32Core/MISO",
+        "13": "/ESP32Core/SCK",
+        "14": "/ESP32Core/CS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x07_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        158.428,
+        77.47,
+        90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "ADC1",
+      "value": "Conn_01x04_Pin",
+      "footprint": "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical",
+      "pads": {
+        "1": "GND",
+        "2": "+5V",
+        "3": "/ADC/ADC1",
+        "4": "+3V3_SYS"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step"
+      ],
+      "at": [
+        188.51,
+        116.332,
+        -90
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H7",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        188.122,
+        77.120425
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "H8",
+      "value": "MountingHole",
+      "footprint": "EnvNode-Footprints:MountingHole_4.5mm_SelfTapping_4mm",
+      "pads": {
+        "": "NC"
+      },
+      "models": [],
+      "at": [
+        188.122,
+        135.120425
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "J3",
+      "value": "Conn_01x02_Pin",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "Net-(J3-Pin_2)"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+      ],
+      "at": [
+        144.11,
+        76.21,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "NT1",
+      "value": "NetTie_2",
+      "footprint": "NetTie:NetTie-2_SMD_Pad0.5mm",
+      "pads": {
+        "1": "EEPROM_A0_A",
+        "2": "GND"
+      },
+      "models": [],
+      "at": [
+        155.73,
+        77.47
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "R3",
+      "value": "4,7 kOhm",
+      "footprint": "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder",
+      "pads": {
+        "1": "Net-(J5-Pin_2)",
+        "2": "I2C1_SCL"
+      },
+      "models": [
+        "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_1206_3216Metric.step"
+      ],
+      "at": [
+        87.122,
+        84.074,
+        180
+      ],
+      "layer": "F.Cu"
+    },
+    {
+      "ref": "NT2",
+      "value": "NetTie_2",
+      "footprint": "NetTie:NetTie-2_SMD_Pad0.5mm",
+      "pads": {
+        "1": "+3V3_SYS",
+        "2": "EEPROM_A0_B"
+      },
+      "models": [],
+      "at": [
+        78.82,
+        77.74,
+        -90
+      ],
+      "layer": "B.Cu"
+    }
+  ],
+  "source_sha256": {
+    "ADC.kicad_sch": "ff48076ff5b82145a34fdf95a253e811a9e1ee4cfc0862605f8838f099209a8e",
+    "ESP32Core.kicad_sch": "bf94fd4b7574112858502d14253b375606cfb2127f8e3209d7c1e6a214dbca3c",
+    "EnvNode Mini.kicad_pcb": "dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105",
+    "EnvNode Mini.kicad_pro": "a661c4137794305c178d1c2fb949855dc6e34a1d8023b7b6eb5cf200f9dab77a",
+    "EnvNode Mini.kicad_sch": "45d7af2e59a0f6668a6372a5ece9d94c20ad248f669ff8589a1a6c61c9e9a178",
+    "PCB.kicad_sch": "ed19908459ebba8a0c0957a70928c7e5f7a28a7906c4574dc2a22a69e9126551",
+    "Power.kicad_sch": "e31c045d9ccf359a5704e7f459512f885d122886f80038bd971eea93a1a3da0a",
+    "SlotA.kicad_sch": "6acc11c48da4dce5fd633a443f920c35c617c4472b92fc866cc63f65c99d06f2",
+    "SlotB.kicad_sch": "649abacbdd409d99a35778051c58a5466877563ed6fda753ce3fb25c828c579d"
+  },
+  "commit": "ff906605036ccac222eda68e9d515e630a9cae6c"
+}

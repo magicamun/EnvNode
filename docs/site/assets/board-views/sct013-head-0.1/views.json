@@ -1,0 +1,159 @@
+{
+  "id": "sct013-head-0.1",
+  "guide": "sensors/sct013-head/assembly.md",
+  "pcb_source": "main/hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb",
+  "pcb_sha256": "5361e2f392efc484dd3522dd2f4c0fc8d85c413e14519de21736decc2d476a8e",
+  "back_components": [
+    "C1",
+    "C2",
+    "R1",
+    "R2",
+    "R3",
+    "R4"
+  ],
+  "hero": {
+    "front": "assets/images/sct013-assembly/top.png",
+    "back": "assets/images/sct013-assembly/bottom.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/sct013-head-0.1/assembly-front.png",
+      "png_size_px": [
+        2451,
+        1757
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/sct013-head-0.1/assembly-back.png",
+      "png_size_px": [
+        2449,
+        1757
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "J1",
+      "value": "Conn_01x05_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        86.31,
+        62.607
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "ADC1",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        102.616,
+        58.547
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R3",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        99.822,
+        59.227
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C1",
+      "value": "10nF",
+      "side": "B.Cu",
+      "position_mm": [
+        91.948,
+        63.78
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "C2",
+      "value": "10uF",
+      "side": "B.Cu",
+      "position_mm": [
+        97.028,
+        59.227
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R2",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        99.822,
+        65.487
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R1",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        89.154,
+        59.227
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R4",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        94.488,
+        63.78
+      ],
+      "rotation_deg": 90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 7,
+  "asset_sha256": {
+    "assets/board-views/sct013-head-0.1/assembly-front.png": "7fc384dab741b96fa6f1e42f790c83b22fbcfbf0d1acc343cc8d509e802ce2b5",
+    "assets/board-views/sct013-head-0.1/assembly-back.png": "1efec77519bfc35c3df0b5a0f39e60b582ec860306cf5465ffe23413c0aafd6a",
+    "assets/images/sct013-assembly/top.png": "1f8ca6b4bcaef6520355a40f9dbd65cb420d002eb3eb52a385be5b0e236ef0a8",
+    "assets/images/sct013-assembly/bottom.png": "d5173869d07574091201ae723ba938ebcde31f1467da3172f7cf7057ed5271c0"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

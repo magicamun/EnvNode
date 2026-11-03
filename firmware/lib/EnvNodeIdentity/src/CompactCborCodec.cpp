@@ -26,6 +26,15 @@ bool CompactCborWriter::append(const uint8_t* data, size_t size) {
     return true;
 }
 
+bool CompactCborWriter::writeEncodedValue(const uint8_t* value, size_t size) {
+    CompactCborReader reader(value,size);
+    if (!value || !size || !reader.skip() || reader.remaining()) {
+        status_ = CompactCborStatus::InvalidArgument;
+        return false;
+    }
+    return append(value,size);
+}
+
 bool CompactCborWriter::writeHead(uint8_t majorType, uint64_t value) {
     uint8_t encoded[9];
     size_t count = 1;

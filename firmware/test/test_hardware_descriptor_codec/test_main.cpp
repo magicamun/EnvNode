@@ -53,7 +53,7 @@ void contract(CompactCborWriter& writer, uint16_t id, uint16_t apiVersion = 1) {
     writer.writeUnsigned(apiVersion);
 }
 
-size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = true) {
+size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = true, HardwareDescriptorResourceKind resourceKind = HardwareDescriptorResourceKind::Gpio, unsigned address = 72) {
     CompactCborWriter writer(output, capacity);
     writer.beginMap(9);
     key(writer, HardwareDescriptorKey::SchemaVersion);
@@ -95,12 +95,17 @@ size_t buildModule(uint8_t* output, size_t capacity, bool includeManufacturer = 
     writer.writeUnsigned(static_cast<uint8_t>(HardwareDescriptorInterfaceCode::Module2x7));
     key(writer, HardwareDescriptorKey::Requirements);
     writer.beginArray(1);
-    writer.beginMap(4);
+    writer.beginMap(resourceKind == HardwareDescriptorResourceKind::I2C ? 5 : 4);
     key(writer, HardwareDescriptorKey::Capabilities);
     writer.beginArray(1); writer.writeText("digital-output");
     key(writer, HardwareDescriptorKey::Id); writer.writeText("relay-control");
-    key(writer, HardwareDescriptorKey::Kind); writer.writeUnsigned(static_cast<uint8_t>(HardwareDescriptorResourceKind::Gpio));
-    key(writer, HardwareDescriptorKey::Resource); writer.writeText("AUX_GPIO1");
+    key(writer, HardwareDescriptorKey::Kind); writer.writeUnsigned(static_cast<uint8_t>(resourceKind));
+    if (resourceKind == HardwareDescriptorResourceKind::I2C) {
+        key(writer, HardwareDescriptorKey::Properties);
+        writer.beginMap(1); writer.writeText("address"); writer.writeUnsigned(address);
+    }
+    key(writer, HardwareDescriptorKey::Resource);
+    writer.writeText(resourceKind == HardwareDescriptorResourceKind::I2C ? "I2C0" : resourceKind == HardwareDescriptorResourceKind::SPI ? "SPI" : "AUX_GPIO1");
     key(writer, HardwareDescriptorKey::Devices);
     writer.beginArray(1);
     writer.beginMap(7);
@@ -344,8 +349,39 @@ void test_discovery_prefers_descriptor_and_reports_semantic_compatibility() {
         static_cast<int>(result->descriptorCompatibility));
 }
 
+void test_unsupported_module_reserves_spi_and_i2c_resources() {
+    for (auto kind : {HardwareDescriptorResourceKind::SPI, HardwareDescriptorResourceKind::I2C}) {
+        MemoryStorage a, b;
+        HardwareDescriptorStore as(a), bs(b);
+        uint8_t payload[2048];
+        const size_t size = buildModule(payload, sizeof(payload), true, kind);
+        TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareDescriptorStoreStatus::Valid),
+            static_cast<int>(as.write(HardwareDescriptorObjectKind::Module, payload, size).status));
+        ModuleDiscoveryService discovery(as, bs); discovery.scan();
+        TEST_ASSERT_TRUE(discovery.result(ModuleSlot::A)->identified());
+        TEST_ASSERT_NOT_EQUAL(static_cast<int>(HardwareDescriptorCompatibilityStatus::Compatible),
+            static_cast<int>(discovery.result(ModuleSlot::A)->descriptorCompatibility));
+        if (kind == HardwareDescriptorResourceKind::SPI) {
+            for (unsigned pin : {18,19,23})
+                TEST_ASSERT_TRUE(discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(pin))));
+            TEST_ASSERT_FALSE(discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(16))));
+        } else {
+            TEST_ASSERT_TRUE(discovery.ownsHardware(HardwareResourceAssignment::i2cResource(I2CResource(I2CBus::I2C0,72))));
+            TEST_ASSERT_FALSE(discovery.ownsHardware(HardwareResourceAssignment::i2cResource(I2CResource(I2CBus::I2C1,72))));
+            TEST_ASSERT_FALSE(discovery.ownsHardware(HardwareResourceAssignment::i2cResource(I2CResource(I2CBus::I2C0,73))));
+        }
+    }
+}
+void test_invalid_requirement_address_is_rejected() {
+    uint8_t payload[2048]; HardwareDescriptor descriptor;
+    const size_t size = buildModule(payload, sizeof(payload), true, HardwareDescriptorResourceKind::I2C, 128);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareDescriptorDecodeStatus::InvalidValue),
+        static_cast<int>(HardwareDescriptorCodec::decode(payload,size,HardwareDescriptorObjectKind::Module,descriptor)));
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_unsupported_module_reserves_spi_and_i2c_resources);
+    RUN_TEST(test_invalid_requirement_address_is_rejected);
     RUN_TEST(test_unknown_module_type_decodes_without_registry);
     RUN_TEST(test_generic_inventory_resolves_unknown_product_by_slot_contract);
     RUN_TEST(test_board_resources_decode_independently_of_known_product_id);

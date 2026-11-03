@@ -1,0 +1,48 @@
+{
+  "generator": "WeasyPrint fixed-template v1",
+  "metadata": {
+    "id": "analog-0.5",
+    "title": "AnalogHydroPressure",
+    "subtitle": "Bestückungs- und Bring-up-Anleitung",
+    "hardware_revision": "0.5",
+    "document_version": "1.1",
+    "document_date": "2026-10-28",
+    "source_document_date": "2026-10-17",
+    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+  },
+  "pages": 14,
+  "source_pdf": "hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf",
+  "source_pdf_sha256": "1c6748d9ce0172df2d1d2489a4fd34df87b736fa1b6f27d8b70f07b6f7ef4de7",
+  "markdown_sha256": "114848f5611060a06762a07f3f112bd2a306286bc7f6b0d8c7c05f53f6ff510e",
+  "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
+  "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
+  "palette": {
+    "--envnode-gold": "#9E6C00",
+    "--envnode-accent": "#CC9319",
+    "--envnode-cover": "#CA8E01",
+    "--envnode-text": "#262626",
+    "--envnode-secondary": "#595959",
+    "--envnode-rule": "#D6D6D6",
+    "--envnode-neutral": "#F5F5F5",
+    "--envnode-info": "#FAF4E6",
+    "--envnode-white": "#FFFFFF"
+  },
+  "renderer_version": "68.0",
+  "generator_sha256": "e0b0a9df7793efc9e256e71be7f739f2d17a58013c7bd88e26335b821ff84c66",
+  "image_assets": {
+    "assets/images/analog-assembly/page-04-view-1.png": "cd915f41cb121e268b36c97e22dcb50b6ce51b8a9a72d118b6f6c3e7ebc79f9d",
+    "assets/images/analog-assembly/page-05-view-1.png": "83cb4d3810507a20c274d97b4e8d245fe93ab9bcf252df82eaa4006366dd0c64",
+    "assets/board-views/analog-0.5/assembly-front.png": "44b24c22c3d49be4d7be72e9d20119adbf3842169201d144267db27cfd51b1a7",
+    "assets/board-views/analog-0.5/assembly-back.png": "09384ab83b456c54b2f4249adc9b29c6f514105dd64ddd610b0e917942fd6e21"
+  },
+  "images": {
+    "page-04-view-1.png": "cd915f41cb121e268b36c97e22dcb50b6ce51b8a9a72d118b6f6c3e7ebc79f9d",
+    "page-05-view-1.png": "83cb4d3810507a20c274d97b4e8d245fe93ab9bcf252df82eaa4006366dd0c64"
+  },
+  "fonts": {
+    "DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
+  },
+  "pdf_sha256": "ee312aee90253aa49680779770c473da9fe18b62bcf9ffb9dbefa9a446d41f7e"
+}

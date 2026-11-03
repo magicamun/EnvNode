@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "mainboard-0.3",
+      "filename": "mainboard-0.3.15d156653951c89cbd6b6fb377211dac946ae5208bd5d9341e629ed90c366948.json",
+      "sha256": "15d156653951c89cbd6b6fb377211dac946ae5208bd5d9341e629ed90c366948",
+      "portMap": "mainboard-0.3.945d5d2a6a0113f7d20b3705bba9c6594e50bebb9ea9c216320363caeefb4a4d.portmap.cbor",
+      "portMapSha256": "945d5d2a6a0113f7d20b3705bba9c6594e50bebb9ea9c216320363caeefb4a4d",
+      "portMapBytes": 116
+    },
+    {
+      "id": "weather-0.2-pcb0.2.1",
+      "filename": "weather-0.2-pcb0.2.1.2709ca56ec4c3f86ad243c068fe7784e020aacb98079393f52b638dee0a2756d.json",
+      "sha256": "2709ca56ec4c3f86ad243c068fe7784e020aacb98079393f52b638dee0a2756d",
+      "portMap": "weather-0.2-pcb0.2.1.8c1ee8c69d8a7c365723573e0dfc7e29c7ae7dc2ec3acef9d44ab8c273526ae1.portmap.cbor",
+      "portMapSha256": "8c1ee8c69d8a7c365723573e0dfc7e29c7ae7dc2ec3acef9d44ab8c273526ae1",
+      "portMapBytes": 110
+    },
+    {
+      "id": "mini-0.8-pcb0.8.1",
+      "filename": "mini-0.8-pcb0.8.1.4cd1b16a9ade4d387ab64d2ea870433024235cdd39392bcf1876eaa656e3742d.json",
+      "sha256": "4cd1b16a9ade4d387ab64d2ea870433024235cdd39392bcf1876eaa656e3742d",
+      "portMap": "mini-0.8-pcb0.8.1.6456b8732cbb59fc4c0d75d9eb60bfcb487f0c6434ce4ffd6bb6d28135e2258a.portmap.cbor",
+      "portMapSha256": "6456b8732cbb59fc4c0d75d9eb60bfcb487f0c6434ce4ffd6bb6d28135e2258a",
+      "portMapBytes": 120
+    },
+    {
+      "id": "weather-0.3-pcb0.3.0",
+      "filename": "weather-0.3-pcb0.3.0.2d8d8d4223dee5ce5f4aff6c3390273c48f224d7e1075002450df1903a80f413.json",
+      "sha256": "2d8d8d4223dee5ce5f4aff6c3390273c48f224d7e1075002450df1903a80f413",
+      "portMap": "weather-0.3-pcb0.3.0.620e65c20aacf7113dbbf8e2e4ec290984979ab9966eea7d86673f7ac6d62277.portmap.cbor",
+      "portMapSha256": "620e65c20aacf7113dbbf8e2e4ec290984979ab9966eea7d86673f7ac6d62277",
+      "portMapBytes": 110
+    },
+    {
+      "id": "mini-0.9-pcb0.9.0",
+      "filename": "mini-0.9-pcb0.9.0.1bc0a33aecd279268a80bc4ac227b5f718576f595133f70164e73ed122db527f.json",
+      "sha256": "1bc0a33aecd279268a80bc4ac227b5f718576f595133f70164e73ed122db527f",
+      "portMap": "mini-0.9-pcb0.9.0.67ec5da85b34040190ca7fbb7509e9405e6259d97f221f6524a0bff415e5846b.portmap.cbor",
+      "portMapSha256": "67ec5da85b34040190ca7fbb7509e9405e6259d97f221f6524a0bff415e5846b",
+      "portMapBytes": 120
+    }
+  ]
+}

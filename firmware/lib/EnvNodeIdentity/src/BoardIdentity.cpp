@@ -1,13 +1,16 @@
 #include "BoardIdentity.h"
+#include "BoardIdentityProfiles.h"
 
 #include <cstring>
 
 namespace EnvNode {
 
 bool isKnownBoardProfileId(uint16_t encodedId) {
-    return encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMainboard)
-        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeWeather)
-        || encodedId == static_cast<uint16_t>(BoardProfileId::EnvNodeMini);
+    for (size_t i = 0; i < boardIdentityProfileCount(); ++i) {
+        const auto* profile = boardIdentityProfileAt(i);
+        if (profile && encodedId == encodeBoardProfileId(profile->id)) return true;
+    }
+    return false;
 }
 
 bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId) {
@@ -23,6 +26,14 @@ uint16_t encodeBoardProfileId(BoardProfileId profileId) {
     return static_cast<uint16_t>(profileId);
 }
 
+BoardIdentityStatus validateBoardIdentityStructure(const BoardIdentity& identity) {
+    if (!std::memchr(identity.serialNumber.value,0,sizeof(identity.serialNumber.value))) return BoardIdentityStatus::InvalidSerial;
+    if (encodeBoardProfileId(identity.profileId) > 254) return BoardIdentityStatus::UnknownBoardProfile;
+    if (identity.revision.major == 255 && identity.revision.minor == 255) return BoardIdentityStatus::InvalidRevision;
+    if (!isValidBoardSerialNumber(identity.serialNumber.value)) return BoardIdentityStatus::InvalidSerial;
+    return isBoardSerialNumberAssigned(identity.serialNumber) ? BoardIdentityStatus::Valid : BoardIdentityStatus::UnassignedSerial;
+}
+
 BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
     if (!isKnownBoardProfileId(encodeBoardProfileId(identity.profileId))) {
         return BoardIdentityStatus::UnknownBoardProfile;
@@ -32,24 +43,8 @@ BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity) {
         return BoardIdentityStatus::InvalidRevision;
     }
 
-    switch (identity.profileId) {
-        case BoardProfileId::EnvNodeMainboard:
-            if (identity.revision.major != 0 || identity.revision.minor != 3) {
-                return BoardIdentityStatus::UnsupportedRevision;
-            }
-            break;
-        case BoardProfileId::EnvNodeWeather:
-            if (identity.revision.major != 0 || identity.revision.minor != 2) {
-                return BoardIdentityStatus::UnsupportedRevision;
-            }
-            break;
-        case BoardProfileId::EnvNodeMini:
-            if (identity.revision.major != 0 || identity.revision.minor != 8) {
-                return BoardIdentityStatus::UnsupportedRevision;
-            }
-            break;
-        default:
-            return BoardIdentityStatus::UnknownBoardProfile;
+    if (!boardIdentityProfile(identity.profileId,identity.revision)) {
+        return BoardIdentityStatus::UnsupportedRevision;
     }
 
     if (!isValidBoardSerialNumber(identity.serialNumber.value)) {
@@ -84,6 +79,24 @@ bool setBoardSerialNumber(BoardSerialNumber& target, const char* serialNumber) {
 
 bool isBoardSerialNumberAssigned(const BoardSerialNumber& serialNumber) {
     return serialNumber.value[0] != '\0';
+}
+
+const char* boardIdentityStatusName(BoardIdentityStatus status) {
+    switch (status) {
+        case BoardIdentityStatus::Valid: return "Valid";
+        case BoardIdentityStatus::StorageUnavailable: return "StorageUnavailable";
+        case BoardIdentityStatus::NotProvisioned: return "NotProvisioned";
+        case BoardIdentityStatus::InvalidMagic: return "InvalidMagic";
+        case BoardIdentityStatus::UnsupportedFormat: return "UnsupportedFormat";
+        case BoardIdentityStatus::InvalidLength: return "InvalidLength";
+        case BoardIdentityStatus::InvalidCRC: return "InvalidCRC";
+        case BoardIdentityStatus::UnknownBoardProfile: return "UnknownBoardProfile";
+        case BoardIdentityStatus::InvalidRevision: return "InvalidRevision";
+        case BoardIdentityStatus::UnsupportedRevision: return "UnsupportedRevision";
+        case BoardIdentityStatus::InvalidSerial: return "InvalidSerial";
+        case BoardIdentityStatus::UnassignedSerial: return "UnassignedSerial";
+        default: return "Unknown";
+    }
 }
 
 } // namespace EnvNode

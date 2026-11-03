@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0",
+  "id": "mainboard-0.3",
+  "name": "EnvNode Mainboard",
+  "boardProfile": "EnvNodeMainboard",
+  "boardProfileId": 0,
+  "identityRevision": "0.3",
+  "minimumRuntimeFirmwareVersion": "0.8.2",
+  "image": null,
+  "provisioning": {
+    "identityBus": "I2C0",
+    "identityAddress": 80,
+    "gpios": [
+      {
+        "gpio": 4,
+        "name": "GPIO4",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 13,
+        "name": "GPIO13",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 14,
+        "name": "GPIO14",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 15,
+        "name": "GPIO15",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 16,
+        "name": "GPIO16",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 17,
+        "name": "GPIO17",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 18,
+        "name": "GPIO18",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 19,
+        "name": "GPIO19",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 23,
+        "name": "GPIO23",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup"
+        ]
+      },
+      {
+        "gpio": 32,
+        "name": "GPIO32",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup",
+          "GpioCapability::AnalogInput"
+        ]
+      },
+      {
+        "gpio": 33,
+        "name": "GPIO33",
+        "capabilities": [
+          "GpioCapability::DigitalInput",
+          "GpioCapability::DigitalOutput",
+          "GpioCapability::Interrupt",
+          "GpioCapability::InternalPullup",
+          "GpioCapability::AnalogInput"
+        ]
+      },
+      {
+        "gpio": 34,
+        "name": "GPIO34",
+        "capabilities": [
+          "GpioCapability::AnalogInput"
+        ]
+      },
+      {
+        "gpio": 35,
+        "name": "GPIO35",
+        "capabilities": [
+          "GpioCapability::AnalogInput"
+        ]
+      },
+      {
+        "gpio": 36,
+        "name": "GPIO36",
+        "capabilities": [
+          "GpioCapability::AnalogInput"
+        ]
+      },
+      {
+        "gpio": 39,
+        "name": "GPIO39",
+        "capabilities": [
+          "GpioCapability::AnalogInput"
+        ]
+      }
+    ],
+    "i2cBuses": [
+      {
+        "bus": "I2C0",
+        "sda": 21,
+        "scl": 22
+      },
+      {
+        "bus": "I2C1",
+        "sda": 25,
+        "scl": 26
+      }
+    ],
+    "moduleSlots": [
+      {
+        "slot": "A",
+        "identityAddress": 82,
+        "aux1": 4,
+        "aux2": 13,
+        "cs": 5,
+        "fiveVolt": true
+      },
+      {
+        "slot": "B",
+        "identityAddress": 83,
+        "aux1": 14,
+        "aux2": 16,
+        "cs": 27,
+        "fiveVolt": true
+      }
+    ],
+    "spiBus": {
+      "clock": 18,
+      "miso": 19,
+      "mosi": 23
+    }
+  },
+  "testing": null,
+  "testGeneration": null
+}

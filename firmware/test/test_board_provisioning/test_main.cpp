@@ -139,7 +139,7 @@ void test_weather_provisioning_round_trip_and_profile() {
         BoardCapabilities::current().gpio(GpioResource(34))->capabilities,
         GpioCapability::DigitalOutput));
     BoardIdentity invalid = weather;
-    invalid.revision.minor = 3;
+    invalid.revision.minor = 4;
     TEST_ASSERT_EQUAL_INT(static_cast<int>(BoardProvisioningStatus::InvalidIdentity),
         static_cast<int>(service.provision(invalid, true).status));
 }
@@ -165,7 +165,24 @@ void test_mini_08_profile_has_expected_slots_and_adc_inputs() {
             {BoardProfileId::EnvNodeMini, {0, 8}, {"MINI-A01"}})));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(BoardIdentityStatus::UnsupportedRevision),
         static_cast<int>(validateBoardIdentity(
-            {BoardProfileId::EnvNodeMini, {0, 9}, {"MINI-A01"}})));
+            {BoardProfileId::EnvNodeMini, {0, 10}, {"MINI-A01"}})));
+}
+
+void test_new_revisions_roundtrip_and_reuse_verified_gpio_resources() {
+    for(const auto identity:{BoardIdentity{BoardProfileId::EnvNodeMini,{0,9},{"MINI-09"}},
+        BoardIdentity{BoardProfileId::EnvNodeWeather,{0,3},{"WEATHER-03"}}}) {
+        MemoryStorage storage;BoardIdentityStore store(storage);BoardProvisioningService service(store);
+        TEST_ASSERT_EQUAL(BoardProvisioningStatus::Success,service.provision(identity,true).status);
+        const auto read=store.read();TEST_ASSERT_EQUAL(BoardIdentityStatus::Valid,read.status);
+        TEST_ASSERT_EQUAL(identity.revision.minor,read.identity.revision.minor);
+        const auto* p=boardProfile(read.identity.profileId,read.identity.revision);
+        const auto* old=boardProfile(identity.profileId);TEST_ASSERT_NOT_NULL(p);
+        TEST_ASSERT_EQUAL(identity.revision.minor,p->revision.minor);
+        TEST_ASSERT_EQUAL_PTR(old->gpios,p->gpios);TEST_ASSERT_EQUAL_PTR(old->moduleSlots,p->moduleSlots);
+        TEST_ASSERT_EQUAL_PTR(old->i2cBuses,p->i2cBuses);
+    }
+    TEST_ASSERT_NULL(boardProfile(BoardProfileId::EnvNodeMini,{0,10}));
+    TEST_ASSERT_NULL(boardProfile(BoardProfileId::EnvNodeWeather,{0,4}));
 }
 
 int main(int, char**) {
@@ -177,5 +194,6 @@ int main(int, char**) {
     RUN_TEST(test_readback_failure_does_not_request_reboot);
     RUN_TEST(test_weather_provisioning_round_trip_and_profile);
     RUN_TEST(test_mini_08_profile_has_expected_slots_and_adc_inputs);
+    RUN_TEST(test_new_revisions_roundtrip_and_reuse_verified_gpio_resources);
     return UNITY_END();
 }

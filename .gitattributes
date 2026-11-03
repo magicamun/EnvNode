@@ -1,3 +1,4 @@
-# SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
-# See LICENSE. PDF streams must not receive text conversion or whitespace checks.
+# EnvNode: see repository LICENSE.
 *.pdf binary
+docs/site/assets/testboard/v1/*.cbor binary
+docs/site/assets/hardware/v1/*.cbor binary

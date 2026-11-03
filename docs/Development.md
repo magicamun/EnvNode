@@ -243,3 +243,16 @@ After changes run `pio run -e esp32dev`, `pio test -e native` and
 flash and check startup, retained settings, measurements/controllers, MQTT, web
 and display. No configuration reset or new partition-table transition is needed
 for the startup/loop extraction.
+
+
+## Independent test board target
+
+`pio run -e esp32dev` builds EnvNode; `pio run -e testboard` builds the fixture
+base. The default remains EnvNode. Sources are explicitly separated: EnvNode
+excludes `src/testboard/`, while the fixture includes only that directory.
+The build-info generator selects an application version header through
+`custom_firmware_version_header`, with EnvNode's existing header as the default.
+
+See [TestBoardFirmware.md](TestBoardFirmware.md) for output paths, connection
+settings, independent NVS namespaces, current scope and physical acceptance.
+The separate native environment is `pio test -e testboard_native`.

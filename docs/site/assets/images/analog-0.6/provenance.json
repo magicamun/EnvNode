@@ -1,0 +1,24 @@
+{
+  "board": "AnalogHydroPressure",
+  "hardware_revision": "0.6",
+  "checkout": "analog-hydro-pressure",
+  "commit": "22a23bd7c2d1eeedc8284dd62a1c876d9f3fd786",
+  "source_sha256": {
+    "24VBoost.kicad_sch": "cd0a84deb00eb290ab596b9604f476b06d50300694f4aedb86c46addc5f0420d",
+    "Analog.kicad_sch": "447e8534e54cfb9ef02fb16d72f3351dadf1a94b8d307a0a62f713d6e4933ac3",
+    "AnalogHydroPressure.kicad_pcb": "922c80698c3d7b888f5c7f905ecb3e3dfc0098ac6227a8902e95c6f52a30463a",
+    "AnalogHydroPressure.kicad_pro": "30fa158903dace3d5a136cffc23a9f3cca427e2d56e63312cce7ec86b020b512",
+    "AnalogHydroPressure.kicad_sch": "abdc9c851af5464fd9510fa227b51d634a789c2d216f9b1fe4f82aaa6f35f55a"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "56f0be2973b4e8672cb2e193c9b39fc551bf6e07f901e6a9dabf09be2c67bc78",
+    "bottom.png": "c0031bb36d0fef4eddd50435d0cc007da5d77447be446424ca9b2c07f7d24520"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

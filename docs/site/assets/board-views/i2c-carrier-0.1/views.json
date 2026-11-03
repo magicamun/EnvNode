@@ -1,0 +1,176 @@
+{
+  "id": "i2c-carrier-0.1",
+  "guide": "modules/i2c-carrier/assembly.md",
+  "pcb_source": "main/hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/I2C Carrier HalfSize.kicad_pcb",
+  "pcb_sha256": "b71e5b0ad27786db08d27ee1dfaf55b7bfcc75347c856eb36445d8a2ec0e7dae",
+  "back_components": [
+    "C1",
+    "J1",
+    "U2"
+  ],
+  "hero": {
+    "front": "assets/images/i2c-carrier-assembly/page-01-view-1.png",
+    "back": "assets/board-views/i2c-carrier-0.1/3d-back.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/i2c-carrier-0.1/assembly-front.png",
+      "png_size_px": [
+        2319,
+        1987
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    },
+    "back": {
+      "png": "assets/board-views/i2c-carrier-0.1/assembly-back.png",
+      "png_size_px": [
+        2319,
+        1988
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "JP3",
+      "value": "SolderJumper_3_Open",
+      "side": "F.Cu",
+      "position_mm": [
+        120.9,
+        45.15
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "JP1",
+      "value": "SolderJumper_3_Open",
+      "side": "F.Cu",
+      "position_mm": [
+        142.89,
+        45.145
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "JP2",
+      "value": "SolderJumper_3_Open",
+      "side": "F.Cu",
+      "position_mm": [
+        152.67,
+        45.15
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        136.779,
+        59.262
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "JP4",
+      "value": "SolderJumper_3_Open",
+      "side": "F.Cu",
+      "position_mm": [
+        130.67,
+        45.14
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J2",
+      "value": "I2C0",
+      "side": "F.Cu",
+      "position_mm": [
+        143.969,
+        61.79
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "J3",
+      "value": "I2C1",
+      "side": "F.Cu",
+      "position_mm": [
+        121.97,
+        61.79
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        34.18
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U2",
+      "value": "24LC32",
+      "side": "B.Cu",
+      "position_mm": [
+        151.16,
+        38.6795
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "B.Cu",
+      "position_mm": [
+        129.159,
+        37.342
+      ],
+      "rotation_deg": -90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 5,
+  "asset_sha256": {
+    "assets/board-views/i2c-carrier-0.1/assembly-front.png": "609d8496e796b5ee81b4ad2ef61c386c3f56d116ea9a23cfe384f51f122cb4e8",
+    "assets/board-views/i2c-carrier-0.1/assembly-back.png": "4ed0d77458a725096601b00cc5c5089e1fd067e6f27d40f40c2f595ef5427912",
+    "assets/images/i2c-carrier-assembly/page-01-view-1.png": "8171c5e5dbf494eba83c2e40c8ee3d8c889640fae98abd86a670c8b8d4d0ceb7",
+    "assets/board-views/i2c-carrier-0.1/3d-back.png": "9207ebfeff794779a88d82165c7e7ac7c2d3d0116331d924a3d408feb3cf8059"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

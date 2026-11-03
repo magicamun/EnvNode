@@ -270,6 +270,7 @@ void ConfigurationService::loadFromPreferences() {
         configuration_.display.hardware.enabled = false;
         configuration_.display.secondHardware.enabled = false;
     }
+
 }
 
 void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
@@ -486,6 +487,7 @@ void ConfigurationService::validateConfiguration() {
 }
 
 void ConfigurationService::loadConfiguration() {
+    loadingConfiguration_ = true;
     initializeDefaults();
     ensurePreferencesStarted();
     const size_t length = storage_.preferences().getBytesLength("cfg_snapshot");
@@ -497,6 +499,21 @@ void ConfigurationService::loadConfiguration() {
             && validateRestore(*candidate)) configuration_ = *candidate;
     }
     loadFromPreferences();
+    loadingConfiguration_ = false;
+    // Preserve saved settings, but never initialize a manual driver on a module port.
+    if (moduleOwnsHardware_) {
+        for (auto& slot : configuration_.sensorSlots)
+            if (moduleOwnsHardware_(slot.hardware)) { slot.enabled = false; slot.schedule.enabled = false; }
+        for (auto& slot : configuration_.actuatorSlots)
+            if (!validModuleActuatorReference(slot.moduleTarget) && moduleOwnsHardware_(slot.hardware))
+                slot.enabled = false;
+    }
+    if (moduleOwnsHardware_) {
+        auto& first = configuration_.display.hardware;
+        auto& second = configuration_.display.secondHardware;
+        if (moduleOwnsHardware_(HardwareResourceAssignment::i2cResource(I2CResource(first.bus,first.address)))) first.enabled = false;
+        if (moduleOwnsHardware_(HardwareResourceAssignment::i2cResource(I2CResource(second.bus,second.address)))) second.enabled = false;
+    }
     validateConfiguration();
 }
 
@@ -919,6 +936,10 @@ bool ConfigurationService::validateHardwareOccupancy(
         claims[claimIndex++] = HardwareResourceClaim(hardware.enabled,
             HardwareResourceAssignment::i2cResource(I2CResource(hardware.bus, hardware.address)));
     }
+    if (moduleOwnsHardware_ && !loadingConfiguration_) {
+        for (size_t index = 0; index < claimIndex; ++index)
+            if (claims[index].active && moduleOwnsHardware_(claims[index].assignment)) return false;
+    }
     const auto& sd=sdStorage==nullptr ? configuration_.sdStorage : *sdStorage;
     if(sd.slot!=ModuleSlot::A && sd.slot!=ModuleSlot::B) return false;
     if(sd.enabled) {
@@ -926,7 +947,6 @@ bool ConfigurationService::validateHardwareOccupancy(
         if(!slot || !slot->fiveVoltSupplyAvailable) return false;
         const uint8_t pins[]={18,19,23,slot->spiChipSelect.number,slot->auxGpio1.number};
         for(uint8_t pin:pins) claims[claimIndex++]=HardwareResourceClaim(true,HardwareResourceAssignment::gpioResource(GpioResource(pin)));
-    }
     return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
 

@@ -34,9 +34,12 @@ enum class BoardIdentityStatus : uint8_t {
     UnassignedSerial,
 };
 
+const char* boardIdentityStatusName(BoardIdentityStatus status);
+
 bool isKnownBoardProfileId(uint16_t encodedId);
 bool decodeBoardProfileId(uint16_t encodedId, BoardProfileId& profileId);
 uint16_t encodeBoardProfileId(BoardProfileId profileId);
+BoardIdentityStatus validateBoardIdentityStructure(const BoardIdentity& identity);
 BoardIdentityStatus validateBoardIdentity(const BoardIdentity& identity);
 bool isValidBoardSerialNumber(const char* serialNumber);
 bool setBoardSerialNumber(BoardSerialNumber& target, const char* serialNumber);

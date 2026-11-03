@@ -14,6 +14,7 @@ public:
         HardwareDescriptorStore& slotBStore,
         ModuleDiscoveryService& discoveryService);
 
+    bool snapshot(ModuleSlot slot,ProvisioningSnapshot& out) { auto* s=store(slot);return s&&s->snapshot(out,slot); }
     ModuleDescriptorProvisioningResult provision(
         ModuleSlot slot,
         const uint8_t* payload,
@@ -25,7 +26,6 @@ private:
 
     HardwareDescriptorStore* stores_[ModuleDiscoveryService::SlotCount];
     ModuleDiscoveryService& discoveryService_;
-    HardwareDescriptor descriptorScratch_ = {};
 };
 
 

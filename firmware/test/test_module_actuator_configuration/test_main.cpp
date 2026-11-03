@@ -149,8 +149,36 @@ void test_reset_defaults_clears_module_binding() {
     reloaded.loadConfiguration();
     TEST_ASSERT_FALSE(validModuleActuatorReference(reloaded.getConfiguration().actuatorSlots[0].moduleTarget));
 }
+void test_unsupported_module_ports_reject_manual_configuration_and_survive_reload() {
+    Fixture f;
+    auto manual = f.config.getConfiguration().actuatorSlots[1];
+    manual.enabled = true;
+    manual.implementation = ActuatorImplementation::GpioOnOff;
+    manual.hardware = HardwareResourceAssignment::gpioResource(GpioResource(16));
+    TEST_ASSERT_TRUE(f.config.setActuatorSlotConfiguration(manual));
+    auto occupied = [](const HardwareResourceAssignment& hardware) {
+        return hardware.kind == HardwareResourceKind::GPIO && hardware.gpio.number == 16;
+    };
+    auto unrelated = f.config.getConfiguration().actuatorSlots[2];
+    unrelated.enabled = true;
+    unrelated.implementation = ActuatorImplementation::GpioOnOff;
+    unrelated.hardware = HardwareResourceAssignment::gpioResource(GpioResource(17));
+    TEST_ASSERT_TRUE(f.config.setActuatorSlotConfiguration(unrelated));
+    f.config.setModuleHardwareResolver(occupied);
+    TEST_ASSERT_FALSE(f.config.setActuatorSlotConfiguration(manual));
+    ConfigurationService reloaded;
+    reloaded.setModuleHardwareResolver(occupied);
+    reloaded.loadConfiguration();
+    TEST_ASSERT_FALSE(reloaded.getConfiguration().actuatorSlots[1].enabled);
+    TEST_ASSERT_TRUE(reloaded.getConfiguration().actuatorSlots[2].enabled);
+    TEST_ASSERT_EQUAL_UINT(17, reloaded.getConfiguration().actuatorSlots[2].hardware.gpio.number);
+    ConfigurationService withoutModule;
+    withoutModule.loadConfiguration();
+    TEST_ASSERT_TRUE(withoutModule.getConfiguration().actuatorSlots[1].enabled);
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_unsupported_module_ports_reject_manual_configuration_and_survive_reload);
     RUN_TEST(test_persistence_and_validation);
     RUN_TEST(test_disabled_module_is_not_recreated_and_can_be_enabled);
     RUN_TEST(test_absent_module_does_not_create_gpio_actuator);

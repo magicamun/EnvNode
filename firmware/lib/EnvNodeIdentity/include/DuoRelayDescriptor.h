@@ -4,15 +4,11 @@
 #include <cstdint>
 
 #include "CompactCborCodec.h"
+#include "ModuleManufacturingData.h"
 
 namespace EnvNode {
 
-struct DuoRelayDescriptorManufacturingData {
-    uint8_t instanceId[16] = {};
-    const char* serialNumber = nullptr;
-    const char* productionBatch = nullptr;
-    const char* productionDate = nullptr;
-};
+using DuoRelayDescriptorManufacturingData = ModuleManufacturingData;
 
 class DuoRelayDescriptor {
 public:

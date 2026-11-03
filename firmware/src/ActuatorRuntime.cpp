@@ -40,6 +40,7 @@ bool ActuatorRuntime::configureAutomaticActuators(
 }
 
 bool ActuatorRuntime::moduleOwnsHardware(const HardwareResourceAssignment& hardware) const {
+    if (moduleHardwareResolver_ && moduleHardwareResolver_(hardware)) return true;
     for (size_t index = 0; index < automaticActuatorCount_; ++index) {
         if (exclusiveHardwareResourceConflict(automaticActuators_[index].hardware, hardware))
             return true;

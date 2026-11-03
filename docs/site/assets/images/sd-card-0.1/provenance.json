@@ -1,0 +1,22 @@
+{
+  "board": "SD-Card",
+  "hardware_revision": "0.1",
+  "checkout": "sd-card",
+  "commit": "282c399b9bef1744dfd031a46b8cad6a5ce633d4",
+  "source_sha256": {
+    "SD-Card.kicad_pcb": "921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263",
+    "SD-Card.kicad_pro": "a6a0ad3618d6b37a8107e90e379fb8352f686f7dfbcc59cbfb1007bd9ea17790",
+    "SD-Card.kicad_sch": "5b895697d2029cb90ace31d83af0bd9834d58d8a03e8c1bf3db7c6a96964d22c"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "b86cfd4e9f2a3d42fc2e9f891ac1b1a8e6ef471baff23da0e6d51cd486991a9d",
+    "bottom.png": "e5684977ba3f3100efa970df98305636bd970b225f2ada627869976406f826ed"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

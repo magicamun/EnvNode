@@ -1,0 +1,415 @@
+{
+  "id": "weatherstation-0.2.1",
+  "guide": "mainboards/weatherstation/revisions/0.2.1.md",
+  "pcb_source": "ff906605036ccac222eda68e9d515e630a9cae6c:hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
+  "pcb_sha256": "03522844fad0329562dca237da38add60c2cfe2100cccc07ab42ce9277234f69",
+  "back_components": [],
+  "hero": {
+    "front": "assets/images/weather-assembly/page-03-view-2.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/weatherstation-0.2.1/assembly-front.png",
+      "png_size_px": [
+        2213,
+        1841
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ]
+    }
+  },
+  "footprints": [
+    {
+      "reference": "JP4",
+      "value": "Open",
+      "side": "F.Cu",
+      "position_mm": [
+        142.735,
+        66.9
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R3",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        137.095,
+        71.98
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R2",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        131.455,
+        71.98
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "JP2",
+      "value": "Open",
+      "side": "F.Cu",
+      "position_mm": [
+        131.455,
+        66.9
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "JP1",
+      "value": "Open",
+      "side": "F.Cu",
+      "position_mm": [
+        125.815,
+        66.9
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "I2C0_2",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        75.793571
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_02x07_Odd_Even",
+      "side": "F.Cu",
+      "position_mm": [
+        126.69,
+        81.19
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "H5",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        54.94
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H2",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        134.31,
+        135.11
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "GPIO14",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        113.16,
+        55.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "I2C1_3",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        117.486429
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "ADC1",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        68.17,
+        101.35925
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "U2",
+      "value": "24LC32",
+      "side": "F.Cu",
+      "position_mm": [
+        91.948,
+        69.599759
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "C1",
+      "value": "100nF",
+      "side": "F.Cu",
+      "position_mm": [
+        84.694794,
+        106.474259
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H6",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        138.34
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U3",
+      "value": "ESP32-DevKitC",
+      "side": "F.Cu",
+      "position_mm": [
+        79.248,
+        60.706
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "ADC3",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        68.17,
+        83.845917
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "I2C0_1",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        67.455
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H3",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        63.73,
+        54.94
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "GPIO16",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        120.926,
+        55.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "JP3",
+      "value": "Open",
+      "side": "F.Cu",
+      "position_mm": [
+        137.095,
+        66.9
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R1",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        125.815,
+        71.98
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "GPIO17",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        128.692,
+        55.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R4",
+      "value": "4,7 kOhm",
+      "side": "F.Cu",
+      "position_mm": [
+        142.735,
+        71.98
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "I2C0_4",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        92.470714
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "I2C0_3",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        84.132143
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "I2C1_1",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        100.809286
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "H4",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        63.73,
+        138.34
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "ADC2",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        68.17,
+        92.602583
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole",
+      "side": "F.Cu",
+      "position_mm": [
+        134.31,
+        103.11
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "I2C1_4",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        125.825
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "ADC4",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        68.17,
+        75.08925
+      ],
+      "rotation_deg": 180
+    },
+    {
+      "reference": "GPIO27",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        136.458,
+        55.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "GPIO4",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        151.99,
+        55.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "GPIO32",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        144.224,
+        55.23
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "I2C1_2",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        161.73,
+        109.147857
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "U1",
+      "value": "ORingPower_Module",
+      "side": "F.Cu",
+      "position_mm": [
+        91.795,
+        135.068
+      ],
+      "rotation_deg": 0
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 25,
+  "asset_sha256": {
+    "assets/board-views/weatherstation-0.2.1/assembly-front.png": "cdfda2489e4b9b9bc6754eaf64539984abda31ff28c0b143398da84dac58cf61",
+    "assets/images/weather-assembly/page-03-view-2.png": "cd62e6e5987ce8486c75c01efa068f0c70506f50388a85d0f214e50215805d6e"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

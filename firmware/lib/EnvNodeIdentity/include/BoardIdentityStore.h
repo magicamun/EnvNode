@@ -1,4 +1,5 @@
 #pragma once
+#include "ProvisioningSnapshot.h"
 
 #include "BoardIdentityCodec.h"
 #include "IBoardIdentityStorage.h"
@@ -23,8 +24,9 @@ class BoardIdentityStore {
 public:
     explicit BoardIdentityStore(IBoardIdentityStorage& storage);
 
-    BoardIdentityReadResult read();
-    BoardIdentityWriteStatus write(const BoardIdentity& identity);
+    BoardIdentityReadResult read(bool requireKnownProfile = true);
+    bool snapshot(ProvisioningSnapshot&);
+    BoardIdentityWriteStatus write(const BoardIdentity& identity, bool requireKnownProfile = true);
 
 private:
     IBoardIdentityStorage& storage_;

@@ -1,0 +1,124 @@
+# Gemeinsame Hardwareprofile
+
+EnvNode-eigene Inhalte unterliegen der Repository-LICENSE
+(LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+
+## Verbindliche Trennung
+
+Ein Profil beschreibt die physische Hardware. Provisioning benötigt das unterstützte
+EEPROM-Format, jedoch keine Betriebstreiber. `minimumRuntimeFirmwareVersion` bzw.
+`compatibility.minimumFirmwareVersion` im ENHD-Deskriptor gilt ausschließlich für
+Betrieb. Auch eine Firmware, die ein Modul niemals betreiben wird, darf dessen
+validen Datensatz schreiben. Fehlende Treiber bleiben unabhängig von einer
+Versionsnummer ein Grund, das Modul nicht zu aktivieren.
+
+Nach dem Schreiben werden Speicherintegrität und Wiedererkennung geprüft.
+`Success` bedeutet erfolgreich provisioniert; `compatibilityStatus` beschreibt
+separat die Nutzbarkeit. Eine höhere Mindestversion oder ein fehlender Treiber
+führt nicht zu einem Schreibfehler.
+
+## Eine gepflegte Quelle
+
+`firmware/hardware-profiles/*.json` enthält die fünf vorhandenen Boardrevisionen:
+Mainboard 0.3, Weather 0.2/0.3 und Mini 0.8/0.9. Jeder Datensatz verbindet:
+
+- Identität und Revision;
+- Provisioning-Bus/-Adresse und Capability-/GPIO-Zuordnung einschließlich Slots;
+- SPI- und I²C-Zuordnung;
+- Mindestversion für den Normalbetrieb;
+- Bild-URL und vollständige Testdefinition, soweit vorhanden.
+
+Mainboard 0.3 hat bisher keine Anschlussprüfdefinition und kein zugehöriges
+Prüfprofilbild; beide Felder bleiben ausdrücklich `null`. Die initiale
+Betriebsmindestversion der migrierten Boarddatensätze ist konservativ 0.8.2,
+der dokumentierte gemeinsame Unterstützungsstand. Dies ist keine nachträgliche
+Behauptung über die allererste historisch lauffähige Firmwareversion.
+
+Die SVG-Quellen liegen unter `firmware/hardware-profiles/images/`.
+`testGeneration` hält die Herkunft der PCB-Auswertung fest. Die vorhandene
+PCB-Extraktionsfunktion bleibt als Werkzeug erhalten; reguläres Generieren liest
+die gemeinsamen Datensätze und benötigt weder KiCad noch fremde Arbeitskopien.
+Bei Hardwareänderungen sind GPIO-Zuordnung und Anschlussprüfdaten gemeinsam zu
+prüfen; die Zusammenführung ersetzt keine elektrische Validierung.
+
+```sh
+python3 firmware/scripts/generate_hardware_profiles.py
+python3 firmware/scripts/generate_hardware_profiles.py --check
+```
+
+Dieser eine Aufruf erzeugt Firmwaretabellen, Identitätskatalog,
+JSON-Downloads unter `docs/site/assets/hardware/v1/` und die bisherigen
+Tester-CBOR-/C++-/Bilddateien. Generierte Tabellen und Dateien nicht separat
+pflegen. Die veröffentlichten Tester-v1-Dateien bleiben bytegleich.
+Dateinamen der neuen JSON-Datensätze enthalten ihren SHA-256; der Katalog referenziert
+sie. Diese Dateien werden erst mit einem regulären Docs-Deployment öffentlich.
+
+## Physische Belegung und Anzeige
+
+Erkannte, valide Moduldeskriptoren reservieren die genannten AUX-/CS-Ports auch
+bei `FirmwareTooOld`, `MissingDriver` oder anderer fehlender Betriebsunterstützung.
+SPI-Anforderungen reservieren zusätzlich die drei Buspins aus dem Boardprofil.
+I²C-Anforderungen mit `properties.address` reservieren die jeweilige Busadresse;
+weitere Adressen auf demselben I²C-Bus bleiben verfügbar. Die EEPROM-Adresse eines
+erkannten Moduls ist ebenfalls reserviert.
+
+Die GPIO-Auswahl in Sensor- und Aktorformularen filtert diese Belegung. Die
+Konfigurationsvalidierung schützt zusätzlich direkte Schreibaufrufe und
+Backup-Restore. Beim Laden werden kollidierende manuelle Sensoren/Aktoren im
+RAM deaktiviert; die gespeicherte Konfiguration bleibt für den Fall erhalten,
+dass das Modul später entfernt wird. Deskriptorbasierte Aktoren werden weiterhin
+nur bei vorhandener Betriebsunterstützung erzeugt.
+
+Die Hardwareübersicht zeigt erkannte Module, deren Betriebsstatus und die
+benötigte Firmwareversion. Geräte eines nicht unterstützten Moduls bleiben im
+Inventar sichtbar. Beide Provisioning-Formulare beziehen Boarddaten und
+Mindestversion aus demselben Katalog. Die normale Firmware zeigt das Profilbild
+per HTTPS, der Tester behält zusätzlich seine bestehende Offline-Bildansicht.
+
+## EEPROM und noch ausstehende Integration
+
+ENID und ENHD 0.1 bleiben erhalten. Zusätzlich speichert Board-Provisioning jetzt
+**ENPM 1** in zwei wechselweise geschriebenen Bereichen des Board-EEPROMs. ENPM
+enthält die konkrete Port-/GPIO-Zuordnung, I²C- und SPI-Pins, Modulslots,
+Boardfamilie, Revision, Seriennummer und Betriebsmindestversion. Bilder und
+Testdaten bleiben außerhalb des EEPROMs.
+
+Die normale Firmware liest ENPM beim Start über den festen Identitätsbus und
+rekonstruiert ihre Ressourcen daraus, auch für eine noch nicht eingebaute
+Boardfamilie oder Revision. Eine gültige bisherige ENID-Identität ohne ENPM nutzt
+weiter die eingebauten Tabellen. Der Start schreibt das EEPROM nicht automatisch
+um. Erneutes Provisioning über normale Firmware oder Tester schreibt zunächst
+ENPM, anschließend ENID; beide Datensätze müssen am Ende übereinstimmen.
+
+Eine beschädigte, unbekannte oder nicht zur Identität passende Portzuordnung
+sperrt den Hardwarestart. Ebenso werden physisch ungeeignete ESP32-Pins oder eine
+zu hohe Betriebsmindestversion erst beim Start abgelehnt; das Provisioning selbst
+benötigt diese Betriebsunterstützung nicht. Die normale GPIO-/Businitialisierung folgt erst nach erfolgreicher Prüfung;
+I²C0 wird vorher ausschließlich zum Lesen der Identität gestartet. Das ESP32-Laufzeitmodell kopiert alle Daten in
+eigenen Speicher und benötigt danach weder Download noch Profilpuffer.
+
+Format, Schreibreihenfolge und Ausfallverhalten sind in
+[ADR 0015](adr/0015-self-contained-board-port-map.md) festgelegt.
+
+## Gemeinsamer Remote-Import
+
+Seit EnvNode 0.8.3 / Testboard 0.8.0 importieren beide Anwendungen denselben
+binären Provisioning-Katalog. Der normale EnvNode behält seine Hardwareverwaltung,
+der Tester seinen eigenen Provisioning-Einstieg. Bilder, Mindestversionen und
+EEPROM-Vorlagen kommen aus den gemeinsamen Datensätzen. Bestehende eingebaute
+Formulare und der bisherige Tester-v1-Prüfkatalog bleiben verfügbar.
+
+Der generische Modul-Encoder ergänzt nur die individuelle UUID und
+Herstellungsdaten; Produktdefinition, Treiberanforderungen und unbekannte
+Descriptor-Felder bleiben unverändert. Auch die eingebaute DuoRelay-Vorlage wird
+jetzt aus dem gemeinsamen Modulprofil erzeugt. SD und SX1262-Remote sind noch
+keine veröffentlichten Produktprofile; ihre zukünftigen Definitionen benötigen
+keine fest eingebaute Produktliste im Importer.
+
+Ablauf, Katalogformat, Offline-Verhalten, Vertrauensmodell und Veröffentlichung
+stehen in [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).
+
+Ab EnvNode 0.8.4 / Testboard 0.8.1 übernimmt der Browser den HTTPS-Abruf und
+die SHA-256-Prüfung. Die Firmware validiert den begrenzten Upload und schreibt
+weiterhin über dieselben EEPROM-Pfade. Der Browserclient wird mit SRI vom
+Dokumentationshost geladen; eingebaute Formulare bleiben lokal verfügbar.

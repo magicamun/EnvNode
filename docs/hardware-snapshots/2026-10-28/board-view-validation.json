@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-28",
+  "guides": 18,
+  "front_views": 18,
+  "back_views": 12,
+  "placement_plans": 30,
+  "checks": [
+    "strict production build with 17 PDFs",
+    "strict HTML preview with saved PDF references",
+    "3D chapter before parts in all 18 guides",
+    "back views iff PCB has back components",
+    "orthographic native KiCad PNGs without component models",
+    "original copper, solder mask and silkscreen retained",
+    "PNG/hero hashes verified",
+    "exact current and historical PCB source hashes unchanged",
+    "generated local links/images/anchors verified",
+    "PDF page montages inspected"
+  ],
+  "boards": [
+    {
+      "id": "mini-0.9.0",
+      "pcb_sha256": "dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105"
+    },
+    {
+      "id": "weatherstation-0.3.0",
+      "pcb_sha256": "283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf"
+    },
+    {
+      "id": "analog-0.6",
+      "pcb_sha256": "922c80698c3d7b888f5c7f905ecb3e3dfc0098ac6227a8902e95c6f52a30463a"
+    },
+    {
+      "id": "sd-card-0.1",
+      "pcb_sha256": "921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263"
+    },
+    {
+      "id": "rain-controller-0.4",
+      "pcb_sha256": "b793f10c10ec03b201e0514d98e5ed5e4c8befd761ada973139d5f0c5d8845b4"
+    },
+    {
+      "id": "rain-head-0.2",
+      "pcb_sha256": "6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438"
+    },
+    {
+      "id": "test-controller-0.1",
+      "pcb_sha256": "bb6f4f2f0c016539785691c14dda86cc97bd94ba72e7a92f6113fda60ea6bf07"
+    },
+    {
+      "id": "input-adapter-0.1",
+      "pcb_sha256": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c"
+    },
+    {
+      "id": "module-adapter-0.1",
+      "pcb_sha256": "92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1"
+    },
+    {
+      "id": "duo-relay-0.3",
+      "pcb_sha256": "9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac"
+    },
+    {
+      "id": "oring-power-0.1.1",
+      "pcb_sha256": "df83af34ffdeca74bf51baeb2a5b21115ba8f441d49b31c917e56db63b5332e1"
+    },
+    {
+      "id": "i2c-carrier-0.1",
+      "pcb_sha256": "b71e5b0ad27786db08d27ee1dfaf55b7bfcc75347c856eb36445d8a2ec0e7dae"
+    },
+    {
+      "id": "sct013-head-0.1",
+      "pcb_sha256": "5361e2f392efc484dd3522dd2f4c0fc8d85c413e14519de21736decc2d476a8e"
+    },
+    {
+      "id": "mini-0.8.1",
+      "pcb_sha256": "2e364ea20551036751df5349409bbd5b25c72e8f0e5c8e0cb863ebe0561dfbbf"
+    },
+    {
+      "id": "weatherstation-0.2.1",
+      "pcb_sha256": "03522844fad0329562dca237da38add60c2cfe2100cccc07ab42ce9277234f69"
+    },
+    {
+      "id": "analog-0.5",
+      "pcb_sha256": "593013c4576161ed076c4f8a136ea8c3ed478ddf798b3796247990af6e96c141"
+    },
+    {
+      "id": "rain-controller-0.3",
+      "pcb_sha256": "3f664c0ba8eff0be254e0d38d4aedced9a44d7f3a09e9f7640c9339b8c96e7b3"
+    },
+    {
+      "id": "rain-head-0.1",
+      "pcb_sha256": "bce7ef51f4623b5106ef02c49918cc21bae779a78ca59a78d71062c690db6b50"
+    }
+  ]
+}

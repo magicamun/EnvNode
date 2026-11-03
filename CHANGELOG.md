@@ -2,7 +2,89 @@
 
 ## Unreleased
 
+### Added
+
+- EnvNode 0.8.6 / Testboard 0.8.3: display freshly read board/module EEPROM
+  identity and manufacturing fields beside the planned write. Add explicit
+  refresh/adoption and a before/after summary. Re-read and compare the complete
+  selected EEPROM before dialog writes; refuse changed/unavailable targets with
+  HTTP 409, retain entered data and require review and confirmation again.
+
+
+- EnvNode 0.8.5 / Testboard 0.8.2: share one provisioning dialog with filtered
+  Board/Module selection, matching image, common serial/batch/date fields and
+  explicit target-specific write action. Merge matching online and built-in
+  profiles in one list while retaining offline provisioning and legacy POST APIs.
+- Store board batch/date in ENPM payload v2 with verified readback; retain v1
+  reads and byte-identical v1 writes without batch/date. Report the effective
+  minimum runtime version 0.8.5 when board manufacturing extensions are used.
+
+
+- EnvNode 0.8.4 / Testboard 0.8.1: move provisioning HTTPS downloads and
+  SHA-256 verification into the browser, load its client with SRI, and validate
+  bounded local uploads before the existing EEPROM write. Recover normal
+  firmware flash by removing the provisioning TLS transport; preserve local
+  forms and the separate tester connection-profile downloader.
+
+- EnvNode 0.8.3 / Testboard 0.8.0: load one shared, hash-bound provisioning
+  catalog for boards and modules over verified HTTPS. Preserve the separate
+  tester menu and EnvNode hardware administration; show images and minimum
+  runtime versions without gating EEPROM writes on driver support.
+- Persist self-contained board port maps in verified ENPM dual-bank storage,
+  preserve legacy ENID identities, and reserve module resources even when the
+  installed firmware cannot operate the module. Keep built-in provisioning
+  profiles available offline and derive the DuoRelay fallback from the same
+  source as its downloadable template.
+
+- EnvNode 0.8.2 / Testboard 0.7.0: share manufacturing revision metadata, support
+  Mini 0.9 and Weather 0.3 beside their predecessors, select the exact EEPROM
+  revision at startup and provide explicit revision-specific provisioning forms.
+  Preserve numeric-ID API defaults and configuration; show the matching board
+  image in tester provisioning without writing on selection.
+- Testboard 0.6.0: add 40-input Mini 0.9/Weather 0.3 test profiles, verified HTTPS
+  remote catalogs and compact profiles, built-in fallback and browser-loaded SVGs.
+- Testboard 0.5.0: verified external board provisioning on dedicated GPIO16/5.
+- Testboard 0.4.0: split-fixture routing derived from PCB data and 40-input support.
+
+- Split the fixture hardware into Test-Controller, Input-Adapter and Module-Adapter,
+  with verified cable/GPIO/multiplexer contracts in their READMEs. Retire the
+  monolithic Test-Provisioning project; preserve its final state in Git history.
+  Support 38 socket contacts plus two independent protected reference inputs.
+
+- Testboard 0.3.2: omit component values from rendered board views while keeping
+  reference designators; record centrally downloadable profiles as future work.
+
+- Testboard 0.3.1: remove automatic Check all simulation and its API action;
+  retain operator-confirmed connector tests and Mini PCB 0.8.1.
+
+- Testboard 0.3.0: Check all for a complete simulated run, with automatic virtual
+  reconnection, fixed fault selection, abort and preserved incomplete-coverage results.
+- Testboard 0.2.2: add Mini 0.8 / PCB 0.8.1 with revision-specific mapping, drawing
+  and explicit Net-Tie resolution.
+
+- Testboard 0.2.1: use the connector list to select and inspect any connector
+  whenever measurement is idle, retain full per-connector matrices, and retest
+  individual connectors without clearing other results. Lock selection while
+  running and let Next continue with the next untested connector.
+
+- Guided simulated connector testing in testboard firmware 0.2.0: load Weather
+  0.2 / PCB 0.2.1, confirm one pigtail connection at a time, compare each contact
+  against all 38 socket pads and show board LEDs plus a full result matrix.
+  Derive direct-net expectations and positions reproducibly from KiCad. Mark
+  unmatched +3V3_SYS contacts as incomplete coverage instead of passing them.
+
+- Independent `testboard` firmware build (initial version 0.1.0), with shared
+  network/setup, device/time/locale settings, logs, OTA and explicit restart.
+  Keep fixture settings/reset separate from EnvNode and select each application's
+  sources, dependencies and version header independently. Connector test and
+  EEPROM-provisioning engines remain future work.
+
 ### Documentation and repository maintenance
+
+- Add versioned EnvNode and Tester OTA downloads to the documentation, with
+  curated release summaries, commit identity and SHA-256. Keep the latest build
+  per target/version in GitHub Releases and name local images by target/version.
+  Export normal local OTA builds to the visible firmware/bin directory.
 
 - Remove the former central parts spreadsheet, legacy BOM files and local order
   records. Article master data, purchasing, inventory and kit BOMs are maintained

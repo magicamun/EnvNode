@@ -222,8 +222,53 @@ void test_storage_failure_is_reported() {
         static_cast<int>(result.status));
 }
 
+void test_future_firmware_module_is_provisioned_and_reserves_ports() {
+    Fixture fixture;
+    uint8_t payload[1024];
+    const size_t size = buildDuoRelay(payload, sizeof(payload));
+    // Change the encoded minimum from 0.5.0 to 9.5.0, keeping valid CBOR.
+    const uint8_t version[] = {15, 0x83, 0, 5, 0};
+    bool changed = false;
+    for (size_t i = 0; i + sizeof(version) <= size; ++i) {
+        if (memcmp(payload + i, version, sizeof(version)) == 0) {
+            payload[i + 2] = 9; changed = true; break;
+        }
+    }
+    TEST_ASSERT_TRUE(changed);
+    const auto result = fixture.provisioning.provision(ModuleSlot::A, payload, size, true);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ModuleDescriptorProvisioningStatus::Success), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareDescriptorCompatibilityStatus::FirmwareTooOld), static_cast<int>(result.compatibilityStatus));
+    const auto* module = fixture.discovery.result(ModuleSlot::A);
+    TEST_ASSERT_TRUE(module->identified());
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareDescriptorCompatibilityStatus::FirmwareTooOld), static_cast<int>(module->descriptorCompatibility));
+    TEST_ASSERT_TRUE(fixture.discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(4))));
+    TEST_ASSERT_TRUE(fixture.discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(13))));
+    TEST_ASSERT_FALSE(fixture.discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(5))));
+}
+
+void test_missing_driver_does_not_prevent_provisioning() {
+    Fixture fixture;
+    uint8_t payload[1024];
+    const size_t size = buildDuoRelay(payload, sizeof(payload));
+    const uint8_t driver[] = {18, 0x81, 0xa2, 20, 1, 21, 1};
+    bool changed = false;
+    for (size_t i = 0; i + sizeof(driver) <= size; ++i) {
+        if (memcmp(payload + i, driver, sizeof(driver)) == 0) {
+            payload[i + 4] = 2; changed = true; break;
+        }
+    }
+    TEST_ASSERT_TRUE(changed);
+    const auto result = fixture.provisioning.provision(ModuleSlot::B, payload, size, true);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(ModuleDescriptorProvisioningStatus::Success), static_cast<int>(result.status));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareDescriptorCompatibilityStatus::MissingDriver), static_cast<int>(result.compatibilityStatus));
+    TEST_ASSERT_TRUE(fixture.discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(14))));
+    TEST_ASSERT_TRUE(fixture.discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(16))));
+}
+
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_future_firmware_module_is_provisioned_and_reserves_ports);
+    RUN_TEST(test_missing_driver_does_not_prevent_provisioning);
     RUN_TEST(test_duo_relay_template_is_deterministic_valid_and_compatible);
     RUN_TEST(test_instance_uuid_is_rfc_9562_version_4);
     RUN_TEST(test_confirmation_is_required_before_descriptor_write);

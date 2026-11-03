@@ -6,14 +6,21 @@
 #include "IProvisioningAdministration.h"
 #include "WebLocalization.h"
 #include "Logger.h"
+#include "HardwareProfileRepository.h"
 namespace EnvNode {
+struct ProvisioningWebOptions {
+    bool externalTarget = false;
+    bool modules = true;
+    std::function<bool()> available;
+};
 class HardwareProvisioningWebRoutes : public IWebRoutes {
 public:
     using Overview = std::function<String()>;
     using Random = std::function<void(uint8_t*, size_t)>;
     HardwareProvisioningWebRoutes(WebServer& server, IWebPagePresenter& pages,
         ILogger& logger, IProvisioningAdministration& administration,
-        Overview overview, Random random);
+        Overview overview, Random random, ProvisioningWebOptions options = {});
+    bool enableRemoteProfiles();
     void registerRoutes(WebServer& server) override;
 private:
     const char* uiText(TextId id) const;
@@ -28,5 +35,13 @@ private:
     IProvisioningAdministration& administration_;
     Overview overview_;
     Random random_;
+    ProvisioningWebOptions options_;
+    bool operationAllowed();
+    String remoteProfilesSection();
+    void handleRemoteProfileWrite();
+    void handleProfileState();
+    void handleEepromSnapshot();
+    bool verifySnapshot(bool module,ModuleSlot slot);
+    bool remoteProfilesEnabled_ = false;
 };
 }

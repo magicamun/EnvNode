@@ -1,0 +1,28 @@
+{
+  "board": "EnvNode Mini",
+  "hardware_revision": "0.9.0",
+  "checkout": "main",
+  "commit": "ff906605036ccac222eda68e9d515e630a9cae6c",
+  "source_sha256": {
+    "ADC.kicad_sch": "ff48076ff5b82145a34fdf95a253e811a9e1ee4cfc0862605f8838f099209a8e",
+    "ESP32Core.kicad_sch": "bf94fd4b7574112858502d14253b375606cfb2127f8e3209d7c1e6a214dbca3c",
+    "EnvNode Mini.kicad_pcb": "dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105",
+    "EnvNode Mini.kicad_pro": "a661c4137794305c178d1c2fb949855dc6e34a1d8023b7b6eb5cf200f9dab77a",
+    "EnvNode Mini.kicad_sch": "45d7af2e59a0f6668a6372a5ece9d94c20ad248f669ff8589a1a6c61c9e9a178",
+    "PCB.kicad_sch": "ed19908459ebba8a0c0957a70928c7e5f7a28a7906c4574dc2a22a69e9126551",
+    "Power.kicad_sch": "e31c045d9ccf359a5704e7f459512f885d122886f80038bd971eea93a1a3da0a",
+    "SlotA.kicad_sch": "6acc11c48da4dce5fd633a443f920c35c617c4472b92fc866cc63f65c99d06f2",
+    "SlotB.kicad_sch": "649abacbdd409d99a35778051c58a5466877563ed6fda753ce3fb25c828c579d"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "65a28dfd3eefcefa2b5fb0accdf6f33b68f7e3aa1ff1ed01a5ff0a2159941585",
+    "bottom.png": "5ce3a1d5cba31fd2cc032b494c92c7d238a7603d9012aa2eeef94c9d8ed26d21"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

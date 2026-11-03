@@ -1,4 +1,6 @@
 #include "SdCardSpiDiagnostic.h"
+
+#include "BoardIdentityProfiles.h"
 #include "TextUpload.h"
 #include "WebResult.h"
 #include "InstanceUuidWebText.h"
@@ -446,7 +448,10 @@ void WebService::begin() {
             [this]() { return renderHardwareOverview(); },
             [](uint8_t* bytes, size_t size) { esp_fill_random(bytes, size); }));
     }
-    if (provisioningRoutes_) webHost_.registerRoutes(*provisioningRoutes_);
+    if (provisioningRoutes_) {
+        provisioningRoutes_->enableRemoteProfiles();
+        webHost_.registerRoutes(*provisioningRoutes_);
+    }
     else logger_.error("Insufficient memory to initialize provisioning web routes");
     if (!settingsRoutes_) {
         settingsRoutes_.reset(new (std::nothrow) CommonSettingsWebRoutes(webHost_, *this, *this,
@@ -1548,7 +1553,8 @@ void WebService::handleSensorEdit() {
     const Configuration& configuration = configurationService_.getConfiguration();
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
-        if (gpio == nullptr) continue;
+        if (gpio == nullptr || moduleDiscoveryService_.ownsHardware(
+                HardwareResourceAssignment::gpioResource(gpio->resource))) continue;
         if (gpioAssignedToOtherEnabledSlot(
                 configuration, slot.slotId, InvalidActuatorId, gpio->resource)) {
             continue;
@@ -1647,6 +1653,7 @@ void WebService::handleActuatorEdit() {
     for (size_t index = 0; index < board.gpioCount(); ++index) {
         const BoardGpioCapability* gpio = board.gpioAt(index);
         if (gpio == nullptr
+            || moduleDiscoveryService_.ownsHardware(HardwareResourceAssignment::gpioResource(gpio->resource))
             || actuatorRuntime_.moduleOwnsHardware(HardwareResourceAssignment::gpioResource(gpio->resource))
             || gpioAssignedToOtherEnabledSlot(
                 configuration, InvalidSensorId, slot.slotId, gpio->resource)) {
@@ -1974,7 +1981,8 @@ void WebService::renderDiagnostics() {
                     }
                     if (bus.bus == I2CBus::I2C0 && result.addresses[addressIndex] == 0x50) {
                         c += uiText(TextId::MainboardEEPROM);
-                        if (boardIdentityResolution_.source == BoardIdentitySource::EEPROM) {
+                        if ((boardIdentityResolution_.source == BoardIdentitySource::EEPROM
+                            || boardIdentityResolution_.source == BoardIdentitySource::PortMap)) {
                             const BoardIdentity& identity = boardIdentityResolution_.identity;
                             c += "<br>" + escapeHtml(board.displayName)
                                 + (String(" · ") + uiText(TextId::Revision) + " ") + String(identity.revision.major) + "."
@@ -2480,6 +2488,7 @@ String WebService::renderHardwareOverview() {
     c += (String("<section class='card'><h2>") + uiText(TextId::BoardIdentity) + "</h2><div class='kv'>");
     c += (String("<span>") + uiText(TextId::Source) + "</span><span>") + String(boardIdentitySourceName(boardIdentityResolution_.source)) + "</span>";
     c += (String("<span>") + uiText(TextId::RecordStatus) + "</span><span>") + String(boardIdentityStatusName(boardIdentityResolution_.recordStatus)) + "</span>";
+    c += "<span>ENPM</span><span>" + String(boardPortMapStatusName(boardIdentityResolution_.portMapStatus)) + "</span>";
     c += (String("<span>") + uiText(TextId::BoardProfile) + "</span><span>") + escapeHtml(board.displayName) + "</span>";
     c += (String("<span>") + uiText(TextId::BoardProfileId) + "</span><span>") + String(static_cast<unsigned int>(identity.profileId)) + "</span>";
     c += (String("<span>") + uiText(TextId::HardwareRevision) + "</span><span>") + String(identity.revision.major) + "." + String(identity.revision.minor) + "</span>";
@@ -2530,6 +2539,11 @@ String WebService::renderHardwareOverview() {
         c += moduleDiscoverySourceName(module->source);
         c += "</td><td>";
         c += status;
+        if (module->identified()) {
+            const auto& minimum = module->descriptor.compatibility.minimumFirmwareVersion;
+            c += " · " + String(hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility));
+            c += " · FW ≥ " + String(minimum.major) + "." + String(minimum.minor) + "." + String(minimum.patch);
+        }
         c += "</td><td>" + moduleName + "</td><td>" + revision;
         c += "</td><td class='nowrap'>" + instanceId + "</td><td>" + moduleSerial;
         c += "</td><td>" + productionBatch + "</td><td>" + productionDate + "</td></tr>";
@@ -2543,8 +2557,7 @@ String WebService::renderHardwareOverview() {
     for (size_t slotIndex = 0; slotIndex < ModuleDiscoveryService::SlotCount; ++slotIndex) {
         const ModuleSlot slot = static_cast<ModuleSlot>(slotIndex);
         const ModuleDiscoveryResult* module = moduleDiscoveryService_.result(slot);
-        if (module == nullptr || !module->identified()
-            || module->descriptorCompatibility != HardwareDescriptorCompatibilityStatus::Compatible) {
+        if (module == nullptr || !module->identified()) {
             continue;
         }
         size_t entryCount = 0;
@@ -2594,7 +2607,9 @@ String WebService::renderHardwareOverview() {
             c += " v" + String(entry.driver.apiVersion);
             c += "</td><td>" + capability + "</td><td>" + bindingText;
             c += "</td><td>" + resourceText + "</td><td>" + parameters;
-            c += "</td><td>" + String(moduleDeviceInventoryStatusName(entry.status));
+            c += "</td><td>" + String(module->descriptorCompatibility == HardwareDescriptorCompatibilityStatus::Compatible
+                ? moduleDeviceInventoryStatusName(entry.status)
+                : hardwareDescriptorCompatibilityStatusName(module->descriptorCompatibility));
             c += "</td></tr>";
         }
     }
@@ -2608,18 +2623,24 @@ String WebService::renderHardwareOverview() {
     return c;
 }
 BoardIdentity WebService::provisioningBoardIdentity() const { return boardIdentityResolution_.identity; }
-size_t WebService::provisioningProfileCount() const { return boardProfileCount(); }
+size_t WebService::provisioningProfileCount() const { return boardIdentityProfileCount(); }
 bool WebService::provisioningProfileAt(size_t index, ProvisioningBoardProfile& result) const {
-    const BoardProfile* profile = boardProfileAt(index);
-    if (profile == nullptr) return false;
-    result = {profile->id, profile->displayName, profile->revision};
-    return true;
+    const auto* p=boardIdentityProfileAt(index);
+    if(!p)return false;
+    result={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
 }
 bool WebService::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& result) const {
-    const BoardProfile* profile = boardProfile(id);
-    if (profile == nullptr) return false;
-    result = {profile->id, profile->displayName, profile->revision};
-    return true;
+    const auto* p=defaultBoardIdentityProfile(id);
+    return p && provisioningProfile(id,p->revision,result);
+}
+bool WebService::provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& result) const {
+    const auto* p=boardIdentityProfile(id,revision);
+    if(!p || !boardProfile(id,revision))return false;
+    result={p->id,p->displayName,p->revision,p->minimumRuntimeFirmwareVersion,p->imageUrl};return true;
+}
+BoardProvisioningResult WebService::provisionBoardPortMap(const BoardPortMap& map, bool confirmed) {
+    const BoardIdentity identity={static_cast<BoardProfileId>(map.profileId),map.revision,map.serial};
+    return boardProvisioningService_.provision(identity,confirmed,&map);
 }
 BoardProvisioningResult WebService::provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) {
     return boardProvisioningService_.provision(identity, confirmed);

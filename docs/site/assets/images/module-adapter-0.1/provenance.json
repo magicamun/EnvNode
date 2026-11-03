@@ -1,0 +1,22 @@
+{
+  "board": "Module-Adapter",
+  "hardware_revision": "0.1",
+  "checkout": "test-provision-board",
+  "commit": "08f55b1810812b1deb1e877ef2f7853d0797d5ad",
+  "source_sha256": {
+    "Module-Adapter.kicad_pcb": "92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1",
+    "Module-Adapter.kicad_pro": "b05cd35e919ecc45781aa0d66b834ad57a318423e2fb8da1c2ea52c689cbae0a",
+    "Module-Adapter.kicad_sch": "e32ba198aa4b170ad6ad0eee55a2898b225467d8caefdfbe51abdc62552ece17"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "6e48d57f2b3faacbc9fa5447381a1ee7499ad699a1ed3bf5fec9987cdb28f5c7",
+    "bottom.png": "3615620cfeb144060aec33e5f019e3d65c4817f867aba31766058751c3da3e97"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

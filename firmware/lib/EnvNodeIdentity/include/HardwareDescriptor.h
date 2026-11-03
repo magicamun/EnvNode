@@ -23,7 +23,7 @@ struct DescriptorIdentifier {
 };
 
 struct DescriptorSemanticVersion {
-    DescriptorSemanticVersion(
+    constexpr DescriptorSemanticVersion(
         uint16_t majorValue = 0,
         uint16_t minorValue = 0,
         uint16_t patchValue = 0)
@@ -101,6 +101,8 @@ struct DescriptorRequirement {
     DescriptorTextView id = {};
     DescriptorTextView resource = {};
     HardwareDescriptorResourceKind kind = HardwareDescriptorResourceKind::Gpio;
+    bool hasI2cAddress = false;
+    uint8_t i2cAddress = 0;
     DescriptorCapabilitySet capabilities = {};
 };
 

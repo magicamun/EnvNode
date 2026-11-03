@@ -202,3 +202,74 @@ The final four bytes contain the CRC calculated for that input.
 - `BoardProfileId` assignments remain stable independently of record format versions.
 - Version 2 writers zero-pad unused serial bytes.
 - Readers reject unsupported format versions instead of guessing a compatible layout.
+
+## 8. Self-contained port map (ENPM 1)
+
+ENID remains unchanged at address 0. New board provisioning additionally writes
+ENPM before updating ENID. ENPM banks occupy `0x0100..0x07ff` and
+`0x0800..0x0eff`; bytes `0x0020..0x00ff` and `0x0f00..0x0fff` are preserved.
+Module ENHD storage is unaffected.
+
+The 24-byte little-endian header is:
+
+| Offset | Bytes | Meaning |
+| --- | --- | --- |
+| 0 | 4 | `ENPM`, committed last |
+| 4 | 1 | Format version 1 |
+| 5 | 1 | Header length 24 |
+| 6 | 2 | Payload length, 1..1024 |
+| 8 | 4 | Generation, wraps modulo 2^32 |
+| 12 | 4 | Payload CRC32 |
+| 16 | 4 | CRC32 of header bytes 0..15 |
+| 20 | 4 | Reserved, zero |
+
+Payload uses definite-length canonical CBOR:
+
+```text
+[1, familyId, [revisionMajor, revisionMinor], name,
+ [minimumFwMajor, minimumFwMinor, minimumFwPatch], serial,
+ [[gpio, capabilityMask], ...],
+ [[bus, sda, scl], ...],
+ [[slot, identityAddress, aux1, aux2, chipSelect, fiveVolt], ...],
+ [spiClock, spiMiso, spiMosi]]
+```
+
+Family IDs 0..254 are stable catalog assignments; 255 is reserved. The decoder
+limits GPIOs to 32 entries, I2C buses to two and slots to two. Capability-mask bits
+0..4 are digital input/output, interrupt, internal pull-up and analog input.
+Names are at most 95 bytes, serials retain the ENID limit, and firmware version
+components are unsigned 16-bit integers. Pin numbers 0..254 and nonzero 8-bit
+capability masks are stored without assuming current ESP32 support; runtime
+rejects unsupported pins/bits. I2C bus/slot IDs are 0/1; module identity
+addresses remain 0x52/0x53. The serial in published templates is empty and is
+filled by provisioning.
+
+The generic codec checks structure and bounds. Runtime separately checks the
+ESP32 pin restrictions, fixed I2C0 bootstrap pins 21/22, conflicting bus/slot
+bindings, and minimum firmware. A validated map can therefore be provisioned
+without the current firmware being able to operate it.
+
+A map-aware ENID reader permits unregistered family/revision values only when a
+valid ENPM record matches family, revision and serial. The original strict ENID
+API and legacy ENID-only boot path remain available. A present corrupt, unknown,
+unreadable or mismatched map blocks hardware initialization; it never silently
+selects a compiled profile. Older firmware retains its original strict ENID
+validation and rejects an unknown family/revision.
+
+See [ADR 0015](adr/0015-self-contained-board-port-map.md) for failure handling.
+
+### ENPM manufacturing extension (EnvNode 0.8.5)
+
+The bank header remains format 1. Payload version 2 is an eleven-element array:
+all version-1 fields in the same order, the first element changed to `2`, and
+`[productionBatch, productionDate]` appended. Batch is at most 64 bytes and date
+at most 10 bytes; both are optional, bounded, NUL-terminated in memory and reject
+control characters. Serial retains the ENID limit of 17 characters.
+
+Writers emit v2 only when batch or date is nonempty, raising the stored minimum
+firmware to at least 0.8.5. Otherwise they preserve byte-identical v1 encoding.
+New readers accept both shapes strictly; unsupported shapes/versions and trailing
+bytes fail closed. Earlier ENPM readers cannot operate a v2-provisioned board;
+use EnvNode 0.8.5 or newer. Existing v1 EEPROM data needs no migration. The dual-bank
+commit and full CRC/byte readback cover manufacturing data together with the map.
+Published board templates keep all individual manufacturing fields empty.

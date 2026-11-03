@@ -1,0 +1,133 @@
+{
+  "date": "2026-10-28",
+  "checks": [
+    "mkdocs build --strict",
+    "generated local links/images/anchors",
+    "A4 PDF format and required text",
+    "PDF source and image provenance",
+    "nine PCB/schematic pad-net comparisons",
+    "30 orthographic bare PCB renderings visually inspected",
+    "changed plan pages in all 17 PDF editions visually inspected"
+  ],
+  "documents": [
+    {
+      "source": "modules/duo-relay/index.md",
+      "pdf": "docs/pdf/reference/DuoRelay_Rev0.3_Anleitung.pdf",
+      "pages": 13,
+      "sha256": "081084189ec12c0a3d3ed3f6f1adc62628c61634e2786bcb351134f5f5bacb22",
+      "archive": false
+    },
+    {
+      "source": "mainboards/mini/revisions/0.8.1.md",
+      "pdf": "docs/pdf/reference/EnvNode_Mini_Rev0.8.1_Anleitung.pdf",
+      "pages": 13,
+      "sha256": "f425180ac09ce2aa64d71c247a6a207cfbe0a2974d47433ea5b222ea9b3b2ec3",
+      "archive": true
+    },
+    {
+      "source": "mainboards/weatherstation/revisions/0.2.1.md",
+      "pdf": "docs/pdf/reference/Weatherstation_Rev0.2.1_Anleitung.pdf",
+      "pages": 15,
+      "sha256": "e9aa762f11a1f395bf6f23d978eced16f4ad579fe92ae7e9289ed0ce7525877c",
+      "archive": true
+    },
+    {
+      "source": "mainboards/oring-power/index.md",
+      "pdf": "docs/pdf/reference/ORing_Power_Rev0.1.1_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "aa65cc59e065c9a45ff6900a49506173a6ad36cccec310893b7ab24c40dc85d9",
+      "archive": false
+    },
+    {
+      "source": "modules/analog-hydro-pressure/revisions/0.5.md",
+      "pdf": "docs/pdf/reference/AnalogHydroPressure_Rev0.5_Anleitung.pdf",
+      "pages": 14,
+      "sha256": "ee312aee90253aa49680779770c473da9fe18b62bcf9ffb9dbefa9a446d41f7e",
+      "archive": true
+    },
+    {
+      "source": "sensors/rain-detector-controller/revisions/0.3.md",
+      "pdf": "docs/pdf/reference/RainDetectorController_Rev0.3_Anleitung.pdf",
+      "pages": 11,
+      "sha256": "89332870d0114809a212aad2011ef5a5b5c20cdd373ac3767df0935fe78f09f0",
+      "archive": true
+    },
+    {
+      "source": "sensors/rain-detector-head/revisions/0.1.md",
+      "pdf": "docs/pdf/reference/RainDetectorHead_Rev0.1_Anleitung.pdf",
+      "pages": 10,
+      "sha256": "49c2a9f679c5d65030a7dd3f45c4e33e40fcfe589dc53dd9044af5c211a7d14c",
+      "archive": true
+    },
+    {
+      "source": "modules/i2c-carrier/assembly.md",
+      "pdf": "docs/pdf/reference/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf",
+      "pages": 5,
+      "sha256": "76638210665ba9a519c9b3c31d145ea8b98f4f99427aca3758918e61fea158e0",
+      "archive": false
+    },
+    {
+      "source": "mainboards/mini/index.md",
+      "pdf": "docs/pdf/reference/EnvNode_Mini_Rev0.9.0_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "3c8debb79abdb460fc4cc07824127f51f1c45b4be53b7b3cf57a8617696b61c7",
+      "archive": false
+    },
+    {
+      "source": "mainboards/weatherstation/index.md",
+      "pdf": "docs/pdf/reference/Weatherstation_Rev0.3.0_Anleitung.pdf",
+      "pages": 13,
+      "sha256": "41fdf62059b4445734d8ba80220cb0ab0d8f2dccac7a9737a445a08b7cf36cc3",
+      "archive": false
+    },
+    {
+      "source": "modules/analog-hydro-pressure/index.md",
+      "pdf": "docs/pdf/reference/AnalogHydroPressure_Rev0.6_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "8a21610582cc7fa5b6aefac2f1b844ba9130008e9c7bf53b6d3fdfdf8e59e785",
+      "archive": false
+    },
+    {
+      "source": "modules/sd-card/index.md",
+      "pdf": "docs/pdf/reference/SD_Card_Rev0.1_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "82d0801b3c6c3ef3f8f96c0ad981220f986d501aece1f05aef89469c395f32f8",
+      "archive": false
+    },
+    {
+      "source": "sensors/rain-detector-controller/assembly.md",
+      "pdf": "docs/pdf/reference/RainDetectorController_Rev0.4_Anleitung.pdf",
+      "pages": 11,
+      "sha256": "d44220a114e6609490d63f9ac3a95cab1be30cdef11d5298d473016e8e724a33",
+      "archive": false
+    },
+    {
+      "source": "sensors/rain-detector-head/assembly.md",
+      "pdf": "docs/pdf/reference/RainDetectorHead_Rev0.2_Anleitung.pdf",
+      "pages": 10,
+      "sha256": "0861245f7762c0f082107bde6e2dff42db66fb54f084dff5b1d798ffd06dfce0",
+      "archive": false
+    },
+    {
+      "source": "mainboards/test-controller/index.md",
+      "pdf": "docs/pdf/reference/Test_Controller_Rev0.1_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "4869ebd0100f5cf031f7abdb0f9b472aeb2c23ca2eecf0ebec2dcdff3ca76d11",
+      "archive": false
+    },
+    {
+      "source": "mainboards/input-adapter/index.md",
+      "pdf": "docs/pdf/reference/Input_Adapter_Rev0.1_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "e24cd574edb24105a32654d8ba4b0178ecb8fa944239360cb4c82b5ae3abfd7b",
+      "archive": false
+    },
+    {
+      "source": "mainboards/module-adapter/index.md",
+      "pdf": "docs/pdf/reference/Module_Adapter_Rev0.1_Anleitung.pdf",
+      "pages": 12,
+      "sha256": "cfd39306da881d2fa595a6e5dd8ed1f8385929f920c562543b35ad0919453223",
+      "archive": false
+    }
+  ]
+}

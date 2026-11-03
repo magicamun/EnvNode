@@ -24,6 +24,31 @@ fill; white header text uses the dark gold background for sufficient contrast.
 PCB materials and component colors are physical render colors, not document
 branding colors. Supplier datasheets and third-party documents are excluded.
 
+## Verbindliche Bildfolge in Aufbauanleitungen — 28. Oktober 2026
+
+1. **Vor „Baugruppen und Teile“ / „Teile und Vorbereitung“ steht eine 3D-Ansicht.**
+   Die Vorderseite (F.Cu) wird immer gezeigt. Die Rückseite (B.Cu) wird nur dann
+   ergänzt, wenn dort tatsächlich Bauteile oder Steckverbinder zu bestücken sind.
+   Eine unbestückte Rückseite mit Lötpads oder Kupfer allein erhält kein zweites Bild.
+2. **„Bestückungsübersicht“ enthält senkrechte farbige KiCad-Renderings ohne
+   Bauteilmodelle.** Keine gekippte oder perspektivische Ansicht. Kupfer,
+   Lötstoppmaske und Bestückungsdruck bleiben unverändert. Nur die Modellverweise
+   werden in einer temporären Renderkopie entfernt; die PCB-Quelle bleibt unverändert.
+3. Rückseitige Bestückung erhält zusätzlich einen eindeutig bezeichneten
+   Rückseitenplan, aus Blickrichtung B.Cu. Keine ungekennzeichnete Spiegelung.
+4. Die Vorderseitenpläne der Mainboards liegen als eigenständige PNG-Dateien
+   unter `docs/site/assets/board-views/<board-revision>/`. Anleitung und spätere
+   Testsoftware verwenden dieselben Dateien. `views.json` dokumentiert
+   PCB-Prüfsumme, Bildgröße, Render-Einstellungen und Bauteilpositionen.
+   Pixelkoordinaten für Testmarkierungen müssen am zugeschnittenen Bild kalibriert
+   werden; keine UI-Markierungen in die Masterdatei einzeichnen.
+
+Das gilt für alle gepflegten aktuellen und archivierten Markdown-/PDF-Anleitungen.
+Unveränderte historische Original-PDFs bleiben als Revisionsquellen erhalten.
+`docs/board-views.yml` wählt die exakten Quellen; `tools/docs_board_views.py`
+erzeugt die Pläne reproduzierbar. Für archivierte Anleitungen muss die PCB-
+Prüfsumme zur jeweiligen Anleitung passen.
+
 ## PCB views
 
 The visual reference is `ORing_Power_3D.png` in the ORing Power design block's

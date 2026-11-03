@@ -1,0 +1,23 @@
+{
+  "board": "Input-Adapter",
+  "hardware_revision": "0.1",
+  "checkout": "test-provision-board",
+  "commit": "08f55b1810812b1deb1e877ef2f7853d0797d5ad",
+  "source_sha256": {
+    "INL.kicad_sch": "4b570360a9fd0dd4d0fed59df2594a2fb9191453079c9270894bd907ad8334fc",
+    "Input-Adapter.kicad_pcb": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c",
+    "Input-Adapter.kicad_pro": "c09950b3b0f4df092f76454debb5c8df3a2c1af04d029f4b354dd75a29616f59",
+    "Input-Adapter.kicad_sch": "ed28f15d0cce07d0d4c391dd75df6b1b31f5b2a0b2347c138b483ebb7045b686"
+  },
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "transparent": true
+  },
+  "images": {
+    "top.png": "b98aa9d80b530ecb2981f7114a98543102ccab6b3f81cda0d4f94945f61d9a87",
+    "bottom.png": "256a104df0454a25c66c2cb01fc00e0d9204e2a1ac320b45d564cd0d81f36846"
+  },
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+}

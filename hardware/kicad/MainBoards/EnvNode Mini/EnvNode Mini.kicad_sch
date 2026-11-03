@@ -5,6 +5,187 @@
 	(uuid "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1")
 	(paper "A4")
 	(lib_symbols
+		(symbol "Connector:Conn_01x02_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Pin"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x02_Pin_1_1"
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Connector:Conn_01x04_Pin"
 			(pin_names
 				(offset 1.016)
@@ -258,6 +439,194 @@
 						)
 					)
 					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:D"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "D"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Device" "D"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Pins" "1=K 2=A"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "D_0_1"
+				(polyline
+					(pts
+						(xy -1.27 1.27) (xy -1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "D_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -550,184 +919,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Jumper:SolderJumper_2_Open"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 0)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom no)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "JP"
-				(at 0 2.032 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "SolderJumper_2_Open"
-				(at 0 -2.54 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 -7.62 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Solder Jumper, 2-pole, open"
-				(at 0 -5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "solder jumper SPST"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "SolderJumper*Open*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "SolderJumper_2_Open_0_1"
-				(polyline
-					(pts
-						(xy -0.254 1.016) (xy -0.254 -1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start -0.254 -1.016)
-					(mid -1.2656 0)
-					(end -0.254 1.016)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(arc
-					(start 0.254 1.016)
-					(mid 1.2656 0)
-					(end 0.254 -1.016)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.254 1.016) (xy 0.254 -1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "SolderJumper_2_Open_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 3.81)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 3.81)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "power:GND"
 			(power global)
 			(pin_numbers
@@ -992,6 +1183,16 @@
 	)
 	(wire
 		(pts
+			(xy 257.81 30.48) (xy 261.62 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0db978fc-0ab0-4ef4-b567-a0f7fd5228bf")
+	)
+	(wire
+		(pts
 			(xy 171.45 86.36) (xy 162.56 86.36)
 		)
 		(stroke
@@ -1112,6 +1313,16 @@
 	)
 	(wire
 		(pts
+			(xy 257.81 19.05) (xy 261.62 19.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3263e61e-e5f3-45ba-b514-e8740153ef41")
+	)
+	(wire
+		(pts
 			(xy 109.22 52.07) (xy 109.22 57.15)
 		)
 		(stroke
@@ -1132,6 +1343,16 @@
 	)
 	(wire
 		(pts
+			(xy 207.01 30.48) (xy 209.55 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3bdf43f2-9fad-420c-9ad5-588055decbee")
+	)
+	(wire
+		(pts
 			(xy 125.73 59.69) (xy 162.56 59.69)
 		)
 		(stroke
@@ -1149,6 +1370,16 @@
 			(type default)
 		)
 		(uuid "3e77fe67-4768-4596-8ece-ed5350a74c48")
+	)
+	(wire
+		(pts
+			(xy 264.16 30.48) (xy 267.97 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4553263e-4a80-403a-ad78-fbca864526e2")
 	)
 	(wire
 		(pts
@@ -1422,6 +1653,16 @@
 	)
 	(wire
 		(pts
+			(xy 257.81 41.91) (xy 261.62 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a11f4817-d599-414b-8ce8-61ab9a3ebe50")
+	)
+	(wire
+		(pts
 			(xy 74.93 96.52) (xy 86.36 96.52)
 		)
 		(stroke
@@ -1429,6 +1670,36 @@
 			(type default)
 		)
 		(uuid "a42f89f1-b870-4e5c-b985-8ea6bb4470da")
+	)
+	(wire
+		(pts
+			(xy 264.16 19.05) (xy 267.97 19.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a6c74fb9-0f17-4c47-8a58-5e983bf362df")
+	)
+	(wire
+		(pts
+			(xy 193.04 30.48) (xy 199.39 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a946fded-d8e3-43ff-ab3e-7b49eb863682")
+	)
+	(wire
+		(pts
+			(xy 207.01 27.94) (xy 209.55 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b1d6bda4-fd13-44b4-b3b4-b52355fd5daa")
 	)
 	(wire
 		(pts
@@ -1512,6 +1783,26 @@
 	)
 	(wire
 		(pts
+			(xy 264.16 41.91) (xy 267.97 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6baa0c8-b9a4-4dfa-b427-fa98533652dc")
+	)
+	(wire
+		(pts
+			(xy 264.16 53.34) (xy 267.97 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c979d23c-1a07-4ec9-a3aa-799353cda559")
+	)
+	(wire
+		(pts
 			(xy 147.32 49.53) (xy 125.73 49.53)
 		)
 		(stroke
@@ -1549,6 +1840,16 @@
 			(type default)
 		)
 		(uuid "d039dd9b-ec1c-43a4-aa0d-20e15dd159e5")
+	)
+	(wire
+		(pts
+			(xy 193.04 27.94) (xy 199.39 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d478566c-c22a-48fd-99c7-df40ce2af85a")
 	)
 	(wire
 		(pts
@@ -1632,6 +1933,16 @@
 	)
 	(wire
 		(pts
+			(xy 257.81 53.34) (xy 261.62 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f92ef18a-bc46-4fcd-8fac-a0ac9f9e8c6e")
+	)
+	(wire
+		(pts
 			(xy 151.13 104.14) (xy 171.45 104.14)
 		)
 		(stroke
@@ -1705,6 +2016,30 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+	)
+	(global_label "+3V3_SYS"
+		(shape input)
+		(at 209.55 30.48 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1d0f1f67-042b-40ba-9cb0-1996b72d2580")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 222.0904 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)
@@ -2165,39 +2500,41 @@
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 262.89 41.91 0)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 264.16 48.26 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "04f58572-31be-4dd0-a5ba-0dc7bdfd5264")
-		(property "Reference" "JP3"
-			(at 262.89 35.56 0)
+		(uuid "18313ade-163b-497d-8e20-684293cf6ec9")
+		(property "Reference" "J6"
+			(at 265.43 47.6249 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "Open"
-			(at 262.89 38.1 0)
+		(property "Value" "Conn_01x02_Pin"
+			(at 265.43 50.1649 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 262.89 41.91 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 264.16 48.26 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2208,7 +2545,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 262.89 49.53 0)
+			(at 264.16 48.26 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2218,8 +2555,8 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 262.89 46.99 0)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 264.16 48.26 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2228,56 +2565,58 @@
 					(size 1.27 1.27)
 				)
 			)
-		)
-		(pin "1"
-			(uuid "23a786aa-c2a7-4f67-aef4-03f7479db2c9")
 		)
 		(pin "2"
-			(uuid "cc62f3f4-6566-4f42-b323-ac0a6ae5641b")
+			(uuid "2098ff2a-669d-4795-8342-25f2b830f318")
+		)
+		(pin "1"
+			(uuid "cc64e646-ee2a-4d5f-b8c3-5af47e870dd2")
 		)
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP3")
+					(reference "J6")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 262.89 53.34 0)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 264.16 13.97 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "0be233ba-6f9f-40d6-a98c-a2d232ce7ff5")
-		(property "Reference" "JP4"
-			(at 262.89 46.99 0)
+		(uuid "1966c88d-6989-4b68-b0c0-edea848b4149")
+		(property "Reference" "J3"
+			(at 265.43 13.3349 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "Open"
-			(at 262.89 49.53 0)
+		(property "Value" "Conn_01x02_Pin"
+			(at 265.43 15.8749 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 262.89 53.34 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 264.16 13.97 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2288,7 +2627,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 262.89 60.96 0)
+			(at 264.16 13.97 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2298,8 +2637,8 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 262.89 58.42 0)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 264.16 13.97 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2308,17 +2647,17 @@
 					(size 1.27 1.27)
 				)
 			)
-		)
-		(pin "1"
-			(uuid "b9d18acf-fc19-4596-9eb4-601378167705")
 		)
 		(pin "2"
-			(uuid "ec5920ff-a36f-4c40-9c56-f14805031656")
+			(uuid "a6733aa9-d2fa-4118-a0ef-b694a078df52")
+		)
+		(pin "1"
+			(uuid "3da70066-5ebb-426e-8f88-0c3aeabd0dd3")
 		)
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP4")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -2396,6 +2735,187 @@
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
 					(reference "#PWR012")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 187.96 27.94 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2bd8d0f1-a899-4ae7-b4da-4c8f251c61db")
+		(property "Reference" "TP1"
+			(at 188.595 22.86 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 188.595 25.4 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+			(at 187.96 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 187.96 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 187.96 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f1c4c95c-457b-4158-b981-250f0a20734d")
+		)
+		(pin "2"
+			(uuid "a1eea65f-dd02-4525-aa50-7a99f43053ed")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "TP1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D")
+		(at 203.2 27.94 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3a594b0d-fabc-48fb-9c65-46a7961b2af8")
+		(property "Reference" "D1"
+			(at 203.2 23.368 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1N4148"
+			(at 203.2 25.4 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder"
+			(at 203.2 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 203.2 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Diode"
+			(at 203.2 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 203.2 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 203.2 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3241a43b-f21c-4d39-8f03-7cf862d6f910")
+		)
+		(pin "2"
+			(uuid "136ebff0-c3f0-4f60-917d-6c3528ad3c21")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "D1")
 					(unit 1)
 				)
 			)
@@ -2483,7 +3003,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 254 53.34 90)
+		(at 254 53.34 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2514,7 +3034,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 254 55.118 90)
+			(at 254 51.562 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2562,8 +3082,109 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:D")
+		(at 203.2 30.48 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "62e7be6b-e293-4017-ae89-a250651cd3c8")
+		(property "Reference" "D2"
+			(at 203.2 34.798 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1N4148"
+			(at 203.2 33.02 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder"
+			(at 203.2 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 203.2 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Diode"
+			(at 203.2 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 203.2 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 203.2 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "7a7245b0-b5c5-409b-b58c-dd921ed7c2eb")
+		)
+		(pin "2"
+			(uuid "7f92aa1b-1a12-4657-b04c-091cf08c46a2")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "D2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
-		(at 254 41.91 90)
+		(at 254 41.91 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2594,7 +3215,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 254 43.688 90)
+			(at 254 40.132 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2733,7 +3354,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "80dff491-103a-4d4a-a40e-ee1d6c043e6e")
-		(property "Reference" "J5"
+		(property "Reference" "J7"
 			(at 91.44 25.4 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2801,7 +3422,7 @@
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J5")
+					(reference "J7")
 					(unit 1)
 				)
 			)
@@ -2819,7 +3440,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8b498650-e0de-498e-85fe-52274bd3c3a8")
-		(property "Reference" "J6"
+		(property "Reference" "J9"
 			(at 129.54 25.4 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2887,7 +3508,7 @@
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J6")
+					(reference "J9")
 					(unit 1)
 				)
 			)
@@ -3051,86 +3672,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 262.89 19.05 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a5bafea8-1acc-485c-b00f-40c9a831761c")
-		(property "Reference" "JP1"
-			(at 262.89 12.7 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Open"
-			(at 262.89 15.24 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 262.89 19.05 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 262.89 26.67 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 262.89 24.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "92c6ef2a-b23e-49a3-83ae-d052ad80da4e")
-		)
-		(pin "2"
-			(uuid "a9bda630-5d95-4da0-ab6f-c39ccc029066")
-		)
-		(instances
-			(project "EnvNode Mini"
-				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Connector:Conn_01x04_Pin")
 		(at 114.3 30.48 270)
 		(unit 1)
@@ -3142,7 +3683,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ba168b59-d5f6-45bb-8b67-750cb0d194ce")
-		(property "Reference" "J4"
+		(property "Reference" "J8"
 			(at 113.03 25.4 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3210,46 +3751,48 @@
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J4")
+					(reference "J8")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 262.89 30.48 0)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 264.16 25.4 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "c478ed87-b01a-4405-8777-c23de793c7e2")
-		(property "Reference" "JP2"
-			(at 262.89 24.13 0)
+		(uuid "c3ecc7a2-470a-4ca5-a77e-eeb8db161146")
+		(property "Reference" "J4"
+			(at 265.43 24.7649 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "Open"
-			(at 262.89 26.67 0)
+		(property "Value" "Conn_01x02_Pin"
+			(at 265.43 27.3049 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 262.89 30.48 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 264.16 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3260,7 +3803,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 262.89 38.1 0)
+			(at 264.16 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3270,8 +3813,8 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 262.89 35.56 0)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 264.16 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3280,17 +3823,17 @@
 					(size 1.27 1.27)
 				)
 			)
-		)
-		(pin "1"
-			(uuid "8db660f1-905c-4383-aa2a-d0cceb967dcf")
 		)
 		(pin "2"
-			(uuid "40cec0c9-b9e3-44ec-84fa-2e74ee0075b9")
+			(uuid "14911fd3-4efd-43c6-bcf0-1c6ac2462444")
+		)
+		(pin "1"
+			(uuid "dc870467-f473-48f1-976d-c0739d911304")
 		)
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP2")
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -3374,6 +3917,86 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 209.55 27.94 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d732ebbc-b3c9-4ab3-a36f-9b70058c5219")
+		(property "Reference" "#PWR010"
+			(at 215.9 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 210.8201 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 209.55 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 209.55 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 209.55 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "aa05ca92-8ad9-4eec-9bc5-495cbd64e9ee")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "#PWR010")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x04_Pin")
 		(at 152.4 30.48 270)
 		(unit 1)
@@ -3385,7 +4008,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d87ffa36-e09a-431d-a90b-63764cc71d53")
-		(property "Reference" "J7"
+		(property "Reference" "J10"
 			(at 151.13 25.4 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3453,7 +4076,89 @@
 		(instances
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J7")
+					(reference "J10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 264.16 36.83 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e55e85c4-274f-4dd2-a0cf-6fb8a21bfb4c")
+		(property "Reference" "J5"
+			(at 265.43 36.1949 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 265.43 38.7349 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 264.16 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 264.16 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 264.16 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "263a8289-3175-464f-bcae-035552619bf5")
+		)
+		(pin "1"
+			(uuid "7dff25b8-8628-4db1-a9a3-ecbc6479684c")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "J5")
 					(unit 1)
 				)
 			)

@@ -146,10 +146,10 @@ void test_current_board_profile_describes_envnode_mainboard() {
     TEST_ASSERT_EQUAL_UINT8(3, profile.revision.minor);
     TEST_ASSERT_EQUAL_UINT32(15, profile.gpioCount);
     TEST_ASSERT_EQUAL_UINT32(2, profile.i2cBusCount);
-    TEST_ASSERT_EQUAL_UINT32(2, boardProfileCount());
+    TEST_ASSERT_EQUAL_UINT32(3, boardProfileCount());
     TEST_ASSERT_EQUAL_PTR(&profile, boardProfileAt(0));
     TEST_ASSERT_EQUAL_PTR(&profile, boardProfile(BoardProfileId::EnvNodeMainboard));
-    TEST_ASSERT_NULL(boardProfileAt(2));
+    TEST_ASSERT_NULL(boardProfileAt(3));
 }
 
 void test_current_board_profile_has_exact_gpio_and_i2c_mapping() {

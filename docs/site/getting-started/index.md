@@ -56,9 +56,9 @@ Aufbau sind die tatsächliche Platinenrevision und das zugehörige Boardprofil m
 
 ## 1. Hardware aufbauen und prüfen
 
-Beginne mit der [Mini-Aufbauanleitung](../mainboards/mini/assembly.md) für deine
+Beginne mit der [Mini-Aufbauanleitung](../mainboards/mini/index.md) für deine
 Platinenrevision. Sie verweist auf die Versorgung mit
-[ORing Power](../mainboards/oring-power/assembly.md) und führt durch Bestückung,
+[ORing Power](../mainboards/oring-power/index.md) und führt durch Bestückung,
 Orientierung und elektrische Prüfungen.
 
 Arbeite zunächst ohne zusätzliche Module und Sensoren. Die Versorgung wird nach der
@@ -111,7 +111,7 @@ sind die beiden Signalleitungen neben Versorgung und Masse.
 Prüfe am konkreten Sensorboard und Kabel die vier Verbindungen **GND, 3,3 V, SDA und
 SCL** sowie die Pull-ups des Busses. Die Details stehen unter
 [I²C-Sensoren anschließen](../sensors/i2c.md) und bei den
-[Mini-I²C-Anschlüssen](../mainboards/mini/index.md#i2c-anschlusse).
+[Mini-I²C-Anschlüssen](../mainboards/mini/index.md#41-i2c-qwiic).
 Ein passender Stecker allein bestätigt noch keine passende Kabelbelegung.
 
 Schalte wieder ein und führe unter **Diagnose** einen Scan von I2C1 aus.

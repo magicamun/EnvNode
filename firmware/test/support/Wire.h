@@ -9,6 +9,7 @@ class TwoWire {
 public:
     struct Transmission { uint8_t address; std::vector<uint8_t> bytes; bool stop; };
     bool beginOk = true;
+    int ends = 0, timeout = 0;
     int begins = 0, sda = -1, scl = -1, requests = 0;
     uint8_t device = 0, defaultResult = 0;
     size_t writeLimit = 2048, readLimit = 2048, cursor = 0;
@@ -18,6 +19,8 @@ public:
     std::vector<uint8_t> outgoing;
     std::vector<Transmission> transmissions;
     bool begin(int data, int clock) { ++begins; sda=data; scl=clock; return beginOk; }
+    void end() { ++ends; }
+    void setTimeOut(uint16_t value) { timeout = value; }
     void beginTransmission(uint8_t address) { device=address; outgoing.clear(); }
     size_t write(uint8_t byte) { return write(&byte, 1); }
     size_t write(const uint8_t* bytes, size_t size) {

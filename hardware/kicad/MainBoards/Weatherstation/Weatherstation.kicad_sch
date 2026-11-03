@@ -5,6 +5,375 @@
 	(uuid "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1")
 	(paper "A4")
 	(lib_symbols
+		(symbol "Connector:Conn_01x02_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Pin"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x02_Pin_1_1"
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:D"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "D"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Device" "D"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Pins" "1=K 2=A"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "D_0_1"
+				(polyline
+					(pts
+						(xy -1.27 1.27) (xy -1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "D_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:R"
 			(pin_numbers
 				(hide yes)
@@ -145,7 +514,8 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Jumper:SolderJumper_2_Open"
+		(symbol "power:GND"
+			(power global)
 			(pin_numbers
 				(hide yes)
 			)
@@ -154,22 +524,23 @@
 				(hide yes)
 			)
 			(exclude_from_sim no)
-			(in_bom no)
+			(in_bom yes)
 			(on_board yes)
 			(in_pos_files yes)
 			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "JP"
-				(at 0 2.032 0)
+			(property "Reference" "#PWR"
+				(at 0 -6.35 0)
 				(show_name no)
 				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "SolderJumper_2_Open"
-				(at 0 -2.54 0)
+			(property "Value" "GND"
+				(at 0 -3.81 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -190,28 +561,6 @@
 				)
 			)
 			(property "Datasheet" ""
-				(at 0 -7.62 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Solder Jumper, 2-pole, open"
-				(at 0 -5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "solder jumper SPST"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -222,7 +571,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "SolderJumper*Open*"
+			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -233,49 +582,24 @@
 					)
 				)
 			)
-			(symbol "SolderJumper_2_Open_0_1"
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "GND_0_1"
 				(polyline
 					(pts
-						(xy -0.254 1.016) (xy -0.254 -1.016)
+						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
 					)
 					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start -0.254 -1.016)
-					(mid -1.2656 0)
-					(end -0.254 1.016)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(arc
-					(start 0.254 1.016)
-					(mid 1.2656 0)
-					(end 0.254 -1.016)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.254 1.016) (xy 0.254 -1.016)
-					)
-					(stroke
-						(width 0.1524)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -283,11 +607,11 @@
 					)
 				)
 			)
-			(symbol "SolderJumper_2_Open_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 3.81)
-					(name "A"
+			(symbol "GND_1_1"
+				(pin power_in line
+					(at 0 0 270)
+					(length 0)
+					(name ""
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -302,27 +626,129 @@
 						)
 					)
 				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 3.81)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
 			)
 			(embedded_fonts no)
 		)
+	)
+	(wire
+		(pts
+			(xy 38.1 165.1) (xy 41.91 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "23a59911-71f7-4081-896f-83f6f4376eb3")
+	)
+	(wire
+		(pts
+			(xy 38.1 154.94) (xy 41.91 154.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "301af0be-2475-4b06-be8c-681bd79cef13")
+	)
+	(wire
+		(pts
+			(xy 44.45 134.62) (xy 48.26 134.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "624c9005-abe2-4a20-b878-747701987c26")
+	)
+	(wire
+		(pts
+			(xy 34.29 62.23) (xy 40.64 62.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67b5b540-54af-4c3c-837a-36418ac360f6")
+	)
+	(wire
+		(pts
+			(xy 34.29 59.69) (xy 40.64 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6ae9c643-f4cd-4c27-9cef-347c71e7c3da")
+	)
+	(wire
+		(pts
+			(xy 48.26 59.69) (xy 50.8 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6cfae455-cbbd-4ebe-b81a-443f52cc19f7")
+	)
+	(wire
+		(pts
+			(xy 44.45 165.1) (xy 48.26 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "759938dc-1f1e-45c0-b243-42789d2330f9")
+	)
+	(wire
+		(pts
+			(xy 38.1 116.84) (xy 41.91 116.84)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7fc2f878-afec-4afd-81ab-eed3dbb694fa")
+	)
+	(wire
+		(pts
+			(xy 38.1 134.62) (xy 41.91 134.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "91a6ce2d-6766-49fa-96fe-ce295358c239")
+	)
+	(wire
+		(pts
+			(xy 44.45 154.94) (xy 48.26 154.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d81b297-b6c6-455f-a57a-edfce34d9b89")
+	)
+	(wire
+		(pts
+			(xy 44.45 116.84) (xy 48.26 116.84)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d08edb9e-a4f5-4407-af2b-81d3baaa6092")
+	)
+	(wire
+		(pts
+			(xy 48.26 62.23) (xy 50.8 62.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eb7e7204-b5b0-494a-8b63-14cd1981e4f1")
 	)
 	(global_label "I2C1_SDA"
 		(shape input)
@@ -494,7 +920,7 @@
 	)
 	(global_label "I2C0_SCL"
 		(shape input)
-		(at 30.48 124.46 180)
+		(at 30.48 116.84 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -504,7 +930,7 @@
 		)
 		(uuid "205401af-bc55-4111-a3ff-0de5cabe9a5f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 18.7258 124.46 0)
+			(at 18.7258 116.84 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -926,6 +1352,30 @@
 	)
 	(global_label "+3V3_SYS"
 		(shape input)
+		(at 50.8 62.23 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "6ee68054-b393-4e6b-ae7c-3c8791437dd1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 63.3404 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "+3V3_SYS"
+		(shape input)
 		(at 48.26 165.1 0)
 		(fields_autoplaced yes)
 		(effects
@@ -1286,7 +1736,7 @@
 	)
 	(global_label "+3V3_SYS"
 		(shape input)
-		(at 48.26 124.46 0)
+		(at 48.26 116.84 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1296,7 +1746,7 @@
 		)
 		(uuid "caf56f9a-00e5-445c-85c0-0f669d2827be")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 60.8004 124.46 0)
+			(at 60.8004 116.84 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1597,6 +2047,88 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 41.91 139.7 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "03048b8a-2675-4507-a82f-d35c6e902236")
+		(property "Reference" "J3"
+			(at 45.72 137.7949 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 45.72 140.3349 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 41.91 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 41.91 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 41.91 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2b06c79f-973f-4d6c-82e7-05cc04c17674")
+		)
+		(pin "2"
+			(uuid "71d19ed1-0c91-4be1-8c5b-4da235de46f9")
+		)
+		(instances
+			(project "Weatherstation"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "J3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 34.29 165.1 90)
 		(unit 1)
@@ -1677,19 +2209,18 @@
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 43.18 154.94 0)
+		(lib_id "Device:D")
+		(at 44.45 59.69 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "2edee04c-027a-4d87-a665-c758534b2cab")
-		(property "Reference" "JP3"
-			(at 43.18 148.59 0)
+		(uuid "2a99531b-b254-47f2-9279-d643a157d352")
+		(property "Reference" "D1"
+			(at 44.45 55.118 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1698,8 +2229,8 @@
 				)
 			)
 		)
-		(property "Value" "Open"
-			(at 43.18 151.13 0)
+		(property "Value" "1N4148"
+			(at 44.45 57.15 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1708,8 +2239,8 @@
 				)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 43.18 154.94 0)
+		(property "Footprint" "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder"
+			(at 44.45 59.69 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1720,7 +2251,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 43.18 162.56 0)
+			(at 44.45 59.69 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1730,8 +2261,30 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 43.18 160.02 0)
+		(property "Description" "Diode"
+			(at 44.45 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 44.45 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 44.45 59.69 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1742,34 +2295,35 @@
 			)
 		)
 		(pin "1"
-			(uuid "d47c11df-6df6-4616-8a5f-94fea0cdc6ca")
+			(uuid "66c7638f-5be2-4099-9f34-8525f2742484")
 		)
 		(pin "2"
-			(uuid "f9dca2f5-1c4f-42ed-a7de-63dd1fdd8935")
+			(uuid "a1b8a68c-fb02-4784-aba8-f405a2d3f44d")
 		)
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP3")
+					(reference "D1")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 43.18 124.46 0)
+		(lib_id "power:GND")
+		(at 50.8 59.69 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "4b240d49-5b63-45d6-be00-b80a64a6af08")
-		(property "Reference" "JP1"
-			(at 43.18 118.11 0)
+		(uuid "3fd2b6ac-4bf3-4ae0-9159-b7cd27c42b0c")
+		(property "Reference" "#PWR011"
+			(at 57.15 59.69 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1778,18 +2332,20 @@
 				)
 			)
 		)
-		(property "Value" "Open"
-			(at 43.18 120.65 0)
+		(property "Value" "GND"
+			(at 52.0701 62.23 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 43.18 124.46 0)
+		(property "Footprint" ""
+			(at 50.8 59.69 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1800,7 +2356,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 43.18 132.08 0)
+			(at 50.8 59.69 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1810,8 +2366,8 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 43.18 129.54 0)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 50.8 59.69 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1822,34 +2378,30 @@
 			)
 		)
 		(pin "1"
-			(uuid "0232e96a-a669-4be7-b2a7-b272330d7e66")
-		)
-		(pin "2"
-			(uuid "6028ec24-cbfb-418e-9b69-c4839d37fc0b")
+			(uuid "45b7f392-600b-4b19-adf1-8815c63557d4")
 		)
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP1")
+					(reference "#PWR011")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 43.18 134.62 0)
+		(lib_id "Device:D")
+		(at 44.45 62.23 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "5f4df3b2-e7ef-4281-97f0-7f6c9044b7d4")
-		(property "Reference" "JP2"
-			(at 43.18 128.27 0)
+		(uuid "695ea83a-4dbe-409d-93d2-8a3f4ef22c54")
+		(property "Reference" "D2"
+			(at 44.45 66.548 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1858,8 +2410,8 @@
 				)
 			)
 		)
-		(property "Value" "Open"
-			(at 43.18 130.81 0)
+		(property "Value" "1N4148"
+			(at 44.45 64.77 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1868,8 +2420,8 @@
 				)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 43.18 134.62 0)
+		(property "Footprint" "Diode_SMD:D_1206_3216Metric_Pad1.42x1.75mm_HandSolder"
+			(at 44.45 62.23 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1880,7 +2432,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 43.18 142.24 0)
+			(at 44.45 62.23 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1890,8 +2442,30 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 43.18 139.7 0)
+		(property "Description" "Diode"
+			(at 44.45 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 44.45 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 44.45 62.23 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1902,15 +2476,15 @@
 			)
 		)
 		(pin "1"
-			(uuid "32adb7d1-3c84-46b5-8a01-d0a46ef3d753")
+			(uuid "9ccb6e74-b647-4708-8140-e8aced6992f8")
 		)
 		(pin "2"
-			(uuid "73466a8e-acfb-474d-b101-139912b5f517")
+			(uuid "5d69cb0c-5c4e-4fdc-8791-995f1bfa63e5")
 		)
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP2")
+					(reference "D2")
 					(unit 1)
 				)
 			)
@@ -1998,7 +2572,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 34.29 134.62 90)
+		(at 34.29 134.62 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2006,10 +2580,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "70954561-e9f6-437c-90de-bdfb5170e79d")
 		(property "Reference" "R2"
-			(at 34.29 128.27 90)
+			(at 34.29 120.65 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2019,7 +2592,7 @@
 			)
 		)
 		(property "Value" "4,7 kOhm"
-			(at 34.29 130.81 90)
+			(at 34.29 123.19 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2029,7 +2602,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 34.29 136.398 90)
+			(at 34.29 132.842 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2077,39 +2650,41 @@
 		)
 	)
 	(symbol
-		(lib_id "Jumper:SolderJumper_2_Open")
-		(at 43.18 165.1 0)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 44.45 149.86 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "81b02d61-4a81-4441-90ca-af659d9737a8")
-		(property "Reference" "JP4"
-			(at 43.18 158.75 0)
+		(uuid "ae00074e-6a54-49ee-840c-ee643754682f")
+		(property "Reference" "J4"
+			(at 45.72 149.2249 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "Open"
-			(at 43.18 161.29 0)
+		(property "Value" "Conn_01x02_Pin"
+			(at 45.72 151.7649 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
-			(at 43.18 165.1 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 44.45 149.86 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2120,7 +2695,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 43.18 172.72 0)
+			(at 44.45 149.86 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2130,8 +2705,8 @@
 				)
 			)
 		)
-		(property "Description" "Solder Jumper, 2-pole, open"
-			(at 43.18 170.18 0)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 44.45 149.86 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2142,15 +2717,15 @@
 			)
 		)
 		(pin "1"
-			(uuid "8956a522-ee5d-4c87-a8bd-f88cb46a9e2a")
+			(uuid "c498148d-e445-4b7a-992a-d9d398fd2c2b")
 		)
 		(pin "2"
-			(uuid "d1070357-ca99-41c6-bcda-00ca23c048d0")
+			(uuid "049b41d3-676b-46ec-aafe-db7d40a01c4a")
 		)
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "JP4")
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -2158,7 +2733,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 34.29 124.46 90)
+		(at 34.29 116.84 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2169,7 +2744,7 @@
 		(fields_autoplaced yes)
 		(uuid "ae9b2df4-03d9-44d9-92f7-6b6f46d24ce6")
 		(property "Reference" "R1"
-			(at 34.29 118.11 90)
+			(at 34.29 110.49 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2179,7 +2754,7 @@
 			)
 		)
 		(property "Value" "4,7 kOhm"
-			(at 34.29 120.65 90)
+			(at 34.29 113.03 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2189,7 +2764,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 34.29 126.238 90)
+			(at 34.29 118.618 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2200,7 +2775,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 34.29 124.46 0)
+			(at 34.29 116.84 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2211,7 +2786,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 34.29 124.46 0)
+			(at 34.29 116.84 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2231,6 +2806,250 @@
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
 					(reference "R1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 41.91 121.92 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e05b0092-f56d-4b76-a919-4fc06034c19d")
+		(property "Reference" "J2"
+			(at 45.72 120.0149 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 45.72 122.5549 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 41.91 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 41.91 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 41.91 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "849c0363-2fd2-4b0f-9b30-d4d008318f33")
+		)
+		(pin "2"
+			(uuid "d666fc66-fefd-4b58-9313-2b45cc8068c7")
+		)
+		(instances
+			(project "Weatherstation"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "J2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 44.45 160.02 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fac7548f-45b1-44b0-aba3-08ddc1a69dc2")
+		(property "Reference" "J5"
+			(at 45.72 159.3849 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 45.72 161.9249 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 44.45 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 44.45 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 44.45 160.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "21d66d53-4108-4a91-bdd1-1720a1574d55")
+		)
+		(pin "2"
+			(uuid "ac036dac-67a5-4cde-89ac-ba8285e91065")
+		)
+		(instances
+			(project "Weatherstation"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "J5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 29.21 59.69 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ffa34351-1cb5-4f16-a4f5-e745a422fe08")
+		(property "Reference" "TP1"
+			(at 29.845 54.61 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 29.845 57.15 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+			(at 29.21 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 29.21 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 29.21 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6a14518a-dcef-48ac-a151-4b3bfdf233e1")
+		)
+		(pin "2"
+			(uuid "3f603236-dca8-4d71-89d1-fe3c1adda622")
+		)
+		(instances
+			(project "Weatherstation"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
+					(reference "TP1")
 					(unit 1)
 				)
 			)

@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 #include "BaseSettingsService.h"
 #include "EnvNodeConfigurationStorage.h"
@@ -12,6 +13,9 @@ class ConfigurationService : public IConfigurationService {
 public:
     explicit ConfigurationService(ILogger* logger = nullptr) : logger_(logger) {}
     void setActuatorResolver(const IOnOffActuatorResolver* resolver) { actuatorResolver_ = resolver; }
+    void setModuleHardwareResolver(std::function<bool(const HardwareResourceAssignment&)> resolver) {
+        moduleOwnsHardware_ = resolver;
+    }
     void loadConfiguration() override;
     const Configuration& getConfiguration() const override;
     Locale getLocale() const override;
@@ -95,6 +99,8 @@ private:
         const DisplayConfiguration* display = nullptr,
         const SdStorageConfiguration* sdStorage = nullptr) const;
 
+    bool loadingConfiguration_ = false;
+    std::function<bool(const HardwareResourceAssignment&)> moduleOwnsHardware_;
     const IOnOffActuatorResolver* actuatorResolver_ = nullptr;
     ILogger* logger_ = nullptr;
     Configuration configuration_;

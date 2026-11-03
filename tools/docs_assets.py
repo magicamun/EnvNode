@@ -36,6 +36,29 @@ DOWNLOADS = {
 }
 
 
+# Explicit historical archive; preserve original files and revision labels.
+DOWNLOADS.update({
+    'assets/downloads/old-revisions/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.6.pdf':
+        'hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.6.pdf',
+    'assets/downloads/old-revisions/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.3.pdf':
+        'hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.3.pdf',
+    'assets/downloads/old-revisions/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.2.pdf':
+        'hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.2.pdf',
+    'assets/downloads/old-revisions/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.1.pdf':
+        'hardware/kicad/MainBoards/Weatherstation/Documentation/EnvNode_Weather_Bestueckungs_und_Bringup_Rev0.1.pdf',
+    'assets/downloads/old-revisions/DuoRelay_Bestueckungs_und_Bringup_Rev0.2.pdf':
+        'hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.2.pdf',
+    'assets/downloads/old-revisions/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.4.pdf':
+        'hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.4.pdf',
+    'assets/downloads/old-revisions/EnvNode_Mainboard_Bestueckungs_und_Bringup_Rev0.1.pdf':
+        'hardware/kicad/Revision-0.1/MainBoards/EnvNode/Documentation/EnvNode_Mainboard_Bestueckungs_und_Bringup_Rev0.1.pdf',
+    'assets/downloads/old-revisions/RainDetector_Bestueckungs_und_Bringup_Rev0.2.pdf':
+        'hardware/kicad/Sensors/Raindetector/Documentation/RainDetector_Bestueckungs_und_Bringup_Rev0.2.pdf',
+    'assets/downloads/old-revisions/RainDetector_Bestueckungs_und_Bringup_Rev1.pdf':
+        'hardware/kicad/Sensors/Raindetector/Documentation/RainDetector_Bestueckungs_und_Bringup_Rev1.pdf',
+})
+
+
 # Current PCB patch names for public downloads. Keep the existing URLs available
 # for bookmarks; both names serve the same reviewed guide (ORing: base + supplement).
 for _base, _patch in (
@@ -56,7 +79,7 @@ for _ref in ("ADC1", "J5"):
         DOWNLOADS[f"assets/images/connectors/{_name}"] = f"images/envnode-mini/connectors/{_name}"
 
 def pdf_documents(config):
-    """An explicit manifest selects only the latest approved source for each guide."""
+    """An explicit manifest selects current and archived guides; never sort revisions."""
     import yaml
     root = Path(config.config_file_path).resolve().parent
     documents = yaml.safe_load((root / "docs/pdf/documents.yml").read_text())
@@ -67,7 +90,10 @@ def pdf_documents(config):
             raise ValueError("Duplicate PDF source or destination")
         if not target.startswith("assets/downloads/") or not target.endswith("_Anleitung.pdf"):
             raise ValueError(f"Invalid PDF destination: {target}")
-        for base, relative in ((root / "docs/site", source), (root, document["original"]), (root, document["images"])):
+        inputs = [(root / "docs/site", source), (root, document["images"])]
+        if document.get("original"):
+            inputs.append((root, document["original"]))
+        for base, relative in inputs:
             path = (base / relative).resolve()
             if not path.is_relative_to(base.resolve()) or not path.exists():
                 raise ValueError(f"Missing or invalid PDF input: {relative}")
@@ -82,7 +108,16 @@ def on_files(files, config, **kwargs):
             raise ValueError(f"Duplicate generated PDF: {document['target']}")
         # Serve usable reference PDFs locally; production builds replace placeholders
         # with newly rendered PDFs and still fail if rendering fails.
-        content = (Path(config.config_file_path).resolve().parent / document["original"]).read_bytes() if _preview else b""
+        content = b""
+        if _preview:
+            reference = document.get("preview") or document.get("original")
+            if not reference:
+                raise ValueError(f"No preview PDF configured: {document['source']}")
+            reference_path = (Path(config.config_file_path).resolve().parent / reference).resolve()
+            root = Path(config.config_file_path).resolve().parent
+            if not reference_path.is_relative_to(root) or not reference_path.is_file():
+                raise FileNotFoundError(f"Build production PDFs before preview: {reference}")
+            content = reference_path.read_bytes()
         files.append(File.generated(config, document["target"], content=content))
     root = Path(config.config_file_path).resolve().parent
     for target, source in DOWNLOADS.items():

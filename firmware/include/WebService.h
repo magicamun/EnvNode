@@ -70,10 +70,15 @@ public:
     void loop() override;
 
 private:
+    bool readProvisioningSnapshot(bool module,ModuleSlot slot,ProvisioningSnapshot& out) override { return module?moduleDescriptorProvisioningService_.snapshot(slot,out):boardProvisioningService_.snapshot(out); }
     BoardIdentity provisioningBoardIdentity() const override;
+    const char* provisioningBoardBatch() const override { return boardIdentityResolution_.productionBatch; }
+    const char* provisioningBoardDate() const override { return boardIdentityResolution_.productionDate; }
     size_t provisioningProfileCount() const override;
     bool provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const override;
     bool provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const override;
+    bool provisioningProfile(BoardProfileId id, BoardRevision revision, ProvisioningBoardProfile& profile) const override;
+    BoardProvisioningResult provisionBoardPortMap(const BoardPortMap&, bool) override;
     BoardProvisioningResult provisionBoardIdentity(const BoardIdentity& identity, bool confirmed) override;
     ModuleDescriptorProvisioningResult provisionModuleDescriptor(ModuleSlot slot,
         const uint8_t* payload, size_t size, bool confirmed) override;

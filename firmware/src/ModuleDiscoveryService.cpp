@@ -81,6 +81,37 @@ void ModuleDiscoveryService::scan() {
     }
 }
 
+bool ModuleDiscoveryService::ownsHardware(const HardwareResourceAssignment& hardware) const {
+    if (hardware.kind == HardwareResourceKind::None) return false;
+    const auto& board = currentBoardProfile();
+    for (const auto& module : results_) {
+        if (!module.identified()) continue;
+        const auto* slot = boardModuleSlot(board, module.slot);
+        if (slot == nullptr) continue;
+        if (hardware.kind == HardwareResourceKind::I2C && hardware.i2c.bus == I2CBus::I2C0
+            && hardware.i2c.address == slot->identityEepromAddress) return true;
+        for (size_t index = 0; index < module.descriptor.requirementCount; ++index) {
+            const auto& requirement = module.descriptor.requirements[index];
+            if (hardware.kind == HardwareResourceKind::I2C) {
+                if (requirement.kind == HardwareDescriptorResourceKind::I2C
+                    && requirement.hasI2cAddress && hardware.i2c.address == requirement.i2cAddress
+                    && ((requirement.resource.equals("I2C0") && hardware.i2c.bus == I2CBus::I2C0)
+                        || (requirement.resource.equals("I2C1") && hardware.i2c.bus == I2CBus::I2C1))) return true;
+                continue;
+            }
+            if (requirement.kind == HardwareDescriptorResourceKind::SPI
+                && (hardware.gpio.number == board.spiClock.number
+                    || hardware.gpio.number == board.spiMiso.number
+                    || hardware.gpio.number == board.spiMosi.number)) return true;
+            if ((requirement.resource.equals("AUX_GPIO1") && hardware.gpio.number == slot->auxGpio1.number)
+                || (requirement.resource.equals("AUX_GPIO2") && hardware.gpio.number == slot->auxGpio2.number)
+                || (requirement.resource.equals("SPI_CS") && hardware.gpio.number == slot->spiChipSelect.number))
+                return true;
+        }
+    }
+    return false;
+}
+
 const char* moduleDiscoverySourceName(ModuleDiscoverySource source) {
     switch (source) {
         case ModuleDiscoverySource::Descriptor: return "Descriptor";
