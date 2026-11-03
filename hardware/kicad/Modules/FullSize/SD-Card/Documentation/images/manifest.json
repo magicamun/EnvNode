@@ -1,0 +1,10 @@
+{
+  "pcb_sha256": "921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263",
+  "renderer": "KiCad 10.0.5 pcb render; top/bottom/oblique; 20 October 2026",
+  "note": "Carrier only; no U1 3D model. Standard KiCad models retain their own licenses. EnvNode images: see root LICENSE.",
+  "images": {
+    "top.png": "f1727ccdae65ff1544b8b27588bc5f9f562006fd5316243be4b8da2d2690be34",
+    "bottom.png": "e1c143ed0f889c2e08a9ead37e2abb2396700a57246b2508beae7887ed07b0d7",
+    "oblique.png": "054c19cfeebfa8252861a45001450b63670a458662687b26b506eb5140bf3532"
+  }
+}

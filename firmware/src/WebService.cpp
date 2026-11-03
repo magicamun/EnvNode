@@ -1,3 +1,8 @@
+#include "SdCardSpiDiagnostic.h"
+#include "SdSystemLogService.h"
+#include "DiagnosticWebView.h"
+#include "SystemDiagnostics.h"
+
 #include "BoardIdentityProfiles.h"
 #include "TextUpload.h"
 #include "WebResult.h"
@@ -505,6 +510,26 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/configuration/cancel", HTTP_POST, [this]() {
         restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
     });
+    server.on("/sd-card/settings", HTTP_POST, [this]() { handleSdSettings(); });
+    server.on("/sd-card/rotation-test", HTTP_GET, [this]() { handleSdRotationPreview(); });
+    server.on("/sd-card/rotation-test", HTTP_POST, [this]() { handleSdRotationStart(); });
+    server.on("/sd-card/diagnostic-test",HTTP_POST,[this](){
+        if(!administrationAvailable()){server_.send(503,"text/plain","Unavailable");return;}
+        const auto result=recordDiagnosticTest();const bool accepted=result==DiagnosticRecordResult::Accepted;
+        const bool de=configurationService_.getLocale()==Locale::GermanGermany;
+        String content="<section class='card'><p>";
+        content+=accepted ? (de?"Diagnoseereignis angenommen. Die Datei erscheint nach dem nächsten erfolgreichen Schreibvorgang.":"Diagnostic event accepted. The file appears after the next successful write.")
+            : (de?"Diagnoseereignis nicht angenommen. Erweiterte Systemdiagnose aktivieren und SD-Karte/Puffer prüfen.":"Diagnostic event not accepted. Enable extended system diagnostics and check the SD card/buffer.");
+        content+="</p><a href='/sd-card?path=%2Flogs%2Fdiagnostics'>/logs/diagnostics</a></section>";
+        sendPage(uiText(TextId::SdCard),"/sd-card",content,accepted?200:503);
+    });
+    server.on("/sd-card/test", HTTP_POST, [this]() { handleSdTest(); });
+    server.on("/sd-card/format", HTTP_GET, [this]() { handleSdFormatPreview(); });
+    server.on("/sd-card/format", HTTP_POST, [this]() { handleSdFormat(); });
+    server.on("/sd-card/download", HTTP_GET, [this]() { handleSdDownload(); });
+    server.on("/sd-card/delete", HTTP_GET, [this]() { handleSdDeletePreview(); });
+    server.on("/sd-card/delete", HTTP_POST, [this]() { handleSdDelete(); });
+    server.on("/sd-card", HTTP_GET, [this]() { handleSdCard(); });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
     server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
@@ -528,6 +553,35 @@ void WebService::registerRoutes(WebServer& server) {
 }
 
 void WebService::loop() {
+    if(sdRotationTest_ && sdRotationTest_->done() && !sdRotationTestReported_) {
+        sdRotationTestReported_=true;
+        const auto& r=sdRotationTest_->result();
+        logger_.infof("SD rotation test: %s rotation=%u pruning=%u preserved=%u content=%u cleanup=%u step=%s errno=%d directory=%s",
+            r.passed() ? "PASS" : "FAIL",r.rotation,r.pruning,r.foreignFile,r.content,r.cleanup,r.stage,r.error,r.directory);
+        logger_.infof("SD rotation timing: elapsed_ms=%lu mount_ms=%lu write_ms=%lu verify_ms=%lu cleanup_ms=%lu",
+            static_cast<unsigned long>(r.elapsedMs),static_cast<unsigned long>(r.mountMs),
+            static_cast<unsigned long>(r.writeMs),static_cast<unsigned long>(r.verifyMs),static_cast<unsigned long>(r.cleanupMs));
+        if(!r.passed()) logger_.warnf("SD rotation memory: start_heap=%u start_largest=%u finish_heap=%u finish_largest=%u cleanup_errno=%d",
+            static_cast<unsigned>(r.startHeap),static_cast<unsigned>(r.startLargest),
+            static_cast<unsigned>(r.finishHeap),static_cast<unsigned>(r.finishLargest),r.cleanupError);
+    }
+    if(sdDirectory_ && !sdDirectory_->done() && !sdDirectorySlowReported_ && millis()-sdDirectoryStarted_>=3000) {
+        sdDirectorySlowReported_=true;
+        logger_.warnf("SD directory read slow: elapsed_ms=%lu done=%u; web loop remains active",
+            static_cast<unsigned long>(millis()-sdDirectoryStarted_),sdDirectory_->done());
+    }
+    if (sdFormat_) {
+        const auto state=sdFormat_->state();
+        if(state==SdFormatState::Running) return; // Other runtime services continue; HTTP/OTA/SD remain serialized.
+        sdFormatResult_=state;sdFormatResultAvailable_=true;
+        if(state==SdFormatState::Complete) logger_.info("SD format: PASS; FAT32 remounted and empty root verified");
+        else logger_.warnf("SD format failed: state=%u error=%d",static_cast<unsigned>(state),sdFormat_->errorCode());
+        sdFormat_.reset();
+    }
+    if (sdDownload_) {
+        if (!sdDownload_->service(millis())) sdDownload_.reset();
+        return; // Other runtime services still run; no overlapping SD/HTTP operations.
+    }
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }
@@ -1537,6 +1591,7 @@ void WebService::handleSensorEdit() {
     c.reserve(2600);
     c = (String("<section class='card'><h2>") + uiText(TextId::ConfigureSlot) + " " + "") + String(slot.slotId) + "</h2><form method='post' action='/sensors/save'><input type='hidden' name='slot' value='" + String(slot.slotId) + "'>";
     c += "<label class='choice'><input type='checkbox' name='enabled' value='1'" + String(slot.enabled ? " checked" : "") + (String(">") + uiText(TextId::Enabled) + "</label>");
+    c += renderExtendedDiagnosticsCheckbox(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),configurationService_.getLocale());
     c += (String("<label>") + uiText(TextId::Name) + "<input name='name' maxlength='") + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += (String("<label>") + uiText(TextId::Implementation) + "<select id='sensorImplementation' name='implementation'>") + options + "</select></label>";
     c += "<div id='gpioConfiguration'><label>GPIO<select name='gpio'>" + gpioOptions + (String("</select></label><p class='help'>") + uiText(TextId::AM2302UsesACustomSingleWireProtocolRain) + "</p></div>");
@@ -1582,6 +1637,7 @@ void WebService::handleActuatorEdit() {
                 + moduleActuatorToken(reference) + "'>";
             c += "<label class='choice'><input type='checkbox' name='enabled' value='1'"
                 + String((savedModule ? slot.enabled : true) ? " checked" : "") + (String(">") + uiText(TextId::Enabled) + "</label>");
+            c += renderExtendedDiagnosticsCheckbox(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),configurationService_.getLocale());
             c += (String("<label>") + uiText(TextId::Name) + "<input name='name' required maxlength='") + String(MaxActuatorSlotNameLength)
                 + "' value='" + escapeHtml(savedModule ? slot.name : String(runtime.name)) + "'></label>";
             c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveModuleActuator) + "</button><a class='button' href='/actuators'>" + uiText(TextId::Cancel) + "</a></div></form>");
@@ -1634,6 +1690,7 @@ void WebService::handleActuatorEdit() {
         + String(slot.slotId) + "'>";
     c += "<label class='choice'><input type='checkbox' name='enabled' value='1'"
         + String(slot.enabled ? " checked" : "") + (String(">") + uiText(TextId::Enabled) + "</label>");
+    c += renderExtendedDiagnosticsCheckbox(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),configurationService_.getLocale());
     c += (String("<label>") + uiText(TextId::Name) + "<input name='name' maxlength='")
         + String(MaxActuatorSlotNameLength) + "' required value='"
         + escapeHtml(slot.name) + "'></label>";
@@ -1823,6 +1880,7 @@ void WebService::handleControllerEdit() {
         + String(slot.slotId) + "'>";
     c += "<label class='choice'><input type='checkbox' name='enabled' value='1'"
         + String(slot.enabled ? " checked" : "") + (String(">") + uiText(TextId::Enabled) + "</label>");
+    c += renderExtendedDiagnosticsCheckbox(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),configurationService_.getLocale());
     c += (String("<label>") + uiText(TextId::Name) + "<input name='name' maxlength='") + String(MaxControllerSlotNameLength)
         + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += (String("<label>") + uiText(TextId::Implementation) + "<select id='controllerImplementation' name='implementation'>")
@@ -2054,6 +2112,7 @@ void WebService::handleSensorSave() {
     if (ok) {
         slot = configurationService_.getConfiguration().sensorSlots[requestedSlot - 1];
         slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
+        slot.extendedDiagnostics=extendedDiagnosticsChoice(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),server_.arg("extendedDiagnosticsEditable")=="1",server_.hasArg("extendedDiagnostics"));
         slot.name = server_.arg("name");
         slot.implementation = metadata->implementation;
         slot.schedule = metadata->defaultSchedule;
@@ -2162,6 +2221,7 @@ void WebService::handleActuatorSave() {
             slot.moduleTarget = reference;
             slot.name = server_.arg("name");
             slot.enabled = server_.arg("enabled") == "1";
+            slot.extendedDiagnostics=extendedDiagnosticsChoice(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),server_.arg("extendedDiagnosticsEditable")=="1",server_.hasArg("extendedDiagnostics"));
             slot.implementation = ActuatorImplementation::GpioOnOff;
             slot.hardware = HardwareResourceAssignment::none();
             if (ok) ok = configurationService_.setActuatorSlotConfiguration(slot);
@@ -2181,6 +2241,7 @@ void WebService::handleActuatorSave() {
     if (ok) {
         slot = configurationService_.getConfiguration().actuatorSlots[requestedSlot - 1];
         slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
+        slot.extendedDiagnostics=extendedDiagnosticsChoice(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),server_.arg("extendedDiagnosticsEditable")=="1",server_.hasArg("extendedDiagnostics"));
         slot.name = server_.arg("name");
         slot.implementation = metadata->implementation;
         slot.hardware = HardwareResourceAssignment::none();
@@ -2284,6 +2345,7 @@ void WebService::handleControllerSave() {
     if (ok) {
         slot = configurationService_.getConfiguration().controllerSlots[requestedSlot - 1];
         slot.enabled = server_.hasArg("enabled") && server_.arg("enabled") == "1";
+        slot.extendedDiagnostics=extendedDiagnosticsChoice(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),server_.arg("extendedDiagnosticsEditable")=="1",server_.hasArg("extendedDiagnostics"));
         slot.name = server_.arg("name");
         slot.implementation = metadata->implementation;
         if (slot.implementation == ControllerImplementation::Blink) {
@@ -2543,6 +2605,8 @@ String WebService::renderHardwareOverview() {
                     resourceText += String(binding.gpio.number);
                 } else if (binding.kind == HardwareDescriptorResourceKind::I2C) {
                     resourceText += i2cBusName(binding.i2cBus);
+                } else if (binding.kind == HardwareDescriptorResourceKind::SPI) {
+                    resourceText += "SPI (SCK=GPIO"+String(binding.spiClock.number)+", MISO=GPIO"+String(binding.spiMiso.number)+", MOSI=GPIO"+String(binding.spiMosi.number)+")";
                 } else if (binding.kind == HardwareDescriptorResourceKind::Power) {
                     resourceText += "+5V";
                 } else resourceText += uiText(TextId::Resolved);
@@ -2556,9 +2620,11 @@ String WebService::renderHardwareOverview() {
                 parameters += entry.hasSafeLevel
                     ? (entry.safeLevelHigh ? "high" : "low") : "—";
             }
+            if(entry.kind==HardwareDescriptorDeviceKind::Infrastructure && !strcmp(moduleDeviceDriverName(entry.driver),"sd-spi"))
+                parameters=entry.hasActiveLevel ? (entry.activeLevelHigh ? "cardDetect=high" : "cardDetect=low") : "—";
             const String capability = entry.capabilities.contains(
                 HardwareDescriptorCapabilityCode::ActuatorOnOff)
-                ? String("actuator.on-off") : String("—");
+                ? String("actuator.on-off") : entry.capabilities.contains(HardwareDescriptorCapabilityCode::StorageSd) ? String("storage.sd") : String("—");
             c += "<tr><td>" + String(moduleSlotName(slot)) + "</td><td>";
             c += escapeHtml(descriptorText(entry.id));
             c += "</td><td>" + String((entry.kind == HardwareDescriptorDeviceKind::Sensor ? uiText(TextId::Sensor) : entry.kind == HardwareDescriptorDeviceKind::Actuator ? uiText(TextId::Actuator) : uiText(TextId::Infrastructure)));

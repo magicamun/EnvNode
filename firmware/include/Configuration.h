@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "BaseConfiguration.h"
+#include "SdStorageConfiguration.h"
 #include "MeasurementType.h"
 #include "GeoPosition.h"
 #include "PressureReduction.h"
@@ -40,6 +41,7 @@ struct PresentationConfiguration {
 };
 
 struct Configuration {
+    SdStorageConfiguration sdStorage;
     ValueConfiguration values;
     DisplayConfiguration display;
     DeviceConfiguration device;

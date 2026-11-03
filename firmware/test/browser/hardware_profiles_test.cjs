@@ -94,7 +94,7 @@ async function test(name, run) { await run();++tests;console.log('PASS',name); }
     for(const file of fs.readdirSync(assets).filter(n=>n.endsWith('.cbor')))assert.equal(c.sha256(bytes(file)),hash(bytes(file)));
   });
   await test('all catalog entries preserve exact raw metadata for upload',()=>{
-    const c=context(),entries=c.EnvNodeHardwareProfiles.decodeCatalog(bytes('provisioning-catalog.cbor'));assert.equal(entries.length,6);
+    const c=context(),entries=c.EnvNodeHardwareProfiles.decodeCatalog(bytes('provisioning-catalog.cbor'));assert.equal(entries.length,7);assert.ok(entries.some(e=>e.id==='sd-card-0.1'&&e.kind===1));
     for(const e of entries){assert.equal(hash(bytes(e.filename)),e.digest);assert.ok(e.raw.length<1024);}
   });
   await test('malformed, noncanonical, duplicate and unsafe catalogs are rejected',()=>{
@@ -115,7 +115,7 @@ async function test(name, run) { await run();++tests;console.log('PASS',name); }
   });
   await test('failed refresh preserves catalog and checked offline cache',async()=>{
     const c=context(),t=transport(c),client=c.EnvNodeHardwareProfiles.createClient(t.fetch);const [entry]=await client.refresh();await client.prepare(entry.key);t.offline=true;
-    await assert.rejects(client.refresh(),/Offline/);assert.equal(client.entries().length,6);await client.prepare(entry.key);
+    await assert.rejects(client.refresh(),/Offline/);assert.equal(client.entries().length,7);await client.prepare(entry.key);
   });
   await test('conflicting identity and stale selections are rejected',async()=>{
     const c=context(),t=transport(c),client=c.EnvNodeHardwareProfiles.createClient(t.fetch);const list=await client.refresh(),next=list.map(fields);next[0][1]='Conflicting';t.files.set('provisioning-catalog.cbor',Uint8Array.from(encode([1,next])));
@@ -126,7 +126,7 @@ async function test(name, run) { await run();++tests;console.log('PASS',name); }
     await assert.rejects(client.refresh(),/ProvisioningLocked/);await assert.rejects(client.prepare(client.entries()[0].key),/ProvisioningLocked/);assert.equal(t.calls.filter(x=>x.url.startsWith('https:')).length,before);
   });
   await test('UI loads catalog, switches module fields and resets confirmation',async()=>{
-    const c=context(),t=transport(c),u=ui(c,t);await idle(u);assert.equal(u.doc.items['remote-profile-key'].children.length,6);
+    const c=context(),t=transport(c),u=ui(c,t);await idle(u);assert.equal(u.doc.items['remote-profile-key'].children.length,7);
     const module=u.client.entries().find(e=>e.kind);u.doc.items['remote-profile-key'].value=module.key;u.doc.items['remote-profile-confirm'].checked=true;u.doc.items['remote-profile-key'].fire('change');
     assert.equal(u.doc.items['remote-module-fields'].hidden,false);assert.equal(u.doc.items['remote-profile-serial'].maxLength,64);assert.equal(u.doc.items['remote-profile-confirm'].checked,false);
   });

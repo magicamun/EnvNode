@@ -25,6 +25,11 @@ public:
         return found == arguments.end() ? String() : found->second;
     }
     uint16_t port;
+    std::function<void()> onHandleClient;
+    uint32_t writeDelayMs=0;
+    String currentUri;
+    String uri() {return currentUri;}
+    virtual ~WebServer()=default;
     std::vector<Route> routes;
     bool started = false;
     int handled = 0, responseStatus = 0;
@@ -36,22 +41,27 @@ public:
         routes.push_back({path, method, handler});
     }
     void begin() { started = true; }
-    void handleClient() { ++handled; }
+    void handleClient() { ++handled;if(onHandleClient) onHandleClient(); }
     void setContentLength(size_t size) { declaredLength = size; }
     void send(int status, const char* type, const String& body) {
+        _currentClientWrite(body.c_str(),body.length());
         responseStatus = status; responseType = type; responseBody = body.c_str();
         chunks.clear(); chunks.emplace_back(body.c_str());
     }
-    void sendContent(const String& body) { responseBody += body.c_str(); chunks.emplace_back(body.c_str()); }
-    void sendContent(const char* body, size_t size) { responseBody.append(body, size); chunks.emplace_back(body, size); }
+    void sendContent(const String& body) { _currentClientWrite(body.c_str(),body.length());responseBody += body.c_str(); chunks.emplace_back(body.c_str()); }
+    void sendContent(const char* body, size_t size) { _currentClientWrite(body,size);responseBody.append(body, size); chunks.emplace_back(body, size); }
     void sendHeader(const char* key, const char* value, bool = false) {
         if (std::string(key) == "Cache-Control") cacheControl = value;
     }
     void send_P(int status, const char* type, const char* body, size_t size) {
+        _currentClientWrite_P(body,size);
         responseStatus = status; responseType = type; responseBody.assign(body, size);
     }
     bool request(const char* path, HTTPMethod method) {
-        for (auto& route : routes) if (route.path == path && route.method == method) { route.handler(); return true; }
+        for (auto& route : routes) if (route.path == path && route.method == method) { currentUri=path;route.handler();currentUri=String(); return true; }
         return false;
     }
+protected:
+    virtual size_t _currentClientWrite(const char*,size_t size) {delay(writeDelayMs);return size;}
+    virtual size_t _currentClientWrite_P(const char*,size_t size) {delay(writeDelayMs);return size;}
 };

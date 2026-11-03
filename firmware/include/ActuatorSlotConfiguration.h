@@ -12,6 +12,7 @@ namespace EnvNode {
 struct ActuatorSlotConfiguration {
     ActuatorId slotId = InvalidActuatorId;
     bool enabled = false;
+    bool extendedDiagnostics = false;
     String name;
     ActuatorImplementation implementation = ActuatorImplementation::None;
     HardwareResourceAssignment hardware;

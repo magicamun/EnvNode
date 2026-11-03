@@ -1,6 +1,6 @@
 // EnvNode: see repository LICENSE.
 #pragma once
-#include <WebServer.h>
+#include "MeasuredWebServer.h"
 #include <functional>
 #include "IWebRoutes.h"
 #include "IWiFiService.h"
@@ -19,6 +19,7 @@ public:
 private:
     ILogger& logger_;
     IWiFiService& wifi_;
-    WebServer server_;
+    MeasuredWebServer server_;
+    uint32_t headerRenderMs_=0;
 };
 }

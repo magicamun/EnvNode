@@ -79,7 +79,8 @@ size_t ModuleActuatorComposer::compose(
              index < inventoryCount && count_ < MaxActuatorSlotCount;
              ++index) {
             const ModuleDeviceInventoryEntry& entry = inventory[index];
-            if (entry.status != ModuleDeviceInventoryStatus::Ready) continue;
+            if (entry.kind != HardwareDescriptorDeviceKind::Actuator
+                || entry.status != ModuleDeviceInventoryStatus::Ready) continue;
             const ModuleDeviceBindingResolution* output = outputBinding(entry);
             if (output == nullptr) continue;
             const HardwareResourceAssignment hardware =

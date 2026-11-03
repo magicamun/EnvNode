@@ -24,13 +24,14 @@ bool matches(
 
 bool supportedDriver(const DescriptorContract& driver) {
     return driver.apiVersion == 1
-        && matches(driver.id,
+        && (matches(driver.id,
             static_cast<uint8_t>(HardwareDescriptorDriverCode::GpioOnOff),
-            "org.envnode.driver.gpio-on-off");
+            "org.envnode.driver.gpio-on-off")
+            || (!driver.id.coded && driver.id.text.equals("org.envnode.driver.sd-spi")));
 }
 
 bool supportedCapability(const DescriptorIdentifier& capability) {
-    return matches(capability,
+    return (!capability.coded && capability.text.equals("storage.sd")) || matches(capability,
         static_cast<uint8_t>(HardwareDescriptorCapabilityCode::ActuatorOnOff),
         "actuator.on-off");
 }
@@ -138,6 +139,20 @@ HardwareDescriptorCompatibilityResult evaluateModuleDescriptorCompatibility(
             result.status = HardwareDescriptorCompatibilityStatus::ResourceCapabilityMismatch;
             return result;
         }
+        if(requirement.resource.equals("SPI")) {
+            if(requirement.kind!=HardwareDescriptorResourceKind::SPI) {
+                result.status=HardwareDescriptorCompatibilityStatus::ResourceKindMismatch;return result;
+            }
+            const auto* clock=gpioCapability(board,board.spiClock);
+            const auto* miso=gpioCapability(board,board.spiMiso);
+            const auto* mosi=gpioCapability(board,board.spiMosi);
+            if(!clock || !miso || !mosi || !hasGpioCapabilities(clock->capabilities,GpioCapability::DigitalOutput)
+                || !hasGpioCapabilities(miso->capabilities,GpioCapability::DigitalInput)
+                || !hasGpioCapabilities(mosi->capabilities,GpioCapability::DigitalOutput)) {
+                result.status=HardwareDescriptorCompatibilityStatus::ResourceUnavailable;return result;
+            }
+            continue;
+        }
         if (requirement.resource.equals("I2C0") || requirement.resource.equals("I2C1")) {
             if (requirement.kind != HardwareDescriptorResourceKind::I2C) {
                 result.status = HardwareDescriptorCompatibilityStatus::ResourceKindMismatch;
@@ -176,12 +191,14 @@ HardwareDescriptorCompatibilityResult evaluateModuleDescriptorCompatibility(
             return result;
         }
         const BoardGpioCapability* available = gpioCapability(board, gpio);
-        if (available == nullptr) {
+        // A dedicated slot CS may intentionally be absent from the manual GPIO list.
+        const bool dedicatedCs=requirement.resource.equals("SPI_CS");
+        if (available == nullptr && !dedicatedCs) {
             result.status = HardwareDescriptorCompatibilityStatus::ResourceUnavailable;
             return result;
         }
         const GpioCapability required = requiredGpioCapabilities(requirement.capabilities);
-        if (!hasGpioCapabilities(available->capabilities, required)) {
+        if (!hasGpioCapabilities(available ? available->capabilities : GpioCapability::DigitalOutput, required)) {
             result.status = HardwareDescriptorCompatibilityStatus::ResourceCapabilityMismatch;
             return result;
         }

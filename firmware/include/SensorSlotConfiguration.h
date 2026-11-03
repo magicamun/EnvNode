@@ -74,6 +74,7 @@ struct SensorImplementationConfiguration {
 struct SensorSlotConfiguration {
     SensorId slotId = InvalidSensorId;
     bool enabled = false;
+    bool extendedDiagnostics = false;
     String name;
     SensorImplementation implementation = SensorImplementation::None;
     SensorSchedule schedule;

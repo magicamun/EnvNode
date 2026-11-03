@@ -1,5 +1,11 @@
 # TODO
 
+- [x] SD-Card Rev. 0.1: Bausatz ENK-00022 und InvenTree-BOM mit sechs Positionen (je 1× PCB ENP-00137, U1 ENP-00136, U2 ENP-00102, C1 ENP-00006, R1 ENP-00018 und J1 ENP-00059) angelegt und validiert. Mitgelieferte U1-Stiftleiste wird nicht zusätzlich gezählt.
+
+- [ ] SD-Card: Bestellte Distanzhülsen erst nach Prüfung durch den Nutzer in Bestand und BOM aufnehmen; bis dahin ausdrücklich ausgeschlossen. Die Adafruit-Herstellerverknüpfung bleibt separat offen.
+
+- [x] SD-Card: Modulprofil/Provisioning, automatische Slot-Erkennung, Geräteinventar, Systemlog und allgemeine Diagnoseschnittstelle integriert; physischer Schreib-/Lesetest, gültige Diagnose-JSONL, Neustartpersistenz und Download bestätigt. Web-Sendelatenz bleibt separat offen.
+
 - [x] Controller-Zielauswahl: konfigurierten Aktor-Slot und automatisch erkanntes Modulrelais bei identischer Hardware als einen Eintrag mit Benutzername und Modulzuordnung anzeigen. Auch die exklusive Zielbelegung muss beide Referenzarten als dasselbe Ziel erkennen. Bestehende gespeicherte Referenzen kompatibel halten.
 
 - [ ] In einem separaten Thread eine Benutzerdokumentation der Web-Oberfläche erstellen: Seiten und Felder, Speichern/Anwenden/Neustart, Values und Neustartverhalten, Hysterese/Selector sowie Display-Quellen und Übersetzungen. RainControl als durchgängiges Konfigurationsbeispiel verwenden.
@@ -13,7 +19,7 @@
 - Versionsstand je Release-/Versionscommit dokumentieren, einschließlich Quellcommit und Zielhardware.
 - Zugehörige geprüfte Binärdateien mit Prüfsummen und Flash-/Updatehinweisen bereitstellen.
 - Unterstützte Boardrevisionen und bekannte Einschränkungen pro Release festhalten.
-- Für SD-Card 0.1 danach die geprüfte Firmware-Mindestversion in Hardwareanleitung und Kompatibilität ergänzen.
+- Für SD-Card 0.1 gilt Profilminimum 0.8.6 mit zusätzlicher Prüfung des SD-Betriebstreibers. Den zugehörigen Release-/Buildstand bei Veröffentlichung eindeutig angeben; ältere Builds derselben Versionsnummer können noch ohne SD-Treiber sein.
 
 Vorgemerkt am 28.10.2026; Umsetzung als separater Schritt nach der Hardware-Dokumentation.
 

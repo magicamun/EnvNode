@@ -25,6 +25,7 @@ uint8_t capabilityCode(const DescriptorIdentifier& identifier) {
     if (identifier.text.equals("actuator.on-off")) return static_cast<uint8_t>(HardwareDescriptorCapabilityCode::ActuatorOnOff);
     if (identifier.text.equals("sensor.pressure")) return static_cast<uint8_t>(HardwareDescriptorCapabilityCode::SensorPressure);
     if (identifier.text.equals("sensor.current")) return static_cast<uint8_t>(HardwareDescriptorCapabilityCode::SensorCurrent);
+    if (identifier.text.equals("storage.sd")) return static_cast<uint8_t>(HardwareDescriptorCapabilityCode::StorageSd);
     return 0;
 }
 

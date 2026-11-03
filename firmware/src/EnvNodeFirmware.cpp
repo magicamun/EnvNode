@@ -44,6 +44,10 @@
 #include "MqttDescriptionPublisher.h"
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
+#include "SdSystemLogService.h"
+#include "SystemDiagnostics.h"
+#include "SdModuleActivation.h"
+#include "SdStorageArbiter.h"
 #include "SystemLogTimeProvider.h"
 #include "IdentityEeprom24LC32.h"
 #include "BoardIdentityResolver.h"
@@ -59,7 +63,13 @@ static ArduinoMonotonicClock monotonicClock;
 static SystemLogTimeProvider logTimeProvider(monotonicClock);
 static RecentLogStore recentLogStore;
 static SerialLogger serialLogSink;
-static StructuredLogger logger(recentLogStore, logTimeProvider, serialLogSink);
+class SystemLogOutputs : public ILogEntrySink {
+public:
+    void begin(unsigned long baud) override {serialLogSink.begin(baud);}
+    void write(const LogEntry& entry) override {serialLogSink.write(entry);enqueueSdSystemLog(entry);}
+};
+static SystemLogOutputs systemLogOutputs;
+static StructuredLogger logger(recentLogStore, logTimeProvider, systemLogOutputs);
 static ActuatorFactory actuatorFactory(logger);
 static ActuatorRuntime actuatorRuntime(actuatorFactory, logger);
 static I2CBusManager i2cBusManager(logger, EnvNodeIdentityI2C);
@@ -206,7 +216,10 @@ void setupEnvNodeFirmware() {
     };
     configurationService.setModuleHardwareResolver(moduleOccupancy);
     actuatorRuntime.setModuleHardwareResolver(moduleOccupancy);
+    configurationService.setSdModuleResolver([](SdStorageConfiguration& sd){applyDiscoveredSdModule(moduleDiscoveryService,sd);});
     configurationService.loadConfiguration();
+    const auto& sd=configurationService.getConfiguration().sdStorage;
+    if(sd.automatic) logger.infof("SD module: slot=%s automatic=1 enabled=%u conflict=%u",moduleSlotName(sd.slot),sd.enabled,sd.moduleConflict);
     valueRuntime.begin();
     const Configuration& configuration = configurationService.getConfiguration();
     moduleActuatorComposer.compose(
@@ -220,16 +233,21 @@ void setupEnvNodeFirmware() {
     const bool sensorsInitialized = sensorRuntime.initialize(
         activeSensorCount, sensorFailureReason);
     app.setup(true);
+    beginSdSystemLog(configuration,actuatorRuntime,recentLogStore,logger,logTimeProvider);
     if (!sensorsInitialized) {
         logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
     }
+
     normalRuntimeStarted = true;
 }
 
 void loopEnvNodeFirmware() {
     if (normalRuntimeStarted) {
         app.loop();
+        setSdRuntimeStable(!runtimeManager.restartRequired());
+        serviceSdSystemLog(configurationService.getConfiguration(),actuatorRuntime,logger);
+        serviceSystemDiagnostics();
     }
 }
 

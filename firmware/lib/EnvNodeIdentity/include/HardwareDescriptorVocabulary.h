@@ -92,6 +92,7 @@ enum class HardwareDescriptorCapabilityCode : uint8_t {
     ActuatorOnOff = 5,
     SensorPressure = 6,
     SensorCurrent = 7,
+    StorageSd = 8,
 };
 
 } // namespace EnvNode

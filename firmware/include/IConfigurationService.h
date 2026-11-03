@@ -19,6 +19,7 @@ public:
         return getConfiguration().network;
     }
 
+    virtual bool setSdStorageConfiguration(const SdStorageConfiguration&) { return false; }
     virtual bool setPressureReduction(const PressureReductionConfiguration& configuration) { return false; }
     virtual bool setGeoPosition(const GeoPosition& position) { return false; }
     virtual bool setDeviceName(const String& deviceName) override = 0;
