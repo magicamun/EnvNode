@@ -24,6 +24,12 @@ def publish(target):
     title, environment, header = TARGETS[target]
     version = re.search(r'FirmwareVersion\s*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"',
                         (ROOT / "firmware" / header).read_text())[1]
+    tag = f"firmware-{target}-{version}"
+    releases = json.loads(run("gh", "api", "--paginate", "--slurp", "repos/{owner}/{repo}/releases"))
+    existing = [r for page in releases for r in page if r["tag_name"] == tag]
+    if any(not release["draft"] for release in existing):
+        print(f"{title} {version} already published; keeping its original assets and notes.")
+        return
     notes = (ROOT / "docs/firmware-releases" / target / f"{version}.md").read_text().strip()
     if not notes:
         raise ValueError("Release notes must not be empty")
@@ -32,18 +38,16 @@ def publish(target):
     metadata = dict(target=target, version=version, commit=run("git", "rev-parse", "HEAD"),
                     built_at=datetime.now(timezone.utc).isoformat(), filename=filename,
                     sha256=hashlib.sha256(binary.read_bytes()).hexdigest(), notes=notes)
-    tag = f"firmware-{target}-{version}"
-    releases = json.loads(run("gh", "api", "--paginate", "--slurp", "repos/{owner}/{repo}/releases"))
-    existing = [r for page in releases for r in page if r["tag_name"] == tag]
     with tempfile.TemporaryDirectory() as directory:
         manifest = Path(directory) / "firmware.json"
         manifest.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n")
         if not existing:
             run("gh", "release", "create", tag, "--target", metadata["commit"],
-                "--title", f"{title} {version}", "--latest=false", "--notes", notes + "\n\nLizenz: siehe LICENSE im Repository.")
+                "--title", f"{title} {version}", "--draft", "--latest=false", "--notes", notes + "\n\nLizenz: siehe LICENSE im Repository.")
         else:
             run("gh", "release", "edit", tag, "--notes", notes + "\n\nLizenz: siehe LICENSE im Repository.")
         run("gh", "release", "upload", tag, str(binary), str(manifest), str(ROOT / "LICENSE"), "--clobber")
+        run("gh", "release", "edit", tag, "--draft=false", "--latest=false")
 
 
 def catalog():

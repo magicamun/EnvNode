@@ -16,12 +16,20 @@ Commitliste einfügen. Historische Versionen werden erst ab Einführung dieses
 Workflows gesammelt; alte Images werden nicht nachträglich aus ungeprüften Ständen gebaut.
 
 GitHub Releases `firmware-<ziel>-<version>` halten Anwendungsimage, LICENSE und
-`firmware.json` mit Commit, UTC-Zeit, Prüfsumme und Beschreibung. Derselbe
-Versionsstand wird beim nächsten erfolgreichen Lauf überschrieben. Der Release-Tag
-markiert den ersten veröffentlichten Stand dieser Version; für den konkreten
-Download ist der Commit in `firmware.json` beziehungsweise auf der Downloadseite
-maßgeblich. Alte Versionen bleiben erhalten. Die Dateien auf docs.envnode.de
-verlinken auf diese Release-Assets.
+`firmware.json` mit Commit, UTC-Zeit, Prüfsumme und Beschreibung. Jede neue
+Versionsnummer (einschließlich Patch-Version) wird einmal veröffentlicht. Bereits
+veröffentlichte Versionen werden vollständig übersprungen; Image, Beschreibung und
+Metadaten bleiben erhalten. Für eine neue öffentliche Firmware ist daher die
+Versionsnummer im jeweiligen Header zu erhöhen und eine Änderungsbeschreibung
+hinzuzufügen. Git-Commits ohne Versionsänderung dürfen weiterhin gepusht werden,
+veröffentlichen aber kein neues Firmware-Image.
+
+Neue Releases bleiben bis zum erfolgreichen Asset-Upload als Entwurf verborgen.
+Ein unterbrochener Upload kann beim nächsten Lauf fortgesetzt werden. Bereits
+veröffentlichte Versionen aus dem bisherigen Ablauf bleiben unverändert erhalten.
+Lokale Builds exportieren weiterhin den aktuellen Entwicklungsstand nach
+`firmware/bin/` und ersetzen dort die Datei derselben Version. Alte öffentliche
+Versionen bleiben erhalten; docs.envnode.de verlinkt die Release-Assets.
 
 Lokale Vorschau ohne Netzwerk: `python tools/firmware_downloads.py preview`.
 Der Workflow ersetzt die Platzhalterseite mit dem vollständigen Release-Katalog.
