@@ -19,7 +19,8 @@ SensorRuntime::SensorRuntime(
     , measurements_(measurements)
     , clock_(clock)
     , activePressure_(new (std::nothrow) ActivePressureConfiguration)
-    , composedSensors_(new (std::nothrow) SeaLevelPressureSensor[MaxSensorSlotCount]) {
+    , composedSensors_(new (std::nothrow) SeaLevelPressureSensor[MaxSensorSlotCount])
+    , humiditySensors_(new (std::nothrow) HumidityDerivedSensor[MaxSensorSlotCount]) {
 }
 
 bool SensorRuntime::construct(
@@ -29,8 +30,8 @@ bool SensorRuntime::construct(
     size_t& activeSensorCount,
     const char*& failureReason) {
     activeSensorCount = 0;
-    if (!composedSensors_ || !activePressure_) {
-        failureReason = "Pressure composition allocation failed";
+    if (!composedSensors_ || !humiditySensors_ || !activePressure_) {
+        failureReason = "Derived sensor composition allocation failed";
         return false;
     }
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
@@ -65,8 +66,9 @@ bool SensorRuntime::registerComposition(
         }
         composedSensors_[index].bind(*sensors[index], activePressure_->position,
             activePressure_->reduction, measurements_, clock_);
+        humiditySensors_[index].bind(composedSensors_[index]);
         const SensorRegistrationResult registration = sensorManager_.registerSensor(
-            composedSensors_[index],
+            humiditySensors_[index],
             slot.schedule,
             SensorRegistrationMetadata(
                 slot.name.c_str(),

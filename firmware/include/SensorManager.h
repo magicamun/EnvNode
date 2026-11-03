@@ -56,6 +56,10 @@ struct SensorRuntimeInfo {
     bool supportsTemperature = false;
     bool supportsRelativeHumidity = false;
     bool supportsAtmosphericPressure = false;
+    bool supportsDewPoint = false;
+    bool supportsAbsoluteHumidity = false;
+    bool supportsSolarAzimuth = false;
+    bool supportsSolarElevation = false;
     bool supportsSeaLevelPressure = false;
     bool supportsSolarIrradiance = false;
     bool supportsSolarCellTemperature = false;

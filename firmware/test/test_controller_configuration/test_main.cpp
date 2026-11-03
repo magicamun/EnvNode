@@ -600,7 +600,7 @@ void test_threshold_web_measurements_are_scoped_to_selected_sensor_implementatio
         fixture.service.getConfiguration().sensorSlots[3];
     count = thresholdMeasurementTypesForSensor(
         temperatureAndHumidity, types, MaxImplementationMeasurementTypeCount);
-    TEST_ASSERT_EQUAL_UINT32(2, count);
+    TEST_ASSERT_EQUAL_UINT32(4, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
         static_cast<int>(types[0]));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),
@@ -616,7 +616,7 @@ void test_threshold_web_bme280_measurements_are_compatible_unique_state_values()
     MeasurementType types[MaxImplementationMeasurementTypeCount];
     const size_t count = thresholdMeasurementTypesForSensor(
         bme280, types, MaxImplementationMeasurementTypeCount);
-    TEST_ASSERT_EQUAL_UINT32(4, count);
+    TEST_ASSERT_EQUAL_UINT32(6, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
         static_cast<int>(types[0]));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),

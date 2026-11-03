@@ -5,7 +5,7 @@
 namespace EnvNode {
 namespace {
 
-constexpr size_t ImplementationCount = 9;
+constexpr size_t ImplementationCount = 10;
 
 const SensorImplementationMetadata* implementations() {
     static const SensorImplementationMetadata registeredImplementations[ImplementationCount] = {
@@ -26,7 +26,7 @@ const SensorImplementationMetadata* implementations() {
             HardwareInterfaceKind::Simulation, GpioCapability::None, "Firmware simulation", SensorSchedule::periodic(10000),
             "No implementation-specific configuration"},
         {SensorImplementation::AM2302, "am2302", "AM2302 / DHT22",
-            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 2,
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::DewPoint, MeasurementType::AbsoluteHumidity}, 4,
             HardwareInterfaceKind::GPIO, GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::InternalPullup, "Custom single-wire protocol", SensorSchedule::periodic(5000),
             "AM2302Configuration: GPIO resource"},
         {SensorImplementation::RainGauge, "rain_gauge", "Rain Gauge",
@@ -34,17 +34,21 @@ const SensorImplementationMetadata* implementations() {
             HardwareInterfaceKind::GPIO, GpioCapability::DigitalInput | GpioCapability::Interrupt | GpioCapability::InternalPullup, "Digital interrupt", SensorSchedule::eventOnly(true),
             "RainGaugeConfiguration: GPIO, millimetres per tip, debounce"},
         {SensorImplementation::BME280, "bme280", "BME280",
-            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::AtmosphericPressure, MeasurementType::SeaLevelPressure}, 4,
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::AtmosphericPressure, MeasurementType::SeaLevelPressure, MeasurementType::DewPoint, MeasurementType::AbsoluteHumidity}, 6,
             HardwareInterfaceKind::I2C, GpioCapability::None, "I2C", SensorSchedule::periodic(5000),
             "BME280Configuration: I2C bus and address"},
         {SensorImplementation::SHT4x, "sht4x", "SHT4x",
-            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 2,
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::DewPoint, MeasurementType::AbsoluteHumidity}, 4,
             HardwareInterfaceKind::I2C, GpioCapability::None, "I2C", SensorSchedule::periodic(5000),
             "SHT4xConfiguration: I2C bus and address"},
         {SensorImplementation::SHTC3, "shtc3", "SHTC3",
-            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::Unknown}, 2,
+            SensorProvenance::Physical, {MeasurementType::Temperature, MeasurementType::RelativeHumidity, MeasurementType::DewPoint, MeasurementType::AbsoluteHumidity}, 4,
             HardwareInterfaceKind::I2C, GpioCapability::None, "I2C", SensorSchedule::periodic(5000),
             "SHTC3Configuration: I2C bus and fixed address 0x70"},
+        {SensorImplementation::SolarPosition, "solar_position", "Solar Position",
+            SensorProvenance::Calculated, {MeasurementType::SolarAzimuth, MeasurementType::SolarElevation}, 2,
+            HardwareInterfaceKind::Calculated, GpioCapability::None, "Location and UTC", SensorSchedule::periodic(60000),
+            "Uses configured latitude/longitude and synchronized UTC; no hardware"},
     };
     return registeredImplementations;
 }

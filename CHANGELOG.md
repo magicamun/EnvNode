@@ -4,6 +4,12 @@
 
 ### Added
 
+- Derive dew point and absolute humidity only from paired temperature/humidity
+  values of one sensor instance and acquisition. Add a configurable virtual
+  Solar Position slot using location and UTC, with geometric azimuth/elevation.
+  Publish all four channels through MQTT, Home Assistant Discovery and properties.
+  Expand implementation metadata to six channels and discovery masks to 32 bits.
+
 - EnvNode 0.8.6 / Testboard 0.8.3: display freshly read board/module EEPROM
   identity and manufacturing fields beside the planned write. Add explicit
   refresh/adoption and a before/after summary. Re-read and compare the complete

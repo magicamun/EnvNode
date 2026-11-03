@@ -700,7 +700,8 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
     if (slot.implementation == SensorImplementation::None) {
         return slot.hardware.kind == HardwareResourceKind::None;
     }
-    if (metadata->interfaceKind == HardwareInterfaceKind::Simulation) {
+    if (metadata->interfaceKind == HardwareInterfaceKind::Simulation
+        || metadata->interfaceKind == HardwareInterfaceKind::Calculated) {
         return slot.hardware.kind == HardwareResourceKind::None;
     }
     if (BoardCapabilities::current().validate(metadata->interfaceKind, slot.hardware,

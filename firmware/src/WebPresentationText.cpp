@@ -7,6 +7,10 @@ const char* webMeasurementName(Locale locale, MeasurementType value) {
     switch (value) {
         case MeasurementType::Temperature: return webText(locale, TextId::Temperature);
         case MeasurementType::RelativeHumidity: return webText(locale, TextId::RelativeHumidity);
+        case MeasurementType::DewPoint: return webText(locale, TextId::DewPoint);
+        case MeasurementType::AbsoluteHumidity: return webText(locale, TextId::AbsoluteHumidity);
+        case MeasurementType::SolarAzimuth: return webText(locale, TextId::SolarAzimuth);
+        case MeasurementType::SolarElevation: return webText(locale, TextId::SolarElevation);
         case MeasurementType::SeaLevelPressure: return webText(locale, TextId::SeaLevelPressure);
         case MeasurementType::AtmosphericPressure: return webText(locale, TextId::AtmosphericPressure);
         case MeasurementType::SolarIrradiance: return webText(locale, TextId::SolarIrradiance);
@@ -39,6 +43,8 @@ const char* webUnitName(Locale locale, PresentationUnit value) {
         case PresentationUnit::Ratio: return webText(locale, TextId::Ratio);
         case PresentationUnit::Millimeter: return webText(locale, TextId::Millimetre);
         case PresentationUnit::Metre: return webText(locale, TextId::Metre);
+        case PresentationUnit::GramPerCubicMetre: return webText(locale, TextId::GramPerCubicMetre);
+        case PresentationUnit::Degree: return webText(locale, TextId::Degree);
         case PresentationUnit::Centimetre: return webText(locale, TextId::Centimetre);
         case PresentationUnit::None: return webText(locale, TextId::None);
         default: return UnitConverter::displayName(value);

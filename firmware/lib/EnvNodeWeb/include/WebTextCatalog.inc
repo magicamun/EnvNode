@@ -777,3 +777,17 @@ ENVNODE_WEB_TEXT(DecimalInputHelp, "Use a decimal point, for example 48.137154. 
 ENVNODE_WEB_TEXT(ExternalBoardIdentityWriteNotice, "Writes permanent identity data to the connected target EEPROM. The tester configuration remains unchanged.", "Schreibt dauerhafte Identitätsdaten in das EEPROM des angeschlossenen Prüflings. Die Konfiguration des Testers bleibt erhalten.")
 ENVNODE_WEB_TEXT(ExternalBoardIdentityWritten, "Target identity written and read back. No tester restart required.", "Identität des Prüflings geschrieben und zurückgelesen. Kein Neustart des Testers erforderlich.")
 ENVNODE_WEB_TEXT(ProvisioningLockedDuringConnectorTest, "Connector test running. Provisioning is locked until completion or abort.", "Anschlusstest läuft. Provisioning ist bis zum Ende oder Abbruch gesperrt.")
+
+ENVNODE_WEB_TEXT(DewPoint, "Dew Point (derived)", "Taupunkt (abgeleitet)")
+
+ENVNODE_WEB_TEXT(AbsoluteHumidity, "Absolute Humidity (derived)", "Absolute Feuchte (abgeleitet)")
+
+ENVNODE_WEB_TEXT(SolarAzimuth, "Solar Azimuth (derived)", "Sonnenazimut (berechnet)")
+
+ENVNODE_WEB_TEXT(SolarElevation, "Solar Elevation (derived)", "Sonnenelevation (berechnet)")
+
+ENVNODE_WEB_TEXT(GramPerCubicMetre, "Gram per cubic metre", "Gramm pro Kubikmeter")
+
+ENVNODE_WEB_TEXT(Degree, "Degree", "Grad")
+
+ENVNODE_WEB_TEXT(Calculated, "Calculated", "Berechnet")

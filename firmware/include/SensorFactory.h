@@ -7,6 +7,7 @@
 #include "BME280Sensor.h"
 #include "SHT4xSensor.h"
 #include "SHTC3Sensor.h"
+#include "SolarPositionSensor.h"
 #include "HardwareResources.h"
 #include "Logger.h"
 #include "SimulatedHumiditySensor.h"
@@ -29,7 +30,8 @@ enum class SensorFactoryResult {
 
 class SensorFactory {
 public:
-    SensorFactory(IMonotonicClock& monotonicClock, I2CBusManager& i2cBusManager, ILogger& logger);
+    SensorFactory(IMonotonicClock& monotonicClock, I2CBusManager& i2cBusManager, ILogger& logger,
+        const IConfigurationService* configuration = nullptr, const ITimeService* time = nullptr);
     ~SensorFactory();
 
     ISensor* create(
@@ -47,6 +49,7 @@ private:
         BME280Sensor,
         SHT4xSensor,
         SHTC3Sensor,
+        SolarPositionSensor,
         RainGaugeSensor>::type;
 
     void destroy(size_t storageIndex);
@@ -54,6 +57,8 @@ private:
     IMonotonicClock& monotonicClock_;
     I2CBusManager& i2cBusManager_;
     ILogger& logger_;
+    const IConfigurationService* configuration_;
+    const ITimeService* time_;
     SensorStorage storage_[MaxSensorSlotCount];
     SensorImplementation constructed_[MaxSensorSlotCount];
 };

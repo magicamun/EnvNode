@@ -30,6 +30,7 @@ struct PresentationConfiguration {
 
     PresentationUnit unitFor(MeasurementType type) const {
         switch (type) {
+            case MeasurementType::DewPoint:
             case MeasurementType::Temperature: return temperature;
             case MeasurementType::SeaLevelPressure:
             case MeasurementType::AtmosphericPressure: return atmosphericPressure;

@@ -7,10 +7,11 @@
 namespace EnvNode {
 
 SensorFactory::SensorFactory(IMonotonicClock& monotonicClock,
-    I2CBusManager& i2cBusManager, ILogger& logger)
+    I2CBusManager& i2cBusManager, ILogger& logger,
+    const IConfigurationService* configuration, const ITimeService* time)
     : monotonicClock_(monotonicClock)
     , i2cBusManager_(i2cBusManager)
-    , logger_(logger) {
+    , logger_(logger), configuration_(configuration), time_(time) {
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         constructed_[index] = SensorImplementation::None;
     }
@@ -78,6 +79,10 @@ ISensor* SensorFactory::create(
     void* target = &storage_[storageIndex];
     ISensor* sensor = nullptr;
     switch (slot.implementation) {
+        case SensorImplementation::SolarPosition:
+            if (!configuration_ || !time_) { result = SensorFactoryResult::InvalidResource; return nullptr; }
+            sensor = new (target) SolarPositionSensor(slot.slotId, *configuration_, *time_);
+            break;
         case SensorImplementation::SimulatedTemperature:
             sensor = new (target) SimulatedTemperatureSensor(slot.slotId, monotonicClock_);
             break;
@@ -130,6 +135,9 @@ ISensor* SensorFactory::create(
 void SensorFactory::destroy(size_t storageIndex) {
     void* target = &storage_[storageIndex];
     switch (constructed_[storageIndex]) {
+        case SensorImplementation::SolarPosition:
+            static_cast<SolarPositionSensor*>(target)->~SolarPositionSensor();
+            break;
         case SensorImplementation::SimulatedTemperature:
             static_cast<SimulatedTemperatureSensor*>(target)->~SimulatedTemperatureSensor();
             break;

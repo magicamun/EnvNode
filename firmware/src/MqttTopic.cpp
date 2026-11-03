@@ -39,6 +39,10 @@ String mqttDeviceTopicRoot(const String& deviceName) {
 
 const char* mqttMeasurementTypeTopic(MeasurementType type) {
     switch (type) {
+        case MeasurementType::DewPoint: return "dew_point";
+        case MeasurementType::AbsoluteHumidity: return "absolute_humidity";
+        case MeasurementType::SolarAzimuth: return "solar_azimuth";
+        case MeasurementType::SolarElevation: return "solar_elevation";
         case MeasurementType::Temperature: return "temperature";
         case MeasurementType::RelativeHumidity: return "relative_humidity";
         case MeasurementType::SeaLevelPressure: return "sea_level_pressure";

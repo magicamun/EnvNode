@@ -14,6 +14,7 @@ enum class HardwareInterfaceKind {
     ADC,
     SPI,
     Custom,
+    Calculated,
 };
 
 enum class HardwareResourceKind {

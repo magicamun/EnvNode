@@ -7,6 +7,7 @@
 #include "SensorFactory.h"
 #include "SensorManager.h"
 #include "SeaLevelPressureSensor.h"
+#include "HumidityDerivedSensor.h"
 
 namespace EnvNode {
 
@@ -49,6 +50,7 @@ private:
     };
     std::unique_ptr<ActivePressureConfiguration> activePressure_;
     std::unique_ptr<SeaLevelPressureSensor[]> composedSensors_;
+    std::unique_ptr<HumidityDerivedSensor[]> humiditySensors_;
     SensorSlotConfiguration activeSlots_[MaxSensorSlotCount];
     ISensor* activeSensors_[MaxSensorSlotCount] = {};
 };

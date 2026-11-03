@@ -19,10 +19,15 @@ enum class MeasurementType : uint8_t {
     HydrostaticPressure,
     WaterLevel,
     SeaLevelPressure,
+    DewPoint,
+    AbsoluteHumidity,
+    SolarAzimuth,
+    SolarElevation,
+
 };
 
 constexpr uint8_t SupportedMeasurementTypeCount =
-    static_cast<uint8_t>(MeasurementType::SeaLevelPressure);
+    static_cast<uint8_t>(MeasurementType::SolarElevation);
 
 enum class MeasurementSemantics : uint8_t {
     Unknown,
@@ -43,6 +48,7 @@ struct MeasurementTypeMetadata {
     PresentationUnit defaultPresentationUnit;
 };
 
+bool isDerivedMeasurementType(MeasurementType type);
 bool isSupportedMeasurementType(MeasurementType type);
 const MeasurementTypeMetadata& measurementTypeMetadata(MeasurementType type);
 const char* measurementTypeStableId(MeasurementType type);

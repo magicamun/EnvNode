@@ -421,8 +421,29 @@ void test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration
     for(const auto& field:fields){record.push_back(field.size()&255);record.push_back(field.size()>>8);record.insert(record.end(),field.begin(),field.end());}
     TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.sdStorage.systemDiagnostics);
 }
+void test_solar_position_slot_survives_reboot_and_backup() {
+    ConfigurationService service; service.loadConfiguration();
+    auto slot = service.getConfiguration().sensorSlots[15];
+    slot.enabled = true; slot.name = "Sun";
+    slot.implementation = SensorImplementation::SolarPosition;
+    slot.hardware = HardwareResourceAssignment::none();
+    slot.schedule = SensorSchedule::periodic(60000);
+    TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(slot));
+    ConfigurationService rebooted; rebooted.loadConfiguration();
+    const auto& loaded = rebooted.getConfiguration().sensorSlots[15];
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SensorImplementation::SolarPosition),static_cast<int>(loaded.implementation));
+    TEST_ASSERT_EQUAL_UINT32(60000,loaded.schedule.sampleIntervalMs);
+    String backup; bool passwords; Configuration decoded;
+    TEST_ASSERT_TRUE(encodeConfigurationBackup(rebooted.getConfiguration(),false,"",backup));
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,rebooted.getConfiguration(),decoded,passwords));
+    TEST_ASSERT_TRUE(service.validateRestore(decoded));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SensorImplementation::SolarPosition),static_cast<int>(decoded.sensorSlots[15].implementation));
+    slot.hardware = HardwareResourceAssignment::gpioResource(GpioResource(16));
+    TEST_ASSERT_FALSE(service.setSensorSlotConfiguration(slot));
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_solar_position_slot_survives_reboot_and_backup);
     RUN_TEST(test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration);
     RUN_TEST(test_sd_settings_persist_backup_and_fail_safely);
     RUN_TEST(test_sd_claims_prevent_gpio_conflicts_in_both_directions);

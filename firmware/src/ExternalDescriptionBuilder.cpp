@@ -248,7 +248,7 @@ bool buildControllerDescription(
         appendJsonString(output, measurement.stableId);
         output += ',';
         appendJsonName(output, "derived");
-        appendJsonBoolean(output, source.measurementType == MeasurementType::SeaLevelPressure);
+        appendJsonBoolean(output, isDerivedMeasurementType(source.measurementType));
         if (source.measurementType == MeasurementType::SeaLevelPressure) {
             output += ',';
             appendJsonName(output, "derivation");

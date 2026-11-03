@@ -112,8 +112,11 @@ String MeasurementPublisher::serializePayload(
         payload += '"';
     }
 
+    if (isDerivedMeasurementType(measurement.type)) {
+        payload += ",\"derived\":true";
+    }
     if (measurement.type == MeasurementType::SeaLevelPressure) {
-        payload += ",\"derived\":true,\"derivation\":\"";
+        payload += ",\"derivation\":\"";
         payload += pressureStatus ? pressureReductionMethodId(pressureStatus->method) : "standard_atmosphere";
         payload += '"';
         if (pressureStatus) {

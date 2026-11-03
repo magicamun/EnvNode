@@ -110,8 +110,8 @@ static SensorManager sensorManager(
     monotonicClock,
     measurementPublisher,
     measurementSnapshotCache);
-static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger);
-static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger);
+static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger, &configurationService, &timeService);
+static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger, &configurationService, &timeService);
 static SensorRuntime sensorRuntime(
     configurationService,
     firstSensorFactory,

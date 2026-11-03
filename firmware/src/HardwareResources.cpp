@@ -70,7 +70,8 @@ HardwareResourceValidationResult BoardCapabilities::validate(
     HardwareInterfaceKind interfaceKind,
     const HardwareResourceAssignment& assignment,
     GpioCapability requiredGpioCapabilities) const {
-    if (interfaceKind == HardwareInterfaceKind::Simulation) {
+    if (interfaceKind == HardwareInterfaceKind::Simulation
+        || interfaceKind == HardwareInterfaceKind::Calculated) {
         return assignment.kind == HardwareResourceKind::None
             ? HardwareResourceValidationResult::Valid
             : HardwareResourceValidationResult::ResourceNotRequired;
@@ -106,6 +107,7 @@ HardwareResourceValidationResult BoardCapabilities::validate(
 const char* hardwareInterfaceKindName(HardwareInterfaceKind kind) {
     switch (kind) {
         case HardwareInterfaceKind::Simulation: return "Simulation";
+        case HardwareInterfaceKind::Calculated: return "Calculated";
         case HardwareInterfaceKind::GPIO: return "GPIO";
         case HardwareInterfaceKind::I2C: return "I2C";
         case HardwareInterfaceKind::OneWire: return "OneWire";

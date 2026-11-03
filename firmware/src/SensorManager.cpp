@@ -186,6 +186,10 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     info.schedule = entry.schedule;
     info.supportsTemperature = entry.sensor->supports(MeasurementType::Temperature);
     info.supportsRelativeHumidity = entry.sensor->supports(MeasurementType::RelativeHumidity);
+    info.supportsDewPoint = entry.sensor->supports(MeasurementType::DewPoint);
+    info.supportsAbsoluteHumidity = entry.sensor->supports(MeasurementType::AbsoluteHumidity);
+    info.supportsSolarAzimuth = entry.sensor->supports(MeasurementType::SolarAzimuth);
+    info.supportsSolarElevation = entry.sensor->supports(MeasurementType::SolarElevation);
     info.supportsSeaLevelPressure = entry.sensor->supports(MeasurementType::SeaLevelPressure);
     info.supportsAtmosphericPressure = entry.sensor->supports(MeasurementType::AtmosphericPressure);
     info.supportsSolarIrradiance = entry.sensor->supports(MeasurementType::SolarIrradiance);

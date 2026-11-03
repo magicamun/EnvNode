@@ -23,7 +23,8 @@ bool UnitConverter::convert(
         case PresentationUnit::DegreeFahrenheit:
             presentationValue = canonicalValue * (9.0F / 5.0F) + 32.0F;
             return type == MeasurementType::Temperature
-                || type == MeasurementType::SolarCellTemperature;
+                || type == MeasurementType::SolarCellTemperature
+                || type == MeasurementType::DewPoint;
         case PresentationUnit::Hectopascal:
             presentationValue = canonicalValue / 100.0F;
             return type == MeasurementType::SeaLevelPressure
@@ -51,6 +52,8 @@ bool UnitConverter::convert(
                 ? canonicalValue * 1000.0F
                 : canonicalValue;
             return true;
+        case PresentationUnit::GramPerCubicMetre:
+        case PresentationUnit::Degree:
         case PresentationUnit::DegreeCelsius:
         case PresentationUnit::Pascal:
         case PresentationUnit::WattPerSquareMetre:
@@ -66,6 +69,9 @@ bool UnitConverter::convert(
 
 const char* UnitConverter::symbol(PresentationUnit unit) {
     switch (unit) {
+        case PresentationUnit::GramPerCubicMetre: return "g/m\xC2\xB3";
+        case PresentationUnit::Degree: return "\xC2\xB0";
+
         case PresentationUnit::DegreeCelsius: return "\xC2\xB0" "C";
         case PresentationUnit::DegreeFahrenheit: return "\xC2\xB0" "F";
         case PresentationUnit::Pascal: return "Pa";
@@ -85,6 +91,9 @@ const char* UnitConverter::symbol(PresentationUnit unit) {
 
 const char* UnitConverter::displayName(PresentationUnit unit) {
     switch (unit) {
+        case PresentationUnit::GramPerCubicMetre: return "Gram per cubic metre";
+        case PresentationUnit::Degree: return "Degree";
+
         case PresentationUnit::DegreeCelsius: return "Celsius";
         case PresentationUnit::DegreeFahrenheit: return "Fahrenheit";
         case PresentationUnit::Pascal: return "Pascal";
@@ -104,6 +113,9 @@ const char* UnitConverter::displayName(PresentationUnit unit) {
 
 const char* UnitConverter::stableKey(PresentationUnit unit) {
     switch (unit) {
+        case PresentationUnit::GramPerCubicMetre: return "gram_per_cubic_metre";
+        case PresentationUnit::Degree: return "degree";
+
         case PresentationUnit::None: return "none";
         case PresentationUnit::DegreeCelsius: return "degree_celsius";
         case PresentationUnit::DegreeFahrenheit: return "degree_fahrenheit";
@@ -126,7 +138,7 @@ bool UnitConverter::parseStableKey(const char* key, PresentationUnit& unit) {
         return false;
     }
     for (uint8_t value = static_cast<uint8_t>(PresentationUnit::None);
-         value <= static_cast<uint8_t>(PresentationUnit::Centimetre);
+         value <= static_cast<uint8_t>(PresentationUnit::Degree);
          ++value) {
         const PresentationUnit candidate = static_cast<PresentationUnit>(value);
         const char* candidateKey = stableKey(candidate);

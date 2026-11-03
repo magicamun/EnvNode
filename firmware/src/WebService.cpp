@@ -224,6 +224,10 @@ String measurementTypes(const SensorRuntimeInfo& info, Locale locale) {
     appendType(info.supportsTemperature, MeasurementType::Temperature);
     appendType(info.supportsRelativeHumidity, MeasurementType::RelativeHumidity);
     appendType(info.supportsAtmosphericPressure, MeasurementType::AtmosphericPressure);
+    appendType(info.supportsDewPoint, MeasurementType::DewPoint);
+    appendType(info.supportsAbsoluteHumidity, MeasurementType::AbsoluteHumidity);
+    appendType(info.supportsSolarAzimuth, MeasurementType::SolarAzimuth);
+    appendType(info.supportsSolarElevation, MeasurementType::SolarElevation);
     appendType(info.supportsSeaLevelPressure, MeasurementType::SeaLevelPressure);
     appendType(info.supportsSolarIrradiance, MeasurementType::SolarIrradiance);
     appendType(info.supportsSolarCellTemperature, MeasurementType::SolarCellTemperature);
@@ -331,6 +335,10 @@ bool runtimeSupportsMeasurement(const SensorRuntimeInfo& info, MeasurementType t
     switch (type) {
         case MeasurementType::Temperature: return info.supportsTemperature;
         case MeasurementType::RelativeHumidity: return info.supportsRelativeHumidity;
+        case MeasurementType::DewPoint: return info.supportsDewPoint;
+        case MeasurementType::AbsoluteHumidity: return info.supportsAbsoluteHumidity;
+        case MeasurementType::SolarAzimuth: return info.supportsSolarAzimuth;
+        case MeasurementType::SolarElevation: return info.supportsSolarElevation;
         case MeasurementType::SeaLevelPressure: return info.supportsSeaLevelPressure;
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
@@ -1600,7 +1608,7 @@ void WebService::handleSensorEdit() {
     c += (String("<label>") + uiText(TextId::SampleIntervalMs) + "<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='") + String(slot.schedule.sampleIntervalMs) + "'></label>";
     c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/sensors'>" + uiText(TextId::Cancel) + "</a></div></form></section>");
     if (selected != nullptr) {
-        c += (((String("<section class='card'><h2>") + uiText(TextId::ImplementationMetadata) + "</h2><div class='kv'><span>")) + uiText(TextId::Type) + "</span><span>") + escapeHtml(webSensorImplementationName(configurationService_.getLocale(), selected->implementation)) + (String("</span><span>") + uiText(TextId::Interface) + "</span><span>") + hardwareInterfaceKindName(selected->interfaceKind) + " / " + escapeHtml(webSensorDescription(configurationService_.getLocale(), selected->implementation)) + (String("</span><span>") + uiText(TextId::Provenance) + "</span><span>") + String(selected->provenance == SensorProvenance::Simulated ? uiText(TextId::Simulated) : uiText(TextId::Physical)) + (String("</span><span>") + uiText(TextId::Measurements) + "</span><span>") + implementationMeasurements(selected, configurationService_.getLocale()) + "</span></div></section>";
+        c += (((String("<section class='card'><h2>") + uiText(TextId::ImplementationMetadata) + "</h2><div class='kv'><span>")) + uiText(TextId::Type) + "</span><span>") + escapeHtml(webSensorImplementationName(configurationService_.getLocale(), selected->implementation)) + (String("</span><span>") + uiText(TextId::Interface) + "</span><span>") + hardwareInterfaceKindName(selected->interfaceKind) + " / " + escapeHtml(webSensorDescription(configurationService_.getLocale(), selected->implementation)) + (String("</span><span>") + uiText(TextId::Provenance) + "</span><span>") + String(selected->provenance == SensorProvenance::Calculated ? uiText(TextId::Calculated) : selected->provenance == SensorProvenance::Simulated ? uiText(TextId::Simulated) : uiText(TextId::Physical)) + (String("</span><span>") + uiText(TextId::Measurements) + "</span><span>") + implementationMeasurements(selected, configurationService_.getLocale()) + "</span></div></section>";
     }
     c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='shtc3'?x.value!=='112':o.dataset.kind==='bme280'?(x.value!=='118'&&x.value!=='119'):false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='shtc3')a.value='112';if(reset&&o.dataset.kind==='bme280'&&(a.value==='68'||a.value==='112'))a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
     sendPage(uiText(TextId::ConfigureSensorSlot), "/sensors", c);

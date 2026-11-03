@@ -39,6 +39,9 @@ constexpr uint8_t unitCount(const PresentationUnit (&)[Size]) {
     return static_cast<uint8_t>(Size);
 }
 
+const PresentationUnit DensityUnits[] = {PresentationUnit::GramPerCubicMetre};
+const PresentationUnit AngleUnits[] = {PresentationUnit::Degree};
+
 const MeasurementTypeMetadata MeasurementMetadata[] = {
     {MeasurementType::Unknown, "unknown", "Unknown", ValueKind::None, PresentationUnit::None, 0,
         MeasurementSemantics::Unknown, NoUnit, unitCount(NoUnit), PresentationUnit::None},
@@ -78,6 +81,18 @@ const MeasurementTypeMetadata MeasurementMetadata[] = {
     {MeasurementType::SeaLevelPressure, "sea_level_pressure", "Sea-level Pressure (derived)", ValueKind::FloatingPoint,
         PresentationUnit::Pascal, 1, MeasurementSemantics::State,
         PressureUnits, unitCount(PressureUnits), PresentationUnit::Pascal},
+    {MeasurementType::DewPoint, "dew_point", "Dew Point (derived)", ValueKind::FloatingPoint,
+        PresentationUnit::DegreeCelsius, 1, MeasurementSemantics::State,
+        TemperatureUnits, unitCount(TemperatureUnits), PresentationUnit::DegreeCelsius},
+    {MeasurementType::AbsoluteHumidity, "absolute_humidity", "Absolute Humidity (derived)", ValueKind::FloatingPoint,
+        PresentationUnit::GramPerCubicMetre, 1, MeasurementSemantics::State,
+        DensityUnits, unitCount(DensityUnits), PresentationUnit::GramPerCubicMetre},
+    {MeasurementType::SolarAzimuth, "solar_azimuth", "Solar Azimuth (derived)", ValueKind::FloatingPoint,
+        PresentationUnit::Degree, 1, MeasurementSemantics::State,
+        AngleUnits, unitCount(AngleUnits), PresentationUnit::Degree},
+    {MeasurementType::SolarElevation, "solar_elevation", "Solar Elevation (derived)", ValueKind::FloatingPoint,
+        PresentationUnit::Degree, 1, MeasurementSemantics::State,
+        AngleUnits, unitCount(AngleUnits), PresentationUnit::Degree},
 };
 
 constexpr size_t MeasurementMetadataCount =
@@ -101,6 +116,14 @@ bool hasStructurallyValidPayload(const Measurement& measurement) {
 }
 
 } // namespace
+
+bool isDerivedMeasurementType(MeasurementType type) {
+    return type == MeasurementType::SeaLevelPressure
+        || type == MeasurementType::DewPoint
+        || type == MeasurementType::AbsoluteHumidity
+        || type == MeasurementType::SolarAzimuth
+        || type == MeasurementType::SolarElevation;
+}
 
 bool isSupportedMeasurementType(MeasurementType type) {
     return measurementTypeMetadata(type).type != MeasurementType::Unknown;

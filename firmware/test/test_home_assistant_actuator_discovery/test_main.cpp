@@ -7,6 +7,8 @@
 
 #include "ActuatorRuntime.h"
 #include "SeaLevelPressureSensor.h"
+#include "SolarPositionSensor.h"
+#include "HumidityDerivedSensor.h"
 #include "HomeAssistantDiscoveryPublisher.h"
 
 using namespace EnvNode;
@@ -251,6 +253,43 @@ void test_barometer_discovery_contains_separate_derived_pressure() {
     TEST_ASSERT_EQUAL_UINT32(2, fixture.publisher.lastEntityCount());
 }
 
+class Thermohygrometer : public Barometer {
+public:
+    bool supports(MeasurementType type) const override {
+        return type == MeasurementType::Temperature || type == MeasurementType::RelativeHumidity;
+    }
+};
+void test_humidity_derived_discovery_and_presentation() {
+    Fixture fixture;
+    fixture.actuators.initialize(fixture.configuration.configuration.actuatorSlots);
+    fixture.configuration.configuration.presentation.temperature = PresentationUnit::DegreeFahrenheit;
+    Thermohygrometer sensor; HumidityDerivedSensor composition; composition.bind(sensor);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SensorRegistrationResult::Registered),
+        static_cast<int>(fixture.sensors.registerSensor(composition, SensorSchedule::periodic(1000))));
+    const std::string payload = fixture.publish();
+    assertContains(payload, "_sensor_3_dew_point");
+    assertContains(payload, "_sensor_3_absolute_humidity");
+    assertContains(payload, "g/m\xC2\xB3");
+    assertContains(payload, "\xC2\xB0" "F");
+    TEST_ASSERT_EQUAL_UINT32(4,fixture.publisher.lastEntityCount());
+}
+void test_solar_discovery_last_bit_and_removal() {
+    Fixture fixture;
+    fixture.actuators.initialize(fixture.configuration.configuration.actuatorSlots);
+    SolarPositionSensor solar(16, fixture.configuration, fixture.time);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(SensorRegistrationResult::Registered),
+        static_cast<int>(fixture.sensors.registerSensor(solar, SensorSchedule::periodic(60000))));
+    const std::string payload = fixture.publish();
+    assertContains(payload, "_sensor_16_solar_azimuth");
+    assertContains(payload, "_sensor_16_solar_elevation");
+    assertContains(payload, "value_json.value if value_json.valid else none");
+    TEST_ASSERT_EQUAL_UINT32(2,fixture.publisher.lastEntityCount());
+    fixture.sensors.clear(); fixture.mqtt.messages.clear(); fixture.publish();
+    TEST_ASSERT_EQUAL_UINT32(2,fixture.mqtt.messages.size());
+    assertContains(fixture.mqtt.messages[0].payload, "_sensor_16_solar_elevation\":{\"p\":\"sensor\"}");
+    TEST_ASSERT_EQUAL_UINT32(0,fixture.publisher.lastEntityCount());
+}
+
 } // namespace
 
 void setUp() {}
@@ -258,6 +297,8 @@ void tearDown() {}
 
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_humidity_derived_discovery_and_presentation);
+    RUN_TEST(test_solar_discovery_last_bit_and_removal);
     RUN_TEST(test_barometer_discovery_contains_separate_derived_pressure);
     RUN_TEST(test_on_off_actuator_is_discovered_as_switch);
     RUN_TEST(test_level_actuator_is_one_light_with_zero_to_one_hundred_brightness);

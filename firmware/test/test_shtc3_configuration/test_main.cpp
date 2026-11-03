@@ -31,7 +31,7 @@ void test_registry_describes_shtc3_measurements_and_interface() {
         static_cast<int>(metadata->implementation));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(HardwareInterfaceKind::I2C),
         static_cast<int>(metadata->interfaceKind));
-    TEST_ASSERT_EQUAL_UINT32(2, metadata->measurementTypeCount);
+    TEST_ASSERT_EQUAL_UINT32(4, metadata->measurementTypeCount);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::Temperature),
         static_cast<int>(metadata->measurementTypes[0]));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(MeasurementType::RelativeHumidity),

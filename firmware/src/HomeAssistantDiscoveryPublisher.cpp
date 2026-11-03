@@ -10,11 +10,18 @@
 namespace EnvNode {
 namespace {
 
+static_assert(SupportedMeasurementTypeCount <= 32, "Discovery masks must cover all measurement types");
+
 const MeasurementType DiscoverableMeasurementTypes[] = {
     MeasurementType::Temperature,
     MeasurementType::RelativeHumidity,
     MeasurementType::AtmosphericPressure,
     MeasurementType::SeaLevelPressure,
+    MeasurementType::DewPoint,
+    MeasurementType::AbsoluteHumidity,
+    MeasurementType::SolarAzimuth,
+    MeasurementType::SolarElevation,
+
     MeasurementType::SolarIrradiance,
     MeasurementType::SolarCellTemperature,
     MeasurementType::RainDetectorLevel,
@@ -37,6 +44,10 @@ bool supports(const SensorRuntimeInfo& info, MeasurementType type) {
     switch (type) {
         case MeasurementType::Temperature: return info.supportsTemperature;
         case MeasurementType::RelativeHumidity: return info.supportsRelativeHumidity;
+        case MeasurementType::DewPoint: return info.supportsDewPoint;
+        case MeasurementType::AbsoluteHumidity: return info.supportsAbsoluteHumidity;
+        case MeasurementType::SolarAzimuth: return info.supportsSolarAzimuth;
+        case MeasurementType::SolarElevation: return info.supportsSolarElevation;
         case MeasurementType::SeaLevelPressure: return info.supportsSeaLevelPressure;
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
@@ -57,6 +68,7 @@ const char* entityPlatform(MeasurementType type) {
 
 const char* deviceClass(MeasurementType type) {
     switch (type) {
+        case MeasurementType::DewPoint:
         case MeasurementType::Temperature:
         case MeasurementType::SolarCellTemperature: return "temperature";
         case MeasurementType::RelativeHumidity: return "humidity";
@@ -125,7 +137,7 @@ String HomeAssistantDiscoveryPublisher::discoveryTopic() const {
 }
 
 uint32_t HomeAssistantDiscoveryPublisher::discoverySignature(
-    uint16_t* sensorComponentMasks,
+    uint32_t* sensorComponentMasks,
     uint8_t* actuatorPlatforms) const {
     for (size_t index = 0; index < MaxSensorCount; ++index) sensorComponentMasks[index] = 0;
     for (size_t index = 0; index < MaxActuatorSlotCount; ++index) actuatorPlatforms[index] = 0;
@@ -148,7 +160,7 @@ uint32_t HomeAssistantDiscoveryPublisher::discoverySignature(
         for (MeasurementType type : DiscoverableMeasurementTypes) {
             if (!supports(info, type)) continue;
             const uint8_t bit = static_cast<uint8_t>(type) - 1;
-            sensorComponentMasks[info.id - 1] |= static_cast<uint16_t>(1U << bit);
+            sensorComponentMasks[info.id - 1] |= static_cast<uint32_t>(1U << bit);
             hashByte(hash, static_cast<uint8_t>(type));
         }
     }
@@ -169,8 +181,8 @@ uint32_t HomeAssistantDiscoveryPublisher::discoverySignature(
 }
 
 String HomeAssistantDiscoveryPublisher::buildPayload(
-    const uint16_t* sensorComponentMasks,
-    const uint16_t* sensorRemovalMasks,
+    const uint32_t* sensorComponentMasks,
+    const uint32_t* sensorRemovalMasks,
     const uint8_t* actuatorPlatforms,
     const uint8_t* actuatorRemovalPlatforms,
     size_t& entityCount) const {
@@ -207,7 +219,7 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
         }
         for (MeasurementType type : DiscoverableMeasurementTypes) {
             const uint8_t bit = static_cast<uint8_t>(type) - 1;
-            const uint16_t bitMask = static_cast<uint16_t>(1U << bit);
+            const uint32_t bitMask = static_cast<uint32_t>(1U << bit);
             const bool current = (sensorComponentMasks[slotIndex] & bitMask) != 0;
             const bool remove = sensorRemovalMasks != nullptr
                 && (sensorRemovalMasks[slotIndex] & bitMask) != 0;
@@ -239,7 +251,7 @@ String HomeAssistantDiscoveryPublisher::buildPayload(
                 payload += ",\"event_types\":[\"tip\"],\"value_template\":\"{\\\"event_type\\\":\\\"tip\\\"}\"";
             } else if (type == MeasurementType::RainDetectorWet) {
                 payload += ",\"value_template\":\"{{ 'ON' if value_json.value else 'OFF' }}\"";
-            } else if (type == MeasurementType::SeaLevelPressure) {
+            } else if (isDerivedMeasurementType(type)) {
                 payload += ",\"value_template\":\"{{ value_json.value if value_json.valid else none }}\"";
             } else {
                 payload += ",\"value_template\":\"{{ value_json.value }}\"";
@@ -332,10 +344,10 @@ bool HomeAssistantDiscoveryPublisher::publishPayload(const String& payload) {
 }
 
 bool HomeAssistantDiscoveryPublisher::publishDiscovery(
-    const uint16_t* sensorComponentMasks,
+    const uint32_t* sensorComponentMasks,
     const uint8_t* actuatorPlatforms,
     bool logPublication) {
-    uint16_t sensorRemovals[MaxSensorCount];
+    uint32_t sensorRemovals[MaxSensorCount];
     uint8_t actuatorRemovals[MaxActuatorSlotCount];
     bool hasRemovals = false;
     for (size_t index = 0; index < MaxSensorCount; ++index) {
@@ -380,7 +392,7 @@ bool HomeAssistantDiscoveryPublisher::publishDiscovery(
 DiscoveryRepublishResult HomeAssistantDiscoveryPublisher::republish() {
     if (!mqttService_.connected()) return DiscoveryRepublishResult::MqttUnavailable;
 
-    uint16_t sensorComponentMasks[MaxSensorCount];
+    uint32_t sensorComponentMasks[MaxSensorCount];
     uint8_t actuatorPlatforms[MaxActuatorSlotCount];
     const uint32_t signature = discoverySignature(sensorComponentMasks, actuatorPlatforms);
     if (!clearedAfterBoot_) {
@@ -405,7 +417,7 @@ void HomeAssistantDiscoveryPublisher::loop() {
     }
     const bool connectionEstablished = !wasConnected_;
     wasConnected_ = true;
-    uint16_t sensorComponentMasks[MaxSensorCount];
+    uint32_t sensorComponentMasks[MaxSensorCount];
     uint8_t actuatorPlatforms[MaxActuatorSlotCount];
     const uint32_t signature = discoverySignature(sensorComponentMasks, actuatorPlatforms);
     if (!connectionEstablished && signature == publishedSignature_) return;

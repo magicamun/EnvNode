@@ -18,6 +18,8 @@ enum class PresentationUnit : uint8_t {
     Millimeter = 10,
     Metre = 11,
     Centimetre = 12,
+    GramPerCubicMetre = 13,
+    Degree = 14,
 };
 
 } // namespace EnvNode

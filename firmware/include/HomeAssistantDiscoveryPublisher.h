@@ -31,16 +31,16 @@ private:
     String stableDeviceId() const;
     String discoveryTopic() const;
     uint32_t discoverySignature(
-        uint16_t* sensorComponentMasks,
+        uint32_t* sensorComponentMasks,
         uint8_t* actuatorPlatforms) const;
     bool publishDiscovery(
-        const uint16_t* sensorComponentMasks,
+        const uint32_t* sensorComponentMasks,
         const uint8_t* actuatorPlatforms,
         bool logPublication = true);
     bool publishPayload(const String& payload);
     String buildPayload(
-        const uint16_t* sensorComponentMasks,
-        const uint16_t* sensorRemovalMasks,
+        const uint32_t* sensorComponentMasks,
+        const uint32_t* sensorRemovalMasks,
         const uint8_t* actuatorPlatforms,
         const uint8_t* actuatorRemovalPlatforms,
         size_t& entityCount) const;
@@ -54,7 +54,7 @@ private:
     bool clearedAfterBoot_ = false;
     uint32_t publishedSignature_ = 0;
     uint32_t lastAttemptMs_ = 0;
-    uint16_t publishedComponentMasks_[MaxSensorCount] = {};
+    uint32_t publishedComponentMasks_[MaxSensorCount] = {};
     uint8_t publishedActuatorPlatforms_[MaxActuatorSlotCount] = {};
     size_t lastPayloadSize_ = 0;
     size_t lastEntityCount_ = 0;
