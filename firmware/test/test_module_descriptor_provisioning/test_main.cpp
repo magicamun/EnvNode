@@ -1,4 +1,9 @@
 #include <cstring>
+#include <fstream>
+#include <iterator>
+#include <vector>
+#include "ModuleProfileTemplate.h"
+#include "SdModuleActivation.h"
 
 #include <Arduino.h>
 #include <unity.h>
@@ -265,8 +270,51 @@ void test_missing_driver_does_not_prevent_provisioning() {
     TEST_ASSERT_TRUE(fixture.discovery.ownsHardware(HardwareResourceAssignment::gpioResource(GpioResource(16))));
 }
 
+size_t sdPayload(uint8_t* output,size_t capacity) {
+    std::ifstream f("../docs/site/assets/hardware/v1/sd-card-0.1.3c199c82946fc67bb48455b4ebcc81b7cbbc883f867fb96cece29718e57bb2d1.module.cbor",std::ios::binary);
+    std::vector<uint8_t> bytes{std::istreambuf_iterator<char>(f),std::istreambuf_iterator<char>()};
+    TEST_ASSERT_FALSE(bytes.empty());ModuleManufacturingData m;
+    memcpy(m.instanceId,InstanceId,16);size_t size=0;
+    TEST_ASSERT_TRUE(instantiateModuleProfile(bytes.data(),bytes.size(),m,output,capacity,size));return size;
+}
+void test_sd_module_activates_from_eeprom_in_either_slot_and_rejects_duplicates() {
+    for(auto slot:{ModuleSlot::A,ModuleSlot::B}) {
+        Fixture f;uint8_t payload[2048];const size_t size=sdPayload(payload,sizeof(payload));
+        const auto result=f.provisioning.provision(slot,payload,size,true);
+        TEST_ASSERT_EQUAL(ModuleDescriptorProvisioningStatus::Success,result.status);
+        TEST_ASSERT_EQUAL(HardwareDescriptorCompatibilityStatus::Compatible,result.compatibilityStatus);
+        SdStorageConfiguration settings;applyDiscoveredSdModule(f.discovery,settings);
+        TEST_ASSERT_TRUE(settings.automatic);TEST_ASSERT_TRUE(settings.enabled);
+        TEST_ASSERT_EQUAL(slot,settings.slot);TEST_ASSERT_FALSE(settings.systemLog);TEST_ASSERT_FALSE(settings.moduleConflict);
+        settings.systemLog=true;applyDiscoveredSdModule(f.discovery,settings);TEST_ASSERT_TRUE(settings.systemLog);
+        f.provisioning.provision(slot==ModuleSlot::A?ModuleSlot::B:ModuleSlot::A,payload,size,true);
+        applyDiscoveredSdModule(f.discovery,settings);TEST_ASSERT_FALSE(settings.enabled);TEST_ASSERT_TRUE(settings.moduleConflict);
+    }
+}
+void test_sd_contract_rejects_wrong_polarity_driver_and_binding() {
+    uint8_t payload[2048];const size_t size=sdPayload(payload,sizeof(payload));HardwareDescriptor d;
+    TEST_ASSERT_EQUAL(HardwareDescriptorDecodeStatus::Valid,HardwareDescriptorCodec::decode(payload,size,HardwareDescriptorObjectKind::Module,d));
+    TEST_ASSERT_TRUE(sdModuleContractSupported(d));
+    d.devices[0].activeLevelHigh=false;TEST_ASSERT_FALSE(sdModuleContractSupported(d));d.devices[0].activeLevelHigh=true;
+    d.devices[0].driver.apiVersion=2;TEST_ASSERT_FALSE(sdModuleContractSupported(d));d.devices[0].driver.apiVersion=1;
+    d.devices[0].bindingCount=0;TEST_ASSERT_FALSE(sdModuleContractSupported(d));
+}
+void test_no_sd_descriptor_preserves_manual_breakout_settings() {
+    Fixture f;f.discovery.scan();SdStorageConfiguration sd;sd.enabled=true;sd.slot=ModuleSlot::B;
+    applyDiscoveredSdModule(f.discovery,sd);TEST_ASSERT_TRUE(sd.enabled);TEST_ASSERT_EQUAL(ModuleSlot::B,sd.slot);TEST_ASSERT_FALSE(sd.automatic);
+}
+void test_manual_sd_does_not_claim_another_modules_gpio() {
+    Fixture f;uint8_t payload[1024];const size_t size=buildDuoRelay(payload,sizeof(payload));
+    f.provisioning.provision(ModuleSlot::A,payload,size,true);
+    SdStorageConfiguration sd;sd.enabled=true;sd.slot=ModuleSlot::A;
+    applyDiscoveredSdModule(f.discovery,sd);TEST_ASSERT_FALSE(sd.enabled);TEST_ASSERT_TRUE(sd.moduleConflict);
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_sd_module_activates_from_eeprom_in_either_slot_and_rejects_duplicates);
+    RUN_TEST(test_sd_contract_rejects_wrong_polarity_driver_and_binding);
+    RUN_TEST(test_no_sd_descriptor_preserves_manual_breakout_settings);
+    RUN_TEST(test_manual_sd_does_not_claim_another_modules_gpio);
     RUN_TEST(test_future_firmware_module_is_provisioned_and_reserves_ports);
     RUN_TEST(test_missing_driver_does_not_prevent_provisioning);
     RUN_TEST(test_duo_relay_template_is_deterministic_valid_and_compatible);

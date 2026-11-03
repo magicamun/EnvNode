@@ -1,38 +1,40 @@
-# SD-Card profile integration staging
+# SD-Card profile integration
 
 EnvNode-owned content: see repository LICENSE
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
 
-`sd-card-0.1.json` follows the unified profile wrapper currently maintained in
-main, alongside `duo-relay-0.3.json`. This branch does not yet contain that
-profile generator or its provisioning catalogue. The file is a prepared source
-profile, not an activated firmware integration or a provisioned EEPROM.
+`sd-card-0.1.json` follows the unified profile format alongside DuoRelay 0.3.
+Its 657-byte compact CBOR template and catalogue entry are published through
+main's regular documentation workflow. The ordinary main firmware can provision
+it without having an SD runtime driver. No firmware auto-writes the EEPROM.
 
-The descriptor identifies PCB revision 0.1 and requests SPI, slot-specific
-SPI_CS, AUX_GPIO1 card detect (HIGH means inserted) and +5V. The 24LC32 identity
-EEPROM uses the module interface's existing slot-dependent addressing; the
-profile contains no fixed ESP32 GPIO assignments or fixed slot selection.
-`testing: null` explicitly means no automated connector test is defined.
+The profile describes PCB revision 0.1: SPI, slot-specific SPI_CS, AUX_GPIO1 card
+detect (HIGH means inserted) and +5V. The driver contract is
+`org.envnode.driver.sd-spi` API 1; its infrastructure device advertises
+`storage.sd`. The `activeLevel` parameter applies to card detect. The 24LC32 uses
+the interface's existing slot-dependent identity addresses. No fixed ESP32 GPIOs
+or fixed slot are embedded in the profile. `testing: null` means no automated
+connector test is defined.
 
-The image URL reserves the existing documentation naming convention:
-`https://docs.envnode.de/assets/images/sd-card-0.1/top.png`. Availability and the
-review of the actual image remain separate work. No product-image generation
-rules or images are incorporated by this profile.
+The image URL follows the existing documentation convention:
+`https://docs.envnode.de/assets/images/sd-card-0.1/top.png`. Actual image review
+remains separate; no product-image rules or images are incorporated here.
 
-`org.envnode.driver.sd-spi` API 1 and `storage.sd` are the proposed runtime
-contract names. Runtime registration, SPI requirement compatibility and binding
-this infrastructure device to the existing storage service remain to implement.
-The minimum runtime version 0.8.6 uses the current main baseline; it is not a
-claim that main 0.8.6 already activates this module. Confirm the release minimum
-when the runtime integration is complete. Missing-driver checks must remain
-independent of the version check. Provisioning must continue to allow valid
-hardware descriptors even when their runtime driver is unavailable.
+In sd-card firmware, boot discovery checks compatibility and the device's bus,
+chip-select and card-detect bindings before activating access in the discovered
+slot. Two SD modules or an unsupported SD contract disable access. System-log
+recording stays an explicit persisted user preference. Without an identified SD
+module, the manually configured breakout mode remains available. Automatic slot
+selection is runtime state, not an EEPROM rewrite or a new backup setting.
 
-Validation: profile identity/name/template consistency and deterministic compact
-CBOR encoding with main's existing encoder pass; payload size is 667 bytes
-within the generator's 2016-byte limit. Full generator/catalogue validation and
-firmware decoder/provisioning tests are pending integration of the unified
-profile infrastructure. No EEPROM was written.
+The minimum runtime version 0.8.6 is the current main baseline, not a claim that
+unmodified main 0.8.6 already activates SD modules. Confirm the release minimum
+when the runtime integration is merged; driver support is checked independently.
+
+Provisioning is tested through the generated catalogue, browser upload endpoint,
+instance assignment and EEPROM readback. SD runtime tests cover both slots,
+duplicate modules, wrong polarity, incompatible bindings/API and manual fallback.
+The physical activation test with the assembled module remains required.
 
 Merge acceptance also requires a general bounded diagnostic recording interface:
 Raindetector or SCT013 supplies diagnostic records without depending on SPI/FAT

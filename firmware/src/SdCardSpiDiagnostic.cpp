@@ -39,15 +39,15 @@ static_assert(sizeof(SdCardMountPath) <= ESP_VFS_PATH_MAX - 1,
     "FAT VFS mount path must survive the legacy strlcpy truncation during unregister");
 char activeSdLogPath[96]={};
 bool rotateSdLog=false; // Protected by SdStorageLease.
-constexpr uint8_t ClockPin = 18;
-constexpr uint8_t MisoPin = 19;
-constexpr uint8_t MosiPin = 23;
+uint8_t clockPin() {return currentBoardProfile().spiClock.number;}
+uint8_t misoPin() {return currentBoardProfile().spiMiso.number;}
+uint8_t mosiPin() {return currentBoardProfile().spiMosi.number;}
 constexpr uint32_t DiagnosticClockHz = 1000000;
 bool usesDiagnosticPin(const HardwareResourceAssignment& assignment,
     const BoardModuleSlotCapability& slot) {
     if (assignment.kind != HardwareResourceKind::GPIO) return false;
     const uint8_t pin = assignment.gpio.number;
-    return pin == ClockPin || pin == MisoPin || pin == MosiPin
+    return pin == clockPin() || pin == misoPin() || pin == mosiPin()
         || pin == slot.spiChipSelect.number || pin == slot.auxGpio1.number;
 }
 class PosixSdTestFile : public ISdTestFile {
@@ -94,7 +94,7 @@ public:
     bool mount() override {
         digitalWrite(slot_.spiChipSelect.number, HIGH);
         pinMode(slot_.spiChipSelect.number, OUTPUT);
-        spi_.begin(ClockPin, MisoPin, MosiPin, slot_.spiChipSelect.number);
+        spi_.begin(clockPin(), misoPin(), mosiPin(), slot_.spiChipSelect.number);
         // Last argument MUST remain false: never format a card during diagnostics.
         const uint32_t started=millis(),heap=ESP.getFreeHeap(),largest=ESP.getMaxAllocHeap();
         const bool mounted=SD.begin(slot_.spiChipSelect.number, spi_, DiagnosticClockHz, SdCardMountPath, 2, false);
@@ -187,7 +187,7 @@ void runSdCardSpiDiagnostic(ModuleSlot slotId, const BoardProfile& board,
         }
     }
     logger.infof("SD diagnostic: board=%s slot=%s SCK=%u MISO=%u MOSI=%u CS=%u CD=%u clock_hz=%lu",
-        board.displayName, moduleSlotName(slotId), ClockPin, MisoPin, MosiPin,
+        board.displayName, moduleSlotName(slotId), clockPin(), misoPin(), mosiPin(),
         slot->spiChipSelect.number, slot->auxGpio1.number,
         static_cast<unsigned long>(DiagnosticClockHz));
     SpiDiagnosticDevice device(*slot);
@@ -330,7 +330,7 @@ public:
         pinMode(slot_.auxGpio1.number,INPUT_PULLUP);
         if(digitalRead(slot_.auxGpio1.number)!=HIGH) {error_=100;return false;}
         digitalWrite(slot_.spiChipSelect.number,HIGH);pinMode(slot_.spiChipSelect.number,OUTPUT);
-        spi_.begin(ClockPin,MisoPin,MosiPin,slot_.spiChipSelect.number);
+        spi_.begin(clockPin(),misoPin(),mosiPin(),slot_.spiChipSelect.number);
         drive_=sdcard_init(slot_.spiChipSelect.number,&spi_,DiagnosticClockHz);
         if(drive_==0xFF) {error_=101;return false;}
         if(!sdcard_mount(drive_,SdCardMountPath,2,false)) {error_=102;return false;}

@@ -533,3 +533,39 @@ do not themselves fix the blocking behavior.
 Validation: 35 affected native tests passed (WebHost timing and framing,
 firmware web, web logs, SD rotation); default esp32dev firmware build passed.
 Physical evaluation of the detailed request timing is pending.
+
+## Assembled module provisioning and activation — 3 November 2026
+
+The assembled module's empty identity EEPROM is detected and the card is readable
+(user report). SD-Card 0.1 is now published in the shared provisioning catalogue.
+Current main firmware can write the profile using Hardware → Provisioning →
+Module → Refresh online profiles; select the physical slot, confirm the current
+EEPROM snapshot and write. Manufacturing fields remain optional. A missing SD
+driver in unmodified main is an expected operating status, not a write failure.
+
+The sd-card branch has incorporated current main's profile infrastructure.
+On boot it recognizes the provisioned module, validates SPI/CS/CD bindings and
+HIGH card-detect polarity, then enables access in its discovered slot. Logging
+retains the saved user preference and is not enabled merely by identifying a
+module. Automatic settings are shown as such and cannot be manually moved to
+another slot. Multiple identified SD modules or unsupported contracts disable
+access. The no-EEPROM breakout mode remains available for lab testing.
+SPI pins now come from the selected board profile, including ENPM port maps.
+No application-specific sensor diagnostic functionality is introduced here.
+
+Physical follow-up: provision on main, restart to confirm identity, then flash
+the sd-card branch and check the `SD module: ... automatic=1 enabled=1 conflict=0`
+boot entry, card listing and one explicit read/write test. Do not format merely
+to test recognition. Main's open image/asset-rule edits were excluded from the
+catalogue commit and publication.
+
+Software validation: catalogue generation/check and 21 catalogue/provisioning
+endpoint tests passed on main. On sd-card, 14 module/provisioning/activation tests,
+32 descriptor/actuator/WebHost regression tests, and the existing configuration
+backup, SD web and SD system-log suites passed. Both slots, duplicate detection,
+invalid polarity/API/bindings, manual fallback and conflicts with another module
+are covered. The published template's 657-byte length and SHA-256 were verified
+against the public endpoint after the documentation deployment succeeded.
+The physical EEPROM write and boot activation remain user-run acceptance tests.
+Existing intermittent FAT write/mount errors and WebServer latency remain open;
+this integration does not claim to fix them.

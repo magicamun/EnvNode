@@ -213,10 +213,15 @@ String WebService::renderSdSettings() {
     const bool de=configurationService_.getLocale()==Locale::GermanGermany;
     String html="<section class='card'><h2>";
     html+=de ? "SD-Einstellungen" : "SD settings";
-    html+="</h2><form method='post' action='/sd-card/settings'><label><input type='checkbox' name='enabled' value='1'";
+    html+="</h2>";
+    if(sd.automatic || sd.moduleConflict) html+=sd.moduleConflict ? (de ? "<p>SD-Modulkonflikt oder nicht unterstützter Modulvertrag; Zugriff gesperrt.</p>" : "<p>SD module conflict or unsupported contract; access blocked.</p>") : (de ? "<p>Slot und SD-Zugriff werden automatisch vom Modul-EEPROM übernommen.</p>" : "<p>Slot and SD access are selected automatically from the module EEPROM.</p>");
+    html+="<form method='post' action='/sd-card/settings'><label><input type='checkbox' name='enabled' value='1'";
     if(sd.enabled) html+=" checked";
+    if(sd.automatic) html+=" disabled";
     html+=">";html+=de ? "SD-Zugriff aktivieren" : "Enable SD access";
-    html+="</label><label>Slot <select name='slot'><option value='0'";
+    html+="</label><label>Slot <select name='slot'";
+    if(sd.automatic) html+=" disabled";
+    html+="><option value='0'";
     if(sd.slot==ModuleSlot::A) html+=" selected";
     html+=">A</option><option value='1'";
     if(sd.slot==ModuleSlot::B) html+=" selected";
@@ -238,7 +243,8 @@ String WebService::renderSdSettings() {
 void WebService::handleSdSettings() {
     sdDeleteTicket_.clear();sdFormatTicket_.clear();
     if(!administrationAvailable()) {sdFileError(static_cast<int>(SdDirectoryStatus::Disabled));return;}
-    const String slot=server_.arg("slot");
+    const auto& current=configurationService_.getConfiguration().sdStorage;
+    const String slot=current.automatic ? (current.slot==ModuleSlot::A ? String("0") : String("1")) : server_.arg("slot");
     if(slot!="0" && slot!="1") {server_.send(400,"text/plain","Invalid SD slot");return;}
     SdStorageConfiguration requested;
     requested.enabled=server_.hasArg("enabled");requested.slot=slot=="1" ? ModuleSlot::B : ModuleSlot::A;

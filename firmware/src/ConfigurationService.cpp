@@ -499,6 +499,7 @@ void ConfigurationService::loadConfiguration() {
             && validateRestore(*candidate)) configuration_ = *candidate;
     }
     loadFromPreferences();
+    if(sdModuleResolver_) sdModuleResolver_(configuration_.sdStorage);
     loadingConfiguration_ = false;
     // Preserve saved settings, but never initialize a manual driver on a module port.
     if (moduleOwnsHardware_) {
@@ -940,13 +941,19 @@ bool ConfigurationService::validateHardwareOccupancy(
         for (size_t index = 0; index < claimIndex; ++index)
             if (claims[index].active && moduleOwnsHardware_(claims[index].assignment)) return false;
     }
-    const auto& sd=sdStorage==nullptr ? configuration_.sdStorage : *sdStorage;
+    auto sd=sdStorage==nullptr ? configuration_.sdStorage : *sdStorage;
+    if(sdModuleResolver_) sdModuleResolver_(sd);
     if(sd.slot!=ModuleSlot::A && sd.slot!=ModuleSlot::B) return false;
     if(sd.enabled) {
         const auto* slot=boardModuleSlot(currentBoardProfile(),sd.slot);
         if(!slot || !slot->fiveVoltSupplyAvailable) return false;
-        const uint8_t pins[]={18,19,23,slot->spiChipSelect.number,slot->auxGpio1.number};
-        for(uint8_t pin:pins) claims[claimIndex++]=HardwareResourceClaim(true,HardwareResourceAssignment::gpioResource(GpioResource(pin)));
+        const auto& board=currentBoardProfile();
+        const uint8_t pins[]={board.spiClock.number,board.spiMiso.number,board.spiMosi.number,slot->spiChipSelect.number,slot->auxGpio1.number};
+        for(uint8_t pin:pins) {
+            const auto assignment=HardwareResourceAssignment::gpioResource(GpioResource(pin));
+            if(!loadingConfiguration_ && !sd.automatic && moduleOwnsHardware_ && moduleOwnsHardware_(assignment)) return false;
+            claims[claimIndex++]=HardwareResourceClaim(true,assignment);
+        }
     }
     return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
@@ -1096,7 +1103,9 @@ bool ConfigurationService::setControllerSlotConfiguration(
     return true;
 }
 
-bool ConfigurationService::setSdStorageConfiguration(const SdStorageConfiguration& requested) {
+bool ConfigurationService::setSdStorageConfiguration(const SdStorageConfiguration& input) {
+    SdStorageConfiguration requested=input;
+    if(sdModuleResolver_) sdModuleResolver_(requested);
     if(!validateHardwareOccupancy(configuration_.sensorSlots,configuration_.actuatorSlots,&configuration_.display,&requested)) return false;
     const uint32_t encoded=(requested.enabled ? 1U : 0U) | (requested.slot==ModuleSlot::B ? 2U : 0U) | (requested.systemLog ? 4U : 0U);
     if(!persistUInt("sdStorage",encoded)) return false;
@@ -1226,12 +1235,14 @@ bool ConfigurationService::restoreConfiguration(const Configuration& candidate) 
     if (!storage_.replaceSnapshot(encoded.get(), encodedSize, logger_)) return false;
     if (logger_) logger_->info("Configuration restore activating in-memory candidate");
     configuration_ = candidate;
+    if(sdModuleResolver_) sdModuleResolver_(configuration_.sdStorage);
     if (logger_) logger_->info("Configuration restore candidate activated");
     return true;
 }
 bool ConfigurationService::resetToDefaults() {
     if (!storage_.clearAll()) return false;
     initializeDefaults();
+    if(sdModuleResolver_) sdModuleResolver_(configuration_.sdStorage);
     return true;
 }
 
