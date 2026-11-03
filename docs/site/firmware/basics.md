@@ -37,6 +37,7 @@ nicht unmittelbar die physische Verdrahtung.
 | Hardware | Board Identity, Module und Provisioning |
 | Diagnose (Diagnostics) | Ressourcen und I²C-Scan |
 | Logs | Ereignisse und Fehler |
+| [SD-Karte](sd-card.md) | Dateien, Systemlog und erweiterte Diagnoseaufzeichnung ab 0.8.7 |
 | Firmware | Build-Identität, Update, Neustart und Factory Reset |
 
 ## Speichern ist nicht immer Anwenden

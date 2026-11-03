@@ -21,7 +21,8 @@
   hero_back: assets/images/analog-0.6/bottom.png
 - id: sd-card-0.1
   guide: modules/sd-card/index.md
-  pcb: sd-card/hardware/kicad/Modules/FullSize/SD-Card/SD-Card.kicad_pcb
+  shop_assets: true
+  pcb: main/hardware/kicad/Modules/FullSize/SD-Card/SD-Card.kicad_pcb
   sha256: 921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263
   hero_front: assets/images/sd-card-0.1/top.png
   hero_back: assets/images/sd-card-0.1/bottom.png

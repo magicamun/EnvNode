@@ -5,15 +5,15 @@
     "title": "SD-Card",
     "subtitle": "Bestückungs- und Bring-up-Anleitung",
     "hardware_revision": "0.1",
-    "document_version": "1.1",
-    "document_date": "2026-10-28",
-    "source_document_date": "2026-10-28",
-    "status": "Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung"
+    "document_version": "1.2",
+    "document_date": "2026-11-03",
+    "source_document_date": "2026-11-03",
+    "status": "Aufgebaut und funktional geprüft - Feldqualifikation offen"
   },
-  "pages": 12,
+  "pages": 13,
   "source_pdf": null,
   "source_pdf_sha256": null,
-  "markdown_sha256": "cf1d5bb24d863f0b85669e4d72fef42619e2fd38a25fc1735e5fa2a76b63c5cc",
+  "markdown_sha256": "e4dd3c4c002da11d798da63f0b840ed75ed8fc3e4f28f4d0e7dad593e45ac701",
   "template_sha256": "8fe14bba24cf57a0dc7500a1c5ae473f4138428c55b51d2b1ed56e62ae3cfdf7",
   "print_style_sha256": "294aa57556339003efe69b7b7382e8dca4e786db817d03fec0c912eefe58d8a6",
   "palette": {
@@ -44,5 +44,5 @@
     "DejaVuSans-Bold.ttf": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
     "DejaVuSansMono.ttf": "b4a6c3e4faab8773f4ff761d56451646409f29abedd68f05d38c2df667d3c582"
   },
-  "pdf_sha256": "82d0801b3c6c3ef3f8f96c0ad981220f986d501aece1f05aef89469c395f32f8"
+  "pdf_sha256": "59c9942e99a5c5669eb1f6e1e791aaa74b6b2308ea88078a95ed16f86ca00347"
 }

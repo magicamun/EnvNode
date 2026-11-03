@@ -1,6 +1,6 @@
 # Dokumentationsstand
 
-Stand: **28. Oktober 2026**. „Abgeschlossen“ bezeichnet die redaktionell vollständige Aufbau- und Bring-up-Anleitung. Der reale Fertigungs-/Prüfstand steht jeweils in der Anleitung.
+Stand: **3. November 2026** (SD-Card und Firmwarezuordnung aktualisiert). „Abgeschlossen“ bezeichnet die redaktionell vollständige Aufbau- und Bring-up-Anleitung. Der reale Fertigungs-/Prüfstand steht jeweils in der Anleitung.
 
 ## Abgeschlossen
 
@@ -10,7 +10,7 @@ Stand: **28. Oktober 2026**. „Abgeschlossen“ bezeichnet die redaktionell vol
 - RainDetectorController 0.4 und RainDetectorHead 0.2
 - Test-Controller, Input-Adapter und Modul-Adapter, jeweils 0.1
 
-[Zu den Anleitungen](index.md). Für SD-Card ist der technische Boardstand festgelegt; Fertigung/Aufbau sowie die spätere Ergänzung der Firmware-Mindestversion bleiben gesonderte Schritte.
+[Zu den Anleitungen](index.md). SD-Card 0.1 ist aufgebaut und funktional geprüft; öffentliche Unterstützung ab Firmware 0.8.7. Elektrisches Messprotokoll und Feldqualifikation bleiben offen.
 
 ## Teilumfang
 
@@ -25,8 +25,8 @@ Stand: **28. Oktober 2026**. „Abgeschlossen“ bezeichnet die redaktionell vol
 
 Die monolithische Test-Provisioning-Platine wurde durch die drei separaten Testboards abgelöst. Hierfür wird keine neue Aufbauanleitung geführt.
 
-## Später: Firmware-Releases
+## Firmware-Releases
 
-Firmwarestände sollen künftig je Versionscommit dokumentiert und mit passenden Binärdateien bereitgestellt werden. Dieser Schritt ist vorgemerkt und gehört nicht zur aktuellen Hardware-Dokumentationsrunde.
+[Downloads und Änderungen](../firmware/downloads.md) enthalten veröffentlichte Firmwarestände mit Versionszuordnung, Commit und Prüfsumme. Firmwareversion und Hardware-Revision sind getrennte Angaben.
 
 [Alte Revisionen](old-revisions.md)

@@ -35,9 +35,11 @@ the version number alone is not a claim of SD support.
 Provisioning is tested through the generated catalogue, browser upload endpoint,
 instance assignment and EEPROM readback. SD runtime tests cover both slots,
 duplicate modules, wrong polarity, incompatible bindings/API and manual fallback.
-The physical activation test with the assembled module remains required.
+Physical activation with the assembled SD module in Mini slot A alongside
+DuoRelay in slot B was confirmed on 2026-11-03. The integrated public release
+is EnvNode 0.8.7. Electrical measurements and field qualification remain open.
 
-Merge acceptance also requires a general bounded diagnostic recording interface:
+The integrated general bounded diagnostic recording interface provides:
 Raindetector or SCT013 supplies diagnostic records without depending on SPI/FAT
 or requiring changes to the SD driver. Naming, rotation, storage limits and
 storage failures remain the responsibility of the recording/storage layers.

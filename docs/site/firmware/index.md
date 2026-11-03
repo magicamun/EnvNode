@@ -1,8 +1,9 @@
 # Firmware bedienen
 
 Diese Anleitung führt von der ersten Verbindung mit EnvNode bis zu Messung,
-Schalten, Anzeige und MQTT. Sie beschreibt den Firmware-Quellstand vom
-14. Oktober 2026 (Firmware 0.6.1). Die Sprache der Oberfläche ist einstellbar; englische
+Schalten, Anzeige und MQTT. Die einzelnen Kapitel nennen bei Bedarf ihren
+Funktionsstand; SD-Karte und Diagnoseaufzeichnung sind für Firmware 0.8.7
+(3. November 2026) ergänzt. Die Sprache der Oberfläche ist einstellbar; englische
 Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
 Du beginnst gerade mit EnvNode? [Der Einstieg](../getting-started/index.md) erklärt
@@ -43,6 +44,12 @@ Wenn das ESP32 noch keine passende Firmware hat, beginne mit
 optionalen Koordinaten, die tatsächliche Sensorhöhe, die lokale Temperaturauswahl
 und den getrennten abgeleiteten Druckwert einschließlich Qualität und Rückfallverhalten.
 Die Funktion steht ab Firmware 0.6.0 zur Verfügung.
+
+## SD-Karte und Diagnoseaufzeichnung
+
+[SD-Karte bedienen](sd-card.md) beschreibt automatische Modulerkennung,
+Dateiverwaltung, Systemlog und erweiterte Diagnose einschließlich Rotation,
+Speichergrenzen und Verhalten bei Kartenwechsel.
 
 ## Zwei durchgehende Beispiele
 

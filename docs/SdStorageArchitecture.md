@@ -2,9 +2,17 @@
 
 EnvNode: see repository LICENSE.
 
+Current public integration: **EnvNode 0.8.7**, merged into main on 2026-11-03.
+See [the operating guide](site/firmware/sd-card.md) for current user steps.
+Dated validation paragraphs below preserve the state at each checkpoint; pending
+checks mentioned there are historical, with later results in
+[SdCardSpiBringup.md](SdCardSpiBringup.md).
+
 SD storage is bounded local diagnostic recording, not historical aggregation.
-The normal firmware includes the driver. Configuration defaults to disabled,
-selects an explicit breakout Slot A/B, and separately enables system logging.
+The normal firmware includes the driver. Without an identified module, manual
+configuration defaults to disabled and selects breakout Slot A/B. A supported
+module descriptor enables access and selects the slot automatically. System
+logging and extended diagnostic preferences remain explicit persisted choices.
 EEPROM-based SD module selection and the assembled module write/read test were
 physically validated on 2026-11-03. Manual selection remains for the breakout.
 

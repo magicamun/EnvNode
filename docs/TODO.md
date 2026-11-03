@@ -19,7 +19,7 @@
 - Versionsstand je Release-/Versionscommit dokumentieren, einschließlich Quellcommit und Zielhardware.
 - Zugehörige geprüfte Binärdateien mit Prüfsummen und Flash-/Updatehinweisen bereitstellen.
 - Unterstützte Boardrevisionen und bekannte Einschränkungen pro Release festhalten.
-- Für SD-Card 0.1 gilt Profilminimum 0.8.6 mit zusätzlicher Prüfung des SD-Betriebstreibers. Den zugehörigen Release-/Buildstand bei Veröffentlichung eindeutig angeben; ältere Builds derselben Versionsnummer können noch ohne SD-Treiber sein.
+- Für SD-Card 0.1 gilt Profilminimum 0.8.6 mit zusätzlicher Prüfung des SD-Betriebstreibers. Öffentlich integrierter Stand ist 0.8.7; ältere 0.8.6-Builds können noch ohne SD-Treiber sein.
 
 Vorgemerkt am 28.10.2026; Umsetzung als separater Schritt nach der Hardware-Dokumentation.
 

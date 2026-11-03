@@ -133,6 +133,9 @@
   - ENP-00137
   - 3V3_REG
   - Firmware-Mindestversion
+  - 0.8.7
+  - storage.sd
+  - ENK-00022
 - source: sensors/rain-detector-controller/assembly.md
   target: assets/downloads/RainDetectorController_Rev0.4_Anleitung.pdf
   preview: docs/pdf/reference/RainDetectorController_Rev0.4_Anleitung.pdf

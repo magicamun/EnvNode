@@ -1,5 +1,11 @@
 # SD-Card SPI bring-up — Slot A
 
+Current status (2026-11-03): integrated into main and released as EnvNode 0.8.7.
+The assembled module was physically validated; the user also confirmed the merged
+firmware after flashing. Use [the operating guide](site/firmware/sd-card.md) for
+current setup. The dated sections below are the chronological engineering record,
+including superseded build/branch instructions.
+
 EnvNode: see repository LICENSE.
 
 ## Scope

@@ -1,6 +1,7 @@
 # Hardware-Dokumentationsstand
 
-Stand: **28. Oktober 2026**, nach redaktioneller Freigabe durch den Projektinhaber.
+Stand: **3. November 2026**, SD-Card nach dem Main-Merge aktualisiert.
+Die übrige Bestandsaufnahme folgt der redaktionellen Freigabe vom 28. Oktober.
 „Abgeschlossen“ bezeichnet die Dokumentation. Fertigung, Inbetriebnahme und
 Hardwarequalifikation werden in jeder Anleitung getrennt geführt.
 
@@ -13,7 +14,7 @@ Hardwarequalifikation werden in jeder Anleitung getrennt geführt.
 | ORing Power | 0.1.1 | Web + PDF, Basis 0.1 mit Ergänzung |
 | DuoRelay | 0.3 | Web + PDF |
 | AnalogHydroPressure | 0.6 | Web + PDF; steckbare Bus-/Adresswahl, neue L1, THT-Shunt |
-| SD-Card | 0.1 | Web + PDF; Board technisch festgelegt, Fertigung/Aufbau folgen; Firmware-Mindestversion später ergänzen |
+| SD-Card | 0.1 | Web + PDF; aufgebaut und funktional geprüft, öffentliche SD-Firmware 0.8.7; elektrische Messungen/Feldqualifikation offen |
 | RainDetectorController | 0.4 | Web + PDF, neue Kontur und Renderings |
 | RainDetectorHead | 0.2 | Web + PDF, neue Kontur und Renderings |
 | Test-Controller | 0.1 | Neue vollständige Web-/PDF-Aufbauanleitung |
@@ -54,10 +55,10 @@ Die Basisinventur bleibt als [historischer Audit](HardwareDocumentationAudit-202
 erhalten; dieser Statusbericht ersetzt dessen damalige Einstufungen.
 
 Mini und Weather verwenden den gespeicherten main-Arbeitsstand. AnalogHydroPressure,
-SD-Card, RainDetector und die Testboards verwenden die im jeweiligen
+RainDetector und die Testboards verwenden die im jeweiligen
 Rendernachweis benannten Arbeitszweige und SHA-256-Quellstände. Es wurden keine
-Hardwarezweige zusammengeführt und keine KiCad-Quelldateien für die
-Dokumentation geändert.
+KiCad-Quelldateien für die Dokumentation geändert. SD-Card wurde inzwischen
+nach main übernommen; die ursprünglichen CAD-/Renderprüfsummen gelten weiter.
 
 Neu: 18 native KiCad-Renderings für neun Boards, mit Quell-/Bildprüfsummen.
 Bei allen neun Boards stimmen die gemeinsamen belegten PCB-Pins mit den neu
@@ -69,11 +70,12 @@ wird mit `mkdocs build --strict` geprüft. Die neue PDF-Laufzeit liegt lokal iso
 unter /private/tmp; der CI-Workflow stellt Pango und DejaVu weiterhin selbst bereit.
 Details zur Erstellung und lokalen Vorschau: [Website bearbeiten](WEBSITE.md).
 
-## Nächster separater Schritt
+## Firmwarezuordnung
 
-Firmware pro Versionscommit dokumentieren und passende Binärdateien veröffentlichen;
-SD-Card anschließend die geprüfte Mindestversion zuordnen. Diese Arbeit ist
-vorgemerkt und in dieser Hardware-Dokumentationsrunde nicht implementiert.
+Firmware-Downloads werden inzwischen versionsbezogen veröffentlicht. SD-Card 0.1
+ist dem öffentlichen Funktionsstand EnvNode 0.8.7 zugeordnet. Das technische
+Descriptor-Minimum 0.8.6 bleibt getrennt; ältere Builds derselben Version können
+noch ohne SD-Treiber sein. Siehe [SD-Bedienung](site/firmware/sd-card.md).
 
 ## Einheitliche Bildfolge in den Aufbauanleitungen
 

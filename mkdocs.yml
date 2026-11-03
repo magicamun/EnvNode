@@ -83,6 +83,7 @@ nav:
       - Lokale Controller: firmware/controllers.md
       - Values und Anzeigen: firmware/values-displays.md
       - MQTT und Home Assistant: firmware/mqtt.md
+      - SD-Karte und Aufzeichnung: firmware/sd-card.md
       - Wartung und Diagnose: firmware/maintenance.md
       - Beispiele:
           - Mini mit SHT4x: firmware/example-measurement.md

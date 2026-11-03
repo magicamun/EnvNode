@@ -14,9 +14,8 @@ SOIC-8) and C1 (100 nF, 1206) are on the bottom; R1 (10 kOhm, 1206) is on top.
 
 Optional field recording for Raindetector validation in real rain. Measurements
 and diagnostics are evaluated externally. Normal measurement, MQTT and heater
-control must remain functional without an SD card or on a storage error. This
-hardware does not provide weather analysis, historical aggregation or a finished
-firmware logging subsystem.
+control must remain functional without an SD card or on a storage error. The integrated firmware provides bounded diagnostic recording, not weather
+analysis or historical aggregation.
 
 ## Connections
 
@@ -49,9 +48,11 @@ for M2.5 hardware. Spacer dimensions must match the actual connector stack.
 The model views show the carrier without U1, which has no 3D model assigned.
 
 Local `sym-lib-table` and `fp-lib-table` point to libraries in this checkout.
-The PDF can be regenerated with `tools/build_sd_card_bringup.py` using Python,
-ReportLab and Pillow. Reviewed KiCad render images are kept beside the PDF;
-rerender them after a PCB revision. The generator rejects stale image manifests.
+The canonical guide is `docs/site/modules/sd-card/index.md`. MkDocs and the shared
+PDF template generate the web download; `tools/build_sd_card_bringup.py` exports
+the same PDF to the historical hardware-tree path (or use `--from-site` with a
+reviewed build). It checks source/PDF digests before export. Reviewed KiCad
+render images remain beside the PDF; rerender them after a PCB revision.
 
 ## InvenTree parts - 20 October 2026
 
@@ -74,11 +75,12 @@ therefore counts it within ENP-00136, not again as ENP-00019. Check delivery
 contents before assembly. Mechanical fastener/spacer parts and lengths remain
 to be selected; ordered spacers are intentionally excluded from stock and BOM
 until the user has checked them. The microSD card is separate operating
-accessory/test equipment; its exact type remains to be documented.
+accessory/test equipment; initial tests used a SanDisk Ultra 8 GB / FAT32.
 
-ENP-00136 and ENP-00137 were newly created. The Reichelt supplier part for
-ENP-00136 is saved; the separate Adafruit manufacturer-part link (MPN 254) is
-still open. Existing standard-part records were reused.
+ENP-00136 and ENP-00137 were newly created. The initial supplier entry was Reichelt. The user subsequently selected DigiKey
+for the same original Adafruit 254; the current supplier/manufacturer links
+should be verified in InvenTree before procurement. Existing standard-part
+records were reused. No live InvenTree changes were made during this documentation update.
 
 ### Kit and BOM
 
@@ -132,6 +134,9 @@ download were physically confirmed on 2026-11-03. The writer retains over 6 KB
 of measured stack reserve. HTTP response sending still occasionally takes about
 2–2.5 seconds; this remains a separate issue.
 
+The public integrated release is **EnvNode 0.8.7**; see the
+[SD operating guide](../../../../../docs/site/firmware/sd-card.md) and
+[firmware downloads](https://docs.envnode.de/firmware/downloads/).
 The dedicated module profile declares runtime minimum 0.8.6. Driver support is
 checked independently: older builds of that version may provision the profile
 but cannot operate it without the SD driver. See
@@ -159,3 +164,13 @@ the recorder without depending on SPI/FAT or modifying the SD driver.
 - https://www.adafruit.com/product/254
 - https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/download
 - https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/arduino-wiring
+
+## Product documentation assets
+
+The selected shop revision is `sd-card-0.1` in `docs/board-views.yml`, sourced
+from this main checkout. Eight deterministic assembled/bare views and their
+manifest live under `docs/site/assets/product-boards/sd-card-0.1/`. U1 has no
+3D model and is absent from assembled renders. Kit-content and physical
+reference photos remain outstanding; renders do not establish shop release
+or the physical contents of a delivery. Spacers and the card remain outside
+the six-position kit BOM.

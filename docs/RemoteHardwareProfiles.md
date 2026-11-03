@@ -1,4 +1,7 @@
-# Nachladbare Hardwareprofile — EnvNode 0.8.6 / Tester 0.8.3
+# Nachladbare Hardwareprofile — EnvNode / Tester
+
+Katalogfunktion ab EnvNode 0.8.6 / Tester 0.8.3; der öffentliche integrierte
+SD-Betrieb steht ab EnvNode 0.8.7 bereit.
 
 EnvNode-eigene Inhalte unterliegen der Repository-LICENSE
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).

@@ -5,17 +5,19 @@ pdf:
   title: SD-Card
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.1'
-  document_version: '1.1'
-  document_date: '2026-10-28'
-  source_document_date: '2026-10-28'
-  status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
+  document_version: '1.2'
+  document_date: '2026-11-03'
+  source_document_date: '2026-11-03'
+  status: Aufgebaut und funktional geprüft - Feldqualifikation offen
 ---
 
 # SD-Card 0.1 - Bestückung und Inbetriebnahme
 
-FullSize-Trägerplatine für das fertig bestückte Adafruit MicroSD card breakout board+ (Produkt 254 / Reichelt DEBO MICROSD). Der Hardwarestand 0.1 ist technisch festgelegt; als nächster Hardwareschritt steht die Fertigung und der Aufbau an. Die Firmware-Mindestversion wird später ergänzt.
+FullSize-Trägerplatine (38 × 64 mm) für das fertig bestückte Adafruit MicroSD card breakout board+ (Produkt 254). Das Modul wurde aufgebaut und am EnvNode Mini erfolgreich geprüft. Die integrierte SD-Unterstützung steht als öffentliche Firmware **0.8.7** bereit; Hardware-Revision und Firmwareversion sind getrennte Angaben.
 
-**Dokumentation abgeschlossen am 28. Oktober 2026.** Der Fertigungs- und Erprobungsstand wird im Abschlusskapitel getrennt geführt.
+**Dokumentstand: 3. November 2026.** Bestückungs- und Anschlussdaten gelten unverändert für Hardware 0.1. Funktionale Tests und noch offene elektrische beziehungsweise Außenprüfungen stehen im Abschlusskapitel.
+
+[SD-Karte bedienen und Diagnose aufzeichnen](../../firmware/sd-card.md) · [Firmware herunterladen](../../firmware/downloads.md)
 
 [Anleitung als PDF](../../assets/downloads/SD_Card_Rev0.1_Anleitung.pdf){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
@@ -101,9 +103,9 @@ Für das Adafruit-Breakout U1 ist kein 3D-Modell hinterlegt; die Ansichten zeige
 
 1. Ohne Karte stromlos in den vorgesehenen Slot einsetzen; tatsächliche CS-/CD-GPIOs des Mainboards dokumentieren.
 2. Versorgung strombegrenzt einschalten. 5 V am Breakout, +3V3_SYS am EEPROM und Ruhestrom prüfen. Bei auffälligem Strom/Temperatur abschalten.
-3. U2-Adresse und gültigen dedizierten SD-Card-Descriptor getrennt prüfen; keinen Descriptor eines fremden Moduls verwenden.
+3. Unter **Hardware** das Katalogprofil **EnvNode SD-Card 0.1** für den tatsächlichen Slot provisionieren, falls U2 noch leer ist. Schreib-/Rückleseprüfung abwarten und neu starten. Unter Modulidentität und Geräteinventar `sd.1`, Treiber `sd-spi v1`, Fähigkeit `storage.sd` und Status `Ready` prüfen. [Provisioning-Ablauf](../../firmware/provisioning.md#sd-card-01-provisionieren-und-aktivieren).
 4. CD-Pegel ohne und mit Karte messen. Der Projektstand beschreibt LOW ohne Karte und HIGH mit Karte; die konkrete Kontaktpolarität am vorhandenen Breakout bestätigen.
-5. Mit geeigneter Firmware und Testkarte Initialisierung, Dateiauflistung sowie expliziten Schreib-/Lesetest ausführen. Dateiname, Testgröße und Vergleichsergebnis protokollieren.
+5. Mit Firmware 0.8.7 und einer FAT32-Testkarte **SD-Karte** öffnen. Der provisionierte Slot und SD-Zugriff werden automatisch übernommen. Den ausdrücklich gestarteten 4-KiB-Schreib-/Lesetest ausführen; er vergleicht 4096 Bytes und entfernt seine eigene Testdatei. Ergebnis protokollieren.
 6. Kartenwechsel und Fehlerzustände gezielt prüfen; laufende Messungen und Heizsteuerung müssen bei fehlender/fehlerhafter Karte weiterarbeiten.
 
 ## 7. Mess- und Fertigungsprotokoll
@@ -129,19 +131,71 @@ Für das Adafruit-Breakout U1 ist kein 3D-Modell hinterlegt; die Ansichten zeige
 | EEPROM fehlt | U2/C1, I2C0, Slot-A0 und Descriptor |
 | Sporadische Fehler | Versorgungseinbruch, Karte, Leitungsführung, Kontaktierung |
 
-**Firmware-Mindestversion: wird später ergänzt.** Der Hardwareabschluss ist keine Zusage, dass jede ältere Firmware SD-Card unterstützt. Spätere Releasezuordnung soll Version und Commit sowie nutzbares Binärabbild nennen. Das aktuelle Dokument implementiert keine Firmware und veröffentlicht kein Binärrelease.
+**Firmware-Mindestversion für den hier beschriebenen öffentlichen Funktionsumfang: 0.8.7.**
+Die [Downloads](../../firmware/downloads.md) führen `envnode-0.8.7.bin` samt
+Releasebeschreibung, Commit und Prüfsumme. Das Katalogprofil `sd-card-0.1`
+enthält weiterhin das technische Descriptor-Minimum 0.8.6. Dieses Minimum allein
+belegt keine Treiberunterstützung: ältere 0.8.6-Builds können das EEPROM
+provisionieren, ohne den SD-Treiber zu enthalten. Für neue Aufbauten 0.8.7 oder
+eine neuere kompatible Version verwenden.
+
+Ein gültiger Descriptor ordnet SPI, Chip-Select und Card Detect dem tatsächlichen
+Slot zu. Bei mehreren SD-Modulen oder einem nicht unterstützten Modulvertrag
+wird der SD-Zugriff gesperrt. Manuelle Slot-Auswahl ist für ein separat
+verdrahtetes Breakout ohne EEPROM vorgesehen.
 
 ## 9. Abschluss und Prüfstand
 
-Dokumentation und technischer Boardstand 0.1 sind abgeschlossen. Laut Vorgabe vom 28.10.2026 sind am Board keine weiteren technischen Änderungen geplant; Fertigung und Aufbau stehen als nächste Schritte an. Dies ersetzt den bisherigen Entwurfsstatus.
+Der unveränderte Hardwarestand 0.1 ist aufgebaut. Am 3. November 2026 wurden
+Modulerkennung und automatische Aktivierung in Slot A des EnvNode Mini neben
+DuoRelay in Slot B bestätigt. Der 4096-Byte-Schreib-/Lesevergleich einschließlich
+Aufräumen, Verzeichnisanzeige, System-/Diagnoseaufzeichnung, Neustartpersistenz
+und vollständiger Diagnose-Dateidownload sind funktional bestätigt. Nach dem
+Merge wurde Firmware 0.8.7 geflasht und vom Nutzer als funktionierend bestätigt.
 
-Der gespeicherte CAD-Bericht vom 20.10.2026 nennt DRC ohne Verstöße/offene Pads/Paritätsfehler sowie ERC ohne Fehler und mit sechs Warnungen. Das ist ein historischer CAD-Prüfstand. Bereits dokumentierte Firmware-/Breakoutversuche ersetzen nicht das Fertigungs- und Aufbauprotokoll dieser Trägerplatine. Mindestrevision der Firmware, konkrete Karte und Montagehardware werden später ergänzt.
+Download, bestätigtes Löschen, FAT32-Formatierung, Dateirotation und Wiederanlauf
+nach Kartenwechsel wurden bereits während der Breakout-Erprobung geprüft.
+Die Testkarte war eine SanDisk Ultra mit 8 GB, nach Neuformatierung mit FAT32.
+Diese Tests ersetzen keine Qualifikation beliebiger Karten oder Mainboards.
+
+Der CAD-Bericht vom 20.10.2026 nennt DRC ohne Verstöße/offene Pads/Paritätsfehler
+sowie ERC ohne Fehler und mit sechs Warnungen. Elektrische Messwerte für
+Versorgung und Leistungsaufnahme, endgültige Distanzstücke, Gehäuse sowie
+Langzeit-/Außenerprobung bleiben offen. Das leere Protokoll oben ist eine
+Vorlage für jeden weiteren Aufbau, kein nachträglich ausgefüllter Messnachweis.
+Gelegentliche Web-Sendelatenzen wurden getrennt vom erfolgreichen SD-Zugriff
+beobachtet und sind kein Beleg für einen defekten Kartenleser.
+
+## 10. Lieferumfang und Produktansichten
+
+PCB-Artikel **ENP-00137** bezeichnet ausschließlich die unbestückte Trägerplatine.
+Bausatz **ENK-00022** umfasst die sechs BOM-Positionen aus Abschnitt 1.
+Die mit U1 gelieferte 1×8-Stiftleiste wird nicht zusätzlich gezählt.
+Eine microSD-Karte, Schrauben und Distanzstücke gehören nicht zu dieser BOM.
+Die Beschaffung des Original-Breakouts über DigiKey ändert die Zuordnung zu
+Adafruit Produkt 254 nicht.
+
+Die folgenden Bilder sind aus derselben PCB-Quelle erzeugt. Bei Ansichten mit
+Bauteilmodellen fehlt U1 weiterhin, weil für das Adafruit-Breakout kein 3D-Modell
+hinterlegt ist. Sie ersetzen kein Foto des vollständigen Referenzaufbaus.
+Bestückte Ansichten sind **Beispielaufbau – Bauteile nicht im PCB-Artikel enthalten**.
+
+| Ansicht | Vorderseite | Rückseite |
+| --- | --- | --- |
+| 3D, unbestückte Platine | [Vorne](../../assets/product-boards/sd-card-0.1/3d-bare-front.png) | [Hinten](../../assets/product-boards/sd-card-0.1/3d-bare-back.png) |
+| 3D, vorhandene Bauteilmodelle | [Vorne](../../assets/product-boards/sd-card-0.1/3d-assembled-front.png) | [Hinten](../../assets/product-boards/sd-card-0.1/3d-assembled-back.png) |
+| 2D, unbestückte Platine | [Vorne](../../assets/product-boards/sd-card-0.1/2d-bare-front.png) | [Hinten](../../assets/product-boards/sd-card-0.1/2d-bare-back.png) |
+| 2D, vorhandene Bauteilmodelle | [Vorne](../../assets/product-boards/sd-card-0.1/2d-assembled-front.png) | [Hinten](../../assets/product-boards/sd-card-0.1/2d-assembled-back.png) |
+
+[Herkunft und Prüfsummen der Produktansichten](../../assets/product-boards/sd-card-0.1/asset-manifest.json).
+Ein Foto des tatsächlichen Bausatzinhalts und des aufgebauten Referenzmoduls
+steht noch aus. Die technische Dokumentation erteilt keine Shop-Verkaufsfreigabe.
 
 Adafruit-Design: Limor Fried/Ladyada, CC BY-SA 3.0; die originalen Hersteller- und Bibliotheksrechte bleiben bestehen. Quellen: [Adafruit Produkt 254](https://www.adafruit.com/product/254) und [Herstelleranleitung](https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/overview).
 
 ### Quellenstand
 
-Dokumentiert ist der gespeicherte KiCad-Stand aus `sd-card`, Projekt `SD-Card`, Basiscommit `282c399b9bef1744dfd031a46b8cad6a5ce633d4`. Die Prüfsummen bestimmen den tatsächlichen Arbeitsstand einschließlich lokaler Änderungen; der Commit allein beschreibt diese nicht.
+Dokumentiert ist das Projekt `hardware/kicad/Modules/FullSize/SD-Card` in `main`. Der zuvor im Branch `sd-card` geprüfte CAD-Stand wurde unverändert übernommen. Die ursprünglichen Rendernachweise bleiben erhalten; die folgenden Prüfsummen stimmen mit den Quellen in `main` überein.
 
 | Quelle | SHA-256 |
 | --- | --- |
