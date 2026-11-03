@@ -139,3 +139,11 @@ writer_stack_min_bytes. Runtime-health memory fields explicitly measure internal
 8-bit RAM; generic internal-heap figures can include other memory capabilities.
 Two physically written diagnostic files have been parsed successfully as JSONL.
 Intermittent web-mount registration failure remains under memory-budget validation.
+
+Physical follow-up: user log for Build 430 / 3097aeb confirms both recording
+streams resume automatically after a requested software restart and a 527-byte
+diagnostic file downloads fully. No mount/write error occurs in that supplied
+run. The shared worker retains over 6 KB of measured stack reserve with its
+12 KiB stack. Per-entity flag persistence/migration remains covered by native
+tests; source-specific Raindetector/SCT013 instrumentation is subsequent work.
+HTTP send latency remains a separately open item.

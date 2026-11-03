@@ -654,3 +654,27 @@ diagnostics/automatic values. It did not mean the recognized module was disabled
 Validation: 53 distinct affected native tests passed across recording, serial
 read/write, transfer, formatting and rotation. Firmware build and physical web
 listing with both streams active are required to validate the resource change.
+
+### Physical confirmation of the reduced memory budget — 3 November 2026
+
+User-supplied serial log for Build 430 / commit 3097aeb confirms automatic SD
+module activation in slot A alongside DuoRelay in slot B. System logging and
+extended diagnostics are active. Following an explicitly requested software
+restart, both streams resume without another settings save, confirming persisted
+enablement through restart; the user also confirms retention through flashing.
+
+Resource samples report internal 8-bit free heap of 39560 / 41700 bytes,
+largest corresponding blocks of 18420 / 38900 bytes and minimum writer stack
+reserve of 6332 / 6400 bytes with the 12 KiB task. No FAT registration, mount or
+write failure appears in the supplied run, including repeated SD web activity.
+The diagnostic file boot-0000000020-part-0001.jsonl downloads successfully:
+527 bytes requested and 527 bytes completed. The SDK zero-content-length warning
+occurs for the intentionally header-only start of that streamed response; the
+subsequent transfer is complete.
+
+Observed WebHost calls still spend roughly 2.1–2.5 seconds sending responses,
+while first-write latency is 14–15 ms and shared-header rendering 5 ms. This is
+a separately open HTTP transport-latency issue, not a failed SD transfer in this
+run. The successful trace validates the targeted memory-budget change under the
+reported workload; it is not a long-duration soak test. The full SD branch has
+not been merged into main.
