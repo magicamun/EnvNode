@@ -519,3 +519,17 @@ handleClient call took 7911 ms. The route was empty after request handling, so
 this instrumentation does not yet identify the request or distinguish parsing,
 rendering and sending. Blocking HTTP latency remains open; the earlier sporadic
 FAT VFS registration failure is also not considered fixed by one clean run.
+
+Web latency measurement follow-up: shared WebHost captures the response route
+during the first SDK write, before WebServer clears its URI. Warnings now include
+first_write_ms, send_ms, header_ms and actual written bytes. Large first_write_ms
+with small send_ms points to work before sending (parsing or handler work); large
+send_ms points to socket writes. header_ms isolates the common page header only,
+not the route-specific body. A no-response label means no observed SDK write.
+Normal page navigation is sufficient for the next physical observation; another
+SD rotation run is optional. These counters measure latency, not CPU usage, and
+do not themselves fix the blocking behavior.
+
+Validation: 35 affected native tests passed (WebHost timing and framing,
+firmware web, web logs, SD rotation); default esp32dev firmware build passed.
+Physical evaluation of the detailed request timing is pending.

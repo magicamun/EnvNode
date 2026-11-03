@@ -11,7 +11,7 @@ void HardwareSerial::println(const char*) {}
 size_t HardwareSerial::write(const uint8_t*, size_t n) { return n; }
 void pinMode(unsigned char, int) {}
 void digitalWrite(unsigned char, int) {}
-void setUp() {}
+void setUp() {arduinoTestMillis()=0;}
 void tearDown() {}
 class TestWiFi : public IWiFiService {
 public:
@@ -115,8 +115,49 @@ void test_page_frame_escapes_text_and_omits_setup_hint_when_connected() {
     TEST_ASSERT_NULL(std::strstr(html.c_str(), "Setup only"));
     TEST_ASSERT_NULL(std::strstr(html.c_str(), "main-wide"));
 }
+void test_slow_response_separates_wait_and_send_and_retains_route() {
+    TestWiFi wifi;wifi.online=true;TestLogger logger;WebHost host(logger,wifi);
+    auto& server=host.server();server.writeDelayMs=400;
+    server.on("/slow",HTTP_GET,[&]() {
+        delay(250);
+        host.sendPage([](){delay(100);return String("header");},"body",200,"offline","error");
+    });
+    server.onHandleClient=[&]() {delay(50);server.request("/slow",HTTP_GET);};
+    host.loop();
+    TEST_ASSERT_TRUE(server.uri().isEmpty());
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"route=/slow"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"first_write_ms=400"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"send_ms=1200"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"header_ms=100"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"elapsed_ms=1600"));
+    logger.lastMessage.clear();server.writeDelayMs=0;host.loop();
+    TEST_ASSERT_TRUE(logger.lastMessage.empty());
+}
+void test_slow_request_without_response_is_identified() {
+    TestWiFi wifi;TestLogger logger;WebHost host(logger,wifi);
+    host.server().onHandleClient=[](){delay(1500);};
+    host.loop();
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"route=(no response)"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"send_ms=0"));
+}
+void test_measurements_cover_flash_writes_and_reset_between_requests() {
+    MeasuredWebServer server(80);
+    server.writeDelayMs=500;server.beginMeasurement();
+    server.on("/style",HTTP_GET,[&](){server.send_P(200,"text/css","css",3);});
+    server.request("/style",HTTP_GET);
+    TEST_ASSERT_EQUAL_UINT(500,server.writeMs());
+    TEST_ASSERT_EQUAL_UINT(3,server.writtenBytes());
+    TEST_ASSERT_EQUAL_STRING("/style",server.responseRoute().c_str());
+    server.beginMeasurement();
+    TEST_ASSERT_EQUAL_UINT(0,server.writeMs());
+    TEST_ASSERT_EQUAL_UINT(0,server.writtenBytes());
+    TEST_ASSERT_TRUE(server.responseRoute().isEmpty());
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_slow_response_separates_wait_and_send_and_retains_route);
+    RUN_TEST(test_slow_request_without_response_is_identified);
+    RUN_TEST(test_measurements_cover_flash_writes_and_reset_between_requests);
     RUN_TEST(test_host_accepts_independent_route_modules_and_services_clients);
     RUN_TEST(test_shared_style_keeps_cache_policy_and_content);
     RUN_TEST(test_offline_page_returns_503_without_rendering_header);

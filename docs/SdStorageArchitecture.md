@@ -47,3 +47,18 @@ An explicitly started, isolated hardware rotation diagnostic now reuses the
 production append/pruning backend with fixed 8 KiB/24 KiB test limits in a new
 exclusive workspace. Test data is read back and cleaned up; production limits
 and /logs/system are unchanged. Its physical result is pending.
+
+HTTP latency investigation (2026-10-27): the shared WebHost now measures SDK
+response writes separately from the full handleClient call. It captures the URI
+before the SDK clears it, counts bytes actually handed to the socket and records
+shared page-header rendering time. A slow-request warning includes elapsed_ms,
+first_write_ms (request processing up to the first send), send_ms and header_ms.
+The remaining pre-response time can include parsing, body rendering and route
+work; these are not yet distinguished. No response indicates that no measured
+SDK write occurred, not proof of a parser timeout. Chunked-transfer framing and
+custom download socket writes are outside these byte/write counters.
+
+This step preserves the SDK parser, response framing and timeout behavior. It
+adds observation before choosing a transport or timeout change. Read-only
+network samples returned a 14 KB log page in 0.25 s and a 5 KB status page in
+1.09 s, which does not support page size as the sole cause of stalls.

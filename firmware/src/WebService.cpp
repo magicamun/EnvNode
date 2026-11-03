@@ -567,12 +567,7 @@ void WebService::loop() {
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }
-    const uint32_t started=millis();
     webHost_.loop();
-    const uint32_t elapsed=millis()-started;
-    if(elapsed>=1000) logger_.warnf("Web request slow: elapsed_ms=%lu route=%s heap=%u largest=%u",
-        static_cast<unsigned long>(elapsed),server_.uri().c_str(),
-        static_cast<unsigned>(ESP.getFreeHeap()),static_cast<unsigned>(ESP.getMaxAllocHeap()));
 }
 
 bool WebService::administrationAvailable() const { return webHost_.administrationAvailable(); }
