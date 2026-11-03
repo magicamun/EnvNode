@@ -8,6 +8,7 @@
 #include "HtmlEscaping.h"
 #include <new>
 #include <esp_system.h>
+#include <NetworkClient.h>
 #include <sys/socket.h>
 #include <cerrno>
 #include <limits>
@@ -77,7 +78,7 @@ namespace EnvNode {
 namespace {
 class SdHttpDownload : public ISdDownloadJob, private ISdDownloadSink {
 public:
-    SdHttpDownload(std::unique_ptr<ISdStoredFile> file,WiFiClient client,ILogger& logger,uint32_t now)
+    SdHttpDownload(std::unique_ptr<ISdStoredFile> file,NetworkClient client,ILogger& logger,uint32_t now)
         : file_(std::move(file)),client_(client),logger_(logger),pump_(*file_,*this,now) {}
     bool service(uint32_t now) override {
         const auto result=pump_.step(now);
@@ -93,7 +94,7 @@ private:
         if(result<0 && (errno==EAGAIN || errno==EWOULDBLOCK || errno==EINTR)) return 0;
         return result;
     }
-    std::unique_ptr<ISdStoredFile> file_; WiFiClient client_; ILogger& logger_; SdDownloadPump pump_;
+    std::unique_ptr<ISdStoredFile> file_; NetworkClient client_; ILogger& logger_; SdDownloadPump pump_;
 };
 }
 void WebService::sdFileError(int code) {

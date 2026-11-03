@@ -26,3 +26,9 @@
 !SCT013-ADC/include/RawDiagnostics.h
 !SCT013-ADC/tests/
 !SCT013-ADC/tests/rms_test.cpp
+
+!SD-MountLifecycle/
+!SD-MountLifecycle/platformio.ini
+!SD-MountLifecycle/README.md
+!SD-MountLifecycle/src/
+!SD-MountLifecycle/src/main.cpp

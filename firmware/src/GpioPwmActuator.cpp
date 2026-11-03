@@ -29,15 +29,15 @@ ActuatorOperationResult GpioPwmActuator::begin() {
             static_cast<unsigned int>(validation));
         return ActuatorOperationResult::InvalidHardwareResource;
     }
-    if (ledcSetup(channel_, GpioPwmFrequencyHz, GpioPwmResolutionBits) == 0) {
+    if (!ledcAttachChannel(hardware_.gpio.number, GpioPwmFrequencyHz,
+        GpioPwmResolutionBits, channel_)) {
         initialized_ = false;
         logger_.errorf("GPIO PWM actuator initialization failed: LEDC channel %u",
             static_cast<unsigned int>(channel_));
         return ActuatorOperationResult::InvalidHardwareResource;
     }
 
-    ledcWrite(channel_, 0);
-    ledcAttachPin(hardware_.gpio.number, channel_);
+    ledcWriteChannel(channel_, 0);
     level_ = ActuatorLevel::off();
     initialized_ = true;
     logger_.debugf("GPIO PWM actuator initialized Off on GPIO%u channel=%u",
@@ -56,7 +56,7 @@ OnOffState GpioPwmActuator::state() const {
 
 ActuatorOperationResult GpioPwmActuator::setLevel(ActuatorLevel level) {
     if (!initialized_) return ActuatorOperationResult::NotInitialized;
-    ledcWrite(channel_, gpioPwmDutyForLevel(level));
+    ledcWriteChannel(channel_, gpioPwmDutyForLevel(level));
     level_ = level;
     return ActuatorOperationResult::Completed;
 }
@@ -67,9 +67,9 @@ ActuatorLevel GpioPwmActuator::level() const {
 
 ActuatorOperationResult GpioPwmActuator::shutdown() {
     if (!initialized_) return ActuatorOperationResult::Completed;
-    ledcWrite(channel_, 0);
+    ledcWriteChannel(channel_, 0);
     level_ = ActuatorLevel::off();
-    ledcDetachPin(hardware_.gpio.number);
+    ledcDetach(hardware_.gpio.number);
     pinMode(hardware_.gpio.number, INPUT);
     initialized_ = false;
     logger_.debugf("GPIO PWM actuator shut down Off on GPIO%u channel=%u",

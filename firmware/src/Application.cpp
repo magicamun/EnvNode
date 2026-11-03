@@ -54,9 +54,9 @@ void Application::beginIntegrations() {
     logger_.debugf("Git working tree: %s", FirmwareBuildInfo::SourceState);
     logger_.debugf("Built: %s", FirmwareBuildInfo::BuildTimestampUtc);
     logger_.debugf("Chip model: %s", ESP.getChipModel());
-    logger_.debugf("CPU frequency: %u MHz", ESP.getCpuFreqMHz());
-    logger_.debugf("Flash size: %u KB", ESP.getFlashChipSize() / 1024);
-    logger_.debugf("Free heap: %u bytes", ESP.getFreeHeap());
+    logger_.debugf("CPU frequency: %u MHz", static_cast<unsigned int>(ESP.getCpuFreqMHz()));
+    logger_.debugf("Flash size: %u KB", static_cast<unsigned int>(ESP.getFlashChipSize() / 1024));
+    logger_.debugf("Free heap: %u bytes", static_cast<unsigned int>(ESP.getFreeHeap()));
 }
 
 void Application::loop() {

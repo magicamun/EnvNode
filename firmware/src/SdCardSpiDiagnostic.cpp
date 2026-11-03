@@ -353,7 +353,9 @@ public:
 #endif
         char volume[4];snprintf(volume,sizeof(volume),"%u:",drive_);
         BYTE work[4096];
-        const FRESULT result=f_mkfs(volume,FM_FAT32,0,work,sizeof(work));
+        MKFS_PARM options={};
+        options.fmt=FM_FAT32;
+        const FRESULT result=f_mkfs(volume,&options,work,sizeof(work));
         if(result!=FR_OK) {error_=static_cast<int>(result);return false;}
         release(); // Discard old FAT metadata and mount afresh for verification.
         return true;

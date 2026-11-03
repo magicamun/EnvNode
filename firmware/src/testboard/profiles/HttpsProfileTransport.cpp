@@ -38,7 +38,7 @@ bool HttpsProfileTransport::fetch(const char* filename, size_t maximum, const ch
     if(count!=static_cast<size_t>(length)) return false;
     if(digest) {
         uint8_t hash[32];char hex[65];
-        if(mbedtls_sha256_ret(bytes.get(),count,hash,0)) return false;
+        if(mbedtls_sha256(bytes.get(),count,hash,0)) return false;
         const char* digits="0123456789abcdef";
         for(size_t i=0;i<32;++i) { hex[2*i]=digits[hash[i]>>4];hex[2*i+1]=digits[hash[i]&15]; }
         hex[64]=0;
