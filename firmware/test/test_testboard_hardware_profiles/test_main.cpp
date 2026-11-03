@@ -93,9 +93,9 @@ struct Fixture {
 void setUp(){Wire=TwoWire();Wire1=TwoWire();}
 void tearDown(){}
 void test_generated_catalog_and_all_profiles_decode_and_match_metadata(){
-    Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());TEST_ASSERT_EQUAL(6,repo.count());
+    Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());TEST_ASSERT_EQUAL(7,repo.count());
     for(size_t i=0;i<repo.count();++i){const auto& e=*repo.at(i);const auto* loaded=repo.load(e.id,e.sha256);TEST_ASSERT_NOT_NULL(loaded);TEST_ASSERT_EQUAL(e.bytes,loaded->size);}
-    TEST_ASSERT_EQUAL(6,t.verified);
+    TEST_ASSERT_EQUAL(7,t.verified);
 }
 void test_catalog_rejects_truncation_duplicate_ids_paths_and_unknown_schema(){
     auto c=catalog();auto bytes=catalogBytes(*c);HardwareProfileCatalog rejected;
@@ -108,7 +108,7 @@ void test_catalog_rejects_truncation_duplicate_ids_paths_and_unknown_schema(){
 void test_failed_refresh_and_hash_failure_preserve_catalog_and_loaded_profile(){
     Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());auto e=*repo.at(0);
     const auto* first=repo.load(e.id,e.sha256);TEST_ASSERT_NOT_NULL(first);
-    t.offline=true;TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL(6,repo.count());TEST_ASSERT_EQUAL_PTR(first,repo.load(e.id,e.sha256));
+    t.offline=true;TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL(7,repo.count());TEST_ASSERT_EQUAL_PTR(first,repo.load(e.id,e.sha256));
     t.offline=false;t.rejectDigest=true;auto second=*repo.at(1);TEST_ASSERT_NULL(repo.load(second.id,second.sha256));
     TEST_ASSERT_EQUAL_PTR(first,repo.load(e.id,e.sha256));
     TEST_ASSERT_NULL(repo.load(e.id,"stale"));
@@ -116,7 +116,7 @@ void test_failed_refresh_and_hash_failure_preserve_catalog_and_loaded_profile(){
 void test_catalog_content_conflict_and_profile_metadata_mismatch_are_rejected(){
     Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());auto c=catalog();
     strcpy(c->entries[0].name,"Conflicting name");t.overrides["provisioning-catalog.cbor"]=catalogBytes(*c);
-    TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL_STRING("identity-conflict",repo.status());TEST_ASSERT_EQUAL(6,repo.count());
+    TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL_STRING("identity-conflict",repo.status());TEST_ASSERT_EQUAL(7,repo.count());
     c=catalog();auto bytes=file(c->entries[0].filename);BoardPortMap map;TEST_ASSERT_TRUE(BoardPortMapCodec::decode(bytes.data(),bytes.size(),map));
     strcpy(map.name,"Wrong board");bytes.resize(1024);size_t n=0;TEST_ASSERT_TRUE(BoardPortMapCodec::encode(map,bytes.data(),bytes.size(),n));bytes.resize(n);
     t.overrides[c->entries[0].filename]=bytes;TEST_ASSERT_NULL(repo.load(c->entries[0].id,c->entries[0].sha256));
@@ -156,7 +156,7 @@ void test_unknown_remote_board_with_higher_minimum_firmware_is_provisioned(){
 }
 void test_remote_module_template_generates_unique_instances_and_writes_selected_slot(){
     Fixture f;TEST_ASSERT_TRUE(f.repo.refresh());HardwareProfileEntry module;
-    for(size_t i=0;i<f.repo.count();++i)if(f.repo.at(i)->kind)module=*f.repo.at(i);
+    for(size_t i=0;i<f.repo.count();++i)if(!strcmp(f.repo.at(i)->id,"duo-relay-0.3"))module=*f.repo.at(i);
     uint8_t previous[16]={};
     for(int pass=0;pass<2;++pass){f.form(module);f.server.arguments["remoteSlot"]="B";f.server.arguments["remoteBatch"]="BATCH";
         f.server.request("/hardware/profile/write",HTTP_POST);TEST_ASSERT_EQUAL(200,f.pages.status);
@@ -176,7 +176,7 @@ void test_invalid_upload_and_invalid_serial_do_not_connect_eeprom(){
 }
 void test_remote_only_module_with_unknown_driver_and_future_firmware_is_written(){
     Fixture f;auto c=catalog();HardwareProfileEntry e;
-    for(size_t i=0;i<c->count;++i)if(c->entries[i].kind)e=c->entries[i];
+    for(size_t i=0;i<c->count;++i)if(!strcmp(c->entries[i].id,"duo-relay-0.3"))e=c->entries[i];
     auto bytes=file(e.filename);
     const char type[]="org.envnode.module.duo-relay";
     auto id=std::search(bytes.begin(),bytes.end(),type,type+strlen(type));TEST_ASSERT_TRUE(id!=bytes.end());*id='x';
@@ -193,7 +193,7 @@ void test_remote_only_module_with_unknown_driver_and_future_firmware_is_written(
     TEST_ASSERT_EQUAL(23,decoded.compatibility.drivers[0].id.code);
 }
 void test_module_template_preserves_unknown_fields_and_rejects_assigned_templates(){
-    auto c=catalog();HardwareProfileEntry e;for(size_t i=0;i<c->count;++i)if(c->entries[i].kind)e=c->entries[i];
+    auto c=catalog();HardwareProfileEntry e;for(size_t i=0;i<c->count;++i)if(!strcmp(c->entries[i].id,"duo-relay-0.3"))e=c->entries[i];
     auto bytes=file(e.filename);TEST_ASSERT_EQUAL_HEX8(0xa8,bytes[0]);bytes[0]=0xa9;
     const uint8_t extra[]={0x18,46,0x82,1,2};bytes.insert(bytes.end(),extra,extra+sizeof(extra));
     DuoRelayDescriptorManufacturingData m;m.instanceId[0]=1;m.serialNumber="NEW";
@@ -295,7 +295,24 @@ void test_missing_initial_snapshot_and_invalid_target_cannot_write() {
     const auto before=Wire.storage(0x50);f.server.request("/hardware/board-identity/write",HTTP_POST);TEST_ASSERT_EQUAL(409,f.pages.status);TEST_ASSERT_TRUE(before==Wire.storage(0x50));
     int begins=Wire.begins;f.server.arguments={{"kind","module"},{"slot","C"}};f.server.request("/hardware/eeprom",HTTP_GET);TEST_ASSERT_EQUAL(400,f.server.responseStatus);TEST_ASSERT_EQUAL(begins,Wire.begins);
 }
+void test_sd_card_catalog_profile_provisions_without_runtime_driver() {
+    Fixture f(false);TEST_ASSERT_TRUE(f.repo.refresh());const HardwareProfileEntry* entry=nullptr;
+    for(size_t i=0;i<f.repo.count();++i)if(!strcmp(f.repo.at(i)->id,"sd-card-0.1"))entry=f.repo.at(i);
+    TEST_ASSERT_NOT_NULL(entry);TEST_ASSERT_EQUAL(1,entry->kind);
+    TEST_ASSERT_EQUAL_STRING("assets/images/sd-card-0.1/top.png",entry->image);
+    f.form(*entry);f.server.request("/hardware/profile/write",HTTP_POST);
+    TEST_ASSERT_EQUAL(200,f.pages.status);
+    f.bus.begin();uint8_t payload[2048];const auto read=f.a.read(payload,sizeof(payload));f.bus.end();
+    TEST_ASSERT_EQUAL(HardwareDescriptorStoreStatus::Valid,read.status);
+    HardwareDescriptor d;
+    TEST_ASSERT_EQUAL(HardwareDescriptorDecodeStatus::Valid,HardwareDescriptorCodec::decode(payload,read.envelope.payloadLength,HardwareDescriptorObjectKind::Module,d));
+    TEST_ASSERT_TRUE(d.typeId.equals("org.envnode.module.sd-card"));
+    TEST_ASSERT_TRUE(d.compatibility.drivers[0].id.text.equals("org.envnode.driver.sd-spi"));
+    TEST_ASSERT_EQUAL(4,d.requirementCount);TEST_ASSERT_EQUAL(1,d.deviceCount);
+    TEST_ASSERT_TRUE(d.serialNumber.equals("PROFILE-TEST"));
+}
 int main(){UNITY_BEGIN();
+    RUN_TEST(test_sd_card_catalog_profile_provisions_without_runtime_driver);
     RUN_TEST(test_snapshot_reports_empty_valid_corrupt_and_cannot_write_or_touch_other_targets);
     RUN_TEST(test_changed_snapshot_stops_builtin_and_remote_board_writes_and_fresh_read_allows_retry);
     RUN_TEST(test_module_snapshot_binds_slot_and_reads_manufacturing_after_write);

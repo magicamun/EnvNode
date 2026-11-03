@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "sd-card-0.1",
+  "name": "EnvNode SD-Card",
+  "image": "https://docs.envnode.de/assets/images/sd-card-0.1/top.png",
+  "testing": null,
+  "provisioning": {
+    "schemaVersion": "0.1",
+    "objectKind": "module",
+    "identity": {
+      "typeId": "org.envnode.module.sd-card",
+      "instanceId": "00000000-0000-0000-0000-000000000000",
+      "manufacturer": "org.envnode",
+      "hardwareRevision": {
+        "major": 0,
+        "minor": 1
+      }
+    },
+    "compatibility": {
+      "minimumFirmwareVersion": "0.8.6",
+      "platform": {
+        "id": "org.envnode.platform.any",
+        "apiVersion": 1
+      },
+      "safetyProfile": {
+        "id": "org.envnode.safety.module-interface",
+        "apiVersion": 1
+      },
+      "drivers": [
+        {
+          "id": "org.envnode.driver.sd-spi",
+          "apiVersion": 1
+        }
+      ],
+      "capabilities": [
+        "storage.sd"
+      ]
+    },
+    "description": {
+      "name": "EnvNode SD-Card",
+      "summary": "SPI microSD storage carrier for the Adafruit MicroSD card breakout board+ (254), with card detect and identification EEPROM.",
+      "documentationUrl": "https://github.com/magicamun/EnvNode/tree/main/hardware/kicad/Modules/FullSize/SD-Card"
+    },
+    "hardware": {
+      "interface": "org.envnode.interface.module-2x7",
+      "requirements": [
+        {
+          "id": "sd-bus",
+          "resource": "SPI",
+          "kind": "spi",
+          "capabilities": []
+        },
+        {
+          "id": "sd-select",
+          "resource": "SPI_CS",
+          "kind": "gpio",
+          "capabilities": [
+            "digital-output"
+          ]
+        },
+        {
+          "id": "sd-detect",
+          "resource": "AUX_GPIO1",
+          "kind": "gpio",
+          "capabilities": [
+            "digital-input"
+          ]
+        },
+        {
+          "id": "sd-supply",
+          "resource": "+5V",
+          "kind": "power",
+          "capabilities": [
+            "supply"
+          ],
+          "properties": {
+            "nominalMillivolts": 5000
+          }
+        }
+      ],
+      "devices": [
+        {
+          "id": "sd.1",
+          "kind": "infrastructure",
+          "driver": {
+            "id": "org.envnode.driver.sd-spi",
+            "apiVersion": 1
+          },
+          "bindings": {
+            "bus": "sd-bus",
+            "chipSelect": "sd-select",
+            "cardDetect": "sd-detect"
+          },
+          "parameters": {
+            "activeLevel": "high"
+          },
+          "capabilities": [
+            "storage.sd"
+          ]
+        }
+      ]
+    },
+    "manufacturing": {
+      "serialNumber": null,
+      "productionBatch": null,
+      "productionDate": null
+    },
+    "calibration": []
+  },
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0"
+}
