@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "id": "duo-relay-0.3",
+  "guide": "modules/duo-relay/index.md",
+  "pcb_source": "main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb",
+  "pcb_sha256": "9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac",
+  "repository_commit": "ab5d3983b369271b5cb7f0b0e3beaa357c89524e",
+  "generator": "tools/product_assets.py",
+  "renderer": "KiCad pcb render",
+  "bare_render_policy": "Component model entries are removed from a temporary PCB copy; source copper, mask, silkscreen, footprints and pads are unchanged.",
+  "removed_component_models": 19,
+  "assets": {
+    "3d-assembled-front.png": {
+      "sha256": "f9496ab60c05d3ae251aef032684d6952732c22a8645a80423585c7e07375ed8",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "front",
+      "projection": "perspective",
+      "component_models": true
+    },
+    "3d-assembled-back.png": {
+      "sha256": "0cae0cbd26d31d3f66ea65a8001cb28377b3d5a2273ad8e31c618ae73f7a8ab1",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "back",
+      "projection": "perspective",
+      "component_models": true
+    },
+    "3d-bare-front.png": {
+      "sha256": "d28e4868f512059150e15ba4420258552cc65a506715fff2cb899a2114482e9b",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "front",
+      "projection": "perspective",
+      "component_models": false
+    },
+    "3d-bare-back.png": {
+      "sha256": "0d26f50efe2b348accc976b221a85a9f388070f5bc526eb8a03cd9802852ee5b",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "back",
+      "projection": "perspective",
+      "component_models": false
+    },
+    "2d-assembled-front.png": {
+      "sha256": "e7804d6564360b5ad5f8873d655bc15f889003a6148de5cc51d578fb6c571e57",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "front",
+      "projection": "orthographic",
+      "component_models": true
+    },
+    "2d-assembled-back.png": {
+      "sha256": "3f7f8677af99e85232bfaedb02bfa669bccc83b4bdb05d79e25cc034165cf77c",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "back",
+      "projection": "orthographic",
+      "component_models": true
+    },
+    "2d-bare-front.png": {
+      "sha256": "150f2114220fa8ad7819df0c6988136ae189c08f0ae8b194b711157eff516711",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "front",
+      "projection": "orthographic",
+      "component_models": false
+    },
+    "2d-bare-back.png": {
+      "sha256": "58bd8aa1fdb2e78db0af14a50ab5f22e741696fff9551d18ab6cb0bd11133d3a",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "back",
+      "projection": "orthographic",
+      "component_models": false
+    }
+  }
+}

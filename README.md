@@ -240,6 +240,7 @@ Project documentation is intentionally separated by responsibility.
 | Configuration.md | Configuration backup, restore and NVS persistence |
 | [SeaLevelPressure.md](docs/SeaLevelPressure.md) | GeoPosition, local temperature input and derived sea-level pressure |
 | Hardware.md | Hardware entry point, module templates, and implemented boards |
+| [PRODUCT_ASSET_CONTRACT.md](docs/PRODUCT_ASSET_CONTRACT.md) | Reproducible PCB and webshop image requirements |
 | ADRs | Architectural decisions |
 
 ---

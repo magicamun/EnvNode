@@ -8,6 +8,7 @@
   hero_back: assets/images/mini-0.9.0/bottom.png
 - id: weatherstation-0.3.0
   guide: mainboards/weatherstation/index.md
+  shop_assets: true
   pcb: main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb
   sha256: 283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf
   hero_front: assets/images/weatherstation-0.3.0/top.png
@@ -56,12 +57,14 @@
   hero_back: assets/images/module-adapter-0.1/bottom.png
 - id: duo-relay-0.3
   guide: modules/duo-relay/index.md
+  shop_assets: true
   pcb: main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb
   sha256: 9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac
   hero_front: assets/images/duorelay-assembly/top.png
   hero_back: assets/images/duorelay-assembly/bottom.png
 - id: oring-power-0.1.1
   guide: mainboards/oring-power/index.md
+  shop_assets: true
   pcb: main/hardware/kicad/Power/ORing Power/ORing Power.kicad_pcb
   sha256: df83af34ffdeca74bf51baeb2a5b21115ba8f441d49b31c917e56db63b5332e1
 - id: i2c-carrier-0.1
