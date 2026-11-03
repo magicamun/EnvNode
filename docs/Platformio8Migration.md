@@ -2,6 +2,15 @@
 
 EnvNode: see repository LICENSE.
 
+**Paused on 2026-11-03 by project decision.** Resume this migration together
+with the next hardware architecture (ESP32-S3 candidate). The classic ESP32
+continues on Arduino 2.0.17 with a reproducible SD lifetime backport and
+RainDetector integration. SX1262 is reserved for the next architecture;
+AnalogHydroPressure support on the classic platform remains subject to measured
+resource budgets. This branch remains an experimental port, not the baseline
+for current feature branches. No additional porting or hardware deployment is
+part of the current work.
+
 ## Scope and integration order
 
 The `chore/platformio-8-port` branch starts from main commit `4b46d62`.
