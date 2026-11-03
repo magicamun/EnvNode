@@ -87,8 +87,11 @@ und UUIDs werden nicht im veröffentlichten Katalog gespeichert.
 Anfangs enthält der Katalog Mainboard 0.3, Weather 0.2/0.3, Mini 0.8/0.9 und
 DuoRelay 0.3. Mainboard 0.3 hat weiterhin kein zugehöriges Prüfprofilbild.
 Für DuoRelay wird die vorhandene Assembly-Ansicht verwendet; ein elektrisches
-Modulprüfprofil ist noch nicht definiert. SD und SX1262-Remote erhalten erst mit
-geprüften Hardwaredaten eigene Produktprofile. Der Decoder benötigt für neue
+Modulprüfprofil ist noch nicht definiert. SD-Card 0.1 ergänzt den Katalog als SPI-Speichermodul mit Card Detect;
+die laufende main-Firmware kann den Deskriptor provisionieren, enthält aber noch
+keine automatische SD-Aktivierung. Das zugehörige Bild ist zunächst nur als
+URL vorgesehen. SX1262-Remote erhält erst mit geprüften Hardwaredaten ein eigenes
+Produktprofil. Der Decoder benötigt für neue
 Profil-IDs und Modul-Treiber keine neue Produktliste in der Firmware.
 
 ## Binäres Katalogformat 1
