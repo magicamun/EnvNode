@@ -56,9 +56,11 @@ bool pruneSdSystemLogs(ISdLogDirectory& directory,size_t needed,const char* prot
 }
 bool SdLogBatch::add(const LogEntry& entry,uint32_t now) {
     char line[1800];const size_t length=encodeSdLogEntry(entry,line,sizeof(line));
-    if(!length || length>sizeof(data_)-size_) return false;
-    if(!size_) first_=now;
-    memcpy(data_+size_,line,length);size_+=length;return true;
+    return addEncoded(line,length,now);
+}
+bool SdLogBatch::addEncoded(const char* line,size_t length,uint32_t now) {
+    if(!line || !length || line[length-1]!='\n' || length>sizeof(data_)-size_) return false;
+    if(!size_) first_=now;memcpy(data_+size_,line,length);size_+=length;return true;
 }
 bool SdLogBatch::addLoss(uint32_t count,uint32_t now) {
     LogEntry entry;entry.monotonicMs=now;entry.level=LogLevel::Warn;

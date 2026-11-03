@@ -93,6 +93,7 @@ struct ControllerImplementationConfiguration {
 struct ControllerSlotConfiguration {
     ControllerId slotId = InvalidControllerId;
     bool enabled = false;
+    bool extendedDiagnostics = false;
     String name;
     ControllerImplementation implementation = ControllerImplementation::None;
     ModuleActuatorReference moduleTarget;

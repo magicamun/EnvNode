@@ -40,3 +40,9 @@ Merge acceptance also requires a general bounded diagnostic recording interface:
 Raindetector or SCT013 supplies diagnostic records without depending on SPI/FAT
 or requiring changes to the SD driver. Naming, rotation, storage limits and
 storage failures remain the responsibility of the recording/storage layers.
+
+The general recording boundary is now implemented in `EnvNodeDiagnostics` and
+exercised by the independent system diagnostic producer. See
+`docs/DiagnosticRecording.md` for the producer API, per-entity opt-in and the
+pending physical recording acceptance. Detailed Raindetector events remain
+producer-side work after integration; they do not require SD-driver changes.

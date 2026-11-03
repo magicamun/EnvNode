@@ -4,6 +4,7 @@
 #include "SdCardSpiDiagnostic.h"
 #include "SdStorageArbiter.h"
 #include "SdSystemLogService.h"
+#include "DiagnosticWebView.h"
 #include "HtmlEscaping.h"
 #include <new>
 #include <esp_system.h>
@@ -228,9 +229,18 @@ String WebService::renderSdSettings() {
     html+=">B</option></select></label><label><input type='checkbox' name='systemLog' value='1'";
     if(sd.systemLog) html+=" checked";
     html+=">";html+=de ? "Systemlog auf SD aufzeichnen" : "Record system log on SD";
+    html+="</label><label><input type='checkbox' name='systemDiagnostics' value='1'";
+    if(sd.systemDiagnostics)html+=" checked";if(!extendedDiagnosticsAvailable())html+=" disabled";
+    html+=">";html+=de?"Erweiterte Systemdiagnose":"Extended system diagnostics";
+    html+="<input type='hidden' name='systemDiagnosticsEditable' value='";html+=extendedDiagnosticsAvailable()?"1":"0";html+="'>";
     html+="</label><button type='submit'>";html+=de ? "Speichern" : "Save";
     html+="</button></form><p>";html+=de ? "Die Slot-Auswahl gilt für das Breakout ohne EEPROM-Erkennung." : "Slot selection supports the breakout without EEPROM detection.";
     html+="</p><p>Systemlog: "+escapeHtml(sdSystemLogStatus())+"</p>";
+    html+="<p>";html+=de?"Erweiterte Diagnose: ":"Extended diagnostics: ";html+=escapeHtml(extendedDiagnosticsStatus())+"</p>";
+    if(sd.systemDiagnostics && extendedDiagnosticsAvailable()) {
+        html+="<form method='post' action='/sd-card/diagnostic-test'><button type='submit'>";
+        html+=de?"Diagnose-Testereignis aufzeichnen":"Record diagnostic test event";html+="</button></form>";
+    }
     if(sd.enabled) {
         html+="<form method='post' action='/sd-card/test'><button type='submit'>";
         html+=de ? "4-KiB-Schreib-/Lesetest starten" : "Run 4 KiB write/read test";
@@ -249,6 +259,7 @@ void WebService::handleSdSettings() {
     SdStorageConfiguration requested;
     requested.enabled=server_.hasArg("enabled");requested.slot=slot=="1" ? ModuleSlot::B : ModuleSlot::A;
     requested.systemLog=server_.hasArg("systemLog");
+    requested.systemDiagnostics=extendedDiagnosticsChoice(current.systemDiagnostics,extendedDiagnosticsAvailable(),server_.arg("systemDiagnosticsEditable")=="1",server_.hasArg("systemDiagnostics"));
     SdStorageLease lease;
     if(!lease) {server_.send(503,"text/plain","SD busy; retry settings save");return;}
     if(!configurationService_.setSdStorageConfiguration(requested)) {

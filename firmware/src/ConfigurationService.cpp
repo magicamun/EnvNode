@@ -202,11 +202,12 @@ void ConfigurationService::loadFromPreferences() {
             configuration_.geoPosition = position;
         else configuration_.geoPosition = GeoPosition{};
     }
-    const uint32_t sd=storage_.preferences().getUInt("sdStorage", (configuration_.sdStorage.enabled ? 1U : 0U) | (configuration_.sdStorage.slot==ModuleSlot::B ? 2U : 0U) | (configuration_.sdStorage.systemLog ? 4U : 0U));
-    if(sd<=7) {
+    const uint32_t sd=storage_.preferences().getUInt("sdStorage", (configuration_.sdStorage.enabled ? 1U : 0U) | (configuration_.sdStorage.slot==ModuleSlot::B ? 2U : 0U) | (configuration_.sdStorage.systemLog ? 4U : 0U) | (configuration_.sdStorage.systemDiagnostics ? 8U : 0U));
+    if(sd<=15) {
         configuration_.sdStorage.enabled=(sd&1)!=0;
         configuration_.sdStorage.slot=(sd&2)!=0 ? ModuleSlot::B : ModuleSlot::A;
         configuration_.sdStorage.systemLog=(sd&4)!=0;
+        configuration_.sdStorage.systemDiagnostics=(sd&8)!=0;
     }
     baseSettings().loadIdentityAndNetworkOverrides();
     if (storage_.preferences().isKey(KeyMqttServer)) {
@@ -285,6 +286,7 @@ void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
             sensorKey(expectedId, "id").c_str(), expectedId));
         loaded[index].enabled = storage_.preferences().getUInt(
             sensorKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
+        loaded[index].extendedDiagnostics = storage_.preferences().getUInt(sensorKey(expectedId,"diag").c_str(),loaded[index].extendedDiagnostics ? 1 : 0)!=0;
         loaded[index].name = storage_.preferences().getString(
             sensorKey(expectedId, "name").c_str(), loaded[index].name);
         const String stableImplementation = storage_.preferences().getString(
@@ -351,6 +353,7 @@ void ConfigurationService::loadActuatorSlots(bool checkOccupancy) {
             actuatorKey(expectedId, "id").c_str(), expectedId));
         loaded[index].enabled = storage_.preferences().getUInt(
             actuatorKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
+        loaded[index].extendedDiagnostics = storage_.preferences().getUInt(actuatorKey(expectedId,"diag").c_str(),loaded[index].extendedDiagnostics ? 1 : 0)!=0;
         loaded[index].name = storage_.preferences().getString(
             actuatorKey(expectedId, "name").c_str(), loaded[index].name);
         const String stableImplementation = storage_.preferences().getString(
@@ -396,6 +399,7 @@ void ConfigurationService::loadControllerSlots() {
             controllerKey(expectedId, "id").c_str(), expectedId));
         loaded[index].enabled = storage_.preferences().getUInt(
             controllerKey(expectedId, "en").c_str(), loaded[index].enabled ? 1 : 0) != 0;
+        loaded[index].extendedDiagnostics = storage_.preferences().getUInt(controllerKey(expectedId,"diag").c_str(),loaded[index].extendedDiagnostics ? 1 : 0)!=0;
         loaded[index].name = storage_.preferences().getString(
             controllerKey(expectedId, "name").c_str(), loaded[index].name);
         const String stableImplementation = storage_.preferences().getString(
@@ -964,6 +968,7 @@ bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot
     const SensorId id = slot.slotId;
     return persistUInt(sensorKey(id, "id").c_str(), id)
         && persistUInt(sensorKey(id, "en").c_str(), slot.enabled ? 1 : 0)
+        && persistUInt(sensorKey(id,"diag").c_str(),slot.extendedDiagnostics ? 1 : 0)
         && persistString(sensorKey(id, "name").c_str(), slot.name)
         && persistString(sensorKey(id, "impl").c_str(), metadata->stableId)
         && persistUInt(sensorKey(id, "mode").c_str(),
@@ -1007,6 +1012,7 @@ bool ConfigurationService::persistActuatorSlot(const ActuatorSlotConfiguration& 
     const ActuatorId id = slot.slotId;
     return persistUInt(actuatorKey(id, "id").c_str(), id)
         && persistUInt(actuatorKey(id, "en").c_str(), slot.enabled ? 1 : 0)
+        && persistUInt(actuatorKey(id,"diag").c_str(),slot.extendedDiagnostics ? 1 : 0)
         && persistString(actuatorKey(id, "name").c_str(), slot.name)
         && persistString(actuatorKey(id, "impl").c_str(), metadata->stableId)
         && persistUInt(actuatorKey(id, "mkind").c_str(),
@@ -1059,6 +1065,7 @@ bool ConfigurationService::persistControllerSlot(
     };
     return persistUInt(controllerKey(id, "id").c_str(), id)
         && persistUInt(controllerKey(id, "en").c_str(), slot.enabled ? 1 : 0)
+        && persistUInt(controllerKey(id,"diag").c_str(),slot.extendedDiagnostics ? 1 : 0)
         && persistString(controllerKey(id, "name").c_str(), slot.name)
         && persistString(controllerKey(id, "impl").c_str(), metadata->stableId)
         && persistUInt(controllerKey(id, "act").c_str(), blink.targetActuatorId)
@@ -1107,7 +1114,7 @@ bool ConfigurationService::setSdStorageConfiguration(const SdStorageConfiguratio
     SdStorageConfiguration requested=input;
     if(sdModuleResolver_) sdModuleResolver_(requested);
     if(!validateHardwareOccupancy(configuration_.sensorSlots,configuration_.actuatorSlots,&configuration_.display,&requested)) return false;
-    const uint32_t encoded=(requested.enabled ? 1U : 0U) | (requested.slot==ModuleSlot::B ? 2U : 0U) | (requested.systemLog ? 4U : 0U);
+    const uint32_t encoded=(requested.enabled ? 1U : 0U) | (requested.slot==ModuleSlot::B ? 2U : 0U) | (requested.systemLog ? 4U : 0U) | (requested.systemDiagnostics ? 8U : 0U);
     if(!persistUInt("sdStorage",encoded)) return false;
     configuration_.sdStorage=requested;
     return true;

@@ -30,6 +30,8 @@ std::unique_ptr<ISdFormatJob> startSdCardFormat(ModuleSlot slot,const BoardProfi
 std::unique_ptr<ISdRotationTestJob> startSdRotationTest(ModuleSlot slot,const BoardProfile& board,
     const Configuration& configuration,const ActuatorRuntime& actuators,SdDirectoryStatus& status);
 std::unique_ptr<ISdLogStorage> createSdSystemLogStorage(ModuleSlot slot,uint32_t session);
+std::unique_ptr<ISdLogStorage> createSdDiagnosticStorage(ModuleSlot slot,uint32_t session);
+bool sdDiagnosticCardPresent(const Configuration& configuration);
 // Explicitly requested write/read test; no automatic startup writes.
 void runSdCardSpiDiagnostic(ModuleSlot slot, const BoardProfile& board,
     const Configuration& configuration, const AutomaticActuatorDefinition* automaticActuators,

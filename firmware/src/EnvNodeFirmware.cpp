@@ -45,6 +45,7 @@
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
 #include "SdSystemLogService.h"
+#include "SystemDiagnostics.h"
 #include "SdModuleActivation.h"
 #include "SdStorageArbiter.h"
 #include "SystemLogTimeProvider.h"
@@ -232,7 +233,7 @@ void setupEnvNodeFirmware() {
     const bool sensorsInitialized = sensorRuntime.initialize(
         activeSensorCount, sensorFailureReason);
     app.setup(true);
-    beginSdSystemLog(configuration,actuatorRuntime,recentLogStore,logger);
+    beginSdSystemLog(configuration,actuatorRuntime,recentLogStore,logger,logTimeProvider);
     if (!sensorsInitialized) {
         logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
@@ -246,6 +247,7 @@ void loopEnvNodeFirmware() {
         app.loop();
         setSdRuntimeStable(!runtimeManager.restartRequired());
         serviceSdSystemLog(configurationService.getConfiguration(),actuatorRuntime,logger);
+        serviceSystemDiagnostics();
     }
 }
 

@@ -38,6 +38,8 @@ namespace {
 static_assert(sizeof(SdCardMountPath) <= ESP_VFS_PATH_MAX - 1,
     "FAT VFS mount path must survive the legacy strlcpy truncation during unregister");
 char activeSdLogPath[96]={};
+char activeSdDiagnosticPath[96]={};
+bool rotateSdDiagnostics=false;
 bool rotateSdLog=false; // Protected by SdStorageLease.
 uint8_t clockPin() {return currentBoardProfile().spiClock.number;}
 uint8_t misoPin() {return currentBoardProfile().spiMiso.number;}
@@ -242,6 +244,7 @@ public:
     bool open(const String& path, SdDirectoryStatus& status) {
         if(!lease_) {status=SdDirectoryStatus::Busy;return false;}
         if(path==activeSdLogPath) rotateSdLog=true;
+        if(path==activeSdDiagnosticPath) rotateSdDiagnostics=true;
         if(!device_.cardDetected()) {status=SdDirectoryStatus::NoCard; return false;}
         mounted_=true;
         if(!device_.mount()) {status=SdDirectoryStatus::MountFailed; return false;}
@@ -601,14 +604,14 @@ bool writeAllSdLog(int fd,const char* data,size_t size) {
 }
 class SpiSdLogStorage : public ISdLogStorage {
 public:
-    SpiSdLogStorage(ModuleSlot slot,uint32_t session) : slot_(slot),session_(session) {}
+    SpiSdLogStorage(ModuleSlot slot,uint32_t session,bool diagnostic=false) : slot_(slot),session_(session),diagnostic_(diagnostic) {if(diagnostic_) directory_="/sd/logs/diagnostics";}
     // Internal test constructor: caller owns an outer SD lease and a fresh directory.
     SpiSdLogStorage(ModuleSlot slot,const char* directory,uint64_t expectedMedia) : slot_(slot),session_(1),
         directory_(directory),partLimit_(SdRotationTestPartBytes),budget_(SdRotationTestBudgetBytes),isolated_(true),expectedMedia_(expectedMedia) {}
     SdLogWriteResult append(const char* data,size_t size) override {
         if(isolated_) return appendUnderLease(data,size);
         SdStorageLease lease;
-        if(!lease || !sdSystemLogSlotEnabled(slot_)) return SdLogWriteResult::Busy;
+        if(!lease || !(diagnostic_ ? sdDiagnosticSlotEnabled(slot_) : sdSystemLogSlotEnabled(slot_))) return SdLogWriteResult::Busy;
         return appendUnderLease(data,size);
     }
 private:
@@ -618,7 +621,7 @@ private:
         if(!slot || !slot->fiveVoltSupplyAvailable || size==0 || size>4096) return SdLogWriteResult::Failed;
         // Isolated diagnostics already own the lease and a single outer mount.
         if(isolated_) return appendMounted(data,size,*slot);
-        SpiDiagnosticDevice device(*slot,"system-log");ScopedSdRelease release(device);
+        SpiDiagnosticDevice device(*slot,diagnostic_ ? "diagnostics" : "system-log");ScopedSdRelease release(device);
         if(!device.cardDetected() || !device.mount()) return failed();
         return appendMounted(data,size,*slot);
     }
@@ -626,7 +629,8 @@ private:
         const auto* slot=&capability;
         const uint64_t media=mediaFingerprint();
         if(!media || (isolated_ && media!=expectedMedia_)) return failed();
-        if(media!=media_ || (!isolated_ && rotateSdLog)) {name_[0]=0;partBytes_=0;media_=media;if(!isolated_) rotateSdLog=false;}
+        bool& rotate=diagnostic_ ? rotateSdDiagnostics : rotateSdLog;
+        if(media!=media_ || (!isolated_ && rotate)) {name_[0]=0;partBytes_=0;media_=media;if(!isolated_) rotate=false;}
         if((!isolated_ && !ensureSdLogDirectory("/sd/logs")) || !ensureSdLogDirectory(directory_)) return failed();
         if(partBytes_+size>partLimit_) {name_[0]=0;partBytes_=0;}
         char header[256]={};size_t headerSize=0;
@@ -661,7 +665,10 @@ private:
         if(digitalRead(slot->auxGpio1.number)!=HIGH) ok=false;
         if(!ok) return failed();
         partBytes_+=headerSize+size;
-        if(!isolated_) snprintf(activeSdLogPath,sizeof(activeSdLogPath),"/logs/system/%s",name_);
+        if(!isolated_) {
+            if(diagnostic_) snprintf(activeSdDiagnosticPath,sizeof(activeSdDiagnosticPath),"/logs/diagnostics/%s",name_);
+            else snprintf(activeSdLogPath,sizeof(activeSdLogPath),"/logs/system/%s",name_);
+        }
         return SdLogWriteResult::Written;
     }
 private:
@@ -669,7 +676,7 @@ private:
     ModuleSlot slot_;uint32_t session_;uint64_t media_=0,partBytes_=0;
     unsigned part_=0;char name_[32]={};
     const char* directory_="/sd/logs/system";size_t partLimit_=SdLogPartBytes;
-    uint64_t budget_=SdLogBudgetBytes;bool isolated_=false;uint64_t expectedMedia_=0;
+    uint64_t budget_=SdLogBudgetBytes;bool diagnostic_=false;bool isolated_=false;uint64_t expectedMedia_=0;
 };
 
 const char RotationSentinel[]="EnvNode rotation test: preserve unmanaged files\n";
@@ -854,6 +861,17 @@ std::unique_ptr<ISdRotationTestJob> startSdRotationTest(ModuleSlot slotId,const 
     if(!job->ownsLease()) {status=SdDirectoryStatus::Busy;return {};}
     if(!job->start()) {status=SdDirectoryStatus::ReadFailed;return {};}
     status=SdDirectoryStatus::Ready;return std::unique_ptr<ISdRotationTestJob>(job.release());
+}
+bool sdDiagnosticCardPresent(const Configuration& configuration) {
+    if(!configuration.sdStorage.enabled || !sdRuntimeStable()) return false;
+    const auto* slot=boardModuleSlot(currentBoardProfile(),configuration.sdStorage.slot);
+    if(!slot) return false;
+    pinMode(slot->auxGpio1.number,INPUT_PULLUP);
+    return digitalRead(slot->auxGpio1.number)==HIGH;
+}
+std::unique_ptr<ISdLogStorage> createSdDiagnosticStorage(ModuleSlot slot,uint32_t session) {
+    if(!session) return {};
+    return std::unique_ptr<ISdLogStorage>(new(std::nothrow) SpiSdLogStorage(slot,session,true));
 }
 std::unique_ptr<ISdLogStorage> createSdSystemLogStorage(ModuleSlot slot,uint32_t session) {
     if(!session) return {};

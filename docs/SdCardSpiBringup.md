@@ -592,3 +592,21 @@ module actuator configuration and SD/module provisioning. The new cases cover
 SPI resource resolution, SD-only composition with zero actuators, SD + DuoRelay
 with exactly two relay actuators, and specific invalid-contract statuses.
 Physical verification of the updated inventory display is pending flashing.
+
+### General diagnostic recording interface
+
+The branch adds a storage-independent typed recorder, per-entity extended
+diagnostic choices and a separate /logs/diagnostics JSONL stream. See
+[DiagnosticRecording.md](DiagnosticRecording.md) for limits and acceptance.
+After flashing, enable extended system diagnostics, submit its explicit test
+event and inspect /logs/diagnostics after a successful batch write. System logging
+remains independent. Per-sensor/actuator/controller flags are available, but
+Raindetector/SCT013 instrumentation is intentionally left to those producers.
+Backups now use schema 5; older schemas remain readable with new flags off.
+
+Diagnostic-interface software validation: 81 affected native tests passed,
+including the concrete system producer, nonwaiting concurrent queue use,
+maximum encoded lines, per-source persistence and schema 1–4 migration. The
+first default ESP32 build passed. Final hardware acceptance is still pending
+flashing and inspection of the new diagnostic JSONL stream. Existing sporadic
+mount/write errors and HTTP latency remain separately open.

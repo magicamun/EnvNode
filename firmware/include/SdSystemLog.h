@@ -42,6 +42,7 @@ public:
 class SdLogBatch {
 public:
     bool add(const LogEntry& entry,uint32_t now);
+    bool addEncoded(const char* line,size_t length,uint32_t now);
     bool addLoss(uint32_t count,uint32_t now);
     SdLogWriteResult flush(ISdLogStorage& storage,uint32_t now,bool force=false);
     bool due(uint32_t now) const;
