@@ -92,7 +92,7 @@
             "cardDetect": "sd-detect"
           },
           "parameters": {
-            "cardDetectActiveLevel": "high"
+            "activeLevel": "high"
           },
           "capabilities": [
             "storage.sd"

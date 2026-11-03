@@ -947,6 +947,7 @@ bool ConfigurationService::validateHardwareOccupancy(
         if(!slot || !slot->fiveVoltSupplyAvailable) return false;
         const uint8_t pins[]={18,19,23,slot->spiChipSelect.number,slot->auxGpio1.number};
         for(uint8_t pin:pins) claims[claimIndex++]=HardwareResourceClaim(true,HardwareResourceAssignment::gpioResource(GpioResource(pin)));
+    }
     return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
 
