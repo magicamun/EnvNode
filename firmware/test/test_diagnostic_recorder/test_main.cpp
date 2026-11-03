@@ -86,7 +86,7 @@ void test_maximum_escaped_event_fits_writer_line_bound(){
 }
 void test_system_producer_uses_public_recorder_and_respects_availability_and_interval(){
     installDiagnosticRecorder(nullptr);serviceSystemDiagnostics();Clock clock;BufferedDiagnosticRecorder r(clock);r.setMask(DiagnosticSourceKind::System,1);r.setAvailable(true);installDiagnosticRecorder(&r);
-    arduinoTestMillis()=1000;serviceSystemDiagnostics();DiagnosticRecord record;TEST_ASSERT_TRUE(r.pop(record));TEST_ASSERT_EQUAL_STRING("runtime_health",record.event.name());
+    arduinoTestMillis()=1000;serviceSystemDiagnostics();DiagnosticRecord record;TEST_ASSERT_TRUE(r.pop(record));TEST_ASSERT_EQUAL_STRING("runtime_health",record.event.name());TEST_ASSERT_EQUAL_STRING("free_heap_8bit",record.event.field(0).key);TEST_ASSERT_EQUAL_INT64(200000,record.event.field(0).integer);TEST_ASSERT_EQUAL_STRING("largest_heap_8bit",record.event.field(1).key);
     serviceSystemDiagnostics();TEST_ASSERT_FALSE(r.pop(record));arduinoTestMillis()+=60000;serviceSystemDiagnostics();TEST_ASSERT_TRUE(r.pop(record));
     r.setAvailable(false);serviceSystemDiagnostics();r.setAvailable(true);serviceSystemDiagnostics();TEST_ASSERT_TRUE(r.pop(record));
     TEST_ASSERT_EQUAL(DiagnosticRecordResult::Accepted,recordDiagnosticTest());TEST_ASSERT_TRUE(r.pop(record));TEST_ASSERT_EQUAL_STRING("recorder_test",record.event.name());

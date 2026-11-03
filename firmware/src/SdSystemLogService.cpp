@@ -5,6 +5,7 @@
 #include "SdCardSpiDiagnostic.h"
 #include "SdStorageArbiter.h"
 #include <Preferences.h>
+#include <esp_heap_caps.h>
 #include <atomic>
 #include <new>
 #include <cstring>
@@ -23,6 +24,7 @@ struct RecordingService {
     bool hasPendingDiagnostic=false;
     unsigned diagnosticMode=0;uint32_t diagnosticGeneration=0,lastDropped=0;
     std::atomic<unsigned> diagnosticStatus{0};
+    std::atomic<uint32_t> stackFreeBytes{0};
     void serviceDiagnostics(unsigned mode) {
         const uint32_t generation=diagnostics.generation();
         if(diagnosticMode!=(mode&6) || diagnosticGeneration!=generation) {
@@ -69,7 +71,7 @@ struct RecordingService {
         auto& self=*static_cast<RecordingService*>(context);
         unsigned previous=self.mode.load();
         std::unique_ptr<ISdLogStorage> storage;
-        LogEntry pending;bool hasPending=false;uint32_t lost=0;
+        LogEntry pending;bool hasPending=false;uint32_t lost=0,lastStackProbe=0;
         for(;;) {
             const unsigned mode=self.mode.load();
             if((mode&3)!=(previous&3)) {
@@ -99,6 +101,7 @@ struct RecordingService {
                 }
             } else self.status.store(0);
             self.serviceDiagnostics(mode);
+            if(millis()-lastStackProbe>=1000){self.stackFreeBytes.store(uxTaskGetStackHighWaterMark(nullptr));lastStackProbe=millis();}
             vTaskDelay(pdMS_TO_TICKS(20));
         }
     }
@@ -155,7 +158,7 @@ void beginSdSystemLog(const Configuration& configuration,const ActuatorRuntime& 
         LogEntry entry;if(recent.copyEntry(i,entry)) enqueueSdSystemLog(entry);
     }
     TaskHandle_t task=nullptr;
-    if(xTaskCreatePinnedToCore(RecordingService::worker,"sd-log",16384,recording,1,&task,1)!=pdPASS) {
+    if(xTaskCreatePinnedToCore(RecordingService::worker,"sd-log",12288,recording,1,&task,1)!=pdPASS) {
         delete recording;recording=nullptr;logger.warn("SD log: writer task unavailable; recording disabled");return;
     }
     installDiagnosticRecorder(&recording->diagnostics);
@@ -167,7 +170,13 @@ void serviceSdSystemLog(const Configuration& configuration,const ActuatorRuntime
     const unsigned diagnosticStatus=recording->diagnosticStatus.load();
     if(diagnosticStatus!=lastDiagnosticStatus) {
         if(diagnosticStatus==3)logger.warn("Extended diagnostics: write failed; buffered retry in 30 seconds");
-        else if(diagnosticStatus==2)logger.info("Extended diagnostics: recording active");
+        else if(diagnosticStatus==2) {
+            logger.info("Extended diagnostics: recording active");
+            logger.infof("SD writer resources: heap8=%u largest8=%u stack_min_bytes=%u",
+                static_cast<unsigned>(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
+                static_cast<unsigned>(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
+                static_cast<unsigned>(recording->stackFreeBytes.load()));
+        }
         lastDiagnosticStatus=diagnosticStatus;
     }
     const unsigned status=recording->status.load();
@@ -193,7 +202,7 @@ bool extendedDiagnosticsAvailable(){return recording && recording->diagnostics.a
 String extendedDiagnosticsStatus(){
     if(!recording)return "unavailable";const auto s=recording->diagnostics.stats();
     const char* states[]={"disabled","waiting","recording","write error / retry"};const unsigned status=recording->diagnosticStatus.load();
-    return String(status<4?states[status]:"unknown")+" · queued="+String(static_cast<unsigned>(s.queued))+"/8 · accepted="+String(s.accepted)+" · full="+String(s.full)+" · busy="+String(s.busy)+" · unavailable="+String(s.unavailable)+" · invalid="+String(s.invalid)+" · stale="+String(s.stale);
+    return String(status<4?states[status]:"unknown")+" · queued="+String(static_cast<unsigned>(s.queued))+"/8 · accepted="+String(s.accepted)+" · full="+String(s.full)+" · busy="+String(s.busy)+" · unavailable="+String(s.unavailable)+" · invalid="+String(s.invalid)+" · stale="+String(s.stale)+" · writer_stack_min_bytes="+String(recording->stackFreeBytes.load());
 }
 
 

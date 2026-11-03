@@ -267,7 +267,8 @@ void WebService::handleSdSettings() {
         sendPage(uiText(TextId::SdCard),"/sd-card",de ? "<p>SD-Einstellungen nicht gespeichert. Slot und GPIO-Konflikte prüfen.</p><a href='/sd-card'>SD</a>" : "<p>SD settings not saved. Check slot and GPIO conflicts.</p><a href='/sd-card'>SD</a>",400);return;
     }
     configureSdSystemLog(configurationService_.getConfiguration(),actuatorRuntime_);
-    logger_.infof("SD settings saved: enabled=%u slot=%s system_log=%u",requested.enabled,moduleSlotName(requested.slot),requested.systemLog);
+    const auto& effective=configurationService_.getConfiguration().sdStorage;
+    logger_.infof("SD settings saved: enabled=%u slot=%s system_log=%u system_diagnostics=%u automatic=%u",effective.enabled,moduleSlotName(effective.slot),effective.systemLog,effective.systemDiagnostics,effective.automatic);
     server_.sendHeader("Location","/sd-card",true);server_.send(303,"text/plain","See Other");
 }
 void WebService::handleSdTest() {

@@ -610,3 +610,47 @@ maximum encoded lines, per-source persistence and schema 1–4 migration. The
 first default ESP32 build passed. Final hardware acceptance is still pending
 flashing and inspection of the new diagnostic JSONL stream. Existing sporadic
 mount/write errors and HTTP latency remain separately open.
+
+### Intermittent web mount registration failure after diagnostics enable
+
+A later physical run logged `esp_vfs_fat_register failed 0x101` specifically on
+web access while both recording streams subsequently reported successful writes.
+The mounted card's boot-17 and boot-18 diagnostic files were read without
+modification on the Mac: both were valid JSONL, including runtime_health and
+recorder_test. Thus the typed producer/queue/write path has a physical success;
+individual web mounts still failed intermittently.
+
+The existing ESP.getFreeHeap/getMaxAllocHeap queries use MALLOC_CAP_INTERNAL,
+which can count internal blocks unsuitable for byte-addressed data. A constant
+40948-byte largest internal block therefore does not establish usable malloc
+space for the FAT context. The SDK registration function can report 0x101 for
+unavailable context slots or allocation/registration resources; it does not
+perform card I/O itself. See
+https://github.com/espressif/esp-idf/blob/v4.4.7/components/fatfs/vfs/vfs_fat.c#L112.
+Memory pressure is the working diagnosis, not yet a proven allocation site.
+
+Every exclusively leased EnvNode SD operation has been audited to use at most
+one regular file descriptor simultaneously: directory handles do not consume a
+FIL slot; read/write verification closes before reopening; rotation inspection
+opens parts sequentially; a download retains the lease. All mounts now request
+one open regular file instead of two, saving one SDK FIL (about 4 KiB with this
+configuration). The shared writer returns to its original 12 KiB stack from
+16 KiB; log encoding and diagnostic encoding occur sequentially. This removes
+about another 4 KiB of fixed data-RAM pressure. The worker now reports its minimum
+free stack in bytes for physical validation of this budget.
+
+Mount failures report internal 8-bit heap/largest-block values, FATFS/FIL sizes
+and the file-slot limit. Successful diagnostic activation reports the same
+usable heap class and writer stack margin. Runtime-health events use explicitly
+named free_heap_8bit/largest_heap_8bit fields. No retry is hidden and no SDK
+context is forcibly unregistered. The separate HTTP send-delay issue is not
+claimed fixed by this change.
+
+The `SD settings saved: enabled=0` line was separately misleading: it logged the
+submitted, disabled checkbox rather than the configuration after automatic
+module resolution. Logging now reports effective enabled/slot/system-log/system-
+diagnostics/automatic values. It did not mean the recognized module was disabled.
+
+Validation: 53 distinct affected native tests passed across recording, serial
+read/write, transfer, formatting and rotation. Firmware build and physical web
+listing with both streams active are required to validate the resource change.

@@ -131,3 +131,11 @@ system-log, web, SD transfer/format, actuator and runtime suites; overlapping
 system-log cases counted once). The first default ESP32 build passed. The final
 build includes the independent system producer and form card-change policy.
 No diagnostic event was written remotely to the physical card by the agent.
+
+Memory follow-up: FAT mounts reserve one regular-file slot; all operations are
+serialized and use no more than one regular file at once. The shared worker uses
+12 KiB, as before the diagnostic extension, with its stack minimum exposed as
+writer_stack_min_bytes. Runtime-health memory fields explicitly measure internal
+8-bit RAM; generic internal-heap figures can include other memory capabilities.
+Two physically written diagnostic files have been parsed successfully as JSONL.
+Intermittent web-mount registration failure remains under memory-budget validation.

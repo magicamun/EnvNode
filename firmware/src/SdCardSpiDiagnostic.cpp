@@ -14,6 +14,7 @@
 #undef B110
 #undef B1000000
 #include "esp_vfs.h"
+#include "esp_heap_caps.h"
 #pragma pop_macro("B1000000")
 #pragma pop_macro("B110")
 #include <Arduino.h>
@@ -98,12 +99,13 @@ public:
         pinMode(slot_.spiChipSelect.number, OUTPUT);
         spi_.begin(clockPin(), misoPin(), mosiPin(), slot_.spiChipSelect.number);
         // Last argument MUST remain false: never format a card during diagnostics.
-        const uint32_t started=millis(),heap=ESP.getFreeHeap(),largest=ESP.getMaxAllocHeap();
-        const bool mounted=SD.begin(slot_.spiChipSelect.number, spi_, DiagnosticClockHz, SdCardMountPath, 2, false);
-        if(!mounted) log_w("SD mount failed: operation=%s elapsed_ms=%lu heap_before=%lu largest_before=%lu heap_after=%lu largest_after=%lu fatfs_bytes=%u",
+        const uint32_t started=millis(),heap=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT),largest=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
+        const bool mounted=SD.begin(slot_.spiChipSelect.number, spi_, DiagnosticClockHz, SdCardMountPath, SdCardOpenFileLimit, false);
+        if(!mounted) log_w("SD mount failed: operation=%s elapsed_ms=%lu heap8_before=%lu largest8_before=%lu heap8_after=%lu largest8_after=%lu fatfs_bytes=%u fil_bytes=%u max_files=%u",
             operation_,static_cast<unsigned long>(millis()-started),static_cast<unsigned long>(heap),
-            static_cast<unsigned long>(largest),static_cast<unsigned long>(ESP.getFreeHeap()),
-            static_cast<unsigned long>(ESP.getMaxAllocHeap()),static_cast<unsigned>(sizeof(FATFS)));
+            static_cast<unsigned long>(largest),static_cast<unsigned long>(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
+            static_cast<unsigned long>(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),static_cast<unsigned>(sizeof(FATFS)),
+            static_cast<unsigned>(sizeof(FIL)),static_cast<unsigned>(SdCardOpenFileLimit));
         return mounted;
     }
     SdCardDiagnosticInfo information() override {
@@ -336,7 +338,7 @@ public:
         spi_.begin(clockPin(),misoPin(),mosiPin(),slot_.spiChipSelect.number);
         drive_=sdcard_init(slot_.spiChipSelect.number,&spi_,DiagnosticClockHz);
         if(drive_==0xFF) {error_=101;return false;}
-        if(!sdcard_mount(drive_,SdCardMountPath,2,false)) {error_=102;return false;}
+        if(!sdcard_mount(drive_,SdCardMountPath,SdCardOpenFileLimit,false)) {error_=102;return false;}
         const uint32_t sectors=sdcard_num_sectors(drive_);
         const uint64_t capacity=static_cast<uint64_t>(sectors)*512;
         card=SdFileStamp(capacity,0,fingerprint(capacity,sectors,[this](uint8_t* data,uint32_t sector){return sd_read_raw(drive_,data,sector);}));
@@ -440,7 +442,7 @@ namespace {
 void readSdDirectoryOnSlot(const BoardModuleSlotCapability& capability,SdDirectorySnapshot& snapshot) {
     const auto* slot=&capability;
     if(!sdRuntimeStable()) {snapshot.status=SdDirectoryStatus::Busy;return;}
-    SpiDiagnosticDevice device(*slot);
+    SpiDiagnosticDevice device(*slot,"directory");
     if (!device.cardDetected()) { snapshot.status=SdDirectoryStatus::NoCard; return; }
     if (!device.mount()) { device.release(); snapshot.status=SdDirectoryStatus::MountFailed; return; }
     snapshot.info=device.information();
