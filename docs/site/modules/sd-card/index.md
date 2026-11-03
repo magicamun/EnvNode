@@ -41,7 +41,7 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 | J1 | 1 | Modulstecker 2×7, Bottom-Mount | ENP-00059 | Unterseite |
 | U1-Stiftleiste | 1 | 1×8, 2,54 mm | Bei U1 enthalten | ENP-00019 nur Ersatz |
 
-Die Kit-BOM ENK-00022 umfasst PCB, U1, U2, C1, R1 und J1 mit jeweils einem Stück. Die mit U1 gelieferte Stiftleiste wird nicht doppelt gezählt. Schrauben, Distanzstücke und microSD-Karte sind separat auszuwählen und zu protokollieren. Keine Buchsenleiste zwischen U1 und Träger vorgesehen.
+Die validierte Kit-BOM ENK-00022 umfasst PCB, U1, U2, C1, R1 und J1 mit jeweils einem Stück sowie einen Mainboard-Befestigungssatz aus je 1× ENP-00164 (M2,5-Abstandshalter, 10 mm), ENP-00165 (M2,5-Schraube, 8 mm) und ENP-00166 (M2,5-Mutter). Die mit U1 gelieferte Stiftleiste wird nicht doppelt gezählt. Die zwei M2-Befestigungen des Breakouts werden nach Auswahl der passenden 2–3-mm-Abstandshalter ergänzt. Eine microSD-Karte ist nicht enthalten. Keine Buchsenleiste zwischen U1 und Träger vorgesehen.
 
 Feinlötkolben, Vergrößerung, Multimeter, strombegrenzte Versorgung, geeignetes Mainboard und bekannte FAT32-Testkarte bereitlegen. Zum Bestücken keine Karte einstecken.
 
@@ -169,9 +169,11 @@ beobachtet und sind kein Beleg für einen defekten Kartenleser.
 ## 10. Lieferumfang und Produktansichten
 
 PCB-Artikel **ENP-00137** bezeichnet ausschließlich die unbestückte Trägerplatine.
-Bausatz **ENK-00022** umfasst die sechs BOM-Positionen aus Abschnitt 1.
+Bausatz **ENK-00022** umfasst die sechs elektronischen BOM-Positionen aus Abschnitt 1 sowie je ein Stück ENP-00164, ENP-00165 und ENP-00166 zur Befestigung des Moduls am Mainboard.
 Die mit U1 gelieferte 1×8-Stiftleiste wird nicht zusätzlich gezählt.
-Eine microSD-Karte, Schrauben und Distanzstücke gehören nicht zu dieser BOM.
+Eine microSD-Karte gehört nicht zum Bausatz. Die zwei M2-Schrauben, zwei
+2–3-mm-Abstandshalter und die noch zu bestätigenden M2-Muttern für U1 werden
+nach Auswahl der passenden Artikel ergänzt.
 Die Beschaffung des Original-Breakouts über DigiKey ändert die Zuordnung zu
 Adafruit Produkt 254 nicht.
 

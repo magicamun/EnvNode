@@ -54,6 +54,11 @@ U2 und C1 werden im dokumentierten Bestückungsstand gemeinsam bestückt.
 U2 nutzt I2C0 mit 0x52 in Slot A beziehungsweise 0x53 in Slot B.
 Der passende Modul-Descriptor ist zu provisionieren und die erkannte Identität zu prüfen.
 
+Zum vorgesehenen Verkaufsumfang von **ENK-00002** gehört außerdem ein
+Mainboard-Befestigungssatz aus 1× ENP-00164 (M2,5-Abstandshalter, 10 mm),
+1× ENP-00165 (M2,5-Schraube, 8 mm) und 1× ENP-00166 (M2,5-Mutter). Diese Positionen
+sind in der validierten Live-BOM enthalten.
+
 ### Orientierung und Hilfsmittel
 
 - D1/D2: Kathodenmarkierung mit dem PCB-Aufdruck abgleichen.

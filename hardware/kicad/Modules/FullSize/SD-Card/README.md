@@ -72,10 +72,11 @@ are per module; no stock receipts, consumption or orders were booked.
 Mount U1 directly through the 1x8 header; no additional socket is planned.
 Adafruit specifies the unattached header as included with product 254. The BOM
 therefore counts it within ENP-00136, not again as ENP-00019. Check delivery
-contents before assembly. Mechanical fastener/spacer parts and lengths remain
-to be selected; ordered spacers are intentionally excluded from stock and BOM
-until the user has checked them. The microSD card is separate operating
-accessory/test equipment; initial tests used a SanDisk Ultra 8 GB / FAT32.
+contents before assembly. One mainboard mounting set belongs to the sales kit:
+ENP-00164 (M2.5 x 10 mm spacer), ENP-00165 (M2.5 x 8 mm screw) and ENP-00166
+(M2.5 nut), quantity one each. The M2 fasteners and 2–3 mm spacers for mounting
+U1 remain to be selected and will be added later. The microSD card itself is not
+part of the kit; initial tests used a SanDisk Ultra 8 GB / FAT32.
 
 ENP-00136 and ENP-00137 were newly created. The initial supplier entry was Reichelt. The user subsequently selected DigiKey
 for the same original Adafruit 254; the current supplier/manufacturer links
@@ -98,9 +99,9 @@ checked and marked validated in InvenTree on 20 October 2026:
 | R1 | ENP-00018 | 1 |
 | J1 | ENP-00059 | 1 |
 
-Six required positions, no variants or optional lines. The header is included
-with U1. Distanzhülsen/spacers and other mounting hardware are deliberately not
-included; no stock receipts or consumption were posted for them. The microSD
+The header is included with U1. The validated live BOM additionally contains
+one each of ENP-00164, ENP-00165 and ENP-00166 for mainboard mounting.
+The still-unselected M2 hardware for U1 remains a later addition. The microSD
 card is separate accessory/test equipment. BOM validation records the checked
 parts list, not completion of a physical build or field qualification.
 
@@ -147,8 +148,10 @@ the recorder without depending on SPI/FAT or modifying the SD driver.
 
 - [x] Create U1 and PCB parts in **InvenTree** and identify the existing standard parts.
 - [x] Create and validate **ENK-00022** with its six-position InvenTree BOM.
-- [ ] Check ordered spacers before selecting their lengths/parts and adding them
-  to stock or BOM; keep them excluded until approved.
+- [x] Add one each of ENP-00164, ENP-00165 and ENP-00166 to ENK-00022 and
+  revalidate the live BOM.
+- [ ] Select and add the two M2 screws, two 2–3 mm M2 spacers and required M2
+  nuts for fastening U1 to the carrier.
 - [ ] Link Adafruit as the separate manufacturer record for U1.
 - [x] Assemble and verify module identification, SPI access and 4096-byte write/read cleanup.
 - [ ] Complete the electrical measurement/power record for field qualification.
@@ -172,5 +175,6 @@ from this main checkout. Eight deterministic assembled/bare views and their
 manifest live under `docs/site/assets/product-boards/sd-card-0.1/`. U1 has no
 3D model and is absent from assembled renders. Kit-content and physical
 reference photos remain outstanding; renders do not establish shop release
-or the physical contents of a delivery. Spacers and the card remain outside
-the six-position kit BOM.
+or the physical contents of a delivery. The mainboard mounting set is included
+in the live BOM; U1 mounting hardware remains open.
+The microSD card is not included.

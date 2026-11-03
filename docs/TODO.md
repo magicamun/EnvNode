@@ -2,7 +2,9 @@
 
 - [x] SD-Card Rev. 0.1: Bausatz ENK-00022 und InvenTree-BOM mit sechs Positionen (je 1× PCB ENP-00137, U1 ENP-00136, U2 ENP-00102, C1 ENP-00006, R1 ENP-00018 und J1 ENP-00059) angelegt und validiert. Mitgelieferte U1-Stiftleiste wird nicht zusätzlich gezählt.
 
-- [ ] SD-Card: Bestellte Distanzhülsen erst nach Prüfung durch den Nutzer in Bestand und BOM aufnehmen; bis dahin ausdrücklich ausgeschlossen. Die Adafruit-Herstellerverknüpfung bleibt separat offen.
+- [x] Verkaufs-BOMs ENK-00022 (SD-Card) und ENK-00002 (DuoRelay) um je 1× ENP-00164 (M2,5-Abstandshalter 10 mm), ENP-00165 (M2,5-Schraube 8 mm) und ENP-00166 (M2,5-Mutter) ergänzt und erneut validiert.
+
+- [ ] SD-Card: zwei M2-Schrauben, zwei M2-Abstandshalter 2–3 mm und die benötigten M2-Muttern für das Breakout auswählen, als Artikel anlegen und anschließend in ENK-00022 aufnehmen. Die Adafruit-Herstellerverknüpfung bleibt separat offen.
 
 - [x] SD-Card: Modulprofil/Provisioning, automatische Slot-Erkennung, Geräteinventar, Systemlog und allgemeine Diagnoseschnittstelle integriert; physischer Schreib-/Lesetest, gültige Diagnose-JSONL, Neustartpersistenz und Download bestätigt. Web-Sendelatenz bleibt separat offen.
 

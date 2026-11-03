@@ -44,6 +44,10 @@ During bring-up, verify the 3.3 V supply, I2C0 address and a valid provisioned m
 - Connector axis: centered across the board and 6.35 mm from the top edge
 - Support holes: 2.7 mm for M2.5 hardware, on the centerline at 27.00 mm and 59.00 mm from the top edge
 
+The sales kit includes one mainboard mounting set: one ENP-00164 M2.5 x 10 mm
+spacer, one ENP-00165 M2.5 x 8 mm screw and one ENP-00166 M2.5 nut. These parts
+are included in the validated live BOM for ENK-00002.
+
 ## Relay Contact Region
 
 The relay-contact nets are routed on F.Cu with 1.0 mm tracks. The design keeps at least 8 mm between the 250 VAC contact region and all SELV copper on both layers, including GND zones, vias, pads, and traces.
