@@ -45,3 +45,15 @@ silent server/network drops, including a lost tail with no subsequent record.
 
 References: [imudp ruleset/listener](https://docs.rsyslog.com/doc/configuration/modules/imudp.html),
 [omfile and reopening after rotation](https://docs.rsyslog.com/doc/configuration/modules/omfile.html).
+
+For a captured interval, run the repository helper on copies of the receiver files:
+
+```sh
+python3 tools/analyze_udp_logging.py system.jsonl diagnostics.jsonl
+```
+
+It reports per-device/boot/stream sequence gaps and duplicates, rain revision
+gaps/resets, gate-duration range and observed window rate. Sequence ordering
+allows UDP reordering and uint32 wrap within half the sequence range. This is
+an interval summary: it cannot discover a missing prefix/tail or unobserved boot.
+Retain raw files alongside the summary. No server file is modified by the tool.
