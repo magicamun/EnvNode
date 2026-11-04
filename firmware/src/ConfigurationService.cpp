@@ -97,6 +97,7 @@ void loadModuleTarget(
 
 void ConfigurationService::initializeDefaults() {
     configuration_.sdStorage = SdStorageConfiguration{};
+    configuration_.networkLogging = NetworkLoggingConfiguration{};
     configuration_.values.clear();
     configuration_.display = DisplayConfiguration{};
     configuration_.geoPosition = GeoPosition{};
@@ -210,6 +211,15 @@ void ConfigurationService::loadFromPreferences() {
         configuration_.sdStorage.slot=(sd&2)!=0 ? ModuleSlot::B : ModuleSlot::A;
         configuration_.sdStorage.systemLog=(sd&4)!=0;
         configuration_.sdStorage.systemDiagnostics=(sd&8)!=0;
+    }
+    // Legacy selections migrate without enabling a destination implicitly.
+    if (storage_.preferences().isKey("udpLog")) {
+        NetworkLoggingConfiguration candidate;
+        if (decodeNetworkLogging(storage_.preferences().getString("udpLog"),candidate)) configuration_.networkLogging=candidate;
+        else configuration_.networkLogging=NetworkLoggingConfiguration{};
+    } else if (!storage_.preferences().isKey("cfg_snapshot")) {
+        configuration_.networkLogging.systemLog=configuration_.sdStorage.systemLog;
+        configuration_.networkLogging.systemDiagnostics=configuration_.sdStorage.systemDiagnostics;
     }
     baseSettings().loadIdentityAndNetworkOverrides();
     if (storage_.preferences().isKey(KeyMqttServer)) {
@@ -1172,6 +1182,11 @@ bool ConfigurationService::setControllerSlotConfiguration(
     return true;
 }
 
+bool ConfigurationService::setNetworkLoggingConfiguration(const NetworkLoggingConfiguration& requested) {
+    if(!validNetworkLogging(requested)||!persistString("udpLog",encodeNetworkLogging(requested)))return false;
+    configuration_.networkLogging=requested;return true;
+}
+
 bool ConfigurationService::setSdStorageConfiguration(const SdStorageConfiguration& input) {
     SdStorageConfiguration requested=input;
     if(sdModuleResolver_) sdModuleResolver_(requested);
@@ -1265,7 +1280,7 @@ bool ConfigurationService::validateRestore(const Configuration& c) const {
         && supportsPresentationUnit(MeasurementType::SolarCellTemperature, c.presentation.solarCellTemperature)
         && supportsPresentationUnit(MeasurementType::RainDetectorFrequency, c.presentation.rainDetectorFrequency)
         && supportsPresentationUnit(MeasurementType::RainDetectorLevel, c.presentation.rainDetectorLevel)
-        && validValueConfiguration(c.values) && validateDisplayConfiguration(c.display)
+        && validNetworkLogging(c.networkLogging) && validValueConfiguration(c.values) && validateDisplayConfiguration(c.display)
         && validateSensorSlots(c.sensorSlots) && validateActuatorSlots(c.actuatorSlots)
         && validateControllerSlots(c.controllerSlots, c.sensorSlots, c.actuatorSlots, &c.values)
         && validateHardwareOccupancy(c.sensorSlots, c.actuatorSlots, &c.display, &c.sdStorage);

@@ -60,7 +60,7 @@ void test_reject_malformed_and_incompatible() {
     String backup; Configuration candidate; bool passwords;
     TEST_ASSERT_TRUE(encodeConfigurationBackup(service.getConfiguration(), false, "", backup));
     for (const auto& input : {
-            replace(backup, "\"version\": \"6\"", "\"version\": \"99\""),
+            replace(backup, "\"version\": \"7\"", "\"version\": \"99\""),
             replace(backup, "\"boardProfile\": \"0\"", "\"boardProfile\": \"255\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"65536\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"-1\""),
@@ -259,7 +259,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
     auto end = legacy.find("\"device.name\"", begin);
     TEST_ASSERT_TRUE(begin != std::string::npos && end != std::string::npos);
     legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"6\"", "\"version\": \"1\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"7\"", "\"version\": \"1\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, decoded, passwords));
     TEST_ASSERT_FALSE(decoded.geoPosition.altitude.configured);
     TEST_ASSERT_FALSE(decoded.geoPosition.latitude.configured);
@@ -272,7 +272,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
         const size_t length = record[i] | (record[i + 1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data() + i), length); i += length;
     }
-    fields.erase(fields.end()-(2+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());
+    fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());
     fields[1] = "1"; fields.erase(fields.begin() + 6, fields.begin() + 17);
     record.clear();
     for (const auto& field : fields) {
@@ -337,7 +337,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     TEST_ASSERT_EQUAL(1, rebooted.getConfiguration().pressureReduction.temperatureSensorId);
     std::string legacy(withoutDiagnosticTail(backup).c_str()); auto begin = legacy.find("\"pressure.temperatureSensorId\"");
     auto end = legacy.find("\"device.name\"", begin); legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"6\"", "\"version\": \"2\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"7\"", "\"version\": \"2\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, candidate, passwords));
     TEST_ASSERT_EQUAL(0, candidate.pressureReduction.temperatureSensorId);
     TEST_ASSERT_TRUE(candidate.geoPosition.altitude.configured); TEST_ASSERT_EQUAL_FLOAT(694, candidate.geoPosition.altitude.value);
@@ -347,7 +347,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
         size_t size = record[i] | (record[i+1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data()+i), size); i += size;
     }
-    fields.erase(fields.end()-(2+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());
+    fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());
     fields[1] = "2"; fields.erase(fields.begin()+12, fields.begin()+17); record.clear();
     for (const auto& field : fields) {
         record.push_back(field.size() & 255); record.push_back(field.size() >> 8);
@@ -392,7 +392,7 @@ void test_sd_settings_persist_backup_and_fail_safely() {
     std::string legacy(withoutDiagnosticTail(backup).c_str());
     const auto first=legacy.find("\"sd.enabled\"");const auto end=legacy.find("\"device.name\"",first);
     legacy.erase(first,end-first);
-    const String old=replace(String(legacy.c_str()),"\"version\": \"6\"","\"version\": \"3\"");
+    const String old=replace(String(legacy.c_str()),"\"version\": \"7\"","\"version\": \"3\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(old,service.getConfiguration(),candidate,passwords));
     TEST_ASSERT_FALSE(candidate.sdStorage.enabled);TEST_ASSERT_FALSE(candidate.sdStorage.systemLog);
     Preferences::failUIntKey()="sdStorage";sd.enabled=false;
@@ -412,12 +412,12 @@ void test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration
     TEST_ASSERT_TRUE(c.sensorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.actuatorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.controllerSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.sdStorage.systemDiagnostics);
     String backup;bool passwords;Configuration decoded;TEST_ASSERT_TRUE(encodeConfigurationBackup(c,true,"",backup));
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,c,decoded,passwords));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.actuatorSlots[0].extendedDiagnostics && decoded.controllerSlots[0].extendedDiagnostics && decoded.sdStorage.systemDiagnostics);
-    const String old=replace(withoutDiagnosticTail(backup),"\"version\": \"6\"","\"version\": \"4\"");
+    const String old=replace(withoutDiagnosticTail(backup),"\"version\": \"7\"","\"version\": \"4\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(old,c,decoded,passwords));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.sdStorage.systemDiagnostics);
     std::vector<uint8_t> record;TEST_ASSERT_TRUE(encodeConfigurationRecord(c,record));TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.sdStorage.systemDiagnostics);
     std::vector<std::string> fields;
     for(size_t i=0;i<record.size();){const size_t n=record[i]|(record[i+1]<<8);i+=2;fields.emplace_back(reinterpret_cast<const char*>(record.data()+i),n);i+=n;}
-    fields[1]="4";fields.erase(fields.end()-(2+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());record.clear();
+    fields[1]="4";fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());record.clear();
     for(const auto& field:fields){record.push_back(field.size()&255);record.push_back(field.size()>>8);record.insert(record.end(),field.begin(),field.end());}
     TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.sdStorage.systemDiagnostics);
 }
@@ -454,7 +454,7 @@ void test_frequency_units_persist_and_backup_v6_migrates_v5() {
     std::string legacy(backup.c_str());
     const auto tail=legacy.find(",\n\"presentation.rainDetectorFrequency\"");
     TEST_ASSERT_TRUE(tail!=std::string::npos);legacy.erase(tail);legacy+="\n}\n";
-    backup=replace(String(legacy.c_str()),"\"version\": \"6\"","\"version\": \"5\"");
+    backup=replace(String(legacy.c_str()),"\"version\": \"7\"","\"version\": \"5\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),candidate,passwords));
     TEST_ASSERT_TRUE(candidate.presentation.rainDetectorFrequency==PresentationUnit::Hertz);
     TEST_ASSERT_TRUE(service.resetToDefaults());
@@ -474,7 +474,8 @@ void test_v5_record_defaults_frequency_without_losing_diagnostics() {
         const size_t size=record[offset]|(record[offset+1]<<8);offset+=2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data()+offset),size);offset+=size;
     }
-    TEST_ASSERT_EQUAL_STRING("6",fields[1].c_str());
+    TEST_ASSERT_EQUAL_STRING("7",fields[1].c_str());
+    fields.erase(fields.end()-5,fields.end());
     TEST_ASSERT_EQUAL_STRING("16",fields.back().c_str());
     fields[1]="5";fields.pop_back();record.clear();
     for(const auto& field:fields) {
@@ -512,8 +513,36 @@ void test_solar_and_rain_sensor_ids_coexist_in_backup_and_persistence() {
     TEST_ASSERT_TRUE(decoded.sensorSlots[14].implementation==SensorImplementation::RainDetector);
 }
 
+void test_network_logging_migration_atomic_persistence_and_backup() {
+    ConfigurationService service;service.loadConfiguration();
+    auto sd=service.getConfiguration().sdStorage;sd.systemLog=true;sd.systemDiagnostics=true;
+    TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
+    ConfigurationService migrated;migrated.loadConfiguration();
+    auto c=migrated.getConfiguration().networkLogging;
+    TEST_ASSERT_FALSE(c.enabled);TEST_ASSERT_TRUE(c.systemLog&&c.systemDiagnostics);
+    c.address="192.0.2.10";c.port=5514;c.enabled=true;
+    TEST_ASSERT_TRUE(migrated.setNetworkLoggingConfiguration(c));
+    ConfigurationService rebooted;rebooted.loadConfiguration();
+    TEST_ASSERT_TRUE(rebooted.getConfiguration().networkLogging.enabled);
+    TEST_ASSERT_EQUAL_STRING("192.0.2.10",rebooted.getConfiguration().networkLogging.address.c_str());
+    auto invalid=c;invalid.address="host.example";TEST_ASSERT_FALSE(rebooted.setNetworkLoggingConfiguration(invalid));
+    invalid=c;invalid.port=0;TEST_ASSERT_FALSE(rebooted.setNetworkLoggingConfiguration(invalid));
+    Preferences::failStringWrites()=true;c.address="192.0.2.11";
+    TEST_ASSERT_FALSE(rebooted.setNetworkLoggingConfiguration(c));Preferences::failStringWrites()=false;
+    TEST_ASSERT_EQUAL_STRING("192.0.2.10",rebooted.getConfiguration().networkLogging.address.c_str());
+    String backup;bool passwords;Configuration decoded;
+    TEST_ASSERT_TRUE(encodeConfigurationBackup(rebooted.getConfiguration(),true,"",backup));
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,rebooted.getConfiguration(),decoded,passwords));
+    TEST_ASSERT_TRUE(decoded.networkLogging.enabled&&decoded.networkLogging.systemDiagnostics);
+    TEST_ASSERT_EQUAL_STRING("192.0.2.10",decoded.networkLogging.address.c_str());
+    TEST_ASSERT_TRUE(rebooted.restoreConfiguration(decoded));
+    // A deliberately disabled/empty new configuration must not remigrate legacy bits.
+    c=NetworkLoggingConfiguration{};TEST_ASSERT_TRUE(rebooted.setNetworkLoggingConfiguration(c));
+    ConfigurationService cleared;cleared.loadConfiguration();TEST_ASSERT_FALSE(cleared.getConfiguration().networkLogging.systemDiagnostics);
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_network_logging_migration_atomic_persistence_and_backup);
     RUN_TEST(test_solar_position_slot_survives_reboot_and_backup);
     RUN_TEST(test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration);
     RUN_TEST(test_sd_settings_persist_backup_and_fail_safely);

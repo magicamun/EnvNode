@@ -21,6 +21,7 @@ public:
     const Configuration& getConfiguration() const override;
     Locale getLocale() const override;
 
+    bool setNetworkLoggingConfiguration(const NetworkLoggingConfiguration&) override;
     bool setSdStorageConfiguration(const SdStorageConfiguration&) override;
     bool setPressureReduction(const PressureReductionConfiguration& configuration) override;
     bool setGeoPosition(const GeoPosition& position) override;
