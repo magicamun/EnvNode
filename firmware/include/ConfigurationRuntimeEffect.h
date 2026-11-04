@@ -4,6 +4,15 @@
 
 namespace EnvNode {
 
+struct SensorSlotConfiguration;
+struct ActuatorSlotConfiguration;
+struct ControllerSlotConfiguration;
+
+// Compare effective slot settings, excluding the live diagnostic selection.
+RuntimeAction runtimeActionForChange(const SensorSlotConfiguration& before,const SensorSlotConfiguration& after);
+RuntimeAction runtimeActionForChange(const ActuatorSlotConfiguration& before,const ActuatorSlotConfiguration& after);
+RuntimeAction runtimeActionForChange(const ControllerSlotConfiguration& before,const ControllerSlotConfiguration& after);
+
 enum class ConfigurationArea {
     Network,
     Mqtt,

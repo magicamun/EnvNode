@@ -7,6 +7,8 @@
 #include "ActuatorFactory.h"
 #include "ActuatorRuntime.h"
 #include "ConfigurationRuntimeEffect.h"
+#include "SensorSlotConfiguration.h"
+#include "ControllerSlotConfiguration.h"
 #include "SerialLogger.h"
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
@@ -668,8 +670,57 @@ void test_failed_rebuild_does_not_activate_invalid_new_composition() {
     TEST_ASSERT_NOT_EQUAL(OUTPUT, gpioModes[34]);
 }
 
+void test_diagnostic_selection_does_not_request_runtime_rebuild() {
+    SensorSlotConfiguration sensor;sensor.implementation=SensorImplementation::RainDetector;
+    sensor.enabled=true;sensor.slotId=1;sensor.name="Rain";
+    sensor.hardware=HardwareResourceAssignment::gpioResource(GpioResource(27));
+    auto changed=sensor;changed.extendedDiagnostics=true;
+    TEST_ASSERT_EQUAL(RuntimeAction::None,runtimeActionForChange(sensor,changed));
+    changed.schedule.sampleIntervalMs+=250;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartSensorManager,runtimeActionForChange(sensor,changed));
+    changed=sensor;changed.extendedDiagnostics=true;changed.hardware.gpio.number=4;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartSensorManager,runtimeActionForChange(sensor,changed));
+    sensor.implementation=SensorImplementation::RainGauge;changed=sensor;
+    changed.extendedDiagnostics=true;changed.implementationConfiguration.rainGauge.debounceMs++;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartSensorManager,runtimeActionForChange(sensor,changed));
+    ActuatorSlotConfiguration actor;actor.implementation=ActuatorImplementation::GpioOnOff;
+    auto changedActor=actor;changedActor.extendedDiagnostics=true;
+    TEST_ASSERT_EQUAL(RuntimeAction::None,runtimeActionForChange(actor,changedActor));
+    changedActor.enabled=!actor.enabled;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartActuatorRuntime,runtimeActionForChange(actor,changedActor));
+}
+void test_controller_diagnostics_are_live_but_policy_and_target_changes_rebuild() {
+    ControllerSlotConfiguration before;before.implementation=ControllerImplementation::RainDetector;
+    before.enabled=true;before.slotId=1;before.name="Rain";
+    auto after=before;after.extendedDiagnostics=true;
+    TEST_ASSERT_EQUAL(RuntimeAction::None,runtimeActionForChange(before,after));
+    unsigned RainDetectorPolicyConfig::* parameters[]={&RainDetectorPolicyConfig::edgeMs,
+        &RainDetectorPolicyConfig::dropHz,&RainDetectorPolicyConfig::dropPermille,
+        &RainDetectorPolicyConfig::endSeconds,&RainDetectorPolicyConfig::dryHz,
+        &RainDetectorPolicyConfig::hysteresisHz,&RainDetectorPolicyConfig::drySeconds};
+    for(auto parameter:parameters) {
+        after=before;after.extendedDiagnostics=true;
+        ++(after.implementationConfiguration.rainDetector.policy.*parameter);
+        TEST_ASSERT_EQUAL(RuntimeAction::RestartControllerRuntime,runtimeActionForChange(before,after));
+    }
+    after=before;after.implementationConfiguration.rainDetector.sourceSensorId++;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartControllerRuntime,runtimeActionForChange(before,after));
+    after=before;after.implementationConfiguration.rainDetector.targetActuatorId++;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartControllerRuntime,runtimeActionForChange(before,after));
+    after=before;after.moduleTarget.deviceIdHash[0]=1;
+    TEST_ASSERT_EQUAL(RuntimeAction::RestartControllerRuntime,runtimeActionForChange(before,after));
+    for(const auto implementation:{ControllerImplementation::Blink,ControllerImplementation::Threshold,
+            ControllerImplementation::Selector,ControllerImplementation::None}) {
+        before.implementation=implementation;after=before;after.extendedDiagnostics=true;
+        TEST_ASSERT_EQUAL(RuntimeAction::None,runtimeActionForChange(before,after));
+        after.name="Renamed";
+        TEST_ASSERT_EQUAL(RuntimeAction::RestartControllerRuntime,runtimeActionForChange(before,after));
+    }
+}
 int main(int, char**) {
     UNITY_BEGIN();
+    RUN_TEST(test_diagnostic_selection_does_not_request_runtime_rebuild);
+    RUN_TEST(test_controller_diagnostics_are_live_but_policy_and_target_changes_rebuild);
     RUN_TEST(test_gpio_with_digital_output_is_accepted);
     RUN_TEST(test_gpio_without_digital_output_is_rejected);
     RUN_TEST(test_nonexistent_gpio_is_rejected);

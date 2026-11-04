@@ -2273,9 +2273,13 @@ void WebService::handleSensorSave() {
             }
         }
     }
-    if (ok) ok = configurationService_.setSensorSlotConfiguration(slot);
+    RuntimeAction requiredAction=RuntimeAction::RestartSensorManager;
+    if (ok) {
+        requiredAction=runtimeActionForChange(configurationService_.getConfiguration().sensorSlots[requestedSlot-1],slot);
+        ok=configurationService_.setSensorSlotConfiguration(slot);
+    }
     sendConfigurationResult(
-        configurationSaveResult(ok, ConfigurationArea::Sensors),
+        ConfigurationSaveResult{ok,ok?requiredAction:RuntimeAction::None},
         uiText(TextId::SensorSlotSaved),
         uiText(TextId::SensorSlotSaveFailed),
         "/sensors",
@@ -2322,8 +2326,12 @@ void WebService::handleActuatorSave() {
             slot.extendedDiagnostics=extendedDiagnosticsChoice(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),server_.arg("extendedDiagnosticsEditable")=="1",server_.hasArg("extendedDiagnostics"));
             slot.implementation = ActuatorImplementation::GpioOnOff;
             slot.hardware = HardwareResourceAssignment::none();
-            if (ok) ok = configurationService_.setActuatorSlotConfiguration(slot);
-            sendConfigurationResult(configurationSaveResult(ok, ConfigurationArea::Actuators),
+            RuntimeAction requiredAction=RuntimeAction::RestartActuatorRuntime;
+            if (ok) {
+                requiredAction=runtimeActionForChange(configurationService_.getConfiguration().actuatorSlots[requestedSlot-1],slot);
+                ok=configurationService_.setActuatorSlotConfiguration(slot);
+            }
+            sendConfigurationResult(ConfigurationSaveResult{ok,ok?requiredAction:RuntimeAction::None},
                 uiText(TextId::ModuleActuatorSaved), uiText(TextId::ModuleActuatorSaveFailed), "/actuators",
                 uiText(TextId::InvalidConfigurationOrModuleIdentityChangedReloadThe));
             return;
@@ -2351,9 +2359,13 @@ void WebService::handleActuatorSave() {
         }
     }
     if (ok && actuatorRuntime_.moduleOwnsHardware(slot.hardware)) ok = false;
-    if (ok) ok = configurationService_.setActuatorSlotConfiguration(slot);
+    RuntimeAction requiredAction=RuntimeAction::RestartActuatorRuntime;
+    if (ok) {
+        requiredAction=runtimeActionForChange(configurationService_.getConfiguration().actuatorSlots[requestedSlot-1],slot);
+        ok=configurationService_.setActuatorSlotConfiguration(slot);
+    }
     sendConfigurationResult(
-        configurationSaveResult(ok, ConfigurationArea::Actuators),
+        ConfigurationSaveResult{ok,ok?requiredAction:RuntimeAction::None},
         uiText(TextId::ActuatorSlotSaved),
         uiText(TextId::ActuatorSlotSaveFailed),
         "/actuators",
@@ -2554,9 +2566,13 @@ void WebService::handleControllerSave() {
         }
     }
     if (ok && slot.implementation == ControllerImplementation::Selector) ok = readSelectorConfiguration(slot);
-    if (ok) ok = configurationService_.setControllerSlotConfiguration(slot);
+    RuntimeAction requiredAction=RuntimeAction::RestartControllerRuntime;
+    if (ok) {
+        requiredAction=runtimeActionForChange(configurationService_.getConfiguration().controllerSlots[requestedSlot-1],slot);
+        ok=configurationService_.setControllerSlotConfiguration(slot);
+    }
     sendConfigurationResult(
-        configurationSaveResult(ok, ConfigurationArea::Controllers),
+        ConfigurationSaveResult{ok,ok?requiredAction:RuntimeAction::None},
         uiText(TextId::ControllerSlotSaved),
         uiText(TextId::ControllerSlotSaveFailed),
         "/controllers",

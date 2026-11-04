@@ -140,3 +140,27 @@ and 101,492 static RAM bytes; tester uses 1,473,153 and 71,872 respectively.
 Runtime free heap and on-device SD throughput still require hardware validation.
 The user's existing Weatherstation soak test continues with the earlier image;
 no device was flashed during this change. Automount/eject remains separate work.
+
+## SD lifecycle and live diagnostics — 2026-11-04
+
+The integration now holds a shared FAT/SPI mount between operations, automounts
+on boot/insertion, and offers controlled eject on the SD page. Eject stops new
+record admission, drains buffers and waits for active operations before unmount;
+write failures prevent the safe-removal indication. Reinsert to resume recording.
+Unexpected removal invalidates the mount and its pending data. Mount failures
+back off for 30 seconds. The RainDetector gate recording rate is unchanged.
+
+Diagnostic-only slot saves now update recorder selection without requesting a
+sensor, actuator or controller runtime rebuild. Other effective setting changes
+retain the existing apply requirements. Details are in
+[Diagnostic recording](DiagnosticRecording.md).
+
+Validation: 110 distinct targeted native tests pass across recording, lifecycle,
+formatting, file transfer, SD web views, rotation, hardware/runtime effects and
+RainDetector policy. Both classic firmware targets build. EnvNode measures
+1,652,457 program bytes (90.1%) and 101,572 static RAM bytes before the final clean
+build identity refresh. Hardware acceptance is still outstanding: insertion,
+safe eject while recording/downloading, reinsertion, unexpected removal and a
+longer recording run with concurrent web requests. This change does not establish
+that the separately observed HTTP send stalls or SD communication errors are
+resolved. No firmware was uploaded.

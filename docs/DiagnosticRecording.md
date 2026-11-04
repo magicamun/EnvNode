@@ -217,3 +217,13 @@ Queued data from that mount are discarded rather than replayed onto another card
 diagnostic queue discards count as stale. Reinsertion debounces and mounts afresh.
 Formatting is an explicit exclusive maintenance operation: it detaches the shared
 mount, uses the raw formatter, then creates a fresh shared mount for verification.
+
+## Live source selection — 2026-11-04
+
+Saving only a sensor, actuator or controller's extended-diagnostics checkbox takes
+effect in the shared recorder without requesting a runtime rebuild. Saving an
+otherwise unchanged slot also leaves the running composition alone. Effective
+settings are compared explicitly by implementation, without comparing object
+padding or allocating a serialized configuration. Simultaneous hardware,
+schedule, identity, source, target or policy changes retain the existing apply
+requirements; an already pending runtime action is not cancelled.
