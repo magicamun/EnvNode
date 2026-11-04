@@ -11,7 +11,7 @@ A producer receives an `IDiagnosticRecorder&`, a source kind and a stable source
 ID. The firmware composition installs the buffered recorder; without a sink,
 `diagnosticRecorder()` provides a no-op recorder. A stable forwarding facade also supports producers constructed before storage
 initialization. A new producer/event needs no
-SD-driver changes, filenames, filesystem access or event-name registration.
+transport changes, filenames, filesystem access or event-name registration.
 
 Example for a future sensor implementation (not Raindetector instrumentation):
 
@@ -65,7 +65,10 @@ The UDP candidate keeps selections editable whenever the logger buffer is
 allocated, independently of receiver or WiFi availability. Disabled entities do
 not emit; saved preferences survive outages. System diagnostics and system logs
 are separate selections under `/network-logging`. A destination is not activated
-implicitly when old SD preferences migrate. The sensor/controller flags retain
+implicitly when old SD preferences migrate. Schema-7 exports retain reserved
+legacy SD fields for positional/backward compatibility, but always encode SD
+enabled=false and slot=0; these fields cannot activate hardware. Older saved
+system/diagnostic selections migrate to network logging. The sensor/controller flags retain
 their NVS keys and meaning.
 
 SystemDiagnostics produces runtime health on activation and once per minute.
@@ -73,10 +76,11 @@ The network logging test button submits `recorder_test`. All events use the same
 public recorder; producers perform no network I/O. Every completed RainDetector
 gate is still submitted at nominal 250 ms, without averaging or downsampling.
 
-## UDP candidate — 2026-11-04
+## Classic ESP32 UDP recording — 2026-11-04
 
-The classic ESP32 composition now routes recording to UDP, while retaining the
-SD code temporarily for the required staged validation. See
+The classic ESP32 composition routes recording to UDP. After the receiver
+continuity checkpoint, SD runtime, web management, formatting, tests and the
+framework patch were removed. See
 [implementation plan](UdpLoggingImplementationPlan.md),
 [measured validation ledger](UdpLoggingValidation.md), and
 [receiver example](../tools/rsyslog/README.md).

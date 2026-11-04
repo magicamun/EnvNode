@@ -359,67 +359,24 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     current.sensorSlots[0].enabled = false; TEST_ASSERT_FALSE(service.validateRestore(current));
     TEST_ASSERT_TRUE(service.resetToDefaults()); TEST_ASSERT_EQUAL(0, service.getConfiguration().pressureReduction.temperatureSensorId);
 }
-void test_sd_claims_prevent_gpio_conflicts_in_both_directions() {
-    ConfigurationService service;service.loadConfiguration();
-    const auto* slot=boardModuleSlot(currentBoardProfile(),ModuleSlot::A);TEST_ASSERT_NOT_NULL(slot);
-    auto sensor=service.getConfiguration().sensorSlots[3];
-    sensor.hardware=HardwareResourceAssignment::gpioResource(GpioResource(23));
-    sensor.implementationConfiguration.am2302.gpio=GpioResource(23);
-    TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(sensor));
-    SdStorageConfiguration sd;sd.enabled=true;
-    TEST_ASSERT_FALSE(service.setSdStorageConfiguration(sd));
-    sensor.enabled=false;sensor.schedule.enabled=false;TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(sensor));
-    TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
-    sensor.enabled=true;sensor.schedule.enabled=true;TEST_ASSERT_FALSE(service.setSensorSlotConfiguration(sensor));
-    Configuration candidate=service.getConfiguration();candidate.sensorSlots[3]=sensor;
-    TEST_ASSERT_FALSE(service.validateRestore(candidate));
-}
-
-void test_sd_settings_persist_backup_and_fail_safely() {
-    ConfigurationService service;service.loadConfiguration();
-    TEST_ASSERT_FALSE(service.getConfiguration().sdStorage.enabled);
-    SdStorageConfiguration sd;sd.enabled=true;sd.slot=ModuleSlot::B;sd.systemLog=true;
-    TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
-    ConfigurationService rebooted;rebooted.loadConfiguration();
-    TEST_ASSERT_TRUE(rebooted.getConfiguration().sdStorage.enabled);
-    TEST_ASSERT_TRUE(rebooted.getConfiguration().sdStorage.systemLog);
-    TEST_ASSERT_EQUAL_INT(1,static_cast<int>(rebooted.getConfiguration().sdStorage.slot));
-    String backup;bool passwords;Configuration candidate;
-    TEST_ASSERT_TRUE(encodeConfigurationBackup(rebooted.getConfiguration(),true,"",backup));
-    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),candidate,passwords));
-    TEST_ASSERT_TRUE(candidate.sdStorage.enabled && candidate.sdStorage.systemLog);
-    TEST_ASSERT_TRUE(service.validateRestore(candidate));
-    std::string legacy(withoutDiagnosticTail(backup).c_str());
-    const auto first=legacy.find("\"sd.enabled\"");const auto end=legacy.find("\"device.name\"",first);
-    legacy.erase(first,end-first);
-    const String old=replace(String(legacy.c_str()),"\"version\": \"7\"","\"version\": \"3\"");
-    TEST_ASSERT_TRUE(decodeConfigurationBackup(old,service.getConfiguration(),candidate,passwords));
-    TEST_ASSERT_FALSE(candidate.sdStorage.enabled);TEST_ASSERT_FALSE(candidate.sdStorage.systemLog);
-    Preferences::failUIntKey()="sdStorage";sd.enabled=false;
-    TEST_ASSERT_FALSE(service.setSdStorageConfiguration(sd));
-    TEST_ASSERT_TRUE(service.getConfiguration().sdStorage.enabled);
-    Preferences::failUIntKey()=String();
-    TEST_ASSERT_TRUE(service.resetToDefaults());TEST_ASSERT_FALSE(service.getConfiguration().sdStorage.enabled);
-}
-
 void test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration() {
     ConfigurationService service;service.loadConfiguration();
     auto sensor=service.getConfiguration().sensorSlots[0];sensor.extendedDiagnostics=true;TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(sensor));
     auto actor=service.getConfiguration().actuatorSlots[0];actor.extendedDiagnostics=true;TEST_ASSERT_TRUE(service.setActuatorSlotConfiguration(actor));
     auto controller=service.getConfiguration().controllerSlots[0];controller.extendedDiagnostics=true;TEST_ASSERT_TRUE(service.setControllerSlotConfiguration(controller));
-    auto sd=service.getConfiguration().sdStorage;sd.systemDiagnostics=true;TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
+    auto logging=service.getConfiguration().networkLogging;logging.systemDiagnostics=true;TEST_ASSERT_TRUE(service.setNetworkLoggingConfiguration(logging));
     ConfigurationService rebooted;rebooted.loadConfiguration();const auto& c=rebooted.getConfiguration();
-    TEST_ASSERT_TRUE(c.sensorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.actuatorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.controllerSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.sdStorage.systemDiagnostics);
+    TEST_ASSERT_TRUE(c.sensorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.actuatorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.controllerSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.networkLogging.systemDiagnostics);
     String backup;bool passwords;Configuration decoded;TEST_ASSERT_TRUE(encodeConfigurationBackup(c,true,"",backup));
-    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,c,decoded,passwords));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.actuatorSlots[0].extendedDiagnostics && decoded.controllerSlots[0].extendedDiagnostics && decoded.sdStorage.systemDiagnostics);
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,c,decoded,passwords));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.actuatorSlots[0].extendedDiagnostics && decoded.controllerSlots[0].extendedDiagnostics && decoded.networkLogging.systemDiagnostics);
     const String old=replace(withoutDiagnosticTail(backup),"\"version\": \"7\"","\"version\": \"4\"");
-    TEST_ASSERT_TRUE(decodeConfigurationBackup(old,c,decoded,passwords));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.sdStorage.systemDiagnostics);
-    std::vector<uint8_t> record;TEST_ASSERT_TRUE(encodeConfigurationRecord(c,record));TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.sdStorage.systemDiagnostics);
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(old,c,decoded,passwords));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.networkLogging.systemDiagnostics);
+    std::vector<uint8_t> record;TEST_ASSERT_TRUE(encodeConfigurationRecord(c,record));TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.networkLogging.systemDiagnostics);
     std::vector<std::string> fields;
     for(size_t i=0;i<record.size();){const size_t n=record[i]|(record[i+1]<<8);i+=2;fields.emplace_back(reinterpret_cast<const char*>(record.data()+i),n);i+=n;}
     fields[1]="4";fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());record.clear();
     for(const auto& field:fields){record.push_back(field.size()&255);record.push_back(field.size()>>8);record.insert(record.end(),field.begin(),field.end());}
-    TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.sdStorage.systemDiagnostics);
+    TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.networkLogging.systemDiagnostics);
 }
 void test_solar_position_slot_survives_reboot_and_backup() {
     ConfigurationService service; service.loadConfiguration();
@@ -465,7 +422,7 @@ void test_v5_record_defaults_frequency_without_losing_diagnostics() {
     ConfigurationService service; service.loadConfiguration();
     Configuration current=service.getConfiguration();
     current.presentation.rainDetectorFrequency=PresentationUnit::Kilohertz;
-    current.sdStorage.systemDiagnostics=true;
+    current.networkLogging.systemDiagnostics=true;
     current.sensorSlots[0].extendedDiagnostics=true;
     std::vector<uint8_t> record;
     TEST_ASSERT_TRUE(encodeConfigurationRecord(current,record));
@@ -485,7 +442,7 @@ void test_v5_record_defaults_frequency_without_losing_diagnostics() {
     Configuration decoded;
     TEST_ASSERT_TRUE(decodeConfigurationRecord(record,current,decoded));
     TEST_ASSERT_TRUE(decoded.presentation.rainDetectorFrequency==PresentationUnit::Hertz);
-    TEST_ASSERT_TRUE(decoded.sdStorage.systemDiagnostics);
+    TEST_ASSERT_TRUE(decoded.networkLogging.systemDiagnostics);
     TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics);
 }
 
@@ -515,8 +472,7 @@ void test_solar_and_rain_sensor_ids_coexist_in_backup_and_persistence() {
 
 void test_network_logging_migration_atomic_persistence_and_backup() {
     ConfigurationService service;service.loadConfiguration();
-    auto sd=service.getConfiguration().sdStorage;sd.systemLog=true;sd.systemDiagnostics=true;
-    TEST_ASSERT_TRUE(service.setSdStorageConfiguration(sd));
+    Preferences legacy;legacy.begin("weather");legacy.putUInt("sdStorage",12);legacy.end();
     ConfigurationService migrated;migrated.loadConfiguration();
     auto c=migrated.getConfiguration().networkLogging;
     TEST_ASSERT_FALSE(c.enabled);TEST_ASSERT_TRUE(c.systemLog&&c.systemDiagnostics);
@@ -545,8 +501,6 @@ int main() {
     RUN_TEST(test_network_logging_migration_atomic_persistence_and_backup);
     RUN_TEST(test_solar_position_slot_survives_reboot_and_backup);
     RUN_TEST(test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration);
-    RUN_TEST(test_sd_settings_persist_backup_and_fail_safely);
-    RUN_TEST(test_sd_claims_prevent_gpio_conflicts_in_both_directions);
     RUN_TEST(test_frequency_units_persist_and_backup_v6_migrates_v5);
     RUN_TEST(test_v5_record_defaults_frequency_without_losing_diagnostics);
     RUN_TEST(test_solar_and_rain_sensor_ids_coexist_in_backup_and_persistence);

@@ -45,14 +45,14 @@ Ein I²C-Scan prüft Erreichbarkeit, nicht die richtige Sensorimplementierung.
 Fehlende Werte zunächst lokal untersuchen, bevor Broker oder Home Assistant
 als Ursache angenommen werden.
 
-## Aufzeichnung auf SD-Karte
+## Netzwerkaufzeichnung
 
-Ab Firmware 0.8.7 können Systemlog und freigegebene erweiterte Diagnosen auf
-einem erkannten SD-Modul gespeichert werden. Dateien bleiben über Neustarts
-erhalten und lassen sich über die Weboberfläche herunterladen. Die RAM-Loganzeige
-und ihre begrenzte Historie sind davon unabhängig.
+Systemlogs und freigegebene Diagnosen werden über UDP an rsyslog gesendet.
+Die RAM-Loganzeige bleibt davon unabhängig. Der klassische ESP32 unterstützt
+keine SD-Aufzeichnung mehr. Aufbewahrung und Rotation erfolgen beim Empfänger.
 
-[Einrichtung, Dateiverwaltung und Grenzen](sd-card.md)
+[Einrichtung und Verlustzähler](network-logging.md) ·
+[Historischer SD-Betrieb](sd-card.md)
 
 ## Factory Reset
 

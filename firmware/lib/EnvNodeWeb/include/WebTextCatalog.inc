@@ -2,7 +2,6 @@
 // See the repository root LICENSE.
 // Single catalog: stable ID, English fallback, optional German translation.
 // Define ENVNODE_WEB_TEXT before including this file. No include guard by design.
-ENVNODE_WEB_TEXT(SdCard, "SD card", "SD-Karte")
 ENVNODE_WEB_TEXT(Sensors, "Sensors", "Sensoren")
 ENVNODE_WEB_TEXT(Measurements, "Measurements", "Messwerte")
 ENVNODE_WEB_TEXT(Display, "Display", "Anzeige")

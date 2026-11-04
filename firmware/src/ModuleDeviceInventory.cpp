@@ -1,5 +1,4 @@
 #include "ModuleDeviceInventory.h"
-#include "SdModuleContract.h"
 
 #include <new>
 
@@ -120,15 +119,9 @@ bool deriveModuleDeviceInventory(
         }
 
         if(device.kind==HardwareDescriptorDeviceKind::Infrastructure) {
-            if(device.driver.id.coded || !device.driver.id.text.equals("org.envnode.driver.sd-spi") || device.driver.apiVersion!=1)
-                entry.status=ModuleDeviceInventoryStatus::UnsupportedDriver;
-            else if(!device.capabilities.contains(HardwareDescriptorCapabilityCode::StorageSd))
-                entry.status=ModuleDeviceInventoryStatus::MissingCapability;
-            else if(!resourcesResolved) { /* Preserve the specific resolution failure. */ }
-            else if(!device.hasActiveLevel || !device.activeLevelHigh)
-                entry.status=ModuleDeviceInventoryStatus::InvalidParameters;
-            else if(!sdModuleContractSupported(descriptor)) entry.status=ModuleDeviceInventoryStatus::MissingBinding;
-            else entry.status=ModuleDeviceInventoryStatus::Ready;
+            // Classic ESP32 has no storage/radio driver. Keep the hardware
+            // descriptor visible without activating unsupported infrastructure.
+            entry.status=ModuleDeviceInventoryStatus::UnsupportedDriver;
             continue;
         }
         if (device.kind != HardwareDescriptorDeviceKind::Actuator) {

@@ -7,8 +7,6 @@
 #include "ActuatorFactory.h"
 #include "ActuatorRuntime.h"
 #include "ConfigurationRuntimeEffect.h"
-#include "SdStorageEligibility.h"
-#include "SdStorageArbiter.h"
 #include "SensorSlotConfiguration.h"
 #include "ControllerSlotConfiguration.h"
 #include "SerialLogger.h"
@@ -719,28 +717,8 @@ void test_controller_diagnostics_are_live_but_policy_and_target_changes_rebuild(
         TEST_ASSERT_EQUAL(RuntimeAction::RestartControllerRuntime,runtimeActionForChange(before,after));
     }
 }
-void test_sd_automount_eligibility_does_not_require_a_mount_or_free_lease() {
-    TestLogger logger;ActuatorFactory factory(logger);ActuatorRuntime runtime(factory,logger);
-    Configuration config;config.sdStorage.enabled=true;config.sdStorage.slot=ModuleSlot::A;
-    setSdRuntimeStable(false);
-    {
-        SdStorageLease held;
-        // No mounted device exists in native tests. Eligibility is hardware-only.
-        TEST_ASSERT_TRUE(sdStoragePinsAvailable(config,runtime));
-    }
-    setSdRuntimeStable(true);
-    TEST_ASSERT_TRUE(sdStoragePinsAvailable(config,runtime));
-    config.sensorSlots[0].enabled=true;
-    config.sensorSlots[0].hardware=HardwareResourceAssignment::gpioResource(currentBoardProfile().spiClock);
-    TEST_ASSERT_FALSE(sdStoragePinsAvailable(config,runtime));
-    config.sensorSlots[0].enabled=false;TEST_ASSERT_TRUE(sdStoragePinsAvailable(config,runtime));
-    config.sdStorage.moduleConflict=true;TEST_ASSERT_FALSE(sdStoragePinsAvailable(config,runtime));
-    config.sdStorage.moduleConflict=false;config.sdStorage.enabled=false;
-    TEST_ASSERT_FALSE(sdStoragePinsAvailable(config,runtime));
-}
 int main(int, char**) {
     UNITY_BEGIN();
-    RUN_TEST(test_sd_automount_eligibility_does_not_require_a_mount_or_free_lease);
     RUN_TEST(test_diagnostic_selection_does_not_request_runtime_rebuild);
     RUN_TEST(test_controller_diagnostics_are_live_but_policy_and_target_changes_rebuild);
     RUN_TEST(test_gpio_with_digital_output_is_accepted);

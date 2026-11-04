@@ -2,7 +2,7 @@
 
 Lizenz: siehe [Lizenz und Nutzung](../license.md).
 
-Der klassische ESP32-Teststand sendet Systemlogs und strukturierte Diagnosen
+Der klassische ESP32 sendet Systemlogs und strukturierte Diagnosen
 an rsyslog. Das bestehende Framework bleibt erhalten. RainDetector erfasst
 weiterhin jedes Messfenster, normalerweise alle 250 ms. Die spätere Integration
 von Analog und SCT013 hängt von gemessenen Ressourcenbudgets ab. SD/SX1262 und
@@ -37,3 +37,11 @@ Systemlogs und Diagnosen werden separat gespeichert; die konkrete Aufbewahrung
 wird dort verwaltet. Der aktuelle Stand und noch offene Hardwareprüfungen stehen
 in `docs/UdpLoggingValidation.md`. Die lokale Validierung ersetzt keinen
 Dauertest auf Weather 0.2 unter gleichzeitiger Web-/WLAN-/MQTT-Last.
+
+
+SD-Aufzeichnung, Dateiverwaltung, Formatierung und SD-Webseiten sind im
+klassischen Build entfernt. Ein vorhandener SD-Descriptor bleibt sichtbar,
+aktiviert aber keinen Treiber. SX1262 ist ebenfalls kein unterstützter Treiber.
+Historische SD-Stände sind über Git verfügbar, insbesondere Commit `6bb9b1c`
+vor der Entfernung. Hardwareprofile und EEPROM-Identitäten bleiben unabhängig
+von der jeweiligen Firmware-Treiberunterstützung.

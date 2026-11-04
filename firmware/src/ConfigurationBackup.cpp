@@ -276,12 +276,17 @@ private:
     size_t recordPosition_ = 0;
 };
 void configurationFields(Fields& f, Configuration& c, bool passwords, const String& version) {
+    // Reserved schema 4-7 fields are consumed for backwards compatibility only.
+    // New exports cannot enable SD; selections are mirrored for old importers.
+    bool legacyEnabled=false,legacySystemLog=!f.reading() && c.networkLogging.systemLog;
+    bool legacySystemDiagnostics=!f.reading() && c.networkLogging.systemDiagnostics;
+    unsigned legacySlot=0;
     if (f.reading()) {
         c.presentation.rainDetectorFrequency = PresentationUnit::Hertz;
         for(auto& slot:c.sensorSlots) slot.extendedDiagnostics=false;
         for(auto& slot:c.actuatorSlots) slot.extendedDiagnostics=false;
         for(auto& slot:c.controllerSlots) slot.extendedDiagnostics=false;
-        c.networkLogging = NetworkLoggingConfiguration{}; c.sdStorage = SdStorageConfiguration{}; c.geoPosition = GeoPosition{}; c.pressureReduction = PressureReductionConfiguration{}; }
+        c.networkLogging = NetworkLoggingConfiguration{}; c.geoPosition = GeoPosition{}; c.pressureReduction = PressureReductionConfiguration{}; }
     if (version == "2" || version == "3" || (version == "4" || version == "5" || version == "6" || version == "7")) {
         f.boolean("geo.latitude.configured", c.geoPosition.latitude.configured);
         f.floating("geo.latitude.value", c.geoPosition.latitude.value);
@@ -297,9 +302,9 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         if (c.pressureReduction.maxTemperatureAgeMs == 0) f.ok = false;
     }
     if(version=="4" || version=="5" || version=="6" || version=="7") {
-        f.boolean("sd.enabled",c.sdStorage.enabled);
-        f.number("sd.slot",c.sdStorage.slot,1);
-        f.boolean("sd.systemLog",c.sdStorage.systemLog);
+        f.boolean("sd.enabled",legacyEnabled);
+        f.number("sd.slot",legacySlot,1);
+        f.boolean("sd.systemLog",legacySystemLog);
     }
     f.text("device.name", c.device.name);
     f.text("network.hostname", c.network.hostname);
@@ -403,7 +408,7 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         c.display.configured = configured;
     }
     if(version=="5" || version=="6" || version=="7") {
-        f.boolean("sd.systemDiagnostics",c.sdStorage.systemDiagnostics);
+        f.boolean("sd.systemDiagnostics",legacySystemDiagnostics);
         for(size_t i=0;i<MaxSensorSlotCount;++i) f.boolean("diagnostic.sensor."+String(static_cast<unsigned>(i+1)),c.sensorSlots[i].extendedDiagnostics);
         for(size_t i=0;i<MaxActuatorSlotCount;++i) f.boolean("diagnostic.actuator."+String(static_cast<unsigned>(i+1)),c.actuatorSlots[i].extendedDiagnostics);
         for(size_t i=0;i<MaxControllerSlotCount;++i) f.boolean("diagnostic.controller."+String(static_cast<unsigned>(i+1)),c.controllerSlots[i].extendedDiagnostics);
@@ -418,8 +423,8 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         f.boolean("logging.systemDiagnostics",c.networkLogging.systemDiagnostics);
         if(!validNetworkLogging(c.networkLogging))f.ok=false;
     } else if(f.reading()) {
-        c.networkLogging.systemLog=c.sdStorage.systemLog;
-        c.networkLogging.systemDiagnostics=c.sdStorage.systemDiagnostics;
+        c.networkLogging.systemLog=legacySystemLog;
+        c.networkLogging.systemDiagnostics=legacySystemDiagnostics;
     }
 
 }

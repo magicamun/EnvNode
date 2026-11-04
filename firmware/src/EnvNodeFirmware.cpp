@@ -46,8 +46,6 @@
 #include "RecentLogStore.h"
 #include "NetworkLoggingService.h"
 #include "SystemDiagnostics.h"
-#include "SdModuleActivation.h"
-#include "SdStorageArbiter.h"
 #include "SystemLogTimeProvider.h"
 #include "IdentityEeprom24LC32.h"
 #include "BoardIdentityResolver.h"
@@ -216,10 +214,7 @@ void setupEnvNodeFirmware() {
     };
     configurationService.setModuleHardwareResolver(moduleOccupancy);
     actuatorRuntime.setModuleHardwareResolver(moduleOccupancy);
-    configurationService.setSdModuleResolver([](SdStorageConfiguration& sd){applyDiscoveredSdModule(moduleDiscoveryService,sd);});
     configurationService.loadConfiguration();
-    const auto& sd=configurationService.getConfiguration().sdStorage;
-    if(sd.automatic) logger.infof("SD module: slot=%s automatic=1 enabled=%u conflict=%u",moduleSlotName(sd.slot),sd.enabled,sd.moduleConflict);
     valueRuntime.begin();
     const Configuration& configuration = configurationService.getConfiguration();
     moduleActuatorComposer.compose(
@@ -246,7 +241,6 @@ void loopEnvNodeFirmware() {
     if (normalRuntimeStarted) {
         const uint32_t applicationStartUs=micros();
         app.loop();
-        setSdRuntimeStable(!runtimeManager.restartRequired());
         serviceNetworkLogging(configurationService.getConfiguration(),micros()-applicationStartUs);
         serviceSystemDiagnostics();
     }

@@ -35,10 +35,6 @@
 #include "ModuleDescriptorProvisioningService.h"
 #include "ValueRuntime.h"
 #include "ModuleDeviceInventory.h"
-#include "SdFileTransfer.h"
-#include "SdCardFormat.h"
-#include "SdCardWebView.h"
-#include "SdRotationTest.h"
 
 namespace EnvNode {
 
@@ -137,32 +133,6 @@ private:
     void handleNetworkLogging();
     void handleNetworkLoggingSave();
     void handleNetworkLoggingTest();
-    void handleSdCard();
-    void sendSdDirectoryProgress();
-    std::unique_ptr<ISdDirectoryJob> sdDirectory_;
-    uint32_t sdDirectorySequence_=0;
-    uint32_t sdDirectoryStarted_=0;
-    bool sdDirectorySlowReported_=false;
-    String sdDirectoryRequestUrl_;
-    String renderSdSettings();
-    void handleSdSettings();
-    void handleSdTest();
-    void handleSdRotationPreview();
-    void handleSdRotationStart();
-    std::unique_ptr<ISdRotationTestJob> sdRotationTest_;
-    bool sdRotationTestReported_=false;
-    void handleSdDownload();
-    void handleSdDeletePreview();
-    void handleSdDelete();
-    void handleSdFormatPreview();
-    void handleSdFormat();
-    void sdFileError(int status);
-    std::unique_ptr<ISdFormatJob> sdFormat_;
-    SdFormatTicket sdFormatTicket_;
-    bool sdFormatResultAvailable_=false;
-    SdFormatState sdFormatResult_=SdFormatState::Failed;
-    std::unique_ptr<ISdDownloadJob> sdDownload_;
-    SdDeleteTicket sdDeleteTicket_;
     void handleDiagnostics();
     void handleI2CScan();
     void handleMqttSave();

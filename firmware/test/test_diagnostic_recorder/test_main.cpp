@@ -3,7 +3,6 @@
 #include "BufferedDiagnosticRecorder.h"
 #include "DiagnosticWebView.h"
 #include "SystemDiagnostics.h"
-#include "SdSystemLog.h"
 #include <thread>
 #include <atomic>
 #include <cstring>
@@ -57,11 +56,7 @@ void test_json_is_typed_escaped_and_bounded(){
     TEST_ASSERT_NOT_NULL(strstr(data,"\"volts\":2.5"));TEST_ASSERT_NOT_NULL(strstr(data,"\"counter\":9007199254740993"));TEST_ASSERT_NOT_NULL(strstr(data,"\"wet\":true"));TEST_ASSERT_NOT_NULL(strstr(data,"Regen \\\"ja\\\"\\u000a\\\\"));
     TEST_ASSERT_EQUAL_UINT(0,encodeDiagnosticRecord(r,data,12));TEST_ASSERT_EQUAL_CHAR(0,data[0]);
 }
-void test_diagnostic_json_uses_shared_batch_retry_and_checkbox_retains_disabled_choice(){
-    struct Storage : ISdLogStorage {bool fail=true;std::string data;SdLogWriteResult append(const char* bytes,size_t n) override {if(fail)return SdLogWriteResult::Failed;data.append(bytes,n);return SdLogWriteResult::Written;}} storage;
-    DiagnosticRecord record;record.event=DiagnosticEvent("probe");record.event.boolean("ok",true);char line[2048];const size_t n=encodeDiagnosticRecord(record,line,sizeof(line));
-    SdLogBatch batch;TEST_ASSERT_TRUE(batch.addEncoded(line,n,100));TEST_ASSERT_FALSE(batch.addEncoded(line,n-1,100));
-    TEST_ASSERT_EQUAL(SdLogWriteResult::Failed,batch.flush(storage,5100));storage.fail=false;TEST_ASSERT_EQUAL(SdLogWriteResult::Busy,batch.flush(storage,5101));TEST_ASSERT_EQUAL(SdLogWriteResult::Written,batch.flush(storage,35100));TEST_ASSERT_EQUAL_STRING(line,storage.data.c_str());
+void test_checkbox_retains_disabled_choice(){
     TEST_ASSERT_TRUE(extendedDiagnosticsChoice(true,true,false,false));
     TEST_ASSERT_TRUE(extendedDiagnosticsChoice(true,false,true,false));
     TEST_ASSERT_FALSE(extendedDiagnosticsChoice(false,false,true,true));
@@ -107,4 +102,4 @@ void test_stopping_admission_preserves_accepted_records_for_eject_drain() {
     TEST_ASSERT_TRUE(recorder.discardPending());TEST_ASSERT_TRUE(recorder.empty());
     TEST_ASSERT_EQUAL_UINT(1,recorder.stats().stale);
 }
-int main(){UNITY_BEGIN();RUN_TEST(test_stopping_admission_preserves_accepted_records_for_eject_drain);RUN_TEST(test_system_producer_uses_public_recorder_and_respects_availability_and_interval);RUN_TEST(test_maximum_escaped_event_fits_writer_line_bound);RUN_TEST(test_diagnostic_json_uses_shared_batch_retry_and_checkbox_retains_disabled_choice);RUN_TEST(test_concurrent_producers_and_consumer_preserve_every_accepted_record);RUN_TEST(test_no_storage_is_noop_and_source_policy_is_explicit);RUN_TEST(test_queue_is_bounded_and_keeps_time_source_and_order);RUN_TEST(test_disabled_sources_and_configuration_generations_do_not_leak_pending_records);RUN_TEST(test_invalid_records_are_rejected_without_consuming_queue);RUN_TEST(test_json_is_typed_escaped_and_bounded);return UNITY_END();}
+int main(){UNITY_BEGIN();RUN_TEST(test_stopping_admission_preserves_accepted_records_for_eject_drain);RUN_TEST(test_system_producer_uses_public_recorder_and_respects_availability_and_interval);RUN_TEST(test_maximum_escaped_event_fits_writer_line_bound);RUN_TEST(test_checkbox_retains_disabled_choice);RUN_TEST(test_concurrent_producers_and_consumer_preserve_every_accepted_record);RUN_TEST(test_no_storage_is_noop_and_source_policy_is_explicit);RUN_TEST(test_queue_is_bounded_and_keeps_time_source_and_order);RUN_TEST(test_disabled_sources_and_configuration_generations_do_not_leak_pending_records);RUN_TEST(test_invalid_records_are_rejected_without_consuming_queue);RUN_TEST(test_json_is_typed_escaped_and_bounded);return UNITY_END();}

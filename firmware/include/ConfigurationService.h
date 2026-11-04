@@ -16,13 +16,11 @@ public:
     void setModuleHardwareResolver(std::function<bool(const HardwareResourceAssignment&)> resolver) {
         moduleOwnsHardware_ = resolver;
     }
-    void setSdModuleResolver(std::function<void(SdStorageConfiguration&)> resolver) {sdModuleResolver_=resolver;}
     void loadConfiguration() override;
     const Configuration& getConfiguration() const override;
     Locale getLocale() const override;
 
     bool setNetworkLoggingConfiguration(const NetworkLoggingConfiguration&) override;
-    bool setSdStorageConfiguration(const SdStorageConfiguration&) override;
     bool setPressureReduction(const PressureReductionConfiguration& configuration) override;
     bool setGeoPosition(const GeoPosition& position) override;
     bool setDeviceName(const String& deviceName) override;
@@ -98,10 +96,8 @@ private:
     bool validateHardwareOccupancy(
         const SensorSlotConfiguration* sensorSlots,
         const ActuatorSlotConfiguration* actuatorSlots,
-        const DisplayConfiguration* display = nullptr,
-        const SdStorageConfiguration* sdStorage = nullptr) const;
+        const DisplayConfiguration* display = nullptr) const;
 
-    std::function<void(SdStorageConfiguration&)> sdModuleResolver_;
     bool loadingConfiguration_ = false;
     std::function<bool(const HardwareResourceAssignment&)> moduleOwnsHardware_;
     const IOnOffActuatorResolver* actuatorResolver_ = nullptr;

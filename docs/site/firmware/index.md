@@ -2,8 +2,8 @@
 
 Diese Anleitung führt von der ersten Verbindung mit EnvNode bis zu Messung,
 Schalten, Anzeige und MQTT. Die einzelnen Kapitel nennen bei Bedarf ihren
-Funktionsstand; SD-Karte und Diagnoseaufzeichnung sind für Firmware 0.8.7
-(3. November 2026) ergänzt. Die Sprache der Oberfläche ist einstellbar; englische
+Funktionsstand. Der klassische ESP32 verwendet nun UDP-Netzwerklogging;
+die SD-Beschreibung dokumentiert den historischen Stand. Die Sprache der Oberfläche ist einstellbar; englische
 Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
 Du beginnst gerade mit EnvNode? [Der Einstieg](../getting-started/index.md) erklärt
@@ -45,11 +45,11 @@ optionalen Koordinaten, die tatsächliche Sensorhöhe, die lokale Temperaturausw
 und den getrennten abgeleiteten Druckwert einschließlich Qualität und Rückfallverhalten.
 Die Funktion steht ab Firmware 0.6.0 zur Verfügung.
 
-## SD-Karte und Diagnoseaufzeichnung
+## Diagnoseaufzeichnung
 
-[SD-Karte bedienen](sd-card.md) beschreibt automatische Modulerkennung,
-Dateiverwaltung, Systemlog und erweiterte Diagnose einschließlich Rotation,
-Speichergrenzen und Verhalten bei Kartenwechsel.
+[Netzwerklogging](network-logging.md) beschreibt den rsyslog-Empfänger,
+Diagnoseauswahl, Verlustzähler und Rotation. [SD-Karte](sd-card.md) bleibt als
+historische Referenz erhalten; der klassische ESP32 unterstützt sie nicht mehr.
 
 ## Zwei durchgehende Beispiele
 
@@ -59,5 +59,5 @@ Speichergrenzen und Verhalten bei Kartenwechsel.
 Die Hardwareanleitungen erklären Bestückung und elektrische Prüfungen.
 Diese Bedienungsanleitung setzt einen entsprechend geprüften Aufbau voraus.
 Firmwareunterstützung und Hardware-Reifegrad werden getrennt beschrieben;
-RainDetector, SCT013 und der ADS1115-Messpfad sind keine fertigen Sensoroptionen
-in der aktuellen Sensorregistry.
+RainDetector ist im klassischen Build integriert. SCT013 und weitere
+Analogpfade benötigen eigene Integration und gemessene Ressourcenbudgets.

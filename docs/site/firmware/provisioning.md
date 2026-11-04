@@ -57,8 +57,8 @@ der Neustart ist deshalb Bestandteil des Ablaufs.
 ## Modul schreiben
 
 Für DuoRelay bietet die Webfunktion die Descriptor-Vorlage **DuoRelay 0.3**.
-Für SD-Card das passende Profil aus dem gemeinsamen Hardwarekatalog wählen;
-der konkrete Ablauf folgt unten.
+Ein SD-Card-Descriptor kann aus dem Hardwarekatalog geschrieben werden, wird
+im klassischen ESP32-Build aber nicht als Laufzeitgerät unterstützt.
 Slot A oder B passend zum eingesetzten Modul wählen, die angebotenen
 Fertigungsangaben prüfen und die ausdrückliche Bestätigung verwenden.
 Ergebnis und die anschließend erkannte Identität kontrollieren.
@@ -68,9 +68,13 @@ Ein leeres EEPROM muss mit einem passenden Descriptor provisioniert
 werden. Die hier dokumentierte Webfunktion bietet noch keine passende Vorlage
 für AnalogHydroPressure; dafür niemals die DuoRelay-Vorlage verwenden.
 
-## SD-Card 0.1 provisionieren und aktivieren
+## SD-Card 0.1: historischer Betriebsablauf
 
-1. Firmware **0.8.7** oder eine neuere kompatible Version installieren.
+Die folgenden Schritte beziehen sich auf den früheren SD-Build. Der aktuelle
+klassische ESP32 meldet fehlende Treiberunterstützung und bietet keine SD-Seite.
+Ein EEPROM-Descriptor allein aktiviert keinen Treiber.
+
+1. Einen historischen SD-fähigen Build von **0.8.7** verwenden.
 2. Das stromlos eingesetzte Modul und seinen tatsächlichen Slot A oder B feststellen.
 3. Unter **Hardware** den gemeinsamen Hardwarekatalog laden und **EnvNode SD-Card 0.1** (`sd-card-0.1`) auswählen. Kein DuoRelay-Profil als Ersatz verwenden.
 4. Slot, Profil und Fertigungsangaben prüfen, Schreiben ausdrücklich bestätigen und erfolgreiche Schreib-/Rückleseprüfung abwarten. Ein bereits gültiges SD-EEPROM muss nicht erneut geschrieben werden.

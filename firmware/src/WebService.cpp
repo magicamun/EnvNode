@@ -1,6 +1,4 @@
 #include "NetworkLoggingService.h"
-#include "SdCardSpiDiagnostic.h"
-#include "SdSystemLogService.h"
 #include "DiagnosticWebView.h"
 #include "SystemDiagnostics.h"
 
@@ -525,31 +523,6 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/network-logging", HTTP_GET, [this]() { handleNetworkLogging(); });
     server.on("/network-logging/save", HTTP_POST, [this]() { handleNetworkLoggingSave(); });
     server.on("/network-logging/test", HTTP_POST, [this]() { handleNetworkLoggingTest(); });
-    server.on("/sd-card/settings", HTTP_POST, [this]() { handleSdSettings(); });
-    server.on("/sd-card/rotation-test", HTTP_GET, [this]() { handleSdRotationPreview(); });
-    server.on("/sd-card/rotation-test", HTTP_POST, [this]() { handleSdRotationStart(); });
-    server.on("/sd-card/diagnostic-test",HTTP_POST,[this](){
-        if(!administrationAvailable()){server_.send(503,"text/plain","Unavailable");return;}
-        const auto result=recordDiagnosticTest();const bool accepted=result==DiagnosticRecordResult::Accepted;
-        const bool de=configurationService_.getLocale()==Locale::GermanGermany;
-        String content="<section class='card'><p>";
-        content+=accepted ? (de?"Diagnoseereignis angenommen. Die Datei erscheint nach dem nächsten erfolgreichen Schreibvorgang.":"Diagnostic event accepted. The file appears after the next successful write.")
-            : (de?"Diagnoseereignis nicht angenommen. Erweiterte Systemdiagnose aktivieren und SD-Karte/Puffer prüfen.":"Diagnostic event not accepted. Enable extended system diagnostics and check the SD card/buffer.");
-        content+="</p><a href='/sd-card?path=%2Flogs%2Fdiagnostics'>/logs/diagnostics</a></section>";
-        sendPage(uiText(TextId::SdCard),"/sd-card",std::move(content),accepted?200:503);
-    });
-    server.on("/sd-card/test", HTTP_POST, [this]() { handleSdTest(); });
-    server.on("/sd-card/format", HTTP_GET, [this]() { handleSdFormatPreview(); });
-    server.on("/sd-card/format", HTTP_POST, [this]() { handleSdFormat(); });
-    server.on("/sd-card/download", HTTP_GET, [this]() { handleSdDownload(); });
-    server.on("/sd-card/delete", HTTP_GET, [this]() { handleSdDeletePreview(); });
-    server.on("/sd-card/delete", HTTP_POST, [this]() { handleSdDelete(); });
-    server.on("/sd-card/eject", HTTP_POST, [this]() {
-        ejectSdCardRecording();
-        server_.sendHeader("Location","/sd-card",true);
-        server_.send(303,"text/plain","");
-    });
-    server.on("/sd-card", HTTP_GET, [this]() { handleSdCard(); });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });
     server.on("/mqtt/save", HTTP_POST, [this]() { handleMqttSave(); });
@@ -573,35 +546,6 @@ void WebService::registerRoutes(WebServer& server) {
 }
 
 void WebService::loop() {
-    if(sdRotationTest_ && sdRotationTest_->done() && !sdRotationTestReported_) {
-        sdRotationTestReported_=true;
-        const auto& r=sdRotationTest_->result();
-        logger_.infof("SD rotation test: %s rotation=%u pruning=%u preserved=%u content=%u cleanup=%u step=%s errno=%d directory=%s",
-            r.passed() ? "PASS" : "FAIL",r.rotation,r.pruning,r.foreignFile,r.content,r.cleanup,r.stage,r.error,r.directory);
-        logger_.infof("SD rotation timing: elapsed_ms=%lu mount_ms=%lu write_ms=%lu verify_ms=%lu cleanup_ms=%lu",
-            static_cast<unsigned long>(r.elapsedMs),static_cast<unsigned long>(r.mountMs),
-            static_cast<unsigned long>(r.writeMs),static_cast<unsigned long>(r.verifyMs),static_cast<unsigned long>(r.cleanupMs));
-        if(!r.passed()) logger_.warnf("SD rotation memory: start_heap=%u start_largest=%u finish_heap=%u finish_largest=%u cleanup_errno=%d",
-            static_cast<unsigned>(r.startHeap),static_cast<unsigned>(r.startLargest),
-            static_cast<unsigned>(r.finishHeap),static_cast<unsigned>(r.finishLargest),r.cleanupError);
-    }
-    if(sdDirectory_ && !sdDirectory_->done() && !sdDirectorySlowReported_ && millis()-sdDirectoryStarted_>=3000) {
-        sdDirectorySlowReported_=true;
-        logger_.warnf("SD directory read slow: elapsed_ms=%lu done=%u; web loop remains active",
-            static_cast<unsigned long>(millis()-sdDirectoryStarted_),sdDirectory_->done());
-    }
-    if (sdFormat_) {
-        const auto state=sdFormat_->state();
-        if(state==SdFormatState::Running) return; // Other runtime services continue; HTTP/OTA/SD remain serialized.
-        sdFormatResult_=state;sdFormatResultAvailable_=true;
-        if(state==SdFormatState::Complete) logger_.info("SD format: PASS; FAT32 remounted and empty root verified");
-        else logger_.warnf("SD format failed: state=%u error=%d",static_cast<unsigned>(state),sdFormat_->errorCode());
-        sdFormat_.reset();
-    }
-    if (sdDownload_) {
-        if (!sdDownload_->service(millis())) sdDownload_.reset();
-        return; // Other runtime services still run; no overlapping SD/HTTP operations.
-    }
     if (restoreCandidate_ && millis() - restorePreviewTime_ > 300000UL) {
         restoreCandidate_.reset(); restoreToken_ = String();
     }
@@ -2770,8 +2714,6 @@ String WebService::renderHardwareOverview() {
                 parameters += entry.hasSafeLevel
                     ? (entry.safeLevelHigh ? "high" : "low") : "—";
             }
-            if(entry.kind==HardwareDescriptorDeviceKind::Infrastructure && !strcmp(moduleDeviceDriverName(entry.driver),"sd-spi"))
-                parameters=entry.hasActiveLevel ? (entry.activeLevelHigh ? "cardDetect=high" : "cardDetect=low") : "—";
             const String capability = entry.capabilities.contains(
                 HardwareDescriptorCapabilityCode::ActuatorOnOff)
                 ? String("actuator.on-off") : entry.capabilities.contains(HardwareDescriptorCapabilityCode::StorageSd) ? String("storage.sd") : String("—");

@@ -1,7 +1,7 @@
 # SD diagnostic storage architecture
 
 Historical backend reference. The classic ESP32 UDP candidate uses
-[network logging](UdpLoggingImplementationPlan.md); SD removal follows full-rate
+[network logging](UdpLoggingImplementationPlan.md); SD runtime was removed after full-rate receiver
 validation. Existing SD implementation remains available through Git.
 
 EnvNode: see repository LICENSE.

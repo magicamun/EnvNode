@@ -96,7 +96,6 @@ void loadModuleTarget(
 
 
 void ConfigurationService::initializeDefaults() {
-    configuration_.sdStorage = SdStorageConfiguration{};
     configuration_.networkLogging = NetworkLoggingConfiguration{};
     configuration_.values.clear();
     configuration_.display = DisplayConfiguration{};
@@ -205,21 +204,15 @@ void ConfigurationService::loadFromPreferences() {
             configuration_.geoPosition = position;
         else configuration_.geoPosition = GeoPosition{};
     }
-    const uint32_t sd=storage_.preferences().getUInt("sdStorage", (configuration_.sdStorage.enabled ? 1U : 0U) | (configuration_.sdStorage.slot==ModuleSlot::B ? 2U : 0U) | (configuration_.sdStorage.systemLog ? 4U : 0U) | (configuration_.sdStorage.systemDiagnostics ? 8U : 0U));
-    if(sd<=15) {
-        configuration_.sdStorage.enabled=(sd&1)!=0;
-        configuration_.sdStorage.slot=(sd&2)!=0 ? ModuleSlot::B : ModuleSlot::A;
-        configuration_.sdStorage.systemLog=(sd&4)!=0;
-        configuration_.sdStorage.systemDiagnostics=(sd&8)!=0;
-    }
+    const uint32_t legacySd=storage_.preferences().getUInt("sdStorage",0);
     // Legacy selections migrate without enabling a destination implicitly.
     if (storage_.preferences().isKey("udpLog")) {
         NetworkLoggingConfiguration candidate;
         if (decodeNetworkLogging(storage_.preferences().getString("udpLog"),candidate)) configuration_.networkLogging=candidate;
         else configuration_.networkLogging=NetworkLoggingConfiguration{};
     } else if (!storage_.preferences().isKey("cfg_snapshot")) {
-        configuration_.networkLogging.systemLog=configuration_.sdStorage.systemLog;
-        configuration_.networkLogging.systemDiagnostics=configuration_.sdStorage.systemDiagnostics;
+        configuration_.networkLogging.systemLog=(legacySd<=15 && (legacySd&4)!=0);
+        configuration_.networkLogging.systemDiagnostics=(legacySd<=15 && (legacySd&8)!=0);
     }
     baseSettings().loadIdentityAndNetworkOverrides();
     if (storage_.preferences().isKey(KeyMqttServer)) {
@@ -532,7 +525,6 @@ void ConfigurationService::loadConfiguration() {
             && validateRestore(*candidate)) configuration_ = *candidate;
     }
     loadFromPreferences();
-    if(sdModuleResolver_) sdModuleResolver_(configuration_.sdStorage);
     loadingConfiguration_ = false;
     // Preserve saved settings, but never initialize a manual driver on a module port.
     if (moduleOwnsHardware_) {
@@ -978,8 +970,8 @@ bool ConfigurationService::validateControllerSlots(
 bool ConfigurationService::validateHardwareOccupancy(
     const SensorSlotConfiguration* sensorSlots,
     const ActuatorSlotConfiguration* actuatorSlots,
-    const DisplayConfiguration* display, const SdStorageConfiguration* sdStorage) const {
-    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount + 7];
+    const DisplayConfiguration* display) const {
+    HardwareResourceClaim claims[MaxSensorSlotCount + MaxActuatorSlotCount + 2];
     size_t claimIndex = 0;
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         claims[claimIndex].active = sensorSlots[index].enabled
@@ -1002,20 +994,6 @@ bool ConfigurationService::validateHardwareOccupancy(
     if (moduleOwnsHardware_ && !loadingConfiguration_) {
         for (size_t index = 0; index < claimIndex; ++index)
             if (claims[index].active && moduleOwnsHardware_(claims[index].assignment)) return false;
-    }
-    auto sd=sdStorage==nullptr ? configuration_.sdStorage : *sdStorage;
-    if(sdModuleResolver_) sdModuleResolver_(sd);
-    if(sd.slot!=ModuleSlot::A && sd.slot!=ModuleSlot::B) return false;
-    if(sd.enabled) {
-        const auto* slot=boardModuleSlot(currentBoardProfile(),sd.slot);
-        if(!slot || !slot->fiveVoltSupplyAvailable) return false;
-        const auto& board=currentBoardProfile();
-        const uint8_t pins[]={board.spiClock.number,board.spiMiso.number,board.spiMosi.number,slot->spiChipSelect.number,slot->auxGpio1.number};
-        for(uint8_t pin:pins) {
-            const auto assignment=HardwareResourceAssignment::gpioResource(GpioResource(pin));
-            if(!loadingConfiguration_ && !sd.automatic && moduleOwnsHardware_ && moduleOwnsHardware_(assignment)) return false;
-            claims[claimIndex++]=HardwareResourceClaim(true,assignment);
-        }
     }
     return validateExclusiveHardwareResourceOccupancy(claims, claimIndex);
 }
@@ -1187,16 +1165,6 @@ bool ConfigurationService::setNetworkLoggingConfiguration(const NetworkLoggingCo
     configuration_.networkLogging=requested;return true;
 }
 
-bool ConfigurationService::setSdStorageConfiguration(const SdStorageConfiguration& input) {
-    SdStorageConfiguration requested=input;
-    if(sdModuleResolver_) sdModuleResolver_(requested);
-    if(!validateHardwareOccupancy(configuration_.sensorSlots,configuration_.actuatorSlots,&configuration_.display,&requested)) return false;
-    const uint32_t encoded=(requested.enabled ? 1U : 0U) | (requested.slot==ModuleSlot::B ? 2U : 0U) | (requested.systemLog ? 4U : 0U) | (requested.systemDiagnostics ? 8U : 0U);
-    if(!persistUInt("sdStorage",encoded)) return false;
-    configuration_.sdStorage=requested;
-    return true;
-}
-
 bool ConfigurationService::setDisplayConfiguration(const DisplayConfiguration& display) {
     String encoded;
     if (!encodeDisplayConfiguration(display, encoded)
@@ -1283,7 +1251,7 @@ bool ConfigurationService::validateRestore(const Configuration& c) const {
         && validNetworkLogging(c.networkLogging) && validValueConfiguration(c.values) && validateDisplayConfiguration(c.display)
         && validateSensorSlots(c.sensorSlots) && validateActuatorSlots(c.actuatorSlots)
         && validateControllerSlots(c.controllerSlots, c.sensorSlots, c.actuatorSlots, &c.values)
-        && validateHardwareOccupancy(c.sensorSlots, c.actuatorSlots, &c.display, &c.sdStorage);
+        && validateHardwareOccupancy(c.sensorSlots, c.actuatorSlots, &c.display);
 }
 
 
@@ -1320,14 +1288,12 @@ bool ConfigurationService::restoreConfiguration(const Configuration& candidate) 
     if (!storage_.replaceSnapshot(encoded.get(), encodedSize, logger_)) return false;
     if (logger_) logger_->info("Configuration restore activating in-memory candidate");
     configuration_ = candidate;
-    if(sdModuleResolver_) sdModuleResolver_(configuration_.sdStorage);
     if (logger_) logger_->info("Configuration restore candidate activated");
     return true;
 }
 bool ConfigurationService::resetToDefaults() {
     if (!storage_.clearAll()) return false;
     initializeDefaults();
-    if(sdModuleResolver_) sdModuleResolver_(configuration_.sdStorage);
     return true;
 }
 
