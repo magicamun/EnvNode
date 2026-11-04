@@ -167,3 +167,50 @@ requests. Increasing the response-body budget does not address this wait.
 No firmware/configuration/server change accompanied this browser diagnosis.
 Screenshot evidence remains private/Git-ignored at
 firmware/.pio/logging-validation/web-speed/safari-inspector.png.
+
+## Targeted fix: bounded waiting clients before the SDK parser
+
+MeasuredWebServer now selects a client only after its first request byte is
+available. A fixed HttpClientGate holds at most two waiting client handles, uses
+one nonblocking WiFiServer::available accept per application turn, and never
+reads/buffers request bytes. Waiting clients with data are selected round-robin
+before new arrivals. A new ready client can be served even while both waiting
+slots contain empty connections. If another empty connection arrives at a full
+pool, the oldest still-empty one is closed; ready clients are not evicted. A rare
+arrival with no room and no empty eviction candidate is rejected. Expiry,
+eviction and rejection counters are retained in the gate. A five-second
+first-byte deadline and disconnected-client cleanup bound handle retention;
+unsigned time subtraction handles millis wraparound. Idle polling retains the
+SDK's one-millisecond cooperative delay.
+
+This is a project-owned adapter using the existing WebServer protected client
+and state interface, not a patch/copy of the framework's parser. Only ESP32
+builds use this accept adapter. Route handling, upload parsing and deferred
+responses keep their existing implementation. Request bytes remain untouched,
+including the first byte of fragmented requests. Once bytes arrive, the existing
+synchronous SDK parser can still block on incomplete headers/uploads. This change
+addresses the demonstrated empty-connection starvation, not every slow-client
+or synchronous MQTT/application stall. The prior 8-KiB response-pump experiment
+remains separately identifiable in ecc43ac; it is not the fix for the five-second
+pre-response wait.
+
+Native validation of the targeted fix passed 52 cases: 23 WebHost/client-gate,
+three firmware-runtime, 20 RainDetector policy/acquisition/controller, six UDP
+logging cases. Added cases exercise idle-plus-ready clients, later/fragmented
+first bytes, a full idle pool, ready-client fairness, timeout wraparound and
+closed-client cleanup. After a hub disconnect and NAS executable-busy errors,
+the successful run used PLATFORMIO_BUILD_DIR=/private/tmp/envnode-web-gate-build;
+failed/interrupted earlier runs are not counted as validation.
+
+The read-only hardware regression is reproducible with:
+
+```sh
+python3 tools/probe_http_idle_clients.py http://192.168.20.63/controllers
+```
+
+On build 478 the controlled baseline returned 415.6 ms with no idle clients,
+4,840.5 ms with one, 9,887.0 ms with two, timed out with four (10-second socket
+timeout), and took 4,915.3 ms for one idle client plus a fragmented request.
+The probe checks status 200 and a configurable total-time limit (default one
+second). This is an integration test against a supplied read-only URL; it does
+not change device configuration or any server settings.

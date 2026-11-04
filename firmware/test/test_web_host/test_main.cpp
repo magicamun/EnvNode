@@ -4,6 +4,8 @@
 #include "WebPageFrame.h"
 #include "WebStyle.h"
 #include <string>
+#include <deque>
+#include "HttpClientGate.h"
 using namespace EnvNode;
 HardwareSerial Serial;
 void HardwareSerial::begin(unsigned long) {}
@@ -259,8 +261,85 @@ void test_measurements_cover_flash_writes_and_reset_between_requests() {
     TEST_ASSERT_EQUAL_UINT(0,server.writtenBytes());
     TEST_ASSERT_TRUE(server.responseRoute().isEmpty());
 }
+struct GateClient {
+    struct State {bool online=true;std::string bytes;};
+    std::shared_ptr<State> state;
+    static GateClient make(const char* bytes="") {
+        GateClient c;c.state=std::make_shared<State>();c.state->bytes=bytes;return c;
+    }
+    bool connected() const {return state && state->online;}
+    size_t available() const {return connected()?state->bytes.size():0;}
+    void stop() {if(state)state->online=false;}
+};
+struct GateAcceptor {
+    std::deque<GateClient> queue;unsigned calls=0;
+    GateClient available() {
+        ++calls;if(queue.empty())return {};
+        auto c=queue.front();queue.pop_front();return c;
+    }
+};
+void test_empty_connection_does_not_hold_up_ready_request_and_can_be_used_later() {
+    HttpClientGate<GateClient> gate;GateAcceptor server;GateClient selected;
+    auto idle=GateClient::make();auto request=GateClient::make("GET /controllers HTTP/1.1\r\n\r\n");
+    server.queue.push_back(idle);TEST_ASSERT_FALSE(gate.poll(server,selected,0));
+    server.queue.push_back(request);TEST_ASSERT_TRUE(gate.poll(server,selected,300));
+    TEST_ASSERT_TRUE(selected.state==request.state);TEST_ASSERT_TRUE(idle.connected());
+    TEST_ASSERT_EQUAL_STRING("GET /controllers HTTP/1.1\r\n\r\n",selected.state->bytes.c_str());
+    // Even a fragmented request's first byte is preserved for the SDK parser.
+    idle.state->bytes="G";TEST_ASSERT_TRUE(gate.poll(server,selected,400));
+    TEST_ASSERT_TRUE(selected.state==idle.state);TEST_ASSERT_EQUAL_STRING("G",selected.state->bytes.c_str());
+    TEST_ASSERT_EQUAL_UINT(3,server.calls);
+}
+void test_full_idle_pool_evicts_oldest_but_next_ready_client_does_not_wait() {
+    HttpClientGate<GateClient> gate;GateAcceptor server;GateClient selected;
+    auto a=GateClient::make(),b=GateClient::make(),c=GateClient::make(),request=GateClient::make("GET /");
+    server.queue.push_back(a);TEST_ASSERT_FALSE(gate.poll(server,selected,0));
+    server.queue.push_back(b);TEST_ASSERT_FALSE(gate.poll(server,selected,10));
+    server.queue.push_back(c);TEST_ASSERT_FALSE(gate.poll(server,selected,20));
+    TEST_ASSERT_FALSE(a.connected());TEST_ASSERT_TRUE(b.connected());TEST_ASSERT_TRUE(c.connected());
+    TEST_ASSERT_EQUAL_UINT(1,gate.evicted());
+    server.queue.push_back(request);TEST_ASSERT_TRUE(gate.poll(server,selected,30));
+    TEST_ASSERT_TRUE(selected.state==request.state);TEST_ASSERT_EQUAL_UINT(1,gate.evicted());
+}
+void test_pending_ready_clients_are_served_before_new_arrivals_without_losing_bytes() {
+    HttpClientGate<GateClient> gate;GateAcceptor server;GateClient selected;
+    auto a=GateClient::make(),b=GateClient::make(),c=GateClient::make("GET /new");
+    server.queue.push_back(a);gate.poll(server,selected,0);
+    server.queue.push_back(b);gate.poll(server,selected,1);
+    a.state->bytes="GET /a";b.state->bytes="GET /b";server.queue.push_back(c);
+    TEST_ASSERT_TRUE(gate.poll(server,selected,2));TEST_ASSERT_TRUE(selected.state==a.state);
+    TEST_ASSERT_TRUE(gate.poll(server,selected,3));TEST_ASSERT_TRUE(selected.state==b.state);
+    TEST_ASSERT_TRUE(gate.poll(server,selected,4));TEST_ASSERT_TRUE(selected.state==c.state);
+    TEST_ASSERT_EQUAL_UINT(0,gate.evicted());TEST_ASSERT_EQUAL_UINT(0,gate.rejected());
+    TEST_ASSERT_EQUAL_STRING("GET /a",a.state->bytes.c_str());
+    TEST_ASSERT_EQUAL_STRING("GET /b",b.state->bytes.c_str());
+}
+void test_idle_timeout_wraps_and_ready_bytes_at_deadline_are_not_discarded() {
+    HttpClientGate<GateClient> gate;GateAcceptor server;GateClient selected;
+    auto idle=GateClient::make();const uint32_t start=0xfffffff0U;
+    server.queue.push_back(idle);gate.poll(server,selected,start);
+    TEST_ASSERT_FALSE(gate.poll(server,selected,start+4999));TEST_ASSERT_TRUE(idle.connected());
+    TEST_ASSERT_FALSE(gate.poll(server,selected,start+5000));TEST_ASSERT_FALSE(idle.connected());
+    TEST_ASSERT_EQUAL_UINT(1,gate.expired());
+    auto late=GateClient::make();server.queue.push_back(late);gate.poll(server,selected,6000);
+    late.state->bytes="G";TEST_ASSERT_TRUE(gate.poll(server,selected,11000));
+    TEST_ASSERT_TRUE(selected.state==late.state);TEST_ASSERT_EQUAL_UINT(1,gate.expired());
+}
+void test_disconnected_waiting_client_releases_capacity() {
+    HttpClientGate<GateClient> gate;GateAcceptor server;GateClient selected;
+    auto gone=GateClient::make(),next=GateClient::make();server.queue.push_back(gone);
+    gate.poll(server,selected,0);gone.stop();server.queue.push_back(next);
+    TEST_ASSERT_FALSE(gate.poll(server,selected,1));
+    next.state->bytes="GET /";TEST_ASSERT_TRUE(gate.poll(server,selected,2));
+    TEST_ASSERT_TRUE(selected.state==next.state);TEST_ASSERT_EQUAL_UINT(0,gate.evicted());
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_empty_connection_does_not_hold_up_ready_request_and_can_be_used_later);
+    RUN_TEST(test_full_idle_pool_evicts_oldest_but_next_ready_client_does_not_wait);
+    RUN_TEST(test_pending_ready_clients_are_served_before_new_arrivals_without_losing_bytes);
+    RUN_TEST(test_idle_timeout_wraps_and_ready_bytes_at_deadline_are_not_discarded);
+    RUN_TEST(test_disconnected_waiting_client_releases_capacity);
     RUN_TEST(test_backpressure_keeps_page_and_returns_to_measurement_loop);
     RUN_TEST(test_stalled_page_times_out_explicitly_and_next_client_can_be_served);
     RUN_TEST(test_explicit_restart_waits_for_response_and_grace_without_blocking);

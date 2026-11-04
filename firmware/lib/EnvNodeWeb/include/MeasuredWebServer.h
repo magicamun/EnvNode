@@ -2,11 +2,27 @@
 #pragma once
 #include <WebServer.h>
 #include <utility>
+#include "HttpClientGate.h"
 namespace EnvNode {
 // Observe SDK writes; capture fixed-length page headers for deferred delivery.
 class MeasuredWebServer : public WebServer {
 public:
     explicit MeasuredWebServer(uint16_t port) : WebServer(port) {}
+    void handleClient() {
+#if defined(ARDUINO_ARCH_ESP32)
+        if(_currentStatus==HC_NONE) {
+            WiFiClient ready;
+            if(!waitingClients_.poll(_server,ready,millis())) {
+                if(_nullDelay)delay(1);
+                return;
+            }
+            _currentClient=std::move(ready);
+            _currentStatus=HC_WAIT_READ;
+            _statusChange=millis();
+        }
+#endif
+        WebServer::handleClient();
+    }
     void beginMeasurement() {
         started_=millis();firstWriteMs_=writeMs_=bytes_=0;wrote_=false;route_=String();
     }
@@ -42,6 +58,9 @@ private:
         const size_t written=WebServer::_currentClientWrite_P(data,size);
         writeMs_+=millis()-started;bytes_+=written;return written;
     }
+#if defined(ARDUINO_ARCH_ESP32)
+    HttpClientGate<WiFiClient> waitingClients_;
+#endif
     String captured_;bool capture_=false,captureFailed_=false;
     uint32_t started_=0,firstWriteMs_=0,writeMs_=0;
     size_t bytes_=0;bool wrote_=false;String route_;
