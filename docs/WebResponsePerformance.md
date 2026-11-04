@@ -141,3 +141,29 @@ queue drops remain explicitly visible; they are not diagnostic-window losses.
 Private backups, request timing JSON, flash/read logs and receiver JSONL remain
 Git-ignored in firmware/.pio/logging-validation/web-speed/. Candidate firmware,
 ELF, build identity and checksums are in firmware/bin/web-speed/build478/.
+
+## Browser reproduction: idle TCP connection starves the next request
+
+Safari's Web Inspector reproduced the visible main-page hitch on the installed
+build 478. Clicking Controllers from Measurements showed 5,222.8 ms total:
+64.0 ms TCP establishment, 5,056.6 ms waiting for the response, and 100.5 ms
+loading it. CSS came from memory in 0.06 ms. This captured delay precedes the
+response body; it is not explained by slow CSS transfer or page painting.
+
+The installed Arduino WebServer has HTTP_MAX_DATA_WAIT=5000. handleClient accepts
+one client, retains it in HC_WAIT_READ while it has no available data, and does
+not accept another until that wait expires. A controlled read-only socket test
+opened one TCP connection, sent no bytes, waited 300 ms, then issued an ordinary
+/controllers GET on a second connection. Headers arrived after 4,746 ms and the
+full body after 4,839 ms. After closing the idle connection, the same request
+completed in 145 ms. Both responses were HTTP 200 with 13,082 body bytes.
+
+This demonstrates request starvation by an accepted empty TCP connection.
+Safari speculative connections are a plausible trigger, but were not identified
+by packet capture. The captured Safari symptom and controlled starvation have
+the same five-second signature. The next fix should address selection/fairness
+among waiting connections, preserving bounded RAM and normal slow/fragmented
+requests. Increasing the response-body budget does not address this wait.
+No firmware/configuration/server change accompanied this browser diagnosis.
+Screenshot evidence remains private/Git-ignored at
+firmware/.pio/logging-validation/web-speed/safari-inspector.png.
