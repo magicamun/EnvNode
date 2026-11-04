@@ -96,13 +96,13 @@ state/output changes for field analysis (see below).
 
 ## Diagnostics and MQTT
 
-With SD recording available, enable **Extended diagnostics** on the RainDetector
+With UDP logging configured at `/network-logging`, enable **Extended diagnostics** on the RainDetector
 sensor and on its controller. The sensor records every completed measurement gate
 (normally 250 ms), including pulse count, frequency and faults. The controller
 records configuration, decisions and output changes, with a fresh context every
-60 seconds. Records go to `/logs/diagnostics` as JSONL; sensor ID and revision
+60 seconds. Records go to the configured rsyslog receiver as JSON; sensor ID and revision
 correlate measurements with decisions. See [Diagnostic recording](DiagnosticRecording.md)
-for the event fields and retention limits. Recording is bounded and best effort;
+for event fields, loss counters and receiver retention. Recording is bounded and best effort;
 a full queue drops diagnostic events without delaying measurement or control.
 The system-health diagnostics checkbox is independent of these entity selections.
 

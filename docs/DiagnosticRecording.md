@@ -57,33 +57,48 @@ result. Avoid a system-log message on every rejected diagnostic event.
 
 Sensor, actuator (including module-actuator) and controller forms offer
 **Extended diagnostics**. The saved choice defaults to false and persists in
-NVS and backup schema 6. Schemas 1–5 remain readable; schemas 1–4 default
+NVS and backup schema 7. Schemas 1–6 remain readable; schemas 1–4 default
 the diagnostic choices to off.
 Old positional NVS snapshots and JSON backups are tested separately.
 
-The checkbox is editable with configured SD access and an inserted card. When
-unavailable it remains visible and retains the saved choice. Disabled entities
-do not emit even if the preference is retained. Saved settings do not imply a
-producer already implements diagnostic events. RainDetector instrumentation is
-described below; SCT013-specific instrumentation remains separate work.
+The UDP candidate keeps selections editable whenever the logger buffer is
+allocated, independently of receiver or WiFi availability. Disabled entities do
+not emit; saved preferences survive outages. System diagnostics and system logs
+are separate selections under `/network-logging`. A destination is not activated
+implicitly when old SD preferences migrate. The sensor/controller flags retain
+their NVS keys and meaning.
 
-The first concrete producer is `SystemDiagnostics.cpp`; it uses the public
-recorder only and contains no SD/filesystem dependency.
+SystemDiagnostics produces runtime health on activation and once per minute.
+The network logging test button submits `recorder_test`. All events use the same
+public recorder; producers perform no network I/O. Every completed RainDetector
+gate is still submitted at nominal 250 ms, without averaging or downsampling.
 
-The SD page separately enables **Extended system diagnostics**. This produces a
-runtime-health event on activation/card return and then once per minute (heap,
-largest free allocation). Its explicit test button submits
-`recorder_test` through the same public recorder contract. The test queues one
-event; it neither formats the card nor creates a separate disposable test file.
+## UDP candidate — 2026-11-04
 
-Availability means configuration, pin ownership, stable runtime, allocated RAM
-and mechanical card detect allow submission. It does not certify a FAT mount or
-successful durable write. Real storage errors remain visible as write/retry
-status. Card removal stops new submissions; previously accepted buffered records
-may be retried on return. Settings changes discard stale queued generations and
-clear pending diagnostic batches; an in-flight write may finish.
+The classic ESP32 composition now routes recording to UDP, while retaining the
+SD code temporarily for the required staged validation. See
+[implementation plan](UdpLoggingImplementationPlan.md),
+[measured validation ledger](UdpLoggingValidation.md), and
+[receiver example](../tools/rsyslog/README.md).
 
-## Buffered persistence
+Queues hold eight system entries and eight diagnostic records. Encoding uses a
+single 2-KiB buffer. Each application loop attempts at most one datagram per
+stream with a nonblocking numeric-IPv4 socket; failures are counted and dropped.
+There is no writer task, filesystem batch or persistent replay in this path.
+The web status exposes full/busy/offline/backpressure/send/encode counters and
+queue occupancy/high water. Receiver silence does not prove a send failed.
+
+Every message carries a factory device ID, random per-boot ID and build identity,
+with the original sequence and capture timestamps. Diagnostics add source-mask
+selection_generation; their valid selected attempts consume a sequence before
+potential queue rejection. Counters/sequences wrap at 32 bits. Existing event
+names, typed fields and sensor revisions are unchanged. Complete extreme text
+events can exceed the usual MTU and fragment; they are never silently truncated.
+
+## Historical SD buffered persistence
+
+The following describes the previous SD backend and its historical validation,
+not the active recording target in the UDP candidate.
 
 One worker services two independent streams under the shared SD arbiter:
 

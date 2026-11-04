@@ -1,5 +1,10 @@
 # SD-Karte und Diagnoseaufzeichnung
 
+**Historischer SD-Stand:** Im klassischen ESP32-Teststand wird die Aufzeichnung
+auf [UDP-Netzwerklogging](network-logging.md) umgestellt. Der SD-Code bleibt bis
+zur Validierung vorübergehend enthalten. Die folgende Anleitung beschreibt den
+bisherigen SD-Betrieb.
+
 Stand: **EnvNode 0.8.7, 3. November 2026**. Lizenz: siehe [Lizenz und Nutzung](../license.md).
 Die SD-Karte dient der begrenzten lokalen Diagnoseaufzeichnung. Messungen und
 Regelung laufen unabhängig davon; die Aufzeichnung ist keine Wetterhistorie.

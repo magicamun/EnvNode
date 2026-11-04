@@ -1,0 +1,17 @@
+# EnvNode-owned: see repository LICENSE.
+# Ownership and systemctl service name are distribution-specific; adapt first.
+/var/log/envnode/*.jsonl /var/log/envnode/unrecognized.log {
+    daily
+    maxsize 32M
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0640 syslog adm
+    su syslog adm
+    sharedscripts
+    postrotate
+        /bin/systemctl kill --kill-who=main --signal=HUP rsyslog.service
+    endscript
+}
