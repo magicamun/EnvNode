@@ -169,3 +169,42 @@ destination remained 192.168.20.10:514. Full receiver continuity is still pendin
 The new receiver analysis helper passed three Python tests covering wrap,
 reordering, duplicates, gaps, separate boots and distinction between transport
 sequence gaps and sensor-revision gaps.
+
+## Current partition table installed on explicit user request
+
+On 2026-11-04 the user explicitly requested the newer/larger partition table.
+The current firmware/partitions.csv was compiled with the installed framework's
+gen_esp32part.py and matched the already-built candidate partitions.bin exactly
+(SHA-256 000720dbb6a6beb1f081495f1555461eb76b2074cdce9c3496e52e819d9ace58).
+The difference is the dedicated 256-KiB cfg_nvs partition, not larger OTA slots:
+app0/app1 remain 0x1c0000 bytes each, with unchanged offsets. The candidate
+application already fit the previous OTA slots.
+
+Before installation, fresh backups captured 0x8000–0xffff (partition table,
+current NVS/OTA) and the entire old 0x390000–0x3fffff SPIFFS region under
+firmware/.pio/logging-validation/partition-migration/, with restrictive umask.
+Backup SHA-256 values:
+
+- before-table-nvs-ota.bin: b29b24c3e3c27d7ab1a719d27d5917564c405e91c91ffe47c06e3485db49c7ff.
+- before-spiffs-tail.bin: 6c28586364462df0ca5704154d2962e6d2a714a2443388b2a97220269188dcac.
+
+The new cfg_nvs range was already entirely 0xff. No data-region erase was needed.
+Only the partition-table sector at **0x8000** was written, at 115200 baud, with
+esptool hash verification. The table plus NVS/OTA were then read back. Table
+bytes match the current CSV-derived image and OTA metadata remained byte-identical.
+Legacy NVS acquired two WIFI_STA_DEF system entries during the normal reboot;
+it is therefore not byte-identical, and no such claim is made. The saved logger,
+RainDetector sensor and controller edit forms compare unchanged before/after.
+
+The device boots the same UDP application, reconnects WiFi/MQTT, retains six
+active sensors and one running controller, and retains receiver 192.168.20.10:514.
+As designed, table-only installation leaves legacy configuration authoritative;
+the first verified snapshot restore switches authority to cfg_nvs. No restore,
+factory reset, controller rebuild, bootloader upload or application rewrite was
+performed as part of this partition-table update.
+
+After restart the system-log queue reported 19 full drops while replaying startup
+history into its bounded eight-entry queue. This is visible expected best-effort
+startup overflow, not an unreported loss. A later observation showed 15 system
+records and 204 diagnostics locally sent, with no diagnostic queue or send errors.
+This does not replace receiver-side confirmation of full-rate continuity.
