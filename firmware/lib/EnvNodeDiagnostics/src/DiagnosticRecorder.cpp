@@ -65,6 +65,7 @@ DiagnosticRecordResult BufferedDiagnosticRecorder::record(DiagnosticSource sourc
     if(!selected(source))return DiagnosticRecordResult::Disabled;
     if(!available()){++unavailable_;return DiagnosticRecordResult::Unavailable;}
     if(lock_.test_and_set(std::memory_order_acquire)){++busy_;return DiagnosticRecordResult::Busy;}
+    if(!available()) {++unavailable_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Unavailable;}
     const size_t count=count_.load();
     if(count==DiagnosticQueueEntries){++full_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Full;}
     auto& r=records_[(head_+count)%DiagnosticQueueEntries];r.source=source;r.event=event;r.sequence=++sequence_;
@@ -80,6 +81,15 @@ bool BufferedDiagnosticRecorder::pop(DiagnosticRecord& record) {
         head_=(head_+1)%DiagnosticQueueEntries;count_.fetch_sub(1);if(found)break;
     }
     lock_.clear(std::memory_order_release);return found;
+}
+bool BufferedDiagnosticRecorder::empty() {
+    if(lock_.test_and_set(std::memory_order_acquire))return false;
+    const bool result=count_.load()==0;lock_.clear(std::memory_order_release);return result;
+}
+bool BufferedDiagnosticRecorder::discardPending() {
+    if(lock_.test_and_set(std::memory_order_acquire))return false;
+    stale_.fetch_add(count_.load());count_.store(0);head_=0;
+    lock_.clear(std::memory_order_release);return true;
 }
 DiagnosticRecorderStats BufferedDiagnosticRecorder::stats() const {DiagnosticRecorderStats s;s.accepted=accepted_;s.full=full_;s.busy=busy_;s.unavailable=unavailable_;s.invalid=invalid_;s.stale=stale_;s.queued=count_;return s;}
 namespace {

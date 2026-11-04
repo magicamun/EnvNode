@@ -21,6 +21,8 @@ public:
     bool enabled(DiagnosticSource source) const override;
     DiagnosticRecordResult record(DiagnosticSource source,const DiagnosticEvent& event) override;
     bool pop(DiagnosticRecord& record);
+    bool empty(); // synchronized with producers, including admission shutdown
+    bool discardPending();
     uint32_t generation() const {return generation_.load();}
     DiagnosticRecorderStats stats() const;
 private:

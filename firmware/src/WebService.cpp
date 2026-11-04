@@ -540,6 +540,11 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/sd-card/download", HTTP_GET, [this]() { handleSdDownload(); });
     server.on("/sd-card/delete", HTTP_GET, [this]() { handleSdDeletePreview(); });
     server.on("/sd-card/delete", HTTP_POST, [this]() { handleSdDelete(); });
+    server.on("/sd-card/eject", HTTP_POST, [this]() {
+        ejectSdCardRecording();
+        server_.sendHeader("Location","/sd-card",true);
+        server_.send(303,"text/plain","");
+    });
     server.on("/sd-card", HTTP_GET, [this]() { handleSdCard(); });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });

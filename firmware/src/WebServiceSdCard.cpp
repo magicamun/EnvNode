@@ -20,6 +20,9 @@ void WebService::handleSdCard() {
         sendPage(uiText(TextId::SdCard), "/sd-card", "", 503);
         return;
     }
+    if(sdCardEjectRequested()) {
+        sendPage(uiText(TextId::SdCard),"/sd-card",renderSdSettings());return;
+    }
     if(sdFormatResultAvailable_) {
         sdFormatResultAvailable_=false;
         const bool de=configurationService_.getLocale()==Locale::GermanGermany;
@@ -237,6 +240,14 @@ String WebService::renderSdSettings() {
     html+="</button></form><p>";html+=de ? "Die Slot-Auswahl gilt für das Breakout ohne EEPROM-Erkennung." : "Slot selection supports the breakout without EEPROM detection.";
     html+="</p><p>Systemlog: "+escapeHtml(sdSystemLogStatus())+"</p>";
     html+="<p>";html+=de?"Erweiterte Diagnose: ":"Extended diagnostics: ";html+=escapeHtml(extendedDiagnosticsStatus())+"</p>";
+    html+="<p>SD: "+escapeHtml(sdCardMountStatus(de))+"</p>";
+    if(sdCardAcceptingAccess()) {
+        html+="<form method='post' action='/sd-card/eject'><button type='submit'>";
+        html+=de?"SD-Karte auswerfen":"Eject SD card";html+="</button></form>";
+    }
+    if(sdCardEjectRequested()) {
+        html+=de?"<p>Nach dem Auswerfen neu einstecken, um wieder aufzuzeichnen. Status mit Aktualisieren prüfen. Bei Schreibfehlern bleibt die Entnahme gesperrt.</p>":"<p>Reinsert after ejecting to resume recording. Refresh to check status. Write failures prevent safe removal.</p>";
+    }
     if(sd.systemDiagnostics && extendedDiagnosticsAvailable()) {
         html+="<form method='post' action='/sd-card/diagnostic-test'><button type='submit'>";
         html+=de?"Diagnose-Testereignis aufzeichnen":"Record diagnostic test event";html+="</button></form>";

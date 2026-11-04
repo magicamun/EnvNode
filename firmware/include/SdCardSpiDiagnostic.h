@@ -12,6 +12,13 @@
 #include "SdRotationTest.h"
 #include <memory>
 namespace EnvNode {
+void configureSdCardMount(bool enabled,ModuleSlot slot);
+void serviceSdCardMount(bool drained);
+void requestSdCardEject();
+bool sdCardEjectRequested();
+bool sdCardAcceptingAccess();
+uint32_t sdCardMediaGeneration();
+const char* sdCardMountStatus(bool german=false);
 bool sdStoragePinsAvailable(const Configuration& configuration,const ActuatorRuntime& actuators);
 std::unique_ptr<ISdDirectoryJob> startSdDirectoryRead(ModuleSlot slot,const BoardProfile& board,
     const Configuration& configuration,const ActuatorRuntime& actuators,

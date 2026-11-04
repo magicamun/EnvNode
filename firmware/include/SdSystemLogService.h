@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "ILogTimeProvider.h"
 namespace EnvNode {
+void ejectSdCardRecording();
 void enqueueSdSystemLog(const LogEntry& entry);
 void beginSdSystemLog(const Configuration& configuration,const ActuatorRuntime& actuators,const RecentLogStore& recent,ILogger& logger,ILogTimeProvider& clock);
 void serviceSdSystemLog(const Configuration& configuration,const ActuatorRuntime& actuators,ILogger& logger);

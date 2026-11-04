@@ -2,6 +2,7 @@
 #include <unity.h>
 #include "SdSystemLog.h"
 #include "SdStorageArbiter.h"
+#include "SdMountLifecycle.h"
 #include <cstring>
 #include <string>
 #include <vector>
@@ -112,8 +113,67 @@ void test_arbiter_is_exclusive_and_releases_only_owned_lease() {
     next.release(); // Explicit completion and later destruction must not unlock another owner.
     SdStorageLease blockedAgain;TEST_ASSERT_FALSE(static_cast<bool>(blockedAgain));
 }
+class MountDevice : public ISdMountDevice {
+public:
+    unsigned mounts=0,unmounts=0;bool success=true;
+    bool mount() override {++mounts;return success;}
+    void unmount() override {++unmounts;}
+};
+void test_automount_debounces_and_keeps_one_mount_for_all_accesses() {
+    MountDevice device;SdMountLifecycle lifecycle;
+    lifecycle.service(device,true,true,false,true,0);
+    lifecycle.service(device,true,true,false,true,299);TEST_ASSERT_EQUAL_UINT(0,device.mounts);
+    lifecycle.service(device,true,true,false,true,300);TEST_ASSERT_TRUE(lifecycle.mounted());
+    for(unsigned t=301;t<100000;++t)lifecycle.service(device,true,true,false,true,t);
+    TEST_ASSERT_EQUAL_UINT(1,device.mounts);TEST_ASSERT_EQUAL_UINT(0,device.unmounts);
+}
+void test_eject_waits_for_drain_and_stays_unmounted_until_reinserted() {
+    MountDevice device;SdMountLifecycle lifecycle;
+    lifecycle.service(device,true,true,false,true,0);lifecycle.service(device,true,true,false,true,300);
+    lifecycle.service(device,true,true,true,false,500);
+    TEST_ASSERT_TRUE(lifecycle.state()==SdMountState::Ejecting);TEST_ASSERT_TRUE(lifecycle.mounted());
+    lifecycle.service(device,true,true,true,false,40000);TEST_ASSERT_EQUAL_UINT(0,device.unmounts);
+    lifecycle.service(device,true,true,true,true,40001);TEST_ASSERT_FALSE(lifecycle.mounted());
+    TEST_ASSERT_TRUE(lifecycle.state()==SdMountState::Ejected);TEST_ASSERT_EQUAL_UINT(1,device.unmounts);
+    lifecycle.service(device,true,true,false,true,90000);TEST_ASSERT_EQUAL_UINT(1,device.mounts);
+    lifecycle.service(device,true,false,false,true,91000);
+    lifecycle.service(device,true,true,false,true,92000);lifecycle.service(device,true,true,false,true,92300);
+    TEST_ASSERT_EQUAL_UINT(2,device.mounts);TEST_ASSERT_TRUE(lifecycle.mounted());
+}
+void test_eject_does_not_unmount_a_failed_pending_batch() {
+    MountDevice device;SdMountLifecycle lifecycle;SdLogBatch batch;Storage storage;
+    lifecycle.service(device,true,true,false,true,0);lifecycle.service(device,true,true,false,true,300);
+    LogEntry entry;strcpy(entry.message,"final record");TEST_ASSERT_TRUE(batch.add(entry,400));
+    storage.result=SdLogWriteResult::Failed;batch.flush(storage,500,true);
+    lifecycle.service(device,true,true,true,batch.bytes()==0,500);
+    TEST_ASSERT_TRUE(lifecycle.mounted());TEST_ASSERT_TRUE(lifecycle.state()==SdMountState::Ejecting);
+    storage.result=SdLogWriteResult::Written;batch.flush(storage,30500,true);
+    lifecycle.service(device,true,true,true,batch.bytes()==0,30500);
+    TEST_ASSERT_TRUE(lifecycle.state()==SdMountState::Ejected);TEST_ASSERT_EQUAL_UINT(1,device.unmounts);
+    TEST_ASSERT_NOT_NULL(strstr(storage.data.c_str(),"final record"));
+}
+void test_removed_card_invalidates_mount_and_failed_mounts_back_off_across_wrap() {
+    MountDevice device;SdMountLifecycle lifecycle;
+    lifecycle.service(device,true,true,false,true,0);lifecycle.service(device,true,true,false,true,300);
+    lifecycle.service(device,true,false,false,false,400);TEST_ASSERT_FALSE(lifecycle.mounted());
+    TEST_ASSERT_EQUAL_UINT(1,lifecycle.generation());TEST_ASSERT_EQUAL_UINT(1,device.unmounts);
+    device.success=false;
+    const uint32_t start=0xFFFFFF00U;
+    lifecycle.service(device,true,true,false,true,start);
+    lifecycle.service(device,true,true,false,true,start+300);TEST_ASSERT_EQUAL_UINT(2,device.mounts);
+    TEST_ASSERT_TRUE(lifecycle.state()==SdMountState::MountFailed);
+    lifecycle.service(device,true,true,false,true,start+30299);TEST_ASSERT_EQUAL_UINT(2,device.mounts);
+    device.success=true;lifecycle.service(device,true,true,false,true,start+30300);
+    TEST_ASSERT_EQUAL_UINT(3,device.mounts);TEST_ASSERT_TRUE(lifecycle.mounted());
+    lifecycle.service(device,false,true,false,true,start+30400);TEST_ASSERT_FALSE(lifecycle.mounted());
+}
+
 }
 int main(){UNITY_BEGIN();
+RUN_TEST(test_automount_debounces_and_keeps_one_mount_for_all_accesses);
+RUN_TEST(test_eject_waits_for_drain_and_stays_unmounted_until_reinserted);
+RUN_TEST(test_eject_does_not_unmount_a_failed_pending_batch);
+RUN_TEST(test_removed_card_invalidates_mount_and_failed_mounts_back_off_across_wrap);
 RUN_TEST(test_queue_overflow_retains_order_and_counts_loss);
 RUN_TEST(test_jsonl_preserves_time_and_escapes_controls);
 RUN_TEST(test_batch_flushes_after_five_seconds_and_handles_clock_wrap);

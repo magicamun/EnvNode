@@ -92,4 +92,19 @@ void test_system_producer_uses_public_recorder_and_respects_availability_and_int
     TEST_ASSERT_EQUAL(DiagnosticRecordResult::Accepted,recordDiagnosticTest());TEST_ASSERT_TRUE(r.pop(record));TEST_ASSERT_EQUAL_STRING("recorder_test",record.event.name());
     installDiagnosticRecorder(nullptr);serviceSystemDiagnostics();
 }
-int main(){UNITY_BEGIN();RUN_TEST(test_system_producer_uses_public_recorder_and_respects_availability_and_interval);RUN_TEST(test_maximum_escaped_event_fits_writer_line_bound);RUN_TEST(test_diagnostic_json_uses_shared_batch_retry_and_checkbox_retains_disabled_choice);RUN_TEST(test_concurrent_producers_and_consumer_preserve_every_accepted_record);RUN_TEST(test_no_storage_is_noop_and_source_policy_is_explicit);RUN_TEST(test_queue_is_bounded_and_keeps_time_source_and_order);RUN_TEST(test_disabled_sources_and_configuration_generations_do_not_leak_pending_records);RUN_TEST(test_invalid_records_are_rejected_without_consuming_queue);RUN_TEST(test_json_is_typed_escaped_and_bounded);return UNITY_END();}
+void test_stopping_admission_preserves_accepted_records_for_eject_drain() {
+    Clock clock;BufferedDiagnosticRecorder recorder(clock);
+    recorder.setAvailable(true);recorder.setMask(DiagnosticSourceKind::Sensor,1);
+    DiagnosticSource source(DiagnosticSourceKind::Sensor,1);DiagnosticEvent event("rain_window");
+    event.integer("revision",1);
+    TEST_ASSERT_EQUAL(DiagnosticRecordResult::Accepted,recorder.record(source,event));
+    recorder.setAvailable(false);TEST_ASSERT_FALSE(recorder.enabled(source));
+    TEST_ASSERT_EQUAL(DiagnosticRecordResult::Unavailable,recorder.record(source,event));
+    TEST_ASSERT_FALSE(recorder.empty());DiagnosticRecord record;
+    TEST_ASSERT_TRUE(recorder.pop(record));TEST_ASSERT_EQUAL_UINT(1,record.sequence);
+    TEST_ASSERT_TRUE(recorder.empty());
+    recorder.setAvailable(true);recorder.record(source,event);
+    TEST_ASSERT_TRUE(recorder.discardPending());TEST_ASSERT_TRUE(recorder.empty());
+    TEST_ASSERT_EQUAL_UINT(1,recorder.stats().stale);
+}
+int main(){UNITY_BEGIN();RUN_TEST(test_stopping_admission_preserves_accepted_records_for_eject_drain);RUN_TEST(test_system_producer_uses_public_recorder_and_respects_availability_and_interval);RUN_TEST(test_maximum_escaped_event_fits_writer_line_bound);RUN_TEST(test_diagnostic_json_uses_shared_batch_retry_and_checkbox_retains_disabled_choice);RUN_TEST(test_concurrent_producers_and_consumer_preserve_every_accepted_record);RUN_TEST(test_no_storage_is_noop_and_source_policy_is_explicit);RUN_TEST(test_queue_is_bounded_and_keeps_time_source_and_order);RUN_TEST(test_disabled_sources_and_configuration_generations_do_not_leak_pending_records);RUN_TEST(test_invalid_records_are_rejected_without_consuming_queue);RUN_TEST(test_json_is_typed_escaped_and_bounded);return UNITY_END();}

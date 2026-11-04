@@ -2,6 +2,7 @@
 #include "SdCardSpiDiagnostic.h"
 #include "SdCardDiagnostic.h"
 #include "SdStorageArbiter.h"
+#include "SdMountLifecycle.h"
 #include "FirmwareBuildInfo.h"
 #include "SdSystemLogService.h"
 #include "SdCardMountPath.h"
@@ -84,29 +85,46 @@ private:
     }
     int fd_ = -1;
 };
-class SpiDiagnosticDevice : public ISdCardDiagnosticDevice {
+SPIClass mountedSpi(VSPI);
+const BoardModuleSlotCapability* mountedSlot=nullptr;
+class SharedSdMountDevice : public ISdMountDevice {
 public:
-    explicit SpiDiagnosticDevice(const BoardModuleSlotCapability& slot,const char* operation="sd-access")
-        : slot_(slot), spi_(VSPI),operation_(operation) {}
-    bool cardDetected() override {
-        // External 10k pull-up to 3V3 as on the SD module; internal pull-up is a fallback.
-        pinMode(slot_.auxGpio1.number, INPUT_PULLUP);
-        delay(5);
-        return digitalRead(slot_.auxGpio1.number) == HIGH;
-    }
+    const BoardModuleSlotCapability* slot=nullptr;
     bool mount() override {
-        digitalWrite(slot_.spiChipSelect.number, HIGH);
-        pinMode(slot_.spiChipSelect.number, OUTPUT);
-        spi_.begin(clockPin(), misoPin(), mosiPin(), slot_.spiChipSelect.number);
+        auto& spi_=mountedSpi;
+        digitalWrite(slot->spiChipSelect.number, HIGH);
+        pinMode(slot->spiChipSelect.number, OUTPUT);
+        spi_.begin(clockPin(), misoPin(), mosiPin(), slot->spiChipSelect.number);
         // Last argument MUST remain false: never format a card during diagnostics.
         const uint32_t started=millis(),heap=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT),largest=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
-        const bool mounted=SD.begin(slot_.spiChipSelect.number, spi_, DiagnosticClockHz, SdCardMountPath, SdCardOpenFileLimit, false);
+        const bool mounted=SD.begin(slot->spiChipSelect.number, spi_, DiagnosticClockHz, SdCardMountPath, SdCardOpenFileLimit, false);
         if(!mounted) log_w("SD mount failed: operation=%s elapsed_ms=%lu heap8_before=%lu largest8_before=%lu heap8_after=%lu largest8_after=%lu fatfs_bytes=%u fil_bytes=%u max_files=%u",
-            operation_,static_cast<unsigned long>(millis()-started),static_cast<unsigned long>(heap),
+            "automount",static_cast<unsigned long>(millis()-started),static_cast<unsigned long>(heap),
             static_cast<unsigned long>(largest),static_cast<unsigned long>(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
             static_cast<unsigned long>(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),static_cast<unsigned>(sizeof(FATFS)),
             static_cast<unsigned>(sizeof(FIL)),static_cast<unsigned>(SdCardOpenFileLimit));
         return mounted;
+    }
+    void unmount() override {
+        SD.end(); mountedSpi.end();
+        if(slot) digitalWrite(slot->spiChipSelect.number,HIGH);
+    }
+};
+SharedSdMountDevice mountDevice;
+SdMountLifecycle mountLifecycle;
+std::atomic<unsigned> mountConfiguration{0}; // bit 0 enabled, bit 1 slot B
+std::atomic<SdMountState> mountState{SdMountState::Disabled};
+std::atomic<bool> ejectRequested{false};
+std::atomic<uint32_t> mediaGeneration{0};
+class SpiDiagnosticDevice : public ISdCardDiagnosticDevice {
+public:
+    explicit SpiDiagnosticDevice(const BoardModuleSlotCapability& slot,const char* ="sd-access") : slot_(slot) {}
+    bool cardDetected() override {
+        return digitalRead(slot_.auxGpio1.number)==HIGH;
+    }
+    bool mount() override {
+        return mountLifecycle.mounted() && mountedSlot && mountedSlot->spiChipSelect.number==slot_.spiChipSelect.number
+            && cardDetected();
     }
     SdCardDiagnosticInfo information() override {
         SdCardDiagnosticInfo info;
@@ -149,22 +167,16 @@ public:
         PosixSdTestFile file;
         return runSdWriteReadTest(file, logger);
     }
-    void release() override {
-        SD.end();
-        spi_.end();
-        digitalWrite(slot_.spiChipSelect.number, HIGH);
-    }
+    void release() override {} // The shared lifecycle owns the mount and SPI bus.
 private:
     const BoardModuleSlotCapability& slot_;
-    SPIClass spi_;
-    const char* operation_;
 };
 }
 void runSdCardSpiDiagnostic(ModuleSlot slotId, const BoardProfile& board,
     const Configuration& configuration, const AutomaticActuatorDefinition* automaticActuators,
     size_t automaticCount, ILogger& logger) {
     SdStorageLease lease;
-    if(!lease || !sdRuntimeStable() || !configuration.sdStorage.enabled || slotId!=configuration.sdStorage.slot) {
+    if(!lease || !sdCardAcceptingAccess() || !sdRuntimeStable() || !configuration.sdStorage.enabled || slotId!=configuration.sdStorage.slot) {
         logger.warn("SD diagnostic: storage disabled or busy; skipped");return;
     }
     const BoardModuleSlotCapability* slot = boardModuleSlot(board, slotId);
@@ -202,7 +214,7 @@ namespace {
 const BoardModuleSlotCapability* sdFileSlot(ModuleSlot slotId, const BoardProfile& board,
     const Configuration& configuration, const ActuatorRuntime& actuators, SdDirectoryStatus& status) {
     if(!configuration.sdStorage.enabled) {status=SdDirectoryStatus::Disabled;return nullptr;}
-    if(!sdRuntimeStable()) {status=SdDirectoryStatus::Busy;return nullptr;}
+    if(!sdRuntimeStable() || !sdCardAcceptingAccess()) {status=SdDirectoryStatus::Busy;return nullptr;}
     if(slotId!=configuration.sdStorage.slot) {status=SdDirectoryStatus::Conflict;return nullptr;}
     const auto* slot = boardModuleSlot(board, slotId);
     if (!slot || !slot->fiveVoltSupplyAvailable) { status=SdDirectoryStatus::Conflict; return nullptr; }
@@ -329,9 +341,10 @@ namespace {
 // No file handles are open while f_mkfs invalidates/recreates the entire volume.
 class Fat32FormatDevice : public ISdFormatDevice {
 public:
-    explicit Fat32FormatDevice(const BoardModuleSlotCapability& slot) : slot_(slot),spi_(VSPI) {}
+    explicit Fat32FormatDevice(const BoardModuleSlotCapability& slot) : slot_(slot) {}
     ~Fat32FormatDevice() override {release();}
     bool inspect(SdFileStamp& card) override {
+        mountLifecycle.invalidate(mountDevice);
         pinMode(slot_.auxGpio1.number,INPUT_PULLUP);
         if(digitalRead(slot_.auxGpio1.number)!=HIGH) {error_=100;return false;}
         digitalWrite(slot_.spiChipSelect.number,HIGH);pinMode(slot_.spiChipSelect.number,OUTPUT);
@@ -359,6 +372,8 @@ public:
         return true;
     }
     bool verify() override {
+        // Raw formatter released its drive before a fresh shared mount.
+        if(!mountLifecycle.remountAfterMaintenance(mountDevice,millis())) {error_=105;return false;}
         SpiDiagnosticDevice device(slot_);
         if(!device.cardDetected()) {error_=100;return false;}
         if(!device.mount()) {device.release();error_=105;return false;}
@@ -392,10 +407,12 @@ public:
     int error() const {return error_;}
 private:
     void release() {
-        if(drive_!=0xFF) {sdcard_unmount(drive_);sdcard_uninit(drive_);drive_=0xFF;}
-        spi_.end();digitalWrite(slot_.spiChipSelect.number,HIGH);
+        if(drive_!=0xFF) {
+            sdcard_unmount(drive_);sdcard_uninit(drive_);drive_=0xFF;
+            spi_.end();digitalWrite(slot_.spiChipSelect.number,HIGH);
+        }
     }
-    BoardModuleSlotCapability slot_;SPIClass spi_;uint8_t drive_=0xFF;int error_=0;
+    BoardModuleSlotCapability slot_;SPIClass& spi_=mountedSpi;uint8_t drive_=0xFF;int error_=0;
 };
 class Fat32FormatJob : public ISdFormatJob {
 public:
@@ -417,6 +434,7 @@ private:
             result=runSdCardFormat(device,self->expected_);
             self->error_=device.error();
         }
+        self->lease_.release();
         self->state_.store(result,std::memory_order_release);
         vTaskDelete(nullptr); // No access to self after publishing completion.
     }
@@ -618,7 +636,7 @@ public:
     }
 private:
     SdLogWriteResult appendUnderLease(const char* data,size_t size) {
-        if(!sdRuntimeStable()) return SdLogWriteResult::Busy;
+        if(!sdRuntimeStable() || !mountLifecycle.mounted()) return SdLogWriteResult::Busy;
         const auto* slot=boardModuleSlot(currentBoardProfile(),slot_);
         if(!slot || !slot->fiveVoltSupplyAvailable || size==0 || size>4096) return SdLogWriteResult::Failed;
         // Isolated diagnostics already own the lease and a single outer mount.
@@ -864,8 +882,50 @@ std::unique_ptr<ISdRotationTestJob> startSdRotationTest(ModuleSlot slotId,const 
     if(!job->start()) {status=SdDirectoryStatus::ReadFailed;return {};}
     status=SdDirectoryStatus::Ready;return std::unique_ptr<ISdRotationTestJob>(job.release());
 }
+void configureSdCardMount(bool enabled,ModuleSlot slot) {
+    mountConfiguration.store((enabled?1U:0U)|(slot==ModuleSlot::B?2U:0U));
+}
+bool sdCardEjectRequested() {return ejectRequested.load();}
+bool sdCardAcceptingAccess() {return !ejectRequested.load() && mountState.load()==SdMountState::Mounted;}
+void requestSdCardEject() {ejectRequested.store(true);}
+uint32_t sdCardMediaGeneration() {return mediaGeneration.load();}
+void serviceSdCardMount(bool drained) {
+    const unsigned config=mountConfiguration.load();
+    const auto* slot=boardModuleSlot(currentBoardProfile(),(config&2)?ModuleSlot::B:ModuleSlot::A);
+    bool present=false;
+    if(slot && (config&1)) {pinMode(slot->auxGpio1.number,INPUT_PULLUP);present=digitalRead(slot->auxGpio1.number)==HIGH;}
+    static bool removalPending=false;
+    if(!present) removalPending=true;
+    SdStorageLease lease;
+    if(!lease) return; // sample removal even while a download owns the lease
+    if(mountedSlot!=slot) {
+        mountLifecycle.service(mountDevice,false,false,false,true,millis());
+        mountedSlot=slot;mountDevice.slot=slot;
+    }
+    if(removalPending) {
+        mountLifecycle.service(mountDevice,(config&1)&&slot,false,false,true,millis());
+        removalPending=false;ejectRequested.store(false);
+    }
+    mountLifecycle.service(mountDevice,(config&1)&&slot,present,ejectRequested.load(),drained,millis());
+    if(!present || !(config&1)) ejectRequested.store(false);
+    mountState.store(mountLifecycle.state());mediaGeneration.store(mountLifecycle.generation());
+    if(mountLifecycle.state()==SdMountState::NoCard) {
+        activeSdLogPath[0]=activeSdDiagnosticPath[0]=0;rotateSdLog=rotateSdDiagnostics=true;
+    }
+}
+const char* sdCardMountStatus(bool german) {
+    switch(mountState.load()) {
+        case SdMountState::Disabled:return german?"deaktiviert":"disabled";
+        case SdMountState::NoCard:return german?"keine Karte":"no card";
+        case SdMountState::Waiting:return german?"Einbinden ausstehend":"mount pending";
+        case SdMountState::Mounted:return german?"eingebunden":"mounted";
+        case SdMountState::Ejecting:return german?"Auswerfen: Puffer werden geschrieben; Karte nicht entfernen":"ejecting: draining buffers; do not remove";
+        case SdMountState::Ejected:return german?"ausgeworfen / Karte kann entfernt werden":"unmounted / safe to remove";
+        default:return german?"Einbinden fehlgeschlagen / Wiederholung nach 30 Sekunden":"mount failed / retry in 30 seconds";
+    }
+}
 bool sdDiagnosticCardPresent(const Configuration& configuration) {
-    if(!configuration.sdStorage.enabled || !sdRuntimeStable()) return false;
+    if(!configuration.sdStorage.enabled || !sdRuntimeStable() || !sdCardAcceptingAccess()) return false;
     const auto* slot=boardModuleSlot(currentBoardProfile(),configuration.sdStorage.slot);
     if(!slot) return false;
     pinMode(slot->auxGpio1.number,INPUT_PULLUP);

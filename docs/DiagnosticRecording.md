@@ -194,3 +194,26 @@ The existing 32 MiB diagnostic rotation budget remains in force; this is not a
 promise of days/weeks of complete retention. Enable sensor and controller
 recording together for raw-window/decision correlation, and download parts
 before rotation removes them. No automatic mount/eject change is included.
+
+## Persistent mount and safe eject — 2026-11-04
+
+The shared SD worker mounts automatically after startup/card insertion (300 ms
+insertion debounce). SPI and FAT remain mounted between recording batches and web
+operations. All accesses retain the existing exclusive nonblocking storage lease;
+normal clients only borrow the mount. A failed mount is cleaned up and retried
+at most once per 30 seconds. No automatic formatting is performed.
+
+The SD page's **Eject SD card** button stops admission of new system/diagnostic
+records and new web accesses. The worker drains accepted records and batches,
+including fsync/close, and waits for existing downloads/directory/format jobs to
+release their lease before unmounting. Refresh the page and wait for **unmounted /
+safe to remove** before removing the card. A write error retains the pending batch
+and prevents a successful eject indication; it is not silently discarded. Eject
+is a runtime state, not a saved configuration change. Reinsert the card to resume.
+The 250-ms RainDetector recording rate is unchanged.
+
+Unexpected card removal invalidates the mount after the current lease is released.
+Queued data from that mount are discarded rather than replayed onto another card;
+diagnostic queue discards count as stale. Reinsertion debounces and mounts afresh.
+Formatting is an explicit exclusive maintenance operation: it detaches the shared
+mount, uses the raw formatter, then creates a fresh shared mount for verification.

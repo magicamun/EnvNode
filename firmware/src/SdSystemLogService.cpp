@@ -25,7 +25,7 @@ struct RecordingService {
     unsigned diagnosticMode=0;uint32_t diagnosticGeneration=0,lastDropped=0;
     std::atomic<unsigned> diagnosticStatus{0};
     std::atomic<uint32_t> stackFreeBytes{0};
-    void serviceDiagnostics(unsigned mode) {
+    void serviceDiagnostics(unsigned mode,bool draining=false) {
         const uint32_t generation=diagnostics.generation();
         if(diagnosticMode!=(mode&6) || diagnosticGeneration!=generation) {
             diagnosticStorage.reset();diagnosticBatch.clear();hasPendingDiagnostic=false;
@@ -51,7 +51,7 @@ struct RecordingService {
         }
         // A settings change may revoke a source while the worker was encoding it.
         if(diagnostics.generation()!=generation){diagnosticBatch.clear();hasPendingDiagnostic=false;return;}
-        const auto result=diagnosticBatch.flush(*diagnosticStorage,now,force);
+        const auto result=diagnosticBatch.flush(*diagnosticStorage,now,force||draining);
         if(result==SdLogWriteResult::Written)diagnosticStatus.store(2);
         else if(result==SdLogWriteResult::Failed)diagnosticStatus.store(3);
     }
@@ -71,9 +71,19 @@ struct RecordingService {
         auto& self=*static_cast<RecordingService*>(context);
         unsigned previous=self.mode.load();
         std::unique_ptr<ISdLogStorage> storage;
-        LogEntry pending;bool hasPending=false;uint32_t lost=0,lastStackProbe=0;
+        LogEntry pending;bool hasPending=false;uint32_t lost=0,lastStackProbe=0,mediaGeneration=0;
         for(;;) {
+            serviceSdCardMount(false);
             const unsigned mode=self.mode.load();
+            const uint32_t generation=sdCardMediaGeneration();
+            if(generation!=mediaGeneration) {
+                // Never carry data from a removed/changed medium onto the next one.
+                if(!self.diagnostics.discardPending()) {vTaskDelay(pdMS_TO_TICKS(20));continue;}
+                storage.reset();self.diagnosticStorage.reset();self.batch.clear();self.diagnosticBatch.clear();
+                self.clearQueue();hasPending=self.hasPendingDiagnostic=false;lost=0;
+                mediaGeneration=generation;
+            }
+            const bool draining=sdCardEjectRequested();
             if((mode&3)!=(previous&3)) {
                 storage.reset();self.batch.clear();self.clearQueue();hasPending=false;lost=0;previous=mode;
                 if(mode&1) {
@@ -95,12 +105,17 @@ struct RecordingService {
                         if(!self.batch.add(pending,now)) {force=true;break;}
                         hasPending=false;
                     }
-                    const auto result=self.batch.flush(*storage,now,force);
+                    const auto result=self.batch.flush(*storage,now,force||draining);
                     if(result==SdLogWriteResult::Written) self.status.store(2);
                     else if(result==SdLogWriteResult::Failed) self.status.store(3);
                 }
             } else self.status.store(0);
-            self.serviceDiagnostics(mode);
+            self.serviceDiagnostics(mode,draining);
+            bool emptyQueue;
+            portENTER_CRITICAL(&self.mux);emptyQueue=self.queue.count()==0;portEXIT_CRITICAL(&self.mux);
+            const bool drained=emptyQueue && !hasPending && !lost && !self.batch.bytes()
+                && self.diagnostics.empty() && !self.hasPendingDiagnostic && !self.diagnosticBatch.bytes();
+            serviceSdCardMount(drained);
             if(millis()-lastStackProbe>=1000){self.stackFreeBytes.store(uxTaskGetStackHighWaterMark(nullptr));lastStackProbe=millis();}
             vTaskDelay(pdMS_TO_TICKS(20));
         }
@@ -109,9 +124,14 @@ struct RecordingService {
 RecordingService* recording=nullptr;
 unsigned lastReported=0;
 }
+void ejectSdCardRecording() {
+    // Close diagnostic admission before publishing the drain request to the worker.
+    if(recording) recording->diagnostics.setAvailable(false);
+    requestSdCardEject();
+}
 void enqueueSdSystemLog(const LogEntry& entry) {
-    if(!recording || !(recording->mode.load()&1)) return;
-    portENTER_CRITICAL(&recording->mux);recording->queue.push(entry);portEXIT_CRITICAL(&recording->mux);
+    if(!recording || !(recording->mode.load()&1) || sdCardEjectRequested()) return;
+    portENTER_CRITICAL(&recording->mux);if(!sdCardEjectRequested())recording->queue.push(entry);portEXIT_CRITICAL(&recording->mux);
 }
 bool sdSystemLogSlotEnabled(ModuleSlot slot) {
     if(!recording) return false;
@@ -122,6 +142,7 @@ void configureSdSystemLog(const Configuration& configuration,const ActuatorRunti
     if(!recording) return;
     const bool access=recording->session && configuration.sdStorage.enabled
         && sdStoragePinsAvailable(configuration,actuators) && sdRuntimeStable();
+    configureSdCardMount(access,configuration.sdStorage.slot);
     recording->diagnostics.setAvailable(access && sdDiagnosticCardPresent(configuration));
     uint32_t sensors=0,actors=0,controllers=0;
     static_assert(MaxSensorSlotCount<=32 && MaxActuatorSlotCount<=32 && MaxControllerSlotCount<=32,"diagnostic source mask capacity");
@@ -166,6 +187,9 @@ void beginSdSystemLog(const Configuration& configuration,const ActuatorRuntime& 
 void serviceSdSystemLog(const Configuration& configuration,const ActuatorRuntime& actuators,ILogger& logger) {
     configureSdSystemLog(configuration,actuators);
     if(!recording) return;
+    static const char* lastMountStatus=nullptr;
+    const char* mountStatus=sdCardMountStatus();
+    if(mountStatus!=lastMountStatus) {logger.infof("SD card: %s",mountStatus);lastMountStatus=mountStatus;}
     static unsigned lastDiagnosticStatus=0;
     const unsigned diagnosticStatus=recording->diagnosticStatus.load();
     if(diagnosticStatus!=lastDiagnosticStatus) {
@@ -192,7 +216,7 @@ String sdSystemLogStatus() {
     portENTER_CRITICAL(&recording->mux);queued=recording->queue.count();dropped=recording->queue.dropped();portEXIT_CRITICAL(&recording->mux);
     const char* states[]={"disabled","waiting","recording","write error / retry"};
     const unsigned status=recording->status.load();
-    return String(status<4 ? states[status] : "unknown")+" · queue="+String(static_cast<unsigned>(queued))+"/28 · dropped="+String(dropped);
+    return String(sdCardEjectRequested()?"paused (card eject)":status<4 ? states[status] : "unknown")+" · queue="+String(static_cast<unsigned>(queued))+"/28 · dropped="+String(dropped);
 }
 bool sdDiagnosticSlotEnabled(ModuleSlot slot) {
     if(!recording)return false;const unsigned mode=recording->mode.load();
@@ -202,7 +226,7 @@ bool extendedDiagnosticsAvailable(){return recording && recording->diagnostics.a
 String extendedDiagnosticsStatus(){
     if(!recording)return "unavailable";const auto s=recording->diagnostics.stats();
     const char* states[]={"disabled","waiting","recording","write error / retry"};const unsigned status=recording->diagnosticStatus.load();
-    return String(status<4?states[status]:"unknown")+" · queued="+String(static_cast<unsigned>(s.queued))+"/8 · accepted="+String(s.accepted)+" · full="+String(s.full)+" · busy="+String(s.busy)+" · unavailable="+String(s.unavailable)+" · invalid="+String(s.invalid)+" · stale="+String(s.stale)+" · writer_stack_min_bytes="+String(recording->stackFreeBytes.load());
+    return String(sdCardEjectRequested()?"paused (card eject)":status<4?states[status]:"unknown")+" · queued="+String(static_cast<unsigned>(s.queued))+"/8 · accepted="+String(s.accepted)+" · full="+String(s.full)+" · busy="+String(s.busy)+" · unavailable="+String(s.unavailable)+" · invalid="+String(s.invalid)+" · stale="+String(s.stale)+" · writer_stack_min_bytes="+String(recording->stackFreeBytes.load());
 }
 
 
