@@ -33,6 +33,10 @@ void HardwareProvisioningWebRoutes::handleProfileState(){
     if(!operationAllowed())return;
     server_.send(200,"application/json","{\"available\":true}");
 }
+void HardwareProvisioningWebRoutes::handleDialogScript() {
+    if(!pages_.sendStaticContent("application/javascript; charset=utf-8",ProvisioningDialogScript))
+        server_.send(503,"text/plain","Static content unavailable");
+}
 String HardwareProvisioningWebRoutes::remoteProfilesSection(){
     const bool de=pages_.webLocale()==Locale::GermanGermany;
     String c="<section class='card' id='remote-hardware-profiles' data-de='";
@@ -81,13 +85,14 @@ String HardwareProvisioningWebRoutes::remoteProfilesSection(){
     c+="<label class='choice'><input type='checkbox' name='confirmRemoteProvisioning' id='remote-profile-confirm' value='1' required>";
     c+=de?"Ich bestätige das Schreiben des ausgewählten Profils ins EEPROM.":"I confirm writing the selected profile to EEPROM.";
     c+="</label><button type='submit' id='remote-profile-submit'>";c+=de?"Provisionieren":"Provision";
-    c+="</button></form></section><script>";c+=ProvisioningDialogScript;c+="</script>";
+    c+="</button></form></section><script src='/provisioning-dialog.js'></script>";
     if(!remoteProfilesEnabled_)return c;
     c+="<script async crossorigin='anonymous' src='";
     c+=BrowserHardwareProfilesUrl;c+="' integrity='";c+=BrowserHardwareProfilesIntegrity;
     c+="' onerror=\"document.getElementById('remote-profile-status').textContent='";
     c+=de?"Browsercode nicht geladen. Eingebaute Profile bleiben verfügbar.":"Browser code unavailable. Built-in profiles remain available.";
-    return c+"'\"></script>";
+    c+="'\"></script>";
+    return c;
 }
 void HardwareProvisioningWebRoutes::handleRemoteProfileWrite(){
     if(!operationAllowed()||!remoteProfilesEnabled_)return;

@@ -72,8 +72,11 @@ String TestBoardWeb::renderPageHeader(const char* title, const char* active, boo
 }
 void TestBoardWeb::sendPage(const char* title, const char* active, const String& content,
     int status, bool wide) {
+    sendPage(title,active,String(content),status,wide);
+}
+void TestBoardWeb::sendPage(const char* title,const char* active,String&& content,int status,bool wide) {
     host_.sendPage([this, title, active, wide]() { return renderPageHeader(title, active, wide); },
-        content, status, text(TextId::AdministrationUnavailableWhileNetworkIsConnecting),
+        std::move(content), status, text(TextId::AdministrationUnavailableWhileNetworkIsConnecting),
         text(TextId::PageRenderingFailedPleaseRetry));
 }
 void TestBoardWeb::home() {

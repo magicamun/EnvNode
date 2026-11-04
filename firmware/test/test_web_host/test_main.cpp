@@ -3,6 +3,7 @@
 #include "WebHost.h"
 #include "WebPageFrame.h"
 #include "WebStyle.h"
+#include "IWebPagePresenter.h"
 #include <string>
 #include <deque>
 #include "HttpClientGate.h"
@@ -333,8 +334,32 @@ void test_disconnected_waiting_client_releases_capacity() {
     next.state->bytes="GET /";TEST_ASSERT_TRUE(gate.poll(server,selected,2));
     TEST_ASSERT_TRUE(selected.state==next.state);TEST_ASSERT_EQUAL_UINT(0,gate.evicted());
 }
+void test_static_flash_asset_uses_deferred_pump_without_html_wrapper() {
+    TestWiFi wifi;wifi.online=true;TestLogger logger;WebHost host(logger,wifi);
+    const std::string script(12000,'x');host.server().clientState.state->blocked=true;
+    host.sendStaticContent("application/javascript",script.c_str());host.loop();
+    TEST_ASSERT_TRUE(host.server().clientState.state->sent.empty());
+    TEST_ASSERT_EQUAL_STRING("no-cache",host.server().cacheControl.c_str());
+    host.server().clientState.state->blocked=false;finishPage(host);
+    TEST_ASSERT_EQUAL_STRING(script.c_str(),responseBody(host).c_str());
+    TEST_ASSERT_EQUAL_UINT(script.size(),host.server().declaredLength);
+}
+void test_presenter_dispatches_owned_pages_without_const_reference_copy() {
+    struct OwnedPages : IWebPagePresenter {
+        String owned;unsigned copies=0,moves=0;
+        Locale webLocale() const override {return Locale::EnglishUnitedKingdom;}
+        void sendPage(const char*,const char*,const String& value,int,bool) override {++copies;owned=value;}
+        void sendPage(const char*,const char*,String&& value,int,bool) override {++moves;owned=std::move(value);}
+    } pages;
+    String body;for(unsigned i=0;i<10000;++i)body+='x';const char* original=body.c_str();
+    IWebPagePresenter& presenter=pages;presenter.sendPage("title","/",std::move(body));
+    TEST_ASSERT_EQUAL_UINT(1,pages.moves);TEST_ASSERT_EQUAL_UINT(0,pages.copies);
+    TEST_ASSERT_TRUE(original==pages.owned.c_str());
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_static_flash_asset_uses_deferred_pump_without_html_wrapper);
+    RUN_TEST(test_presenter_dispatches_owned_pages_without_const_reference_copy);
     RUN_TEST(test_empty_connection_does_not_hold_up_ready_request_and_can_be_used_later);
     RUN_TEST(test_full_idle_pool_evicts_oldest_but_next_ready_client_does_not_wait);
     RUN_TEST(test_pending_ready_clients_are_served_before_new_arrivals_without_losing_bytes);

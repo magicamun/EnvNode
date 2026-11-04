@@ -22,7 +22,8 @@ struct Logger : ILogger {
 };
 struct Pages : IWebPagePresenter {
     Locale locale=Locale::EnglishUnitedKingdom;
-    int status=0; String content,title;
+    int status=0; String content,title;const char* asset=nullptr;
+    bool sendStaticContent(const char*,const char* bytes) override {asset=bytes;return true;}
     Locale webLocale() const override {return locale;}
     void sendPage(const char* t,const char*,const String& c,int s,bool) override {title=t;content=c;status=s;}
 };
@@ -69,15 +70,20 @@ struct Fixture {
     void moduleForm(bool confirmed=true){server.arguments={{"descriptorModuleSlot","B"},{"descriptorTemplate","duo-relay-0.3"},{"descriptorSerialNumber","RELAY-1"},{"descriptorProductionBatch","batch-2"},{"descriptorProductionDate","2026-10-25"}};if(confirmed)server.arguments["confirmModuleDescriptorProvisioning"]="1";}
 };
 void test_hardware_page_preserves_forms_and_application_inventory() {
-    Fixture f;TEST_ASSERT_EQUAL(6,f.server.routes.size());
+    Fixture f;TEST_ASSERT_EQUAL(7,f.server.routes.size());
     TEST_ASSERT_TRUE(f.server.request("/hardware",HTTP_GET));
     TEST_ASSERT_EQUAL(200,f.pages.status);
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"application inventory"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"Mini &lt;test&gt; 0.8"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"/hardware/board-identity/write"));
-    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"/hardware/module-descriptor/write"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"confirmRemoteProvisioning"));
     TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"provision-current-fields"));
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"src='/provisioning-dialog.js'"));
+    TEST_ASSERT_NULL(strstr(f.pages.content.c_str(),"function renderCurrent"));
+    TEST_ASSERT_TRUE(f.server.request("/provisioning-dialog.js",HTTP_GET));
+    TEST_ASSERT_NOT_NULL(f.pages.asset);TEST_ASSERT_TRUE(strlen(f.pages.asset)>10000);
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.asset,"/hardware/module-descriptor/write"));
+    TEST_ASSERT_TRUE(f.pages.content.length()<10000);
     f.pages.locale=Locale::GermanGermany;f.server.request("/hardware",HTTP_GET);
     TEST_ASSERT_EQUAL_STRING(webText(f.pages.locale,TextId::Hardware),f.pages.title.c_str());
 }

@@ -22,6 +22,7 @@ void HardwareProvisioningWebRoutes::registerRoutes(WebServer& server) {
         server.on("/hardware/profile/write", HTTP_POST, [this]() { handleRemoteProfileWrite(); });
     }
     server.on("/hardware/eeprom", HTTP_GET, [this]() { handleEepromSnapshot(); });
+    server.on("/provisioning-dialog.js", HTTP_GET, [this]() { handleDialogScript(); });
     server.on("/hardware", HTTP_GET, [this]() { handleHardware(); });
     server.on("/hardware/board-identity/write", HTTP_POST, [this]() { handleBoardProvisioning(); });
     server.on("/device/board-identity/write", HTTP_POST, [this]() { handleBoardProvisioning(); });
@@ -38,8 +39,12 @@ void HardwareProvisioningWebRoutes::sendResult(const char* title, const char* ro
 void HardwareProvisioningWebRoutes::handleHardware() {
     if (!operationAllowed()) return;
     String c = overview_();
-    c += remoteProfilesSection();
-    sendPage(uiText(TextId::Hardware), "/hardware", c);
+    String section=remoteProfilesSection();
+    if(c.isEmpty() || section.isEmpty() || !c.concat(section.c_str(),section.length())) {
+        server_.send(503,"text/plain","Insufficient memory to render hardware page");return;
+    }
+    section=String();
+    pages_.sendPage(uiText(TextId::Hardware), "/hardware", std::move(c));
 }
 
 bool HardwareProvisioningWebRoutes::operationAllowed() {

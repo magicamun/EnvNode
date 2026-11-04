@@ -27,6 +27,7 @@ private:
     void sendPage(const char* title, const char* route, const String& content, int status=200);
     void sendResult(const char* title, const char* route, const char* message, bool success);
     void handleHardware();
+    void handleDialogScript();
     void handleBoardProvisioning();
     void handleModuleDescriptorProvisioning();
     WebServer& server_;

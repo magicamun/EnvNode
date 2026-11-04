@@ -15,6 +15,7 @@ public:
     WebServer& server();
     void registerRoutes(IWebRoutes& routes);
     void begin();
+    void sendStaticContent(const char* type, const char* bytes);
     void loop();
     void afterResponse(std::function<void()> action);
     bool responsePending() const {return response_.active() || static_cast<bool>(afterResponse_);}

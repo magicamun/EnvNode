@@ -20,6 +20,13 @@ void WebHost::begin() {
     server_.begin();
     logger_.info("Web administration started");
 }
+void WebHost::sendStaticContent(const char* type,const char* bytes) {
+    if(!administrationAvailable() || !bytes) {
+        server_.send(503,"text/plain","Static content unavailable");return;
+    }
+    server_.sendHeader("Cache-Control","no-cache");
+    queuePage(String(),String(),200,type,bytes);
+}
 void WebHost::afterResponse(std::function<void()> action) {
     if(!response_.active()) {action();return;}
     afterResponse_=std::move(action);
