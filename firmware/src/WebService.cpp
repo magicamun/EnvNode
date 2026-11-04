@@ -522,6 +522,7 @@ void WebService::registerRoutes(WebServer& server) {
     });
     server.on("/network-logging", HTTP_GET, [this]() { handleNetworkLogging(); });
     server.on("/network-logging/save", HTTP_POST, [this]() { handleNetworkLoggingSave(); });
+    server.on("/network-logging/marker", HTTP_POST, [this]() { handleNetworkLoggingMarker(); });
     server.on("/network-logging/test", HTTP_POST, [this]() { handleNetworkLoggingTest(); });
     server.on("/diagnostics", HTTP_GET, [this]() { handleDiagnostics(); });
     server.on("/diagnostics/i2c/scan", HTTP_POST, [this]() { handleI2CScan(); });

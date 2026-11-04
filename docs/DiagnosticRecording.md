@@ -72,8 +72,9 @@ system/diagnostic selections migrate to network logging. The sensor/controller f
 their NVS keys and meaning.
 
 SystemDiagnostics produces runtime health on activation and once per minute.
-The network logging test button submits `recorder_test`. All events use the same
-public recorder; producers perform no network I/O. Every completed RainDetector
+The network logging test button submits `recorder_test`. Automatic events use
+the public recorder; manual markers use the bounded explicit-admission path
+described below. Producers perform no network I/O. Every completed RainDetector
 gate is still submitted at nominal 250 ms, without averaging or downsampling.
 
 ## Classic ESP32 UDP recording — 2026-11-04
@@ -98,6 +99,88 @@ selection_generation; their valid selected attempts consume a sequence before
 potential queue rejection. Counters/sequences wrap at 32 bits. Existing event
 names, typed fields and sensor revisions are unchanged. Complete extreme text
 events can exceed the usual MTU and fragment; they are never silently truncated.
+
+## Manual test markers
+
+On **Network logging**, the **Test markers** form accepts a short test name and
+optional note. The extended-diagnostics checkbox links directly to that form;
+save the sensor/controller settings before following the link. Marker actions
+never change diagnostic choices, sensor/controller configuration or NVS.
+
+1. Enable and save the desired sensor/controller detail diagnostics.
+2. Enter a test name such as `Head 0.4 trocken` and a note such as `Controller 0.3`.
+3. Choose **Mark begin**, perform the test, optionally **Add note**, then **Mark end**.
+4. A standalone note can announce the next test without opening an interval.
+
+Each field is limited to **32 UTF-8 bytes**, matching the existing diagnostic
+text budget. Oversized/invalid text is rejected, never truncated. Notes outside
+an interval have `test_id: 0`; their entered name is retained in RAM for the next
+begin action. Begin allocates a monotonically increasing nonzero test ID for
+this boot. Begin/end/notes during an interval carry its ID and original label.
+Only one interval is active. Text and session state are RAM-only; a reboot has
+no active interval and starts a new ID space. Pair intervals using
+**device_id + boot_id + values.test_id**, never test_id alone. An unfinished
+interval is not automatically given an invented end when the device restarts.
+
+The new event is in the existing diagnostic stream and sequence space, with
+system source ID 0. The following is a payload excerpt; device/boot/build,
+sequence, selection generation and capture timestamps are supplied by the
+existing recorder/UDP envelope:
+
+```json
+{
+  "type": "diagnostic",
+  "source_kind": "system",
+  "source_id": 0,
+  "event": "test_marker",
+  "values": {
+    "phase": "begin",
+    "test_id": 1,
+    "label": "Head 0.4 trocken",
+    "text": "Controller 0.3",
+    "origin": "web"
+  }
+}
+```
+
+`phase` is `begin`, `note` or `end`. Existing measurement events are unchanged;
+markers define time boundaries and are not copied into every rain record.
+They do not reset or align measurement gates. Inspect markers in a JSONL export:
+
+```sh
+jq -c 'select(.event == "test_marker") | {device_id,boot_id,sequence,uptime_ms,values}' capture.jsonl
+```
+
+An explicit operator marker is independent of system/sensor/controller detail
+checkboxes. The concrete recorder admits only `test_marker` through this path;
+normal producer masks retain their existing behavior. Such queued markers
+survive source-mask generation changes, so unchecking a sensor does not erase a
+just-accepted end marker. They still share the same eight-entry queue and send
+budget, without priority eviction, a second queue, extra text buffers or retries.
+A session uses at most 48 bytes of fixed storage. Rain windows remain full rate.
+
+The POST at `/network-logging/marker` validates the phase, UTF-8 text, expected
+active test ID and originating boot ID. Old forms, duplicate begin/end actions
+and conflicting tabs return 409 without another marker. Invalid input returns
+400. Disabled logging, disconnected WiFi, unavailable/busy/full buffers return
+503. Session state advances only after RAM admission, so rejected begin/end
+operations can be retried. Success redirects (303) back to the marker form,
+preventing a page refresh from resubmitting the POST. Repeated explicit note
+submissions are separate point markers.
+
+**Accepted means RAM admission, not receiver delivery.** UDP outages or a later
+logging shutdown may still lose a queued marker; normal transport counters and
+stream sequences expose those gaps. The UI says receipt is unconfirmed. Marker
+rejection does not affect measurements, controller output or diagnostic choices.
+
+Validation: ten new native marker cases cover pairing/IDs, stale contexts,
+UTF-8/length limits, unchanged selection, full buffers and retries, mask changes,
+offline transport, UI escaping/status and 14,400 full-rate rain records with
+146 interleaved markers. Existing recorder, real UDP loopback, RainDetector and
+shared web tests also pass (79 distinct native cases in total). Per the user's
+workflow, no ESP32 firmware build, flash, device POST or rsyslog change was
+performed for this feature. Firmware compilation and hardware receipt validation
+remain with the user's next build/flash and test.
 
 ## Historical SD buffered persistence
 
