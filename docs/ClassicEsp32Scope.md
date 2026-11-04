@@ -2,32 +2,27 @@
 
 EnvNode: see repository LICENSE.
 
-Decision recorded on 2026-11-03: continue the current classic ESP32 architecture
-on PlatformIO Espressif32 7.0.1 / Arduino-ESP32 2.0.17. Pause the separate
-`chore/platformio-8-port` migration. Resume the new framework together with the
-next hardware architecture, rather than maintaining a temporary Arduino 3
-baseline on the current 4 MiB boards.
+Current decision, 2026-11-04: keep PlatformIO Espressif32 7.0.1 /
+Arduino-ESP32 2.0.17 on classic 4-MiB ESP32 boards. Logging moves to UDP/rsyslog;
+SD runtime, file/web management, formatting, SD tests and the framework patch
+are removed after full-rate receiver validation. SX1262 is not supported.
+RainDetector remains included, with every completed nominal-250-ms gate retained.
+Analog/SCT013 hardware integration depends on measured combined resource budgets.
+A newer framework, SD and SX1262 belong to a later S3 hardware/build profile.
+Keep one application core through shared interfaces, rather than application forks.
 
-The classic ESP32 scope includes existing functionality, reliable SD operation
-and integration of the RainDetector acquisition and heating controller.
-SX1262 support is explicitly reserved for the next architecture and will not be
-added to the classic ESP32 firmware. AnalogHydroPressure remains a candidate;
-its inclusion depends on measured flash and runtime internal-RAM budgets after
-RainDetector integration. No support commitment is implied by remaining flash
-alone.
+Current configuration backup schema 7 preserves old fields only for migration;
+no legacy setting activates SD. Diagnostic checkboxes/preferences remain intact.
+The dual-OTA layout has 1.75-MiB slots and the newer 256-KiB cfg_nvs partition.
+See [the ADR](adr/0016-classic-esp32-network-diagnostics.md),
+[UDP logging](DiagnosticRecording.md) and [validation ledger](UdpLoggingValidation.md)
+for current behavior, receiver evidence, artifact locations and measured limits.
 
-Keep the existing dual-OTA partition layout, configuration compatibility and
-measurement continuity. Validate combined firmware size, startup, largest free
-internal-RAM block, SD logging/web access and RainDetector control on hardware.
-Build/test success alone does not establish runtime acceptance.
+## Historical SD framework backport (removed)
 
-Implementation is isolated on `codex/esp32-rain-integration`, starting from
-main `4b46d62`. Framework correction and RainDetector integration are separate
-commits. Existing feature worktrees and uncommitted user work remain intact.
-The SD lifecycle redesign (automount and explicit eject) is a separate functional
-change; this backport retains the current per-operation mounts.
-
-## Reproducible SD framework backport
+The remaining dated record describes earlier integration commits. Its SD scripts,
+build alias and tests no longer exist in the current classic build. To reproduce
+those historical commands, use a historical SD commit such as 6bb9b1c first.
 
 Arduino 2.0.17 `sdcard_uninit()` frees its internal card structure while an
 `AcquireSPI` guard still refers to it. The guard destructor then reads

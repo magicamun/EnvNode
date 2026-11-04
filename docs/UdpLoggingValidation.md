@@ -272,3 +272,103 @@ A first /dev/stdin attempt was ignored by logrotate and was not counted as a
 successful parse. No production config, listener, rotation, firewall or log file
 was changed; no service was reloaded. The prepared separate-storage/rotation
 example has not been deployed.
+
+## C: SD removed, final build and physical verification
+
+Source commit **e39d774**, build **0.8.7+474.ge39d774.dirty**. The dirty marker is
+still the pre-existing local firmware/firmware.bin deletion, excluded from every
+commit. SD runtime, recording/file/web/formatting code, SD implementation tests,
+activation/configuration/pin claims and the project-local framework patch are
+removed. The generic descriptor catalog remains usable for EEPROM provisioning,
+but compatibility reports MissingDriver and runtime inventory UnsupportedDriver.
+Physical unsupported-module pins remain reserved by generic discovery.
+
+Diagnostic producer events, checkboxes and per-entity NVS keys remain unchanged.
+Backup schema 7 retains reserved legacy SD fields for positional compatibility;
+exports always encode enabled=false and slot=0. Only old system/diagnostic choices
+migrate; no setting can activate an SD driver. No framework migration was made.
+
+Final tests and builds:
+
+- **610/610 classic native cases passed**, all 58 selected classic suites.
+- **71/71 tester-native cases passed**, all five tester suites.
+- All three browser suites passed (17 profile cases, shared provisioning dialog,
+  English/German page-editor checks).
+- Codec JSON parser fixtures passed; all four receiver-analyzer Python tests pass.
+- esp32dev and testboard release builds passed with Arduino 2.0.17 / platform 7.0.1.
+- Defined-symbol inspection of the final ELF retains no EnvNode SD classes,
+  SDFS/SDClass, SD disk I/O, SD card init/mount/uninit, or FAT mount/open functions.
+  General FS/SPI support required by unrelated libraries is not claimed removed.
+
+| Resource, bytes | A: original SD | B: UDP with SD code | C: UDP without SD | C − A |
+| --- | ---: | ---: | ---: | ---: |
+| Program, PlatformIO definition | 1,656,157 | 1,674,529 | **1,569,321** | **−86,836** |
+| OTA slot reserve | 178,851 | 160,479 | **265,687** | +86,836 |
+| Static DRAM | 101,764 | 101,980 | **100,776** | **−988** |
+| .dram0.data | 26,276 | 26,276 | 26,096 | −180 |
+| .dram0.bss | 75,488 | 75,704 | 74,680 | −808 |
+| .iram0.text | 86,815 | 86,775 | 85,135 | −1,680 |
+
+The final SD-removal step C−B frees 105,208 program bytes and 1,204 static DRAM
+bytes. All use identical toolchain, optimization/profile and OTA slot sizes;
+program reporting excludes .flash.appdesc consistently. C tester build is
+1,476,529 program bytes / 72,064 static DRAM bytes. Array/object UDP heap budget
+remains 9,332 bytes plus allocator overhead, with no UDP worker stack.
+
+A fresh table/NVS/OTA backup and form snapshots were taken before the final flash.
+The installed new table and OTA sequence/state still selected app1. Only the
+final app at 0x1d0000 was written, with esptool data-hash verification. No server,
+partition, NVS, OTA selection or bootloader rewrite accompanied that app update.
+All three logger/Rain-sensor/controller edit forms compare unchanged after reboot.
+WiFi/MQTT reconnect, six sensors and one running controller remain. Old /sd-card,
+/sd-card/format and /sd-card/download now return 404; navigation has no SD link.
+The physically inserted SD descriptor is displayed with MissingDriver.
+
+Runtime C internal 8-bit heap observations:
+
+- Before the final repeated-load probe: free 46,596, minimum 26,400,
+  largest 24,564 bytes.
+- Same 12-round status/controller/measurement HTTP probe and five-second slow
+  reader used earlier: free around 38,252, minimum **14,900**, largest 24,564.
+- Later observation: free 41,168; minimum unchanged. Maximum logger service
+  **8,964 µs**, maximum application body **453,596 µs**.
+
+For comparison, A's recorded failed-mount checkpoint was 45,596 free / 42,996
+largest, with no comparable lifetime minimum. B's new-table early observation
+was 43,364 free / 23,540 largest / 26,328 minimum; its later local-receiver HTTP
+trial reached an 8,904-byte minimum. The earlier 12-round B probe, before cfg_nvs
+installation, reached 10,484. These identify memory pressure and scenario conditions;
+unequal uptime, network/allocator state and partition-cache state prevent a
+controlled numerical runtime-minimum saving claim. Static and runtime figures
+must not be combined into a guaranteed Analog/SCT013 budget.
+
+Receiver verification after the C HTTP probe found **1,424 diagnoses**, including
+**1,389 rain_window**, plus 16 system logs for the final build/boot. Diagnostics
+have **zero sequence gaps/duplicates** and rain has **zero revision gaps/resets**;
+all 1,389 windows have fault=none. Observed window rate was 3.659/s, gate minimum
+250,040 µs, largest 527,018 µs including initial startup, and largest adjacent end
+delta 390,603 µs. The nominal 250,000-µs acquisition constant is unchanged; every
+actual completed window is sent, without traffic-driven averaging/downsampling.
+This is a multi-minute physical checkpoint, not a long-duration field qualification.
+
+The system stream has **18 sequence gaps**, matching the local **full=18** count
+while bounded startup history is replayed into eight slots. These visible startup
+losses are accepted best-effort behavior, not claimed zero loss. Diagnostic full,
+busy, offline, would_block, send_error and encode_error stayed zero. A local
+socket acceptance counter still cannot prove future delivery; this checkpoint
+uses actual receiver-file evidence.
+
+Final local hardware-test artifacts:
+
+- firmware/bin/udp-validation/udp-without-sd/: app, bootloader, partition table,
+  boot_app0, ELF, map, symbol/section report, manifest, README, license and hashes.
+- firmware/bin/udp-validation/envnode-0.8.7-build474-no-sd.zip: flash/test package,
+  without debug ELF/map or any configuration backup/captured user logs.
+- App SHA-256: d17481160ec313dfd0e3659e54219b2152d9bdcf7fdf61e6e076dddd63f16367.
+- ELF SHA-256: 4f375b38c2e32e65f53bb17b14512f3c6bb79e2faaa29b0fe6f72fbc1e775389.
+- ZIP SHA-256: 5a0d04180fab4350c3022ee738ce057e8831b572a5d3c1c9477f240353aa360c.
+
+The final device remains configured to **192.168.20.10:514/UDP**. The user-authorized
+read-only SSH checks did not deploy the prepared split-file rules or rotation;
+the live server still has its original combined per-source log. The syntax-checked
+examples under tools/rsyslog are ready for a separately coordinated deployment.

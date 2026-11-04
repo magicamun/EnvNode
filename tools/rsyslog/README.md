@@ -3,9 +3,15 @@
 EnvNode-owned: see repository LICENSE.
 
 Prepared for `iot-rsyslogd` / `192.168.20.10`, UDP 514. These files have **not**
-been installed or executed on that host. The rsyslog 8.2302.0 syntax check passed via the user-authorized SSH session;
+been installed or activated on that host. The rsyslog 8.2302.0 syntax check passed via the user-authorized SSH session;
 production routing/rotation configuration was not changed. Docker and Podman
 are not available in the local development environment. Adapt the example to the target distribution first.
+
+The inspected server already has `/etc/rsyslog.d/20-remote-udp.conf` bound to
+UDP 514 and writes both streams to `/var/log/remote/<source-IP>/syslog.log`.
+When deploying the example, adapt that existing ruleset/listener; do not add a
+second listener on the same address/port. Existing production files were left
+unchanged during validation.
 
 1. Confirm UDP port 514 and the server's bind address. Prepare `/var/log/envnode`
    with the runtime rsyslog user's ownership and directory permissions 0750.

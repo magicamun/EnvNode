@@ -1,5 +1,10 @@
 # SD-Card SPI bring-up — Slot A
 
+Historical engineering record. SD runtime and the framework patch were removed
+from the classic ESP32 after UDP receiver validation on 2026-11-04. See
+[network logging](site/firmware/network-logging.md) for the current path.
+The commands and aliases below apply to their dated historical commits.
+
 Current status (2026-11-03): integrated into main and released as EnvNode 0.8.7.
 The assembled module was physically validated; the user also confirmed the merged
 firmware after flashing. Use [the operating guide](site/firmware/sd-card.md) for

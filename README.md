@@ -4,6 +4,11 @@ EnvNode is an source-available ESP32-based embedded platform for reliable enviro
 
 WeatherStation is the first reference application built on the reusable EnvNode platform.
 
+The classic ESP32 firmware keeps Arduino-ESP32 2.x and RainDetector, with UDP
+logging to rsyslog instead of SD storage. SD and SX1262 runtime support belong
+to the later S3 hardware/build profile. See the [classic ESP32 scope](docs/ClassicEsp32Scope.md)
+and [logging validation](docs/UdpLoggingValidation.md) for current limits and measurements.
+
 The project intentionally separates **measurement** from **interpretation**.
 
 The firmware is responsible for acquiring reliable physical Measurements and publishing them to external systems.
