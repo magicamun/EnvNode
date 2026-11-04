@@ -81,3 +81,63 @@ includes connection setup and is not an isolated rendering measurement. No page
 contents, configuration or credentials were saved. The candidate has not been
 flashed, so none of these times measure the new transport. Browser rendering,
 parallel asset requests, uploads and long-running tail latency remain unmeasured.
+
+## Hardware checkpoint: build 478
+
+The user authorized flashing the candidate on Weather 0.2, serial
+/dev/cu.usbserial-0001. ESP32-D0WD-V3 revision 3.1 and MAC 30:76:f5:e5:c6:14 were
+confirmed. The prior application was 0.8.7+477.gc08a626. A fresh table/NVS/OTA read
+showed the current large layout, but OTA sequence 1 selecting app0 at 0x10000,
+unlike the earlier integration tests' app1. OTA states were UNDEFINED (rollback
+not enabled), with valid sequence CRCs. The whole active 0x1c0000-byte app0 was
+saved before writing. Only the new app was written at 0x10000; esptool verified
+its data hash. A subsequent read confirmed byte-identical partition-table and
+OTA regions. No bootloader, configuration, server or firewall change was made.
+
+The device reports **0.8.7+478.gecc43ac**, clean source. Linker sizes are
+1,569,565 bytes flash and 100,792 bytes static RAM; the final binary is 1,576,144
+bytes. Logger, sensor slot 1 and controller slot 1 form fingerprints match
+before/after. The full-rate rain source is slot 4 in receiver event identities.
+
+Ten complete requests per route before flashing and two ten-request rounds after
+flashing yielded these median complete-response times (milliseconds):
+
+| Route | Build 477 | Build 478 first round | Build 478 warm round |
+| --- | ---: | ---: | ---: |
+| / | 84.8 | 101.8 | 103.5 |
+| /sensors | 117.9 | 141.1 | 151.1 |
+| /controllers | 123.1 | 149.7 | 146.4 |
+| /measurements | 124.1 | 146.5 | 150.8 |
+| /display | 84.5 | 105.4 | 105.4 |
+| /style.css | 74.2 | 91.5 | 97.5 |
+
+All 180 sequential requests returned complete HTTP 200 responses. The largest
+observed total was 419.7 ms after flashing, versus 296.6 ms before. A concurrent
+controller-page/CSS pair also completed; order affects the single-client server's
+queueing. A separate client requested /controllers with a 1-KiB receive buffer
+and deliberately did not read for five seconds. A concurrent status request
+completed in 190.4 ms before and 209.3 ms after. That client did not cause a long
+stall in this setup; it does not prove arbitrary backpressure is harmless.
+
+**This hardware comparison does not demonstrate a speedup.** Candidate medians
+were slower in both rounds; network/boot-phase differences are not isolated by a
+randomized repeated A/B experiment. The user-visible intermittent main-page hitch
+has not been reproduced by these requests. Keep this as an experimental branch;
+do not promote it to main as a confirmed performance fix. Browser observation
+and better per-service/per-response profiling remain the next evidence needed.
+
+After load, internal 8-bit heap was 38,264 bytes free, 14,656 minimum and 19,444
+largest block. Observed logger service maximum was 11,133 us; application body
+maximum was 454,382 us. Application latency remains, despite bounded HTTP sends.
+The final receiver sample spans 165.6 seconds: 614 diagnostic events, including
+599 rain windows, with zero diagnostic sequence gaps, zero duplicates and zero
+rain revision gaps/resets. All 599 windows have fault=none. Observed rate is
+3.637 windows/s; gates span 250,041–524,406 us, with maximum adjacent end delta
+403,921 us. Nominal 250-ms acquisition remains subject to existing main-loop
+latency; this is not an exact 4-Hz deadline result. Controller configuration,
+decision/output and runtime-health events were received. The existing 18 startup system-log
+queue drops remain explicitly visible; they are not diagnostic-window losses.
+
+Private backups, request timing JSON, flash/read logs and receiver JSONL remain
+Git-ignored in firmware/.pio/logging-validation/web-speed/. Candidate firmware,
+ELF, build identity and checksums are in firmware/bin/web-speed/build478/.
