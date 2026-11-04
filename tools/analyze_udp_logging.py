@@ -33,6 +33,9 @@ def analyze(paths):
                 except (ValueError, KeyError, TypeError) as error:
                     print(f"{path}:{number}: invalid record: {error}")
                     bad += 1
+    if not streams:
+        print("No valid UDP log records found; receipt is not validated.")
+        return 1
     for key, sequences in sorted(streams.items()):
         # Order within half the uint32 range, allowing UDP reordering before the first record.
         offsets = sorted({((n - sequences[0] + 0x80000000) & 0xFFFFFFFF) - 0x80000000 for n in sequences})

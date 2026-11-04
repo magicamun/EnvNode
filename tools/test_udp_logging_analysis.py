@@ -29,6 +29,14 @@ class ReceiverAnalysisTests(unittest.TestCase):
         self.assertEqual(output[0]["sequence_gaps"], 1)
         self.assertEqual(output[0]["duplicates"], 1)
 
+    def test_empty_capture_is_a_failed_receipt_check(self):
+        with tempfile.NamedTemporaryFile(mode="w+", suffix=".jsonl") as source:
+            result = io.StringIO()
+            with contextlib.redirect_stdout(result):
+                code = analyze([source.name])
+            self.assertEqual(code, 1)
+            self.assertIn("receipt is not validated", result.getvalue())
+
     def test_boots_are_separate_and_missing_prefix_is_not_invented(self):
         code, output = self.run_records([self.record(40), self.record(42), self.record(1, "other")])
         self.assertEqual(code, 0)

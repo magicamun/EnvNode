@@ -208,3 +208,35 @@ history into its bounded eight-entry queue. This is visible expected best-effort
 startup overflow, not an unreported loss. A later observation showed 15 system
 records and 204 diagnostics locally sent, with no diagnostic queue or send errors.
 This does not replace receiver-side confirmation of full-rate continuity.
+
+## Authorized local receiver attempt after partition installation
+
+The user explicitly authorized routing system logs and diagnostics to their Mac
+192.168.10.20:5514 for at most three minutes, then restoring 192.168.20.10:514.
+The local listener ran for 180 seconds; the firmware was redirected for roughly
+160 seconds, with a finally-block restoring the intended server. A separate
+readback of the saved web form confirmed **192.168.20.10:514** afterwards.
+
+No accepted ESP32 packets reached the local capture (0 diagnostics / 0 system
+records). The user confirmed this path is blocked by a firewall. Route inspection
+showed the Mac on 192.168.10.20/en5 through gateway 192.168.10.253 and the ESP32
+on 192.168.20.63. The macOS application firewall reported disabled; this does not
+rule out network ACLs or other filters. Packet capture was unavailable because
+sudo required a password. No firewall, routing or server settings were changed.
+Do not interpret this attempt as a successful end-to-end receipt validation.
+
+During repeated HTTP requests, a four-second nonreading client and this blocked
+UDP-destination interval, diagnostics continued locally: 896 → 1,459 accepted/
+sent_local in the recorded 150-second sample span, with diagnostic full/busy/
+offline/would_block/send_error/encode_error all zero. Controller/system context
+is included in that count, so it is not a direct rain-window count. Maximum
+observed logger service remained 14,402 µs, application body 452,049 µs. The
+minimum internal 8-bit heap under this load reached **8,904 bytes**; later samples
+were around 35 KiB free. The narrow memory margin remains a measured limitation,
+not evidence that all network stalls or future sensor budgets are resolved.
+
+The receiver analyzer now returns failure for an empty capture, preventing zero
+received records from being mistaken for a passed test. Four Python tests pass.
+Actual rsyslog receipt/full-rate continuity is still pending read-only server
+access or receiver-side evidence. SD removal is still held at that validation
+boundary.
