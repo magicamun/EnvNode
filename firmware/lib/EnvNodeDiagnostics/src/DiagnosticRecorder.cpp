@@ -63,14 +63,15 @@ DiagnosticRecordResult BufferedDiagnosticRecorder::record(DiagnosticSource sourc
     const auto kind=static_cast<unsigned>(source.kind);
     if(kind>=static_cast<unsigned>(DiagnosticSourceKind::Count)||(source.kind==DiagnosticSourceKind::System?source.id!=0:source.id<1||source.id>32)){++invalid_;return DiagnosticRecordResult::Invalid;}
     if(!selected(source))return DiagnosticRecordResult::Disabled;
+    const uint32_t sequence=sequence_.fetch_add(1)+1;
     if(!available()){++unavailable_;return DiagnosticRecordResult::Unavailable;}
     if(lock_.test_and_set(std::memory_order_acquire)){++busy_;return DiagnosticRecordResult::Busy;}
     if(!available()) {++unavailable_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Unavailable;}
     const size_t count=count_.load();
     if(count==DiagnosticQueueEntries){++full_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Full;}
-    auto& r=records_[(head_+count)%DiagnosticQueueEntries];r.source=source;r.event=event;r.sequence=++sequence_;
+    auto& r=records_[(head_+count)%DiagnosticQueueEntries];r.source=source;r.event=event;r.sequence=sequence;
     r.uptimeMs=clock_.monotonicMs();r.wallClockValid=clock_.wallClockEpochSeconds(r.epochSeconds);r.generation=generation_.load();
-    count_.store(count+1);++accepted_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Accepted;
+    count_.store(count+1);if(count+1>highWater_.load())highWater_.store(count+1);++accepted_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Accepted;
 }
 bool BufferedDiagnosticRecorder::pop(DiagnosticRecord& record) {
     if(lock_.test_and_set(std::memory_order_acquire))return false;
@@ -91,7 +92,7 @@ bool BufferedDiagnosticRecorder::discardPending() {
     stale_.fetch_add(count_.load());count_.store(0);head_=0;
     lock_.clear(std::memory_order_release);return true;
 }
-DiagnosticRecorderStats BufferedDiagnosticRecorder::stats() const {DiagnosticRecorderStats s;s.accepted=accepted_;s.full=full_;s.busy=busy_;s.unavailable=unavailable_;s.invalid=invalid_;s.stale=stale_;s.queued=count_;return s;}
+DiagnosticRecorderStats BufferedDiagnosticRecorder::stats() const {DiagnosticRecorderStats s;s.accepted=accepted_;s.full=full_;s.busy=busy_;s.unavailable=unavailable_;s.invalid=invalid_;s.stale=stale_;s.queued=count_;s.highWater=highWater_;return s;}
 namespace {
 class Json {
 public:

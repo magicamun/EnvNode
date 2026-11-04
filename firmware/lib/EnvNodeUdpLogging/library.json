@@ -1,0 +1,1 @@
+{"name":"EnvNodeUdpLogging","version":"0.1.0","description":"Bounded nonblocking UDP syslog transport. See repository LICENSE.","build":{"includeDir":"include","srcDir":"src"}}
