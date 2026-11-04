@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 constexpr size_t CONTENT_LENGTH_UNKNOWN = static_cast<size_t>(-1);
 enum HTTPMethod { HTTP_GET, HTTP_POST };
 enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END, UPLOAD_FILE_ABORTED };
@@ -12,7 +13,19 @@ struct HTTPUpload { HTTPUploadStatus status = UPLOAD_FILE_START; String name, fi
 class WebServer {
 public:
     struct Route { std::string path; HTTPMethod method; std::function<void()> handler; std::function<void()> uploadHandler; };
-    struct Client { int flushes = 0; void flush() { ++flushes; } } clientState;
+    struct Client {
+        struct State {bool online=true,blocked=false;int maxWrite=1024;std::string sent;};
+        std::shared_ptr<State> state=std::make_shared<State>();
+        int flushes=0;void flush(){++flushes;}
+        bool connected() {return state->online;}
+        void stop() {state->online=false;}
+        int sendNonblocking(const char* data,size_t size) {
+            if(!state->online || state->maxWrite<0)return -1;
+            if(state->blocked)return 0;
+            const size_t n=std::min(size,static_cast<size_t>(state->maxWrite));
+            state->sent.append(data,n);return static_cast<int>(n);
+        }
+    } clientState;
     Client& client() { return clientState; }
     HTTPUpload uploadState;
     HTTPUpload& upload() { return uploadState; }
@@ -44,7 +57,10 @@ public:
     void handleClient() { ++handled;if(onHandleClient) onHandleClient(); }
     void setContentLength(size_t size) { declaredLength = size; }
     void send(int status, const char* type, const String& body) {
-        _currentClientWrite(body.c_str(),body.length());
+        if(body.isEmpty() && declaredLength) {
+            const std::string header="HTTP/1.1 "+std::to_string(status)+" OK\r\nContent-Length: "+std::to_string(declaredLength)+"\r\n\r\n";
+            _currentClientWrite(header.data(),header.size());
+        } else _currentClientWrite(body.c_str(),body.length());
         responseStatus = status; responseType = type; responseBody = body.c_str();
         chunks.clear(); chunks.emplace_back(body.c_str());
     }
@@ -58,7 +74,9 @@ public:
         responseStatus = status; responseType = type; responseBody.assign(body, size);
     }
     bool request(const char* path, HTTPMethod method) {
-        for (auto& route : routes) if (route.path == path && route.method == method) { currentUri=path;route.handler();currentUri=String(); return true; }
+        for (auto& route : routes) if (route.path == path && route.method == method) {
+            if(!clientState.connected())clientState.state=std::make_shared<Client::State>();
+            declaredLength=0;currentUri=path;route.handler();currentUri=String(); return true; }
         return false;
     }
 protected:

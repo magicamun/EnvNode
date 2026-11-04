@@ -532,7 +532,7 @@ void WebService::registerRoutes(WebServer& server) {
         content+=accepted ? (de?"Diagnoseereignis angenommen. Die Datei erscheint nach dem nächsten erfolgreichen Schreibvorgang.":"Diagnostic event accepted. The file appears after the next successful write.")
             : (de?"Diagnoseereignis nicht angenommen. Erweiterte Systemdiagnose aktivieren und SD-Karte/Puffer prüfen.":"Diagnostic event not accepted. Enable extended system diagnostics and check the SD card/buffer.");
         content+="</p><a href='/sd-card?path=%2Flogs%2Fdiagnostics'>/logs/diagnostics</a></section>";
-        sendPage(uiText(TextId::SdCard),"/sd-card",content,accepted?200:503);
+        sendPage(uiText(TextId::SdCard),"/sd-card",std::move(content),accepted?200:503);
     });
     server.on("/sd-card/test", HTTP_POST, [this]() { handleSdTest(); });
     server.on("/sd-card/format", HTTP_GET, [this]() { handleSdFormatPreview(); });
@@ -608,9 +608,13 @@ bool WebService::administrationAvailable() const { return webHost_.administratio
 
 void WebService::sendPage(const char* title, const char* activeRoute, const String& content,
     int status, bool wideContent) {
+    sendPage(title,activeRoute,String(content),status,wideContent);
+}
+void WebService::sendPage(const char* title, const char* activeRoute, String&& content,
+    int status, bool wideContent) {
     webHost_.sendPage([this, title, activeRoute, wideContent]() {
         return renderPageHeader(title, activeRoute, wideContent);
-    }, content, status,
+    }, std::move(content), status,
         uiText(TextId::AdministrationUnavailableWhileNetworkIsConnecting),
         uiText(TextId::PageRenderingFailedPleaseRetry));
 }
@@ -739,7 +743,7 @@ void WebService::handleStatus() {
         + (String("</span><span>") + uiText(TextId::Running) + "</span><span>")
         + localeFormatter_.formatNumber(runningControllerCount, 0)
         + (String("</span></div><p><a href='/controllers'>") + uiText(TextId::ViewControllers) + "</a></p></section></div>");
-    sendPage(uiText(TextId::Status), "/status", c);
+    sendPage(uiText(TextId::Status), "/status", std::move(c));
 }
 
 
@@ -750,7 +754,7 @@ void WebService::handleMqtt() {
     c = (String("<section class='card'><h2>") + uiText(TextId::RuntimeStatus) + "</h2>") + (m.server.isEmpty()?badge(uiText(TextId::NotConfigured),"warn"):mqttService_.connected()?badge(uiText(TextId::Connected),"good"):badge(uiText(TextId::Disconnected),"bad")) + (String("</section><section class='card'><h2>") + uiText(TextId::BrokerConfiguration) + "</h2><form method='post' action='/mqtt/save' autocomplete='off'>");
     c += (String("<label>") + uiText(TextId::BrokerHostnameOrIP) + "<input name='server' value='") + escapeHtml(m.server) + (String("'></label><label>") + uiText(TextId::Port) + "<input type='number' min='1' max='65535' name='port' required value='") + String(m.port) + (String("'></label><label>") + uiText(TextId::Username) + "<input name='username' value='") + escapeHtml(m.username) + (String("'></label><label class='choice'><input type='checkbox' name='changePassword' value='1'>") + uiText(TextId::ChangeMQTTPassword) + "</label><label>" + uiText(TextId::NewPassword) + "<input type='password' name='password' autocomplete='new-password'></label><div class='actions'><button>" + uiText(TextId::SaveMQTTSettings) + "</button></div></form></section>");
     c += (String("<section class='card'><h2>Home Assistant Discovery</h2><p class='help'>") + uiText(TextId::RepublishTheCurrentRetainedDeviceDiscoveryConfiguration) + "</p><form method='post' action='/mqtt/discovery/republish'><button type='submit'>" + uiText(TextId::RepublishHomeAssistantDiscovery) + "</button></form></section>");
-    sendPage(uiText(TextId::MQTT), "/mqtt", c);
+    sendPage(uiText(TextId::MQTT), "/mqtt", std::move(c));
 }
 
 
@@ -761,7 +765,7 @@ void WebService::handleUnits() {
     c = (String("<section class='card'><h2>") + uiText(TextId::PresentationUnits) + "</h2><p class='help'>" + uiText(TextId::ChangesAffectFutureMQTTPayloadsAndDoNot) + "</p><form method='post' action='/units/save'>");
     c += String("<label>") + uiText(TextId::FrequencyUnit) + unitSelect("rainFrequency", MeasurementType::RainDetectorFrequency, p.rainDetectorFrequency, configurationService_.getLocale()) + "</label>";
     c += (String("<label>") + uiText(TextId::Temperature) + "") + unitSelect("temperature",MeasurementType::Temperature,p.temperature, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::AtmosphericPressure) + "") + unitSelect("pressure",MeasurementType::AtmosphericPressure,p.atmosphericPressure, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::SolarCellTemperature) + "") + unitSelect("solarTemperature",MeasurementType::SolarCellTemperature,p.solarCellTemperature, configurationService_.getLocale()) + (String("</label><label>") + uiText(TextId::RainDetectorLevel) + "") + unitSelect("rainLevel",MeasurementType::RainDetectorLevel,p.rainDetectorLevel, configurationService_.getLocale()) + (String("</label><div class='actions'><button>") + uiText(TextId::SaveUnits) + "</button></div></form></section>");
-    sendPage(uiText(TextId::Units), "/units", c);
+    sendPage(uiText(TextId::Units), "/units", std::move(c));
 }
 
 void WebService::handleConfiguration() {
@@ -774,7 +778,7 @@ void WebService::handleConfiguration() {
         + uiText(TextId::RestoreHelp) + "</p><form method='post' action='/configuration/preview' enctype='multipart/form-data' onsubmit='this.action=\"/configuration/preview?configurationSize=\"+this.elements.configuration.files[0].size'>"
         + "<input type='file' name='configuration' accept='.json,application/json' required><div class='actions'><button>"
         + uiText(TextId::RestoreUpload) + "</button></div></form></section>";
-    sendPage(uiText(TextId::Configuration), "/configuration", c);
+    sendPage(uiText(TextId::Configuration), "/configuration", std::move(c));
 }
 
 void WebService::handleConfigurationDownload() {
@@ -974,7 +978,7 @@ void WebService::handleSensors() {
         c += "<td class='sensor-actions'><a class='button' href='/sensors/edit?slot=" + String(slot.slotId) + (String("'>") + uiText(TextId::Configure) + "</a></td></tr>");
     }
     c += "</tbody></table></div></section>";
-    sendPage(uiText(TextId::Sensors), "/sensors", c);
+    sendPage(uiText(TextId::Sensors), "/sensors", std::move(c));
 }
 
 void WebService::handleActuators() {
@@ -1067,7 +1071,7 @@ void WebService::handleActuators() {
             + String(slot.slotId) + (String("'>") + uiText(TextId::Configure) + "</a></td></tr>");
     }
     c += "</tbody></table></div></section>";
-    sendPage(uiText(TextId::Actuators), "/actuators", c, 200, true);
+    sendPage(uiText(TextId::Actuators), "/actuators", std::move(c), 200, true);
 }
 
 void WebService::handleControllers() {
@@ -1301,7 +1305,7 @@ void WebService::handleControllers() {
             + String(slot.slotId) + (String("'>") + uiText(TextId::Configure) + "</a></div></td></tr>");
     }
     c += "</tbody></table></div></section>";
-    sendPage(uiText(TextId::Controllers), "/controllers", c, 200, true);
+    sendPage(uiText(TextId::Controllers), "/controllers", std::move(c), 200, true);
 }
 
 bool WebService::readDisplayEnumTranslations(DisplayPage& page, const IPropertyReader& properties) {
@@ -1469,7 +1473,7 @@ void WebService::handleMeasurements() {
     if (sensorManager_.sensorCount() == 0) {
         content += (String("<section class='card'><p>") + uiText(TextId::NoActiveRuntimeSensors) + "</p></section>");
     }
-    sendPage(uiText(TextId::Measurements), "/measurements", content);
+    sendPage(uiText(TextId::Measurements), "/measurements", std::move(content));
 }
 
 void WebService::handleDisplay() {
@@ -1587,7 +1591,7 @@ void WebService::handleDisplay() {
     // These temporary inputs are no longer needed while sending the page header/body.
     previewOptions = String();
     storage.reset();
-    sendPage(uiText(TextId::Display), "/display", content);
+    sendPage(uiText(TextId::Display), "/display", std::move(content));
 }
 
 void WebService::handleSensorEdit() {
@@ -1660,7 +1664,7 @@ void WebService::handleSensorEdit() {
         + uiText(TextId::Provenance) + "</span><span id='sensorMetadataProvenance'></span><span>"
         + uiText(TextId::Measurements) + "</span><span id='sensorMetadataMeasurements'></span></div></section>";
     c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('sensorMetadataType').textContent=o.textContent;document.getElementById('sensorMetadataInterface').textContent=o.dataset.interface+' / '+o.dataset.description;document.getElementById('sensorMetadataProvenance').textContent=o.dataset.provenance;document.getElementById('sensorMetadataMeasurements').textContent=o.dataset.measurements;document.getElementById('rainIntervalHelp').style.display=o.dataset.kind==='rain_detector'?'block':'none';document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='shtc3'?x.value!=='112':o.dataset.kind==='bme280'?(x.value!=='118'&&x.value!=='119'):false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='shtc3')a.value='112';if(reset&&o.dataset.kind==='bme280'&&(a.value==='68'||a.value==='112'))a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
-    sendPage(uiText(TextId::ConfigureSensorSlot), "/sensors", c);
+    sendPage(uiText(TextId::ConfigureSensorSlot), "/sensors", std::move(c));
 }
 
 void WebService::handleActuatorEdit() {
@@ -1702,7 +1706,7 @@ void WebService::handleActuatorEdit() {
             c += (String("<p>") + uiText(TextId::AModuleInstanceIdentityIsRequiredToSave) + "</p>");
         }
         c += "</section>";
-        sendPage(uiText(TextId::ConfigureModuleActuator), "/actuators", c);
+        sendPage(uiText(TextId::ConfigureModuleActuator), "/actuators", std::move(c));
         return;
     }
     const ActuatorImplementationMetadata* selected =
@@ -1768,7 +1772,7 @@ void WebService::handleActuatorEdit() {
                     ? (uiText(TextId::OnOff)) : uiText(TextId::None)) + "</span></div></section>";
     }
     c += "<script>function actuatorFields(reset){const s=document.getElementById('actuatorImplementation');const o=s.options[s.selectedIndex];const p=document.getElementById('actuatorGpioConfiguration');p.style.display=o.dataset.interface==='GPIO'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}}document.getElementById('actuatorImplementation').addEventListener('change',()=>actuatorFields(true));actuatorFields(false);</script>";
-    sendPage(uiText(TextId::ConfigureActuatorSlot), "/actuators", c);
+    sendPage(uiText(TextId::ConfigureActuatorSlot), "/actuators", std::move(c));
 }
 
 void WebService::handleControllerEdit() {
@@ -2036,7 +2040,7 @@ void WebService::handleControllerEdit() {
             + "</span></div></section>";
     }
     c += "<script>const thresholdMeasurementCatalog=" + measurementCatalog + ";function thresholdMeasurements(rebuild){const s=document.getElementById('thresholdSourceSensor'),m=document.getElementById('thresholdMeasurement'),previous=m.value;if(rebuild){m.replaceChildren(new Option((globalThis.EnvNodeUi.SelectAMeasurement),'unknown'));for(const x of thresholdMeasurementCatalog[s.value]||[]){const o=new Option(x.label,x.value);o.dataset.unit=x.unit;m.add(o)}if(Array.from(m.options).some(o=>o.value===previous))m.value=previous;else m.value='unknown'}const o=m.options[m.selectedIndex];document.getElementById('thresholdUnit').textContent=o?o.dataset.unit||'':''}function controllerFields(){const s=document.getElementById('controllerImplementation'),k=s.options[s.selectedIndex].dataset.kind;document.getElementById('rainConfiguration').style.display=k==='rain_detector'?'block':'none';document.getElementById('blinkConfiguration').style.display=k==='blink'?'block':'none';document.getElementById('thresholdConfiguration').style.display=k==='threshold'?'block':'none';document.getElementById('selectorConfiguration').style.display=k==='selector'?'block':'none';document.getElementById('thresholdTargetField').style.display=document.getElementById('thresholdDecisionOnly').checked?'none':'block';thresholdMeasurements(false)}document.getElementById('controllerImplementation').addEventListener('change',controllerFields);document.getElementById('thresholdSourceSensor').addEventListener('change',()=>thresholdMeasurements(true));document.getElementById('thresholdMeasurement').addEventListener('change',()=>thresholdMeasurements(false));document.getElementById('thresholdDecisionOnly').addEventListener('change',controllerFields);controllerFields();</script>";
-    sendPage(uiText(TextId::ConfigureControllerSlot), "/controllers", c);
+    sendPage(uiText(TextId::ConfigureControllerSlot), "/controllers", std::move(c));
 }
 
 void WebService::handleDiagnostics() {
@@ -2140,7 +2144,7 @@ void WebService::renderDiagnostics() {
     }
     c += "</section>";
     for(size_t index=0;index<sensorManager_.sensorCount();++index){SensorRuntimeInfo i; if(!sensorManager_.runtimeInfo(index,i))continue;SensorRuntimeStatus s;sensorManager_.runtimeStatus(i.id,s);c+=(String("<section class='card'><h2>") + uiText(TextId::Sensor) + " " + "")+localeFormatter_.formatNumber(i.id,0)+" · "+escapeHtml(i.name)+(String("</h2><div class='kv'><span>") + uiText(TextId::Type) + "</span><span>")+escapeHtml(i.type)+(String("</span><span>") + uiText(TextId::State) + "</span><span>")+sensorStateName(i.state, configurationService_.getLocale())+(String("</span><span>") + uiText(TextId::Accepted) + "</span><span>")+localeFormatter_.formatNumber(s.acceptedMeasurementCount,0)+(String("</span><span>") + uiText(TextId::Rejected) + "</span><span>")+localeFormatter_.formatNumber(s.rejectedMeasurementCount,0)+(String("</span><span>") + uiText(TextId::PreSyncDiscarded) + "</span><span>")+localeFormatter_.formatNumber(s.preSyncDiscardCount,0)+(String("</span><span>") + uiText(TextId::LastSampleEmissions) + "</span><span>")+localeFormatter_.formatNumber(s.lastSampleEmissionCount,0)+"</span></div></section>";}
-    sendPage(uiText(TextId::Diagnostics), "/diagnostics", c);
+    sendPage(uiText(TextId::Diagnostics), "/diagnostics", std::move(c));
 }
 
 

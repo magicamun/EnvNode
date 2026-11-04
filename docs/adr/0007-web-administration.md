@@ -491,3 +491,44 @@ The administration interface reflects architecture rather than defining it.
 
 Progressive Disclosure
 The administration interface presents functionality appropriate to the selected administration level. Common operational tasks remain simple, while advanced configuration and developer-oriented diagnostics are revealed only when explicitly enabled. The administration level affects presentation only. It never changes subsystem behaviour, configuration ownership or runtime semantics.
+
+## Fixed-length response delivery — 2026-11-04
+
+HTML pages presented through WebHost and the shared stylesheet use a cooperative
+response sender rather than WiFiClient's synchronous write retry loop. The host
+retains the socket and rendered page after the route handler returns. It sends at
+most 2 KiB in up to four nonblocking calls per application loop, using chunks of
+at most 1 KiB. Partial writes advance only by the returned byte count; EAGAIN,
+EWOULDBLOCK and EINTR retain the current offset for the next loop. Measurements
+and integrations continue while a client is slow. One response is active at a
+time, and the host accepts the next request after it completes or aborts.
+
+The SDK still generates HTTP status/headers. The host captures those headers
+(up to 2 KiB) before sending any bytes and preserves the declared Content-Length.
+The page header/body are moved into the response owner where possible; static
+footer/CSS data remain borrowed. There is no extra serialized copy of the complete
+page and no per-step allocation. Total retained response size is limited to
+64 KiB. Failure to capture/retain a response aborts the connection with an explicit
+log; it does not silently continue a partially generated page.
+
+An idle client times out after 10 seconds without send progress, with a 60-second
+total limit. Completion/abort logs include route, bytes sent and expected bytes;
+slow successful transmission is reported separately from slow request rendering.
+Explicit restart/factory-reset actions execute after the response finishes or
+aborts, followed by a cooperative 200-ms grace period. Synchronous presenters
+retain immediate completion semantics.
+
+This applies to normal presented HTML pages (including sensors/controllers/SD)
+and CSS. Direct SDK responses, the chunked timezone selector, uploads and custom
+file-download handlers retain their existing paths; SD downloads already have a
+separate nonblocking pump. HTTP request parsing remains the SDK parser. Hardware
+validation of WiFi throughput and concurrent SD recording is still required;
+this does not establish the cause of a separate SD write failure.
+
+Validation: 39 native shared-web tests pass, including short writes, backpressure,
+byte-exact complete pages, bounded per-loop work, timeout/disconnection, unchanged
+Content-Length and restart/factory reset after deferred completion. All 71 tester
+native cases pass across the complete run and the updated asynchronous fixture
+rerun. Both ESP32 targets build; EnvNode measured 1,656,157 program bytes and
+101,764 static RAM bytes before the final build-identity refresh. Static RAM
+increases by 192 bytes; runtime page/socket memory still needs hardware measurement.

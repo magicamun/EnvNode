@@ -168,9 +168,12 @@ private:
     void handleGeoPositionSave();
     void handlePressureReductionSave();
     void handleNotFound();
+    void afterResponse(std::function<void()> action) override {webHost_.afterResponse(std::move(action));}
 
     void sendPage(const char* title, const char* activeRoute, const String& content,
         int status = 200, bool wideContent = false) override;
+    void sendPage(const char* title, const char* activeRoute, String&& content,
+        int status = 200, bool wideContent = false);
     void sendResult(const char* title, const char* activeRoute, const char* message, bool success);
     void sendConfigurationResult(
         const ConfigurationSaveResult& result,

@@ -21,6 +21,7 @@ public:
     void begin() override;
     void loop() override;
     Locale webLocale() const override;
+    void afterResponse(std::function<void()> action) override {host_.afterResponse(std::move(action));}
     void sendPage(const char* title, const char* activeRoute, const String& content,
         int status = 200, bool wideContent = false) override;
     String renderPageHeader(const char* title, const char* active, bool wideContent) const override;

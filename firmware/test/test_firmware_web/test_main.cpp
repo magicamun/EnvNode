@@ -17,7 +17,8 @@ struct Logger : ILogger {
  void begin(unsigned long) override {} void println(const char*) override {} void printf(const char*, ...) override {}
 };
 struct Pages : IWebPagePresenter {
- int status=0; String content;
+ int status=0; String content; bool defer=false;std::function<void()> completion;
+ void afterResponse(std::function<void()> action) override {if(defer)completion=std::move(action);else action();}
  Locale webLocale() const override { return Locale::EnglishUnitedKingdom; }
  void sendPage(const char*, const char*, const String& c, int s, bool) override { status=s;content=c; }
 };
@@ -53,6 +54,16 @@ void test_explicit_restart_flushes_response_first(){
     TEST_ASSERT_EQUAL(1,f.restart.executions);
     TEST_ASSERT_TRUE(f.restart.responseBeforeRestart);}
 
+void test_explicit_restart_and_reset_wait_for_deferred_response() {
+    for(const auto* route:{"/restart","/factory-reset"}) {
+        Fixture f;f.pages.defer=true;
+        f.server.request(route,HTTP_POST);
+        TEST_ASSERT_TRUE(f.restart.pending);TEST_ASSERT_EQUAL_UINT(0,f.restart.executions);
+        TEST_ASSERT_TRUE(static_cast<bool>(f.pages.completion));
+        f.pages.completion();
+        TEST_ASSERT_EQUAL_UINT(1,f.restart.executions);TEST_ASSERT_TRUE(f.restart.responseBeforeRestart);
+    }
+}
 void test_failed_reset_never_restarts(){
     Fixture f;
     f.resetOk=false;
@@ -112,6 +123,7 @@ void test_abort_never_stages_or_restarts(){
 int main(){UNITY_BEGIN();
     RUN_TEST(test_page_and_route_inventory);
     RUN_TEST(test_explicit_restart_flushes_response_first);
+    RUN_TEST(test_explicit_restart_and_reset_wait_for_deferred_response);
     RUN_TEST(test_failed_reset_never_restarts);
     RUN_TEST(test_successful_reset_restarts_after_response);
     RUN_TEST(test_busy_upload_blocks_reset_and_restart);
