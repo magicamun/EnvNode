@@ -13,7 +13,7 @@ void serviceSdSystemLog(const Configuration& configuration,const ActuatorRuntime
 void configureSdSystemLog(const Configuration& configuration,const ActuatorRuntime& actuators);
 bool sdSystemLogSlotEnabled(ModuleSlot slot);
 bool sdDiagnosticSlotEnabled(ModuleSlot slot);
-bool extendedDiagnosticsAvailable();
-String extendedDiagnosticsStatus();
+bool sdExtendedDiagnosticsAvailable();
+String sdExtendedDiagnosticsStatus();
 String sdSystemLogStatus();
 }

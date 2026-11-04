@@ -817,3 +817,5 @@ ENVNODE_WEB_TEXT(RainLastWetting, "Last detected wetting", "Letzte erkannte Bene
 ENVNODE_WEB_TEXT(RainEndConfirmedAt, "Rain end detected at", "Regenende erkannt um")
 
 ENVNODE_WEB_TEXT(FrequencyUnit, "Frequency", "Frequenz")
+
+ENVNODE_WEB_TEXT(NetworkLogging, "Network logging", "Netzwerklogging")

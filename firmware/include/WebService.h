@@ -134,6 +134,9 @@ private:
     uint32_t restorePreviewTime_ = 0;
     uint32_t restoreSequence_ = 0;
     String restoreToken_;
+    void handleNetworkLogging();
+    void handleNetworkLoggingSave();
+    void handleNetworkLoggingTest();
     void handleSdCard();
     void sendSdDirectoryProgress();
     std::unique_ptr<ISdDirectoryJob> sdDirectory_;

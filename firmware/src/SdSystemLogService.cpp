@@ -222,8 +222,8 @@ bool sdDiagnosticSlotEnabled(ModuleSlot slot) {
     if(!recording)return false;const unsigned mode=recording->mode.load();
     return (mode&4) && ((mode&2)?ModuleSlot::B:ModuleSlot::A)==slot;
 }
-bool extendedDiagnosticsAvailable(){return recording && recording->diagnostics.available();}
-String extendedDiagnosticsStatus(){
+bool sdExtendedDiagnosticsAvailable(){return recording && recording->diagnostics.available();}
+String sdExtendedDiagnosticsStatus(){
     if(!recording)return "unavailable";const auto s=recording->diagnostics.stats();
     const char* states[]={"disabled","waiting","recording","write error / retry"};const unsigned status=recording->diagnosticStatus.load();
     return String(sdCardEjectRequested()?"paused (card eject)":status<4?states[status]:"unknown")+" · queued="+String(static_cast<unsigned>(s.queued))+"/8 · accepted="+String(s.accepted)+" · full="+String(s.full)+" · busy="+String(s.busy)+" · unavailable="+String(s.unavailable)+" · invalid="+String(s.invalid)+" · stale="+String(s.stale)+" · writer_stack_min_bytes="+String(recording->stackFreeBytes.load());

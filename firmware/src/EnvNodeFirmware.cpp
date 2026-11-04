@@ -44,7 +44,7 @@
 #include "MqttDescriptionPublisher.h"
 #include "StructuredLogger.h"
 #include "RecentLogStore.h"
-#include "SdSystemLogService.h"
+#include "NetworkLoggingService.h"
 #include "SystemDiagnostics.h"
 #include "SdModuleActivation.h"
 #include "SdStorageArbiter.h"
@@ -66,7 +66,7 @@ static SerialLogger serialLogSink;
 class SystemLogOutputs : public ILogEntrySink {
 public:
     void begin(unsigned long baud) override {serialLogSink.begin(baud);}
-    void write(const LogEntry& entry) override {serialLogSink.write(entry);enqueueSdSystemLog(entry);}
+    void write(const LogEntry& entry) override {serialLogSink.write(entry);enqueueNetworkSystemLog(entry);}
 };
 static SystemLogOutputs systemLogOutputs;
 static StructuredLogger logger(recentLogStore, logTimeProvider, systemLogOutputs);
@@ -233,7 +233,7 @@ void setupEnvNodeFirmware() {
     const bool sensorsInitialized = sensorRuntime.initialize(
         activeSensorCount, sensorFailureReason);
     app.setup(true);
-    beginSdSystemLog(configuration,actuatorRuntime,recentLogStore,logger,logTimeProvider);
+    beginNetworkLogging(configuration,logTimeProvider,recentLogStore);
     if (!sensorsInitialized) {
         logger.errorf("Sensor runtime initialization failed: %s",
             sensorFailureReason == nullptr ? "unknown failure" : sensorFailureReason);
@@ -244,9 +244,10 @@ void setupEnvNodeFirmware() {
 
 void loopEnvNodeFirmware() {
     if (normalRuntimeStarted) {
+        const uint32_t applicationStartUs=micros();
         app.loop();
         setSdRuntimeStable(!runtimeManager.restartRequired());
-        serviceSdSystemLog(configurationService.getConfiguration(),actuatorRuntime,logger);
+        serviceNetworkLogging(configurationService.getConfiguration(),micros()-applicationStartUs);
         serviceSystemDiagnostics();
     }
 }

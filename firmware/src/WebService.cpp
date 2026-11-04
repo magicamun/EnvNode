@@ -1,3 +1,4 @@
+#include "NetworkLoggingService.h"
 #include "SdCardSpiDiagnostic.h"
 #include "SdSystemLogService.h"
 #include "DiagnosticWebView.h"
@@ -521,6 +522,9 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/configuration/cancel", HTTP_POST, [this]() {
         restoreCandidate_.reset(); restoreToken_ = String(); handleConfiguration();
     });
+    server.on("/network-logging", HTTP_GET, [this]() { handleNetworkLogging(); });
+    server.on("/network-logging/save", HTTP_POST, [this]() { handleNetworkLoggingSave(); });
+    server.on("/network-logging/test", HTTP_POST, [this]() { handleNetworkLoggingTest(); });
     server.on("/sd-card/settings", HTTP_POST, [this]() { handleSdSettings(); });
     server.on("/sd-card/rotation-test", HTTP_GET, [this]() { handleSdRotationPreview(); });
     server.on("/sd-card/rotation-test", HTTP_POST, [this]() { handleSdRotationStart(); });

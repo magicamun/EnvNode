@@ -233,13 +233,13 @@ String WebService::renderSdSettings() {
     if(sd.systemLog) html+=" checked";
     html+=">";html+=de ? "Systemlog auf SD aufzeichnen" : "Record system log on SD";
     html+="</label><label><input type='checkbox' name='systemDiagnostics' value='1'";
-    if(sd.systemDiagnostics)html+=" checked";if(!extendedDiagnosticsAvailable())html+=" disabled";
+    if(sd.systemDiagnostics)html+=" checked";if(!sdExtendedDiagnosticsAvailable())html+=" disabled";
     html+=">";html+=de?"Erweiterte Systemdiagnose":"Extended system diagnostics";
-    html+="<input type='hidden' name='systemDiagnosticsEditable' value='";html+=extendedDiagnosticsAvailable()?"1":"0";html+="'>";
+    html+="<input type='hidden' name='systemDiagnosticsEditable' value='";html+=sdExtendedDiagnosticsAvailable()?"1":"0";html+="'>";
     html+="</label><button type='submit'>";html+=de ? "Speichern" : "Save";
     html+="</button></form><p>";html+=de ? "Die Slot-Auswahl gilt für das Breakout ohne EEPROM-Erkennung." : "Slot selection supports the breakout without EEPROM detection.";
     html+="</p><p>Systemlog: "+escapeHtml(sdSystemLogStatus())+"</p>";
-    html+="<p>";html+=de?"Erweiterte Diagnose: ":"Extended diagnostics: ";html+=escapeHtml(extendedDiagnosticsStatus())+"</p>";
+    html+="<p>";html+=de?"Erweiterte Diagnose: ":"Extended diagnostics: ";html+=escapeHtml(sdExtendedDiagnosticsStatus())+"</p>";
     html+="<p>SD: "+escapeHtml(sdCardMountStatus(de))+"</p>";
     if(sd.enabled) {
         html+="<form method='post' action='/sd-card/eject'><button type='submit'";
@@ -250,7 +250,7 @@ String WebService::renderSdSettings() {
     if(sdCardEjectRequested()) {
         html+=de?"<p>Nach dem Auswerfen neu einstecken, um wieder aufzuzeichnen. Status mit Aktualisieren prüfen. Bei Schreibfehlern bleibt die Entnahme gesperrt.</p>":"<p>Reinsert after ejecting to resume recording. Refresh to check status. Write failures prevent safe removal.</p>";
     }
-    if(sd.systemDiagnostics && extendedDiagnosticsAvailable()) {
+    if(sd.systemDiagnostics && sdExtendedDiagnosticsAvailable()) {
         html+="<form method='post' action='/sd-card/diagnostic-test'><button type='submit'>";
         html+=de?"Diagnose-Testereignis aufzeichnen":"Record diagnostic test event";html+="</button></form>";
     }
@@ -272,7 +272,7 @@ void WebService::handleSdSettings() {
     SdStorageConfiguration requested;
     requested.enabled=server_.hasArg("enabled");requested.slot=slot=="1" ? ModuleSlot::B : ModuleSlot::A;
     requested.systemLog=server_.hasArg("systemLog");
-    requested.systemDiagnostics=extendedDiagnosticsChoice(current.systemDiagnostics,extendedDiagnosticsAvailable(),server_.arg("systemDiagnosticsEditable")=="1",server_.hasArg("systemDiagnostics"));
+    requested.systemDiagnostics=extendedDiagnosticsChoice(current.systemDiagnostics,sdExtendedDiagnosticsAvailable(),server_.arg("systemDiagnosticsEditable")=="1",server_.hasArg("systemDiagnostics"));
     SdStorageLease lease;
     if(!lease) {server_.send(503,"text/plain","SD busy; retry settings save");return;}
     if(!configurationService_.setSdStorageConfiguration(requested)) {
