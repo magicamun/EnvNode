@@ -141,6 +141,24 @@ void test_log_page_and_json_keep_entries_and_localized_page_title() {
     host.server().request("/logs/data", HTTP_GET);
     TEST_ASSERT_NOT_NULL(std::strstr(host.server().responseBody.c_str(), "<warning>"));
 }
+void test_log_routes_page_entries_and_reject_bad_pagination() {
+    TestLogger logger;TestWiFi wifi;Pages pages;RecentLogStore logs;WebHost host(logger,wifi);
+    for(unsigned i=1;i<=64;++i){LogEntry e;e.sequence=i;snprintf(e.message,sizeof(e.message),"entry %u",i);logs.append(e);}
+    LogWebRoutes routes(host,pages,logs);host.registerRoutes(routes);
+    host.server().request("/logs",HTTP_GET);contains(pages.content,"#64</td>");
+    TEST_ASSERT_NULL(strstr(pages.content.c_str(),"#56</td>"));
+    host.server().arguments={{"offset","8"},{"limit","8"}};
+    host.server().request("/logs/data",HTTP_GET);
+    contains(host.server().responseBody.c_str(),"\"sequence\":56,");
+    TEST_ASSERT_NULL(strstr(host.server().responseBody.c_str(),"\"sequence\":48,"));
+    host.server().arguments={{"offset","-1"}};host.server().request("/logs",HTTP_GET);
+    TEST_ASSERT_EQUAL(400,host.server().responseStatus);
+    host.server().arguments={{"limit","64"}};host.server().request("/logs/data",HTTP_GET);
+    TEST_ASSERT_EQUAL(400,host.server().responseStatus);
+    host.server().arguments.clear();host.server().request("/logs/data",HTTP_GET);
+    TEST_ASSERT_EQUAL(200,host.server().responseStatus);
+    contains(host.server().responseBody.c_str(),"\"sequence\":1,");
+}
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_network_form_escapes_values_and_never_embeds_saved_password);
@@ -150,5 +168,6 @@ int main() {
     RUN_TEST(test_failed_network_save_notifies_application_without_changing_settings);
     RUN_TEST(test_log_json_rejects_offline_access_and_serves_setup_ap);
     RUN_TEST(test_log_page_and_json_keep_entries_and_localized_page_title);
+    RUN_TEST(test_log_routes_page_entries_and_reject_bad_pagination);
     return UNITY_END();
 }

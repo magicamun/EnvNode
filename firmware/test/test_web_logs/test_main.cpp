@@ -138,14 +138,35 @@ void testLogPageContainsLocalPollingAndPauseControl() {
     const String html = buildRecentLogHtml(store);
     assertContains(html, "id='log-auto-refresh' type='checkbox' checked");
     assertContains(html, "id='log-refresh-status'>On · 2 s");
-    assertContains(html, "intervalMs=2000");
-    assertContains(html, "fetch('/logs/data',{cache:'no-store'})");
-    assertContains(html, "setInterval(refresh,intervalMs)");
-    assertContains(html, "if(!box.checked)return");
-    assertContains(html, "cell(row,'log-message',entry.message)");
-    TEST_ASSERT_NULL(strstr(html.c_str(), "innerHTML"));
+    assertContains(html,"src='/log-view.js'");
+    const String script(recentLogScript());
+    assertContains(script,"intervalMs=2000");
+    assertContains(script,"fetch('/logs/data?offset='+offset+'&limit=8'");
+    assertContains(script,"setInterval(refresh,intervalMs)");
+    assertContains(script,"if(!box.checked)return");
+    assertContains(script,"cell(row,'log-message',entry.message)");
+    TEST_ASSERT_NULL(strstr(script.c_str(),"innerHTML"));
 }
 
+void testBoundedLogPagesRetainAll64RecordsAndEscapeWorstCaseMessages() {
+    RecentLogStore store;char message[LogMessageCapacity];
+    memset(message,'"',sizeof(message)-1);message[sizeof(message)-1]=0;
+    for(uint32_t i=1;i<=64;++i)store.append(makeEntry(i,LogLevel::Info,message));
+    const String first=buildRecentLogHtml(store,Locale::EnglishUnitedKingdom,0,8);
+    assertContains(first,"#64</td>");assertContains(first,"#57</td>");
+    TEST_ASSERT_NULL(strstr(first.c_str(),"#56</td>"));assertContains(first,"/logs?offset=8");
+    TEST_ASSERT_TRUE(first.length()<18000);
+    TEST_ASSERT_TRUE(strstr(first.c_str(),"id='log-pagination'")<strstr(first.c_str(),"id='log-content'"));
+    const String next=buildRecentLogHtml(store,Locale::GermanGermany,8,8);
+    assertContains(next,"#56</td>");assertContains(next,"#49</td>");
+    assertContains(next,"/logs?offset=0");assertContains(next,"/logs?offset=16");
+    assertContains(next,"Neuere");assertContains(next,"Ältere");
+    const String json=buildRecentLogJson(store,56,8);
+    assertContains(json,"\"count\":64");assertContains(json,"\"sequence\":8,");
+    assertContains(json,"\"sequence\":1,");TEST_ASSERT_NULL(strstr(json.c_str(),"\"sequence\":9,"));
+    TEST_ASSERT_EQUAL_UINT(64,store.count());
+    assertContains(buildRecentLogJson(store,64,8),"\"entries\":[]");
+}
 } // namespace
 
 int main(int, char**) {
@@ -158,5 +179,6 @@ int main(int, char**) {
     RUN_TEST(testEmptyStoreProducesCompactValidJson);
     RUN_TEST(testJsonUsesNewestFirstOrderSharedTimesLevelsAndEscaping);
     RUN_TEST(testLogPageContainsLocalPollingAndPauseControl);
+    RUN_TEST(testBoundedLogPagesRetainAll64RecordsAndEscapeWorstCaseMessages);
     return UNITY_END();
 }
