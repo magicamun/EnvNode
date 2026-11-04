@@ -273,3 +273,58 @@ firmware/.pio/logging-validation/web-gate/. Git-index backups also preserve the
 SMB index-write workaround used to create the commit; unrelated changes were
 not staged. Local firmware package and ELF are in firmware/bin/web-speed/build481/,
 with the ZIP firmware/bin/web-speed/envnode-0.8.7-build481-http-gate.zip.
+
+## Hardware/protocol-page memory repair: build 484
+
+The user reported missing provisioning controls and a failed Logs page on build
+481. Read-only reproduction returned /hardware HTTP 200 with 5,147 bytes: the
+inventory was present but the provisioning form/script was absent and a script
+tail remained. /logs returned 503 with a page-rendering error (header=3144,
+content=0); /logs/data still returned valid retained records. Internal largest
+block was 18,420 bytes and the observed minimum had fallen to 11,204 bytes.
+The provisioning/log route implementations had not changed in the client-gate
+fix; their large-page render paths were not covered by the earlier on-device
+main-page probe. This closes that validation gap without claiming which earlier
+change first made the heap failure visible.
+
+Commits cd7e3ca and 30c9acc repair the memory-heavy representation:
+
+- An owned-page overload on IWebPagePresenter lets production presenters move
+  rendered content into WebHost, avoiding the prior full copy through const String&.
+  Existing synchronous/mock presenters retain a compatible const-reference fallback.
+- The 11,477-byte provisioning dialog script is a separate local static-flash
+  asset at /provisioning-dialog.js. It uses the existing bounded nonblocking
+  response pump without a full script String or HTML wrapper. Provisioning forms,
+  EEPROM snapshot/confirmation checks and browser profile catalog remain intact.
+- Hardware composition checks append failure and releases the temporary section
+  before rendering the common header. The final large StringSumHelper copy is removed.
+- /logs displays eight records at a time with Older/Newer navigation through all
+  64 retained RAM entries. Its script at /log-view.js polls bounded JSON pages
+  with offset/limit=8. Count/capacity retain their stored-record meanings; legacy
+  /logs/data requests without page parameters keep their all-record format.
+  Pagination does not reduce UDP diagnostic rate or erase/limit the retained cache.
+  Page parameters are validated; invalid requests return 400. Long messages
+  remain escaped text. Paging controls survive refresh and support German/English.
+
+Validation: 51 targeted native cases pass (25 WebHost, nine log-view, eight web
+admin, nine provisioning), including the fixed ownership dispatch, static asset
+under backpressure, full 64-record cache and maximally escaped eight-record pages.
+Four Node browser suites pass, including the new polling/pagination/pause/error/
+text-safety test and the existing provisioning/profile/editor suites. One initial
+assertion was updated to inspect the module POST URL in its new script asset,
+instead of incorrectly expecting that script text inline in the HTML.
+
+Both ESP32 and Testboard compile. Clean candidate **0.8.7+484.g30c9acc** reports
+1,574,209 program bytes and 100,912 static RAM bytes on ESP32 (+3,440/+0 versus
+build 481); Testboard 1,481,373/72,200 bytes. Board and module EEPROM snapshots
+were only read, with hashes saved privately before the test; no physical
+provisioning POST was sent. Firmware artifacts are under
+firmware/bin/web-speed/build484/. The user will perform the functional browser
+validation and requested ownership of subsequent build/flash operations while
+the already-started app-only flash of this candidate was in progress. Do not
+report the repaired pages as hardware-validated until that feedback arrives.
+
+The already-running flash then completed successfully: only app0 at 0x10000
+was written, 1,580,784 image bytes, with esptool data-hash verification. No further
+device access was performed after the user requested taking over build/flash.
+Post-flash page/EEPROM/partition readback remains pending user validation.
