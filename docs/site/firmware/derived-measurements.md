@@ -1,78 +1,84 @@
 <!-- SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0 -->
 <!-- See the repository root LICENSE. -->
-# Derived measurements
+# Abgeleitete Messwerte
 
-EnvNode exposes derived physical quantities as separate measurement channels.
-Their MQTT payloads contain `derived: true`. Raw channels remain available.
-These calculations do not perform forecasting, aggregation or automation.
+EnvNode stellt abgeleitete physikalische Größen als separate Messkanäle bereit.
+Ihre MQTT-Nutzdaten enthalten `derived: true`. Die Rohdatenkanäle bleiben verfügbar.
+Diese Berechnungen führen keine Vorhersagen, Aggregationen oder Automatisierungen durch.
 
-## Dew point and absolute humidity
+## Taupunkt und absolute Luftfeuchtigkeit
 
-AM2302, BME280, SHT4x and SHTC3 instances expose `dew_point` (°C, or the
-configured temperature presentation unit) and `absolute_humidity` (g/m³).
-They share the originating sensor's ID, acquisition schedule and timestamp.
-No extra slot or cross-sensor source selection is required.
+Instanzen von AM2302, BME280, SHT4x und SHTC3 stellen `dew_point` (°C oder die
+konfigurierte Temperatureinheit für die Anzeige) und `absolute_humidity` (g/m³) bereit.
+Sie verwenden dieselbe Sensor-ID, denselben Erfassungszeitplan und denselben Zeitstempel
+wie der zugrunde liegende Sensor. Ein zusätzlicher Sensorplatz oder eine
+sensorübergreifende Quellenauswahl ist nicht erforderlich.
 
-The `HumidityDerivedSensor` decorator pairs temperature and relative humidity
-from the same wrapped instance and the same `sample()` or `service()` call.
-It never fills a missing input from the snapshot cache or another instance.
-A partial acquisition produces invalid derived values; no acquisition produces
-no additional messages. Separate simulated temperature and humidity instances
-therefore do not produce these channels.
+Der Dekorator `HumidityDerivedSensor` kombiniert Temperatur und relative Luftfeuchtigkeit
+aus derselben umschlossenen Sensorinstanz und demselben Aufruf von `sample()` oder `service()`.
+Fehlende Eingangswerte ergänzt er niemals aus dem Snapshot-Cache oder einer anderen Instanz.
+Eine unvollständige Erfassung erzeugt ungültige abgeleitete Werte; findet keine Erfassung
+statt, entstehen keine zusätzlichen Nachrichten. Separate simulierte Temperatur- und
+Luftfeuchtigkeitsinstanzen erzeugen diese Kanäle daher nicht.
 
-For temperature T in °C and relative humidity H in percent:
+Für die Temperatur T in °C und die relative Luftfeuchtigkeit H in Prozent gilt:
 
 - γ = ln(H / 100) + 17.62 T / (243.12 + T)
-- dew point = 243.12 γ / (17.62 − γ)
-- vapour pressure e = (H / 100) × 6.112 × exp(17.62 T / (243.12 + T)), in hPa
-- absolute humidity = 216.7 e / (273.15 + T), in g/m³
+- Taupunkt = 243.12 γ / (17.62 − γ)
+- Dampfdruck e = (H / 100) × 6.112 × exp(17.62 T / (243.12 + T)), in hPa
+- Absolute Luftfeuchtigkeit = 216.7 e / (273.15 + T), in g/m³
 
-These are Magnus approximations over liquid water (including supercooled water),
-not frost-point calculations. Inputs are restricted to −45…60 °C and 0…100 % RH.
-At 0 % RH, absolute humidity is zero and dew point is invalid, rather than
-publishing an infinite number. Missing, invalid or out-of-range inputs produce
-`valid: false` without `value`. Valid results have `good` quality when both inputs are good;
-otherwise they preserve the worse input quality (`estimated`,
-`below_measurement_range`, or `degraded`). Derivation alone does not reduce quality.
+Dies sind Magnus-Näherungen über flüssigem Wasser (einschließlich unterkühltem Wasser),
+keine Frostpunktberechnungen. Die Eingangswerte sind auf −45…60 °C und 0…100 % relative
+Luftfeuchtigkeit begrenzt. Bei 0 % relativer Luftfeuchtigkeit ist die absolute
+Luftfeuchtigkeit null und der Taupunkt ungültig, sodass kein unendlicher Zahlenwert
+veröffentlicht wird. Fehlende, ungültige oder außerhalb des zulässigen Bereichs liegende
+Eingangswerte führen zu `valid: false` ohne `value`. Gültige Ergebnisse erhalten die
+Qualität `good`, wenn beide Eingangswerte diese Qualität haben; andernfalls übernehmen
+sie die schlechtere Eingangsqualität (`estimated`, `below_measurement_range` oder
+`degraded`). Die Ableitung allein verringert die Qualität nicht.
 
-References: [Sensirion, Humidity at a glance](https://sensirion.com/resource/application_note/sht/glance),
-[Vaisala, dew point calculation](https://docs.vaisala.com/r/M212417EN-L/en-US/GUID-EBE2B115-3C98-4C8C-9F2D-A2FF1EFECFCC).
+Quellen: [Sensirion, Luftfeuchtigkeit im Überblick](https://sensirion.com/resource/application_note/sht/glance),
+[Vaisala, Taupunktberechnung](https://docs.vaisala.com/r/M212417EN-L/en-US/GUID-EBE2B115-3C98-4C8C-9F2D-A2FF1EFECFCC).
 
-## Solar position
+## Sonnenstand
 
-Choose **Solar Position** (`solar_position`) in an unused sensor slot. It needs
-no GPIO or I²C resource. Its default interval is 60 seconds and can be configured
-like other periodic sensors. It exposes:
+Wähle **Solar Position** (`solar_position`) auf einem freien Sensorplatz. Die Quelle
+benötigt weder GPIO- noch I²C-Ressourcen. Ihr Standardintervall beträgt 60 Sekunden und
+lässt sich wie bei anderen periodischen Sensoren konfigurieren. Sie stellt folgende Werte bereit:
 
-- `solar_azimuth`, degrees clockwise from true north: north 0°, east 90°,
-  south 180°, west 270°; range [0, 360).
-- `solar_elevation`, degrees above the geometric horizon; negative at night.
+- `solar_azimuth`: Winkel in Grad im Uhrzeigersinn ab geografisch Nord: Nord 0°,
+  Ost 90°, Süd 180°, West 270°; Wertebereich [0, 360).
+- `solar_elevation`: Winkel in Grad über dem geometrischen Horizont; nachts negativ.
 
-Both use configured latitude/longitude and synchronized UTC, independently of
-the configured display timezone and daylight saving time. Altitude is not
-required. The source is calculated, not simulated. Results are marked
-`derived: true`, `simulated: false` and `quality: good` when the location and
-synchronized UTC are valid. Invalid prerequisites produce `quality: degraded`.
+Beide Werte verwenden den konfigurierten Breiten- und Längengrad sowie die synchronisierte
+UTC-Zeit, unabhängig von der eingestellten Anzeigezeitzone und der Sommerzeit. Eine
+Höhenangabe ist nicht erforderlich. Die Quelle wird berechnet und ist nicht simuliert.
+Wenn Standort und synchronisierte UTC-Zeit gültig sind, erhalten die Ergebnisse
+`derived: true`, `simulated: false` und `quality: good`. Sind diese Voraussetzungen
+nicht erfüllt, erhalten sie `quality: degraded`.
 
-The solar-centre calculation uses the
-[USNO approximate solar coordinates](https://aa.usno.navy.mil/faq/sun_approx)
-and the [horizontal coordinate transformation](https://aa.usno.navy.mil/faq/alt_az).
-It has no atmospheric refraction, terrain, horizon dip or observer-height
-correction. The implementation accepts years 1800–2199 where representable by
-platform `time_t`. A missing/invalid location or undefined zenith/nadir azimuth
-makes the pair invalid. Before time synchronization the SensorManager discards
-all measurements as for physical sensors. A valid location and time allow
-recovery without disabling the source.
+Die Berechnung des Sonnenmittelpunkts verwendet die
+[angenäherten Sonnenkoordinaten des USNO](https://aa.usno.navy.mil/faq/sun_approx)
+und die [Transformation in Horizontkoordinaten](https://aa.usno.navy.mil/faq/alt_az).
+Atmosphärische Refraktion, Gelände, Horizontabsenkung und Beobachterhöhe werden nicht
+berücksichtigt. Die Implementierung akzeptiert die Jahre 1800–2199, soweit diese mit
+`time_t` auf der jeweiligen Plattform darstellbar sind. Ein fehlender oder ungültiger
+Standort oder ein nicht definierter Azimut im Zenit oder Nadir macht das Wertepaar ungültig.
+Vor der Zeitsynchronisierung verwirft der SensorManager wie bei physischen Sensoren
+sämtliche Messwerte. Sobald Standort und Zeit gültig sind, liefert die Quelle wieder
+gültige Werte, ohne dass sie zuvor deaktiviert werden muss.
 
-## Integration and limits
+## Integration und Grenzen
 
-All channels use the existing SensorManager → snapshot cache → MQTT pipeline.
-Home Assistant Discovery includes the new channels and maps invalid derived
-values to an unavailable numeric state through the value template. Properties,
-display sources and threshold source selection use their ordinary stable keys.
-Dew point shares the configured temperature presentation unit.
+Alle Kanäle verwenden die bestehende Verarbeitungskette SensorManager → Snapshot-Cache → MQTT.
+Home Assistant Discovery berücksichtigt die neuen Kanäle und bildet ungültige abgeleitete
+Werte über das Werte-Template auf einen nicht verfügbaren numerischen Zustand ab.
+Eigenschaften, Anzeigequellen und die Quellenauswahl für Schwellwerte verwenden ihre
+üblichen stabilen Schlüssel. Der Taupunkt verwendet die konfigurierte Temperatureinheit
+für die Anzeige.
 
-Sensor implementation metadata now permits six channels (BME280 uses all six).
-Discovery uses 32-bit masks, with a compile-time check against the number of
-measurement types. Existing measurement IDs and unit IDs remain unchanged;
-the four new measurement types and two new units are appended.
+Die Metadaten der Sensorimplementierungen erlauben nun sechs Kanäle (der BME280 nutzt alle sechs).
+Discovery verwendet 32-Bit-Masken; eine Prüfung beim Kompilieren gleicht diese mit der
+Anzahl der Messwerttypen ab. Bestehende Messwert-IDs und Einheiten-IDs bleiben unverändert;
+die vier neuen Messwerttypen und zwei neuen Einheiten werden angehängt.
