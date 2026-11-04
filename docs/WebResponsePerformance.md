@@ -214,3 +214,62 @@ timeout), and took 4,915.3 ms for one idle client plus a fragmented request.
 The probe checks status 200 and a configurable total-time limit (default one
 second). This is an integration test against a supplied read-only URL; it does
 not change device configuration or any server settings.
+
+## Targeted fix hardware result: build 481
+
+Commit 3e1045b, clean build **0.8.7+481.g3e1045b**, was app-only flashed to the
+same Weather 0.2 at 0x10000 with esptool hash verification. Partition table and
+OTA metadata compare byte-identical before/after. Logger, actual rain-sensor
+slot 4 and controller slot 1 form fingerprints match. No server or firewall
+configuration changed. The user confirmed Safari main-page navigation is now
+fast. Browser feedback is user-observed; the automated hardware evidence below
+uses raw HTTP sockets rather than a new browser recording.
+
+| Idle clients before the real GET | Build 478 | Build 481 |
+| --- | ---: | ---: |
+| 0 | 415.6 ms | 157.7 ms |
+| 1 | 4,840.5 ms | 202.5 ms |
+| 2 | 9,887.0 ms | 192.5 ms |
+| 4 | Socket timeout (10 s) | 198.6 ms |
+| 1, real request fragmented by 50 ms | 4,915.3 ms | 579.1 ms |
+
+All five corrected cases pass the one-second threshold, return HTTP 200 and
+complete 13,082-byte bodies. Another 72 sequential requests across status,
+sensors, controllers, measurements, display and stylesheet all completed;
+per-route medians were 92.5–152.7 ms and the largest total was 281.3 ms. These
+samples demonstrate removal of the reproduced starvation, not a promise that
+all possible network/client stalls are gone. The earlier response-body budget
+experiment is still included and remains separately identifiable in ecc43ac.
+
+Final resource reports: ESP32 1,570,769 program bytes and 100,912 static RAM
+bytes (+1,204/+120 versus clean build 478). Testboard builds with 1,477,877
+program bytes and 72,200 static RAM bytes. Build identity bytes are included in
+these comparisons. After web load, internal 8-bit heap: free 37,852, minimum
+16,656, largest block 18,420 bytes. Logger service maximum was 11,960 us.
+
+Receiver capture of the final boot spans 124.4 s: 449 diagnoses including 434
+rain windows, with two diagnostic packet/measurement-revision gaps, no duplicates
+and one invalid_window. All these exceptions were in the first 15 seconds.
+The invalid window lasted 3,695,794 us and coincided with a measured application
+body maximum of 3,483,331 us, shortly before the MQTT-connected log at uptime
+8,253 ms. That timing suggests synchronous MQTT startup work, but individual
+service profiling was not performed; causality is not proven. This separate
+startup stall remains unresolved. Zero local diagnostic full/offline/error
+counters and sent_local=accepted do not prove UDP delivery: the two startup
+packets were missing at the receiver despite those zero local counters.
+
+The same capture filtered to uptime >=15 s contains **410 diagnostic events,
+400 rain windows, zero sequence gaps, zero rain revision gaps/resets/duplicates
+and only fault=none**. Rain rate in that interval was 3.628 windows/s, gate
+250,043–379,351 us, maximum adjacent end delta 464,839 us. Full diagnostic
+production remains enabled; no rate reduction/averaging was introduced. The
+system stream has 21 gaps in the complete startup sample: 18 locally reported
+startup queue drops plus three additional missing receiver packets. Do not
+report that complete boot as loss-free.
+
+Private snapshots, table/NVS/OTA backups, source/test/build/flash evidence,
+receiver JSONL and before/after timing are kept under
+firmware/.pio/logging-validation/web-gate/. Git-index backups also preserve the
+SMB index-write workaround used to create the commit; unrelated changes were
+not staged. Local firmware package and ELF are in firmware/bin/web-speed/build481/,
+with the ZIP firmware/bin/web-speed/envnode-0.8.7-build481-http-gate.zip.
