@@ -15,6 +15,9 @@ enum class HttpResponseState { Idle, More, Complete, Disconnected, Timeout, Writ
 class HttpResponsePump {
 public:
     static constexpr size_t MaxBytes=65536;
+    static constexpr size_t StepBytes=8192;
+    static constexpr unsigned StepCalls=8;
+    static constexpr uint32_t StepTimeMs=2;
     bool begin(String&& wireHeader,String&& pageHeader,String&& content,const char* footer,uint32_t now) {
         if(active_ || !footer || wireHeader.isEmpty())return false;
         const size_t footerBytes=strlen(footer);
@@ -29,11 +32,16 @@ public:
         if(!active_)return HttpResponseState::Idle;
         if(!sink.connected())return finish(HttpResponseState::Disconnected);
         if(now-started_>=60000 || now-lastProgress_>=10000)return finish(HttpResponseState::Timeout);
-        size_t budget=2048;
-        for(unsigned calls=0;calls<4 && budget;++calls) {
+        const uint32_t stepStarted=millis();
+        size_t budget=StepBytes;
+        for(unsigned calls=0;calls<StepCalls && budget;++calls) {
             while(part_<4 && offset_==length(part_)) {++part_;offset_=0;}
             if(part_==4)return finish(HttpResponseState::Complete);
-            size_t size=length(part_)-offset_;if(size>1024)size=1024;if(size>budget)size=budget;
+            // Socket writes must remain nonblocking. Stop between calls even when
+            // the byte budget has not been exhausted; no waiting for capacity.
+            if(calls && static_cast<uint32_t>(millis()-stepStarted)>=StepTimeMs)
+                return HttpResponseState::More;
+            size_t size=length(part_)-offset_;if(size>1460)size=1460;if(size>budget)size=budget;
             const int written=sink.send(data(part_)+offset_,size);
             if(written<0 || static_cast<size_t>(written)>size)return finish(HttpResponseState::WriteFailed);
             if(!written)return HttpResponseState::More;

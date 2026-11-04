@@ -4,6 +4,7 @@ Shared synchronous HTTP host for EnvNode and future fixture applications.
 
 - WebHost owns WebServer and services its clients. Applications register one or more IWebRoutes providers before begin(). Providers and captured handler state must outlive the server.
 - WebHost serves the existing /style.css asset with its previous cache policy, and streams page header, application content and footer without constructing a second complete-page String. It preserves 503 responses while station WiFi is connecting and permits access in setup-AP mode.
+- Deferred HTML/CSS responses yield after at most 8 KiB, eight nonblocking writes or a two-millisecond check between writes. Slow-response logs distinguish pump scheduling gaps and zero-progress steps; see docs/WebResponsePerformance.md for validation and hardware limits.
 - WebPageFrame accepts product/device/version metadata, language, setup-mode text and application-supplied script/navigation/notice renderers. Fragments render sequentially to avoid keeping all temporary fragment Strings alive alongside the page header. Renderers run synchronously; referenced context must remain valid for the call.
 - Text fields are HTML-escaped. Script, navigation and notices are trusted HTML fragments produced by application code, not direct request parameters.
 - HtmlEscaping, HttpRedirect and IWebService retain their original include names.

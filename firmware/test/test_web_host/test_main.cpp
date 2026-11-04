@@ -145,6 +145,9 @@ void test_backpressure_keeps_page_and_returns_to_measurement_loop() {
     const std::string expected="header"+std::string(13000,'x')+webPageFooter();
     TEST_ASSERT_EQUAL_STRING(expected.c_str(),responseBody(host).c_str());
     TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"HTTP response complete: route=/slow"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"blocked_steps=21"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"max_gap_ms=250"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"max_step_ms=0"));
 }
 void test_stalled_page_times_out_explicitly_and_next_client_can_be_served() {
     TestWiFi wifi;wifi.online=true;TestLogger logger;WebHost host(logger,wifi);
@@ -168,10 +171,10 @@ void test_explicit_restart_waits_for_response_and_grace_without_blocking() {
 }
 class PumpSink : public IHttpResponseSink {
 public:
-    bool online=true,blocked=false,fail=false;size_t limit=7,calls=0;std::string sent;
+    bool online=true,blocked=false,fail=false;size_t limit=7,calls=0;uint32_t writeMs=0;std::string sent;
     bool connected() override {return online;}
     int send(const char* data,size_t size) override {
-        ++calls;if(fail)return -1;if(blocked)return 0;
+        ++calls;delay(writeMs);if(fail)return -1;if(blocked)return 0;
         const size_t n=std::min(size,limit);sent.append(data,n);return static_cast<int>(n);
     }
 };
@@ -183,13 +186,40 @@ void test_response_pump_preserves_partial_writes_backpressure_and_bounds_work() 
     sink.blocked=false;
     for(unsigned i=0;i<100 && pump.active();++i) {
         const auto calls=sink.calls;pump.step(sink,200+i);
-        TEST_ASSERT_LESS_OR_EQUAL_UINT(4,sink.calls-calls);
+        TEST_ASSERT_LESS_OR_EQUAL_UINT(HttpResponsePump::StepCalls,sink.calls-calls);
     }
     TEST_ASSERT_EQUAL_STRING("HTTP\r\nheadbodyätail",sink.sent.c_str());
     TEST_ASSERT_EQUAL_UINT(pump.expected(),pump.sent());TEST_ASSERT_FALSE(pump.active());
-    String large;for(unsigned i=0;i<5000;++i)large+='x';sink.limit=10000;sink.sent.clear();
+    String large;for(unsigned i=0;i<20000;++i)large+='x';sink.limit=10000;sink.sent.clear();
     TEST_ASSERT_TRUE(pump.begin(String("H"),String(),std::move(large),"",0));
-    pump.step(sink,1);TEST_ASSERT_LESS_OR_EQUAL_UINT(2048,pump.sent());TEST_ASSERT_TRUE(pump.active());
+    pump.step(sink,1);TEST_ASSERT_EQUAL_UINT(HttpResponsePump::StepBytes,pump.sent());TEST_ASSERT_TRUE(pump.active());
+}
+void test_large_response_uses_fewer_loop_turns_without_waiting() {
+    HttpResponsePump pump;PumpSink sink;sink.limit=10000;
+    String body;for(unsigned i=0;i<32768;++i)body+='x';
+    TEST_ASSERT_TRUE(pump.begin(String("H"),String(),std::move(body),"",0));
+    unsigned turns=0;
+    while(pump.active() && turns<100) {
+        delay(250);pump.step(sink,millis());++turns;
+    }
+    TEST_ASSERT_EQUAL_UINT(5,turns);
+    TEST_ASSERT_EQUAL_UINT(1250,millis());
+    TEST_ASSERT_EQUAL_UINT(32769,sink.sent.size());
+}
+void test_response_pump_yields_on_elapsed_budget_even_across_clock_wrap() {
+    for(const uint32_t start : {0U,0xFFFFFFFEU}) {
+        arduinoTestMillis()=start;
+        HttpResponsePump pump;PumpSink sink;sink.limit=10000;sink.writeMs=1;
+        String body;for(unsigned i=0;i<20000;++i)body+='x';
+        TEST_ASSERT_TRUE(pump.begin(String("H"),String(),std::move(body),"",start));
+        TEST_ASSERT_TRUE(pump.step(sink,start)==HttpResponseState::More);
+        TEST_ASSERT_EQUAL_UINT(2,sink.calls);
+        TEST_ASSERT_EQUAL_UINT(2,static_cast<uint32_t>(millis()-start));
+        TEST_ASSERT_TRUE(pump.active());
+        sink.writeMs=0;
+        while(pump.active())pump.step(sink,millis());
+        TEST_ASSERT_EQUAL_UINT(20001,sink.sent.size());
+    }
 }
 void test_response_pump_reports_socket_failure_disconnect_and_timeout_across_wrap() {
     HttpResponsePump pump;PumpSink sink;
@@ -235,6 +265,8 @@ int main() {
     RUN_TEST(test_stalled_page_times_out_explicitly_and_next_client_can_be_served);
     RUN_TEST(test_explicit_restart_waits_for_response_and_grace_without_blocking);
     RUN_TEST(test_response_pump_preserves_partial_writes_backpressure_and_bounds_work);
+    RUN_TEST(test_large_response_uses_fewer_loop_turns_without_waiting);
+    RUN_TEST(test_response_pump_yields_on_elapsed_budget_even_across_clock_wrap);
     RUN_TEST(test_response_pump_reports_socket_failure_disconnect_and_timeout_across_wrap);
     RUN_TEST(test_response_pump_rejects_oversized_page_before_transmission);
     RUN_TEST(test_slow_request_without_response_is_identified);

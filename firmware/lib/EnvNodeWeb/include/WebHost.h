@@ -32,6 +32,8 @@ private:
     std::function<void()> afterResponse_;
     uint32_t afterResponseAt_=0;
     String responseRoute_;
+    uint32_t responseSteps_=0,responseBlocked_=0,responseLastStepMs_=0;
+    uint32_t responseMaxGapMs_=0,responseMaxStepMs_=0;
     ILogger& logger_;
     IWiFiService& wifi_;
     MeasuredWebServer server_;

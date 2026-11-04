@@ -68,6 +68,8 @@ void WebHost::sendPage(const std::function<String()>& renderHeader,
 void WebHost::queuePage(String header,String content,int status,const char* type,const char* footer) {
     if(response_.active()) {logger_.error("HTTP response already active");return;}
     responseClient_=server_.client();responseRoute_=server_.uri();
+    responseSteps_=responseBlocked_=responseMaxGapMs_=responseMaxStepMs_=0;
+    responseLastStepMs_=millis();
     server_.setContentLength(header.length()+content.length()+strlen(footer));
     server_.captureResponseHeaders();
     server_.send(status,type,String());
@@ -90,16 +92,26 @@ int WebHost::send(const char* data,size_t size) {
 }
 void WebHost::serviceResponse() {
     const uint32_t now=millis();
+    const uint32_t gap=now-responseLastStepMs_;
+    if(gap>responseMaxGapMs_)responseMaxGapMs_=gap;
+    responseLastStepMs_=now;
+    const size_t before=response_.sent();
     const auto state=response_.step(*this,now);
+    const uint32_t stepMs=millis()-now;
+    if(stepMs>responseMaxStepMs_)responseMaxStepMs_=stepMs;
+    ++responseSteps_;
+    if(state==HttpResponseState::More && response_.sent()==before)++responseBlocked_;
     if(state==HttpResponseState::More)return;
     const uint32_t elapsed=now-response_.started();
     if(state!=HttpResponseState::Complete || elapsed>=1000) {
-        char message[320];
+        char message[256];
         snprintf(message,sizeof(message),
-            "HTTP response %s: route=%s elapsed_ms=%lu sent=%u expected=%u state=%u heap=%u largest=%u",
+            "HTTP response %s: route=%.40s elapsed_ms=%lu sent=%u expected=%u state=%u steps=%lu blocked_steps=%lu max_gap_ms=%lu max_step_ms=%lu heap=%u largest=%u",
             state==HttpResponseState::Complete?"complete":"aborted",responseRoute_.c_str(),
             static_cast<unsigned long>(elapsed),static_cast<unsigned>(response_.sent()),
             static_cast<unsigned>(response_.expected()),static_cast<unsigned>(state),
+            static_cast<unsigned long>(responseSteps_),static_cast<unsigned long>(responseBlocked_),
+            static_cast<unsigned long>(responseMaxGapMs_),static_cast<unsigned long>(responseMaxStepMs_),
             static_cast<unsigned>(ESP.getFreeHeap()),static_cast<unsigned>(ESP.getMaxAllocHeap()));
         logger_.log(state==HttpResponseState::Complete?LogLevel::Info:LogLevel::Warn,message);
     }
