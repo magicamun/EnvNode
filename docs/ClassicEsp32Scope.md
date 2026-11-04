@@ -107,3 +107,17 @@ concurrency, startup and heating behavior, card removal/reinsertion, log downloa
 and largest-free-block measurements are the next acceptance step. The patch fixes
 the proven unmount use-after-free; it does not by itself resolve all earlier
 low-memory mount failures or implement automount/eject.
+
+
+## Weatherstation SD hardware checkpoint — 2026-11-04
+
+The user reports that the integration firmware has been flashed onto the
+existing Weatherstation (192.168.20.63), and the SD module moved from EnvNode
+Mini is recognized and written successfully. This is user-observed hardware
+validation of detection and writing with the classic Arduino 2.0.17 backport.
+The supplied development image was built from integration commit c0daeea.
+
+Reading/downloading the resulting files, longer-duration stability, heap/largest
+free block and card removal/reinsertion are not yet confirmed for this run.
+The firmware still uses per-operation mounts; automount/eject and RainController
+specific diagnostic producers remain outstanding functional work.

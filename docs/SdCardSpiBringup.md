@@ -684,3 +684,17 @@ a separately open HTTP transport-latency issue, not a failed SD transfer in this
 run. The successful trace validates the targeted memory-budget change under the
 reported workload; it is not a long-duration soak test. At that validation checkpoint the full SD branch had
 not yet been merged into main.
+
+
+## Weatherstation SD hardware checkpoint — 2026-11-04
+
+The user reports that the integration firmware has been flashed onto the
+existing Weatherstation (192.168.20.63), and the SD module moved from EnvNode
+Mini is recognized and written successfully. This is user-observed hardware
+validation of detection and writing with the classic Arduino 2.0.17 backport.
+The supplied development image was built from integration commit c0daeea.
+
+Reading/downloading the resulting files, longer-duration stability, heap/largest
+free block and card removal/reinsertion are not yet confirmed for this run.
+The firmware still uses per-operation mounts; automount/eject and RainController
+specific diagnostic producers remain outstanding functional work.
