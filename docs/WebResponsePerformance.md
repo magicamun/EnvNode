@@ -319,12 +319,14 @@ Both ESP32 and Testboard compile. Clean candidate **0.8.7+484.g30c9acc** reports
 build 481); Testboard 1,481,373/72,200 bytes. Board and module EEPROM snapshots
 were only read, with hashes saved privately before the test; no physical
 provisioning POST was sent. Firmware artifacts are under
-firmware/bin/web-speed/build484/. The user will perform the functional browser
-validation and requested ownership of subsequent build/flash operations while
-the already-started app-only flash of this candidate was in progress. Do not
-report the repaired pages as hardware-validated until that feedback arrives.
+firmware/bin/web-speed/build484/. The user requested ownership of subsequent build/flash operations while the
+already-started app-only flash of this candidate was in progress.
 
 The already-running flash then completed successfully: only app0 at 0x10000
 was written, 1,580,784 image bytes, with esptool data-hash verification. No further
 device access was performed after the user requested taking over build/flash.
-Post-flash page/EEPROM/partition readback remains pending user validation.
+The user subsequently confirmed that navigation remains very fast and the
+hardware provisioning and protocol/log views are visible again. This confirms
+restored browser functionality on build 484; it does not constitute an EEPROM
+write test or a post-flash byte-level EEPROM/partition comparison. No further
+device access was performed for that confirmation.
