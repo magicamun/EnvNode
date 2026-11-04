@@ -10,6 +10,7 @@
 #include "SdCardFormat.h"
 #include "SdSystemLog.h"
 #include "SdRotationTest.h"
+#include "SdStorageEligibility.h"
 #include <memory>
 namespace EnvNode {
 void configureSdCardMount(bool enabled,ModuleSlot slot);
@@ -19,7 +20,6 @@ bool sdCardEjectRequested();
 bool sdCardAcceptingAccess();
 uint32_t sdCardMediaGeneration();
 const char* sdCardMountStatus(bool german=false);
-bool sdStoragePinsAvailable(const Configuration& configuration,const ActuatorRuntime& actuators);
 std::unique_ptr<ISdDirectoryJob> startSdDirectoryRead(ModuleSlot slot,const BoardProfile& board,
     const Configuration& configuration,const ActuatorRuntime& actuators,
     const String& path,unsigned offset,SdDirectoryStatus& status);

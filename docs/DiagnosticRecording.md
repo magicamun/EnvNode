@@ -227,3 +227,17 @@ settings are compared explicitly by implementation, without comparing object
 padding or allocating a serialized configuration. Simultaneous hardware,
 schedule, identity, source, target or policy changes retain the existing apply
 requirements; an already pending runtime action is not cancelled.
+
+### Automount eligibility correction
+
+Hardware eligibility is independent of mount state, runtime stability and lease
+ownership. The lifecycle combines eligibility with runtime stability separately;
+file clients additionally require a mounted card. This prevents a startup cycle
+where the automount permission itself requires an existing mount. The eject button
+remains visible whenever SD support is enabled, but is disabled until access is
+available; the adjacent SD state explains whether mount is pending or failed.
+
+Regression validation: 36 hardware/runtime-effect tests and 12 SD lifecycle/log
+buffer tests pass, including hardware eligibility before any mount exists and
+while the storage lease is occupied. On-device startup/listing/eject validation
+remains required.

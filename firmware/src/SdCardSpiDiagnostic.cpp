@@ -2,6 +2,7 @@
 #include "SdCardSpiDiagnostic.h"
 #include "SdCardDiagnostic.h"
 #include "SdStorageArbiter.h"
+#include "SdStorageEligibility.h"
 #include "SdMountLifecycle.h"
 #include "FirmwareBuildInfo.h"
 #include "SdSystemLogService.h"
@@ -215,19 +216,8 @@ const BoardModuleSlotCapability* sdFileSlot(ModuleSlot slotId, const BoardProfil
     const Configuration& configuration, const ActuatorRuntime& actuators, SdDirectoryStatus& status) {
     if(!configuration.sdStorage.enabled) {status=SdDirectoryStatus::Disabled;return nullptr;}
     if(!sdRuntimeStable() || !sdCardAcceptingAccess()) {status=SdDirectoryStatus::Busy;return nullptr;}
-    if(slotId!=configuration.sdStorage.slot) {status=SdDirectoryStatus::Conflict;return nullptr;}
-    const auto* slot = boardModuleSlot(board, slotId);
-    if (!slot || !slot->fiveVoltSupplyAvailable) { status=SdDirectoryStatus::Conflict; return nullptr; }
-    for (const auto& sensor : configuration.sensorSlots) {
-        if (sensor.enabled && usesDiagnosticPin(sensor.hardware, *slot)) { status=SdDirectoryStatus::Conflict; return nullptr; }
-    }
-    for (const auto& actuator : configuration.actuatorSlots) {
-        if (actuator.enabled && usesDiagnosticPin(actuator.hardware, *slot)) { status=SdDirectoryStatus::Conflict; return nullptr; }
-    }
-    for (size_t i=0; i<actuators.runtimeCount(); ++i) {
-        ActuatorRuntimeInfo info;
-        if (actuators.runtimeInfo(i, info) && usesDiagnosticPin(info.hardware, *slot)) { status=SdDirectoryStatus::Conflict; return nullptr; }
-    }
+    const auto* slot=configuredSdStorageSlot(slotId,board,configuration,actuators);
+    if(!slot) status=SdDirectoryStatus::Conflict;
     return slot;
 }
 template<class ReadSector>
@@ -304,9 +294,6 @@ private:
     int fd_=-1; char path_[256]={}; SdFileStamp stamp_;
     const char* error_="none";int errorCode_=0;
 };
-}
-bool sdStoragePinsAvailable(const Configuration& configuration,const ActuatorRuntime& actuators) {
-    SdDirectoryStatus status;return sdFileSlot(configuration.sdStorage.slot,currentBoardProfile(),configuration,actuators,status)!=nullptr;
 }
 std::unique_ptr<ISdStoredFile> openSdCardFile(ModuleSlot slotId,const BoardProfile& board,
     const Configuration& configuration,const ActuatorRuntime& actuators,

@@ -241,8 +241,10 @@ String WebService::renderSdSettings() {
     html+="</p><p>Systemlog: "+escapeHtml(sdSystemLogStatus())+"</p>";
     html+="<p>";html+=de?"Erweiterte Diagnose: ":"Extended diagnostics: ";html+=escapeHtml(extendedDiagnosticsStatus())+"</p>";
     html+="<p>SD: "+escapeHtml(sdCardMountStatus(de))+"</p>";
-    if(sdCardAcceptingAccess()) {
-        html+="<form method='post' action='/sd-card/eject'><button type='submit'>";
+    if(sd.enabled) {
+        html+="<form method='post' action='/sd-card/eject'><button type='submit'";
+        if(!sdCardAcceptingAccess())html+=" disabled";
+        html+=">";
         html+=de?"SD-Karte auswerfen":"Eject SD card";html+="</button></form>";
     }
     if(sdCardEjectRequested()) {
