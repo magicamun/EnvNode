@@ -9,6 +9,9 @@
 #include "ControllerRuntime.h"
 #include "UnitConverter.h"
 #include "MqttTopic.h"
+#include "BufferedDiagnosticRecorder.h"
+#include <cstring>
+#include <vector>
 using namespace EnvNode;
 HardwareSerial Serial;
 // Native firmware build links the existing logger/GPIO adapters as well.
@@ -17,8 +20,8 @@ void HardwareSerial::println(const char*) {}
 size_t HardwareSerial::write(const uint8_t*, size_t count) { return count; }
 void pinMode(unsigned char, int) {}
 void digitalWrite(unsigned char, int) {}
-void setUp() {}
-void tearDown() {}
+void setUp() {installDiagnosticRecorder(nullptr);}
+void tearDown() {installDiagnosticRecorder(nullptr);}
 void test_shared_policy_wetting_end_and_dry_are_independent() {
     RainDetectorPolicy policy;
     policy.enable();
@@ -235,10 +238,16 @@ class RainTestActor : public IOnOffActuator {
 public:
     OnOffState output=OnOffState::Off;
     uint8_t percent=100;
+    bool failWrites=false;
+    unsigned commands=0;
     uint8_t outputPercent() const override { return output==OnOffState::On?percent:0; }
     ActuatorOperationResult begin() override { return ActuatorOperationResult::Completed; }
     ActuatorOperationResult shutdown() override { output=OnOffState::Off; return ActuatorOperationResult::Completed; }
-    ActuatorOperationResult setState(OnOffState state) override { output=state; percent=state==OnOffState::On?100:0; return ActuatorOperationResult::Completed; }
+    ActuatorOperationResult setState(OnOffState state) override {
+        ++commands;
+        if (failWrites) return ActuatorOperationResult::InvalidHardwareResource;
+        output=state; percent=state==OnOffState::On?100:0; return ActuatorOperationResult::Completed;
+    }
     OnOffState state() const override { return output; }
     bool initialized() const override { return true; }
 };
@@ -431,6 +440,219 @@ void test_runtime_autostarts_enabled_rain_controller_with_heater_off() {
     TEST_ASSERT_TRUE(runtime.runtimeInfo(0,info)); TEST_ASSERT_TRUE(info.running);
     TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
 }
+class RainDiagnosticSink : public IDiagnosticRecorder {
+public:
+    struct Entry {DiagnosticSource source;DiagnosticEvent event;};
+    std::vector<Entry> entries;
+    bool active=false;
+    unsigned attempts=0;
+    DiagnosticRecordResult response=DiagnosticRecordResult::Accepted;
+    bool enabled(DiagnosticSource source) const override {
+        return active && ((source.kind==DiagnosticSourceKind::Sensor && source.id==1)
+            || (source.kind==DiagnosticSourceKind::Controller && source.id==3));
+    }
+    DiagnosticRecordResult record(DiagnosticSource source,const DiagnosticEvent& event) override {
+        ++attempts;
+        TEST_ASSERT_TRUE(enabled(source));TEST_ASSERT_TRUE(event.valid());
+        if (response==DiagnosticRecordResult::Accepted) entries.push_back({source,event});
+        return response;
+    }
+    const DiagnosticEvent* last(const char* name) const {
+        for(auto entry=entries.rbegin();entry!=entries.rend();++entry)
+            if(!strcmp(entry->event.name(),name)) return &entry->event;
+        return nullptr;
+    }
+    size_t count(const char* name) const {
+        size_t result=0;for(const auto& entry:entries)if(!strcmp(entry.event.name(),name))++result;
+        return result;
+    }
+};
+const DiagnosticField* rainDiagnosticField(const DiagnosticEvent* event,const char* name) {
+    TEST_ASSERT_NOT_NULL(event);
+    for(size_t i=0;i<event->count();++i)if(!strcmp(event->field(i).key,name))return &event->field(i);
+    return nullptr;
+}
+const DiagnosticField& requiredRainField(const DiagnosticEvent* event,const char* name) {
+    const auto* field=rainDiagnosticField(event,name);TEST_ASSERT_NOT_NULL(field);return *field;
+}
+void test_rain_sensor_diagnostics_capture_raw_faults_without_publication_or_backpressure_effects() {
+    TestFrequencyInput input;FrequencyTestClock clock;FrequencyMeasurementSink measurements;
+    RainDiagnosticSink diagnostics;RainDetectorSensor sensor(1,27,input,clock,diagnostics);
+    sensor.begin();input.next=RainFrequencyPoll::Window;
+    input.window=rainFrequencyWindow(0,250000,8000,false);clock.now=250;sensor.service(measurements);
+    TEST_ASSERT_EQUAL_UINT(0,diagnostics.attempts);
+    diagnostics.active=true;
+    input.window=rainFrequencyWindow(250000,500000,8000,false);clock.now=500;sensor.service(measurements);
+    TEST_ASSERT_EQUAL_UINT(0,measurements.count);
+    const auto* event=diagnostics.last("rain_window");
+    TEST_ASSERT_EQUAL_UINT(6,event->count());
+    TEST_ASSERT_EQUAL_INT64(2,requiredRainField(event,"revision").integer);
+    TEST_ASSERT_EQUAL_INT64(250000,requiredRainField(event,"start_us").integer);
+    TEST_ASSERT_EQUAL_INT64(500000,requiredRainField(event,"end_us").integer);
+    TEST_ASSERT_EQUAL_INT64(8000,requiredRainField(event,"pulses").integer);
+    TEST_ASSERT_FLOAT_WITHIN(0.01F,32000.0F,static_cast<float>(requiredRainField(event,"frequency_hz").number));
+    TEST_ASSERT_EQUAL_STRING("none",requiredRainField(event,"fault").text);
+    TEST_ASSERT_TRUE(diagnostics.entries.back().source.kind==DiagnosticSourceKind::Sensor);
+    TEST_ASSERT_EQUAL_UINT(1,diagnostics.entries.back().source.id);
+    diagnostics.response=DiagnosticRecordResult::Full;
+    input.window=rainFrequencyWindow(500000,750000,9000,false);clock.now=750;sensor.service(measurements);
+    sensor.sample(measurements);TEST_ASSERT_TRUE(measurements.last.valid);
+    TEST_ASSERT_EQUAL_UINT(1,diagnostics.entries.size());
+    RainFrequencySnapshot snapshot;TEST_ASSERT_TRUE(sensor.rainFrequencySnapshot(snapshot));
+    TEST_ASSERT_EQUAL_UINT(3,snapshot.revision);
+    diagnostics.response=DiagnosticRecordResult::Accepted;
+    input.window=rainFrequencyWindow(750000,1000000,0,false);clock.now=1000;sensor.service(measurements);
+    TEST_ASSERT_EQUAL_STRING("no_signal",requiredRainField(diagnostics.last("rain_window"),"fault").text);
+    input.window.frequencyHz=NAN;input.window.fault=RainFrequencyFault::InvalidWindow;
+    sensor.service(measurements);
+    event=diagnostics.last("rain_window");TEST_ASSERT_TRUE(event->valid());
+    TEST_ASSERT_NULL(rainDiagnosticField(event,"frequency_hz"));
+    TEST_ASSERT_EQUAL_STRING("invalid_window",requiredRainField(event,"fault").text);
+    input.next=RainFrequencyPoll::Failed;sensor.service(measurements);
+    TEST_ASSERT_EQUAL_STRING("driver_error",requiredRainField(diagnostics.last("rain_window"),"fault").text);
+    TEST_ASSERT_TRUE(sensor.state()==SensorState::Failed);
+}
+void test_rain_controller_diagnostics_capture_configuration_output_and_deduplicate_faults() {
+    RainDetectorControllerConfiguration cfg;cfg.sourceSensorId=1;cfg.targetActuatorId=1;
+    RainTestSource source;RainTestActors actors;FrequencyTestClock clock;RainTestLogger logger;
+    RainDiagnosticSink diagnostics;diagnostics.active=true;
+    RainDetectorController controller(cfg,ModuleActuatorReference{},source,actors,clock,logger,3,diagnostics);
+    TEST_ASSERT_TRUE(controller.begin()==ControllerOperationResult::Completed);
+    TEST_ASSERT_EQUAL_UINT(4,diagnostics.entries.size());
+    TEST_ASSERT_EQUAL_INT64(1,requiredRainField(diagnostics.last("rain_config"),"sensor_id").integer);
+    TEST_ASSERT_EQUAL_INT64(32000,requiredRainField(diagnostics.last("rain_config"),"dry_hz").integer);
+    TEST_ASSERT_EQUAL_INT64(1000,requiredRainField(diagnostics.last("rain_edge_config"),"edge_ms").integer);
+    for(unsigned i=0;i<30;++i) {
+        clock.now+=250;++source.frame.revision;source.frame.acceptedMs=clock.now;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,7500,false);
+        controller.service();
+    }
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::On);
+    TEST_ASSERT_TRUE(requiredRainField(diagnostics.last("rain_decision"),"heating").boolean);
+    TEST_ASSERT_FALSE(requiredRainField(diagnostics.last("rain_decision"),"wetting").boolean);
+    TEST_ASSERT_EQUAL_INT64(100,requiredRainField(diagnostics.last("rain_output"),"output_percent").integer);
+    controller.service();const size_t unchanged=diagnostics.entries.size();
+    for(unsigned i=0;i<100;++i)controller.service();
+    TEST_ASSERT_EQUAL_UINT(unchanged,diagnostics.entries.size());
+    clock.now+=2000;controller.service();const size_t stale=diagnostics.entries.size();
+    TEST_ASSERT_EQUAL_STRING("stale_input",requiredRainField(diagnostics.last("rain_output"),"reason").text);
+    for(unsigned i=0;i<100;++i)controller.service();
+    TEST_ASSERT_EQUAL_UINT(stale,diagnostics.entries.size());
+    source.available=false;controller.service();const size_t unavailable=diagnostics.entries.size();
+    TEST_ASSERT_EQUAL_STRING("no_input",requiredRainField(diagnostics.last("rain_output"),"reason").text);
+    for(unsigned i=0;i<100;++i)controller.service();
+    TEST_ASSERT_EQUAL_UINT(unavailable,diagnostics.entries.size());
+    actors.available=false;controller.service();const size_t targetLost=diagnostics.entries.size();
+    TEST_ASSERT_NULL(rainDiagnosticField(diagnostics.last("rain_output"),"output_percent"));
+    TEST_ASSERT_EQUAL_STRING("target_unavailable",requiredRainField(diagnostics.last("rain_output"),"operation").text);
+    for(unsigned i=0;i<100;++i)controller.service();
+    TEST_ASSERT_EQUAL_UINT(targetLost,diagnostics.entries.size());
+    actors.available=true;actors.actor.failWrites=true;controller.service();const size_t failed=diagnostics.entries.size();
+    TEST_ASSERT_EQUAL_STRING("actuator_operation_failed",requiredRainField(diagnostics.last("rain_output"),"operation").text);
+    for(unsigned i=0;i<100;++i)controller.service();
+    TEST_ASSERT_EQUAL_UINT(failed,diagnostics.entries.size());
+    actors.actor.failWrites=false;controller.service();
+    TEST_ASSERT_EQUAL_STRING("target_recovered",requiredRainField(diagnostics.last("rain_output"),"reason").text);
+    TEST_ASSERT_TRUE(actors.actor.output==OnOffState::Off);
+    diagnostics.active=false;controller.service();const size_t disabled=diagnostics.entries.size();
+    diagnostics.active=true;controller.service();
+    TEST_ASSERT_EQUAL_UINT(disabled+4,diagnostics.entries.size());
+    const size_t configs=diagnostics.count("rain_config");clock.now+=60000;controller.service();
+    TEST_ASSERT_EQUAL_UINT(configs+1,diagnostics.count("rain_config"));
+    for(const auto& entry:diagnostics.entries) {
+        TEST_ASSERT_TRUE(entry.source.kind==DiagnosticSourceKind::Controller);
+        TEST_ASSERT_EQUAL_UINT(3,entry.source.id);
+        TEST_ASSERT_TRUE(entry.event.valid());TEST_ASSERT_LESS_OR_EQUAL_UINT(6,entry.event.count());
+    }
+}
+void test_rain_diagnostic_rejections_never_change_heater_policy_or_manual_override() {
+    for(const auto rejection:{DiagnosticRecordResult::Full,DiagnosticRecordResult::Busy,
+            DiagnosticRecordResult::Unavailable,DiagnosticRecordResult::Invalid}) {
+        RainDetectorControllerConfiguration cfg;cfg.sourceSensorId=1;cfg.targetActuatorId=1;
+        RainTestSource firstSource,secondSource;RainTestActors firstActors,secondActors;
+        FrequencyTestClock clock;RainTestLogger logger;RainDiagnosticSink diagnostics;
+        diagnostics.active=true;diagnostics.response=rejection;
+        RainDetectorController first(cfg,ModuleActuatorReference{},firstSource,firstActors,clock,logger);
+        RainDetectorController second(cfg,ModuleActuatorReference{},secondSource,secondActors,clock,logger,3,diagnostics);
+        TEST_ASSERT_TRUE(first.begin()==second.begin());
+        for(unsigned i=0;i<420;++i) {
+            clock.now+=250;
+            const float hz=i<30?30000:i<120?34000:i<390?30000:34000;
+            ++firstSource.frame.revision;firstSource.frame.acceptedMs=clock.now;
+            firstSource.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,
+                static_cast<uint32_t>(hz/4),false);
+            secondSource.frame=firstSource.frame;
+            TEST_ASSERT_TRUE(first.service()==second.service());
+            TEST_ASSERT_TRUE(firstActors.actor.output==secondActors.actor.output);
+            TEST_ASSERT_TRUE(first.result().rain==second.result().rain);
+            TEST_ASSERT_TRUE(first.result().valid==second.result().valid);
+            TEST_ASSERT_TRUE(first.result().dry==second.result().dry);
+            TEST_ASSERT_EQUAL_UINT(first.wettingCount(),second.wettingCount());
+            TEST_ASSERT_EQUAL_UINT(firstSource.gateRestarts,secondSource.gateRestarts);
+        }
+        firstActors.actor.output=secondActors.actor.output=
+            firstActors.actor.output==OnOffState::On?OnOffState::Off:OnOffState::On;
+        TEST_ASSERT_TRUE(first.service()==second.service());
+        TEST_ASSERT_FALSE(first.running());TEST_ASSERT_FALSE(second.running());
+        TEST_ASSERT_GREATER_THAN_UINT(0,diagnostics.attempts);
+        TEST_ASSERT_EQUAL_UINT(0,diagnostics.entries.size());
+    }
+}
+class RainDiagnosticClock : public FrequencyTestClock, public ILogTimeProvider {
+public:
+    uint32_t monotonicMs() const override {return now;}
+    bool wallClockEpochSeconds(int64_t&) const override {return false;}
+};
+void test_rain_factory_diagnostics_use_controller_slot_id() {
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    EmptyRainMeasurements measurements; RainDiagnosticSink diagnostics; diagnostics.active=true;
+    installDiagnosticRecorder(&diagnostics);
+    ControllerFactory factory(measurements,actors,clock,logger,nullptr,&source);
+    ControllerSlotConfiguration slot; slot.slotId=3; slot.name="Rain"; slot.enabled=true;
+    slot.implementation=ControllerImplementation::RainDetector;
+    slot.implementationConfiguration.rainDetector.sourceSensorId=1;
+    slot.implementationConfiguration.rainDetector.targetActuatorId=1;
+    ControllerFactoryResult result;
+    auto instance=factory.create(2,slot,result);
+    TEST_ASSERT_NOT_NULL(instance.controller);
+    instance.controller->begin();
+    TEST_ASSERT_EQUAL_UINT(4,diagnostics.entries.size());
+    for(const auto& entry:diagnostics.entries) {
+        TEST_ASSERT_TRUE(entry.source.kind==DiagnosticSourceKind::Controller);
+        TEST_ASSERT_EQUAL_UINT(3,entry.source.id);
+    }
+    installDiagnosticRecorder(nullptr);
+}
+void test_rain_producers_use_real_buffer_and_finite_jsonl_without_storage_dependency() {
+    RainDiagnosticClock clock;BufferedDiagnosticRecorder recorder(clock);
+    recorder.setAvailable(true);recorder.setMask(DiagnosticSourceKind::Sensor,1);
+    recorder.setMask(DiagnosticSourceKind::Controller,1U<<2);
+    TestFrequencyInput input;FrequencyMeasurementSink measurements;
+    RainDetectorSensor sensor(1,27,input,clock,recorder);
+    RainDetectorControllerConfiguration cfg;cfg.sourceSensorId=1;cfg.targetActuatorId=1;
+    RainTestSource source;RainTestActors actors;RainTestLogger logger;
+    RainDetectorController controller(cfg,ModuleActuatorReference{},source,actors,clock,logger,3,recorder);
+    sensor.begin();controller.begin();input.next=RainFrequencyPoll::Window;
+    unsigned windows=0,decisions=0,outputs=0;
+    for(unsigned i=0;i<360;++i) {
+        clock.now+=250;
+        input.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,i<80?8500:7500,false);
+        sensor.service(measurements);TEST_ASSERT_TRUE(sensor.rainFrequencySnapshot(source.frame));
+        controller.service();
+        DiagnosticRecord record;
+        while(recorder.pop(record)) {
+            char json[2048];TEST_ASSERT_GREATER_THAN_UINT(0,encodeDiagnosticRecord(record,json,sizeof(json)));
+            TEST_ASSERT_NULL(strstr(json,"nan"));TEST_ASSERT_NULL(strstr(json,"inf"));
+            TEST_ASSERT_NOT_NULL(strstr(json,"\"epoch_s\":null"));
+            if(!strcmp(record.event.name(),"rain_window"))++windows;
+            if(!strcmp(record.event.name(),"rain_decision"))++decisions;
+            if(!strcmp(record.event.name(),"rain_output"))++outputs;
+        }
+    }
+    TEST_ASSERT_EQUAL_UINT(360,windows);
+    TEST_ASSERT_GREATER_THAN_UINT(0,decisions);TEST_ASSERT_GREATER_THAN_UINT(0,outputs);
+    TEST_ASSERT_EQUAL_UINT(0,recorder.stats().invalid);TEST_ASSERT_EQUAL_UINT(0,recorder.stats().full);
+}
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_startup_above_threshold_confirms_dry_without_heat_or_rain);
@@ -448,5 +670,10 @@ int main() {
     RUN_TEST(test_frequency_metadata_does_not_reuse_ratio_measurements);
     RUN_TEST(test_controller_operates_without_UTC_and_recovers_after_signal_failure);
     RUN_TEST(test_runtime_autostarts_enabled_rain_controller_with_heater_off);
+    RUN_TEST(test_rain_sensor_diagnostics_capture_raw_faults_without_publication_or_backpressure_effects);
+    RUN_TEST(test_rain_controller_diagnostics_capture_configuration_output_and_deduplicate_faults);
+    RUN_TEST(test_rain_diagnostic_rejections_never_change_heater_policy_or_manual_override);
+    RUN_TEST(test_rain_factory_diagnostics_use_controller_slot_id);
+    RUN_TEST(test_rain_producers_use_real_buffer_and_finite_jsonl_without_storage_dependency);
     return UNITY_END();
 }

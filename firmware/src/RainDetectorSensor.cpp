@@ -1,5 +1,6 @@
 // EnvNode-owned: see ../../LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
 #include "RainDetectorSensor.h"
+#include <cmath>
 namespace EnvNode {
 void RainDetectorSensor::begin() {
     observed_ = false;
@@ -13,6 +14,16 @@ void RainDetectorSensor::onRainFrequency(const RainFrequencyWindow& window) {
     ++latest_.revision;
     observed_ = true;
     state_ = window.valid() ? SensorState::Ready : SensorState::Degraded;
+    const DiagnosticSource source(DiagnosticSourceKind::Sensor,id_);
+    if (!diagnostics_.enabled(source)) return;
+    DiagnosticEvent event("rain_window");
+    event.integer("revision",latest_.revision);
+    event.integer("start_us",static_cast<int64_t>(window.startUs));
+    event.integer("end_us",static_cast<int64_t>(window.endUs));
+    event.integer("pulses",window.pulseCount);
+    if (std::isfinite(window.frequencyHz)) event.number("frequency_hz",window.frequencyHz);
+    event.text("fault",rainFrequencyFaultName(window.fault));
+    (void)diagnostics_.record(source,event);
 }
 SensorOperationResult RainDetectorSensor::service(IMeasurementSink& output) {
     (void)output;

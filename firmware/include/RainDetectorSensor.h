@@ -4,13 +4,15 @@
 #include "IRainFrequencyResolver.h"
 #include "IMonotonicClock.h"
 #include "RainFrequencyAcquisition.h"
+#include "IDiagnosticRecorder.h"
 
 namespace EnvNode {
 // Physical/simulated input is injected; no heater policy or transport code.
 class RainDetectorSensor : public ISensor, private IRainFrequencyObserver {
 public:
     RainDetectorSensor(SensorId id, uint8_t gpio, IRainFrequencyInput& input,
-        IMonotonicClock& clock) : id_(id), gpio_(gpio), clock_(clock), acquisition_(input,*this) {}
+        IMonotonicClock& clock, IDiagnosticRecorder& diagnostics = diagnosticRecorder())
+        : id_(id), gpio_(gpio), clock_(clock), acquisition_(input,*this), diagnostics_(diagnostics) {}
     SensorId id() const override { return id_; }
     const char* type() const override { return "RainDetector"; }
     SensorProvenance provenance() const override { return SensorProvenance::Physical; }
@@ -29,6 +31,7 @@ private:
     uint8_t gpio_;
     IMonotonicClock& clock_;
     RainFrequencyAcquisition acquisition_;
+    IDiagnosticRecorder& diagnostics_;
     SensorState state_ = SensorState::Unknown;
     RainFrequencySnapshot latest_;
     bool observed_ = false;

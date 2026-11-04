@@ -55,7 +55,7 @@ ControllerFactoryInstance ControllerFactory::create(
         }
         auto* storage = new (target) RainDetectorStorage;
         storage->controller.reset(new (std::nothrow) RainDetectorController(config,slot.moduleTarget,
-            *rainSource_,actuatorResolver_,monotonicClock_,logger_));
+            *rainSource_,actuatorResolver_,monotonicClock_,logger_,slot.slotId));
         if (!storage->controller) {
             storage->~RainDetectorStorage();
             result = ControllerFactoryResult::InvalidConfiguration;

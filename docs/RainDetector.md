@@ -72,8 +72,8 @@ not calibrated specifications of rain intensity or surface moisture.
 Optional temperature and humidity source selections are persisted and validated
 against the selected sensors' capabilities. They are reserved inputs: no dew-point,
 cold-weather or proportional preventive heating is active. They are not required
-for the current wetting/drying policy. Shared SD diagnostic recording is available;
-recording every local frequency gate for field analysis remains a separate follow-up.
+for the current wetting/drying policy. Shared SD diagnostic recording includes every local frequency gate and controller
+state/output changes for field analysis (see below).
 
 ## Failure and stop behavior
 
@@ -95,6 +95,16 @@ recording every local frequency gate for field analysis remains a separate follo
   starts a new initialization; ordinary signal recovery does not.
 
 ## Diagnostics and MQTT
+
+With SD recording available, enable **Extended diagnostics** on the RainDetector
+sensor and on its controller. The sensor records every completed measurement gate
+(normally 250 ms), including pulse count, frequency and faults. The controller
+records configuration, decisions and output changes, with a fresh context every
+60 seconds. Records go to `/logs/diagnostics` as JSONL; sensor ID and revision
+correlate measurements with decisions. See [Diagnostic recording](DiagnosticRecording.md)
+for the event fields and retention limits. Recording is bounded and best effort;
+a full queue drops diagnostic events without delaying measurement or control.
+The system-health diagnostics checkbox is independent of these entity selections.
 
 Sensors show current raw frequency and the fault name (`none`, `no_signal`,
 `counter_overflow`, `invalid_window`, `driver_error`). A fault does not uniquely

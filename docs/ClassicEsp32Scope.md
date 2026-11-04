@@ -121,3 +121,22 @@ Reading/downloading the resulting files, longer-duration stability, heap/largest
 free block and card removal/reinsertion are not yet confirmed for this run.
 The firmware still uses per-operation mounts; automount/eject and RainController
 specific diagnostic producers remain outstanding functional work.
+
+
+## RainDetector diagnostic producer checkpoint — 2026-11-04
+
+The integration now records raw measurement gates (`rain_window`) and controller
+configuration, decisions and output changes through the shared bounded recorder.
+Enable extended diagnostics independently for the sensor and controller; system
+health recording is a separate selection. Details and retention limits are in
+[Diagnostic recording](DiagnosticRecording.md).
+
+Validation: 20 RainDetector tests, 14 controller-runtime tests and nine recorder
+tests pass. These cover actual factory slot IDs, finite JSONL without UTC,
+raw-gate delivery independent of measurement publication, fault deduplication,
+and unchanged heater behavior when diagnostic records are rejected. Both classic
+firmware targets build successfully. EnvNode uses 1,648,701 program bytes (89.8%)
+and 101,492 static RAM bytes; tester uses 1,473,153 and 71,872 respectively.
+Runtime free heap and on-device SD throughput still require hardware validation.
+The user's existing Weatherstation soak test continues with the earlier image;
+no device was flashed during this change. Automount/eject remains separate work.

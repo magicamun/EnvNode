@@ -57,14 +57,15 @@ result. Avoid a system-log message on every rejected diagnostic event.
 
 Sensor, actuator (including module-actuator) and controller forms offer
 **Extended diagnostics**. The saved choice defaults to false and persists in
-NVS and backup schema 5. Schemas 1–4 remain readable, with all new choices off.
+NVS and backup schema 6. Schemas 1–5 remain readable; schemas 1–4 default
+the diagnostic choices to off.
 Old positional NVS snapshots and JSON backups are tested separately.
 
 The checkbox is editable with configured SD access and an inserted card. When
 unavailable it remains visible and retains the saved choice. Disabled entities
 do not emit even if the preference is retained. Saved settings do not imply a
-producer already implements diagnostic events: Raindetector/SCT013-specific
-instrumentation is later work in the respective application branches.
+producer already implements diagnostic events. RainDetector instrumentation is
+described below; SCT013-specific instrumentation remains separate work.
 
 The first concrete producer is `SystemDiagnostics.cpp`; it uses the public
 recorder only and contains no SD/filesystem dependency.
@@ -147,3 +148,49 @@ run. The shared worker retains over 6 KB of measured stack reserve with its
 12 KiB stack. Per-entity flag persistence/migration remains covered by native
 tests; source-specific Raindetector/SCT013 instrumentation is subsequent work.
 HTTP send latency remains a separately open item.
+
+## RainDetector producers — implementation contract, 2026-11-04
+
+Enable Extended diagnostics on the RainDetector sensor to record every completed
+local gate (nominally 250 ms), independently of the MQTT/publication interval.
+`rain_window` uses the sensor slot ID and contains `revision`, `start_us`,
+`end_us`, `pulses`, `frequency_hz` and `fault`. Invalid gates and acquisition
+failures remain visible. Fault names use the acquisition interface; `none`
+means valid. Non-finite frequency values are omitted, never written as NaN/Inf.
+Recorder uptime is the submission time; start/end are acquisition monotonic times.
+
+Enable Extended diagnostics separately on its RainDetector controller to record
+`rain_decision` on changes of validity, wetting, rain state, heat request or dry
+confirmation. Fields: `sensor_id`, `revision`, `valid`, `wetting`, `rain`,
+`heating`. Revision refers to the sensor window consumed by the controller.
+Unchanged evaluations are suppressed; this is not one decision record per gate.
+
+`rain_output` records lifecycle, fault/recovery and output changes. Fields are
+`sensor_id`, `running`, `dry`, `output_percent`, `reason`, `operation`.
+Output percent is read back from the actuator interface, not inferred from the
+heat request; it is omitted when the target is absent/uninitialized. Reasons
+identify start, stop, manual override, target loss/recovery and input conditions.
+Operation reports the existing controller return result. Repeated unchanged
+stale input, unavailable target or failed writes do not flood the queue.
+
+On diagnostic activation/card return and every 60 seconds, `rain_config` and
+`rain_edge_config` repeat the effective policy and source/target IDs, followed
+by current decision/output snapshots. Config fields are respectively
+`sensor_id`, `target_actuator_id`, `dry_hz`, `hysteresis_hz`, `dry_seconds`,
+`end_seconds`, and `sensor_id`, `edge_ms`, `drop_hz`, `drop_permille`. A zero
+explicit actuator ID may indicate a module-bound target; keep the configuration
+backup to resolve its module identity. Optional temperature/humidity references
+are not policy inputs yet and are not recorded as decision inputs.
+
+Producers depend only on IDiagnosticRecorder, check enabled() before constructing
+an event, allocate no per-event heap and perform no file I/O or retries. The
+existing six-field, eight-entry queue and SD worker budget are unchanged.
+Rejected records never change measurement, heater commands or policy state.
+After a full queue, deduplication still advances; missing transitions are covered
+by loss counters and subsequent periodic snapshots, not guaranteed replay.
+
+Gate recording is intended for field diagnosis and consumes storage continuously.
+The existing 32 MiB diagnostic rotation budget remains in force; this is not a
+promise of days/weeks of complete retention. Enable sensor and controller
+recording together for raw-window/decision correlation, and download parts
+before rotation removes them. No automatic mount/eject change is included.
