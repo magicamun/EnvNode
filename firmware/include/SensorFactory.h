@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <type_traits>
+#include <memory>
 
 #include "AM2302Sensor.h"
 #include "BME280Sensor.h"
@@ -15,6 +16,8 @@
 #include "SimulatedTemperatureSensor.h"
 #include "SensorSlotConfiguration.h"
 #include "RainGaugeSensor.h"
+#include "RainDetectorSensor.h"
+#include "Esp32RainFrequencyInput.h"
 #include "I2CBusManager.h"
 
 namespace EnvNode {
@@ -23,6 +26,7 @@ enum class SensorFactoryResult {
     Created,
     NoRuntimeSensor,
     InvalidStorageIndex,
+    StorageUnavailable,
     StorageOccupied,
     UnknownImplementation,
     InvalidResource,
@@ -41,6 +45,12 @@ public:
     void destroyAll();
 
 private:
+    struct RainDetectorInstance {
+        Esp32RainFrequencyInput input;
+        RainDetectorSensor sensor;
+        RainDetectorInstance(SensorId id, uint8_t gpio, IMonotonicClock& clock)
+            : input(), sensor(id,gpio,input,clock) {}
+    };
     using SensorStorage = typename std::aligned_union<0,
         SimulatedTemperatureSensor,
         SimulatedHumiditySensor,
@@ -50,7 +60,7 @@ private:
         SHT4xSensor,
         SHTC3Sensor,
         SolarPositionSensor,
-        RainGaugeSensor>::type;
+        RainGaugeSensor, RainDetectorInstance>::type;
 
     void destroy(size_t storageIndex);
 
@@ -59,7 +69,7 @@ private:
     ILogger& logger_;
     const IConfigurationService* configuration_;
     const ITimeService* time_;
-    SensorStorage storage_[MaxSensorSlotCount];
+    std::unique_ptr<SensorStorage[]> storage_;
     SensorImplementation constructed_[MaxSensorSlotCount];
 };
 

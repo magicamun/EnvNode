@@ -75,3 +75,72 @@ PropertyReadResult ControllerPropertyReader::read(const PropertyReference& refer
 }
 
 } // namespace EnvNode
+
+#include "ControllerRuntime.h"
+#include "LocaleFormatter.h"
+namespace EnvNode {
+namespace {
+const PropertyEnumOption RainStates[] = {
+    {"unknown", "Unknown"}, {"active", "Rain active"}, {"end_estimated", "Rain end estimated"}
+};
+const char* const RainKeys[] = {"rain", "valid", "heating", "heater_percent", "dry", "wetting_count", "running", "target_available", "rain_start", "rain_end", "rain_end_detected"};
+}
+const char* const* RainDetectorPropertyReader::keys(size_t& count) {
+    count = sizeof(RainKeys)/sizeof(RainKeys[0]); return RainKeys;
+}
+bool RainDetectorPropertyReader::describe(const PropertyReference& reference, PropertyDescription& result) const {
+    result = PropertyDescription{};
+    if (reference.componentKind != PropertyComponentKind::Controller || reference.componentId != info_.id
+        || info_.implementation != ControllerImplementation::RainDetector || !reference.propertyKey) return false;
+    size_t count; const auto list=keys(count);
+    for (size_t i=0;i<count;++i) {
+        if (strcmp(reference.propertyKey,list[i])) continue;
+        result.stableKey=list[i]; result.displayName=list[i];
+        result.valueKind=PropertyValueKind::Boolean;
+        if (!strcmp(list[i],"rain_start") || !strcmp(list[i],"rain_end") || !strcmp(list[i],"rain_end_detected")) {
+            result.valueKind=PropertyValueKind::Text;
+            result.displayName = !strcmp(list[i],"rain_start") ? "Last rain start"
+                : !strcmp(list[i],"rain_end") ? "Last wetting / estimated rain end" : "Rain end detected at";
+        } else if (!strcmp(list[i],"rain")) {
+            result.valueKind=PropertyValueKind::Enumeration;
+            result.enumOptions=RainStates; result.enumOptionCount=3;
+        } else if (!strcmp(list[i],"wetting_count") || !strcmp(list[i],"heater_percent")) {
+            result.valueKind=PropertyValueKind::UnsignedInteger;
+            if (!strcmp(list[i],"heater_percent")) result.canonicalUnit=PresentationUnit::Percent;
+        }
+        return true;
+    }
+    return false;
+}
+PropertyReadResult RainDetectorPropertyReader::read(const PropertyReference& reference, PropertySnapshot& result) const {
+    result=PropertySnapshot{};
+    PropertyDescription description;
+    if (!describe(reference,description)) return PropertyReadResult::UnknownReference;
+    const char* key=reference.propertyKey;
+    if (description.valueKind == PropertyValueKind::Text) {
+        const auto& event = !strcmp(key,"rain_start") ? info_.rainStart
+            : !strcmp(key,"rain_end") ? info_.rainEnd : info_.rainEndDetected;
+        if (!event.occurred || !event.hasTimestamp) return PropertyReadResult::NoValue;
+        tm local{};
+        if (!localtime_r(&event.timestamp,&local)) return PropertyReadResult::NoValue;
+        char iso[24];
+        if (!strftime(iso,sizeof(iso),"%Y-%m-%d %H:%M:%S",&local)) return PropertyReadResult::NoValue;
+        result.value=PropertyValue::text(locale_ ? locale_->formatDateTime(local) : String(iso));
+        result.valid=true; result.hasTimestamp=true; result.timestamp=event.timestamp;
+        return PropertyReadResult::Available;
+    }
+    if (!strcmp(key,"rain")) result.value=PropertyValue::enumeration(RainStates[static_cast<unsigned>(info_.rainDetector.rain)]);
+    else if (!strcmp(key,"wetting_count")) result.value=MeasurementValue::unsignedInteger(info_.rainWettingCount);
+    else if (!strcmp(key,"heater_percent")) result.value=MeasurementValue::unsignedInteger(info_.rainDetector.heating?100:0);
+    else {
+        const bool value=!strcmp(key,"valid")?info_.rainDetector.valid
+            :!strcmp(key,"heating")?info_.rainDetector.heating
+            :!strcmp(key,"dry")?info_.rainDetector.dry
+            :!strcmp(key,"running")?info_.running:info_.targetAvailable;
+        result.value=MeasurementValue::boolean(value);
+    }
+    // Controller status is available even if the input measurement is invalid.
+    result.valid=true;
+    return PropertyReadResult::Available;
+}
+}

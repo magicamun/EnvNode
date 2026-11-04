@@ -14,6 +14,13 @@ enum class ControllerParameter : uint8_t {
     OffThreshold,
     ThresholdDirection,
     MaxMeasurementAgeMs,
+    RainEdgeMs,
+    RainDropHz,
+    RainDropPermille,
+    RainEndSeconds,
+    RainDryHz,
+    RainHysteresisHz,
+    RainDrySeconds,
     Count,
 };
 
@@ -26,6 +33,7 @@ enum class ControllerParameterValueType : uint8_t {
 enum class ControllerParameterUnit : uint8_t {
     Milliseconds,
     SourceMeasurementCanonical,
+    Hertz, Seconds, Permille,
     None,
 };
 

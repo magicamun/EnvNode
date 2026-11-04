@@ -264,6 +264,26 @@ void test_failed_publication_remains_dirty_and_retries_later() {
     TEST_ASSERT_NOT_NULL(findLast(fixture.mqtt.messages, "/actuator/1/description"));
 }
 
+void test_rain_source_target_and_policy_changes_refresh_retained_description() {
+    Fixture fixture;
+    auto& slot=fixture.configuration.configuration.controllerSlots[0];
+    slot.slotId=1;slot.enabled=true;slot.implementation=ControllerImplementation::RainDetector;
+    auto& rain=slot.implementationConfiguration.rainDetector;
+    rain.sourceSensorId=1;rain.targetActuatorId=1;
+    fixture.publisher.loop();fixture.mqtt.messages.clear();
+    fixture.publisher.loop();TEST_ASSERT_EQUAL_UINT32(0,fixture.mqtt.messages.size());
+    rain.sourceSensorId=2;fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(1,fixture.mqtt.messages.size());
+    TEST_ASSERT_NOT_NULL(strstr(fixture.mqtt.messages.back().payload.c_str(),"\"sensor_id\":2"));
+    rain.policy.dryHz=33000;fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(2,fixture.mqtt.messages.size());
+    TEST_ASSERT_NOT_NULL(strstr(fixture.mqtt.messages.back().payload.c_str(),"33000"));
+    rain.targetActuatorId=2;fixture.publisher.loop();
+    TEST_ASSERT_EQUAL_UINT32(3,fixture.mqtt.messages.size());
+    TEST_ASSERT_NOT_NULL(strstr(fixture.mqtt.messages.back().payload.c_str(),"\"actuator_id\":2"));
+    TEST_ASSERT_TRUE(fixture.mqtt.messages.back().retained);
+}
+
 void test_threshold_payload_fits_current_mqtt_buffer() {
     ControllerSlotConfiguration slot;
     slot.slotId = 1;
@@ -300,5 +320,6 @@ int main(int, char**) {
     RUN_TEST(test_none_transitions_clear_and_publish_retained_description);
     RUN_TEST(test_failed_publication_remains_dirty_and_retries_later);
     RUN_TEST(test_threshold_payload_fits_current_mqtt_buffer);
+    RUN_TEST(test_rain_source_target_and_policy_changes_refresh_retained_description);
     return UNITY_END();
 }

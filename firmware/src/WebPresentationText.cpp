@@ -5,6 +5,7 @@
 namespace EnvNode {
 const char* webMeasurementName(Locale locale, MeasurementType value) {
     switch (value) {
+        case MeasurementType::RainDetectorFrequency: return webText(locale, TextId::RainFrequency);
         case MeasurementType::Temperature: return webText(locale, TextId::Temperature);
         case MeasurementType::RelativeHumidity: return webText(locale, TextId::RelativeHumidity);
         case MeasurementType::DewPoint: return webText(locale, TextId::DewPoint);
@@ -35,6 +36,8 @@ const char* webQualityName(Locale locale, MeasurementQuality value) {
 }
 const char* webUnitName(Locale locale, PresentationUnit value) {
     switch (value) {
+        case PresentationUnit::Kilohertz: return "Kilohertz";
+        case PresentationUnit::Hertz: return "Hertz";
         case PresentationUnit::DegreeCelsius: return webText(locale, TextId::Celsius);
         case PresentationUnit::DegreeFahrenheit: return webText(locale, TextId::Fahrenheit);
         case PresentationUnit::Pascal: return webText(locale, TextId::Pascal);
@@ -79,6 +82,7 @@ const char* webDisplayLineError(Locale locale, const DisplayLineResult& result) 
 }
 const char* webSensorImplementationName(Locale locale, SensorImplementation value) {
     switch (value) {
+        case SensorImplementation::RainDetector: return webText(locale, TextId::RainDetectorSensorName);
         case SensorImplementation::None: return webText(locale, TextId::None);
         case SensorImplementation::SimulatedTemperature: return webText(locale, TextId::SimulatedTemperature);
         case SensorImplementation::SimulatedHumidity: return webText(locale, TextId::SimulatedHumidity);
@@ -103,6 +107,7 @@ const char* webActuatorImplementationName(Locale locale, ActuatorImplementation 
 }
 const char* webControllerImplementationName(Locale locale, ControllerImplementation value) {
     switch (value) {
+        case ControllerImplementation::RainDetector: return "RainDetector";
         case ControllerImplementation::None: return webText(locale, TextId::None);
         case ControllerImplementation::Blink: return webText(locale, TextId::Blink);
         case ControllerImplementation::Threshold: return webText(locale, TextId::ThresholdHysteresis);
@@ -115,6 +120,7 @@ const char* webControllerImplementationName(Locale locale, ControllerImplementat
 }
 const char* webSensorDescription(Locale locale, SensorImplementation value) {
     switch (value) {
+        case SensorImplementation::RainDetector: return webText(locale, TextId::RainSensorDescription);
         case SensorImplementation::None: return webText(locale, TextId::NoRuntimeSensor2);
         case SensorImplementation::SimulatedTemperature: return webText(locale, TextId::FirmwareSimulation);
         case SensorImplementation::SimulatedHumidity: return webText(locale, TextId::FirmwareSimulation);
@@ -140,6 +146,7 @@ const char* webActuatorDescription(Locale locale, ActuatorImplementation value) 
 }
 const char* webControllerDescription(Locale locale, ControllerImplementation value) {
     switch (value) {
+        case ControllerImplementation::RainDetector: return webText(locale, TextId::RainControllerDescription);
         case ControllerImplementation::None: return webText(locale, TextId::NoRuntimeController2);
         case ControllerImplementation::Blink: return webText(locale, TextId::PeriodicallySwitchesAnOnOffActuator);
         case ControllerImplementation::Threshold: return webText(locale, TextId::ControlsAnOnOffActuatorFromNumericMeasurement);

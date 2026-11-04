@@ -12,6 +12,7 @@ enum class ControllerImplementation : uint8_t {
     Blink = 1,
     Threshold = 2,
     Selector = 3,
+    RainDetector = 4,
 };
 
 struct ControllerImplementationMetadata {

@@ -83,8 +83,13 @@ void ControllerStatePublisher::loop() {
         current.running = info.running;
         current.targetAvailable = info.targetAvailable;
         current.phase = info.blinkPhase;
+        current.rain = info.rainDetector.rain;
+        current.heating = info.rainDetector.heating;
+        current.dry = info.rainDetector.dry;
+        current.wettingCount = info.rainWettingCount;
         current.sourceAvailable = info.sourceAvailable;
-        current.measurementValid = info.latestMeasurementValid;
+        current.measurementValid = info.implementation == ControllerImplementation::RainDetector
+            ? info.rainDetector.valid : info.latestMeasurementValid;
         current.stale = info.latestSnapshotStale;
         current.decision = info.thresholdDecision;
         current.outputPending = info.outputApplicationPending;
@@ -150,7 +155,8 @@ void ControllerStatePublisher::loop() {
 bool ControllerStatePublisher::sameStatus(
     const StatusSnapshot& left,
     const StatusSnapshot& right) {
-    return left.implementation == right.implementation
+    return left.wettingCount == right.wettingCount && left.rain == right.rain && left.heating == right.heating && left.dry == right.dry
+        && left.implementation == right.implementation
         && left.running == right.running
         && left.targetAvailable == right.targetAvailable
         && left.phase == right.phase
@@ -163,6 +169,16 @@ bool ControllerStatePublisher::sameStatus(
 }
 
 String ControllerStatePublisher::statusPayload(const ControllerRuntimeInfo& info) {
+    if (info.implementation == ControllerImplementation::RainDetector) {
+        return String("{\"running\":") + (info.running?"true":"false")
+            + ",\"wetting_count\":" + String(info.rainWettingCount)
+            + ",\"rain\":\"" + rainDetectorRainStateName(info.rainDetector.rain)
+            + "\",\"valid\":" + (info.rainDetector.valid?"true":"false")
+            + ",\"heating\":" + (info.rainDetector.heating?"true":"false")
+            + ",\"dry\":" + (info.rainDetector.dry?"true":"false")
+            + ",\"target_available\":" + (info.targetAvailable?"true":"false")
+            + ",\"last_result\":\"" + resultName(info.lastOperationResult) + "\"}";
+    }
     if (info.implementation == ControllerImplementation::Selector) {
         return String("{\"running\":") + (info.running ? "true" : "false")
             + ",\"decision\":\"" + decisionName(info.thresholdDecision)
@@ -191,6 +207,19 @@ bool ControllerStatePublisher::parameterValue(
     const ControllerSlotConfiguration& slot,
     ControllerParameter parameter,
     String& value) {
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        const auto& config=slot.implementationConfiguration.rainDetector.policy;
+        switch(parameter) {
+            case ControllerParameter::RainEdgeMs: value=String(config.edgeMs); return true;
+            case ControllerParameter::RainDropHz: value=String(config.dropHz); return true;
+            case ControllerParameter::RainDropPermille: value=String(config.dropPermille); return true;
+            case ControllerParameter::RainEndSeconds: value=String(config.endSeconds); return true;
+            case ControllerParameter::RainDryHz: value=String(config.dryHz); return true;
+            case ControllerParameter::RainHysteresisHz: value=String(config.hysteresisHz); return true;
+            case ControllerParameter::RainDrySeconds: value=String(config.drySeconds); return true;
+            default: return false;
+        }
+    }
     if (slot.implementation == ControllerImplementation::Blink) {
         if (parameter == ControllerParameter::OnDurationMs) {
             value = String(slot.implementationConfiguration.blink.onDurationMs);

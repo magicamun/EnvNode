@@ -277,11 +277,12 @@ private:
 };
 void configurationFields(Fields& f, Configuration& c, bool passwords, const String& version) {
     if (f.reading()) {
+        c.presentation.rainDetectorFrequency = PresentationUnit::Hertz;
         for(auto& slot:c.sensorSlots) slot.extendedDiagnostics=false;
         for(auto& slot:c.actuatorSlots) slot.extendedDiagnostics=false;
         for(auto& slot:c.controllerSlots) slot.extendedDiagnostics=false;
         c.sdStorage = SdStorageConfiguration{}; c.geoPosition = GeoPosition{}; c.pressureReduction = PressureReductionConfiguration{}; }
-    if (version == "2" || version == "3" || (version == "4" || version == "5")) {
+    if (version == "2" || version == "3" || (version == "4" || version == "5" || version == "6")) {
         f.boolean("geo.latitude.configured", c.geoPosition.latitude.configured);
         f.floating("geo.latitude.value", c.geoPosition.latitude.value);
         f.boolean("geo.longitude.configured", c.geoPosition.longitude.configured);
@@ -290,12 +291,12 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         f.floating("geo.altitude.value", c.geoPosition.altitude.value);
         if (!validGeoPosition(c.geoPosition)) f.ok = false;
     }
-    if (version == "3" || (version == "4" || version == "5")) {
+    if (version == "3" || (version == "4" || version == "5" || version == "6")) {
         f.number("pressure.temperatureSensorId", c.pressureReduction.temperatureSensorId, MaxSensorSlotCount);
         f.number("pressure.maxTemperatureAgeMs", c.pressureReduction.maxTemperatureAgeMs, INT32_MAX);
         if (c.pressureReduction.maxTemperatureAgeMs == 0) f.ok = false;
     }
-    if(version=="4" || version=="5") {
+    if(version=="4" || version=="5" || version=="6") {
         f.boolean("sd.enabled",c.sdStorage.enabled);
         f.number("sd.slot",c.sdStorage.slot,1);
         f.boolean("sd.systemLog",c.sdStorage.systemLog);
@@ -358,6 +359,22 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         metadata = ControllerImplementationRegistry::findByStableId(impl.c_str());
         if (!metadata) { f.ok = false; return; } s.implementation = metadata->implementation;
         f.target(p + ".target", s.moduleTarget);
+        if (s.implementation == ControllerImplementation::RainDetector) {
+            auto& rain = s.implementationConfiguration.rainDetector;
+            f.number(p+".rain.temperature",rain.temperatureSource.sensorId,MaxSensorSlotCount);
+            f.number(p+".rain.humidity",rain.humiditySource.sensorId,MaxSensorSlotCount);
+            rain.temperatureSource.measurementType=MeasurementType::Temperature;
+            rain.humiditySource.measurementType=MeasurementType::RelativeHumidity;
+            f.number(p+".rain.sensor",rain.sourceSensorId,MaxSensorSlotCount);
+            f.number(p+".rain.actuator",rain.targetActuatorId,MaxActuatorSlotCount);
+            f.number(p+".rain.edgeMs",rain.policy.edgeMs,100000);
+            f.number(p+".rain.dropHz",rain.policy.dropHz,100000);
+            f.number(p+".rain.dropPermille",rain.policy.dropPermille,100000);
+            f.number(p+".rain.endSeconds",rain.policy.endSeconds,100000);
+            f.number(p+".rain.dryHz",rain.policy.dryHz,100000);
+            f.number(p+".rain.hysteresisHz",rain.policy.hysteresisHz,100000);
+            f.number(p+".rain.drySeconds",rain.policy.drySeconds,100000);
+        }
         auto& b = s.implementationConfiguration.blink;
         f.number(p + ".blink.actuator", b.targetActuatorId, MaxActuatorSlotCount);
         f.number(p + ".blink.onMs", b.onDurationMs, UINT32_MAX); f.number(p + ".blink.offMs", b.offDurationMs, UINT32_MAX);
@@ -385,13 +402,14 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         if (!decodeDisplayConfiguration(display, c.display) || !decodeValueConfiguration(values, c.values)) f.ok = false;
         c.display.configured = configured;
     }
-    if(version=="5") {
+    if(version=="5" || version=="6") {
         f.boolean("sd.systemDiagnostics",c.sdStorage.systemDiagnostics);
         for(size_t i=0;i<MaxSensorSlotCount;++i) f.boolean("diagnostic.sensor."+String(static_cast<unsigned>(i+1)),c.sensorSlots[i].extendedDiagnostics);
         for(size_t i=0;i<MaxActuatorSlotCount;++i) f.boolean("diagnostic.actuator."+String(static_cast<unsigned>(i+1)),c.actuatorSlots[i].extendedDiagnostics);
         for(size_t i=0;i<MaxControllerSlotCount;++i) f.boolean("diagnostic.controller."+String(static_cast<unsigned>(i+1)),c.controllerSlots[i].extendedDiagnostics);
     }
 
+    if (version == "6") f.number("presentation.rainDetectorFrequency", c.presentation.rainDetectorFrequency, 255);
 }
 void header(Fields& f, bool& passwords, String& firmware, String& version) {
     String format("EnvNode-configuration");
@@ -399,7 +417,7 @@ void header(Fields& f, bool& passwords, String& firmware, String& version) {
     unsigned int profile = static_cast<unsigned int>(currentBoardProfile().id);
     f.text("format", format); f.text("version", version); f.text("license", license);
     f.text("firmware", firmware); f.number("boardProfile", profile, 255); f.boolean("includesPasswords", passwords);
-    if (format != "EnvNode-configuration" || (version != "1" && version != "2" && version != "3" && version != "4" && version != "5")
+    if (format != "EnvNode-configuration" || (version != "1" && version != "2" && version != "3" && version != "4" && version != "5" && version != "6")
         || profile != static_cast<unsigned int>(currentBoardProfile().id)) f.ok = false;
 }
 }
@@ -408,7 +426,7 @@ bool encodeConfigurationBackup(const Configuration& configuration, bool includeP
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
     if (!copy) return false;
     String result("{\n"), firmware(firmwareVersion);
-    Fields f(result); String version("5"); header(f, includePasswords, firmware, version); configurationFields(f, *copy, includePasswords, version);
+    Fields f(result); String version("6"); header(f, includePasswords, firmware, version); configurationFields(f, *copy, includePasswords, version);
     const size_t expected = result.length() + 3;
     result += "\n}\n";
     if (!f.ok || result.length() != expected || result.length() > MaxConfigurationBackupLength) return false;
@@ -422,7 +440,7 @@ bool decodeConfigurationBackupCandidate(const String& input, const Configuration
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(current));
     if (!copy) return false;
     bool passwords = false; String firmware;
-    Fields f(object); String version("5"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
+    Fields f(object); String version("6"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !object.empty()) return false;
     candidate = std::move(copy); includesPasswords = passwords; return true;
 }
@@ -439,7 +457,7 @@ bool encodeConfigurationRecordBuffer(const Configuration& configuration,
     std::unique_ptr<uint8_t[]>& output, size_t& size) {
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
     if (!copy) return false;
-    bool passwords = true; String firmware, version("5");
+    bool passwords = true; String firmware, version("6");
     Fields count(nullptr, 0);
     header(count, passwords, firmware, version); configurationFields(count, *copy, true, version);
     if (!count.ok) return false;
@@ -456,7 +474,7 @@ bool encodeConfigurationRecord(const Configuration& configuration, std::vector<u
     if (!copy) return false;
     std::vector<uint8_t> result;
     Fields f(result, true); bool passwords = true; String firmware;
-    String version("5"); header(f, passwords, firmware, version); configurationFields(f, *copy, true, version);
+    String version("6"); header(f, passwords, firmware, version); configurationFields(f, *copy, true, version);
     if (!f.ok || result.size() > MaxConfigurationBackupLength) return false;
     output.swap(result); return true;
 }
@@ -466,7 +484,7 @@ bool decodeConfigurationRecord(const std::vector<uint8_t>& input, const Configur
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(current));
     if (!copy) return false;
     Fields f(input); bool passwords = true; String firmware;
-    String version("5"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
+    String version("6"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !f.complete() || !passwords) return false;
     candidate = *copy; return true;
 }

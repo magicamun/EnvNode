@@ -101,15 +101,15 @@ static ActuatorMqttAdapter actuatorMqttAdapter(
 static ActuatorStatePublisher actuatorStatePublisher(
     logger, configurationService, mqttService, actuatorRuntime);
 static MeasurementSnapshotCache measurementSnapshotCache;
-static ControllerFactory controllerFactory(
-    measurementSnapshotCache, actuatorRuntime, monotonicClock, logger, &valueRuntime);
-static ControllerRuntime controllerRuntime(controllerFactory, logger);
 static MeasurementPublisher measurementPublisher(configurationService, timeService, mqttService);
 static SensorManager sensorManager(
     timeService,
     monotonicClock,
     measurementPublisher,
     measurementSnapshotCache);
+static ControllerFactory controllerFactory(
+    measurementSnapshotCache, actuatorRuntime, monotonicClock, logger, &valueRuntime, &sensorManager);
+static ControllerRuntime controllerRuntime(controllerFactory, logger);
 static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger, &configurationService, &timeService);
 static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger, &configurationService, &timeService);
 static SensorRuntime sensorRuntime(
@@ -138,8 +138,8 @@ static HomeAssistantDiscoveryPublisher homeAssistantDiscoveryPublisher(
     actuatorRuntime);
 static SystemPropertyReader timeProperties(timeService, localeFormatter, FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::GitBranch, FirmwareBuildInfo::CompactIdentity, &configurationService, &wifiService);
 static ValuePropertyReader valueProperties(valueRuntime);
-static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties);
-static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation);
+static PropertyResolver displayProperties(sensorManager, measurementSnapshotCache, actuatorRuntime, controllerRuntime, &timeProperties, &valueProperties, &localeFormatter);
+static PropertyPresentationReader presentedDisplayProperties(displayProperties, configurationService.getConfiguration().presentation, &configurationService.getConfiguration().locale);
 static U8g2TextDisplay oled(i2cBusManager, logger);
 static U8g2TextDisplay secondOled(i2cBusManager, logger);
 static DisplayService displayService(configurationService.getConfiguration().display,

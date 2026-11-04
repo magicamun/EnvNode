@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <cstdint>
+#include <RainDetectorPolicy.h>
 
 #include "ActuatorId.h"
 #include "ModuleActuatorReference.h"
@@ -84,7 +85,16 @@ inline uint32_t selectorMappingSignature(const SelectorControllerConfiguration& 
     return hash;
 }
 
+struct RainDetectorControllerConfiguration {
+    SensorId sourceSensorId = InvalidSensorId;
+    ActuatorId targetActuatorId = InvalidActuatorId;
+    MeasurementSourceReference temperatureSource;
+    MeasurementSourceReference humiditySource;
+    RainDetectorPolicyConfig policy;
+};
+
 struct ControllerImplementationConfiguration {
+    RainDetectorControllerConfiguration rainDetector;
     SelectorControllerConfiguration selector;
     BlinkControllerConfiguration blink;
     ThresholdControllerConfiguration threshold;
@@ -104,6 +114,9 @@ inline bool configuredControllerTargetActuatorId(
     const ControllerSlotConfiguration& slot,
     ActuatorId& targetActuatorId) {
     switch (slot.implementation) {
+        case ControllerImplementation::RainDetector:
+            targetActuatorId = slot.implementationConfiguration.rainDetector.targetActuatorId;
+            return true;
         case ControllerImplementation::Blink:
             targetActuatorId =
                 slot.implementationConfiguration.blink.targetActuatorId;

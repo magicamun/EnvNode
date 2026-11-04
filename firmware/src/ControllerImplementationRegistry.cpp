@@ -5,7 +5,7 @@
 namespace EnvNode {
 namespace {
 
-constexpr size_t ImplementationCount = 4;
+constexpr size_t ImplementationCount = 5;
 
 const ControllerImplementationMetadata* implementations() {
     static const ControllerImplementationMetadata registered[ImplementationCount] = {
@@ -18,6 +18,8 @@ const ControllerImplementationMetadata* implementations() {
             "Controls an On/Off actuator from numeric Measurement thresholds"},
         {ControllerImplementation::Selector, "selector", "Selector", ActuatorCapability::OnOff,
             "Selects automatic decision or fixed On/Off from an Enum Value; Unknown holds output"},
+        {ControllerImplementation::RainDetector, "rain_detector", "RainDetector", ActuatorCapability::OnOff,
+            "Local wetting detection and full-output dry heating"},
     };
     return registered;
 }

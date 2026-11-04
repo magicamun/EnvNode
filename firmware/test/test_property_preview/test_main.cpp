@@ -63,6 +63,7 @@ void test_float_width_precision_alignment_and_literal_percent() {
     Reader reader;
     expectText(reader, "Temperature: %.1f C", "Temperature: 21.2 C");
     expectText(reader, "[%8.2f]", "[   21.25]");
+    expectText(reader, "[%5.2f]", "[21.25]");
     expectText(reader, "[%-8.2f]", "[21.25   ]");
     expectText(reader, "%08.2f %%", "00021.25 %");
     expectText(reader, "%%%f%%", "%21.250000%");
@@ -78,6 +79,7 @@ void test_integer_and_boolean_text() {
     expectText(reader, "%u", "4294967295");
     reader.snapshot.value = MeasurementValue::unsignedInteger(42);
     expectText(reader, "%05u", "00042");
+    expectText(reader, "[%3u]", "[ 42]");
     reader.description.valueKind = PropertyValueKind::Boolean;
     reader.description.trueText = "On";
     reader.description.falseText = "Off";
@@ -554,8 +556,37 @@ void test_presentation_preserves_untyped_values_and_invalid_states() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(PropertyReadResult::NoValue), static_cast<int>(presented.read(Source, snapshot)));
     TEST_ASSERT_FALSE(snapshot.valid);
 }
+
+void test_frequency_presentation_applies_kilohertz_before_width_precision() {
+    Reader reader; reader.description.measurementType=MeasurementType::RainDetectorFrequency;
+    reader.description.canonicalUnit=PresentationUnit::Hertz;
+    reader.snapshot.value=MeasurementValue::floatingPoint(32125);
+    PresentationConfiguration config; config.rainDetectorFrequency=PresentationUnit::Kilohertz;
+    PropertyPresentationReader presented(reader,config);
+    TEST_ASSERT_EQUAL_STRING("32.12 kHz",formatPropertyText(presented,Source,"%5.2f kHz").text);
+    config.rainDetectorFrequency=PresentationUnit::Hertz;
+    TEST_ASSERT_EQUAL_STRING("32125 Hz",formatPropertyText(presented,Source,"%.0f Hz").text);
+    float canonical=0; TEST_ASSERT_TRUE(reader.snapshot.value.tryGetFloatingPoint(canonical));
+    TEST_ASSERT_EQUAL_FLOAT(32125,canonical);
+}
+
+void test_locale_decimal_separator_preserves_padding_literals_and_canonical_data() {
+    Reader reader; reader.description.measurementType=MeasurementType::RainDetectorFrequency;
+    reader.description.canonicalUnit=PresentationUnit::Hertz;
+    reader.snapshot.value=MeasurementValue::floatingPoint(33948);
+    PresentationConfiguration config; config.rainDetectorFrequency=PresentationUnit::Kilohertz;
+    LocaleConfiguration locale; locale.locale=Locale::GermanGermany;
+    PropertyPresentationReader presented(reader,config,&locale);
+    TEST_ASSERT_EQUAL_STRING("Detfreq.: 33,948 kHz",formatPropertyText(presented,Source,"Detfreq.: %.3f kHz").text);
+    TEST_ASSERT_EQUAL_STRING("v1.2 [  33,948]",formatPropertyText(presented,Source,"v1.2 [%8.3f]").text);
+    TEST_ASSERT_EQUAL_STRING("[0033,948]",formatPropertyText(presented,Source,"[%08.3f]").text);
+    TEST_ASSERT_EQUAL_STRING("[33,948  ]",formatPropertyText(presented,Source,"[%-8.3f]").text);
+    locale.locale=Locale::EnglishUnitedStates;
+    TEST_ASSERT_EQUAL_STRING("33.948 kHz",formatPropertyText(presented,Source,"%.3f kHz").text);
+    TEST_ASSERT_EQUAL_STRING("33948.000 Hz",formatPropertyText(reader,Source,"%.3f Hz").text);
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_presentation_converts_before_formatting_and_tracks_live_units); RUN_TEST(test_presentation_preserves_untyped_values_and_invalid_states); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
+    UNITY_BEGIN(); RUN_TEST(test_locale_decimal_separator_preserves_padding_literals_and_canonical_data); RUN_TEST(test_frequency_presentation_applies_kilohertz_before_width_precision); RUN_TEST(test_presentation_converts_before_formatting_and_tracks_live_units); RUN_TEST(test_presentation_preserves_untyped_values_and_invalid_states); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
     RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
     RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
     RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);

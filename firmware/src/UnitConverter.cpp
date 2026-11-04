@@ -20,6 +20,9 @@ bool UnitConverter::convert(
     }
 
     switch (presentationUnit) {
+        case PresentationUnit::Kilohertz:
+            presentationValue = canonicalValue / 1000.0F;
+            return type == MeasurementType::RainDetectorFrequency;
         case PresentationUnit::DegreeFahrenheit:
             presentationValue = canonicalValue * (9.0F / 5.0F) + 32.0F;
             return type == MeasurementType::Temperature
@@ -59,6 +62,7 @@ bool UnitConverter::convert(
         case PresentationUnit::WattPerSquareMetre:
         case PresentationUnit::Ratio:
         case PresentationUnit::Metre:
+        case PresentationUnit::Hertz:
             presentationValue = canonicalValue;
             return true;
         case PresentationUnit::None:
@@ -72,6 +76,8 @@ const char* UnitConverter::symbol(PresentationUnit unit) {
         case PresentationUnit::GramPerCubicMetre: return "g/m\xC2\xB3";
         case PresentationUnit::Degree: return "\xC2\xB0";
 
+        case PresentationUnit::Kilohertz: return "kHz";
+        case PresentationUnit::Hertz: return "Hz";
         case PresentationUnit::DegreeCelsius: return "\xC2\xB0" "C";
         case PresentationUnit::DegreeFahrenheit: return "\xC2\xB0" "F";
         case PresentationUnit::Pascal: return "Pa";
@@ -94,6 +100,8 @@ const char* UnitConverter::displayName(PresentationUnit unit) {
         case PresentationUnit::GramPerCubicMetre: return "Gram per cubic metre";
         case PresentationUnit::Degree: return "Degree";
 
+        case PresentationUnit::Kilohertz: return "Kilohertz";
+        case PresentationUnit::Hertz: return "Hertz";
         case PresentationUnit::DegreeCelsius: return "Celsius";
         case PresentationUnit::DegreeFahrenheit: return "Fahrenheit";
         case PresentationUnit::Pascal: return "Pascal";
@@ -116,6 +124,8 @@ const char* UnitConverter::stableKey(PresentationUnit unit) {
         case PresentationUnit::GramPerCubicMetre: return "gram_per_cubic_metre";
         case PresentationUnit::Degree: return "degree";
 
+        case PresentationUnit::Kilohertz: return "kilohertz";
+        case PresentationUnit::Hertz: return "hertz";
         case PresentationUnit::None: return "none";
         case PresentationUnit::DegreeCelsius: return "degree_celsius";
         case PresentationUnit::DegreeFahrenheit: return "degree_fahrenheit";
@@ -138,7 +148,7 @@ bool UnitConverter::parseStableKey(const char* key, PresentationUnit& unit) {
         return false;
     }
     for (uint8_t value = static_cast<uint8_t>(PresentationUnit::None);
-         value <= static_cast<uint8_t>(PresentationUnit::Degree);
+         value <= static_cast<uint8_t>(PresentationUnit::Kilohertz);
          ++value) {
         const PresentationUnit candidate = static_cast<PresentationUnit>(value);
         const char* candidateKey = stableKey(candidate);

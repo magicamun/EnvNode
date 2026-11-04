@@ -141,3 +141,10 @@ def on_post_build(config, **kwargs):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     module.render_all(config, pdf_documents(config))
+# Current mechanical RainDetector revisions; historical downloads remain available.
+for _name, _rev in (("Head", "0.2"), ("Controller", "0.4")):
+    _pdf = f"RainDetector{_name}_Bestueckungs_und_Bringup_Rev{_rev}.pdf"
+    DOWNLOADS[f"assets/downloads/{_pdf}"] = f"hardware/kicad/Sensors/RainDetector{_name}/Documentation/{_pdf}"
+    for _view in ("top", "bottom"):
+        _img = f"RainDetector{_name}-Rev{_rev}-{_view}.png"
+        DOWNLOADS[f"assets/images/rain-detector/{_img}"] = f"images/rain-detector/{_img}"

@@ -26,6 +26,7 @@ struct PresentationConfiguration {
     PresentationUnit temperature = PresentationUnit::DegreeCelsius;
     PresentationUnit atmosphericPressure = PresentationUnit::Pascal;
     PresentationUnit solarCellTemperature = PresentationUnit::DegreeCelsius;
+    PresentationUnit rainDetectorFrequency = PresentationUnit::Hertz;
     PresentationUnit rainDetectorLevel = PresentationUnit::Ratio;
 
     PresentationUnit unitFor(MeasurementType type) const {
@@ -35,6 +36,7 @@ struct PresentationConfiguration {
             case MeasurementType::SeaLevelPressure:
             case MeasurementType::AtmosphericPressure: return atmosphericPressure;
             case MeasurementType::SolarCellTemperature: return solarCellTemperature;
+            case MeasurementType::RainDetectorFrequency: return rainDetectorFrequency;
             case MeasurementType::RainDetectorLevel: return rainDetectorLevel;
             default: return measurementTypeMetadata(type).defaultPresentationUnit;
         }

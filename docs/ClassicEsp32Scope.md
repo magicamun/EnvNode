@@ -69,3 +69,41 @@ comparison. Both Arduino 2 firmware targets build successfully. EnvNode uses
 1,615,389 of 1,835,008 program bytes and 105,012 static RAM bytes. The compiler
 dependency file confirms that sd_diskio.cpp comes from the local corrected
 library. Combined RainDetector validation and hardware acceptance remain open.
+
+
+## RainDetector integration — 2026-11-04
+
+The RainDetector branch is merged with the current main functionality, including
+SD recording, hardware provisioning, derived humidity values and solar position.
+The production composition supplies SensorManager as the local frequency source
+and uses the locale-aware property adapters for event times and numeric display.
+RainDetector description changes refresh retained MQTT metadata.
+
+Published main IDs are preserved: SolarPosition remains implementation 9;
+RainDetector is added as 10. Existing measurement IDs 1–16 remain unchanged;
+frequency is 17. Existing unit IDs 13/14 retain density/angle; Hz/kHz use 15/16.
+The combined backup/snapshot schema is version 6, appending frequency preference
+after the version-5 fields. Stable main schemas 1–5 remain readable and default
+frequency presentation to Hz, preserving their SD and diagnostic choices.
+Experimental RainDetector branch builds had colliding IDs and a different draft
+v4 layout; those draft encodings are not the stable main compatibility contract.
+Review/recreate experimental configurations before using them on this baseline.
+
+The controller's larger RainDetector history is owned only by instantiated
+RainDetector controllers, rather than inflating all 16 slots of both runtime
+banks. Frequency acquisition and policy service allocate no per-window memory.
+Task-time checked allocation and the existing runtime failure handling remain.
+
+Combined validation: 653 unique native tests pass, including a corrected rerun
+of the 20-test configuration/backup suite; all 71 tester-native tests pass.
+All three browser suites pass. Both classic Arduino 2.0.17 firmware targets
+build with the project-local SD correction. Before the final commit identity
+refresh, EnvNode uses 1,646,389 program bytes (89.7% of 1,835,008) and 101,492
+static RAM bytes; tester uses 1,473,153 program bytes and 71,872 static RAM bytes.
+These are build measurements, not a measurement of runtime free heap.
+
+No firmware was uploaded and main was not updated. On-device RainDetector/SD
+concurrency, startup and heating behavior, card removal/reinsertion, log download
+and largest-free-block measurements are the next acceptance step. The patch fixes
+the proven unmount use-after-free; it does not by itself resolve all earlier
+low-memory mount failures or implement automount/eject.

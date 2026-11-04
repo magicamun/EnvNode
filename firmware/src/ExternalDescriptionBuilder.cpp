@@ -50,6 +50,9 @@ void appendCapabilities(String& output, ActuatorCapability capabilities) {
 const char* parameterUnit(
     const ControllerParameterDescriptor& descriptor,
     MeasurementType sourceType) {
+    if (descriptor.unit == ControllerParameterUnit::Hertz) return "hertz";
+    if (descriptor.unit == ControllerParameterUnit::Seconds) return "s";
+    if (descriptor.unit == ControllerParameterUnit::Permille) return "permille";
     if (descriptor.unit == ControllerParameterUnit::Milliseconds) return "ms";
     if (descriptor.unit == ControllerParameterUnit::None) return "";
     const PresentationUnit unit = measurementTypeMetadata(sourceType).canonicalUnit;
@@ -67,6 +70,19 @@ void appendParameterValue(
             parameter == ControllerParameter::OnDurationMs
                 ? blink.onDurationMs : blink.offDurationMs);
         return;
+    }
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        const auto& config=slot.implementationConfiguration.rainDetector.policy;
+        switch(parameter) {
+            case ControllerParameter::RainEdgeMs: appendJsonUnsigned(output,config.edgeMs); return;
+            case ControllerParameter::RainDropHz: appendJsonUnsigned(output,config.dropHz); return;
+            case ControllerParameter::RainDropPermille: appendJsonUnsigned(output,config.dropPermille); return;
+            case ControllerParameter::RainEndSeconds: appendJsonUnsigned(output,config.endSeconds); return;
+            case ControllerParameter::RainDryHz: appendJsonUnsigned(output,config.dryHz); return;
+            case ControllerParameter::RainHysteresisHz: appendJsonUnsigned(output,config.hysteresisHz); return;
+            case ControllerParameter::RainDrySeconds: appendJsonUnsigned(output,config.drySeconds); return;
+            default: output+='0'; return;
+        }
     }
     const ThresholdControllerConfiguration& threshold =
         slot.implementationConfiguration.threshold;
@@ -234,6 +250,11 @@ bool buildControllerDescription(
         output += ",\"on_code\":"; appendJsonString(output, selector.onCode.c_str());
         output += ",\"off_code\":"; appendJsonString(output, selector.offCode.c_str());
         output += ",\"unknown_behavior\":\"hold\"}";
+    }
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        const auto& rain=slot.implementationConfiguration.rainDetector;
+        output += "{\"sensor_id\":"; appendJsonUnsigned(output,rain.sourceSensorId);
+        output += ",\"measurement\":\"rain_detector_frequency\",\"unit\":\"hertz\"}";
     }
     if (slot.implementation == ControllerImplementation::Threshold) {
         const MeasurementSourceReference& source =

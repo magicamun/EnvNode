@@ -76,6 +76,9 @@ ISensor* SensorFactory::create(
         return nullptr;
     }
 
+    // Reserve bounded storage only after the scheduler has started.
+    if (!storage_) storage_.reset(new (std::nothrow) SensorStorage[MaxSensorSlotCount]);
+    if (!storage_) { result = SensorFactoryResult::StorageUnavailable; return nullptr; }
     void* target = &storage_[storageIndex];
     ISensor* sensor = nullptr;
     switch (slot.implementation) {
@@ -99,6 +102,11 @@ ISensor* SensorFactory::create(
                 monotonicClock_,
                 logger_);
             break;
+        case SensorImplementation::RainDetector: {
+            auto* instance = new (target) RainDetectorInstance(slot.slotId, slot.hardware.gpio.number, monotonicClock_);
+            sensor = &instance->sensor;
+            break;
+        }
         case SensorImplementation::RainGauge:
             sensor = new (target) RainGaugeSensor(
                 slot.slotId,
@@ -133,6 +141,7 @@ ISensor* SensorFactory::create(
 }
 
 void SensorFactory::destroy(size_t storageIndex) {
+    if (!storage_) return;
     void* target = &storage_[storageIndex];
     switch (constructed_[storageIndex]) {
         case SensorImplementation::SolarPosition:
@@ -149,6 +158,9 @@ void SensorFactory::destroy(size_t storageIndex) {
             break;
         case SensorImplementation::AM2302:
             static_cast<AM2302Sensor*>(target)->~AM2302Sensor();
+            break;
+        case SensorImplementation::RainDetector:
+            static_cast<RainDetectorInstance*>(target)->~RainDetectorInstance();
             break;
         case SensorImplementation::RainGauge:
             static_cast<RainGaugeSensor*>(target)->~RainGaugeSensor();

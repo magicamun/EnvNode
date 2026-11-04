@@ -20,6 +20,7 @@ enum class SensorImplementation : uint8_t {
     SHT4x = 7,
     SHTC3 = 8,
     SolarPosition = 9,
+    RainDetector = 10,
 };
 
 constexpr size_t MaxImplementationMeasurementTypeCount = 6;

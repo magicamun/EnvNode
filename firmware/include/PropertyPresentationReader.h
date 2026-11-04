@@ -8,10 +8,13 @@
 namespace EnvNode {
 class PropertyPresentationReader : public IPropertyReader {
 public:
-    PropertyPresentationReader(const IPropertyReader& canonical, const PresentationConfiguration& configuration)
-        : canonical_(canonical), configuration_(configuration) {}
+    PropertyPresentationReader(const IPropertyReader& canonical, const PresentationConfiguration& configuration,
+        const LocaleConfiguration* locale = nullptr)
+        : canonical_(canonical), configuration_(configuration), locale_(locale) {}
     bool describe(const PropertyReference& reference, PropertyDescription& result) const override {
         if (!canonical_.describe(reference, result)) { result = PropertyDescription{}; return false; }
+        if (result.valueKind == PropertyValueKind::FloatingPoint && locale_)
+            result.decimalSeparator = locale_->locale == Locale::GermanGermany ? ',' : '.';
         if (converts(result)) result.presentationUnit = UnitConverter::resolvePresentationUnit(
             result.measurementType, configuration_.unitFor(result.measurementType));
         return true;
@@ -41,5 +44,6 @@ private:
     }
     const IPropertyReader& canonical_;
     const PresentationConfiguration& configuration_;
+    const LocaleConfiguration* locale_;
 };
 }

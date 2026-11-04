@@ -20,6 +20,8 @@ enum class PresentationUnit : uint8_t {
     Centimetre = 12,
     GramPerCubicMetre = 13,
     Degree = 14,
+    Hertz = 15,
+    Kilohertz = 16,
 };
 
 } // namespace EnvNode

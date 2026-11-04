@@ -75,6 +75,19 @@ uint32_t controllerSignature(const ControllerSlotConfiguration& slot) {
             hashValue(hash, selectorMappingSignature(selector));
             break;
         }
+        case ControllerImplementation::RainDetector: {
+            const auto& rain = slot.implementationConfiguration.rainDetector;
+            hashValue(hash, rain.sourceSensorId);
+            hashValue(hash, rain.targetActuatorId);
+            hashValue(hash, rain.policy.edgeMs);
+            hashValue(hash, rain.policy.dropHz);
+            hashValue(hash, rain.policy.dropPermille);
+            hashValue(hash, rain.policy.endSeconds);
+            hashValue(hash, rain.policy.dryHz);
+            hashValue(hash, rain.policy.hysteresisHz);
+            hashValue(hash, rain.policy.drySeconds);
+            break;
+        }
         case ControllerImplementation::None:
         default:
             break;

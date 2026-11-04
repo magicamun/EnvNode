@@ -2627,7 +2627,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "EnvNode-Footprints:RainDetector_Interdigitated_48.86x37.25mm_P0.51mm"
+		(property "Footprint" "EnvNode-Footprints:RainDetector_Interdigitated_44.78x37.25mm_P0.51mm"
 			(at 129.2352 142.24 0)
 			(hide yes)
 			(show_name no)

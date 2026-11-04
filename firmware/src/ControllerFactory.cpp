@@ -10,11 +10,11 @@ ControllerFactory::ControllerFactory(
     IMeasurementResolver& measurementResolver,
     IOnOffActuatorResolver& actuatorResolver,
     IMonotonicClock& monotonicClock,
-    ILogger& logger, const IEnumValueReader* values)
+    ILogger& logger, const IEnumValueReader* values, IRainFrequencyResolver* rainSource)
     : measurementResolver_(measurementResolver)
     , actuatorResolver_(actuatorResolver)
     , monotonicClock_(monotonicClock)
-    , logger_(logger), values_(values) {
+    , logger_(logger), values_(values), rainSource_(rainSource) {
     for (size_t index = 0; index < MaxControllerSlotCount; ++index) {
         constructed_[index] = ControllerImplementation::None;
     }
@@ -43,8 +43,28 @@ ControllerFactoryInstance ControllerFactory::create(
         result = ControllerFactoryResult::UnknownImplementation;
         return instance;
     }
+    // Reserve bounded storage only after the scheduler has started.
+    if (!storage_) storage_.reset(new (std::nothrow) ControllerStorage[MaxControllerSlotCount]);
+    if (!storage_) { result = ControllerFactoryResult::InvalidConfiguration; return instance; }
     void* target = &storage_[storageIndex];
-    if (slot.implementation == ControllerImplementation::Blink) {
+    if (slot.implementation == ControllerImplementation::RainDetector) {
+        const auto& config = slot.implementationConfiguration.rainDetector;
+        if (!rainSource_ || !config.policy.valid() || !isValidSensorId(config.sourceSensorId)
+            || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(config.targetActuatorId))) {
+            result = ControllerFactoryResult::InvalidConfiguration; return instance;
+        }
+        auto* storage = new (target) RainDetectorStorage;
+        storage->controller.reset(new (std::nothrow) RainDetectorController(config,slot.moduleTarget,
+            *rainSource_,actuatorResolver_,monotonicClock_,logger_));
+        if (!storage->controller) {
+            storage->~RainDetectorStorage();
+            result = ControllerFactoryResult::InvalidConfiguration;
+            return instance;
+        }
+        instance.rainDetector = storage->controller.get();
+        instance.controller = instance.rainDetector;
+        constructed_[storageIndex] = ControllerImplementation::RainDetector;
+    } else if (slot.implementation == ControllerImplementation::Blink) {
         const BlinkControllerConfiguration& blink = slot.implementationConfiguration.blink;
         if ((!validModuleActuatorReference(slot.moduleTarget)
                 && !isValidActuatorId(blink.targetActuatorId))
@@ -103,6 +123,10 @@ ControllerFactoryInstance ControllerFactory::create(
 }
 
 void ControllerFactory::destroy(size_t storageIndex) {
+    if (!storage_) return;
+    if (constructed_[storageIndex] == ControllerImplementation::RainDetector) {
+        static_cast<RainDetectorStorage*>(static_cast<void*>(&storage_[storageIndex]))->~RainDetectorStorage();
+    }
     if (constructed_[storageIndex] == ControllerImplementation::Blink) {
         static_cast<BlinkController*>(
             static_cast<void*>(&storage_[storageIndex]))->~BlinkController();

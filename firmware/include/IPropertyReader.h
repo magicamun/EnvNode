@@ -43,6 +43,8 @@ struct PropertyDescription {
     PresentationUnit canonicalUnit = PresentationUnit::None;
     // Set only by the presentation boundary; canonical readers leave this unset.
     PresentationUnit presentationUnit = PresentationUnit::None;
+    // Human-facing numeric text only; canonical readers use a decimal point.
+    char decimalSeparator = '.';
     const char* trueText = "True";
     const char* falseText = "False";
 };

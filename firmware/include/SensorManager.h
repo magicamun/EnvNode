@@ -7,6 +7,7 @@
 #include "IMeasurementObserver.h"
 #include "IMonotonicClock.h"
 #include "ISensor.h"
+#include "IRainFrequencyResolver.h"
 #include "ITimeService.h"
 #include "SensorSchedule.h"
 #include "SensorImplementationRegistry.h"
@@ -63,6 +64,7 @@ struct SensorRuntimeInfo {
     bool supportsSeaLevelPressure = false;
     bool supportsSolarIrradiance = false;
     bool supportsSolarCellTemperature = false;
+    bool supportsRainDetectorFrequency = false;
     bool supportsRainDetectorLevel = false;
     bool supportsRainDetectorWet = false;
     bool supportsRainGaugeTip = false;
@@ -95,7 +97,7 @@ struct SensorRegistrationMetadata {
     HardwareResourceAssignment hardware;
 };
 
-class SensorManager : public IMeasurementSink, public IPressureReductionStatusResolver {
+class SensorManager : public IMeasurementSink, public IPressureReductionStatusResolver, public IRainFrequencyResolver {
 public:
     SensorManager(
         ITimeService& timeService,
@@ -108,6 +110,8 @@ public:
         ISensor& sensor,
         const SensorSchedule& schedule,
         const SensorRegistrationMetadata& metadata);
+    void rainFrequencyHeaterChanged(SensorId id) override;
+    bool rainFrequencySnapshot(SensorId id, RainFrequencySnapshot& result) const override;
     void begin();
     void clear();
     void loop();

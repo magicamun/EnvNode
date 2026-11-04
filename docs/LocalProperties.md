@@ -639,3 +639,29 @@ This boundary can later supply a centrally configured default format without
 changing acquisition, controllers or the existing per-line printf override.
 Units written in format strings remain literal text and must match Units settings.
 No saved-page migration is needed. Numeric %s support/default formats are deferred.
+
+### RainDetector controller sources
+
+The common resolver also exposes `controller/<id>/rain`, `valid`, `heating`,
+`heater_percent`, `dry`, `wetting_count`, `running`, and `target_available` for
+RainDetector controllers. The rain enum uses `unknown`, `active`, `end_estimated`.
+Heating values represent controller commands, not physical heater feedback.
+The source inventory is shared by the web preview and OLED page editor.
+
+Frequency presentation supports Hz/kHz; canonical input and controller thresholds
+remain Hz. A format such as `%5.2f kHz` uses the selected presentation value but
+literal unit text. `%3u` is minimum width 3 for unsigned values; `%5.2f` is minimum
+width 5 with two decimal places. Both forms are supported by firmware and editor.
+
+The presentation adapter also supplies the locale-specific decimal separator to
+the text formatter: German comma, English point. This replaces only the decimal
+point in each formatted floating-point value; literal dots, field widths, source
+data and MQTT JSON are unchanged. Locale changes take effect without rewriting
+saved display pages.
+
+RainDetector event sources `rain_start`, `rain_end` (last detected wetting), and
+`rain_end_detected` are date/time text sources for `%s`. They follow the configured
+locale. Snapshots additionally identify the UTC event time. They are unavailable
+before the event/time synchronization and are cleared on controller Start/rebuild.
+The runtime resolves monotonic events through ITimeService; evaluation never waits
+for NTP. The most recent event of each type is retained until replaced or restarted.

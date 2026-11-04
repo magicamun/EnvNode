@@ -1,5 +1,7 @@
 # TODO
 
+Aktuelle Plattformabgrenzung: [Classic ESP32 scope](ClassicEsp32Scope.md). RainDetector wird integriert; SX1262 bleibt der nächsten Architektur vorbehalten.
+
 - [x] SD-Card Rev. 0.1: Bausatz ENK-00022 und InvenTree-BOM mit sechs Positionen (je 1× PCB ENP-00137, U1 ENP-00136, U2 ENP-00102, C1 ENP-00006, R1 ENP-00018 und J1 ENP-00059) angelegt und validiert. Mitgelieferte U1-Stiftleiste wird nicht zusätzlich gezählt.
 
 - [x] Verkaufs-BOMs ENK-00022 (SD-Card) und ENK-00002 (DuoRelay) um je 1× ENP-00164 (M2,5-Abstandshalter 10 mm), ENP-00165 (M2,5-Schraube 8 mm) und ENP-00166 (M2,5-Mutter) ergänzt und erneut validiert.

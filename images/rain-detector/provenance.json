@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-21",
+  "renderer": "KiCad 10.0.5 pcb render",
+  "camera": {
+    "top": "-25,0,5",
+    "bottom": "-25,0,-5",
+    "perspective": true,
+    "zoom": 0.8,
+    "width": 2200,
+    "height": 1500,
+    "light_top": 0.6,
+    "light_camera": 0.5
+  },
+  "boards": {
+    "Head": {
+      "path": "hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb",
+      "sha256": "6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438",
+      "revision": "0.2",
+      "part": "ENP-00139",
+      "outline_mm": [
+        62.12,
+        54.52
+      ],
+      "pad_nets_unchanged": true,
+      "references": {
+        "H1": {
+          "xy": [
+            159.676955,
+            88.476955
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "H2": {
+          "xy": [
+            214.443045,
+            88.476955
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "H3": {
+          "xy": [
+            214.443045,
+            135.643045
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "C1": {
+          "xy": [
+            187.315,
+            112.06
+          ],
+          "rot": 0.0,
+          "footprint": "RainDetector_Interdigitated_44.78x37.25mm_P0.51mm"
+        },
+        "H4": {
+          "xy": [
+            159.676955,
+            135.643045
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "J2": {
+          "xy": [
+            210.635,
+            112.06
+          ],
+          "rot": -90.0,
+          "footprint": "PinHeader_2x02_P2.54mm_Vertical_SMD"
+        },
+        "J1": {
+          "xy": [
+            163.485,
+            112.06
+          ],
+          "rot": -90.0,
+          "footprint": "PinHeader_2x02_P2.54mm_Vertical_SMD"
+        }
+      }
+    },
+    "Controller": {
+      "path": "hardware/kicad/Sensors/RainDetectorController/RainDetectorController.kicad_pcb",
+      "sha256": "b793f10c10ec03b201e0514d98e5ed5e4c8befd761ada973139d5f0c5d8845b4",
+      "revision": "0.4",
+      "part": "ENP-00138",
+      "outline_mm": [
+        62.12,
+        54.52
+      ],
+      "pad_nets_unchanged": true,
+      "references": {
+        "H1": {
+          "xy": [
+            71.49,
+            47.25
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "H2": {
+          "xy": [
+            126.25,
+            47.25
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "H3": {
+          "xy": [
+            126.25,
+            94.51
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "C1": {
+          "xy": [
+            102.84,
+            75.8
+          ],
+          "rot": 180.0,
+          "footprint": "C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
+        },
+        "H4": {
+          "xy": [
+            71.49,
+            94.51
+          ],
+          "rot": 0.0,
+          "footprint": "MountingHole_3.2mm_M3"
+        },
+        "J1": {
+          "xy": [
+            123.715,
+            69.56
+          ],
+          "rot": 90.0,
+          "footprint": "PinSocket_2x02_P2.54mm_Vertical"
+        },
+        "J2": {
+          "xy": [
+            76.565,
+            69.56
+          ],
+          "rot": 90.0,
+          "footprint": "PinSocket_2x02_P2.54mm_Vertical"
+        }
+      }
+    }
+  },
+  "images": {
+    "RainDetectorHead-Rev0.2-top.png": "5500baa737d9aae87770f14dbade60dbd7fdf9456f47e5beae3f14d02d9c244c",
+    "RainDetectorHead-Rev0.2-bottom.png": "615fec9f8a9ac4cd03bd8f42c2d956d38c5833c1c8226d5badf40bc464fde5b9",
+    "RainDetectorController-Rev0.4-top.png": "bd493e16ec5ca01d616cf758b592a120c61b5ec0aae3a728633675df02841fc1",
+    "RainDetectorController-Rev0.4-bottom.png": "0b1ee2d90c867516c29cd180ea0bd7eff51cc553f5dd2213b4f67237cf2341bf",
+    "ENP-00139-RainDetectorHead-Rev0.2.png": "6852df7220229175f0bae9f41a65b873a7cee7404f9272473fc2016028818df0",
+    "ENP-00138-RainDetectorController-Rev0.4.png": "0e1452b4ce834dd0992b1c22646a057445d2adf592f2e1b09ccd4e97df480e18"
+  },
+  "inventree_updates": {
+    "ENP-00138": {
+      "part_id": 142,
+      "image": "ENP-00138-RainDetectorController-Rev0.4.png",
+      "verified": "2026-10-21 via UI: upload success and current image visible"
+    },
+    "ENP-00139": {
+      "part_id": 143,
+      "image": "ENP-00139-RainDetectorHead-Rev0.2.png",
+      "verified": "2026-10-21 via UI: upload success and current image visible"
+    }
+  }
+}
