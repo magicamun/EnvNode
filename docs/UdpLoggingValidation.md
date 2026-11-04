@@ -240,3 +240,35 @@ received records from being mistaken for a passed test. Four Python tests pass.
 Actual rsyslog receipt/full-rate continuity is still pending read-only server
 access or receiver-side evidence. SD removal is still held at that validation
 boundary.
+
+## Receiver-side full-rate validation passed
+
+The user provided root SSH access with an existing key. Connection by numeric IP
+initially failed host-key verification; the already trusted hostname
+`iot-rsyslogd` was used successfully, without disabling host-key checking.
+Read-only inspection confirmed rsyslog 8.2302.0 active on 0.0.0.0:514/UDP and
+actual ESP32 records in /var/log/remote/192.168.20.63/syslog.log.
+
+A protected local copy contained **4,410 valid JSON records**, 4,361 diagnoses
+and 49 system logs across four intentional test boots. Diagnoses included
+4,255 rain_window, periodic controller context/decisions/outputs, health records
+and recorder_test. No malformed JSON was found. The final 120-second interval
+had 450 diagnoses, including 440 rain windows, **zero transport sequence gaps,
+zero duplicate packets and zero sensor revision gaps/resets**. Every completed
+measurement window was retained; no downsampling or averaging was introduced.
+
+Measured gates in that interval ranged 250,038–372,730 µs with observed window
+rate 3.659/s and maximum adjacent end-time delta 383,538 µs. All 440 windows had
+fault=none. The nominal acquisition constant remains 250,000 µs; real main-loop
+latency makes some gates longer. This proves complete transfer of actual windows,
+not an exact 4-Hz hardware deadline or elimination of existing application stalls.
+This receiver checkpoint satisfies the staged validation gate before SD removal.
+
+The server currently writes both streams into a single per-source log. The
+repository example for separate files passes `rsyslogd -N1` on that server.
+The rotation example was adapted to root:adm, matching the inspected daemon,
+and parsed successfully with logrotate --debug through a RAM-only memfd.
+A first /dev/stdin attempt was ignored by logrotate and was not counted as a
+successful parse. No production config, listener, rotation, firewall or log file
+was changed; no service was reloaded. The prepared separate-storage/rotation
+example has not been deployed.

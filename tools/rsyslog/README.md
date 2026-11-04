@@ -3,9 +3,9 @@
 EnvNode-owned: see repository LICENSE.
 
 Prepared for `iot-rsyslogd` / `192.168.20.10`, UDP 514. These files have **not**
-been installed or executed on that host. `rsyslogd`, Docker and Podman are not
-available in the development environment, so syntax/rotation verification on
-rsyslog is still pending. Adapt the example to the target distribution first.
+been installed or executed on that host. The rsyslog 8.2302.0 syntax check passed via the user-authorized SSH session;
+production routing/rotation configuration was not changed. Docker and Podman
+are not available in the local development environment. Adapt the example to the target distribution first.
 
 1. Confirm UDP port 514 and the server's bind address. Prepare `/var/log/envnode`
    with the runtime rsyslog user's ownership and directory permissions 0750.
@@ -22,7 +22,8 @@ rsyslog is still pending. Adapt the example to the target distribution first.
 6. Expect valid JSONL in system.jsonl and diagnostics.jsonl. A packet contains a
    complete JSON object, no batching. Check device_id, boot_id, build, sequence,
    uptime_ms and optional epoch_s; a successful local send is no delivery receipt.
-7. Adapt logrotate owner/group and service name. Run `logrotate --debug <config>`;
+7. The example uses root:adm, matching the inspected Debian receiver. Adapt
+   logrotate owner/group and service name on other systems. Run `logrotate --debug <config>`;
    verify rename/reopen with test data before enabling scheduled rotation. Daily
    plus maxsize requires running logrotate frequently enough for the desired
    size bound; 32 MiB is a trigger, not a hard filesystem limit. HUP follows rename

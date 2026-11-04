@@ -8,8 +8,8 @@
     notifempty
     compress
     delaycompress
-    create 0640 syslog adm
-    su syslog adm
+    create 0640 root adm
+    su root adm
     sharedscripts
     postrotate
         /bin/systemctl kill --kill-who=main --signal=HUP rsyslog.service
