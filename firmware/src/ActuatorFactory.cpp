@@ -51,11 +51,11 @@ ActuatorFactoryInstance ActuatorFactory::create(
     void* target = &storage_[storageIndex];
     switch (slot.implementation) {
         case ActuatorImplementation::GpioOnOff:
-            instance.onOff = new (target) GpioOnOffActuator(slot.hardware, logger_);
+            instance.onOff = new (target) GpioOnOffActuator(slot.hardware, logger_, slot.slotId);
             break;
         case ActuatorImplementation::GpioPwm:
             instance.level = new (target) GpioPwmActuator(
-                slot.hardware, static_cast<uint8_t>(storageIndex), logger_);
+                slot.hardware, static_cast<uint8_t>(storageIndex), logger_, slot.slotId);
             instance.onOff = instance.level;
             break;
         case ActuatorImplementation::None:

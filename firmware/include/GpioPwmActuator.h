@@ -3,6 +3,7 @@
 #include "HardwareResources.h"
 #include "ILevelActuator.h"
 #include "Logger.h"
+#include "ActuatorId.h"
 
 namespace EnvNode {
 
@@ -17,7 +18,7 @@ public:
     GpioPwmActuator(
         const HardwareResourceAssignment& hardware,
         uint8_t channel,
-        ILogger& logger);
+        ILogger& logger, ActuatorId diagnosticId = InvalidActuatorId);
 
     ActuatorOperationResult begin() override;
     ActuatorOperationResult shutdown() override;
@@ -31,6 +32,7 @@ private:
     HardwareResourceAssignment hardware_;
     uint8_t channel_;
     ILogger& logger_;
+    ActuatorId diagnosticId_;
     ActuatorLevel level_ = ActuatorLevel::off();
     bool initialized_ = false;
 };

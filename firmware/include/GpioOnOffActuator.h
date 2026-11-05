@@ -3,6 +3,7 @@
 #include "HardwareResources.h"
 #include "IOnOffActuator.h"
 #include "Logger.h"
+#include "ActuatorId.h"
 
 namespace EnvNode {
 
@@ -10,7 +11,7 @@ class GpioOnOffActuator : public IOnOffActuator {
 public:
     GpioOnOffActuator(
         const HardwareResourceAssignment& hardware,
-        ILogger& logger);
+        ILogger& logger, ActuatorId diagnosticId = InvalidActuatorId);
 
     ActuatorOperationResult begin() override;
     ActuatorOperationResult shutdown() override;
@@ -21,6 +22,7 @@ public:
 private:
     HardwareResourceAssignment hardware_;
     ILogger& logger_;
+    ActuatorId diagnosticId_;
     OnOffState state_ = OnOffState::Off;
     bool initialized_ = false;
 };

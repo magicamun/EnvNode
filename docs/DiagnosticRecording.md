@@ -343,3 +343,53 @@ Regression validation: 36 hardware/runtime-effect tests and 12 SD lifecycle/log
 buffer tests pass, including hardware eligibility before any mount exists and
 while the storage lease is occupied. On-device startup/listing/eject validation
 remains required.
+
+## Actuator and controller output diagnostics
+
+The existing **Extended diagnostics** checkbox on each enabled actuator/controller
+selects its source ID for network logging. Network logging must also be enabled.
+No separate system-log checkbox is needed for these diagnostic events.
+
+GPIO On/Off and PWM actuators emit `actuator_output` directly after a hardware
+write changes the requested output, as well as on initialization, shutdown and
+rejected uninitialized commands. Fields are `gpio`, `previous_percent`,
+`requested_percent`, `output_percent`, `operation` and `action` (`begin`, `set`,
+`shutdown`). Factory-created actors carry their actuator slot ID, including
+module actors assigned to those slots. Unchanged successful set commands do not
+emit additional events. These are software output confirmations, not electrical
+feedback. All callers (web, MQTT, controller, runtime shutdown) use this path.
+
+The envelope's `uptime_ms` is captured by the recorder at the producer call,
+right after application; UDP transmission and receiver arrival happen later.
+Correlate by device ID, boot ID and device uptime, not receiver timestamps.
+Resolution is milliseconds, not a hardware-edge timestamp or an ISR trace.
+
+All runtime controllers emit `controller_state` and `controller_decision` when
+discrete status/decision changes, on first observation after diagnostic enable,
+and every 60 seconds as context. State includes implementation, running,
+target/source availability, pending output application and last operation.
+Decision includes the target actuator ID and implementation-specific blink phase,
+threshold decision/reason, selector decision, or rain/dry/heating/wetting count.
+Begin/stop/rebuild are observed in the same runtime call; service decisions are
+observed immediately after that controller's service call. Continuously changing
+measurement values/ages do not cause per-loop messages. RainDetector's existing
+`rain_config`, `rain_edge_config`, `rain_decision` and `rain_output` remain available.
+For exact actuator application timing, prefer `actuator_output` over a later
+controller status snapshot. Commands rejected before reaching an actor are not
+actor writes; controller failure status is recorded separately.
+
+Records use the existing bounded nonblocking recorder and UDP transport. Queue
+or network loss remains possible and is reported by the existing counters and
+sequence gaps. There is no claim of lossless delivery. Device acceptance still
+requires a user build/flash and inspection of receiver logs with both relevant
+checkboxes enabled; no device or receiver settings are changed by this source
+update.
+
+Source validation (2026-11-05): 89 native cases passed across actuator MQTT (9),
+RainDetector policy/diagnostics (20), threshold/selector (24), controller MQTT
+(19), and controller runtime (17, including three new output-diagnostic tests).
+The final context-field update was rechecked with all 41 threshold/runtime
+cases. GPIO ordering, PWM percentage transitions, repeated-command suppression,
+shutdown, uninitialized rejection, checkbox selection and a full-recorder result
+are covered. ESP32 build, flash and receiver acceptance are intentionally left
+to the user for this iteration.
