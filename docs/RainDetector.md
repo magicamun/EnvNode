@@ -192,3 +192,26 @@ updates its own value; a new rain episode keeps the previous end-decision time
 until a subsequent end is detected. Initialization heating/dry confirmation does
 not create rain timestamps. They are volatile: explicit Start/rebuild/reboot
 clears them, while Stop or a signal fault retains the last events.
+
+## Startup input availability and composed sensors
+
+Immediately after boot, `no_input` is expected until the first acquisition
+window is available. The controller remains armed with heating off, polls again
+on each service call, and accepts the first available window automatically;
+a restart or artificial startup delay is not required. The normal evaluation
+and heater guards still apply before wetting/dry decisions become valid.
+
+A persistent `no_input` despite valid `rain_window` events was traced on
+2026-11-05 to the humidity-derived sensor wrapper used for all runtime sensors.
+The outer wrapper did not forward the direct frequency-snapshot capability or
+heater-change notification, hiding the working RainDetector behind ISensor's
+no-input defaults. It now forwards both, like the pressure wrapper already did.
+This leaves acquisition timing and thresholds unchanged.
+
+The regression test follows the production composition: RainDetectorSensor →
+SeaLevelPressureSensor → HumidityDerivedSensor → SensorManager → rain controller.
+It covers empty startup, first-window recovery independent of periodic sample
+publication, dry confirmation, wetting/full heat, acquisition restart on heater
+change, invalid signal/heater off, and fresh wetting after signal recovery.
+The test failed at the first snapshot before the fix and passes with forwarding.
+Build/flash and physical validation remain with the user.

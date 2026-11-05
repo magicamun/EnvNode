@@ -8,6 +8,10 @@
 #include "RainDetectorController.h"
 #include "ControllerRuntime.h"
 #include "UnitConverter.h"
+#include "HumidityDerivedSensor.h"
+#include "SeaLevelPressureSensor.h"
+#include "SensorManager.h"
+#include "MeasurementSnapshotCache.h"
 #include "MqttTopic.h"
 #include "BufferedDiagnosticRecorder.h"
 #include <cstring>
@@ -367,6 +371,57 @@ public:
     String iso8601Local(time_t) const override { return ""; }
     uint32_t epoch() const override { return now(); }
 };
+void test_composed_rain_sensor_recovers_from_empty_boot_and_forwards_heater_gate_restart() {
+    FrequencyTestClock clock; EventTestTime time(clock); TestFrequencyInput input;
+    FrequencyMeasurementSink output; MeasurementSnapshotCache cache;
+    RainDetectorSensor physical(4,27,input,clock);
+    GeoPosition position; SeaLevelPressureSensor pressure; pressure.bind(physical,position);
+    HumidityDerivedSensor humidity; humidity.bind(pressure);
+    SensorManager manager(time,clock,output,cache);
+    TEST_ASSERT_TRUE(manager.registerSensor(humidity,SensorSchedule::periodic(5000))
+        ==SensorRegistrationResult::Registered);
+    manager.begin();
+    RainDetectorControllerConfiguration cfg; cfg.sourceSensorId=4; cfg.targetActuatorId=1;
+    RainTestActors actors; RainTestLogger logger;
+    RainDetectorController controller(cfg,ModuleActuatorReference{},manager,actors,clock,logger);
+    controller.begin(); controller.service();
+    TEST_ASSERT_FALSE(controller.result().valid);
+    TEST_ASSERT_TRUE(controller.running());
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    RainFrequencySnapshot snapshot;
+    TEST_ASSERT_FALSE(manager.rainFrequencySnapshot(4,snapshot));
+    const auto frame=[&](uint32_t pulses) {
+        clock.now+=250; input.next=RainFrequencyPoll::Window;
+        input.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,pulses,false);
+        manager.loop(); controller.service();
+    };
+    frame(8500);
+    TEST_ASSERT_TRUE(manager.rainFrequencySnapshot(4,snapshot));
+    TEST_ASSERT_TRUE(snapshot.window.valid());
+    TEST_ASSERT_EQUAL_UINT32(1,snapshot.revision);
+    TEST_ASSERT_EQUAL_UINT32(250,snapshot.acceptedMs);
+    RainFrequencySnapshot wrong;
+    TEST_ASSERT_FALSE(manager.rainFrequencySnapshot(3,wrong));
+    for(unsigned i=0;i<70;++i)frame(8500);
+    TEST_ASSERT_TRUE(controller.result().valid);
+    TEST_ASSERT_TRUE(controller.result().dry);
+    const unsigned stops=input.stopped;
+    frame(7500);
+    TEST_ASSERT_TRUE(controller.result().wetting);
+    TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    TEST_ASSERT_GREATER_THAN_UINT(stops,input.stopped);
+    frame(0);
+    TEST_ASSERT_TRUE(manager.rainFrequencySnapshot(4,snapshot));
+    TEST_ASSERT_FALSE(snapshot.window.valid());
+    TEST_ASSERT_FALSE(controller.result().valid);
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    for(unsigned i=0;i<26;++i)frame(7500);
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    frame(7000);
+    TEST_ASSERT_TRUE(controller.result().wetting);
+    TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+}
+
 void test_rain_event_times_resolve_after_sync_and_track_each_rain_episode() {
     RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
     EmptyRainMeasurements measurements; EventTestTime time(clock);
@@ -655,6 +710,7 @@ void test_rain_producers_use_real_buffer_and_finite_jsonl_without_storage_depend
 }
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_composed_rain_sensor_recovers_from_empty_boot_and_forwards_heater_gate_restart);
     RUN_TEST(test_startup_above_threshold_confirms_dry_without_heat_or_rain);
     RUN_TEST(test_rain_event_times_resolve_after_sync_and_track_each_rain_episode);
     RUN_TEST(test_controller_initial_drying_has_no_wetting_and_target_recovery_stays_off);
