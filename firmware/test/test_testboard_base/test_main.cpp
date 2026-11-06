@@ -48,6 +48,18 @@ struct Fixture {
         {"0.1.0", "0.1.0+test", "1", "abc", "testboard", "now", "clean", false}};
     Fixture() { settings.load(); web.begin(); }
     WebServer& server() { return host.server(); }
+    bool request(const char* path,HTTPMethod method) {
+        const bool found=server().request(path,method);
+        // Model the application loop until the deferred response/action completes.
+        for(unsigned i=0;i<12000 && host.responsePending();++i) {host.loop();delay(1);}
+        TEST_ASSERT_FALSE(host.responsePending());
+        const auto& wire=server().clientState.state->sent;
+        if(!wire.empty()) {
+            const auto end=wire.find("\r\n\r\n");TEST_ASSERT_TRUE(end!=std::string::npos);
+            server().responseBody=wire.substr(end+4);
+        }
+        return found;
+    }
 };
 void setUp() {
     Preferences::failBeginNamespace() = String(); Preferences::failClearNamespace() = String();
@@ -89,12 +101,12 @@ void test_tester_settings_survive_reboot_and_reset_keeps_envnode_data() {
 void test_only_base_routes_are_registered_and_available_in_setup_mode() {
     Fixture f;
     for (const char* route : {"/", "/network", "/time", "/device", "/logs", "/logs/data", "/firmware", "/style.css"}) {
-        TEST_ASSERT_TRUE(f.server().request(route, HTTP_GET));
+        TEST_ASSERT_TRUE(f.request(route, HTTP_GET));
         TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     }
     for (const char* route : {"/sensors", "/actuators", "/controllers", "/values", "/mqtt", "/display", "/configuration", "/hardware"})
-        TEST_ASSERT_FALSE(f.server().request(route, HTTP_GET));
-    f.server().request("/", HTTP_GET);
+        TEST_ASSERT_FALSE(f.request(route, HTTP_GET));
+    f.request("/", HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "EnvNode Testboard · v0.1.0"));
     TEST_ASSERT_NULL(strstr(f.server().responseBody.c_str(), "href='/sensors'"));
 }
@@ -102,36 +114,36 @@ void test_network_save_persists_and_requires_only_explicit_restart() {
     Fixture f;
     f.server().arguments = {{"hostname", "fixture"}, {"wifiSSID", "FixtureNetwork"},
         {"addressMode", "dhcp"}, {"changeWifiPassword", "1"}, {"wifiPassword", "password123"}};
-    TEST_ASSERT_TRUE(f.server().request("/network/save", HTTP_POST));
+    TEST_ASSERT_TRUE(f.request("/network/save", HTTP_POST));
     TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_TRUE(f.restart.deviceRestartPending());
     TEST_ASSERT_EQUAL(0, f.driver.calls);
     TestBoardSettings rebooted; TEST_ASSERT_TRUE(rebooted.load());
     TEST_ASSERT_EQUAL_STRING("FixtureNetwork", rebooted.base().getNetworkConfiguration().wifiSSID.c_str());
-    TEST_ASSERT_TRUE(f.server().request("/restart", HTTP_POST));
+    TEST_ASSERT_TRUE(f.request("/restart", HTTP_POST));
     TEST_ASSERT_EQUAL(1, f.driver.calls);
 }
 void test_failed_save_never_marks_restart_and_locale_is_live() {
     Fixture f; Preferences::failStringWrites() = true;
     f.server().arguments = {{"deviceName", "Fixture"}};
-    f.server().request("/device/save", HTTP_POST);
+    f.request("/device/save", HTTP_POST);
     TEST_ASSERT_EQUAL(400, f.server().responseStatus);
     TEST_ASSERT_FALSE(f.restart.deviceRestartPending());
     Preferences::failStringWrites() = false;
     f.server().arguments = {{"locale", "en-US"}, {"timezone", f.settings.base().getTimeConfiguration().timezone},
         {"ntpServer1", "pool.ntp.org"}, {"ntpServer2", "time.nist.gov"}};
-    f.server().request("/time/save", HTTP_POST);
+    f.request("/time/save", HTTP_POST);
     TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_EQUAL(Locale::EnglishUnitedStates, f.web.webLocale());
     TEST_ASSERT_FALSE(f.restart.deviceRestartPending());
-    f.server().request("/", HTTP_GET);
+    f.request("/", HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "<html lang='en'>"));
 }
 void test_factory_reset_is_scoped_to_tester_and_flushes_before_restart() {
     Fixture f;
     Preferences old; old.begin("weather"); old.putString("deviceName", "WeatherStation");
     f.settings.base().setDeviceName("Fixture");
-    f.server().request("/factory-reset", HTTP_POST);
+    f.request("/factory-reset", HTTP_POST);
     TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_EQUAL(1, f.driver.calls);
     TEST_ASSERT_EQUAL(1, f.server().clientState.flushes);
@@ -149,7 +161,7 @@ void test_ota_stages_without_executing_restart() {
     f.server().uploadEvent("/firmware/upload");
     f.server().uploadState.status = UPLOAD_FILE_END;
     f.server().uploadEvent("/firmware/upload");
-    f.server().request("/firmware/upload", HTTP_POST);
+    f.request("/firmware/upload", HTTP_POST);
     TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_TRUE(f.ota.firmwareStaged());
     TEST_ASSERT_TRUE(f.restart.deviceRestartPending());

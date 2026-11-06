@@ -55,6 +55,18 @@ struct Fixture {
     TestWebRoutes routes{host, web, runner, fixture};
     Fixture() { settings.load(); web.attachTestRoutes(routes); web.begin(); }
     WebServer& server() { return host.server(); }
+    bool request(const char* path,HTTPMethod method) {
+        const bool found=server().request(path,method);
+        // Model the application loop until the deferred response/action completes.
+        for(unsigned i=0;i<12000 && host.responsePending();++i) {host.loop();delay(1);}
+        TEST_ASSERT_FALSE(host.responsePending());
+        const auto& wire=server().clientState.state->sent;
+        if(!wire.empty()) {
+            const auto end=wire.find("\r\n\r\n");TEST_ASSERT_TRUE(end!=std::string::npos);
+            server().responseBody=wire.substr(end+4);
+        }
+        return found;
+    }
 };
 void setUp() {
     Preferences::failBeginNamespace() = String(); Preferences::failClearNamespace() = String();
@@ -161,32 +173,32 @@ void test_busy_backend_times_out_and_select_error_never_reads_a_stale_path() {
 void test_stale_and_invalid_web_actions_do_not_advance_the_session() {
     Fixture f;
     f.server().arguments = {{"action", "load"}, {"generation", "0"}, {"board", weatherBoard().id}};
-    TEST_ASSERT_TRUE(f.server().request("/test/action", HTTP_POST)); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    TEST_ASSERT_TRUE(f.request("/test/action", HTTP_POST)); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     f.server().arguments = {{"action", "start"}, {"generation", "0"}, {"fault", "none"}};
-    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    f.request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
     TEST_ASSERT_EQUAL(Phase::AwaitingConnection, f.runner.phase());
-    f.server().request("/test/state", HTTP_GET);
+    f.request("/test/state", HTTP_GET);
     TEST_ASSERT_EQUAL('}', f.server().responseBody.back());
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"verdicts\":[0,0"));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"contacts\":\"000"));
     f.server().arguments["generation"] = String(f.runner.generation()); f.server().arguments["fault"] = "invalid";
-    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(400, f.server().responseStatus);
+    f.request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(400, f.server().responseStatus);
     f.server().arguments["fault"] = "none";
-    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    f.request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_EQUAL(Phase::Running, f.runner.phase());
-    f.server().request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
+    f.request("/test/action", HTTP_POST); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
     TEST_ASSERT_EQUAL(0, f.runner.completed());
 }
 void test_actual_test_page_and_definition_apis_are_simulation_only() {
-    Fixture f; f.server().request("/test", HTTP_GET);
+    Fixture f; f.request("/test", HTTP_GET);
     TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "SIMULATION"));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "/test/ui.js"));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "test-matrix"));
-    f.server().request("/test/definition", HTTP_GET);
+    f.request("/test/definition", HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "weather-0.2-pcb0.2.1"));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"covered\":false"));
-    f.server().request("/test/state", HTTP_GET);
+    f.request("/test/state", HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"simulation\":true"));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"phase\":0"));
 }
@@ -242,7 +254,7 @@ void test_web_selection_and_retest_are_strict_and_locked_while_running() {
     f.runner.load(weatherBoard());
     auto select = [&](const char* index, uint32_t generation) {
         f.server().arguments = {{"action", "select"}, {"connector", index}, {"generation", String(generation)}};
-        f.server().request("/test/action", HTTP_POST);
+        f.request("/test/action", HTTP_POST);
     };
     select("18", f.runner.generation());
     TEST_ASSERT_EQUAL(200, f.server().responseStatus); TEST_ASSERT_EQUAL(18, f.runner.step());
@@ -255,7 +267,7 @@ void test_web_selection_and_retest_are_strict_and_locked_while_running() {
     f.fixture.connect(weatherBoard(), 18, SimulatedFault::None); f.runner.start(0);
     uint32_t now = 0; finish(f.runner, now);
     f.server().arguments = {{"action", "start"}, {"generation", String(f.runner.generation())}, {"fault", "none"}};
-    f.server().request("/test/action", HTTP_POST);
+    f.request("/test/action", HTTP_POST);
     TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_EQUAL(Verdict::Untested, f.runner.verdict(18));
     select("0", f.runner.generation()); TEST_ASSERT_EQUAL(409, f.server().responseStatus);
@@ -292,22 +304,22 @@ void test_mini_plan_has_1976_comparisons_and_nine_uncovered_contacts() {
     TEST_ASSERT_EQUAL(Phase::Complete, runner.phase()); TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.overall());
 }
 void test_catalog_profile_assets_and_board_switch_never_mix_results() {
-    Fixture f; f.server().request("/test/catalog", HTTP_GET);
+    Fixture f; f.request("/test/catalog", HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), weatherBoard().id));
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), miniBoard().id));
     f.runner.load(weatherBoard()); f.fixture.connect(weatherBoard(), 0, SimulatedFault::None);
     f.runner.start(0); uint32_t now = 0; finish(f.runner, now);
     f.server().arguments = {{"action", "load"}, {"board", miniBoard().id}, {"generation", String(f.runner.generation())}};
-    f.server().request("/test/action", HTTP_POST);
+    f.request("/test/action", HTTP_POST);
     TEST_ASSERT_EQUAL(200, f.server().responseStatus); TEST_ASSERT_EQUAL_PTR(&miniBoard(), f.runner.board());
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "\"board\":\"mini-0.8-pcb0.8.1\""));
     TEST_ASSERT_EQUAL(0, f.runner.completed()); TEST_ASSERT_EQUAL(Verdict::Untested, f.runner.verdict(0));
-    f.server().arguments.clear(); f.server().request("/test/definition", HTTP_GET);
+    f.server().arguments.clear(); f.request("/test/definition", HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(), "Slot B"));
     f.server().arguments["board"] = "unknown";
-    f.server().request("/test/definition", HTTP_GET); TEST_ASSERT_EQUAL(404, f.server().responseStatus);
+    f.request("/test/definition", HTTP_GET); TEST_ASSERT_EQUAL(404, f.server().responseStatus);
     f.server().arguments["board"] = miniBoard().id;
-    f.server().request("/test/board.svg", HTTP_GET); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
+    f.request("/test/board.svg", HTTP_GET); TEST_ASSERT_EQUAL(200, f.server().responseStatus);
     TEST_ASSERT_EQUAL_HEX8(0x1f, static_cast<uint8_t>(f.server().responseBody[0]));
     TEST_ASSERT_EQUAL_HEX8(0x8b, static_cast<uint8_t>(f.server().responseBody[1]));
 }
@@ -316,12 +328,12 @@ void test_whole_board_action_is_removed_and_cannot_start_measurement() {
     f.server().arguments["generation"] = String(f.runner.generation());
     f.server().arguments["action"] = "all";
     f.server().arguments["fault"] = "none";
-    f.server().request("/test/action", HTTP_POST);
+    f.request("/test/action", HTTP_POST);
     TEST_ASSERT_EQUAL(409, f.server().responseStatus);
     TEST_ASSERT_EQUAL(Phase::AwaitingConnection, f.runner.phase());
-    f.server().request("/test", HTTP_GET);
+    f.request("/test", HTTP_GET);
     TEST_ASSERT_NULL(strstr(f.server().responseBody.c_str(), "test-all"));
-    f.server().request("/test/ui.js", HTTP_GET);
+    f.request("/test/ui.js", HTTP_GET);
     TEST_ASSERT_NULL(strstr(f.server().responseBody.c_str(), "test-all"));
 }
 

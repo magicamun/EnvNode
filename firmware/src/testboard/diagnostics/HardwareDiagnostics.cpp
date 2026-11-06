@@ -98,6 +98,6 @@ form.onsubmit=e=>{e.preventDefault();const p=new URLSearchParams(new FormData(fo
 document.getElementById('stop').onclick=()=>command(new URLSearchParams({action:'stop'}));
 async function poll(){try{const r=await fetch('/diagnostics/state',{cache:'no-store'});if(!r.ok)throw Error('Status nicht erreichbar');show(await r.json());}catch(e){err.textContent=e.message;}setTimeout(poll,1000);}poll();
 addEventListener('pagehide',()=>navigator.sendBeacon('/diagnostics/action',new URLSearchParams({action:'stop'})));})();</script>)HTML";
-    pages_.sendPage("Hardwarediagnose", "/diagnostics", html);
+    pages_.sendPage("Hardwarediagnose", "/diagnostics", std::move(html));
 }
 }

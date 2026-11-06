@@ -149,7 +149,7 @@ void FirmwareWebRoutes::handleRestart() { if(otaService_.busy()){sendResult(uiTe
 
 void FirmwareWebRoutes::handleFactoryReset() { if(otaService_.busy()){sendResult(uiText(TextId::FactoryResetUnavailable),"/firmware",uiText(TextId::AFirmwareUploadIsCurrentlyActive),false);return;} if(!resetConfiguration_()){sendResult(uiText(TextId::FactoryResetFailed),"/firmware",uiText(TextId::StoredConfigurationCouldNotBeCleared),false);return;} deviceRestart_.requestDeviceRestart(); sendResult(uiText(TextId::FactoryResetComplete),"/firmware",uiText(TextId::ConfigurationErasedRestartingIntoProvisioningMode),true);performExplicitRestart(); }
 
-void FirmwareWebRoutes::performExplicitRestart() { server_.client().flush(); deviceRestart_.performDeviceRestart(); }
+void FirmwareWebRoutes::performExplicitRestart() { pages_.afterResponse([this]() { server_.client().flush(); deviceRestart_.performDeviceRestart(); }); }
 }
 
 namespace EnvNode {

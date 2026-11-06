@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.1) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.2) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -154,7 +154,7 @@ See [remote profile format, operation and trust model](TestBoardRemoteProfiles.m
 The independent signature check and physical validation remain future work.
 Revision-specific provisioning is included in 0.7.0 / EnvNode 0.8.2 below.
 
-## Revision-specific provisioning (0.7.1)
+## Revision-specific provisioning (0.7.2)
 
 Both applications share `BoardIdentityProfiles`; EnvNode 0.8.2 accepts the new
 identities and selects the exact recorded runtime revision. Existing identities,
@@ -163,7 +163,7 @@ a revision-specific board image using the same definition/image routes as testin
 An unknown external EEPROM requires an explicit board/revision selection.
 See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
 
-## Manual controller diagnostics (0.7.1)
+## Manual controller diagnostics (0.7.2)
 
 Open `/diagnostics` or **Hardwarediagnose** on the tester. This mode drives real
 GPIOs on Test-Controller revision 0.1; the normal connector test remains simulated.
@@ -190,3 +190,11 @@ with all input multiplexers disabled. Compare LOW and HIGH ADC readings. R6 (1 k
 and R9 (2.2 kΩ) divide the HIGH voltage to approximately 2.27 V before multiplexer
 resistance; a full-scale ADC count is not expected. This is a manual commissioning
 tool, not an automatic continuity certification or a validated physical test result.
+
+## Browser response delivery (0.7.2)
+
+The tester uses the same bounded nonblocking HTTP response pump and idle-client
+gate as main. Page delivery yields between writes, and browser preconnections
+without request data cannot monopolize request parsing. Firmware diagnostics
+continue between response steps. Remote HTTPS profile downloads remain synchronous
+and may still briefly delay requests when refreshing or loading a remote profile.

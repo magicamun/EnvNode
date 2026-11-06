@@ -4,6 +4,9 @@
 
 ### Added
 
+- Testboard 0.7.2: port the verified main HTTP client gate and nonblocking
+  response pump to the tester; avoid copying diagnostic page content.
+
 - Testboard 0.7.1: add opt-in real controller diagnostics for mux address/enable
   selection, GPIO17 LOW/HIGH and GPIO34 ADC readings; disable after 60 seconds
   or network loss and block provisioning/test actions while active.
