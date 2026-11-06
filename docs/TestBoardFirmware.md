@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.2) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.8.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -154,7 +154,7 @@ See [remote profile format, operation and trust model](TestBoardRemoteProfiles.m
 The independent signature check and physical validation remain future work.
 Revision-specific provisioning is included in 0.7.0 / EnvNode 0.8.2 below.
 
-## Revision-specific provisioning (0.7.2)
+## Revision-specific provisioning (0.8.0)
 
 Both applications share `BoardIdentityProfiles`; EnvNode 0.8.2 accepts the new
 identities and selects the exact recorded runtime revision. Existing identities,
@@ -163,7 +163,7 @@ a revision-specific board image using the same definition/image routes as testin
 An unknown external EEPROM requires an explicit board/revision selection.
 See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
 
-## Manual controller diagnostics (0.7.2)
+## Manual controller diagnostics (0.8.0)
 
 Open `/diagnostics` or **Hardwarediagnose** on the tester. This mode drives real
 GPIOs on Test-Controller revision 0.1; the normal connector test remains simulated.
@@ -191,10 +191,41 @@ and R9 (2.2 kΩ) divide the HIGH voltage to approximately 2.27 V before multiple
 resistance; a full-scale ADC count is not expected. This is a manual commissioning
 tool, not an automatic continuity certification or a validated physical test result.
 
-## Browser response delivery (0.7.2)
+## Browser response delivery (0.8.0)
 
 The tester uses the same bounded nonblocking HTTP response pump and idle-client
 gate as main. Page delivery yields between writes, and browser preconnections
 without request data cannot monopolize request parsing. Firmware diagnostics
 continue between response steps. Remote HTTPS profile downloads remain synchronous
 and may still briefly delay requests when refreshing or loading a remote profile.
+
+## Guided physical fixture self-test (0.8.0)
+
+`/selftest` guides manual loopback wiring for Controller 0.1 and the original
+produced Input-Adapter 0.1. The new DevKit adapters are not supported by this test.
+Select any row while idle. Confirm the displayed bridge, then start that one test;
+there is no run-all function because each contact requires manual rewiring.
+
+The first 22 rows test J1/J2/J3 output contacts directly against controller J8 pin 9
+(COM_IN), without the input adapter. The next 40 rows use controller J3 pin 2 as
+source and test J4 pins 1–38 plus TP1 pin 2 (MB_3V3_SYS) and TP1 pin 1 (MB_GND).
+These last two are free adapter reference contacts, not a connection to an actual
+mainboard. Do not attach a DUT or provisioned target during fixture self-test.
+
+Each nonblocking run checks target LOW and HIGH, disabled-path isolation, and all
+other mapped channels in the same group. The other unused physical mux channels
+are not covered. After switching, allow 15 ms to settle and acquire 8 ADC samples
+at least 2 ms apart. Preliminary commissioning limits: every LOW/isolation sample
+at most 200, every HIGH sample between 1000 and 3800. The report contains mean LOW,
+mean HIGH and maximum isolation reading. These are raw ADC values, not calibrated
+continuity resistance or a production acceptance threshold. A bad source, missing
+supply or wrong bridge can also produce failure; no exact fault diagnosis is inferred.
+
+All paths are disabled on completion, cancellation, network loss or a ten-second
+run timeout. Manual diagnosis, provisioning and simulated-test actions cannot
+change the hardware during a guided run. Background profile loading is deferred
+while diagnostics or an HTTP response is active. Results live in firmware RAM;
+the browser additionally retains completed readings in sessionStorage for this tab,
+so switching power off to rewire does not discard the collected report. Download
+JSON before closing the tab. Saved readings reflect previous runs, not an ongoing
+measurement. “Ergebnisse löschen” clears firmware results and the browser session.

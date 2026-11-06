@@ -55,7 +55,7 @@ void TestWebRoutes::registerRoutes(WebServer& server) {
         if(id.isEmpty()) id=runner_.board()?runner_.board()->id:weatherBoard().id;
         const bool builtinActive=runner_.board() && runner_.board()==findBoard(id.c_str());
         if(profiles_ && !builtinActive) {
-            const auto* p=profiles_->prepare(id.c_str(),runner_.phase()!=Phase::Running);
+            const auto* p=profiles_->prepare(id.c_str(),runner_.phase()!=Phase::Running && !(hardwareBusy_ && hardwareBusy_()));
             if(p) {
                 const String json=profileJson(*p);
                 if(json.isEmpty()) { host_.server().send(503,"application/json","{\"error\":\"Profile buffer unavailable\"}");return; }

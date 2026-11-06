@@ -1,0 +1,102 @@
+// EnvNode: see repository LICENSE.
+#include "HardwareDiagnostics.h"
+#include "../TestBoardFirmwareVersion.h"
+namespace EnvNode {
+namespace {
+bool indexValue(const String& text, uint32_t& value) {
+    if (!text.length() || text.length()>10) return false;
+    value=0;
+    for(size_t i=0;i<text.length();++i) {
+        if(text[i]<'0'||text[i]>'9'||value>(UINT32_MAX-uint32_t(text[i]-'0'))/10) return false;
+        value=value*10+uint32_t(text[i]-'0');
+    }
+    return true;
+}
+String outputLabel(size_t index) {
+    return String(index<4 ? "J1 · Pin " : index<8 ? "J2 · Pin " : "J3 · Pin ")+
+        String(unsigned(index<4 ? index+1 : index<8 ? index-3 : index-7));
+}
+String inputLabel(size_t index) {
+    if(index<38) return String("Input-Adapter J4 · Pin ")+String(unsigned(index+1));
+    return index==38 ? "Input-Adapter TP1 · Pin 2 (MB_3V3_SYS)" : "Input-Adapter TP1 · Pin 1 (MB_GND)";
+}
+}
+void HardwareDiagnostics::selfTestState() {
+    using Testing::GuidedSelfTest;
+    String json; json.reserve(6000);
+    json=String("{\"running\":")+(selfTest_.running()?"true":"false")+",\"selected\":"+String(unsigned(selfSelected_));
+    json+=String(",\"active\":")+(active()?"true":"false");
+    json+=",\"firmware\":\""+String(FirmwareVersion)+"\"";
+    json+=",\"generation\":"+String(selfGeneration_)+",\"results\":[";
+    for(size_t i=0;i<GuidedSelfTest::Count;++i) {
+        if(i)json+=',';
+        const auto& r=selfTest_.result(i);
+        json+='[';json+=String(unsigned(r.verdict));json+=',';json+=String(r.low);json+=',';
+        json+=String(r.high);json+=',';json+=String(r.isolation);json+=']';
+    }
+    json+="]}";
+    host_.server().sendHeader("Cache-Control","no-store");
+    host_.server().send(200,"application/json",json);
+}
+void HardwareDiagnostics::selfTestAction() {
+    auto& s=host_.server();
+    if(s.arg("action")=="stop") { stop();++selfGeneration_;selfTestState();return; }
+    uint32_t generation=0,index=0;
+    if(!indexValue(s.arg("generation"),generation)||generation!=selfGeneration_) {
+        s.send(409,"text/plain","Veraltete Auswahl. Status aktualisieren.");return;
+    }
+    if(!host_.administrationAvailable()||!available_()||selfTest_.running()) {
+        s.send(409,"text/plain","Erst den laufenden Test beenden.");return;
+    }
+    if(s.arg("action")=="clear") {
+        stop();selfTest_.clear();++selfGeneration_;selfTestState();return;
+    }
+    if(s.arg("action")=="select") {
+        if(!indexValue(s.arg("index"),index)||index>=Testing::GuidedSelfTest::Count) {
+            s.send(400,"text/plain","Ungültiger Kontakt");return;
+        }
+        stop();selfSelected_=index;++selfGeneration_;selfTestState();return;
+    }
+    if(s.arg("action")!="run"||s.arg("confirm")!="yes"||
+        !indexValue(s.arg("index"),index)||index!=selfSelected_) {
+        s.send(400,"text/plain","Auswahl oder Bestätigung fehlt");return;
+    }
+    stop();
+    selfTest_.start(selfSelected_,millis());++selfGeneration_;selfTestState();
+}
+void HardwareDiagnostics::selfTestPage() {
+    using Testing::GuidedSelfTest;
+    String html;html.reserve(16000);
+    html=R"HTML(<section class='card'><h2>Geführter Hardware-Selbsttest</h2>
+<p><strong>Test-Controller 0.1 + ursprünglicher Input-Adapter 0.1.</strong> Die neuen DevKit-Adapter werden hier noch nicht unterstützt. Kein Mainboard, Modul oder Provisioning-Kabel anschließen. Referenzkabel bleibt frei. Versorgung der Multiplexer muss vorhanden sein.</p>
+<p>Die Firmware schaltet LOW/HIGH und prüft danach die anderen zugeordneten Kanäle sowie den deaktivierten Pfad. Provisorische ADC-Grenzen: LOW/Trennung ≤ 200; HIGH 1000–3800. Jeder Schritt: 15 ms Einschwingen und 8 Messungen. Das ist eine Inbetriebnahmeprüfung, keine kalibrierte Mainboardprüfung.</p>
+<p>Vor dem Umstecken Versorgung ausschalten. Nach jedem Lauf werden die Multiplexer abgeschaltet. Ergebnisse werden im Browser für diese Tabsitzung gesammelt, auch wenn der ESP32 zum Umstecken ausgeschaltet wird. JSON-Protokoll vor dem Schließen herunterladen.</p>
+<h3 id='chosen'></h3><p id='instruction'></p>
+<label><input id='confirm' type='checkbox'> Nur die angezeigte Brücke ist gesteckt; keine fremde Spannung / kein Prüfling angeschlossen.</label>
+<div class='actions'><button id='run' type='button'>Diesen Kontakt prüfen</button><button id='stop' type='button'>Abbrechen / alles abschalten</button><button id='next' type='button'>Nächster Kontakt</button><button id='export' type='button'>Protokoll herunterladen</button><button id='clear' type='button'>Ergebnisse löschen</button></div>
+<p id='progress' role='status'></p><p id='error' role='alert'></p>
+<div class='table-scroll'><table><thead><tr><th>Kontakt / Auswahl</th><th>Ergebnis</th><th>LOW</th><th>HIGH</th><th>Trennung max.</th></tr></thead><tbody id='rows'></tbody></table></div>
+<p>Output-Gruppe: Input-Adapter und weitere Brücken abziehen, Kontakt direkt gegen Controller J8/9 (COM_IN). Input-Gruppe: Input-Adapter anschließen, nur Controller J3/2 mit dem gewählten Adapterkontakt verbinden. TP1 benennt die späteren Mainboard-Referenzkontakte und darf hier an keinem Mainboard hängen.</p>
+<p><a href='/diagnostics'>Manuelle Hardwarediagnose</a></p></section><script>(()=>{const cases=[)HTML";
+    for(size_t i=0;i<GuidedSelfTest::Count;++i) {
+        if(i)html+=',';
+        const bool in=i>=GuidedSelfTest::OutputCount;
+        String label=in?inputLabel(i-GuidedSelfTest::OutputCount):outputLabel(i);
+        String instruction=in?String("Controller J3 · Pin 2 ↔ ")+label:
+            String("Controller ")+label+" ↔ Controller J8 · Pin 9 (COM_IN). Input-Adapter abziehen.";
+        html+="{label:'"+label+"',instruction:'"+instruction+"'}";
+    }
+    html+=R"HTML(];let state=null,busy=false;const storageKey='envnode-guided-controller01-input01-v1';let saved=Array(cases.length).fill(null);try{const previous=JSON.parse(sessionStorage.getItem(storageKey));if(Array.isArray(previous)&&previous.length===cases.length)saved=previous;}catch(e){}const $=id=>document.getElementById(id),names=['Offen','Läuft','Bestanden','Fehler','Abgebrochen'];
+const rows=cases.map((c,i)=>{const tr=document.createElement('tr'),cell=document.createElement('td'),b=document.createElement('button');b.type='button';b.textContent=(i<22?'Output · ':'Input · ')+c.label;b.onclick=()=>command('select',{index:i});cell.append(b);tr.append(cell);for(let j=0;j<4;j++)tr.append(document.createElement('td'));$('rows').append(tr);return {tr,b};});
+function values(s,i){const r=s.results[i];return r[0]===0&&saved[i]?saved[i].values:r;}
+function render(s){state=s;let changed=false;s.results.forEach((r,i)=>{const collected=r[0]===1?[4,r[1],r[2],r[3]]:r;if(r[0]>=1&&(!saved[i]||JSON.stringify(saved[i].values)!==JSON.stringify(collected))){saved[i]={values:collected,at:new Date().toISOString()};changed=true;}});if(changed)try{sessionStorage.setItem(storageKey,JSON.stringify(saved));}catch(e){$('error').textContent='Browser-Sitzungsspeicher nicht verfügbar. Protokoll vor Neustart herunterladen.';}const c=cases[s.selected];$('chosen').textContent=c.label;$('instruction').textContent=c.instruction;$('run').disabled=busy||s.running;$('next').disabled=busy||s.running||s.selected===cases.length-1;$('export').disabled=busy||s.running;$('clear').disabled=busy||s.running;
+let pass=0,fail=0;rows.forEach((r,i)=>{const v=values(s,i);r.b.disabled=busy||s.running;r.tr.style.background=i===s.selected?'#fff0d7':'';r.tr.cells[1].textContent=names[v[0]];r.tr.cells[2].textContent=v[0]===0?'—':v[1];r.tr.cells[3].textContent=v[0]===0?'—':v[2];r.tr.cells[4].textContent=v[0]===0?'—':v[3];if(v[0]===2)pass++;if(v[0]===3)fail++;});$('progress').textContent=(s.running?'Messung läuft … ':s.active?'Manuelle Diagnose aktiv. ':'Ausgänge abgeschaltet. ')+pass+' bestanden · '+fail+' fehlerhaft · '+cases.length+' Kontakte insgesamt';}
+async function command(action,extra={}){if(busy||!state)return;if(action==='run'&&!$('confirm').checked){$('error').textContent='Bitte die Verbindung bestätigen.';return;}busy=true;render(state);try{const p=new URLSearchParams({action,generation:state.generation,index:state.selected,confirm:$('confirm').checked?'yes':'',...extra});const r=await fetch('/selftest/action',{method:'POST',body:p});if(!r.ok)throw Error(await r.text());render(await r.json());$('error').textContent='';if(action==='select')$('confirm').checked=false;if(action==='clear'){saved=Array(cases.length).fill(null);try{sessionStorage.removeItem(storageKey);}catch(e){}render(state);}}catch(e){$('error').textContent=e.message;}finally{busy=false;if(state)render(state);}}
+$('clear').onclick=()=>{if(confirm('Alle gesammelten Ergebnisse löschen?'))command('clear');};
+$('run').onclick=()=>command('run');$('stop').onclick=()=>command('stop');$('next').onclick=()=>command('select',{index:state.selected+1});
+$('export').onclick=()=>{if(!state||state.running)return;const report={schema:1,fixture:'controller0.1-input0.1-module0.1',firmware:state.firmware,mode:'physical-guided-loopback',thresholds:{lowMaximum:200,highMinimum:1000,highMaximum:3800},capturedAtBrowser:new Date().toISOString(),results:cases.map((c,i)=>({contact:c.label,instruction:c.instruction,verdict:names[values(state,i)[0]],low:values(state,i)[1],high:values(state,i)[2],isolationMaximum:values(state,i)[3],testedAtBrowser:saved[i]?saved[i].at:null}))};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='envnode-hardware-selbsttest.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+async function poll(){try{if(!busy){const r=await fetch('/selftest/state',{cache:'no-store'});if(!r.ok)throw Error('Status nicht erreichbar');render(await r.json());}}catch(e){$('error').textContent=e.message;}setTimeout(poll,300);}poll();
+addEventListener('pagehide',()=>navigator.sendBeacon('/selftest/action',new URLSearchParams({action:'stop'})));})();</script>)HTML";
+    pages_.sendPage("Hardware-Selbsttest","/selftest",std::move(html),200,true);
+}
+}

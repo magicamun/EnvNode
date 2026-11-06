@@ -48,6 +48,7 @@ String TestBoardWeb::navigation(const char* active) const {
     };
     link("/", testerText("Prüfboard", "Test board"));
     if (testRoutes_) link("/test", testerText("Anschlussprüfung", "Connector test"));
+    if (diagnosticsRoutes_) link("/selftest", testerText("Hardware-Selbsttest", "Hardware self-test"));
     if (diagnosticsRoutes_) link("/diagnostics", testerText("Hardwarediagnose", "Hardware diagnostics"));
     if (provisioningRoutes_) link("/hardware", "Provisioning");
     link("/network", text(TextId::Network));

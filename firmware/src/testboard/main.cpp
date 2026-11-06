@@ -30,8 +30,8 @@ public:
 };
 class TestBoardApplication : public IFirmwareApplication {
 public:
-    TestBoardApplication(ILogger& logger, Testing::TestRunner& tests, Testing::ProfileRepository& profiles, IWiFiService& wifi, ITimeService& time)
-        : logger_(logger), tests_(tests), profiles_(profiles), wifi_(wifi), time_(time) {}
+    TestBoardApplication(ILogger& logger, Testing::TestRunner& tests, Testing::ProfileRepository& profiles, IWiFiService& wifi, ITimeService& time, std::function<bool()> hardwareBusy)
+        : logger_(logger), tests_(tests), profiles_(profiles), wifi_(wifi), time_(time), hardwareBusy_(hardwareBusy) {}
     // No GPIO or I²C activity at boot; provisioning connects per operation.
     void initializeDevices() override {}
     void beginIntegrations() override {
@@ -41,13 +41,14 @@ public:
         logger_.info("Testboard base ready; simulated connector tests ready; measurement I/O inactive; EEPROM provisioning ready on SDA16/SCL5");
     }
     void serviceMeasurements() override { tests_.tick(millis()); }
-    void serviceIntegrations() override { profiles_.service(wifi_.connected() && time_.synchronized(), tests_.phase()==Testing::Phase::Running); }
+    void serviceIntegrations() override { profiles_.service(wifi_.connected() && time_.synchronized(), tests_.phase()==Testing::Phase::Running || hardwareBusy_()); }
 private:
     ILogger& logger_;
     Testing::TestRunner& tests_;
     Testing::ProfileRepository& profiles_;
     IWiFiService& wifi_;
     ITimeService& time_;
+    std::function<bool()> hardwareBusy_;
 };
 TestBoardLogTime logTime;
 RecentLogStore recentLogs;
@@ -86,7 +87,7 @@ HardwareProvisioningWebRoutes provisioningRoutes(host.server(), web, logger, pro
     [](uint8_t*, size_t) {}, provisioningOptions());
 Testing::HttpsProfileTransport profileTransport(logger);
 Testing::ProfileRepository profiles(profileTransport);
-TestBoardApplication application(logger, tests, profiles, wifi, time);
+TestBoardApplication application(logger, tests, profiles, wifi, time, []() { return diagnostics.active() || host.responsePending(); });
 FirmwareRuntime runtime(wifi, time, web, application);
 }
 void setupTestBoard() {

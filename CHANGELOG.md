@@ -4,6 +4,10 @@
 
 ### Added
 
+- Testboard 0.8.0: add guided physical loopback commissioning for 22 outputs and
+  40 original-adapter inputs, automatic LOW/HIGH/isolation measurements, free
+  contact selection and a downloadable browser-session report.
+
 - Testboard 0.7.2: port the verified main HTTP client gate and nonblocking
   response pump to the tester; avoid copying diagnostic page content.
 
