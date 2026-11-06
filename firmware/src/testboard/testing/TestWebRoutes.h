@@ -11,6 +11,7 @@ class TestWebRoutes : public IWebRoutes {
 public:
     TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner& runner, SimulatedFixture& fixture);
     void attachProfiles(ProfileRepository& profiles) { profiles_ = &profiles; }
+    void setHardwareBusy(std::function<bool()> busy) { hardwareBusy_ = busy; }
     void registerRoutes(WebServer& server) override;
     void tick(uint32_t now) { runner_.tick(now); }
     const TestRunner& runner() const { return runner_; }
@@ -22,6 +23,7 @@ private:
     IWebPagePresenter& pages_;
     SimulatedFixture& fixture_;
     TestRunner& runner_;
+    std::function<bool()> hardwareBusy_;
     ProfileRepository* profiles_ = nullptr;
 };
 } }

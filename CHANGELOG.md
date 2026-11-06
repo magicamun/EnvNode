@@ -4,6 +4,10 @@
 
 ### Added
 
+- Testboard 0.7.1: add opt-in real controller diagnostics for mux address/enable
+  selection, GPIO17 LOW/HIGH and GPIO34 ADC readings; disable after 60 seconds
+  or network loss and block provisioning/test actions while active.
+
 - EnvNode 0.8.2 / Testboard 0.7.0: share manufacturing revision metadata, support
   Mini 0.9 and Weather 0.3 beside their predecessors, select the exact EEPROM
   revision at startup and provide explicit revision-specific provisioning forms.

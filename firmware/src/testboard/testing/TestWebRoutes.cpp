@@ -122,6 +122,9 @@ void TestWebRoutes::action() {
     if (!unsignedValue(server.arg("generation"), generation) || generation != runner_.generation()) {
         server.send(409, "application/json", "{\"error\":\"Stale session state; refresh status\"}"); return;
     }
+    if (hardwareBusy_ && hardwareBusy_()) {
+        server.send(409, "application/json", "{\"error\":\"Hardwarediagnose zuerst abschalten\"}"); return;
+    }
     const String command = server.arg("action");
     bool ok = false;
     if (command == "load") {

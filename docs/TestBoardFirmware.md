@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.1) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -154,7 +154,7 @@ See [remote profile format, operation and trust model](TestBoardRemoteProfiles.m
 The independent signature check and physical validation remain future work.
 Revision-specific provisioning is included in 0.7.0 / EnvNode 0.8.2 below.
 
-## Revision-specific provisioning (0.7.0)
+## Revision-specific provisioning (0.7.1)
 
 Both applications share `BoardIdentityProfiles`; EnvNode 0.8.2 accepts the new
 identities and selects the exact recorded runtime revision. Existing identities,
@@ -162,3 +162,31 @@ configuration and numeric-ID APIs retain their previous behavior. The tester add
 a revision-specific board image using the same definition/image routes as testing.
 An unknown external EEPROM requires an explicit board/revision selection.
 See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
+
+## Manual controller diagnostics (0.7.1)
+
+Open `/diagnostics` or **Hardwarediagnose** on the tester. This mode drives real
+GPIOs on Test-Controller revision 0.1; the normal connector test remains simulated.
+No measurement GPIOs are initialized at boot. Explicitly confirm the controller
+and apply the settings to activate the diagnostic mode. Provisioning and simulated
+test actions are blocked while diagnostics are active; starting diagnostics during
+a running simulated test is rejected.
+
+With the controller unpowered, remove the DUT and provisioning cable. Supply the
+multiplexers through 3V3_SYS and common ground. If ORing is not installed, a temporary
+connection from the DevKit 3V3 pin to J8 pin 1 supplies this rail; remove that bridge
+before installing ORing. Never connect 5 V to COM_IN / GPIO34.
+
+Select U1 or U2, channel I0–I15, and LOW/HIGH on GPIO17. Input EN1–EN3 and channel
+selection can also be exercised at J8; leave all inputs disabled without an adapter.
+GPIO34 is displayed as a 12-bit raw ADC count, not calibrated volts. The stop button,
+network loss, or 60 seconds after the last apply command disables all multiplexers
+and returns GPIO17 to input mode. Status polling does not extend that interval.
+Closing/navigating away from the page sends a best-effort stop; the timeout remains
+the fallback. A controller reset restores the inactive boot state.
+
+For an initial loopback, connect J1 pin 1 to J8 pin 9 while unpowered. Select U1/I8
+with all input multiplexers disabled. Compare LOW and HIGH ADC readings. R6 (1 kΩ)
+and R9 (2.2 kΩ) divide the HIGH voltage to approximately 2.27 V before multiplexer
+resistance; a full-scale ADC count is not expected. This is a manual commissioning
+tool, not an automatic continuity certification or a validated physical test result.

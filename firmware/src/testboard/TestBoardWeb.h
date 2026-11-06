@@ -18,6 +18,7 @@ public:
         IDeviceRestart& restart, const IRecentLogReader& logs, FirmwareWebBuildInfo build);
     void attachProvisioningRoutes(IWebRoutes& routes) { provisioningRoutes_ = &routes; }
     void attachTestRoutes(IWebRoutes& routes) { testRoutes_ = &routes; }
+    void attachDiagnosticsRoutes(IWebRoutes& routes) { diagnosticsRoutes_ = &routes; }
     void begin() override;
     void loop() override;
     Locale webLocale() const override;
@@ -42,6 +43,7 @@ private:
     FirmwareWebRoutes firmwareRoutes_;
     LogWebRoutes logRoutes_;
     IWebRoutes* provisioningRoutes_ = nullptr;
+    IWebRoutes* diagnosticsRoutes_ = nullptr;
     IWebRoutes* testRoutes_ = nullptr;
 };
 }

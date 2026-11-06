@@ -17,6 +17,7 @@
 #include "HardwareProvisioningWebRoutes.h"
 #include "provisioning/ProvisioningPage.h"
 #include "profiles/HttpsProfileTransport.h"
+#include "diagnostics/HardwareDiagnostics.h"
 namespace EnvNode {
 namespace {
 class TestBoardLogTime : public ILogTimeProvider {
@@ -66,12 +67,13 @@ TestBoardWeb web(host, settings, wifi, time, formatter, ota, restart, recentLogs
 Testing::SimulatedFixture fixture;
 Testing::TestRunner tests(fixture);
 Testing::TestWebRoutes testRoutes(host, web, tests, fixture);
+HardwareDiagnostics diagnostics(host, web, []() { return tests.phase() != Testing::Phase::Running; });
 ProvisioningI2C provisioningBus(Testing::fixtureRevision01().provisioningSda,
     Testing::fixtureRevision01().provisioningScl);
 IdentityEeprom24LC32 targetEeprom(provisioningBus, 0x50);
 BoardIdentityStore targetStore(targetEeprom);
 TestBoardProvisioning provisioning(provisioningBus, targetStore,
-    []() { return tests.phase() != Testing::Phase::Running; });
+    []() { return !diagnostics.active() && tests.phase() != Testing::Phase::Running; });
 ProvisioningWebOptions provisioningOptions() {
     ProvisioningWebOptions options;
     options.externalTarget = true;
@@ -92,11 +94,13 @@ void setupTestBoard() {
     delay(500);
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
     testRoutes.attachProfiles(profiles);
+    testRoutes.setHardwareBusy([]() { return diagnostics.active(); });
     web.attachTestRoutes(testRoutes);
+    web.attachDiagnosticsRoutes(diagnostics);
     web.attachProvisioningRoutes(provisioningRoutes);
     runtime.begin();
 }
-void loopTestBoard() { runtime.loop(); }
+void loopTestBoard() { diagnostics.tick(millis()); runtime.loop(); }
 }
 void setup() { EnvNode::setupTestBoard(); }
 void loop() { EnvNode::loopTestBoard(); }

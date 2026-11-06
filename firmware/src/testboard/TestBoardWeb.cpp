@@ -30,6 +30,7 @@ void TestBoardWeb::begin() {
     host_.registerRoutes(logRoutes_);
     if (provisioningRoutes_) host_.registerRoutes(*provisioningRoutes_);
     if (testRoutes_) host_.registerRoutes(*testRoutes_);
+    if (diagnosticsRoutes_) host_.registerRoutes(*diagnosticsRoutes_);
     host_.begin();
 }
 void TestBoardWeb::loop() { host_.loop(); }
@@ -47,6 +48,7 @@ String TestBoardWeb::navigation(const char* active) const {
     };
     link("/", testerText("Prüfboard", "Test board"));
     if (testRoutes_) link("/test", testerText("Anschlussprüfung", "Connector test"));
+    if (diagnosticsRoutes_) link("/diagnostics", testerText("Hardwarediagnose", "Hardware diagnostics"));
     if (provisioningRoutes_) link("/hardware", "Provisioning");
     link("/network", text(TextId::Network));
     link("/time", text(TextId::LocaleTime));
