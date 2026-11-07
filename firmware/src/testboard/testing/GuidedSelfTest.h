@@ -15,6 +15,7 @@ enum class SelfTestVerdict : uint8_t { Untested, Running, Passed, Failed, Aborte
 struct SelfTestResult {
     SelfTestVerdict verdict = SelfTestVerdict::Untested;
     uint16_t low = 0, high = 0, isolation = 0;
+    uint16_t settleMs = 15;
     // 255: no completed isolation window, 0: disabled path, otherwise 1-based contact in its group.
     uint8_t isolationPath = 255, isolationAbove = 0, isolationBadWindows = 0;
     uint16_t isolationMean = 0, isolationMinimum = 0;
@@ -28,7 +29,7 @@ public:
     static constexpr size_t OutputCount = 22, Count = OutputCount + MaxInputs;
     static constexpr uint16_t LowMaximum = 200, HighMinimum = 1000, HighMaximum = 3800;
     explicit GuidedSelfTest(IDiagnosticIo& io) : io_(io) {}
-    bool start(size_t index, uint32_t now);
+    bool start(size_t index, uint32_t now, uint16_t settleMs = 15);
     void tick(uint32_t now);
     void cancel();
     void clear() { if (!running_) for (auto& result : results_) result = SelfTestResult(); }

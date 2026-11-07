@@ -5,9 +5,10 @@ MuxAddress GuidedSelfTest::output(size_t index) {
     const auto& r = fixtureRevision01().routing;
     return index < 4 ? r.gpio[index] : index < 8 ? r.i2c[index-4] : r.module[index-8];
 }
-bool GuidedSelfTest::start(size_t index, uint32_t now) {
-    if (running_ || index >= Count) return false;
+bool GuidedSelfTest::start(size_t index, uint32_t now, uint16_t settleMs) {
+    if (running_ || index >= Count || (settleMs!=15 && settleMs!=50 && settleMs!=100)) return false;
     selected_ = index; results_[index] = SelfTestResult();
+    results_[index].settleMs = settleMs;
     results_[index].verdict = SelfTestVerdict::Running;
     running_ = true; failed_ = false; step_ = 0; startedAt_ = now;
     switchStep(now); return true;
@@ -38,7 +39,7 @@ void GuidedSelfTest::tick(uint32_t now) {
     if (!running_) return;
     if (uint32_t(now-startedAt_) > 10000) { cancel(); return; }
     // Let RC and mux paths settle; sample one value per application turn.
-    if (uint32_t(now-switchedAt_) < 15 || (samples_ && uint32_t(now-sampledAt_) < 2)) return;
+    if (uint32_t(now-switchedAt_) < results_[selected_].settleMs || (samples_ && uint32_t(now-sampledAt_) < 2)) return;
     const uint16_t value = io_.sampleDiagnostic(); sampledAt_ = now;
     windowSamples_[samples_] = value;
     if(value > LowMaximum) ++above_;

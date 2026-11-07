@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.1) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.2) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Sixty-two tests exercise configuration isolation,
+composition and shared libraries. Sixty-three tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -267,3 +267,12 @@ contact run. Equal peaks prefer the higher mean. Decisions and timing are unchan
 The JSON report schema is 2; old session summaries are migrated without fabricating
 missing diagnostic data. The UI supplies the original mux settings for manual
 COM_IN measurement. This reports observations, not an inferred physical cause.
+
+## Controlled settling comparison (0.9.2)
+
+Guided self-tests accept only 15, 50 or 100 ms settling before each unchanged
+eight-sample window. The default remains 15 ms. Both the firmware result and
+browser-session/report record the actual settling value. Thresholds and peak-based
+pass/fail decisions are unchanged. The whole-run 10-second timeout remains; the
+longest supported input sequence nominally takes less than five seconds at 100 ms.
+This setting does not alter DUT connector-test timing.

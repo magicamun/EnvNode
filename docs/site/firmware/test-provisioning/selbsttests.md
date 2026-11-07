@@ -52,11 +52,14 @@ Wiederholung eines Kontakts. Während eines Laufs ist die Auswahl gesperrt.
 
 Geprüft werden der gewählte Pfad bei LOW und HIGH, dessen Abschaltung sowie die
 Trennung zu den anderen zugeordneten Kanälen der Gruppe. Unbenutzte physische
-Multiplexerkanäle sind nicht Teil dieses Plans. Ein Kontaktlauf dauert typischerweise
-ein bis zwei Sekunden. Nach 10 Sekunden ohne Abschluss wird abgebrochen.
+Multiplexerkanäle sind nicht Teil dieses Plans. Ein Kontaktlauf dauert je nach Einschwingzeit typischerweise
+ein bis fünf Sekunden. Nach 10 Sekunden ohne Abschluss wird abgebrochen.
 
 Die vorläufigen Grenzen sind **LOW/Trennung ≤ 200**, **HIGH 1000–3800**.
-Nach jeder Schaltung werden 15 ms abgewartet und acht Messungen aufgenommen.
+Die Einschwingzeit nach jeder Schaltung ist seit 0.9.2 mit **15, 50 oder 100 ms**
+wählbar; bisheriger Standard bleibt 15 ms. Danach werden unverändert acht
+Messungen aufgenommen. Für einen Zeitvergleich dieselbe Brücke bei 15 und
+100 ms testen; das Protokoll hält die gewählte Wartezeit je Ergebnis fest.
 Die Tabelle zeigt LOW-/HIGH-Mittelwerte und den höchsten Trennungswert.
 Seit 0.9.1 stehen daneben der zugehörige Kontakt samt Multiplexer/Kanal,
 Mittelwert, Minimum und die Anzahl der acht Werte über 200. Oberhalb der Tabelle
@@ -70,7 +73,8 @@ Die angezeigten Einstellungen für die manuelle Diagnose lassen sich zum Nachmes
 verwenden: Brücke unverändert lassen, genannten Pfad aktiv schalten und COM_IN
 gegen GND messen. Ein Multimeter kann kurze Spitzen übersehen; das Gegenprüfen
 hilft zunächst zwischen dauerhaftem Pegel und Umschalt-/Erfassungseffekt zu unterscheiden.
-Die Messreihenfolge, Einschwingzeiten und Fehlergrenze 200 wurden nicht geändert.
+Die Messreihenfolge, acht Messwerte und Fehlergrenze 200 bleiben unverändert.
+Nur die ausdrücklich gewählte Wartezeit vor dem Messfenster ändert sich.
 Ältere Browserergebnisse bleiben erhalten, haben aber keine nachträglich erfundenen
 Detaildaten: Für diese Kontakte muss der Test erneut ausgeführt werden.
 **Fehler** bedeutet, dass der Messweg diese Bedingungen nicht erfüllt; Ursache

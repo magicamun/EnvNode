@@ -82,6 +82,7 @@ void test_results_remain_independent_and_clear_is_inactive_only() {
 #include "physical_checks.inc"
 #include "esp32_io_checks.inc"
 int main() { UNITY_BEGIN();
+    RUN_TEST(test_selectable_settling_waits_without_changing_sampling_or_decisions);
     RUN_TEST(test_isolation_single_spike_records_channel_samples_and_unchanged_failure);
     RUN_TEST(test_isolation_steady_voltage_and_disabled_path_are_distinguishable);
     RUN_TEST(test_output_isolation_and_equal_peaks_keep_the_correct_contact);

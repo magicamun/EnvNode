@@ -49,3 +49,18 @@ void test_isolation_details_reset_on_retest_clear_and_remain_per_contact() {
     runner.cancel();runner.clear();
     for(size_t i=0;i<GuidedSelfTest::Count;++i){TEST_ASSERT_EQUAL(255,runner.result(i).isolationPath);TEST_ASSERT_EQUAL(0,runner.result(i).isolationTotalAbove);}
 }
+
+void test_selectable_settling_waits_without_changing_sampling_or_decisions() {
+    for(uint16_t settle : {15,50,100}) {
+        IsolationIo io;io.test=28;GuidedSelfTest runner(io);
+        TEST_ASSERT_FALSE(runner.start(io.test,0,16));TEST_ASSERT_TRUE(io.selections.empty());
+        TEST_ASSERT_TRUE(runner.start(io.test,0,settle));
+        runner.tick(settle-1);TEST_ASSERT_EQUAL(0,io.reads);
+        runner.tick(settle);TEST_ASSERT_EQUAL(1,io.reads);
+        finish(runner,settle);
+        const auto& r=runner.result(io.test);
+        TEST_ASSERT_EQUAL(settle,r.settleMs);TEST_ASSERT_EQUAL(320,r.isolationTotalSamples);
+        TEST_ASSERT_EQUAL(223,r.isolation);TEST_ASSERT_EQUAL(1,r.isolationTotalAbove);
+        TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Failed),unsigned(r.verdict));
+    }
+}

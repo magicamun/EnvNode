@@ -1,6 +1,6 @@
 # Ein Mainboard prüfen
 
-**Stand 0.9.1:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
+**Stand 0.9.2:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
 Die vollständige Boardabnahme einschließlich der Diodenpfade wird jetzt erstmals
 praktisch erprobt. Vor einer Bewertung zunächst
 [Controller, Adapter und Pigtails prüfen](selbsttests.md).
