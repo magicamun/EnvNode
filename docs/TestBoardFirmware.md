@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.1) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Fifty-eight tests exercise configuration isolation,
+composition and shared libraries. Sixty-two tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -257,3 +257,13 @@ are rejected during a run. The simulated-fault selector is hidden in physical mo
 The web state always includes the actual backend mode. Diagnostic/self-test and
 provisioning remain mutually exclusive with a running connector test. Loss of
 network administration availability aborts and releases the active runner.
+
+## Isolation-window diagnostics (0.9.1)
+
+Self-tests retain the maximum isolation window's 1-based logical contact (0 for
+all muxes disabled), mean, minimum, eight raw samples and count above 200. Global
+sample/above-limit/window counts cover every completed isolation window in that
+contact run. Equal peaks prefer the higher mean. Decisions and timing are unchanged.
+The JSON report schema is 2; old session summaries are migrated without fabricating
+missing diagnostic data. The UI supplies the original mux settings for manual
+COM_IN measurement. This reports observations, not an inferred physical cause.

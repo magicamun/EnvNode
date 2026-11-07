@@ -15,6 +15,12 @@ enum class SelfTestVerdict : uint8_t { Untested, Running, Passed, Failed, Aborte
 struct SelfTestResult {
     SelfTestVerdict verdict = SelfTestVerdict::Untested;
     uint16_t low = 0, high = 0, isolation = 0;
+    // 255: no completed isolation window, 0: disabled path, otherwise 1-based contact in its group.
+    uint8_t isolationPath = 255, isolationAbove = 0, isolationBadWindows = 0;
+    uint16_t isolationMean = 0, isolationMinimum = 0;
+    uint16_t isolationTotalAbove = 0, isolationTotalSamples = 0;
+    uint16_t isolationSamples[8] = {};
+
 };
 // Controller 0.1 + original produced Input-Adapter 0.1 only. Not a DUT profile.
 class GuidedSelfTest {
@@ -37,7 +43,8 @@ private:
     size_t selected_ = 0, step_ = 0;
     uint32_t switchedAt_ = 0, sampledAt_ = 0, startedAt_ = 0, sum_ = 0;
     uint16_t minimum_ = 4095, maximum_ = 0;
-    uint8_t samples_ = 0;
+    uint8_t samples_ = 0, above_ = 0;
+    uint16_t windowSamples_[8] = {};
     bool running_ = false, failed_ = false;
 };
 } }

@@ -4,6 +4,10 @@
 
 ### Added
 
+- Testboard 0.9.1: identify the worst isolation channel/window, retain its raw
+  samples and aggregate exceedance counts, and show manual meter-check settings
+  without changing thresholds, timing or pass/fail decisions.
+
 - Testboard 0.9.0: connect board tests to a real LOW/HIGH ADC fixture driver;
   preserve explicit simulation, require physical-target confirmation and clear
   results on mode change. Share electrical switching with hardware self-tests.

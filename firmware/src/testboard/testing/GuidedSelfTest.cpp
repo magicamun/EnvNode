@@ -32,7 +32,7 @@ void GuidedSelfTest::switchStep(uint32_t now) {
     // Step 2 explicitly verifies the disabled selected multiplexer path.
     if (step_ == 2 && !inputTest) p.output.device = 255;
     io_.selectDiagnostic(p);
-    switchedAt_ = sampledAt_ = now; samples_ = 0; sum_ = 0; minimum_ = 4095; maximum_ = 0;
+    switchedAt_ = sampledAt_ = now; samples_ = above_ = 0; sum_ = 0; minimum_ = 4095; maximum_ = 0;
 }
 void GuidedSelfTest::tick(uint32_t now) {
     if (!running_) return;
@@ -40,6 +40,8 @@ void GuidedSelfTest::tick(uint32_t now) {
     // Let RC and mux paths settle; sample one value per application turn.
     if (uint32_t(now-switchedAt_) < 15 || (samples_ && uint32_t(now-sampledAt_) < 2)) return;
     const uint16_t value = io_.sampleDiagnostic(); sampledAt_ = now;
+    windowSamples_[samples_] = value;
+    if(value > LowMaximum) ++above_;
     sum_ += value; if (value < minimum_) minimum_ = value; if (value > maximum_) maximum_ = value;
     if (++samples_ < 8) return;
     auto& result = results_[selected_];
@@ -48,7 +50,17 @@ void GuidedSelfTest::tick(uint32_t now) {
     else if (step_ == 1) {
         result.high = mean; failed_ |= minimum_ < HighMinimum || maximum_ > HighMaximum;
     } else {
-        if (maximum_ > result.isolation) result.isolation = maximum_;
+        result.isolationTotalSamples += samples_;
+        result.isolationTotalAbove += above_;
+        if(above_) ++result.isolationBadWindows;
+        if(result.isolationPath==255 || maximum_>result.isolation ||
+            (maximum_==result.isolation && mean>result.isolationMean)) {
+            result.isolation = maximum_;
+            result.isolationPath = step_==2 ? 0 : uint8_t(step_-2);
+            result.isolationMean = mean; result.isolationMinimum = minimum_;
+            result.isolationAbove = above_;
+            for(size_t i=0;i<8;++i)result.isolationSamples[i]=windowSamples_[i];
+        }
         failed_ |= maximum_ > LowMaximum;
     }
     ++step_;

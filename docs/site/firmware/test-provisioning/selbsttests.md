@@ -58,6 +58,21 @@ ein bis zwei Sekunden. Nach 10 Sekunden ohne Abschluss wird abgebrochen.
 Die vorläufigen Grenzen sind **LOW/Trennung ≤ 200**, **HIGH 1000–3800**.
 Nach jeder Schaltung werden 15 ms abgewartet und acht Messungen aufgenommen.
 Die Tabelle zeigt LOW-/HIGH-Mittelwerte und den höchsten Trennungswert.
+Seit 0.9.1 stehen daneben der zugehörige Kontakt samt Multiplexer/Kanal,
+Mittelwert, Minimum und die Anzahl der acht Werte über 200. Oberhalb der Tabelle
+erscheinen für den ausgewählten Kontakt alle acht Einzelwerte des Fensters mit
+dem höchsten Spitzenwert sowie die Grenzüberschreitungen über sämtliche
+Trennungsfenster. Bei gleichem Spitzenwert wird das Fenster mit höherem Mittelwert
+angezeigt. „Alle Input-/Output-Multiplexer aus“ bezeichnet die Abschaltprüfung,
+keinen zusätzlichen Steckerpin.
+
+Die angezeigten Einstellungen für die manuelle Diagnose lassen sich zum Nachmessen
+verwenden: Brücke unverändert lassen, genannten Pfad aktiv schalten und COM_IN
+gegen GND messen. Ein Multimeter kann kurze Spitzen übersehen; das Gegenprüfen
+hilft zunächst zwischen dauerhaftem Pegel und Umschalt-/Erfassungseffekt zu unterscheiden.
+Die Messreihenfolge, Einschwingzeiten und Fehlergrenze 200 wurden nicht geändert.
+Ältere Browserergebnisse bleiben erhalten, haben aber keine nachträglich erfundenen
+Detaildaten: Für diese Kontakte muss der Test erneut ausgeführt werden.
 **Fehler** bedeutet, dass der Messweg diese Bedingungen nicht erfüllt; Ursache
 können auch eine falsche Brücke, fehlende Versorgung oder schlechte Kontaktierung sein.
 

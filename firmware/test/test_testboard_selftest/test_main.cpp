@@ -78,9 +78,14 @@ void test_results_remain_independent_and_clear_is_inactive_only() {
     runner.cancel();runner.clear();
     for(size_t i=0;i<GuidedSelfTest::Count;++i)TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Untested),unsigned(runner.result(i).verdict));
 }
+#include "isolation_checks.inc"
 #include "physical_checks.inc"
 #include "esp32_io_checks.inc"
 int main() { UNITY_BEGIN();
+    RUN_TEST(test_isolation_single_spike_records_channel_samples_and_unchanged_failure);
+    RUN_TEST(test_isolation_steady_voltage_and_disabled_path_are_distinguishable);
+    RUN_TEST(test_output_isolation_and_equal_peaks_keep_the_correct_contact);
+    RUN_TEST(test_isolation_details_reset_on_retest_clear_and_remain_per_contact);
     RUN_TEST(test_shared_gpio_io_disables_before_address_changes_and_has_no_boot_side_effects);
     RUN_TEST(test_real_driver_runs_a_complete_40_input_matrix_without_using_expectations);
     RUN_TEST(test_real_driver_rejects_boundary_crossing_samples_and_survives_clock_wrap);

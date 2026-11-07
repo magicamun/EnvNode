@@ -216,7 +216,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-58 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+62 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
