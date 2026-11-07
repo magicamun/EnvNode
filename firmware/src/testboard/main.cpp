@@ -18,6 +18,8 @@
 #include "provisioning/ProvisioningPage.h"
 #include "profiles/HttpsProfileTransport.h"
 #include "diagnostics/HardwareDiagnostics.h"
+#include "diagnostics/Esp32FixtureIo.h"
+#include "testing/PhysicalFixture.h"
 namespace EnvNode {
 namespace {
 class TestBoardLogTime : public ILogTimeProvider {
@@ -38,9 +40,12 @@ public:
         logger_.infof("Testboard firmware version: %s", FirmwareBuildInfo::SemanticVersion);
         logger_.infof("Build: %s", FirmwareBuildInfo::BuildNumber);
         logger_.infof("Git commit: %s", FirmwareBuildInfo::GitCommit);
-        logger_.info("Testboard base ready; simulated connector tests ready; measurement I/O inactive; EEPROM provisioning ready on SDA16/SCL5");
+        logger_.info("Testboard base ready; physical connector measurement ready (explicit start required); EEPROM provisioning ready on SDA16/SCL5");
     }
-    void serviceMeasurements() override { tests_.tick(millis()); }
+    void serviceMeasurements() override {
+        if(tests_.phase()==Testing::Phase::Running&&!wifi_.connected()&&!wifi_.inSetupAccessPointMode())tests_.abort();
+        tests_.tick(millis());
+    }
     void serviceIntegrations() override { profiles_.service(wifi_.connected() && time_.synchronized(), tests_.phase()==Testing::Phase::Running || hardwareBusy_()); }
 private:
     ILogger& logger_;
@@ -66,9 +71,12 @@ TestBoardWeb web(host, settings, wifi, time, formatter, ota, restart, recentLogs
      FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::GitBranch,
      FirmwareBuildInfo::BuildTimestampUtc, FirmwareBuildInfo::SourceState, FirmwareBuildInfo::SourceDirty});
 Testing::SimulatedFixture fixture;
-Testing::TestRunner tests(fixture);
+Esp32FixtureIo measurementIo;
+Testing::PhysicalFixture physicalFixture(measurementIo, []() { return millis(); });
+Testing::SelectableFixture measurement(fixture, &physicalFixture, false);
+Testing::TestRunner tests(measurement);
 Testing::TestWebRoutes testRoutes(host, web, tests, fixture);
-HardwareDiagnostics diagnostics(host, web, []() { return tests.phase() != Testing::Phase::Running; });
+HardwareDiagnostics diagnostics(host, web, []() { return tests.phase() != Testing::Phase::Running; }, measurementIo);
 ProvisioningI2C provisioningBus(Testing::fixtureRevision01().provisioningSda,
     Testing::fixtureRevision01().provisioningScl);
 IdentityEeprom24LC32 targetEeprom(provisioningBus, 0x50);
@@ -95,6 +103,7 @@ void setupTestBoard() {
     delay(500);
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
     testRoutes.attachProfiles(profiles);
+    testRoutes.attachMeasurement(measurement);
     testRoutes.setHardwareBusy([]() { return diagnostics.active(); });
     web.attachTestRoutes(testRoutes);
     web.attachDiagnosticsRoutes(diagnostics);

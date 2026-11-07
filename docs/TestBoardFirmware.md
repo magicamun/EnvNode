@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.8.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -39,14 +39,16 @@ sensor/actuator/controller runtimes, MQTT, Home Assistant or display is linked
 into the fixture binary. Shared libraries may compile unused reusable helpers;
 linker garbage collection omits unused functions from the firmware.
 
-Available pages: `/`, `/test`, `/hardware` (Provisioning), `/network`, `/time`, `/device`, `/logs`, `/firmware`.
-The start page identifies the fixture and its current scope. `/test` provides a
-guided simulated connector test with a revision-specific Weather or Mini definition,
-KiCad board view, LEDs and contact-versus-socket matrix. Physical measurement and
-tester configuration backup/restore are future work.
-Measurement multiplexers/ADC and DUT power switching remain inactive. Provisioning
-uses real I2C only during explicit page reads or confirmed identity writes.
-See [TestBoardApplication.md](TestBoardApplication.md) for models, coverage and flow.
+Available pages: `/`, `/test`, `/selftest`, `/diagnostics`, `/hardware`
+(Provisioning), `/network`, `/time`, `/device`, `/logs`, `/firmware`.
+`/test` defaults to real LOW/HIGH measurement on Controller 0.1 + original
+Input-Adapter 0.1. Simulation is an explicit alternative and cannot silently
+replace a real measurement. Switching modes clears the entire runner session.
+The revision-specific board view, LEDs and result matrix use the same runner.
+Tester configuration backup/restore and DUT power switching are not implemented.
+No measurement GPIO or I²C is initialized at boot; an explicit operation is needed.
+See the [user manual](site/firmware/test-provisioning/index.md) and
+[TestBoardApplication.md](TestBoardApplication.md).
 
 ## Settings and first startup
 
@@ -66,8 +68,9 @@ keeps the restart explicit, as in EnvNode.
 
 Hardware mapping remains fixed per application. The schematic's dedicated
 provisioning bus is GPIO16 SDA / GPIO5 SCL; it starts only for each EEPROM operation.
-The continuity engine and its safe enable/output sequencing must be implemented
-and physically validated before testing boards.
+The real continuity engine is integrated since 0.9.0. Controller/input-adapter
+loopbacks are verified; full DUT/reference-diode acceptance and threshold tuning
+remain part of hardware commissioning.
 
 ## Validation and hardware follow-up
 
@@ -79,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Forty-five tests exercise configuration isolation,
+composition and shared libraries. Fifty-eight tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -89,7 +92,7 @@ fixture suite. Its previously known board-profile-count assertion is unrelated.
 Before accepting the baseline on hardware, flash `testboard` onto the fixture
 ESP or a spare devkit, check setup access point/network save/restart, locale/time,
 name, logs and a same-product OTA update. Confirm that the start log identifies
-Testboard 0.7.0. No physical device was flashed or restarted during implementation.
+the selected Testboard version. Hardware flashing/restarts remain explicit user actions.
 
 ## Mini (0.3.1)
 
@@ -120,7 +123,7 @@ Mainboard 0.3. Board and actual revision are selected explicitly; existing
 numeric-ID API calls retain their old revision. Module provisioning is not exposed yet.
 
 The dedicated connector is GND / 3V3_SYS / SDA16 / SCL5; target EEPROM address is
-0x50. Provisioning is real, even though `/test` remains a simulation. Remove the
+0x50. Provisioning is real; `/test` now offers explicit real and simulated modes. Remove the
 target ESP32 and disconnect other supplies, Input Adapter and measurement pigtails
 before connecting this cable. Disconnect it again before passive continuity tests. Its supply is wired;
 ending I2C does not turn target power off.
@@ -154,7 +157,7 @@ See [remote profile format, operation and trust model](TestBoardRemoteProfiles.m
 The independent signature check and physical validation remain future work.
 Revision-specific provisioning is included in 0.7.0 / EnvNode 0.8.2 below.
 
-## Revision-specific provisioning (0.8.0)
+## Revision-specific provisioning (0.7.0)
 
 Both applications share `BoardIdentityProfiles`; EnvNode 0.8.2 accepts the new
 identities and selects the exact recorded runtime revision. Existing identities,
@@ -163,10 +166,11 @@ a revision-specific board image using the same definition/image routes as testin
 An unknown external EEPROM requires an explicit board/revision selection.
 See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
 
-## Manual controller diagnostics (0.8.0)
+## Manual controller diagnostics (0.7.1)
 
 Open `/diagnostics` or **Hardwarediagnose** on the tester. This mode drives real
-GPIOs on Test-Controller revision 0.1; the normal connector test remains simulated.
+GPIOs on Test-Controller revision 0.1. Since 0.9.0 the connector test can also
+use physical I/O through the same shared driver.
 No measurement GPIOs are initialized at boot. Explicitly confirm the controller
 and apply the settings to activate the diagnostic mode. Provisioning and simulated
 test actions are blocked while diagnostics are active; starting diagnostics during
@@ -191,7 +195,7 @@ and R9 (2.2 kΩ) divide the HIGH voltage to approximately 2.27 V before multiple
 resistance; a full-scale ADC count is not expected. This is a manual commissioning
 tool, not an automatic continuity certification or a validated physical test result.
 
-## Browser response delivery (0.8.0)
+## Browser response delivery (0.7.2)
 
 The tester uses the same bounded nonblocking HTTP response pump and idle-client
 gate as main. Page delivery yields between writes, and browser preconnections
@@ -229,3 +233,27 @@ the browser additionally retains completed readings in sessionStorage for this t
 so switching power off to rewire does not discard the collected report. Download
 JSON before closing the tab. Saved readings reflect previous runs, not an ongoing
 measurement. “Ergebnisse löschen” clears firmware results and the browser session.
+
+## Physical connector measurement (0.9.0)
+
+`Esp32FixtureIo` implements the electrical switching once for diagnostics,
+self-test and `PhysicalFixture`. Hardware access lives outside the runner and DUT
+profiles. `PhysicalFixture` resolves pins via `FixtureRouting`, drives LOW, waits
+20 ms, samples eight times, drives HIGH, waits 40 ms and samples eight more times.
+Samples are taken at least 2 ms apart; the cooperative read method never sleeps.
+The driver never reads expected connection masks.
+
+All LOW samples must be ≤200. All HIGH samples ≤200 mean isolation; all between
+800 and 3800 mean continuity (including forward reference diodes). Intermediate,
+noisy/boundary-crossing or saturated readings are measurement errors. A 500 ms
+per-path timeout releases outputs; the outer runner also bounds busy responses.
+Limits are preliminary commissioning constants and require real DUT validation.
+R6 and R9 plus a diode, pull-ups and capacitors affect measured values.
+
+`SelectableFixture` arbitrates simulation versus the physical backend. Device boot
+uses physical mode, with no GPIO side effects until start. Real start requires an
+explicit server-side confirmation. Mode changes clear all connector results and
+are rejected during a run. The simulated-fault selector is hidden in physical mode.
+The web state always includes the actual backend mode. Diagnostic/self-test and
+provisioning remain mutually exclusive with a running connector test. Loss of
+network administration availability aborts and releases the active runner.

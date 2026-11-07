@@ -51,9 +51,16 @@ struct Fixture {
     TestBoardWeb web{host, settings, wifi, time, formatter, ota, restart, logs,
         {"0.3.1", "0.3.1+test", "1", "abc", "testboard", "now", "clean", false}};
     SimulatedFixture fixture;
-    TestRunner runner{fixture};
+    struct Real : ITestFixture {
+        unsigned selects=0,releases=0;
+        bool select(Pigtail,uint8_t,uint8_t) override {++selects;return true;}
+        Sample read(bool& connected) override {connected=false;return Sample::Ready;}
+        void release() override {++releases;}
+    } real;
+    SelectableFixture measurement{fixture,&real};
+    TestRunner runner{measurement};
     TestWebRoutes routes{host, web, runner, fixture};
-    Fixture() { settings.load(); web.attachTestRoutes(routes); web.begin(); }
+    Fixture() { settings.load(); routes.attachMeasurement(measurement); web.attachTestRoutes(routes); web.begin(); }
     WebServer& server() { return host.server(); }
     bool request(const char* path,HTTPMethod method) {
         const bool found=server().request(path,method);
@@ -403,8 +410,34 @@ void test_40_input_profile_checks_references_without_reading_past_old_socket_tab
     TEST_ASSERT_EQUAL(152,runner.completed()); TEST_ASSERT_EQUAL(Verdict::Incomplete,runner.overall());
 }
 
+void test_real_mode_requires_confirmation_and_resets_previous_simulated_results() {
+    Fixture f;TEST_ASSERT_TRUE(f.runner.load(weatherBoard()));
+    f.fixture.connect(weatherBoard(),0,SimulatedFault::None);uint32_t now=0;f.runner.start(now);finish(f.runner,now);
+    TEST_ASSERT_NOT_EQUAL(Verdict::Untested,f.runner.verdict(0));
+    f.server().arguments={{"action","mode"},{"mode","physical"},{"generation",String(f.runner.generation())}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(200,f.server().responseStatus);
+    TEST_ASSERT_FALSE(f.measurement.simulated());TEST_ASSERT_EQUAL(Verdict::Untested,f.runner.verdict(0));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(),"\"simulation\":false"));
+    f.server().arguments={{"action","start"},{"generation",String(f.runner.generation())},{"fault","none"}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(400,f.server().responseStatus);TEST_ASSERT_EQUAL(0,f.real.selects);
+    f.server().arguments["confirm"]="yes";f.request("/test/action",HTTP_POST);
+    TEST_ASSERT_EQUAL(200,f.server().responseStatus);TEST_ASSERT_EQUAL(1,f.real.selects);
+    f.server().arguments={{"action","mode"},{"mode","simulation"},{"generation",String(f.runner.generation())}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(409,f.server().responseStatus);TEST_ASSERT_FALSE(f.measurement.simulated());
+    f.runner.abort();f.server().arguments={{"action","mode"},{"mode","simulation"},{"generation",String(f.runner.generation())}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(200,f.server().responseStatus);TEST_ASSERT_TRUE(f.measurement.simulated());
+    TEST_ASSERT_EQUAL(0,f.runner.completed());TEST_ASSERT_EQUAL(Verdict::Untested,f.runner.verdict(0));
+}
+void test_hardware_diagnostics_lock_real_test_actions() {
+    Fixture f;f.runner.load(weatherBoard());f.routes.setHardwareBusy([](){return true;});
+    f.server().arguments={{"action","start"},{"generation",String(f.runner.generation())},{"confirm","yes"},{"fault","none"}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(409,f.server().responseStatus);TEST_ASSERT_EQUAL(0,f.real.selects);
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_real_mode_requires_confirmation_and_resets_previous_simulated_results);
+    RUN_TEST(test_hardware_diagnostics_lock_real_test_actions);
     RUN_TEST(test_fixture_revision01_resolves_all_physical_channels_and_gpio_controls);
     RUN_TEST(test_40_input_profile_checks_references_without_reading_past_old_socket_tables);
     RUN_TEST(test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered);

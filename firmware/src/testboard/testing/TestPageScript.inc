@@ -28,6 +28,10 @@ function matrix(c){
 }
 function paint(){
  const c=board.connectors[state.step], phase=state.phase, pendingBoard=$('test-board').value!==board.id;
+ $('test-mode').value=state.simulation?'simulation':'physical';$('test-mode').disabled=busy||phase===2||!state.physicalAvailable;
+ $('test-mode-label').textContent=state.simulation?'SIMULATION':tr('REALE MESSUNG','PHYSICAL MEASUREMENT');
+ $('test-mode-note').textContent=state.simulation?tr('Keine elektrische Messung; Ergebnisse werden simuliert.','No electrical measurement; results are simulated.'):tr('Controller 0.1 + ursprünglicher Input-Adapter 0.1. Vorläufige ADC-Grenzen: LOW/Trennung ≤ 200, Durchgang 800–3800; Zwischenwerte oder instabiles Signal = Messfehler.','Controller 0.1 + original Input-Adapter 0.1. Provisional ADC limits: LOW/isolation ≤ 200, continuity 800–3800; ambiguous/unstable readings = measurement error.');
+ $('test-fault-wrap').hidden=!state.simulation;$('test-confirm-wrap').hidden=state.simulation;$('test-confirm').disabled=busy||phase===2;
  if(shown!==state.step)matrix(c);
  $('test-board').disabled=busy||phase===2;$('test-load').disabled=busy||phase===2;$('test-start').disabled=busy||pendingBoard||![1,3].includes(phase);$('test-start').textContent=phase===3?tr('Verbunden – erneut prüfen','Connected – test again'):tr('Verbunden – Prüfung starten','Connected – start test');$('test-next').disabled=busy||pendingBoard||phase!==3;$('test-abort').disabled=busy||![1,2,3].includes(phase);$('test-fault').disabled=busy||pendingBoard||![1,3].includes(phase);
  const active=[1,2,3].includes(phase)&&c;
@@ -36,8 +40,8 @@ function paint(){
  $('test-refresh').disabled=busy||phase===2;
  const profileStatus={ready:tr('Remote-Katalog verfügbar.','Remote catalog available.'),waiting:tr('Eingebaute Profile; Remote-Abfrage wartet auf Netzwerk und Zeit.','Embedded profiles; remote lookup waits for network and time.'),unavailable:tr('Remote-Katalog nicht erreichbar oder ungültig; eingebaute Profile verfügbar.','Remote catalog unavailable or invalid; embedded profiles available.'),'profile-fallback':tr('Remote-Profil nicht ladbar; passendes eingebautes Profil wird verwendet, sofern vorhanden.','Remote profile unavailable; using matching embedded profile where available.'),'revision-conflict':tr('Geändertes Profil mit gleicher Revisions-ID abgelehnt.','Changed profile with the same revision ID rejected.'),embedded:tr('Eingebaute Profile.','Embedded profiles.')};
  $('test-profile-status').textContent=profileStatus[state.profilesStatus]||state.profilesStatus||'';
- $('test-reference').textContent=board.socket.length===40?tr('Referenzkabel an TP1 anschließen: Pin 1 GND, Pin 2 3V3_SYS. Prüfling ohne ESP32 und ohne Versorgung prüfen. Diodenpfade sind noch elektrisch zu validieren.','Connect reference cable to TP1: pin 1 GND, pin 2 3V3_SYS. Test unpowered target without its ESP32. Diode paths still require physical validation.'):'';
- $('test-summary').textContent=pendingBoard?tr('Bitte das ausgewählte Board laden.','Load the selected board.'):phase===2?tr(`Prüfung läuft: ${state.completed} / ${c.pins.length*board.socket.length}`,`Test running: ${state.completed} / ${c.pins.length*board.socket.length}`):phase===3?tr(`Anschluss: ${verdicts[state.verdicts[state.step]]}. Für den nächsten Schritt den Pigtail umstecken.`,`Connector: ${verdicts[state.verdicts[state.step]]}. Move the pigtail for the next step.`):phase===4?tr(`Gesamtergebnis: ${verdicts[state.overall]} – Simulation.`,`Overall result: ${verdicts[state.overall]} – simulation.`):tr('Jeder Anschluss muss vor seinem Test ausdrücklich bestätigt werden.','Confirm the connection before each connector test.');
+ $('test-reference').textContent=board.socket.length===40?tr('Referenzkabel an TP1 anschließen: Pin 1 GND, Pin 2 3V3_SYS. Prüfling ohne ESP32 und ohne Versorgung prüfen. Diodenpfade werden in Vorwärtsrichtung geprüft; Grenzwerte am ersten Board validieren.','Connect reference cable to TP1: pin 1 GND, pin 2 3V3_SYS. Test unpowered target without its ESP32. Diode paths are measured forward; validate thresholds on the first board.'):'';
+ $('test-summary').textContent=pendingBoard?tr('Bitte das ausgewählte Board laden.','Load the selected board.'):phase===2?tr(`Prüfung läuft: ${state.completed} / ${c.pins.length*board.socket.length}`,`Test running: ${state.completed} / ${c.pins.length*board.socket.length}`):phase===3?tr(`Anschluss: ${verdicts[state.verdicts[state.step]]}. Für den nächsten Schritt den Pigtail umstecken.`,`Connector: ${verdicts[state.verdicts[state.step]]}. Move the pigtail for the next step.`):phase===4?tr(`Gesamtergebnis: ${verdicts[state.overall]} – ${state.simulation?'Simulation':'reale Messung'}.`,`Overall result: ${verdicts[state.overall]} – ${state.simulation?'simulation':'physical measurement'}.`):tr('Jeder Anschluss muss vor seinem Test ausdrücklich bestätigt werden.','Confirm the connection before each connector test.');
  $('test-progress').max=c?c.pins.length*board.socket.length:1;$('test-progress').value=phase===4?$('test-progress').max:state.completed;
  portItems.forEach((li,i)=>{li.textContent=`${board.connectors[i].label||board.connectors[i].id} · ${verdicts[state.verdicts[i]||0]}`;li.disabled=busy||pendingBoard||phase===0||phase===2;li.setAttribute('aria-pressed',String(!!active&&i===state.step));li.parentElement.classList.toggle('current',!!active&&i===state.step);});
  board.connectors.forEach((port,i)=>contactLeds[i].forEach((led,p)=>{let color=verdictColors[Number((state.contacts||'')[i*14+p])||0];if(!port.pins[p].covered&&color!==verdictColors[2])color='#ffbf42';led.setAttribute('fill',color);}));
@@ -51,8 +55,8 @@ function paint(){
  if(phase===2&&state.completed<c.pins.length*board.socket.length){socketLeds[state.completed%board.socket.length].setAttribute('fill','#57baff');contactLeds[state.step][Math.floor(state.completed/board.socket.length)].setAttribute('fill','#57baff');}
 }
 async function command(action, extra={}){
- if(busy||!state)return;busy=true;paint();$('test-error').textContent='';
- try{const response=await fetch('/test/action',{method:'POST',body:new URLSearchParams({action,generation:state.generation,board:action==='load'?$('test-board').value:board.id,fault:$('test-fault').value,...extra})});const body=await response.json();if(!response.ok)throw Error(body.error||response.status);if(action==='load')displayBoard(await definition(body.board));await acceptState(body);shown=-1;paint();}catch(e){$('test-error').textContent=e.message;}finally{busy=false;paint();}
+ if(busy||!state)return;if(action==='start'&&!state.simulation&&!$('test-confirm').checked){$('test-error').textContent=tr('Bitte den spannungslosen Aufbau und die Verbindung bestätigen.','Please confirm the unpowered target and connection.');return;}busy=true;paint();$('test-error').textContent='';
+ try{const response=await fetch('/test/action',{method:'POST',body:new URLSearchParams({action,generation:state.generation,board:action==='load'?$('test-board').value:board.id,confirm:$('test-confirm').checked?'yes':'no',fault:$('test-fault').value,...extra})});const body=await response.json();if(!response.ok)throw Error(body.error||response.status);if(['load','select','next','mode','abort'].includes(action))$('test-confirm').checked=false;if(action==='load')displayBoard(await definition(body.board));await acceptState(body);shown=-1;paint();}catch(e){$('test-error').textContent=e.message;}finally{busy=false;paint();}
 }
 async function poll(){
  try{if(!busy){const response=await fetch('/test/state',{cache:'no-store'});if(!response.ok)throw Error(response.status);const next=await response.json();await acceptState(next);}}catch(e){$('test-error').textContent=tr('Statusverbindung unterbrochen: ','Status connection interrupted: ')+e.message;}finally{setTimeout(poll,180);}
@@ -82,14 +86,17 @@ async function acceptState(next){
  const model=wanted===board.id?board:await definition(wanted);
  if(state&&next.generation<state.generation&&next.phase!==0)return;
  if(model.id!==board.id)displayBoard(model);
+ if(state&&(next.step!==state.step||next.board!==state.board||next.simulation!==state.simulation))$('test-confirm').checked=false;
  state=next;paint();
 }
 (async()=>{try{
  await refreshCatalog();
  displayBoard(await definition(catalog[0].id));
+ $('test-mode').onchange=()=>command('mode',{mode:$('test-mode').value});
  $('test-board').onchange=()=>{if(state)paint();};
  for(const [id,action]of [['test-refresh','refresh'],['test-load','load'],['test-start','start'],['test-next','next'],['test-abort','abort']])$(id).onclick=()=>command(action);
  await poll();
 }catch(e){$('test-error').textContent=e.message;}})();
+addEventListener('pagehide',()=>{if(state&&state.phase===2)navigator.sendBeacon('/test/action',new URLSearchParams({action:'abort',generation:state.generation}));});
 })();
 )SCRIPT";

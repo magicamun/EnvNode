@@ -84,7 +84,7 @@ void TestWebRoutes::registerRoutes(WebServer& server) {
 }
 void TestWebRoutes::page() {
     pages_.sendPage(pages_.webLocale() == Locale::GermanGermany ? "Anschlussprüfung" : "Connector test",
-        "/test", buildTestPage(pages_.webLocale()), 200, true);
+        "/test", buildTestPage(pages_.webLocale(), measurement_ && measurement_->physicalAvailable()), 200, true);
 }
 void TestWebRoutes::state() {
     String json;
@@ -92,7 +92,9 @@ void TestWebRoutes::state() {
         host_.server().send(503, "application/json", "{\"error\":\"Status buffer unavailable\"}");
         return;
     }
-    json = "{\"simulation\":true,\"board\":";
+    json = String("{\"simulation\":")+((!measurement_||measurement_->simulated())?"true":"false");
+    json += String(",\"physicalAvailable\":")+((measurement_&&measurement_->physicalAvailable())?"true":"false");
+    json += ",\"fixture\":\"controller0.1-input0.1-module0.1\",\"board\":";
     appendJsonString(json, runner_.board() ? runner_.board()->id : "");
     json += String(",\"generation\":") + runner_.generation()
         + ",\"phase\":" + static_cast<unsigned>(runner_.phase())
@@ -127,15 +129,21 @@ void TestWebRoutes::action() {
     }
     const String command = server.arg("action");
     bool ok = false;
-    if (command == "load") {
+    if(command=="mode" && measurement_ && runner_.phase()!=Phase::Running) {
+        const String mode=server.arg("mode");
+        if(mode!="simulation"&&mode!="physical") {server.send(400,"application/json","{\"error\":\"Unknown measurement mode\"}");return;}
+        ok=measurement_->setSimulation(mode=="simulation")&&runner_.resetForModeChange();
+    } else if (command == "load") {
         const auto* board = findBoard(server.arg("board").c_str());
         ok = profiles_ ? profiles_->load(server.arg("board").c_str(),runner_) : board && runner_.load(*board);
     } else if (command == "start" && (runner_.phase() == Phase::AwaitingConnection || runner_.phase() == Phase::Review)) {
         const String fault = server.arg("fault");
-        if (fault != "none" && fault != "open" && fault != "short") {
+        const bool simulation=!measurement_||measurement_->simulated();
+        if(!simulation&&server.arg("confirm")!="yes") {server.send(400,"application/json","{\"error\":\"Confirm unpowered DUT, removed ESP32 and disconnected provisioning cable\"}");return;}
+        if (simulation && fault != "none" && fault != "open" && fault != "short") {
             server.send(400, "application/json", "{\"error\":\"Unknown simulation fault\"}"); return;
         }
-        fixture_.connect(*runner_.board(), runner_.step(), fault == "open" ? SimulatedFault::OpenContact
+        if(simulation) fixture_.connect(*runner_.board(), runner_.step(), fault == "open" ? SimulatedFault::OpenContact
             : fault == "short" ? SimulatedFault::ExtraConnection : SimulatedFault::None);
         ok = runner_.start(millis());
     } else if(command=="refresh" && profiles_ && runner_.phase()!=Phase::Running) {

@@ -1,12 +1,18 @@
 // EnvNode: see repository LICENSE.
 #include "TestPage.h"
 namespace EnvNode { namespace Testing {
-String buildTestPage(Locale locale) {
+String buildTestPage(Locale locale, bool physicalAvailable) {
     const bool de = locale == Locale::GermanGermany;
     String html("<div id='test-app' data-language='"); html += de ? "de" : "en";
-    html += "'><div class='notice'><strong>SIMULATION</strong> · ";
-    html += de ? "Keine reale Messung. Prüfboard-Ausgänge bleiben inaktiv." : "No physical measurement. Fixture outputs remain inactive.";
-    html += "</div><section class='card'><label>";
+    html += "'><div class='notice'><strong id='test-mode-label'>";
+    html += de ? "Messmodus wird geladen" : "Loading measurement mode";
+    html += "</strong><p id='test-mode-note'></p></div><section class='card'><label>";
+    html += de ? "Betriebsart (Wechsel verwirft Ergebnisse)" : "Mode (changing clears results)";
+    html += "<select id='test-mode'><option value='physical'";
+    if(!physicalAvailable)html += " disabled";
+    html += ">";
+    html += de ? "Reale Messung · ursprünglicher Input-Adapter 0.1" : "Physical measurement · original Input-Adapter 0.1";
+    html += "</option><option value='simulation'>SIMULATION</option></select></label><label>";
     html += de ? "Zielboard und Revision" : "Target board and revision";
     html += "<select id='test-board'></select></label><button id='test-load'>";
     html += de ? "Board laden / neuer Testlauf" : "Load board / new session";
@@ -14,13 +20,15 @@ String buildTestPage(Locale locale) {
     html += de ? "Remote-Profile aktualisieren" : "Refresh remote profiles";
     html += "</button><p id='test-profile-status' role='status'></p><p id='test-reference' class='help'></p><details><summary>";
     html += de ? "Quelle der Prüfdaten" : "Test data source";
-    html += "</summary><p id='test-source' class='help'></p></details></section><section class='card'><h2 id='test-instruction'></h2><p id='test-summary' role='status' aria-live='polite'></p><label>";
+    html += "</summary><p id='test-source' class='help'></p></details></section><section class='card'><h2 id='test-instruction'></h2><p id='test-summary' role='status' aria-live='polite'></p><label id='test-fault-wrap'>";
     html += de ? "Simulierter Zustand" : "Simulated condition";
     html += "<select id='test-fault'><option value='none'>OK</option><option value='open'>";
     html += de ? "Kontakt 1 unterbrochen" : "Contact 1 open";
     html += "</option><option value='short'>";
     html += de ? "Kontakt 1 mit Zusatzverbindung" : "Contact 1 with extra connection";
-    html += "</option></select></label><div class='actions'><button id='test-start'>";
+    html += "</option></select></label><label id='test-confirm-wrap'><input type='checkbox' id='test-confirm'>";
+    html += de ? "Prüfling ohne Versorgung und ohne ESP32; Provisioning-Kabel getrennt, richtiger Pigtail verbunden. Nur ursprünglicher Input-Adapter 0.1." : "Target unpowered, ESP32 removed, provisioning cable disconnected, correct pigtail connected. Original Input-Adapter 0.1 only.";
+    html += "</label><div class='actions'><button id='test-start'>";
     html += de ? "Verbunden – Prüfung starten" : "Connected – start test";
     html += "</button><button id='test-next'>";
     html += de ? "Nächster Anschluss" : "Next connector";
@@ -37,7 +45,7 @@ String buildTestPage(Locale locale) {
     html += de ? "Einzelprüfungen: Kontakt gegen Prüfeingang" : "Individual checks: contact against measurement input";
     html += "</h2><p class='help'>";
     html += de ? "● Durchgang erwartet · ○ Trennung erwartet · ! unerwarteter Durchgang · × fehlender Durchgang · E Messfehler. Kontakte ohne positiven Prüfpfad bleiben unvollständig." : "● Expected continuity · ○ Expected isolation · ! Unexpected continuity · × Missing continuity · E Measurement error. Contacts without a positive test path remain incomplete.";
-    html += "</p><div class='table-scroll'><table id='test-matrix'></table></div></section></div><style>.test-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,1fr);gap:16px}.test-layout svg{width:100%;max-height:700px;background:#17483e;border-radius:8px}.test-layout ol{padding-left:24px}.test-layout li{padding:4px}.test-layout li.current{font-weight:750;background:#fff0d7}.test-layout li button{display:block;width:100%;text-align:left;background:transparent;color:var(--ink);padding:5px 3px;white-space:normal}.test-layout li button:hover:not(:disabled){background:#fff0d7}.test-layout li.current button{font-weight:750}#test-matrix td,#test-matrix th{padding:4px;min-width:22px;text-align:center}#test-matrix th:first-child{min-width:160px;text-align:left}button:disabled{opacity:.45;cursor:default}@media(max-width:850px){.test-layout{grid-template-columns:1fr}}</style><script src='/test/ui.js'></script>";
+    html += "</p><div class='table-scroll'><table id='test-matrix'></table></div></section></div><style>#test-app [hidden]{display:none!important}.test-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,1fr);gap:16px}.test-layout svg{width:100%;max-height:700px;background:#17483e;border-radius:8px}.test-layout ol{padding-left:24px}.test-layout li{padding:4px}.test-layout li.current{font-weight:750;background:#fff0d7}.test-layout li button{display:block;width:100%;text-align:left;background:transparent;color:var(--ink);padding:5px 3px;white-space:normal}.test-layout li button:hover:not(:disabled){background:#fff0d7}.test-layout li.current button{font-weight:750}#test-matrix td,#test-matrix th{padding:4px;min-width:22px;text-align:center}#test-matrix th:first-child{min-width:160px;text-align:left}button:disabled{opacity:.45;cursor:default}@media(max-width:850px){.test-layout{grid-template-columns:1fr}}</style><script src='/test/ui.js'></script>";
     return html;
 }
 } }

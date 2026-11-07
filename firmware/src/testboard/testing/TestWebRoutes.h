@@ -5,11 +5,13 @@
 #include "WebHost.h"
 #include "TestRunner.h"
 #include "SimulatedFixture.h"
+#include "PhysicalFixture.h"
 #include "../profiles/ProfileRepository.h"
 namespace EnvNode { namespace Testing {
 class TestWebRoutes : public IWebRoutes {
 public:
     TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner& runner, SimulatedFixture& fixture);
+    void attachMeasurement(SelectableFixture& fixture) { measurement_ = &fixture; }
     void attachProfiles(ProfileRepository& profiles) { profiles_ = &profiles; }
     void setHardwareBusy(std::function<bool()> busy) { hardwareBusy_ = busy; }
     void registerRoutes(WebServer& server) override;
@@ -24,6 +26,7 @@ private:
     SimulatedFixture& fixture_;
     TestRunner& runner_;
     std::function<bool()> hardwareBusy_;
+    SelectableFixture* measurement_ = nullptr;
     ProfileRepository* profiles_ = nullptr;
 };
 } }

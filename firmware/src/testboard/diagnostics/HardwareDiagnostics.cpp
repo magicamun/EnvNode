@@ -24,45 +24,16 @@ void HardwareDiagnostics::stop() {
 }
 void HardwareDiagnostics::releaseDiagnostic() {
     if (!active_) return;
-    const auto& f = Testing::fixtureRevision01();
-    for (auto pin : f.outputEnable) digitalWrite(pin, HIGH);
-    for (auto pin : f.inputEnable) digitalWrite(pin, HIGH);
-    pinMode(f.drive, INPUT);
-    active_ = false;
+    io_.releaseDiagnostic();active_=false;
 }
 void HardwareDiagnostics::apply() {
-    const auto& f = Testing::fixtureRevision01();
-    // Disable every path before changing address or drive level.
-    for (auto pin : f.outputEnable) { digitalWrite(pin, HIGH); pinMode(pin, OUTPUT); }
-    for (auto pin : f.inputEnable) { digitalWrite(pin, HIGH); pinMode(pin, OUTPUT); }
-    pinMode(f.drive, INPUT);
-    for (int i = 0; i < 4; ++i) {
-        digitalWrite(f.outputSelect[i], (channel_ >> i) & 1); pinMode(f.outputSelect[i], OUTPUT);
-        digitalWrite(f.inputSelect[i], (inputChannel_ >> i) & 1); pinMode(f.inputSelect[i], OUTPUT);
-    }
-    pinMode(f.sense, INPUT);
-    analogReadResolution(12);
-    analogSetPinAttenuation(f.sense, ADC_11db);
-    if (output_ >= 0) {
-        digitalWrite(f.drive, level_); pinMode(f.drive, OUTPUT);
-        digitalWrite(f.outputEnable[output_], LOW);
-    }
-    if (input_ >= 0) digitalWrite(f.inputEnable[input_], LOW);
-    lastCommand_ = millis(); active_ = true;
+    Testing::DiagnosticPath path{{uint8_t(output_<0?255:output_),uint8_t(channel_)},input_,uint8_t(inputChannel_),level_!=0};
+    io_.selectDiagnostic(path);lastCommand_=millis();active_=true;
 }
 void HardwareDiagnostics::selectDiagnostic(const Testing::DiagnosticPath& path) {
-    output_ = path.output.device == 255 ? -1 : path.output.device; channel_ = path.output.channel;
-    input_ = path.inputDevice; inputChannel_ = path.inputChannel; level_ = path.high ? HIGH : LOW;
-    apply();
-    if (path.output.device == 255) {
-        // Test enable isolation with the COM source still driven HIGH.
-        const auto pin = Testing::fixtureRevision01().drive;
-        digitalWrite(pin, HIGH); pinMode(pin, OUTPUT);
-    }
+    io_.selectDiagnostic(path);lastCommand_=millis();active_=true;
 }
-uint16_t HardwareDiagnostics::sampleDiagnostic() {
-    return analogRead(Testing::fixtureRevision01().sense);
-}
+uint16_t HardwareDiagnostics::sampleDiagnostic() {return io_.sampleDiagnostic();}
 void HardwareDiagnostics::tick(uint32_t now) {
     if (active() && (!host_.administrationAvailable() || uint32_t(now - lastCommand_) >= 60000)) stop();
     selfTest_.tick(now);
@@ -71,7 +42,7 @@ void HardwareDiagnostics::state() {
     String json = String("{\"active\":") + (active_ ? "true" : "false") + ",\"remaining\":";
     json += active_ ? String((60000 - uint32_t(millis() - lastCommand_)) / 1000) : "0";
     json += ",\"adc\":";
-    json += active_ ? String(analogRead(Testing::fixtureRevision01().sense)) : "null";
+    json += active_ ? String(io_.sampleDiagnostic()) : "null";
     json += "}";
     host_.server().sendHeader("Cache-Control", "no-store");
     host_.server().send(200, "application/json", json);

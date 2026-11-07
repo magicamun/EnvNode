@@ -78,7 +78,15 @@ void test_results_remain_independent_and_clear_is_inactive_only() {
     runner.cancel();runner.clear();
     for(size_t i=0;i<GuidedSelfTest::Count;++i)TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Untested),unsigned(runner.result(i).verdict));
 }
+#include "physical_checks.inc"
+#include "esp32_io_checks.inc"
 int main() { UNITY_BEGIN();
+    RUN_TEST(test_shared_gpio_io_disables_before_address_changes_and_has_no_boot_side_effects);
+    RUN_TEST(test_real_driver_runs_a_complete_40_input_matrix_without_using_expectations);
+    RUN_TEST(test_real_driver_rejects_boundary_crossing_samples_and_survives_clock_wrap);
+    RUN_TEST(test_physical_measurement_classifies_only_observed_levels);
+    RUN_TEST(test_physical_low_fault_timeout_invalid_and_release);
+    RUN_TEST(test_selectable_fixture_does_not_drive_at_boot_or_keep_old_outputs);
     RUN_TEST(test_all_contacts_use_the_committed_routing_and_release_outputs);
     RUN_TEST(test_open_short_crosstalk_and_saturation_fail);
     RUN_TEST(test_invalid_and_busy_start_do_not_switch_hardware);

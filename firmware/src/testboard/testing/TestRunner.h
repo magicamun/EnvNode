@@ -10,6 +10,7 @@ public:
     explicit TestRunner(ITestFixture& fixture) : fixture_(fixture) {}
     bool load(const BoardDefinition& board);
     bool start(uint32_t now);
+    bool resetForModeChange();
     bool next();
     bool selectConnector(size_t index);
     void abort();

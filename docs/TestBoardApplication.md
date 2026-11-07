@@ -6,8 +6,8 @@ EnvNode-eigene Inhalte unterliegen der LICENSE im Repository
 ## Hardwareaufteilung seit 2026-10-27
 
 Die drei Projekte [Test-Controller](../hardware/kicad/MainBoards/Test-Controller/README.md),
-[Input-Adapter](../hardware/kicad/MainBoards/Input-Adapter/README.md) und
-[Module-Adapter](../hardware/kicad/MainBoards/Module-Adapter/README.md) ersetzen das
+[Input-Adapter](../hardware/kicad/Adapter/Input-Adapter/README.md) und
+[Module-Adapter](../hardware/kicad/Adapter/Module-Adapter/README.md) ersetzen das
 monolithische Test-Provisioning-Projekt. Die READMEs enthalten die aus den PCB-Daten
 geprüften Kabel-, GPIO- und Kanalzuordnungen.
 
@@ -56,18 +56,20 @@ Multiplexersteuerung und ADC-Auswertung sind weiterhin nicht implementiert.
    Fortschritt, Einzelprüfungen und Ergebnisse. Ein Webadapter verbindet
    Bedienbefehle mit dem Ablauf; er entscheidet keine elektrischen Sollwerte.
 
-`SimulatedFixture` implementiert aktuell `ITestFixture`. Später wird der reale
-Treiber dahinter die Multiplexer auswählen, andere Enable-Leitungen deaktivieren,
-Ausgangspegel setzen, Einschwingzeiten einhalten und den ADC auswerten. Eine
-Kontinuitätsentscheidung darf intern mehrere Anregungs-/Messphasen benötigen;
-die Anwendung erhält ein logisches Durchgangsergebnis. `Busy` erlaubt diese
-asynchrone Ausführung, ohne Netzwerk und Browser zu blockieren. Ein Messpfad ohne
-Ergebnis läuft nach zwei Sekunden in einen Messfehler. Fehlgeschlagene Auswahl,
-Messfehler, Abschluss und Abbruch geben den Prüfpfad frei.
+`PhysicalFixture` und `SimulatedFixture` implementieren `ITestFixture`.
+`SelectableFixture` wählt die Betriebsart; `TestRunner` kennt keine ADC-Grenzen.
+Seit 0.9.0 ist reale Messung der Startmodus auf dem Controller. `Esp32FixtureIo`
+setzt Adressen und Enable-Leitungen auch für Diagnose und Selbsttest einheitlich.
+Der reale Treiber misst LOW/HIGH, hält Einschwingzeiten ein und bewertet acht
+ADC-Werte pro Phase. Er liest keine Sollmasken aus dem Boardprofil.
+`Busy` erlaubt den Ablauf ohne blockierende Wartezeiten. Ein Messpfad hat intern
+500 ms Zeit; der Runner begrenzt Busy-Antworten zusätzlich auf zwei Sekunden.
+Auswahlfehler, Messfehler, Abschluss und Abbruch geben die Hardware frei.
 
-Die physische Routingtabelle ist hinterlegt und wird bei der simulierten
-Pfadauswahl auf gültige Kontakte geprüft. Der Simulator schreibt keine GPIOs und
-startet kein I²C. Dies ersetzt keine Validierung der aufgebauten Hardware.
+Die Routingtabelle wird sowohl für reale als auch simulierte Pfadauswahl verwendet.
+Der Simulator schreibt keine GPIOs und startet kein I²C. Der Modus bleibt in der
+Oberfläche sichtbar; ein Wechsel löscht alle bisherigen Ergebnisse. Grenzwerte,
+Dioden, Pull-ups und Kapazitäten sind am ersten Mainboard physisch zu validieren.
 
 ## Sollwerte und Abdeckung
 
@@ -98,11 +100,11 @@ Im Weather-PCB liegt Sockelpin 1 auf `+3V3_DEVKIT`, die Anschlussversorgung auf
 `+3V3_SYS`. Diese Netze werden nicht gleichgesetzt. Der Nutzer hat ausdrücklich
 festgelegt, diesen Punkt vorerst als nicht vollständig prüfbar auszuweisen.
 Die aktuelle Definition hat dadurch 19 unvollständig abgedeckte Kontakte.
-Für eine kommende Hardware-Revision ist ein zweipoliger JST-PH-Abgriff mit GND
-und +3V3_SYS auf dem Zielboard vereinbart. Beide Kontakte erhalten separat
+Die neueren Profile Mini 0.9 und Weather 0.3 ergänzen inzwischen den
+zweipoligen JST-PH-Abgriff mit GND und +3V3_SYS auf dem Zielboard. Beide Kontakte erhalten separat
 schaltbare Prüfboard-Eingänge; GND wird nicht fest mit Prüfboard-GND verbunden.
 +5V bleibt beim Weather über Sockelpin 19 prüfbar. Diese Referenzkontakte sind
-im aktuellen 38-Pin-Profil und in der Simulation noch nicht enthalten.
+im älteren 38-Pin-Profil nicht enthalten; die neueren Profile verwenden 40 Eingänge.
 
 Verbindungen durch Bauteile, Schutzschaltungen und Pull-ups werden aus einem
 Netznamenvergleich nicht abgeleitet. Analoge Schwellen und die Interpretation
@@ -191,7 +193,9 @@ stateDiagram-v2
 Fortschritt, eine echte KiCad-Draufsicht mit Kontakt-LEDs, die Anschlussliste und
 die vollständige Kontakt-gegen-Sockel-Matrix. Der aktuelle Anschluss ist direkt
 auf dem Board umrahmt. Farben werden durch Symbole und Ergebnistext ergänzt.
-Die Kennzeichnung **SIMULATION** bleibt sichtbar.
+Seit 0.9.0 ist **REALE MESSUNG** auf echter Testhardware der Startmodus.
+**SIMULATION** bleibt explizit wählbar und sichtbar gekennzeichnet. Ein Wechsel
+verwirft die Ergebnisse; die reale Prüfung verlangt eine zusätzliche Bestätigung.
 
 - `/test/definition`: revisionsgebundene Metadaten, Sollwerte und Positionen.
 - `/test/board.svg`: komprimierte KiCad-Draufsicht.
@@ -212,7 +216,7 @@ pio run -e testboard -e esp32dev
 pio test -e testboard_native
 ```
 
-45 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
+58 native Prüfboard-Tests decken Basisfunktionen und Ablauf ab, darunter eine vom
 Simulator unabhängige GPIO16-Messprobe, alle 3.268 Vergleiche, Multi-GND, Modulslot,
 Unterbrechung/Zusatzverbindung, Freigabe/Abbruch/Timeout, Zustandsfreigaben und
 JSON-API-Antworten. Beide ESP32-Ziele bauen. Der Browserablauf wurde zusätzlich
@@ -242,4 +246,6 @@ Git-Commit gebunden. Ein geladener Prüflauf behält seine eigene Definition.
 Die neuen ENID-/Provisioning-Revisionen und eine Boarddarstellung im Tester-
 Provisioning sind seit 0.7.0 integriert. Die Public-Key-Signaturprüfung sowie
 Modul-Provisioning und Modulansichten folgen separat. GPIO16/5 bleiben unverändert;
-die elektrische Provisioning- und Messvalidierung wartet auf die Testhardware.
+Controller und ursprünglicher Input-Adapter wurden inzwischen per Schleifentest
+erprobt. Die reale Anschlussmessung ist seit 0.9.0 integriert; vollständige
+Mainboard-/Referenzdioden-Abnahme und externes Provisioning am Aufbau folgen.

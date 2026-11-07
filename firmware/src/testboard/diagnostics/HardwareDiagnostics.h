@@ -9,8 +9,8 @@
 namespace EnvNode {
 class HardwareDiagnostics : public IWebRoutes, private Testing::IDiagnosticIo {
 public:
-    HardwareDiagnostics(WebHost& host, IWebPagePresenter& pages, std::function<bool()> available)
-        : host_(host), pages_(pages), available_(available), selfTest_(*this) {}
+    HardwareDiagnostics(WebHost& host, IWebPagePresenter& pages, std::function<bool()> available, Testing::IDiagnosticIo& io)
+        : host_(host), pages_(pages), available_(available), io_(io), selfTest_(*this) {}
     void registerRoutes(WebServer& server) override;
     void tick(uint32_t now);
     bool active() const { return active_ || selfTest_.running(); }
@@ -28,6 +28,7 @@ private:
     WebHost& host_;
     IWebPagePresenter& pages_;
     std::function<bool()> available_;
+    Testing::IDiagnosticIo& io_;
     Testing::GuidedSelfTest selfTest_;
     size_t selfSelected_ = 0;
     uint32_t selfGeneration_ = 0;

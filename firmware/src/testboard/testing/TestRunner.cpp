@@ -24,6 +24,11 @@ bool TestRunner::load(const BoardDefinition& board) {
     std::fill_n(verdicts_, MaxConnectors, Verdict::Untested);
     phase_ = Phase::AwaitingConnection; ++generation_; return true;
 }
+bool TestRunner::resetForModeChange() {
+    if(phase_==Phase::Running)return false;
+    if(board_)return load(*board_);
+    fixture_.release();phase_=Phase::Empty;++generation_;return true;
+}
 bool TestRunner::start(uint32_t now) {
     if ((phase_ != Phase::AwaitingConnection && phase_ != Phase::Review) || !connector()) return false;
     std::fill_n(results_[step_], MaxContacts * MaxInputs, Result::Pending);

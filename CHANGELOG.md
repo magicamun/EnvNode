@@ -4,6 +4,11 @@
 
 ### Added
 
+- Testboard 0.9.0: connect board tests to a real LOW/HIGH ADC fixture driver;
+  preserve explicit simulation, require physical-target confirmation and clear
+  results on mode change. Share electrical switching with hardware self-tests.
+  Document EnvNode and Test/Provisioning in separate firmware manual sections.
+
 - Testboard 0.8.0: add guided physical loopback commissioning for 22 outputs and
   40 original-adapter inputs, automatic LOW/HIGH/isolation measurements, free
   contact selection and a downloadable browser-session report.

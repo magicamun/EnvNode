@@ -89,8 +89,8 @@ void TestBoardWeb::home() {
     content += testerText("Netzwerk, Geräteeinstellungen, Sprache/Zeit, Protokolle und Firmwareverwaltung sind verfügbar.",
         "Network, device settings, locale/time, logs and firmware administration are available.");
     content += "</p><p>";
-    if (testRoutes_) content += testerText("Die geführte Anschlussprüfung steht als Simulation bereit. Reale Messung folgt später.",
-        "Guided connector testing is available in simulation. Physical measurement follows later.");
+    if (testRoutes_) content += testerText("Die Anschlussprüfung unterstützt reale Messung und Simulation. Hardwarediagnose und geführter Selbsttest helfen bei der Inbetriebnahme.",
+        "Connector tests support physical measurement and simulation. Hardware diagnostics and guided self-tests support commissioning.");
     else content += testerText("Die Anschlussprüfung ist nicht eingebunden.",
         "Connector testing is not attached.");
     if (provisioningRoutes_) content += testerText(
