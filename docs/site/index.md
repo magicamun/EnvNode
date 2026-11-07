@@ -28,7 +28,7 @@ Weg der Daten bis zu einer externen Anwendung.
 - [Sensoren](sensors/index.md): unterstützte Treiber und Sensoranschlüsse.
 - [Module](modules/index.md): Erweiterungen für zusätzliche Aufgaben.
 - [Displays](displays/index.md): Anzeigen und deren Konfiguration.
-- [Firmware](firmware/index.md): Einrichtung, Messbetrieb, MQTT und Diagnose.
+- [Firmware](firmware/overview.md): EnvNode sowie Test/Provisioning mit Hardware-Selbsttests und Mainboardprüfung.
 
 ## Umfang dieser Dokumentation
 

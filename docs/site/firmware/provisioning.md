@@ -1,5 +1,8 @@
 # Hardware identifizieren und provisionieren
 
+Die eigenständige Test-Firmware und die Trennung von Messbetrieb und externem
+Provisioning beschreibt [Test/Provisioning](test-provisioning/provisioning-profile.md).
+
 Provisioning schreibt die Identität einer Baugruppe in deren EEPROM.
 Es ist bei leerem oder fehlerhaftem Datensatz nötig, nicht bei jedem Neustart.
 
@@ -124,9 +127,9 @@ Input-Adapter trennen, bevor der Provisioning-Stecker angeschlossen wird. Das
 Kabel vor einer passiven Durchgangsprüfung wieder abziehen; die Firmware schaltet
 dessen Versorgung nicht ab.
 
-Die **Anschlussprüfung ist derzeit eine Simulation**. Das Provisioning greift
-dagegen auf das echte EEPROM zu und muss mit der fertigen Tester-Hardware noch
-physisch validiert werden. Eine laufende Anschlussprüfung sperrt Provisioning.
+Seit **Testboard 0.9.0** unterstützt die Anschlussprüfung reale Messung und eine
+explizit gewählte Simulation. Die vollständige Mainboard-/Diodenabnahme und das
+externe Provisioning müssen am fertigen Aufbau noch physisch validiert werden. Eine laufende Anschlussprüfung sperrt Provisioning.
 Modul-Provisioning ist in der Tester-Anwendung noch nicht freigeschaltet.
 
 Die Prüfprofile und Boardbilder werden über docs.envnode.de bereitgestellt.
