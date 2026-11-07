@@ -36,7 +36,11 @@ verlängern diese Freigabe nicht. Ein Neustart startet ohne aktive Messpfade.
 
 Unter **Hardware-Selbsttest** (`/selftest`) entfällt das manuelle Eingeben der
 Multiplexeradressen. Die Anschlussliste dient auch zur freien Auswahl und
-Wiederholung eines Kontakts. Während eines Laufs ist die Auswahl gesperrt.
+Wiederholung eines Kontakts. Während eines Laufs ist die Auswahl gesperrt. Seit 0.9.3 erscheinen Start, Stopp,
+Freigabe und Wartezeit direkt unter dem ausgewählten Kontakt in der Tabelle.
+Die ausführlichen Einzelwerte und Gegenmessung sind dort aufklappbar.
+„Nächster Kontakt“ verschiebt die Bedienung zur nächsten Zeile; die gewählte
+Wartezeit bleibt innerhalb der Seite erhalten.
 
 | Gruppe | Verbindung für den jeweiligen Lauf |
 | --- | --- |
@@ -46,7 +50,7 @@ Wiederholung eines Kontakts. Während eines Laufs ist die Auswahl gesperrt.
 
 1. Kontakt auswählen und die angezeigte Verbindung lesen.
 2. Versorgung ausschalten, nur diese Brücke stecken und wieder einschalten.
-3. Verbindung bestätigen und **Diesen Kontakt prüfen** starten.
+3. Verbindung bestätigen und **Start** starten.
 4. LOW/HIGH und Trennung werden automatisch gemessen; danach sind die Pfade aus.
 5. Ergebnis ansehen, nächsten Kontakt frei auswählen oder **Nächster Kontakt** nutzen.
 
@@ -100,7 +104,6 @@ Vor dem Schließen des Tabs herunterladen. **Ergebnisse löschen** startet einen
 neuen gesammelten Bericht.
 
 Manuelle Diagnose, geführter Selbsttest, Anschlussprüfung und Provisioning teilen
-sich die Hardware und sperren konkurrierende Eingriffe. **Abbrechen / alles
-abschalten** beendet den Selbsttest auch vorzeitig. Das Verlassen der Seite sendet
+sich die Hardware und sperren konkurrierende Eingriffe. **Stopp / abschalten** beendet den Selbsttest auch vorzeitig. Das Verlassen der Seite sendet
 zusätzlich einen bestmöglichen Stop-Befehl; ein Kommunikationsabbruch ist kein
 bestandenes Prüfergebnis.

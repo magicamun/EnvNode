@@ -4,6 +4,10 @@
 
 ### Added
 
+- Testboard 0.9.3: place guided self-test start/stop, confirmation and settling
+  controls beneath the selected contact; keep detailed readings locally collapsible
+  and preserve settings while moving through the list.
+
 - Testboard 0.9.2: make guided self-test settling selectable at 15/50/100 ms
   and retain it per result for controlled comparisons; keep eight samples and
   unchanged thresholds/peak-based decisions.

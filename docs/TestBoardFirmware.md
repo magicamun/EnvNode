@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.2) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.3) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -276,3 +276,11 @@ browser-session/report record the actual settling value. Thresholds and peak-bas
 pass/fail decisions are unchanged. The whole-run 10-second timeout remains; the
 longest supported input sequence nominally takes less than five seconds at 100 ms.
 This setting does not alter DUT connector-test timing.
+
+## Local contact controls (0.9.3)
+
+The guided self-test moves one existing control panel beneath the selected table
+row. Start/stop, connection confirmation and settling are local to that contact;
+selection/next scroll only to this panel. Reusing the same DOM nodes preserves the
+settling choice and disclosure state without replacing focused controls on polls.
+Export/clear remain global. Electrical sequencing and test decisions are unchanged.
