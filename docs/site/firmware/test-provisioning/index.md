@@ -1,6 +1,6 @@
 # Test/Provisioning
 
-**Stand: Test-Firmware 0.10.0, Hardware-Inbetriebnahme.** Die Prüfanwendung verwendet
+**Stand: Test-Firmware 0.10.1, Hardware-Inbetriebnahme.** Die Prüfanwendung verwendet
 Netzwerk, Weboberfläche, Sprache/Zeit, Logs und OTA aus der gemeinsamen Basis,
 führt aber keine EnvNode-Sensoren, Aktoren oder lokalen Controller aus.
 

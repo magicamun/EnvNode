@@ -26,7 +26,7 @@ public:
     Verdict overall() const;
     Verdict contactVerdict(size_t step, size_t contact) const;
     const MeasurementPolicy* policy() const { return policy_; }
-    uint8_t reverseEvidence(size_t rule) const { return rule<2?reverseEvidence_[rule]:0; }
+    uint8_t reverseEvidence(size_t rule) const { return rule<MaxDirectedRules?reverseEvidence_[rule]:0; }
     uint32_t generation() const { return generation_; }
 private:
     bool select();
@@ -34,7 +34,7 @@ private:
     bool positivePath(size_t connector,size_t contact) const;
     Result evaluated(size_t connector,size_t cell) const;
     const MeasurementPolicy* policy_ = nullptr;
-    uint8_t reverseEvidence_[2] = {}; // 0 missing/invalid, 1 blocked with verified positive path, 2 conducting
+    uint8_t reverseEvidence_[MaxDirectedRules] = {}; // 0 missing/invalid, 1 blocked with verified positive path, 2 conducting
 
     void finish();
     ITestFixture& fixture_;

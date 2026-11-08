@@ -441,6 +441,7 @@ int main() {
     // Directed-path regressions are independent of the physical ADC driver.
 
     UNITY_BEGIN();
+    RUN_TEST(test_weather_rail_path_uses_pigtail_drive_and_requires_reference_anchor);
     RUN_TEST(test_directed_paths_wait_for_valid_countercheck_and_recompute_history);
     RUN_TEST(test_directed_short_overrides_good_counterchecks_and_retest_removes_proof);
     RUN_TEST(test_missing_positive_paths_never_certify_reverse_isolation);

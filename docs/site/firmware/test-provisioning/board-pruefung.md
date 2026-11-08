@@ -1,6 +1,6 @@
 # Ein Mainboard prüfen
 
-**Stand 0.10.0:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
+**Stand 0.10.1:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
 Die vollständige Boardabnahme einschließlich der Diodenpfade wird jetzt erstmals
 praktisch erprobt. Vor einer Bewertung zunächst
 [Controller, Adapter und Pigtails prüfen](selbsttests.md).
@@ -128,9 +128,33 @@ Leitnachweis, **keine Messung der Dioden-Flussspannung** und keinen funktionalen
 I²C-/EEPROM-Test. Die separaten TP1-Referenzdioden werden weiterhin nur in der
 vorgegebenen Vorwärtsrichtung geprüft.
 
-In der Simulation ergänzt **EEPROM-Sperrpfade überbrückt** gezielt Fehler in diesen
+In der Simulation ergänzt **Gerichtete Sperrpfade überbrückt** gezielt Fehler in diesen
 Gegenrichtungen. Die normale Simulation bildet die gerichteten Pfade korrekt nach.
 Das ersetzt die noch ausstehende Abnahme am echten Mainboard nicht.
+
+## Weather 0.3: zusätzlicher Pfad GND → 3V3_SYS
+
+Seit 0.10.1 berücksichtigt die revisionsgebundene Regel für Weather 0.3 auch den
+am realen Board gemessenen Versorgungspfad: GND → 3V3_SYS leitet im Diodenbereich
+(etwa 0,656 V), die Gegenrichtung sperrt. Der verursachende Halbleiter ist damit
+noch nicht identifiziert. Diese Zusatzregel gilt vorerst **nur für Weather 0.3**.
+
+Die Vorwärtsmessung erreicht über die vorhandene Referenzdiode D2 den Eingang
+`MB_3V3_SYS` (39). Zur Gegenprüfung speist die Firmware den **3V3_SYS-Kontakt des
+jeweiligen Pigtails** und misst gegen die normalen GND-Kontakte am ESP32-Socket.
+Der geschützte Referenzeingang wird niemals als Ausgang verwendet.
+
+Ein GPIO-Anschluss enthält bereits beide benötigten Quellen: GND und 3V3_SYS.
+Ebenso enthalten sie die I²C- und Modulanschlüsse. Es ist keine neue Verdrahtung
+nötig. Für einen gültigen Nachweis müssen die direkten GND-Verbindungen und der
+positive Pfad 3V3_SYS → Referenzeingang 39 vorhanden sein. Ohne Referenzkabel bleibt
+die Bewertung unvollständig beziehungsweise die erwartete Referenzverbindung fehlerhaft.
+Eine leitende Rückrichtung bleibt ein Fehler. Nachweise werden bei Wiederholung
+wie bei den I2C0-Pfaden neu berechnet.
+
+`D` am Eingang `MB_3V3_SYS` bestätigt damit den gerichteten **Versorgungspfad**;
+die Rückwärtsschutzfunktion der Referenzdiode selbst wird weiterhin nicht geprüft.
+Die elektrische Abnahme dieser erweiterten Auswertung erfolgt am echten Board.
 
 ## LEDs, Matrix und Gesamturteil
 
@@ -142,8 +166,8 @@ Das ersetzt die noch ausstehende Abnahme am echten Mainboard nicht.
 | Rot / `!` | Unerwarteter Durchgang |
 | Rot / `×` | Erwarteter Durchgang fehlt |
 | Rot / `E` | Messfehler / uneindeutige Messung |
-| Orange / `D?` | Vorwärts leitender EEPROM-Pfad; gültiger Anschluss- oder Gegenprüfungsnachweis fehlt |
-| Grün / `D` | Gerichteter EEPROM-Pfad mit bestätigter Sperrrichtung und positivem Anschlussnachweis |
+| Orange / `D?` | Vorwärts leitender Board-Pfad; gültiger Anschluss- oder Gegenprüfungsnachweis fehlt |
+| Grün / `D` | Gerichteter Board-Pfad mit bestätigter Sperrrichtung und positivem Anschlussnachweis |
 | Grün / `S` | In der vorgeschriebenen Sperrrichtung getrennt; allein noch kein vollständiger Diodennachweis |
 | Orange / unvollständig | Positiver Prüfpfad oder erforderliche gerichtete Gegenprüfung fehlt |
 

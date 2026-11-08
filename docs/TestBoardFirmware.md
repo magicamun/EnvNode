@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.10.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.10.1) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Seventy tests exercise configuration isolation,
+composition and shared libraries. Seventy-one tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -317,3 +317,15 @@ phase, with eight samples and unchanged thresholds. The native regressions cover
 missing/aborted proof, missing positive anchors, reverse shorts across connectors,
 retesting/history invalidation, remote binding and non-exempt faults. The ESP32
 build and simulation are checked; full physical DUT acceptance is still required.
+
+## Weather SYS rail reverse excitation (0.10.1)
+
+Weather 0.3 uses `weather-ground-clamps-v2`, extending the two EEPROM rules with
+GND → `Net-(D2-K)` (reference input 39). `DirectedRule.reverseSource` decouples the
+forward sensed node behind D2 from reverse excitation at a `+3V3_SYS` pigtail pin.
+Reverse isolation is measured against normal socket GND. Positive GND paths and
+SYS-to-reference continuity are mandatory. A disconnected reference cannot prove
+blocking; reverse conduction fails. Reference-diode reverse protection itself is
+not certified. Other revisions retain their original policy until measured.
+The web state exposes `reverseSource`; the UI names the actual rail. Physical
+thresholds, settling, GPIO roles and published profile bytes remain unchanged.

@@ -20,7 +20,7 @@ bool TestRunner::load(const BoardDefinition& board) {
     for (size_t p = 0; p < board.inputCount; ++p) if (board.socket[p].number != p + 1) return false;
     for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(contactVerdicts_[i], MaxContacts, Verdict::Untested);
     fixture_.release(); board_ = &board; policy_=measurementPolicy(board);
-    std::fill_n(reverseEvidence_,2,0); step_ = completed_ = 0;
+    std::fill_n(reverseEvidence_,MaxDirectedRules,0); step_ = completed_ = 0;
     for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(results_[i], MaxContacts * MaxInputs, Result::Pending);
     std::fill_n(completedByConnector_, MaxConnectors, 0);
     std::fill_n(verdicts_, MaxConnectors, Verdict::Untested);
@@ -86,14 +86,14 @@ Result TestRunner::evaluated(size_t c,size_t cell) const {
     return reverseEvidence_[rule]==1&&positivePath(c,p)?Result::DirectedConnected:Result::DirectedPending;
 }
 void TestRunner::refreshVerdicts() {
-    std::fill_n(reverseEvidence_,2,0);
+    std::fill_n(reverseEvidence_,MaxDirectedRules,0);
     if(policy_)for(size_t rule=0;rule<policy_->count;++rule) {
         bool blocked=false,conducting=false;
         for(size_t c=0;c<board_->count;++c) {
             const auto& connector=board_->connectors[c];
             if(completedByConnector_[c]!=connector.count*inputCount())continue;
             for(size_t p=0;p<connector.count;++p) {
-                if(strcmp(connector.contacts[p].net,policy_->rules[rule].to))continue;
+                if(strcmp(connector.contacts[p].net,policy_->rules[rule].reverseSource))continue;
                 bool seen=false,allBlocked=true;
                 for(size_t i=0;i<inputCount();++i)if(!strcmp(board_->socket[i].net,policy_->rules[rule].from)) {
                     seen=true;const auto r=results_[c][p*inputCount()+i];

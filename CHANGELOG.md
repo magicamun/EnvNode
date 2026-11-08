@@ -4,6 +4,11 @@
 
 ### Added
 
+- Testboard 0.10.1: validate Weather 0.3 GND→SYS reference conduction using
+  SYS pigtail excitation for the reverse check and mandatory positive reference
+  continuity. Keep shorts and open reference cables detectable; scope the new
+  rule to the measured revision and expose the actual reverse source in the UI.
+
 - Testboard 0.10.0: distinguish directed EEPROM GND→I2C0 paths from shorts;
   require reverse isolation and positive connection evidence, recompute dependent
   results on retest and show D?/D/S in the matrix. Bind rules to reviewed electrical

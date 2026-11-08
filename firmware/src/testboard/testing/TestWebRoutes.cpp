@@ -122,7 +122,9 @@ void TestWebRoutes::state() {
         if(i)json+=',';
         json+="{\"from\":";appendJsonString(json,runner_.policy()->rules[i].from);
         json+=",\"to\":";appendJsonString(json,runner_.policy()->rules[i].to);
-        json+=",\"reverse\":"+String(runner_.reverseEvidence(i))+"}";
+        json+=",\"reverse\":"+String(runner_.reverseEvidence(i));
+        json+=",\"reverseSource\":";appendJsonString(json,runner_.policy()->rules[i].reverseSource);
+        json+="}";
     }
     json+="]}";
     host_.server().sendHeader("Cache-Control", "no-store");

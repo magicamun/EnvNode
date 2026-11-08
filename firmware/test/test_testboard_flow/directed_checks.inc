@@ -112,4 +112,40 @@ void test_direction_policy_and_evidence_are_exposed_by_web_api() {
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(),"\"to\":\"I2C0_SDA\",\"reverse\":1"));
     runDirected(f.runner,f.fixture,10,now,SimulatedFault::DirectedShort);f.request("/test/state",HTTP_GET);
     TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(),"\"to\":\"I2C0_SDA\",\"reverse\":2"));
+    TEST_ASSERT_TRUE(f.runner.load(*findBoard("weather-0.3-pcb0.3.0")));
+    runDirected(f.runner,f.fixture,0,now);f.request("/test/state",HTTP_GET);
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(),"\"measurementPolicy\":\"weather-ground-clamps-v2\""));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(),"\"to\":\"Net-(D2-K)\",\"reverse\":1,\"reverseSource\":\"+3V3_SYS\""));
+}
+
+void test_weather_rail_path_uses_pigtail_drive_and_requires_reference_anchor() {
+    struct RailProbe : SimulatedFixture {
+        uint8_t contact=0,input=0;bool openReference=false,railShort=false;
+        bool select(Pigtail p,uint8_t c,uint8_t i) override {contact=c;input=i;return SimulatedFixture::select(p,c,i);}
+        Sample read(bool& connected) override {
+            auto status=SimulatedFixture::read(connected);
+            if(contact==4&&input==39&&openReference)connected=false;
+            if(contact==4&&(input==14||input==32||input==38)&&railShort)connected=true;
+            return status;
+        }
+    } fixture;
+    TestRunner runner(fixture);uint32_t now=0;const auto& board=*findBoard("weather-0.3-pcb0.3.0");
+    TEST_ASSERT_TRUE(runner.load(board));TEST_ASSERT_EQUAL(3,runner.policy()->count);
+    runDirected(runner,fixture,0,now);
+    TEST_ASSERT_EQUAL(1,runner.reverseEvidence(2));
+    TEST_ASSERT_EQUAL(Result::DirectedConnected,runner.result(38));
+    TEST_ASSERT_EQUAL(Result::DirectedBlocked,runner.result(3*40+13));
+    TEST_ASSERT_EQUAL(Result::DirectedPending,runner.result(32)); // I2C proof still missing.
+    fixture.openReference=true;runDirected(runner,fixture,0,now);
+    TEST_ASSERT_EQUAL(0,runner.reverseEvidence(2));TEST_ASSERT_EQUAL(Result::DirectedPending,runner.result(38));
+    TEST_ASSERT_EQUAL(Result::Open,runner.result(3*40+38));TEST_ASSERT_EQUAL(Verdict::Failed,runner.verdict(0));
+    fixture.openReference=false;fixture.railShort=true;runDirected(runner,fixture,0,now);
+    TEST_ASSERT_EQUAL(2,runner.reverseEvidence(2));TEST_ASSERT_EQUAL(Result::Unexpected,runner.result(38));
+    TEST_ASSERT_EQUAL(Result::Unexpected,runner.result(3*40+13));
+    fixture.railShort=false;runDirected(runner,fixture,0,now);runDirected(runner,fixture,10,now);
+    runner.selectConnector(0);TEST_ASSERT_EQUAL(Verdict::Passed,runner.verdict(0));
+    TEST_ASSERT_EQUAL(Result::DirectedConnected,runner.result(38));
+    // An unmeasured board revision must not inherit the new rail exception.
+    TEST_ASSERT_TRUE(runner.load(*findBoard("mini-0.9-pcb0.9.0")));
+    TEST_ASSERT_EQUAL(2,runner.policy()->count);
 }

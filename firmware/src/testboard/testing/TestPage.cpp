@@ -27,7 +27,7 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     html += "</option><option value='short'>";
     html += de ? "Kontakt 1 mit Zusatzverbindung" : "Contact 1 with extra connection";
     html += "</option><option value='diode-short'>";
-    html += de ? "EEPROM-Sperrpfade überbrückt" : "EEPROM blocking paths bridged";
+    html += de ? "Gerichtete Sperrpfade überbrückt" : "Directed blocking paths bridged";
     html += "</option></select></label><label id='test-confirm-wrap'><input type='checkbox' id='test-confirm'>";
     html += de ? "Prüfling ohne Versorgung und ohne ESP32; Provisioning-Kabel getrennt, richtiger Pigtail verbunden. Nur ursprünglicher Input-Adapter 0.1." : "Target unpowered, ESP32 removed, provisioning cable disconnected, correct pigtail connected. Original Input-Adapter 0.1 only.";
     html += "</label><div class='actions'><button id='test-start'>";
