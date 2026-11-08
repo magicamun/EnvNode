@@ -1,6 +1,6 @@
 # Ein Mainboard prüfen
 
-**Stand 0.11.0:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
+**Stand 0.12.0:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
 Die vollständige Boardabnahme einschließlich der Diodenpfade wird jetzt erstmals
 praktisch erprobt. Vor einer Bewertung zunächst
 [Controller, Adapter und Pigtails prüfen](selbsttests.md).
@@ -12,7 +12,7 @@ praktisch erprobt. Vor einer Bewertung zunächst
   Aktoren und eingesteckte Module entfernen; der Prüfling bleibt spannungslos.
 - Provisioning-Kabel vollständig abziehen. Es ist kein Messpigtail und verbindet
   gegebenenfalls zusätzliche Masse-/Versorgungspfade.
-- Ursprünglichen Input-Adapter 0.1 mit dem Controller verbinden und korrekt
+- Den gewählten Adapter mit dem Controller verbinden und korrekt
   orientiert auf den 38-poligen ESP32-Steckplatz des Prüflings setzen.
 - Bei Profilen mit 40 Eingängen das zweipolige Referenzkabel zusätzlich an den
   Mainboard-Messanschluss stecken: TP1/1 `MB_GND`, TP1/2 `MB_3V3_SYS`.
@@ -25,7 +25,7 @@ den Prüfling weiterhin ohne eigene Versorgung lassen.
 ## Boardprofil und Betriebsart wählen
 
 **Anschlussprüfung** (`/test`) öffnen. Auf echter Testhardware ist beim Start
-**Reale Messung · ursprünglicher Input-Adapter 0.1** ausgewählt. Den sichtbaren
+**Reale Messung · ausgewählte Testhardware** ausgewählt. Den sichtbaren
 Modushinweis kontrollieren. Die Betriebsart wird nicht als Geräteeinstellung
 persistiert; nach Neustart gilt wieder reale Messung.
 
@@ -220,3 +220,6 @@ Moduswechsel löschen sie. Der Download speichert die Datei auf dem Computer; ei
 Speicherung im EEPROM des Prüflings ist nicht implementiert. Das Selbsttest-Protokoll
 bleibt ein eigener Download. Rohwerte älterer Firmwarestände lassen sich nicht
 nachträglich rekonstruieren.
+
+Die Hardwarekombination vor der ersten Messung unter
+[Controller und Adapter](hardwareprofile.md) auswählen und bestätigen.

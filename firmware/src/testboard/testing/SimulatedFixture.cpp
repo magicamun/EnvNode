@@ -8,7 +8,7 @@ void SimulatedFixture::connect(const BoardDefinition& board, size_t connector, S
 bool SimulatedFixture::select(Pigtail pigtail, uint8_t contact, uint8_t socket) {
     selected_ = connector_ && connector_->pigtail == pigtail && contact && contact <= connector_->count && socket && socket <= inputCount_;
     MuxAddress source{}, destination{};
-    selected_ = selected_ && resolveFixturePath(pigtail, contact, socket, source, destination);
+    selected_ = selected_ && resolveFixturePath(selection_?selection_->definition():fixtureRevision01(),pigtail, contact, socket, source, destination);
     contact_ = contact; socket_ = socket; return selected_;
 }
 ITestFixture::Sample SimulatedFixture::read(bool& connected) {

@@ -7,13 +7,14 @@ class PhysicalFixture : public ITestFixture {
 public:
     static constexpr uint16_t LowMaximum=200, ConnectedMinimum=800, HighMaximum=3800;
     struct Readings {uint16_t low=0, high=0;};
-    PhysicalFixture(IDiagnosticIo& io,std::function<uint32_t()> clock):io_(io),clock_(clock) {}
+    PhysicalFixture(IDiagnosticIo& io,std::function<uint32_t()> clock,FixtureSelection* selection=nullptr):selection_(selection),io_(io),clock_(clock) {}
     bool select(Pigtail pigtail,uint8_t contact,uint8_t input) override;
     Sample read(bool& connected) override;
     void release() override;
     bool trace(MeasurementTrace& value) const override {value=trace_;return true;}
     const Readings& readings() const {return readings_;}
 private:
+    FixtureSelection* selection_;
     IDiagnosticIo& io_;std::function<uint32_t()> clock_;
     DiagnosticPath path_{{0,0},-1,0,false};
     Readings readings_;

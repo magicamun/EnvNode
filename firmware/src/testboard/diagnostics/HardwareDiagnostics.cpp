@@ -69,7 +69,7 @@ void HardwareDiagnostics::registerRoutes(WebServer& server) {
     });
 }
 void HardwareDiagnostics::page() {
-    String html = R"HTML(<section class='card'><p><a href="/selftest">Geführter Hardware-Selbsttest</a></p><h2>Hardwarediagnose · Controller 0.1</h2>
+    String html = R"HTML(<section class='card'><p><a href="/selftest">Geführter Hardware-Selbsttest</a></p><h2>Hardwarediagnose · Test-Controller</h2>
 <p>Reale GPIO-Ansteuerung. Ohne Prüfling beginnen. Multiplexer benötigen 3,3 V an 3V3_SYS und gemeinsame Masse. GPIO34 darf höchstens 3,3 V erhalten.</p>
 <p>Kanäle sind die Hardwareadressen I0–I15, unabhängig vom Boardprofil. Automatische Abschaltung 60 Sekunden nach dem letzten Schaltbefehl.</p>
 <form id='diag'><label>Output-Multiplexer <select name='output'><option value='-1'>Beide aus</option><option value='0'>U1 · GPIO / I²C</option><option value='1'>U2 · Modul</option></select></label>

@@ -70,13 +70,14 @@ TestBoardWeb web(host, settings, wifi, time, formatter, ota, restart, recentLogs
     {FirmwareBuildInfo::SemanticVersion, FirmwareBuildInfo::CompactIdentity,
      FirmwareBuildInfo::BuildNumber, FirmwareBuildInfo::GitCommit, FirmwareBuildInfo::GitBranch,
      FirmwareBuildInfo::BuildTimestampUtc, FirmwareBuildInfo::SourceState, FirmwareBuildInfo::SourceDirty});
-Testing::SimulatedFixture fixture;
-Esp32FixtureIo measurementIo;
-Testing::PhysicalFixture physicalFixture(measurementIo, []() { return millis(); });
+Testing::FixtureSelection fixtureSelection;
+Testing::SimulatedFixture fixture(&fixtureSelection);
+Esp32FixtureIo measurementIo(&fixtureSelection);
+Testing::PhysicalFixture physicalFixture(measurementIo, []() { return millis(); },&fixtureSelection);
 Testing::SelectableFixture measurement(fixture, &physicalFixture, false);
 Testing::TestRunner tests(measurement);
 Testing::TestWebRoutes testRoutes(host, web, tests, fixture);
-HardwareDiagnostics diagnostics(host, web, []() { return tests.phase() != Testing::Phase::Running; }, measurementIo);
+HardwareDiagnostics diagnostics(host, web, []() { return tests.phase() != Testing::Phase::Running; }, measurementIo,&fixtureSelection);
 ProvisioningI2C provisioningBus(Testing::fixtureRevision01().provisioningSda,
     Testing::fixtureRevision01().provisioningScl);
 IdentityEeprom24LC32 targetEeprom(provisioningBus, 0x50);
@@ -102,7 +103,9 @@ void setupTestBoard() {
     logger.begin(115200);
     delay(500);
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
+    fixtureSelection.selectCode(settings.fixtureProfile());
     testRoutes.attachProfiles(profiles);
+    testRoutes.attachSelection(fixtureSelection,[](){diagnostics.resetFixture();},[](unsigned code){return settings.saveFixtureProfile(code);});
     testRoutes.setBuildIdentity(FirmwareBuildInfo::GitCommit,FirmwareBuildInfo::BuildNumber);
     testRoutes.attachMeasurement(measurement);
     testRoutes.setHardwareBusy([]() { return diagnostics.active(); });

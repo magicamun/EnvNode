@@ -17,11 +17,17 @@ bool TestBoardSettings::load() {
     settings_.loadTimeAndLocaleOverrides();
     settings_.validateIdentityAndNetwork();
     settings_.validateTime();
+    fixtureProfile_=storage_.preferences().getUInt("fixtureProfile",0);
+    if(fixtureProfile_>3)fixtureProfile_=0;
     return true;
+}
+bool TestBoardSettings::saveFixtureProfile(uint32_t code) {
+    if(code>3||!storage_.persistUInt("fixtureProfile",code))return false;
+    fixtureProfile_=code;return true;
 }
 bool TestBoardSettings::reset() {
     if (!storage_.clearAll()) return false;
-    settings_.initializeDefaults();
+    fixtureProfile_=0;settings_.initializeDefaults();
     return true;
 }
 }

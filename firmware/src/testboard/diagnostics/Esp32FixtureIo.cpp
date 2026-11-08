@@ -3,7 +3,7 @@
 #include <Arduino.h>
 namespace EnvNode {
 void Esp32FixtureIo::selectDiagnostic(const Testing::DiagnosticPath& p) {
-    const auto& f=Testing::fixtureRevision01();
+    const auto& f=definition();
     if((p.output.device>1 && p.output.device!=255)||p.output.channel>15||
         p.inputDevice < -1 || p.inputDevice>2 || p.inputChannel>15) {releaseDiagnostic();return;}
     for(auto pin:f.outputEnable) {digitalWrite(pin,HIGH);pinMode(pin,OUTPUT);}
@@ -19,10 +19,10 @@ void Esp32FixtureIo::selectDiagnostic(const Testing::DiagnosticPath& p) {
     if(p.inputDevice>=0)digitalWrite(f.inputEnable[p.inputDevice],LOW);
     configured_=true;
 }
-uint16_t Esp32FixtureIo::sampleDiagnostic() {return analogRead(Testing::fixtureRevision01().sense);}
+uint16_t Esp32FixtureIo::sampleDiagnostic() {return analogRead(definition().sense);}
 void Esp32FixtureIo::releaseDiagnostic() {
     if(!configured_)return;
-    const auto& f=Testing::fixtureRevision01();
+    const auto& f=definition();
     for(auto pin:f.outputEnable)digitalWrite(pin,HIGH);
     for(auto pin:f.inputEnable)digitalWrite(pin,HIGH);
     pinMode(f.drive,INPUT);configured_=false;

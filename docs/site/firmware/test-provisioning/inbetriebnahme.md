@@ -55,7 +55,7 @@ Mainboardkontakts speist die Testhardware nur ihr begrenztes 3,3-V-Testsignal ei
 
 ## Erste Anmeldung
 
-Auf der Startseite Version **Testboard 0.11.0** kontrollieren. Netzwerk, Sprache,
+Auf der Startseite Version **Testboard 0.12.0** kontrollieren. Netzwerk, Sprache,
 Zeitzone, Logs und Firmwareverwaltung stehen unabhängig von einem Prüfling bereit.
 Die gemeinsamen HTTP-Verbesserungen aus EnvNode sind übernommen. Ein expliziter
 Remote-Profildownload kann weiterhin kurz blockieren; während aktiver Messung
@@ -64,3 +64,6 @@ werden solche Downloads nicht neu gestartet.
 Alte Browser-Tabs nach einem Wechsel von EnvNode zu Test-Firmware oder zurück
 schließen: Deren periodische Statusabfragen können sonst nicht vorhandene Routen
 anfragen und entsprechende Meldungen im seriellen Log erzeugen.
+
+Die Hardwarekombination vor der ersten Messung unter
+[Controller und Adapter](hardwareprofile.md) auswählen und bestätigen.

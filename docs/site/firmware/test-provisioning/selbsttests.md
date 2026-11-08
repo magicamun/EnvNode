@@ -5,6 +5,11 @@ Prüflinge, Module und das externe Provisioning-Kabel abziehen. Die Messversorgu
 muss stabil anliegen. Kontakte am freien Referenzkabel sind hier Messpunkte;
 `MB_GND` darf nicht mit der echten Controllermasse verwechselt werden.
 
+Die Anweisungen für Controller 0.2 und den neuen ESP32-Adapter stehen unter
+[Hardwareprofile und TP2-Selbsttest](hardwareprofile.md). Die nachstehenden
+J3/2- und J8/9-Beispiele gelten für den Legacy-Controller 0.1. Auf der geführten
+Seite werden Anschluss und Multiplexerkanal passend zur aktiven Auswahl angezeigt.
+
 ## Manuelle Hardwarediagnose
 
 Unter **Hardwarediagnose** (`/diagnostics`) lassen sich Output U1/U2 und Input

@@ -32,7 +32,7 @@ Eingängen. Die nachfolgenden Zahlen und Abdeckungsaussagen beziehen sich auf
 diese alten Profile. Seit 0.6.0 modellieren die neuen Profile für Mini 0.9 und Weather 0.3 die
 Referenzkontakte und die gerichteten Schutzdiodenpfade ausdrücklich.
 Ein gleicher Netzname allein bildet diese Pfade nicht ab. Die physische
-Multiplexersteuerung und ADC-Auswertung sind weiterhin nicht implementiert.
+Multiplexersteuerung und ADC-Auswertung sind seit 0.9.0 integriert.
 
 ## Vereinbarte Schichten
 

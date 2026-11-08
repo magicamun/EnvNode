@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.11.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.12.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -41,8 +41,8 @@ linker garbage collection omits unused functions from the firmware.
 
 Available pages: `/`, `/test`, `/selftest`, `/diagnostics`, `/hardware`
 (Provisioning), `/network`, `/time`, `/device`, `/logs`, `/firmware`.
-`/test` defaults to real LOW/HIGH measurement on Controller 0.1 + original
-Input-Adapter 0.1. Simulation is an explicit alternative and cannot silently
+`/test` defaults to real LOW/HIGH measurement on the selected hardware profiles.
+An unconfigured tester initially uses Controller 0.1 + original Input-Adapter 0.1. Simulation is an explicit alternative and cannot silently
 replace a real measurement. Switching modes clears the entire runner session.
 The revision-specific board view, LEDs and result matrix use the same runner.
 Tester configuration backup/restore and DUT power switching are not implemented.
@@ -66,7 +66,7 @@ changes request a restart, with a visible explicit restart button. Locale and
 device-name changes update the UI directly. Uploading firmware stages it and
 keeps the restart explicit, as in EnvNode.
 
-Hardware mapping remains fixed per application. The schematic's dedicated
+Controller and adapter mappings are selected from reviewed hardware profiles. The schematic's dedicated
 provisioning bus is GPIO16 SDA / GPIO5 SCL; it starts only for each EEPROM operation.
 The real continuity engine is integrated since 0.9.0. Controller/input-adapter
 loopbacks are verified; full DUT/reference-diode acceptance and threshold tuning
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Seventy-four tests exercise configuration isolation,
+composition and shared libraries. Seventy-nine tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -205,8 +205,9 @@ and may still briefly delay requests when refreshing or loading a remote profile
 
 ## Guided physical fixture self-test (0.8.0)
 
-`/selftest` guides manual loopback wiring for Controller 0.1 and the original
-produced Input-Adapter 0.1. The new DevKit adapters are not supported by this test.
+`/selftest` guides manual loopback wiring for the selected controller and adapter.
+Controller 0.1 uses the original J3/2 loopback; Controller 0.2 uses TP2.
+The new ESP32 DevKitC 0.3 adapter and produced Legacy adapter are supported.
 Select any row while idle. Confirm the displayed bridge, then start that one test;
 there is no run-all function because each contact requires manual rewiring.
 
@@ -353,3 +354,26 @@ The artifact includes schema/kind, board model, backend, firmware/build/commit,
 thresholds, result/reason/verdict legends, current matrices, raw observations and
 history/eviction metadata. A successful current run can coexist with older failed
 attempts in history. JSON export is separate from guided hardware-selftest reports.
+
+## Independent controller/adapter profiles (0.12.0)
+
+`FixtureSelection` composes the controller capabilities with the adapter's input
+routing. Both controllers share verified GPIO/output wiring; Controller 0.2 adds
+TP2 direct test drive. Adapter 0.3 supplies its own 40-input table. The shared
+selection is injected into physical/simulated fixtures, GPIO I/O, guided self-test
+and web routes; there is no mutable global routing table. Invalid choices do not
+change the active fixture. Applying a profile requires confirmation, idle test and
+diagnostics, and successful atomic persistence of the combination code in the
+existing tester settings. All results are cleared; factory reset restores Legacy.
+
+`generate_fixture_routing.py` pins produced Legacy PCBs to their reviewed Git
+commit, independent of current hardware edits. `generate_fixture_profiles.py`
+derives adapter routing and verifies Controller 0.2 GPIO/output compatibility and
+TP2 against saved PCB files; `--check` validates generated artifacts. Hardware
+profile JSON includes source path, revision and SHA-256. S3 is not offered yet.
+
+The self-test page uses the active fixture's labels, channels and wiring. For
+Controller 0.2 input tests use TEST_DRIVE with both output muxes disabled; output
+tests return through TP2/3. Self-test browser history is keyed by fixture ID and
+reloads on profile changes. Reports identify the actual combination. The
+provisioning bus remains GPIO16/5 and starts only for EEPROM operations.

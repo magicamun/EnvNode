@@ -90,3 +90,17 @@ void test_real_driver_rejects_boundary_crossing_samples_and_survives_clock_wrap(
     for(unsigned i=0;i<250&&sample==ITestFixture::Sample::Busy;++i){now+=2;sample=fixture.read(connected);}
     TEST_ASSERT_EQUAL(unsigned(ITestFixture::Sample::Error),unsigned(sample));TEST_ASSERT_FALSE(connected);TEST_ASSERT_FALSE(io.active);
 }
+void test_controller02_input_selftest_drives_tp2_with_output_muxes_disabled() {
+    struct DirectIo : IDiagnosticIo {
+        DiagnosticPath path{{0,0},-1,0,false};bool active=false;unsigned switches=0;
+        void selectDiagnostic(const DiagnosticPath& p)override {path=p;active=true;++switches;TEST_ASSERT_EQUAL(255,p.output.device);}
+        uint16_t sampleDiagnostic()override{return path.high&&path.inputDevice==1&&path.inputChannel==1?2370:0;}
+        void releaseDiagnostic()override{active=false;}
+    } io;
+    FixtureSelection selection;selection.selectCode(3);GuidedSelfTest test(io,&selection);
+    TEST_ASSERT_EQUAL(0,io.switches);TEST_ASSERT_TRUE(test.start(22+14,0,100));
+    for(unsigned now=0;now<10000&&test.running();now+=2)test.tick(now);
+    TEST_ASSERT_FALSE(test.running());TEST_ASSERT_FALSE(io.active);
+    TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Passed),unsigned(test.result(22+14).verdict));
+    TEST_ASSERT_EQUAL(2370,test.result(22+14).high);
+}

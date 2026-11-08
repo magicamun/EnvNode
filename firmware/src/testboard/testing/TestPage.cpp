@@ -6,12 +6,17 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     String html("<div id='test-app' data-language='"); html += de ? "de" : "en";
     html += "'><div class='notice'><strong id='test-mode-label'>";
     html += de ? "Messmodus wird geladen" : "Loading measurement mode";
-    html += "</strong><p id='test-mode-note'></p></div><section class='card'><label>";
+    html += "</strong><p id='test-mode-note'></p></div><section class='card'><h2>";
+    html += de?"Testhardware":"Test hardware";
+    html += "</h2><label>Controller<select id='fixture-controller'><option value='controller-0.1'>Test-Controller 0.1 (Legacy)</option><option value='controller-0.2'>Test-Controller 0.2 (TP2)</option></select></label><label>Adapter<select id='fixture-adapter'><option value='input-0.1'>Input-Adapter 0.1 (Legacy)</option><option value='esp32-devkitc-0.3'>ESP32 DevKitC Adapter 0.3</option></select></label><label><input type='checkbox' id='fixture-confirm'>";
+    html += de?"Prüfling getrennt; tatsächlichen Controller und Adapter ausgewählt. Wechsel verwirft Prüf- und Selbsttestergebnisse.":"Target disconnected; actual controller and adapter selected. Changing clears test and self-test results.";
+    html += "</label><button id='fixture-apply'>";html += de?"Hardware übernehmen":"Apply hardware";
+    html += "</button><p id='fixture-current' class='help'></p></section><section class='card'><label>";
     html += de ? "Betriebsart (Wechsel verwirft Ergebnisse)" : "Mode (changing clears results)";
     html += "<select id='test-mode'><option value='physical'";
     if(!physicalAvailable)html += " disabled";
     html += ">";
-    html += de ? "Reale Messung · ursprünglicher Input-Adapter 0.1" : "Physical measurement · original Input-Adapter 0.1";
+    html += de ? "Reale Messung · ausgewählte Testhardware" : "Physical measurement · selected test hardware";
     html += "</option><option value='simulation'>SIMULATION</option></select></label><label>";
     html += de ? "Zielboard und Revision" : "Target board and revision";
     html += "<select id='test-board'></select></label><button id='test-load'>";
@@ -31,7 +36,7 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     html += "</option><option value='diode-short'>";
     html += de ? "Gerichtete Sperrpfade überbrückt" : "Directed blocking paths bridged";
     html += "</option></select></label><label id='test-confirm-wrap'><input type='checkbox' id='test-confirm'>";
-    html += de ? "Prüfling ohne Versorgung und ohne ESP32; Provisioning-Kabel getrennt, richtiger Pigtail verbunden. Nur ursprünglicher Input-Adapter 0.1." : "Target unpowered, ESP32 removed, provisioning cable disconnected, correct pigtail connected. Original Input-Adapter 0.1 only.";
+    html += de ? "Prüfling ohne Versorgung und ohne ESP32; Provisioning-Kabel getrennt, richtiger Pigtail verbunden. Hardwareauswahl entspricht dem angeschlossenen Adapter." : "Target unpowered, ESP32 removed, provisioning cable disconnected, correct pigtail connected. Selected hardware matches the connected adapter.";
     html += "</label><div class='actions'><button id='test-start'>";
     html += de ? "Verbunden – Prüfung starten" : "Connected – start test";
     html += "</button><button id='test-next'>";

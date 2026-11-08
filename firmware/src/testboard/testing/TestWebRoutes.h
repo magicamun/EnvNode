@@ -11,6 +11,7 @@ namespace EnvNode { namespace Testing {
 class TestWebRoutes : public IWebRoutes {
 public:
     TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner& runner, SimulatedFixture& fixture);
+    void attachSelection(FixtureSelection& selection,std::function<void()> changed={},std::function<bool(unsigned)> persist={}) {selection_=&selection;selectionChanged_=changed;persistSelection_=persist;}
     void setBuildIdentity(const char* commit,const char* build) {gitCommit_=commit;buildNumber_=build;}
     void attachMeasurement(SelectableFixture& fixture) { measurement_ = &fixture; }
     void attachProfiles(ProfileRepository& profiles) { profiles_ = &profiles; }
@@ -23,6 +24,9 @@ private:
     void state();
     void action();
     void reportContact();
+    FixtureSelection* selection_=nullptr;
+    std::function<void()> selectionChanged_;
+    std::function<bool(unsigned)> persistSelection_;
     const char* gitCommit_="";
     const char* buildNumber_="";
     WebHost& host_;

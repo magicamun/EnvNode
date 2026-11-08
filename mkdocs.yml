@@ -90,6 +90,7 @@ nav:
       - Test/Provisioning:
           - Übersicht und Stand: firmware/test-provisioning/index.md
           - Firmware und Inbetriebnahme: firmware/test-provisioning/inbetriebnahme.md
+          - Controller und Adapter: firmware/test-provisioning/hardwareprofile.md
           - Hardware-Selbsttests: firmware/test-provisioning/selbsttests.md
           - Mainboards prüfen: firmware/test-provisioning/board-pruefung.md
           - Provisioning und Profile: firmware/test-provisioning/provisioning-profile.md

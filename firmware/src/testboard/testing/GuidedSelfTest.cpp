@@ -21,8 +21,9 @@ void GuidedSelfTest::cancel() {
 }
 void GuidedSelfTest::switchStep(uint32_t now) {
     const bool inputTest = selected_ >= OutputCount;
-    const auto& r = fixtureRevision01().routing;
+    const auto& r = definition().routing;
     DiagnosticPath p{inputTest ? r.module[1] : output(selected_), -1, 0, step_ != 0};
+    if(inputTest&&selection_&&selection_->controller().directTestDrive)p.output.device=255;
     if (inputTest) {
         auto input = r.socket[selected_-OutputCount];
         if (step_ >= 3) input = r.socket[step_-3];

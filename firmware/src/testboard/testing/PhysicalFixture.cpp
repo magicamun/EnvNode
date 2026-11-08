@@ -3,7 +3,7 @@
 namespace EnvNode { namespace Testing {
 bool PhysicalFixture::select(Pigtail p,uint8_t contact,uint8_t input) {
     release();trace_=MeasurementTrace();trace_.reason=MeasurementReason::SelectionFailed;MuxAddress source{},destination{};
-    if(!resolveFixturePath(p,contact,input,source,destination))return false;
+    if(!resolveFixturePath(selection_?selection_->definition():fixtureRevision01(),p,contact,input,source,destination))return false;
     path_={source,int(destination.device),destination.channel,false};
     trace_.reason=MeasurementReason::None;readings_=Readings();sum_=samples_=0;minimum_=4095;maximum_=0;
     switched_=lastSample_=started_=clock_();selected_=true;io_.selectDiagnostic(path_);return true;

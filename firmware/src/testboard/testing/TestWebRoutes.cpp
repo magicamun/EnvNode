@@ -97,7 +97,11 @@ void TestWebRoutes::state() {
     }
     json = String("{\"simulation\":")+((!measurement_||measurement_->simulated())?"true":"false");
     json += String(",\"physicalAvailable\":")+((measurement_&&measurement_->physicalAvailable())?"true":"false");
-    json += ",\"fixture\":\"controller0.1-input0.1-module0.1\",\"board\":";
+    json+=",\"fixture\":";appendJsonString(json,selection_?selection_->definition().id:fixtureRevision01().id);
+    json+=",\"controllerProfile\":";appendJsonString(json,selection_?selection_->controller().id:"controller-0.1");
+    json+=",\"adapterProfile\":";appendJsonString(json,selection_?selection_->adapter().id:"input-0.1");
+    json+=",\"fixtureSelectable\":";json+=selection_?"true":"false";
+    json+=",\"board\":";
     appendJsonString(json, runner_.board() ? runner_.board()->id : "");
     json += String(",\"generation\":") + runner_.generation()
         + ",\"phase\":" + static_cast<unsigned>(runner_.phase())
@@ -144,7 +148,18 @@ void TestWebRoutes::action() {
     }
     const String command = server.arg("action");
     bool ok = false;
-    if(command=="mode" && measurement_ && runner_.phase()!=Phase::Running) {
+    if(command=="fixture"&&selection_&&runner_.phase()!=Phase::Running) {
+        // Validate first. A rejected profile cannot disturb the current session.
+        FixtureSelection candidate;
+        if(server.arg("confirm")!="yes"||!candidate.select(server.arg("controller").c_str(),server.arg("adapter").c_str())) {
+            server.send(400,"application/json","{\"error\":\"Confirm disconnected target and valid hardware profiles\"}");return;
+        }
+        if(persistSelection_&&!persistSelection_(candidate.code())) {server.send(503,"application/json","{\"error\":\"Hardware profile could not be saved\"}");return;}
+        if(candidate.code()==selection_->code()){state();return;}
+        fixture_.release();if(measurement_)measurement_->release();
+        ok=selection_->select(candidate.controller().id,candidate.adapter().id)&&runner_.resetForModeChange();
+        if(ok&&selectionChanged_)selectionChanged_();
+    } else if(command=="mode" && measurement_ && runner_.phase()!=Phase::Running) {
         const String mode=server.arg("mode");
         if(mode!="simulation"&&mode!="physical") {server.send(400,"application/json","{\"error\":\"Unknown measurement mode\"}");return;}
         ok=measurement_->setSimulation(mode=="simulation")&&runner_.resetForModeChange();

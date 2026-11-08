@@ -1,5 +1,6 @@
 {
   "schema": 1,
+  "sourceCommit": "e243b133b8790acf3e13b9bbf95671e1c5c2558a",
   "id": "controller0.1-input0.1-module0.1",
   "sources": {
     "hardware/kicad/MainBoards/Input-Adapter/Input-Adapter.kicad_pcb": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c",

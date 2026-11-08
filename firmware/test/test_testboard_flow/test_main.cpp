@@ -437,11 +437,16 @@ void test_hardware_diagnostics_lock_real_test_actions() {
 
 #include "directed_checks.inc"
 #include "report_checks.inc"
+#include "fixture_profile_checks.inc"
 
 int main() {
     // Directed-path regressions are independent of the physical ADC driver.
 
     UNITY_BEGIN();
+    RUN_TEST(test_fixture_profiles_are_independent_and_resolve_all_40_inputs);
+    RUN_TEST(test_fixture_selection_changes_physical_routing_without_boot_gpio_effects);
+    RUN_TEST(test_fixture_web_change_requires_confirmation_clears_results_and_handles_persistence_failure);
+    RUN_TEST(test_fixture_profile_settings_survive_reload_and_factory_reset);
     RUN_TEST(test_fault_history_retains_raw_samples_across_successful_retest_and_is_bounded);
     RUN_TEST(test_report_pages_are_read_only_guarded_and_include_unselected_connectors);
     RUN_TEST(test_report_history_pagination_is_bounded_and_keeps_previous_attempts);

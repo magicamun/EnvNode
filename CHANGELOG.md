@@ -4,6 +4,10 @@
 
 ### Added
 
+- Testboard 0.12.0: select and persist independent Controller 0.1/0.2 and Legacy/
+  ESP32 DevKitC 0.3 adapter profiles. Derive mapping from PCB, preserve produced
+  hardware, adapt guided TP2 self-tests and isolate results/history by fixture.
+
 - Testboard 0.11.0: download complete board-session JSON reports with bounded,
   read-only paging; retain the latest 128 unexpected/open/error observations with
   actual LOW/HIGH samples, reason, attempt and uptime across successful retests.

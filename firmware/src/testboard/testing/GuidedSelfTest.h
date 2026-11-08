@@ -28,7 +28,7 @@ class GuidedSelfTest {
 public:
     static constexpr size_t OutputCount = 22, Count = OutputCount + MaxInputs;
     static constexpr uint16_t LowMaximum = 200, HighMinimum = 1000, HighMaximum = 3800;
-    explicit GuidedSelfTest(IDiagnosticIo& io) : io_(io) {}
+    explicit GuidedSelfTest(IDiagnosticIo& io,FixtureSelection* selection=nullptr) : selection_(selection),io_(io) {}
     bool start(size_t index, uint32_t now, uint16_t settleMs = 15);
     void tick(uint32_t now);
     void cancel();
@@ -39,6 +39,8 @@ public:
     static MuxAddress output(size_t index);
 private:
     void switchStep(uint32_t now);
+    const FixtureDefinition& definition() const {return selection_?selection_->definition():fixtureRevision01();}
+    FixtureSelection* selection_;
     IDiagnosticIo& io_;
     SelfTestResult results_[Count];
     size_t selected_ = 0, step_ = 0;

@@ -41,13 +41,14 @@ Modul-Provisioning ist in dieser Test-Firmware deaktiviert.
 
 | Daten | Aufgabe |
 | --- | --- |
-| Fixture-/Adaptertabelle | ESP32-Steuer-GPIOs und Multiplexeradressen zu physischen Testkontakten; derzeit fest auf Controller/Input-Adapter 0.1 |
+| Fixture-/Adaptertabelle | ESP32-Steuer-GPIOs und Multiplexeradressen zu physischen Testkontakten; getrennte Controller-/Adapterprofile, siehe Hardwareauswahl |
 | Mainboard-Prüfprofil | Erwartete Kontaktverbindungen, Anschlusspositionen und Boardbild für die Anschlussprüfung |
 | Port-/GPIO-Profil der normalen EnvNode-Firmware | Bedeutung der GPIOs, Ports, I²C-Busse und Modulslots im normalen Gerätebetrieb |
 
 Ein Remote-Prüfprofil ändert weder die Verdrahtung des Adapters noch die
 Hardwareansteuerung der normalen EnvNode-Anwendung. Ein neuer Adapter braucht ein
-eigenes Fixture-Mapping und eine noch zu ergänzende Adapterauswahl.
+eigenes Fixture-Mapping. Die [Hardwareauswahl](hardwareprofile.md) unterstützt
+bereits Legacy und ESP32 DevKitC; S3 folgt später.
 
 ## Remote-Prüfprofile
 

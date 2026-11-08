@@ -8,8 +8,11 @@ public:
     TestBoardSettings();
     bool load();
     bool reset();
+    uint32_t fixtureProfile() const {return fixtureProfile_;}
+    bool saveFixtureProfile(uint32_t code);
     BaseSettingsService& base() { return settings_; }
 private:
+    uint32_t fixtureProfile_=0;
     ConfigurationStorage storage_;
     DeviceConfiguration device_;
     NetworkConfiguration network_;
