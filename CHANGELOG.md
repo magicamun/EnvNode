@@ -4,6 +4,12 @@
 
 ### Added
 
+- Testboard 0.10.0: distinguish directed EEPROM GND→I2C0 paths from shorts;
+  require reverse isolation and positive connection evidence, recompute dependent
+  results on retest and show D?/D/S in the matrix. Bind rules to reviewed electrical
+  revisions without changing published profiles. Use validated 100 ms settling
+  for real board tests; add directed-short simulation and regression coverage.
+
 - Testboard 0.9.3: place guided self-test start/stop, confirmation and settling
   controls beneath the selected contact; keep detailed readings locally collapsible
   and preserve settings while moving through the list.

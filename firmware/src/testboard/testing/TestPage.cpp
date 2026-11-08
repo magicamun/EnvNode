@@ -18,7 +18,7 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     html += de ? "Board laden / neuer Testlauf" : "Load board / new session";
     html += "</button><button id='test-refresh'>";
     html += de ? "Remote-Profile aktualisieren" : "Refresh remote profiles";
-    html += "</button><p id='test-profile-status' role='status'></p><p id='test-reference' class='help'></p><details><summary>";
+    html += "</button><p id='test-profile-status' role='status'></p><p id='test-reference' class='help'></p><p id='test-directed' class='help'></p><details><summary>";
     html += de ? "Quelle der Prüfdaten" : "Test data source";
     html += "</summary><p id='test-source' class='help'></p></details></section><section class='card'><h2 id='test-instruction'></h2><p id='test-summary' role='status' aria-live='polite'></p><label id='test-fault-wrap'>";
     html += de ? "Simulierter Zustand" : "Simulated condition";
@@ -26,6 +26,8 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     html += de ? "Kontakt 1 unterbrochen" : "Contact 1 open";
     html += "</option><option value='short'>";
     html += de ? "Kontakt 1 mit Zusatzverbindung" : "Contact 1 with extra connection";
+    html += "</option><option value='diode-short'>";
+    html += de ? "EEPROM-Sperrpfade überbrückt" : "EEPROM blocking paths bridged";
     html += "</option></select></label><label id='test-confirm-wrap'><input type='checkbox' id='test-confirm'>";
     html += de ? "Prüfling ohne Versorgung und ohne ESP32; Provisioning-Kabel getrennt, richtiger Pigtail verbunden. Nur ursprünglicher Input-Adapter 0.1." : "Target unpowered, ESP32 removed, provisioning cable disconnected, correct pigtail connected. Original Input-Adapter 0.1 only.";
     html += "</label><div class='actions'><button id='test-start'>";
@@ -44,7 +46,7 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     html += "</p><ol id='test-connectors'></ol></section></div><section class='card'><h2>";
     html += de ? "Einzelprüfungen: Kontakt gegen Prüfeingang" : "Individual checks: contact against measurement input";
     html += "</h2><p class='help'>";
-    html += de ? "● Durchgang erwartet · ○ Trennung erwartet · ! unerwarteter Durchgang · × fehlender Durchgang · E Messfehler. Kontakte ohne positiven Prüfpfad bleiben unvollständig." : "● Expected continuity · ○ Expected isolation · ! Unexpected continuity · × Missing continuity · E Measurement error. Contacts without a positive test path remain incomplete.";
+    html += de ? "● Durchgang erwartet · ○ Trennung erwartet · ! unerwarteter Durchgang · × fehlender Durchgang · E Messfehler · D? gerichteter Pfad, Gegenprüfung fehlt · D gerichteter Pfad bestätigt · S Sperrrichtung getrennt. Kontakte ohne positiven Prüfpfad bleiben unvollständig." : "● Expected continuity · ○ Expected isolation · ! Unexpected continuity · × Missing continuity · E Measurement error · D? directed path awaiting reverse check · D directed path verified · S reverse direction isolated. Contacts without a positive test path remain incomplete.";
     html += "</p><div class='table-scroll'><table id='test-matrix'></table></div></section></div><style>#test-app [hidden]{display:none!important}.test-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,1fr);gap:16px}.test-layout svg{width:100%;max-height:700px;background:#17483e;border-radius:8px}.test-layout ol{padding-left:24px}.test-layout li{padding:4px}.test-layout li.current{font-weight:750;background:#fff0d7}.test-layout li button{display:block;width:100%;text-align:left;background:transparent;color:var(--ink);padding:5px 3px;white-space:normal}.test-layout li button:hover:not(:disabled){background:#fff0d7}.test-layout li.current button{font-weight:750}#test-matrix td,#test-matrix th{padding:4px;min-width:22px;text-align:center}#test-matrix th:first-child{min-width:160px;text-align:left}button:disabled{opacity:.45;cursor:default}@media(max-width:850px){.test-layout{grid-template-columns:1fr}}</style><script src='/test/ui.js'></script>";
     return html;
 }

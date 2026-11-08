@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.9.3) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.10.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Sixty-three tests exercise configuration isolation,
+composition and shared libraries. Seventy tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -239,7 +239,7 @@ measurement. “Ergebnisse löschen” clears firmware results and the browser s
 `Esp32FixtureIo` implements the electrical switching once for diagnostics,
 self-test and `PhysicalFixture`. Hardware access lives outside the runner and DUT
 profiles. `PhysicalFixture` resolves pins via `FixtureRouting`, drives LOW, waits
-20 ms, samples eight times, drives HIGH, waits 40 ms and samples eight more times.
+100 ms, samples eight times, drives HIGH, waits 100 ms and samples eight more times.
 Samples are taken at least 2 ms apart; the cooperative read method never sleeps.
 The driver never reads expected connection masks.
 
@@ -277,10 +277,43 @@ pass/fail decisions are unchanged. The whole-run 10-second timeout remains; the
 longest supported input sequence nominally takes less than five seconds at 100 ms.
 This setting does not alter DUT connector-test timing.
 
-## Local contact controls (0.9.3)
+## Local contact controls (0.10.0)
 
 The guided self-test moves one existing control panel beneath the selected table
 row. Start/stop, connection confirmation and settling are local to that contact;
 selection/next scroll only to this panel. Reusing the same DOM nodes preserves the
 settling choice and disclosure state without replacing focused controls on polls.
 Export/clear remain global. Electrical sequencing and test decisions are unchanged.
+
+## Directed EEPROM conduction checks (0.10.0)
+
+`testing/MeasurementPolicy.cpp` adds revision-bound interpretation above the raw
+`PhysicalFixture` driver. The readable inventory is
+`firmware/testboard/measurement-policies.json`. Published schema-1 CBOR profiles,
+their hashes, and ordinary expected continuity masks are unchanged. The policy is
+limited to the four explicitly reviewed built-in profile IDs and exact electrical
+layout equality (revision, input/connector/contact numbering, net names and masks).
+Identical remote profiles qualify; unknown or electrically changed profiles do not.
+Adding a new built-in profile does not implicitly grant an exception.
+
+`eeprom-ground-clamp-v1` requires forward conduction GND → I2C0_SDA/SCL and reverse
+isolation. Result codes 0–5 retain their meaning; 6 is pending directed evidence,
+7 is confirmed forward conduction, 8 is reverse isolation. A completed source
+contact must also satisfy every positive expected path. Reverse evidence counts
+only from complete connectors with verified SDA/SCL positive paths; any observed
+reverse conduction overrides other positive evidence. SDA and SCL are independent.
+The runner retains raw pending observations and reevaluates all verdicts after
+completion, restart or abort. Starting a retest immediately removes its old proof.
+
+`/test/state` exposes `measurementPolicy` and `directionChecks` with reverse status
+0 missing/invalid, 1 blocked with positive connection proof, or 2 conducting.
+The UI uses D?, D and S plus existing fault symbols. Simulation includes the real
+forward paths and a separate reverse-short fault. No GPIO roles are reversed and
+no extra wiring is needed. This is not diode-voltage metrology, functional EEPROM
+communication, or reverse protection certification for the TP1 reference diodes.
+
+Real board tests now use the hardware-validated 100 ms settling in each LOW/HIGH
+phase, with eight samples and unchanged thresholds. The native regressions cover
+missing/aborted proof, missing positive anchors, reverse shorts across connectors,
+retesting/history invalidation, remote binding and non-exempt faults. The ESP32
+build and simulation are checked; full physical DUT acceptance is still required.

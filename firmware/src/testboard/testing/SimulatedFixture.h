@@ -1,8 +1,9 @@
 // EnvNode: see repository LICENSE.
 #pragma once
 #include "TestModel.h"
+#include "MeasurementPolicy.h"
 namespace EnvNode { namespace Testing {
-enum class SimulatedFault : uint8_t { None, OpenContact, ExtraConnection };
+enum class SimulatedFault : uint8_t { None, OpenContact, ExtraConnection, DirectedShort };
 class SimulatedFixture : public ITestFixture {
 public:
     void connect(const BoardDefinition& board, size_t connector, SimulatedFault fault);
@@ -10,6 +11,8 @@ public:
     Sample read(bool& connected) override;
     void release() override { selected_ = false; }
 private:
+    const MeasurementPolicy* policy_ = nullptr;
+    const BoardDefinition* board_ = nullptr;
     const Connector* connector_ = nullptr;
     size_t inputCount_ = 0;
     SimulatedFault fault_ = SimulatedFault::None;

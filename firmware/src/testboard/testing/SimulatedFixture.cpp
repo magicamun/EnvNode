@@ -3,7 +3,7 @@
 #include "FixtureRouting.h"
 namespace EnvNode { namespace Testing {
 void SimulatedFixture::connect(const BoardDefinition& board, size_t connector, SimulatedFault fault) {
-    release(); inputCount_ = board.inputCount; connector_ = connector < board.count ? &board.connectors[connector] : nullptr; fault_ = fault;
+    release();board_=&board;policy_=measurementPolicy(board); inputCount_ = board.inputCount; connector_ = connector < board.count ? &board.connectors[connector] : nullptr; fault_ = fault;
 }
 bool SimulatedFixture::select(Pigtail pigtail, uint8_t contact, uint8_t socket) {
     selected_ = connector_ && connector_->pigtail == pigtail && contact && contact <= connector_->count && socket && socket <= inputCount_;
@@ -15,6 +15,8 @@ ITestFixture::Sample SimulatedFixture::read(bool& connected) {
     if (!selected_) return Sample::Error;
     const uint64_t mask = connector_->contacts[contact_ - 1].expected;
     connected = (mask >> (socket_ - 1)) & 1;
+    if(forwardRule(policy_,connector_->contacts[contact_-1].net,board_->socket[socket_-1].net)>=0)connected=true;
+    if(fault_==SimulatedFault::DirectedShort&&reverseRule(policy_,connector_->contacts[contact_-1].net,board_->socket[socket_-1].net)>=0)connected=true;
     // Deterministic faults on contact 1, separate from the runner's comparison.
     if (contact_ == 1 && fault_ == SimulatedFault::OpenContact) connected = false;
     if (contact_ == 1 && fault_ == SimulatedFault::ExtraConnection) {

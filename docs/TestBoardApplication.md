@@ -249,3 +249,16 @@ Modul-Provisioning und Modulansichten folgen separat. GPIO16/5 bleiben unveränd
 Controller und ursprünglicher Input-Adapter wurden inzwischen per Schleifentest
 erprobt. Die reale Anschlussmessung ist seit 0.9.0 integriert; vollständige
 Mainboard-/Referenzdioden-Abnahme und externes Provisioning am Aufbau folgen.
+
+## Gerichtete EEPROM-Pfade (0.10.0)
+
+Die Sollmatrix bleibt unverändert. Eine separate, revisionsgebundene Messregel
+bewertet GND → I2C0_SDA/SCL erst dann als bestanden, wenn auch die Gegenrichtung
+gesperrt ist und die beteiligten Anschlüsse ihre positiven Verbindungen nachgewiesen
+haben. Bis dahin bleibt der Kontakt unvollständig (`D?`). Eine leitende Rückrichtung
+ist ein Fehler und wertet vorhandene Vorwärtsbefunde neu aus. Die Regeln gelten
+nur für vier ausdrücklich freigegebene, elektrisch identische Profile; neue oder
+abweichende Remote-Profile erhalten keine pauschale Ausnahme.
+
+Details, Bedienfolge und Matrixsymbole stehen unter
+[Ein Mainboard prüfen](site/firmware/test-provisioning/board-pruefung.md).

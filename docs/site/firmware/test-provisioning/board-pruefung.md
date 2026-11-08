@@ -1,6 +1,6 @@
 # Ein Mainboard prüfen
 
-**Stand 0.9.3:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
+**Stand 0.10.0:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
 Die vollständige Boardabnahme einschließlich der Diodenpfade wird jetzt erstmals
 praktisch erprobt. Vor einer Bewertung zunächst
 [Controller, Adapter und Pigtails prüfen](selbsttests.md).
@@ -70,13 +70,16 @@ dann HIGH und gibt ausschließlich „verbunden“, „getrennt“ oder „Messf
 Die darüberliegende Prüfmatrix vergleicht dieses Ergebnis mit dem Board-Prüfprofil.
 
 Pro Phase werden acht ADC-Werte mit mindestens 2 ms Abstand erfasst, nach zunächst
-20 ms LOW- beziehungsweise 40 ms HIGH-Einschwingzeit. Vorläufige Grenzwerte:
+100 ms Einschwingzeit sowohl für LOW als auch für HIGH. Vorläufige Grenzwerte:
 
 | Beobachtung | Treiberergebnis |
 | --- | --- |
 | Alle LOW-Werte ≤ 200 und alle HIGH-Werte ≤ 200 | Getrennt |
 | Alle LOW-Werte ≤ 200 und alle HIGH-Werte 800–3800 | Verbunden |
 | LOW zu hoch, HIGH im Zwischenbereich, instabile/grenzübergreifende Werte oder Sättigung | Messfehler |
+
+Ein vierpoliger Anschluss benötigt damit ungefähr 40 Sekunden, ein Modulanschluss
+etwa zwei bis zweieinhalb Minuten; Web- und Messschleife laufen währenddessen weiter.
 
 Jeder Pfad wird nach Auswertung abgeschaltet. Ein interner Messpfad darf höchstens
 500 ms dauern; auch die Prüfsteuerung hat eine Fehlerzeitgrenze. **Abbrechen** und
@@ -89,6 +92,46 @@ Schaltungspfade beeinflussen die Messwerte. Die Grenzen sind noch nicht an allen
 Mainboards validiert. Ein Messfehler ist deshalb zunächst zu untersuchen; er darf
 nicht durch Simulation oder pauschales Ignorieren in „bestanden“ verwandelt werden.
 
+## EEPROM: gerichtete Pfade statt vermeintlicher Kurzschlüsse
+
+Das bestückte EEPROM kann bei ausgeschaltetem Mainboard von **GND nach I2C0_SDA
+und I2C0_SCL** leiten. Diese Pfade werden nicht pauschal als normale Durchverbindung
+freigegeben. Für die vier oben genannten Revisionen prüft die Firmware beide Richtungen:
+
+1. Bei einem GND-Kontakt wird der leitende Weg zu SDA/SCL beobachtet. Zunächst steht
+   dort `D?`; der Kontakt bleibt unvollständig.
+2. Anschließend eine **I2C0-Buchse** prüfen. Derselbe Pigtail speist jetzt unter anderem
+   SDA und SCL; die Socket-GND-Kontakte müssen jeweils getrennt bleiben (`S`).
+3. Zugleich müssen die direkten Verbindungen SDA → Socket-Pin 33 und SCL → Pin 36
+   vorhanden sein. Eine unterbrochene Leitung darf keinen Sperrnachweis vortäuschen.
+   Auch der ursprüngliche GND-Kontakt benötigt seine positiven Verbindungen.
+4. Nach vollständiger Gegenprüfung werden die vorhandenen `D?`-Zellen automatisch
+   zu `D`. Das gilt auch für bereits geprüfte Anschlüsse. SDA und SCL werden getrennt bewertet.
+
+**Praktisch:** Früh eine I2C0-Buchse vollständig prüfen, danach die übrigen Anschlüsse.
+Die Reihenfolge bleibt frei; ein Modulanschluss mit denselben Signalen kann ebenfalls
+Gegenprüfungen liefern. Es ist keine zusätzliche Brücke oder Umverdrahtung nötig.
+Es wird weiterhin pro Anschluss nur der geforderte Pigtail angeschlossen.
+
+Leitet eine Gegenrichtung, wird dies als Fehler angezeigt und auch die zugehörigen
+Vorwärtsbewertungen werden rot. Gute Messungen an anderen Buchsen überstimmen
+solche Fehler nicht. Beim erneuten Start eines Anschlusses werden dessen alte
+Gegenprüfungsnachweise sofort verworfen. Abgebrochene oder nur teilweise geprüfte
+Anschlüsse liefern keine gültigen Nachweise; fehlende Vorwärtsleitung oder uneindeutige
+ADC-Werte bleiben Fehler.
+
+Die ergänzenden Regeln sind an die vier bekannten, elektrisch unveränderten
+Boardprofile gebunden und gelten ebenso für deren identische Remote-Profile.
+Unbekannte Revisionen erhalten keine automatische Ausnahme. Die veröffentlichten
+Verbindungsmatrizen bleiben unverändert. Es handelt sich um einen gerichteten
+Leitnachweis, **keine Messung der Dioden-Flussspannung** und keinen funktionalen
+I²C-/EEPROM-Test. Die separaten TP1-Referenzdioden werden weiterhin nur in der
+vorgegebenen Vorwärtsrichtung geprüft.
+
+In der Simulation ergänzt **EEPROM-Sperrpfade überbrückt** gezielt Fehler in diesen
+Gegenrichtungen. Die normale Simulation bildet die gerichteten Pfade korrekt nach.
+Das ersetzt die noch ausstehende Abnahme am echten Mainboard nicht.
+
 ## LEDs, Matrix und Gesamturteil
 
 | Anzeige | Bedeutung |
@@ -99,11 +142,14 @@ nicht durch Simulation oder pauschales Ignorieren in „bestanden“ verwandelt 
 | Rot / `!` | Unerwarteter Durchgang |
 | Rot / `×` | Erwarteter Durchgang fehlt |
 | Rot / `E` | Messfehler / uneindeutige Messung |
-| Orange / unvollständig | Mindestens ein Kontakt hat keinen positiven, vollständig abgedeckten Prüfpfad |
+| Orange / `D?` | Vorwärts leitender EEPROM-Pfad; gültiger Anschluss- oder Gegenprüfungsnachweis fehlt |
+| Grün / `D` | Gerichteter EEPROM-Pfad mit bestätigter Sperrrichtung und positivem Anschlussnachweis |
+| Grün / `S` | In der vorgeschriebenen Sperrrichtung getrennt; allein noch kein vollständiger Diodennachweis |
+| Orange / unvollständig | Positiver Prüfpfad oder erforderliche gerichtete Gegenprüfung fehlt |
 
 Blaue Markierungen zeigen den gerade geprüften Kontakt. Die Anschlussliste hält
-die Ergebnisse der zuvor geprüften Buchsen; eine Wiederholung ersetzt nur das
-Ergebnis dieses Anschlusses. Ein Gesamturteil ist erst nach allen geforderten
+die Ergebnisse der zuvor geprüften Buchsen; eine Wiederholung ersetzt die Messwerte dieses Anschlusses. Abhängige
+Bewertungen gerichteter Pfade werden dabei ebenfalls neu berechnet. Ein Gesamturteil ist erst nach allen geforderten
 Anschlüssen sinnvoll. Übersprungene Modulanschlüsse bleiben ungeprüft und führen
 nicht zu einem vollständigen „bestanden“.
 

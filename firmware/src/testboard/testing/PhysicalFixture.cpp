@@ -12,7 +12,7 @@ ITestFixture::Sample PhysicalFixture::read(bool& connected) {
     connected=false;if(!selected_)return Sample::Error;
     const uint32_t now=clock_();
     if(uint32_t(now-started_)>=500){release();return Sample::Error;}
-    const uint32_t settle=path_.high?40:20;
+    const uint32_t settle=100;
     if(uint32_t(now-switched_)<settle||(samples_&&uint32_t(now-lastSample_)<2))return Sample::Busy;
     const uint16_t sample=io_.sampleDiagnostic();lastSample_=now;sum_+=sample;
     if(sample<minimum_)minimum_=sample;if(sample>maximum_)maximum_=sample;

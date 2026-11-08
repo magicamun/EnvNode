@@ -115,7 +115,16 @@ void TestWebRoutes::state() {
             json += static_cast<char>('0' + static_cast<unsigned>(runner_.contactVerdict(i, p)));
     json += "\",\"profilesRevision\":" + String(profiles_?profiles_->revision():0);
     json += ",\"profilesStatus\":";appendJsonString(json,profiles_?profiles_->status():"embedded");
-    json += "}";
+    json += ",\"measurementPolicy\":";
+    appendJsonString(json,runner_.policy()?runner_.policy()->id:"");
+    json += ",\"directionChecks\":[";
+    if(runner_.policy())for(size_t i=0;i<runner_.policy()->count;++i) {
+        if(i)json+=',';
+        json+="{\"from\":";appendJsonString(json,runner_.policy()->rules[i].from);
+        json+=",\"to\":";appendJsonString(json,runner_.policy()->rules[i].to);
+        json+=",\"reverse\":"+String(runner_.reverseEvidence(i))+"}";
+    }
+    json+="]}";
     host_.server().sendHeader("Cache-Control", "no-store");
     host_.server().send(200, "application/json; charset=utf-8", json);
 }
@@ -140,11 +149,14 @@ void TestWebRoutes::action() {
         const String fault = server.arg("fault");
         const bool simulation=!measurement_||measurement_->simulated();
         if(!simulation&&server.arg("confirm")!="yes") {server.send(400,"application/json","{\"error\":\"Confirm unpowered DUT, removed ESP32 and disconnected provisioning cable\"}");return;}
-        if (simulation && fault != "none" && fault != "open" && fault != "short") {
+        if (simulation && fault != "none" && fault != "open" && fault != "short" && fault != "diode-short") {
             server.send(400, "application/json", "{\"error\":\"Unknown simulation fault\"}"); return;
         }
+        if(simulation && fault=="diode-short" && !runner_.policy()) {
+            server.send(400,"application/json","{\"error\":\"No reviewed directed paths for this profile\"}");return;
+        }
         if(simulation) fixture_.connect(*runner_.board(), runner_.step(), fault == "open" ? SimulatedFault::OpenContact
-            : fault == "short" ? SimulatedFault::ExtraConnection : SimulatedFault::None);
+            : fault == "short" ? SimulatedFault::ExtraConnection : fault=="diode-short"?SimulatedFault::DirectedShort:SimulatedFault::None);
         ok = runner_.start(millis());
     } else if(command=="refresh" && profiles_ && runner_.phase()!=Phase::Running) {
         profiles_->requestRefresh();ok=true;

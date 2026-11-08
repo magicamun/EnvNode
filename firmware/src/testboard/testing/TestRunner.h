@@ -1,9 +1,10 @@
 // EnvNode: see repository LICENSE.
 #pragma once
 #include "TestModel.h"
+#include "MeasurementPolicy.h"
 namespace EnvNode { namespace Testing {
 enum class Phase : uint8_t { Empty, AwaitingConnection, Running, Review, Complete, Aborted };
-enum class Result : uint8_t { Pending, Isolated, Connected, Unexpected, Open, Error };
+enum class Result : uint8_t { Pending, Isolated, Connected, Unexpected, Open, Error, DirectedPending, DirectedConnected, DirectedBlocked };
 enum class Verdict : uint8_t { Untested, Passed, Failed, Incomplete };
 class TestRunner {
 public:
@@ -24,9 +25,17 @@ public:
     Verdict verdict(size_t step) const;
     Verdict overall() const;
     Verdict contactVerdict(size_t step, size_t contact) const;
+    const MeasurementPolicy* policy() const { return policy_; }
+    uint8_t reverseEvidence(size_t rule) const { return rule<2?reverseEvidence_[rule]:0; }
     uint32_t generation() const { return generation_; }
 private:
     bool select();
+    void refreshVerdicts();
+    bool positivePath(size_t connector,size_t contact) const;
+    Result evaluated(size_t connector,size_t cell) const;
+    const MeasurementPolicy* policy_ = nullptr;
+    uint8_t reverseEvidence_[2] = {}; // 0 missing/invalid, 1 blocked with verified positive path, 2 conducting
+
     void finish();
     ITestFixture& fixture_;
     const BoardDefinition* board_ = nullptr;

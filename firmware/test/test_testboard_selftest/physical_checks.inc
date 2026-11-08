@@ -66,10 +66,10 @@ void test_real_driver_runs_a_complete_40_input_matrix_without_using_expectations
     BoardDefinition board{"synthetic","Synthetic","0.1","0.1",socket,&connector,1,40};
     uint32_t now=0;PhysicalFixture fixture(io,[&](){return now;});TestRunner runner(fixture);
     TEST_ASSERT_TRUE(runner.load(board));TEST_ASSERT_TRUE(runner.start(now));
-    for(;now<30000&&runner.phase()==Phase::Running;now+=2)runner.tick(now);
+    for(;now<90000&&runner.phase()==Phase::Running;now+=2)runner.tick(now);
     TEST_ASSERT_EQUAL(160,runner.completed());TEST_ASSERT_EQUAL(Verdict::Passed,runner.verdict(0));TEST_ASSERT_FALSE(io.active);
     io.broken=true;TEST_ASSERT_TRUE(runner.start(now));
-    for(uint32_t end=now+30000;now<end&&runner.phase()==Phase::Running;now+=2)runner.tick(now);
+    for(uint32_t end=now+90000;now<end&&runner.phase()==Phase::Running;now+=2)runner.tick(now);
     TEST_ASSERT_EQUAL(Verdict::Failed,runner.verdict(0));TEST_ASSERT_EQUAL(Result::Open,runner.result(39));
     TEST_ASSERT_FALSE(io.active);
 }

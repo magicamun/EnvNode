@@ -9,6 +9,7 @@
 #include "testing/TestWebRoutes.h"
 #include "testing/FixtureRouting.h"
 #include <vector>
+#include <algorithm>
 using namespace EnvNode::Testing;
 using namespace EnvNode;
 UpdateClass Update;
@@ -101,7 +102,7 @@ struct IndependentProbe : ITestFixture {
     }
     Sample read(bool& connected) override {
         if (busy) return Sample::Busy;
-        connected = contact == 1 ? socket == 14 || socket == 32 || socket == 38
+        connected = contact == 1 ? socket == 14 || socket == 32 || socket == 38 || socket == 33 || socket == 36
             : contact == 2 ? socket == 19 : contact == 3 && socket == 27;
         return Sample::Ready;
     }
@@ -135,7 +136,7 @@ void test_all_152_pairs_use_logical_pin_numbers_and_wait_for_operator() {
     TEST_ASSERT_EQUAL(Result::Connected, runner.result(37));
     TEST_ASSERT_EQUAL(Result::Isolated, runner.result(0));
     TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(0));
-    TEST_ASSERT_EQUAL(Verdict::Passed, runner.contactVerdict(0, 0));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(0, 0));
     TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(0, 3));
     runner.tick(now + 10000); TEST_ASSERT_EQUAL(0, runner.step());
     TEST_ASSERT_TRUE(runner.next()); TEST_ASSERT_EQUAL(Phase::AwaitingConnection, runner.phase());
@@ -234,7 +235,7 @@ void test_free_selection_preserves_matrices_and_retest_replaces_only_selected_re
     runner.selectConnector(1);
     TEST_ASSERT_EQUAL(152, runner.completed());
     TEST_ASSERT_EQUAL(Result::Connected, runner.result(13));
-    TEST_ASSERT_EQUAL(Verdict::Passed, runner.contactVerdict(1, 0));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(1, 0));
 }
 void test_out_of_order_completion_next_untested_and_selection_after_completion() {
     SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0;
@@ -434,8 +435,20 @@ void test_hardware_diagnostics_lock_real_test_actions() {
     f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(409,f.server().responseStatus);TEST_ASSERT_EQUAL(0,f.real.selects);
 }
 
+#include "directed_checks.inc"
+
 int main() {
+    // Directed-path regressions are independent of the physical ADC driver.
+
     UNITY_BEGIN();
+    RUN_TEST(test_directed_paths_wait_for_valid_countercheck_and_recompute_history);
+    RUN_TEST(test_directed_short_overrides_good_counterchecks_and_retest_removes_proof);
+    RUN_TEST(test_missing_positive_paths_never_certify_reverse_isolation);
+    RUN_TEST(test_aborted_countercheck_does_not_leave_stale_evidence);
+    RUN_TEST(test_policy_is_bound_to_exact_known_electrical_revision);
+    RUN_TEST(test_directed_rules_do_not_hide_other_shorts_or_measurement_errors);
+    RUN_TEST(test_direction_policy_and_evidence_are_exposed_by_web_api);
+
     RUN_TEST(test_real_mode_requires_confirmation_and_resets_previous_simulated_results);
     RUN_TEST(test_hardware_diagnostics_lock_real_test_actions);
     RUN_TEST(test_fixture_revision01_resolves_all_physical_channels_and_gpio_controls);
