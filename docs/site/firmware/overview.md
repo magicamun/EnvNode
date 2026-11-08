@@ -1,5 +1,7 @@
 # Firmware
 
+Fertige Firmware für beide Anwendungen findest du unter [Downloads](downloads.md).
+
 EnvNode hat zwei Firmware-Anwendungen mit gemeinsamer Basis für Netzwerk,
 Weboberfläche, Sprache/Zeit, Protokoll und OTA. Welche Anwendung läuft, wird beim
 Build festgelegt; das ist keine zur Laufzeit umschaltbare Betriebsart.

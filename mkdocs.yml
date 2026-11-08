@@ -71,6 +71,7 @@ nav:
           - Modul-Adapter: mainboards/module-adapter/index.md
   - Firmware:
       - Übersicht: firmware/overview.md
+      - Downloads: firmware/downloads.md
       - EnvNode:
           - Bedienungsanleitung: firmware/index.md
           - Begriffe und Oberfläche: firmware/basics.md
