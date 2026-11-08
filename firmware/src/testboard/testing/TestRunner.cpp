@@ -1,11 +1,26 @@
 // EnvNode: see repository LICENSE.
 #include "TestRunner.h"
 #include <algorithm>
+#include <cstring>
 namespace EnvNode { namespace Testing {
 const Connector* TestRunner::connector() const {
     return board_ && step_ < board_->count ? &board_->connectors[step_] : nullptr;
 }
-Result TestRunner::result(size_t i) const { return step_ < MaxConnectors && i < MaxContacts * MaxInputs ? results_[step_][i] : Result::Error; }
+Result TestRunner::result(size_t i) const { return step_ < MaxConnectors && i < MaxContacts * MaxInputs ? evaluated(step_,i) : Result::Error; }
+Result TestRunner::resultAt(size_t c,size_t i) const {
+    return board_&&c<board_->count&&i<board_->connectors[c].count*inputCount()?evaluated(c,i):Result::Error;
+}
+Result TestRunner::rawResultAt(size_t c,size_t i) const {
+    return board_&&c<board_->count&&i<board_->connectors[c].count*inputCount()?results_[c][i]:Result::Error;
+}
+void TestRunner::recordDiagnostic(Result value,uint32_t now,MeasurementReason fallback) {
+    auto& record=diagnostics_[diagnosticNext_];record=MeasurementRecord();
+    record.attempt=generation_;record.atMs=now;record.connector=uint8_t(step_);record.cell=uint16_t(completed_);record.result=value;
+    if(!pathReady_||!fixture_.trace(record.trace))record.trace.reason=fallback;
+    if(fallback==MeasurementReason::Timeout)record.trace.reason=fallback;
+    diagnosticNext_=(diagnosticNext_+1)%DiagnosticCapacity;
+    if(diagnosticCount_<DiagnosticCapacity)++diagnosticCount_;else ++diagnosticsDropped_;
+}
 Verdict TestRunner::verdict(size_t i) const { return i < MaxConnectors ? verdicts_[i] : Verdict::Failed; }
 bool TestRunner::load(const BoardDefinition& board) {
     if (phase_ == Phase::Running || !board.socket || !board.connectors || !board.count || board.count > MaxConnectors
@@ -18,11 +33,18 @@ bool TestRunner::load(const BoardDefinition& board) {
     }
     for (size_t p = 0; p < board.inputCount; ++p) if (board.socket[p].number != p + 1) return false;
     for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(contactVerdicts_[i], MaxContacts, Verdict::Untested);
-    fixture_.release(); board_ = &board; step_ = completed_ = 0;
+    diagnosticCount_=diagnosticNext_=0;diagnosticsDropped_=0;
+    fixture_.release(); board_ = &board; policy_=measurementPolicy(board);
+    std::fill_n(reverseEvidence_,MaxDirectedRules,0); step_ = completed_ = 0;
     for (size_t i = 0; i < MaxConnectors; ++i) std::fill_n(results_[i], MaxContacts * MaxInputs, Result::Pending);
     std::fill_n(completedByConnector_, MaxConnectors, 0);
     std::fill_n(verdicts_, MaxConnectors, Verdict::Untested);
     phase_ = Phase::AwaitingConnection; ++generation_; return true;
+}
+bool TestRunner::resetForModeChange() {
+    if(phase_==Phase::Running)return false;
+    if(board_)return load(*board_);
+    fixture_.release();phase_=Phase::Empty;++generation_;return true;
 }
 bool TestRunner::start(uint32_t now) {
     if ((phase_ != Phase::AwaitingConnection && phase_ != Phase::Review) || !connector()) return false;
@@ -31,7 +53,7 @@ bool TestRunner::start(uint32_t now) {
     verdicts_[step_] = Verdict::Untested;
     completedByConnector_[step_] = 0;
     completed_ = 0; lastSample_ = now; phase_ = Phase::Running; ++generation_;
-    pathReady_ = select(); return true;
+    refreshVerdicts();pathReady_ = select(); return true;
 }
 bool TestRunner::select() {
     const bool selected = fixture_.select(connector()->pigtail, static_cast<uint8_t>(completed_ / inputCount() + 1),
@@ -42,33 +64,84 @@ bool TestRunner::select() {
 void TestRunner::tick(uint32_t now) {
     if (phase_ != Phase::Running || uint32_t(now - lastSample_) < 20) return;
     bool connected = false;
+    MeasurementReason fallback=pathReady_?MeasurementReason::Unavailable:MeasurementReason::SelectionFailed;
     auto sample = pathReady_ ? fixture_.read(connected) : ITestFixture::Sample::Error;
     if (sample == ITestFixture::Sample::Busy) {
         if (uint32_t(now - lastSample_) < 2000) return;
-        sample = ITestFixture::Sample::Error;
+        fallback=MeasurementReason::Timeout;sample = ITestFixture::Sample::Error;
     }
     if (sample == ITestFixture::Sample::Error) fixture_.release();
-    const bool expected = (connector()->contacts[completed_ / inputCount()].expected >> (completed_ % inputCount())) & 1;
-    results_[step_][completed_] = sample == ITestFixture::Sample::Error ? Result::Error
-        : connected ? (expected ? Result::Connected : Result::Unexpected)
-                    : (expected ? Result::Open : Result::Isolated);
+    const auto& contact=connector()->contacts[completed_/inputCount()];
+    const char* target=board_->socket[completed_%inputCount()].net;
+    const bool expected=(contact.expected>>(completed_%inputCount()))&1;
+    Result value=sample==ITestFixture::Sample::Error?Result::Error:
+        connected?(expected?Result::Connected:Result::Unexpected):(expected?Result::Open:Result::Isolated);
+    if(sample==ITestFixture::Sample::Ready&&!expected) {
+        if(forwardRule(policy_,contact.net,target)>=0)value=connected?Result::DirectedPending:Result::Open;
+        else if(reverseRule(policy_,contact.net,target)>=0)value=connected?Result::Unexpected:Result::DirectedBlocked;
+    }
+    if(value==Result::Error||value==Result::Open||value==Result::Unexpected)recordDiagnostic(value,now,fallback);
+    results_[step_][completed_]=value;
     ++completed_; completedByConnector_[step_] = completed_; lastSample_ = now;
     if (completed_ == connector()->count * inputCount()) finish();
     else pathReady_ = select();
 }
-void TestRunner::finish() {
-    fixture_.release(); bool failed = false, incomplete = false;
-    for (size_t i = 0; i < completed_; ++i)
-        failed |= results_[step_][i] == Result::Unexpected || results_[step_][i] == Result::Open || results_[step_][i] == Result::Error;
-    for (size_t i = 0; i < connector()->count; ++i) incomplete |= connector()->contacts[i].expected == 0;
-    for (size_t p = 0; p < connector()->count; ++p) {
-        bool rowFailed = false;
-        for (size_t s = 0; s < inputCount(); ++s) rowFailed |= results_[step_][p * inputCount() + s] >= Result::Unexpected;
-        contactVerdicts_[step_][p] = rowFailed ? Verdict::Failed
-            : connector()->contacts[p].expected ? Verdict::Passed : Verdict::Incomplete;
+namespace { bool failure(Result r){return r==Result::Unexpected||r==Result::Open||r==Result::Error;} }
+bool TestRunner::positivePath(size_t c,size_t p) const {
+    const uint64_t expected=board_->connectors[c].contacts[p].expected;
+    if(!expected)return false;
+    for(size_t i=0;i<inputCount();++i)if(((expected>>i)&1)&&results_[c][p*inputCount()+i]!=Result::Connected)return false;
+    return true;
+}
+Result TestRunner::evaluated(size_t c,size_t cell) const {
+    const auto raw=results_[c][cell];
+    if(raw!=Result::DirectedPending||!policy_||!board_)return raw;
+    const size_t p=cell/inputCount(),i=cell%inputCount();
+    const int rule=forwardRule(policy_,board_->connectors[c].contacts[p].net,board_->socket[i].net);
+    if(rule<0)return Result::Unexpected;
+    if(reverseEvidence_[rule]==2)return Result::Unexpected;
+    return reverseEvidence_[rule]==1&&positivePath(c,p)?Result::DirectedConnected:Result::DirectedPending;
+}
+void TestRunner::refreshVerdicts() {
+    std::fill_n(reverseEvidence_,MaxDirectedRules,0);
+    if(policy_)for(size_t rule=0;rule<policy_->count;++rule) {
+        bool blocked=false,conducting=false;
+        for(size_t c=0;c<board_->count;++c) {
+            const auto& connector=board_->connectors[c];
+            if(completedByConnector_[c]!=connector.count*inputCount())continue;
+            for(size_t p=0;p<connector.count;++p) {
+                if(strcmp(connector.contacts[p].net,policy_->rules[rule].reverseSource))continue;
+                bool seen=false,allBlocked=true;
+                for(size_t i=0;i<inputCount();++i)if(!strcmp(board_->socket[i].net,policy_->rules[rule].from)) {
+                    seen=true;const auto r=results_[c][p*inputCount()+i];
+                    conducting|=r==Result::Unexpected;
+                    allBlocked&=r==Result::DirectedBlocked;
+                }
+                blocked|=seen&&allBlocked&&positivePath(c,p);
+            }
+        }
+        reverseEvidence_[rule]=conducting?2:blocked?1:0;
     }
-    verdicts_[step_] = failed ? Verdict::Failed : incomplete ? Verdict::Incomplete : Verdict::Passed;
-    phase_ = Phase::Review; ++generation_;
+    for(size_t c=0;c<board_->count;++c) {
+        const auto& connector=board_->connectors[c];
+        if(completedByConnector_[c]!=connector.count*inputCount()) {
+            verdicts_[c]=Verdict::Untested;std::fill_n(contactVerdicts_[c],MaxContacts,Verdict::Untested);continue;
+        }
+        bool failed=false,incomplete=false;
+        for(size_t p=0;p<connector.count;++p) {
+            bool rowFailed=false,rowIncomplete=!connector.contacts[p].expected;
+            for(size_t i=0;i<inputCount();++i) {
+                const auto r=evaluated(c,p*inputCount()+i);
+                rowFailed|=failure(r);rowIncomplete|=r==Result::DirectedPending;
+            }
+            contactVerdicts_[c][p]=rowFailed?Verdict::Failed:rowIncomplete?Verdict::Incomplete:Verdict::Passed;
+            failed|=rowFailed;incomplete|=rowIncomplete;
+        }
+        verdicts_[c]=failed?Verdict::Failed:incomplete?Verdict::Incomplete:Verdict::Passed;
+    }
+}
+void TestRunner::finish() {
+    fixture_.release();phase_=Phase::Review;refreshVerdicts();++generation_;
 }
 bool TestRunner::selectConnector(size_t index) {
     if (!board_ || index >= board_->count || phase_ == Phase::Running) return false;
@@ -86,7 +159,7 @@ bool TestRunner::next() {
     fixture_.release(); step_ = board_->count; completed_ = 0;
     phase_ = Phase::Complete; ++generation_; return true;
 }
-void TestRunner::abort() { fixture_.release(); phase_ = Phase::Aborted; ++generation_; }
+void TestRunner::abort() { fixture_.release(); phase_ = Phase::Aborted; if(board_)refreshVerdicts();++generation_; }
 Verdict TestRunner::contactVerdict(size_t step, size_t contact) const {
     return step < MaxConnectors && contact < MaxContacts ? contactVerdicts_[step][contact] : Verdict::Failed;
 }

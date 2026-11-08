@@ -9,6 +9,7 @@
 #include "testing/TestWebRoutes.h"
 #include "testing/FixtureRouting.h"
 #include <vector>
+#include <algorithm>
 using namespace EnvNode::Testing;
 using namespace EnvNode;
 UpdateClass Update;
@@ -51,9 +52,16 @@ struct Fixture {
     TestBoardWeb web{host, settings, wifi, time, formatter, ota, restart, logs,
         {"0.3.1", "0.3.1+test", "1", "abc", "testboard", "now", "clean", false}};
     SimulatedFixture fixture;
-    TestRunner runner{fixture};
+    struct Real : ITestFixture {
+        unsigned selects=0,releases=0;
+        bool select(Pigtail,uint8_t,uint8_t) override {++selects;return true;}
+        Sample read(bool& connected) override {connected=false;return Sample::Ready;}
+        void release() override {++releases;}
+    } real;
+    SelectableFixture measurement{fixture,&real};
+    TestRunner runner{measurement};
     TestWebRoutes routes{host, web, runner, fixture};
-    Fixture() { settings.load(); web.attachTestRoutes(routes); web.begin(); }
+    Fixture() { settings.load(); routes.attachMeasurement(measurement); web.attachTestRoutes(routes); web.begin(); }
     WebServer& server() { return host.server(); }
     bool request(const char* path,HTTPMethod method) {
         const bool found=server().request(path,method);
@@ -94,7 +102,7 @@ struct IndependentProbe : ITestFixture {
     }
     Sample read(bool& connected) override {
         if (busy) return Sample::Busy;
-        connected = contact == 1 ? socket == 14 || socket == 32 || socket == 38
+        connected = contact == 1 ? socket == 14 || socket == 32 || socket == 38 || socket == 33 || socket == 36
             : contact == 2 ? socket == 19 : contact == 3 && socket == 27;
         return Sample::Ready;
     }
@@ -128,7 +136,7 @@ void test_all_152_pairs_use_logical_pin_numbers_and_wait_for_operator() {
     TEST_ASSERT_EQUAL(Result::Connected, runner.result(37));
     TEST_ASSERT_EQUAL(Result::Isolated, runner.result(0));
     TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.verdict(0));
-    TEST_ASSERT_EQUAL(Verdict::Passed, runner.contactVerdict(0, 0));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(0, 0));
     TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(0, 3));
     runner.tick(now + 10000); TEST_ASSERT_EQUAL(0, runner.step());
     TEST_ASSERT_TRUE(runner.next()); TEST_ASSERT_EQUAL(Phase::AwaitingConnection, runner.phase());
@@ -227,7 +235,7 @@ void test_free_selection_preserves_matrices_and_retest_replaces_only_selected_re
     runner.selectConnector(1);
     TEST_ASSERT_EQUAL(152, runner.completed());
     TEST_ASSERT_EQUAL(Result::Connected, runner.result(13));
-    TEST_ASSERT_EQUAL(Verdict::Passed, runner.contactVerdict(1, 0));
+    TEST_ASSERT_EQUAL(Verdict::Incomplete, runner.contactVerdict(1, 0));
 }
 void test_out_of_order_completion_next_untested_and_selection_after_completion() {
     SimulatedFixture fixture; TestRunner runner(fixture); uint32_t now = 0;
@@ -403,8 +411,56 @@ void test_40_input_profile_checks_references_without_reading_past_old_socket_tab
     TEST_ASSERT_EQUAL(152,runner.completed()); TEST_ASSERT_EQUAL(Verdict::Incomplete,runner.overall());
 }
 
+void test_real_mode_requires_confirmation_and_resets_previous_simulated_results() {
+    Fixture f;TEST_ASSERT_TRUE(f.runner.load(weatherBoard()));
+    f.fixture.connect(weatherBoard(),0,SimulatedFault::None);uint32_t now=0;f.runner.start(now);finish(f.runner,now);
+    TEST_ASSERT_NOT_EQUAL(Verdict::Untested,f.runner.verdict(0));
+    f.server().arguments={{"action","mode"},{"mode","physical"},{"generation",String(f.runner.generation())}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(200,f.server().responseStatus);
+    TEST_ASSERT_FALSE(f.measurement.simulated());TEST_ASSERT_EQUAL(Verdict::Untested,f.runner.verdict(0));
+    TEST_ASSERT_NOT_NULL(strstr(f.server().responseBody.c_str(),"\"simulation\":false"));
+    f.server().arguments={{"action","start"},{"generation",String(f.runner.generation())},{"fault","none"}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(400,f.server().responseStatus);TEST_ASSERT_EQUAL(0,f.real.selects);
+    f.server().arguments["confirm"]="yes";f.request("/test/action",HTTP_POST);
+    TEST_ASSERT_EQUAL(200,f.server().responseStatus);TEST_ASSERT_EQUAL(1,f.real.selects);
+    f.server().arguments={{"action","mode"},{"mode","simulation"},{"generation",String(f.runner.generation())}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(409,f.server().responseStatus);TEST_ASSERT_FALSE(f.measurement.simulated());
+    f.runner.abort();f.server().arguments={{"action","mode"},{"mode","simulation"},{"generation",String(f.runner.generation())}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(200,f.server().responseStatus);TEST_ASSERT_TRUE(f.measurement.simulated());
+    TEST_ASSERT_EQUAL(0,f.runner.completed());TEST_ASSERT_EQUAL(Verdict::Untested,f.runner.verdict(0));
+}
+void test_hardware_diagnostics_lock_real_test_actions() {
+    Fixture f;f.runner.load(weatherBoard());f.routes.setHardwareBusy([](){return true;});
+    f.server().arguments={{"action","start"},{"generation",String(f.runner.generation())},{"confirm","yes"},{"fault","none"}};
+    f.request("/test/action",HTTP_POST);TEST_ASSERT_EQUAL(409,f.server().responseStatus);TEST_ASSERT_EQUAL(0,f.real.selects);
+}
+
+#include "directed_checks.inc"
+#include "report_checks.inc"
+#include "fixture_profile_checks.inc"
+
 int main() {
+    // Directed-path regressions are independent of the physical ADC driver.
+
     UNITY_BEGIN();
+    RUN_TEST(test_fixture_profiles_are_independent_and_resolve_all_40_inputs);
+    RUN_TEST(test_fixture_selection_changes_physical_routing_without_boot_gpio_effects);
+    RUN_TEST(test_fixture_web_change_requires_confirmation_clears_results_and_handles_persistence_failure);
+    RUN_TEST(test_fixture_profile_settings_survive_reload_and_factory_reset);
+    RUN_TEST(test_fault_history_retains_raw_samples_across_successful_retest_and_is_bounded);
+    RUN_TEST(test_report_pages_are_read_only_guarded_and_include_unselected_connectors);
+    RUN_TEST(test_report_history_pagination_is_bounded_and_keeps_previous_attempts);
+    RUN_TEST(test_weather_rail_path_uses_pigtail_drive_and_requires_reference_anchor);
+    RUN_TEST(test_directed_paths_wait_for_valid_countercheck_and_recompute_history);
+    RUN_TEST(test_directed_short_overrides_good_counterchecks_and_retest_removes_proof);
+    RUN_TEST(test_missing_positive_paths_never_certify_reverse_isolation);
+    RUN_TEST(test_aborted_countercheck_does_not_leave_stale_evidence);
+    RUN_TEST(test_policy_is_bound_to_exact_known_electrical_revision);
+    RUN_TEST(test_directed_rules_do_not_hide_other_shorts_or_measurement_errors);
+    RUN_TEST(test_direction_policy_and_evidence_are_exposed_by_web_api);
+
+    RUN_TEST(test_real_mode_requires_confirmation_and_resets_previous_simulated_results);
+    RUN_TEST(test_hardware_diagnostics_lock_real_test_actions);
     RUN_TEST(test_fixture_revision01_resolves_all_physical_channels_and_gpio_controls);
     RUN_TEST(test_40_input_profile_checks_references_without_reading_past_old_socket_tables);
     RUN_TEST(test_weather_profile_matches_direct_nets_and_marks_sys_rail_uncovered);

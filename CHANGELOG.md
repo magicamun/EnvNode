@@ -4,6 +4,11 @@
 
 ### Added
 
+- EnvNode 0.8.8 / Testboard 0.13.0: integrate tester measurements, fixture profiles,
+  diagnostics and report history with current main provisioning/dialog/profile core.
+  Include reviewed Controller 0.2 / ESP32 adapter 0.3 / module adapter 0.2 CAD and
+  retain produced Legacy hardware; physical acceptance of new revisions is pending.
+
 - Derive dew point and absolute humidity only from paired temperature/humidity
   values of one sensor instance and acquisition. Add a configurable virtual
   Solar Position slot using location and UTC, with geometric azimuth/elevation.
@@ -41,6 +46,56 @@
   installed firmware cannot operate the module. Keep built-in provisioning
   profiles available offline and derive the DuoRelay fallback from the same
   source as its downloadable template.
+- Testboard 0.12.1: sort provisioning board choices by name and numeric revision,
+  preserving profile IDs, defaults and the currently selected identity.
+
+- Testboard 0.12.0: select and persist independent Controller 0.1/0.2 and Legacy/
+  ESP32 DevKitC 0.3 adapter profiles. Derive mapping from PCB, preserve produced
+  hardware, adapt guided TP2 self-tests and isolate results/history by fixture.
+
+- Testboard 0.11.0: download complete board-session JSON reports with bounded,
+  read-only paging; retain the latest 128 unexpected/open/error observations with
+  actual LOW/HIGH samples, reason, attempt and uptime across successful retests.
+  Include profile, directed evidence, all matrices, build identity and eviction counts.
+
+- Testboard 0.10.1: validate Weather 0.3 GND→SYS reference conduction using
+  SYS pigtail excitation for the reverse check and mandatory positive reference
+  continuity. Keep shorts and open reference cables detectable; scope the new
+  rule to the measured revision and expose the actual reverse source in the UI.
+
+- Testboard 0.10.0: distinguish directed EEPROM GND→I2C0 paths from shorts;
+  require reverse isolation and positive connection evidence, recompute dependent
+  results on retest and show D?/D/S in the matrix. Bind rules to reviewed electrical
+  revisions without changing published profiles. Use validated 100 ms settling
+  for real board tests; add directed-short simulation and regression coverage.
+
+- Testboard 0.9.3: place guided self-test start/stop, confirmation and settling
+  controls beneath the selected contact; keep detailed readings locally collapsible
+  and preserve settings while moving through the list.
+
+- Testboard 0.9.2: make guided self-test settling selectable at 15/50/100 ms
+  and retain it per result for controlled comparisons; keep eight samples and
+  unchanged thresholds/peak-based decisions.
+
+- Testboard 0.9.1: identify the worst isolation channel/window, retain its raw
+  samples and aggregate exceedance counts, and show manual meter-check settings
+  without changing thresholds, timing or pass/fail decisions.
+
+- Testboard 0.9.0: connect board tests to a real LOW/HIGH ADC fixture driver;
+  preserve explicit simulation, require physical-target confirmation and clear
+  results on mode change. Share electrical switching with hardware self-tests.
+  Document EnvNode and Test/Provisioning in separate firmware manual sections.
+
+- Testboard 0.8.0: add guided physical loopback commissioning for 22 outputs and
+  40 original-adapter inputs, automatic LOW/HIGH/isolation measurements, free
+  contact selection and a downloadable browser-session report.
+
+- Testboard 0.7.2: port the verified main HTTP client gate and nonblocking
+  response pump to the tester; avoid copying diagnostic page content.
+
+- Testboard 0.7.1: add opt-in real controller diagnostics for mux address/enable
+  selection, GPIO17 LOW/HIGH and GPIO34 ADC readings; disable after 60 seconds
+  or network loss and block provisioning/test actions while active.
 
 - EnvNode 0.8.2 / Testboard 0.7.0: share manufacturing revision metadata, support
   Mini 0.9 and Weather 0.3 beside their predecessors, select the exact EEPROM

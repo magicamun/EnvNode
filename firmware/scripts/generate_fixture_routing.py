@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 from generate_testboard_profile import parse, children, child, pads
 
@@ -13,11 +14,15 @@ GPIO_BY_PAD = {5:34,7:32,8:33,9:25,10:26,11:27,12:14,15:13,
 
 def generate():
     boards, sources = {}, {}
+    # Preserve produced hardware independently of in-progress revision-0.2 layouts.
+    commit = "e243b133b8790acf3e13b9bbf95671e1c5c2558a"
     for name in ('Input-Adapter', 'Test-Controller', 'Module-Adapter'):
         path = Path('hardware/kicad/MainBoards') / name / (name + '.kicad_pcb')
-        data = (ROOT / path).read_bytes()
+        data = subprocess.check_output(['git','show',commit+':'+str(path)],cwd=ROOT)
         board = parse(data.decode())
-        assert child(child(board, 'title_block'), 'rev') == ['rev', '0.1']
+        revision = child(child(board, 'title_block'), 'rev')
+        allowed = ('0.1', '0.1.1') if name == 'Test-Controller' else ('0.1',)
+        assert len(revision) == 2 and revision[1] in allowed, (name, revision)
         boards[name] = {next(x[2] for x in children(f, 'property') if x[1] == 'Reference'):
                        {p['number']:p['net'] for p in pads(f)} for f in children(board, 'footprint')}
         sources[str(path)] = hashlib.sha256(data).hexdigest()
@@ -62,7 +67,7 @@ def generate():
     header += '    {' + ',\n     '.join(pairs(v) for v in [inputs,outputs['gpio'],outputs['i2c'],outputs['module']]) + '},\n'
     header += '    ' + ', '.join(numbers(controls[k]) for k in ('inputSelect','inputEnable','outputSelect','outputEnable')) + ',\n'
     header += '    %d, %d, %d, %d\n};\n' % tuple(controls[k] for k in ('sense','drive','sda','scl'))
-    definition = dict(schema=1,id='controller0.1-input0.1-module0.1',sources=sources,
+    definition = dict(schema=1,sourceCommit=commit,id='controller0.1-input0.1-module0.1',sources=sources,
         channelNumbering='zero-based; device indexes input U4/U5/U6, output U1/U2',
         inputs=inputs,outputs=outputs,gpios=controls,
         referenceConnector=dict(reference='TP1',pins={'1':'MB_GND','2':'MB_3V3_SYS'}))

@@ -70,25 +70,31 @@ nav:
           - Input-Adapter: mainboards/input-adapter/index.md
           - Modul-Adapter: mainboards/module-adapter/index.md
   - Firmware:
-      - Downloads und Änderungen: firmware/downloads.md
-      - Bedienungsanleitung: firmware/index.md
-      - Begriffe und Oberfläche: firmware/basics.md
-      - Bauen und Aufspielen: firmware/installation.md
-      - Erste Inbetriebnahme: firmware/configuration.md
-      - GeoPosition und Meereshöhendruck: firmware/geo-position-pressure.md
-      - Abgeleitete Messwerte: firmware/derived-measurements.md
-      - Hardware und Provisioning: firmware/provisioning.md
-      - Sensoren und Messwerte: firmware/sensors.md
-      - Ausgänge schalten: firmware/actuators.md
-      - Lokale Controller: firmware/controllers.md
-      - Values und Anzeigen: firmware/values-displays.md
-      - MQTT und Home Assistant: firmware/mqtt.md
-      - Netzwerklogging: firmware/network-logging.md
-      - SD-Karte (historisch): firmware/sd-card.md
-      - Wartung und Diagnose: firmware/maintenance.md
-      - Beispiele:
-          - Mini mit SHT4x: firmware/example-measurement.md
-          - DuoRelay mit Blink: firmware/example-relay.md
+      - Übersicht: firmware/overview.md
+      - EnvNode:
+          - Bedienungsanleitung: firmware/index.md
+          - Begriffe und Oberfläche: firmware/basics.md
+          - Bauen und Aufspielen: firmware/installation.md
+          - Erste Inbetriebnahme: firmware/configuration.md
+          - GeoPosition und Meereshöhendruck: firmware/geo-position-pressure.md
+          - Hardware und Provisioning: firmware/provisioning.md
+          - Sensoren und Messwerte: firmware/sensors.md
+          - Ausgänge schalten: firmware/actuators.md
+          - Lokale Controller: firmware/controllers.md
+          - Values und Anzeigen: firmware/values-displays.md
+          - MQTT und Home Assistant: firmware/mqtt.md
+          - Wartung und Diagnose: firmware/maintenance.md
+          - Beispiele:
+              - Mini mit SHT4x: firmware/example-measurement.md
+              - DuoRelay mit Blink: firmware/example-relay.md
+          - SD-Karte (historisch): firmware/sd-card.md
+      - Test/Provisioning:
+          - Übersicht und Stand: firmware/test-provisioning/index.md
+          - Firmware und Inbetriebnahme: firmware/test-provisioning/inbetriebnahme.md
+          - Controller und Adapter: firmware/test-provisioning/hardwareprofile.md
+          - Hardware-Selbsttests: firmware/test-provisioning/selbsttests.md
+          - Mainboards prüfen: firmware/test-provisioning/board-pruefung.md
+          - Provisioning und Profile: firmware/test-provisioning/provisioning-profile.md
   - Aufbauanleitungen:
       - Übersicht: guides/index.md
       - Dokumentationsstand: guides/status.md

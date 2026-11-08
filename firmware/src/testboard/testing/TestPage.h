@@ -3,5 +3,5 @@
 #include "EnvNode/Locale.h"
 #include <Arduino.h>
 namespace EnvNode { namespace Testing {
-String buildTestPage(Locale locale);
+String buildTestPage(Locale locale, bool physicalAvailable = false);
 } }

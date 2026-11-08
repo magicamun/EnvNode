@@ -7,8 +7,8 @@ EnvNode-owned materials follow the repository LICENSE
 
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
-| `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.7.0) | `.pio/build/testboard/firmware.bin` |
+| `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.8) | `.pio/build/esp32dev/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.13.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -39,14 +39,16 @@ sensor/actuator/controller runtimes, MQTT, Home Assistant or display is linked
 into the fixture binary. Shared libraries may compile unused reusable helpers;
 linker garbage collection omits unused functions from the firmware.
 
-Available pages: `/`, `/test`, `/hardware` (Provisioning), `/network`, `/time`, `/device`, `/logs`, `/firmware`.
-The start page identifies the fixture and its current scope. `/test` provides a
-guided simulated connector test with a revision-specific Weather or Mini definition,
-KiCad board view, LEDs and contact-versus-socket matrix. Physical measurement and
-tester configuration backup/restore are future work.
-Measurement multiplexers/ADC and DUT power switching remain inactive. Provisioning
-uses real I2C only during explicit page reads or confirmed identity writes.
-See [TestBoardApplication.md](TestBoardApplication.md) for models, coverage and flow.
+Available pages: `/`, `/test`, `/selftest`, `/diagnostics`, `/hardware`
+(Provisioning), `/network`, `/time`, `/device`, `/logs`, `/firmware`.
+`/test` defaults to real LOW/HIGH measurement on the selected hardware profiles.
+An unconfigured tester initially uses Controller 0.1 + original Input-Adapter 0.1. Simulation is an explicit alternative and cannot silently
+replace a real measurement. Switching modes clears the entire runner session.
+The revision-specific board view, LEDs and result matrix use the same runner.
+Tester configuration backup/restore and DUT power switching are not implemented.
+No measurement GPIO or I²C is initialized at boot; an explicit operation is needed.
+See the [user manual](site/firmware/test-provisioning/index.md) and
+[TestBoardApplication.md](TestBoardApplication.md).
 
 ## Settings and first startup
 
@@ -64,10 +66,11 @@ changes request a restart, with a visible explicit restart button. Locale and
 device-name changes update the UI directly. Uploading firmware stages it and
 keeps the restart explicit, as in EnvNode.
 
-Hardware mapping remains fixed per application. The schematic's dedicated
+Controller and adapter mappings are selected from reviewed hardware profiles. The schematic's dedicated
 provisioning bus is GPIO16 SDA / GPIO5 SCL; it starts only for each EEPROM operation.
-The continuity engine and its safe enable/output sequencing must be implemented
-and physically validated before testing boards.
+The real continuity engine is integrated since 0.9.0. Controller/input-adapter
+loopbacks are verified; full DUT/reference-diode acceptance and threshold tuning
+remain part of hardware commissioning.
 
 ## Validation and hardware follow-up
 
@@ -79,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Forty-five tests exercise configuration isolation,
+composition and shared libraries. The combined native tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -89,7 +92,7 @@ fixture suite. Its previously known board-profile-count assertion is unrelated.
 Before accepting the baseline on hardware, flash `testboard` onto the fixture
 ESP or a spare devkit, check setup access point/network save/restart, locale/time,
 name, logs and a same-product OTA update. Confirm that the start log identifies
-Testboard 0.7.0. No physical device was flashed or restarted during implementation.
+the selected Testboard version. Hardware flashing/restarts remain explicit user actions.
 
 ## Mini (0.3.1)
 
@@ -121,7 +124,7 @@ numeric-ID API calls retain their old revision. Module provisioning uses the sam
 shared descriptor writer as EnvNode, independently of runtime-driver support.
 
 The dedicated connector is GND / 3V3_SYS / SDA16 / SCL5; target EEPROM address is
-0x50; module slot A/B EEPROMs use 0x52/0x53. Provisioning is real, even though `/test` remains a simulation. Remove the
+0x50. Provisioning is real; `/test` now offers explicit real and simulated modes. Remove the
 target ESP32 and disconnect other supplies, Input Adapter and measurement pigtails
 before connecting this cable. Disconnect it again before passive continuity tests. Its supply is wired;
 ending I2C does not turn target power off.
@@ -168,38 +171,231 @@ a revision-specific board image using the same definition/image routes as testin
 An unknown external EEPROM requires an explicit board/revision selection.
 See [BoardRevisionCompatibility.md](BoardRevisionCompatibility.md).
 
-## Shared remote provisioning (0.8.0)
+## Manual controller diagnostics (0.7.1)
 
-The tester retains its separate Provisioning menu and external target bus.
-Alongside the built-in forms it now loads the same hardware catalog as EnvNode
-0.8.3. Board maps and arbitrary module templates are downloaded with a verified
-SHA-256 and instantiated without runtime-driver checks. The existing connector
-profile repository remains compatible. See [RemoteHardwareProfiles.md](RemoteHardwareProfiles.md).
+Open `/diagnostics` or **Hardwarediagnose** on the tester. This mode drives real
+GPIOs on Test-Controller revision 0.1. Since 0.9.0 the connector test can also
+use physical I/O through the same shared driver.
+No measurement GPIOs are initialized at boot. Explicitly confirm the controller
+and apply the settings to activate the diagnostic mode. Provisioning and simulated
+test actions are blocked while diagnostics are active; starting diagnostics during
+a running simulated test is rejected.
 
-Since tester 0.8.1 / EnvNode 0.8.4, shared provisioning downloads and SHA-256
-checks run in the browser. A bounded local upload is structurally validated
-before the existing EEPROM write. The browser client loads asynchronously with
-SRI; built-in forms remain available offline. The separate connector-test
-profile downloader retains its existing HTTPS transport.
+With the controller unpowered, remove the DUT and provisioning cable. Supply the
+multiplexers through 3V3_SYS and common ground. If ORing is not installed, a temporary
+connection from the DevKit 3V3 pin to J8 pin 1 supplies this rail; remove that bridge
+before installing ORing. Never connect 5 V to COM_IN / GPIO34.
 
-## Unified provisioning dialog (0.8.2)
+Select U1 or U2, channel I0–I15, and LOW/HIGH on GPIO17. Input EN1–EN3 and channel
+selection can also be exercised at J8; leave all inputs disabled without an adapter.
+GPIO34 is displayed as a 12-bit raw ADC count, not calibrated volts. The stop button,
+network loss, or 60 seconds after the last apply command disables all multiplexers
+and returns GPIO17 to input mode. Status polling does not extend that interval.
+Closing/navigating away from the page sends a best-effort stop; the timeout remains
+the fallback. A controller reset restores the inactive boot state.
 
-The tester and normal EnvNode 0.8.5 share the same dialog implementation:
-Board/Module, one filtered profile list, matching preview, serial/batch/date,
-optional module slot and explicit write confirmation. Online profiles replace
-matching built-in options; offline options remain in the same UI. Connector
-instructions are collapsible. Board batch/date use verified ENPM payload v2,
-read back in the dialog, and require runtime EnvNode 0.8.5 or later. Old v1 maps
-remain readable and keep v1 writes when no batch/date is entered. Legacy POST
-endpoints retain their existing argument names and confirmation requirements.
+For an initial loopback, connect J1 pin 1 to J8 pin 9 while unpowered. Select U1/I8
+with all input multiplexers disabled. Compare LOW and HIGH ADC readings. R6 (1 kΩ)
+and R9 (2.2 kΩ) divide the HIGH voltage to approximately 2.27 V before multiplexer
+resistance; a full-scale ADC count is not expected. This is a manual commissioning
+tool, not an automatic continuity certification or a validated physical test result.
 
-## Live EEPROM comparison (0.8.3)
+## Browser response delivery (0.7.2)
 
-The shared dialog reads the selected board/module slot directly, including all
-4096 EEPROM bytes, and shows valid/empty/corrupt/unavailable status and manufacturing
-fields. Refresh and adoption are explicit; read data never silently fills new
-manufacturing fields. Writes carrying the dialog snapshot token are preceded by
-a fresh target-bound fingerprint comparison. Changed/unavailable targets return
-409 without writes, preserve inputs and require reconfirmation. Normal EnvNode
-0.8.6 uses the same reader and UI, without changing its active boot configuration.
-Legacy POST callers retain their existing explicit-confirmation contract.
+The tester uses the same bounded nonblocking HTTP response pump and idle-client
+gate as main. Page delivery yields between writes, and browser preconnections
+without request data cannot monopolize request parsing. Firmware diagnostics
+continue between response steps. Remote HTTPS profile downloads remain synchronous
+and may still briefly delay requests when refreshing or loading a remote profile.
+
+## Guided physical fixture self-test (0.8.0)
+
+`/selftest` guides manual loopback wiring for the selected controller and adapter.
+Controller 0.1 uses the original J3/2 loopback; Controller 0.2 uses TP2.
+The new ESP32 DevKitC 0.3 adapter and produced Legacy adapter are supported.
+Select any row while idle. Confirm the displayed bridge, then start that one test;
+there is no run-all function because each contact requires manual rewiring.
+
+The first 22 rows test J1/J2/J3 output contacts directly against controller J8 pin 9
+(COM_IN), without the input adapter. The next 40 rows use controller J3 pin 2 as
+source and test J4 pins 1–38 plus TP1 pin 2 (MB_3V3_SYS) and TP1 pin 1 (MB_GND).
+These last two are free adapter reference contacts, not a connection to an actual
+mainboard. Do not attach a DUT or provisioned target during fixture self-test.
+
+Each nonblocking run checks target LOW and HIGH, disabled-path isolation, and all
+other mapped channels in the same group. The other unused physical mux channels
+are not covered. After switching, allow 15 ms to settle and acquire 8 ADC samples
+at least 2 ms apart. Preliminary commissioning limits: every LOW/isolation sample
+at most 200, every HIGH sample between 1000 and 3800. The report contains mean LOW,
+mean HIGH and maximum isolation reading. These are raw ADC values, not calibrated
+continuity resistance or a production acceptance threshold. A bad source, missing
+supply or wrong bridge can also produce failure; no exact fault diagnosis is inferred.
+
+All paths are disabled on completion, cancellation, network loss or a ten-second
+run timeout. Manual diagnosis, provisioning and simulated-test actions cannot
+change the hardware during a guided run. Background profile loading is deferred
+while diagnostics or an HTTP response is active. Results live in firmware RAM;
+the browser additionally retains completed readings in sessionStorage for this tab,
+so switching power off to rewire does not discard the collected report. Download
+JSON before closing the tab. Saved readings reflect previous runs, not an ongoing
+measurement. “Ergebnisse löschen” clears firmware results and the browser session.
+
+## Physical connector measurement (0.9.0)
+
+`Esp32FixtureIo` implements the electrical switching once for diagnostics,
+self-test and `PhysicalFixture`. Hardware access lives outside the runner and DUT
+profiles. `PhysicalFixture` resolves pins via `FixtureRouting`, drives LOW, waits
+100 ms, samples eight times, drives HIGH, waits 100 ms and samples eight more times.
+Samples are taken at least 2 ms apart; the cooperative read method never sleeps.
+The driver never reads expected connection masks.
+
+All LOW samples must be ≤200. All HIGH samples ≤200 mean isolation; all between
+800 and 3800 mean continuity (including forward reference diodes). Intermediate,
+noisy/boundary-crossing or saturated readings are measurement errors. A 500 ms
+per-path timeout releases outputs; the outer runner also bounds busy responses.
+Limits are preliminary commissioning constants and require real DUT validation.
+R6 and R9 plus a diode, pull-ups and capacitors affect measured values.
+
+`SelectableFixture` arbitrates simulation versus the physical backend. Device boot
+uses physical mode, with no GPIO side effects until start. Real start requires an
+explicit server-side confirmation. Mode changes clear all connector results and
+are rejected during a run. The simulated-fault selector is hidden in physical mode.
+The web state always includes the actual backend mode. Diagnostic/self-test and
+provisioning remain mutually exclusive with a running connector test. Loss of
+network administration availability aborts and releases the active runner.
+
+## Isolation-window diagnostics (0.9.1)
+
+Self-tests retain the maximum isolation window's 1-based logical contact (0 for
+all muxes disabled), mean, minimum, eight raw samples and count above 200. Global
+sample/above-limit/window counts cover every completed isolation window in that
+contact run. Equal peaks prefer the higher mean. Decisions and timing are unchanged.
+The JSON report schema is 2; old session summaries are migrated without fabricating
+missing diagnostic data. The UI supplies the original mux settings for manual
+COM_IN measurement. This reports observations, not an inferred physical cause.
+
+## Controlled settling comparison (0.9.2)
+
+Guided self-tests accept only 15, 50 or 100 ms settling before each unchanged
+eight-sample window. The default remains 15 ms. Both the firmware result and
+browser-session/report record the actual settling value. Thresholds and peak-based
+pass/fail decisions are unchanged. The whole-run 10-second timeout remains; the
+longest supported input sequence nominally takes less than five seconds at 100 ms.
+This setting does not alter DUT connector-test timing.
+
+## Local contact controls (0.10.0)
+
+The guided self-test moves one existing control panel beneath the selected table
+row. Start/stop, connection confirmation and settling are local to that contact;
+selection/next scroll only to this panel. Reusing the same DOM nodes preserves the
+settling choice and disclosure state without replacing focused controls on polls.
+Export/clear remain global. Electrical sequencing and test decisions are unchanged.
+
+## Directed EEPROM conduction checks (0.10.0)
+
+`testing/MeasurementPolicy.cpp` adds revision-bound interpretation above the raw
+`PhysicalFixture` driver. The readable inventory is
+`firmware/testboard/measurement-policies.json`. Published schema-1 CBOR profiles,
+their hashes, and ordinary expected continuity masks are unchanged. The policy is
+limited to the four explicitly reviewed built-in profile IDs and exact electrical
+layout equality (revision, input/connector/contact numbering, net names and masks).
+Identical remote profiles qualify; unknown or electrically changed profiles do not.
+Adding a new built-in profile does not implicitly grant an exception.
+
+`eeprom-ground-clamp-v1` requires forward conduction GND → I2C0_SDA/SCL and reverse
+isolation. Result codes 0–5 retain their meaning; 6 is pending directed evidence,
+7 is confirmed forward conduction, 8 is reverse isolation. A completed source
+contact must also satisfy every positive expected path. Reverse evidence counts
+only from complete connectors with verified SDA/SCL positive paths; any observed
+reverse conduction overrides other positive evidence. SDA and SCL are independent.
+The runner retains raw pending observations and reevaluates all verdicts after
+completion, restart or abort. Starting a retest immediately removes its old proof.
+
+`/test/state` exposes `measurementPolicy` and `directionChecks` with reverse status
+0 missing/invalid, 1 blocked with positive connection proof, or 2 conducting.
+The UI uses D?, D and S plus existing fault symbols. Simulation includes the real
+forward paths and a separate reverse-short fault. No GPIO roles are reversed and
+no extra wiring is needed. This is not diode-voltage metrology, functional EEPROM
+communication, or reverse protection certification for the TP1 reference diodes.
+
+Real board tests now use the hardware-validated 100 ms settling in each LOW/HIGH
+phase, with eight samples and unchanged thresholds. The native regressions cover
+missing/aborted proof, missing positive anchors, reverse shorts across connectors,
+retesting/history invalidation, remote binding and non-exempt faults. The ESP32
+build and simulation are checked; full physical DUT acceptance is still required.
+
+## Weather SYS rail reverse excitation (0.10.1)
+
+Weather 0.3 uses `weather-ground-clamps-v2`, extending the two EEPROM rules with
+GND → `Net-(D2-K)` (reference input 39). `DirectedRule.reverseSource` decouples the
+forward sensed node behind D2 from reverse excitation at a `+3V3_SYS` pigtail pin.
+Reverse isolation is measured against normal socket GND. Positive GND paths and
+SYS-to-reference continuity are mandatory. A disconnected reference cannot prove
+blocking; reverse conduction fails. Reference-diode reverse protection itself is
+not certified. Other revisions retain their original policy until measured.
+The web state exposes `reverseSource`; the UI names the actual rail. Physical
+thresholds, settling, GPIO roles and published profile bytes remain unchanged.
+
+## Board-session JSON report and measurement history (0.11.0)
+
+`ITestFixture::trace` optionally returns the actual eight LOW/HIGH readings with
+phase counts and a reason code. `PhysicalFixture` retains partial phases, timeout,
+high LOW and ambiguous HIGH diagnostics without changing timing or thresholds.
+The selectable wrapper forwards traces only from its actual backend.
+
+The runner retains the latest 128 raw unexpected/open/error measurements in a
+fixed ring (~6 KiB), with connector/cell, attempt generation and uptime. Repeating
+a test keeps previous anomalies; loading a board or switching mode clears them.
+Evictions are counted. Normal cells retain result codes only. No unavailable ADC
+samples are fabricated. Directed reclassification itself creates no new reading.
+
+Read-only `/test/report?generation=G&connector=C[&contact=P][&offset=N]` uses zero-based
+connector/contact selectors. Omit contact to batch the whole connector. It rejects running/stale sessions and invalid indices;
+responses contain the requested matrix and at most 16 history records plus a cursor.
+The browser gathers all connector pages and final-checks generation before downloading
+`envnode-pruefergebnis-<profile-id>.json`. This avoids a large all-session JSON buffer
+on the ESP32. Export does not change selection, generation, proof or GPIO state.
+The artifact includes schema/kind, board model, backend, firmware/build/commit,
+thresholds, result/reason/verdict legends, current matrices, raw observations and
+history/eviction metadata. A successful current run can coexist with older failed
+attempts in history. JSON export is separate from guided hardware-selftest reports.
+
+## Independent controller/adapter profiles (0.12.0)
+
+`FixtureSelection` composes the controller capabilities with the adapter's input
+routing. Both controllers share verified GPIO/output wiring; Controller 0.2 adds
+TP2 direct test drive. Adapter 0.3 supplies its own 40-input table. The shared
+selection is injected into physical/simulated fixtures, GPIO I/O, guided self-test
+and web routes; there is no mutable global routing table. Invalid choices do not
+change the active fixture. Applying a profile requires confirmation, idle test and
+diagnostics, and successful atomic persistence of the combination code in the
+existing tester settings. All results are cleared; factory reset restores Legacy.
+
+`generate_fixture_routing.py` pins produced Legacy PCBs to their reviewed Git
+commit, independent of current hardware edits. `generate_fixture_profiles.py`
+derives adapter routing and verifies Controller 0.2 GPIO/output compatibility and
+TP2 against saved PCB files; `--check` validates generated artifacts. Hardware
+profile JSON includes source path, revision and SHA-256. S3 is not offered yet.
+
+The self-test page uses the active fixture's labels, channels and wiring. For
+Controller 0.2 input tests use TEST_DRIVE with both output muxes disabled; output
+tests return through TP2/3. Self-test browser history is keyed by fixture ID and
+reloads on profile changes. Reports identify the actual combination. The
+provisioning bus remains GPIO16/5 and starts only for EEPROM operations.
+
+## Core integration release (EnvNode 0.8.8 / Tester 0.13.0)
+
+Current main provisioning components are retained, including the shared dialog,
+EEPROM snapshots, embedded/remote identity and port profiles, manufacturing
+metadata and external module stores (0x52/0x53). The tester keeps its real
+measurement driver, independent fixture profiles, raw-fault history and JSON
+reports. Diagnostic activity and connector tests block provisioning before bus
+access. Profile fetching is also deferred while diagnostics or responses are active.
+
+Board provisioning can now write the self-contained port map as well as identity;
+the earlier ENID-only 32-byte description is historical. The current common
+provisioning guide defines the persistent layout and compatibility behavior.
+Modules are written through the target mainboard's I2C0 connector; the tester has
+no module operating drivers and returns their compatibility status accordingly.
+Physical commissioning of Controller 0.2 / adapter 0.3 and external module writing
+is pending. Previously validated Legacy hardware remains selectable.

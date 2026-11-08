@@ -18,17 +18,14 @@ public:
         IDeviceRestart& restart, const IRecentLogReader& logs, FirmwareWebBuildInfo build);
     void attachProvisioningRoutes(IWebRoutes& routes) { provisioningRoutes_ = &routes; }
     void attachTestRoutes(IWebRoutes& routes) { testRoutes_ = &routes; }
+    void attachDiagnosticsRoutes(IWebRoutes& routes) { diagnosticsRoutes_ = &routes; }
     void begin() override;
     void loop() override;
-    Locale webLocale() const override;
-    bool sendStaticContent(const char* type,const char* bytes) override {
-        host_.sendStaticContent(type,bytes);return true;
-    }
+    bool sendStaticContent(const char* type,const char* bytes) override {host_.sendStaticContent(type,bytes);return true;}
     void afterResponse(std::function<void()> action) override {host_.afterResponse(std::move(action));}
-    void sendPage(const char* title, const char* activeRoute, const String& content,
-        int status = 200, bool wideContent = false) override;
-    void sendPage(const char* title, const char* activeRoute, String&& content,
-        int status = 200, bool wideContent = false) override;
+    Locale webLocale() const override;
+    void sendPage(const char* title,const char* activeRoute,const String& content,int status=200,bool wideContent=false) override;
+    void sendPage(const char* title,const char* activeRoute,String&& content,int status=200,bool wideContent=false) override;
     String renderPageHeader(const char* title, const char* active, bool wideContent) const override;
     void networkSettingsSaved(bool success) override;
 private:
@@ -48,6 +45,7 @@ private:
     FirmwareWebRoutes firmwareRoutes_;
     LogWebRoutes logRoutes_;
     IWebRoutes* provisioningRoutes_ = nullptr;
+    IWebRoutes* diagnosticsRoutes_ = nullptr;
     IWebRoutes* testRoutes_ = nullptr;
 };
 }

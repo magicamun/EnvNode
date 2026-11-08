@@ -1,5 +1,8 @@
 # Hardware identifizieren und provisionieren
 
+Die eigenständige Test-Firmware und die Trennung von Messbetrieb und externem
+Provisioning beschreibt [Test/Provisioning](test-provisioning/provisioning-profile.md).
+
 Provisioning schreibt die Identität einer Baugruppe in deren EEPROM.
 Es ist bei leerem oder fehlerhaftem Datensatz nötig, nicht bei jedem Neustart.
 

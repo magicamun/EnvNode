@@ -30,6 +30,7 @@ void TestBoardWeb::begin() {
     host_.registerRoutes(logRoutes_);
     if (provisioningRoutes_) host_.registerRoutes(*provisioningRoutes_);
     if (testRoutes_) host_.registerRoutes(*testRoutes_);
+    if (diagnosticsRoutes_) host_.registerRoutes(*diagnosticsRoutes_);
     host_.begin();
 }
 void TestBoardWeb::loop() { host_.loop(); }
@@ -47,6 +48,8 @@ String TestBoardWeb::navigation(const char* active) const {
     };
     link("/", testerText("Prüfboard", "Test board"));
     if (testRoutes_) link("/test", testerText("Anschlussprüfung", "Connector test"));
+    if (diagnosticsRoutes_) link("/selftest", testerText("Hardware-Selbsttest", "Hardware self-test"));
+    if (diagnosticsRoutes_) link("/diagnostics", testerText("Hardwarediagnose", "Hardware diagnostics"));
     if (provisioningRoutes_) link("/hardware", "Provisioning");
     link("/network", text(TextId::Network));
     link("/time", text(TextId::LocaleTime));
@@ -86,8 +89,8 @@ void TestBoardWeb::home() {
     content += testerText("Netzwerk, Geräteeinstellungen, Sprache/Zeit, Protokolle und Firmwareverwaltung sind verfügbar.",
         "Network, device settings, locale/time, logs and firmware administration are available.");
     content += "</p><p>";
-    if (testRoutes_) content += testerText("Die geführte Anschlussprüfung steht als Simulation bereit. Reale Messung folgt später.",
-        "Guided connector testing is available in simulation. Physical measurement follows later.");
+    if (testRoutes_) content += testerText("Die Anschlussprüfung unterstützt reale Messung und Simulation. Hardwarediagnose und geführter Selbsttest helfen bei der Inbetriebnahme.",
+        "Connector tests support physical measurement and simulation. Hardware diagnostics and guided self-tests support commissioning.");
     else content += testerText("Die Anschlussprüfung ist nicht eingebunden.",
         "Connector testing is not attached.");
     if (provisioningRoutes_) content += testerText(

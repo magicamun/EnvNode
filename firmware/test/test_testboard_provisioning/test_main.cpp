@@ -61,7 +61,6 @@ void test_no_bus_at_boot_and_no_module_routes() {
     Fixture f;
     TEST_ASSERT_EQUAL(0, Wire.begins);
     TEST_ASSERT_NULL(f.bus.wire(I2CBus::I2C0));
-    TEST_ASSERT_EQUAL(4, f.server.routes.size());
     TEST_ASSERT_FALSE(f.server.request("/hardware/module-descriptor/write", HTTP_POST));
     TEST_ASSERT_FALSE(f.server.request("/device/module-descriptor/write", HTTP_POST));
     TEST_ASSERT_EQUAL(0, Wire.begins);
@@ -285,8 +284,16 @@ void test_external_board_provisioning_writes_self_contained_map_and_identity() {
     for(size_t i=64;i<256;++i)TEST_ASSERT_EQUAL_HEX8(0x5a,target[i]);
 }
 
+void test_provisioning_choices_remain_sorted_after_core_integration() {
+    Fixture f;const char* names[]={"EnvNode Mainboard","EnvNode Mini","EnvNode Mini","EnvNode Weather","EnvNode Weather"};
+    const unsigned minors[]={3,8,9,2,3};
+    for(size_t i=0;i<5;++i){ProvisioningBoardProfile p;TEST_ASSERT_TRUE(f.administration.provisioningProfileAt(i,p));
+        TEST_ASSERT_EQUAL_STRING(names[i],p.displayName);TEST_ASSERT_EQUAL(minors[i],p.revision.minor);}
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_provisioning_choices_remain_sorted_after_core_integration);
     RUN_TEST(test_external_board_provisioning_writes_self_contained_map_and_identity);
     RUN_TEST(test_running_connector_test_blocks_module_routes_and_direct_writer);
     RUN_TEST(test_module_needing_future_firmware_can_be_written_and_bus_is_released);

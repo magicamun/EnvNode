@@ -1,6 +1,6 @@
-# Module Adapter — revision 0.1
+# Module Adapter — revision 0.2
 
-Passive test adapter between the [Test Controller](../Test-Controller/README.md)
+Passive test adapter between the [Test Controller](../../MainBoards/Test-Controller/README.md)
 module-test output and a DUT module slot. This is not a functional module template:
 there is no identification EEPROM, sensor, actuator or local power source.
 
@@ -48,3 +48,7 @@ connector, library or routing change. Physical fit and electrical behavior still
 require validation on the assembled hardware.
 
 EnvNode-owned files follow the repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+
+Revision 0.2 rotates the IDC header for cable routing. All 14 contacts remain
+pin-for-pin; use a straight IDC cable and verify pin-1 orientation. CAD reviewed;
+physical acceptance of the new revision remains pending.

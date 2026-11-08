@@ -1,0 +1,139 @@
+{
+  "license": "EnvNode-owned material; see repository LICENSE",
+  "schema": 1,
+  "id": "controller-0.2",
+  "revision": "0.2",
+  "source": "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb",
+  "sha256": "7a53c7d76da0e93df69e59b9f951d430c62cc05e8ea48d05faa371cc80157571",
+  "gpios": {
+    "inputSelect": [
+      32,
+      25,
+      27,
+      13
+    ],
+    "inputEnable": [
+      14,
+      26,
+      33
+    ],
+    "outputSelect": [
+      18,
+      19,
+      21,
+      22
+    ],
+    "outputEnable": [
+      23,
+      4
+    ],
+    "sense": 34,
+    "drive": 17,
+    "sda": 16,
+    "scl": 5
+  },
+  "outputs": {
+    "gpio": [
+      [
+        0,
+        8
+      ],
+      [
+        0,
+        9
+      ],
+      [
+        0,
+        10
+      ],
+      [
+        0,
+        11
+      ]
+    ],
+    "i2c": [
+      [
+        0,
+        7
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        4
+      ]
+    ],
+    "module": [
+      [
+        1,
+        7
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        14
+      ],
+      [
+        1,
+        13
+      ],
+      [
+        1,
+        12
+      ],
+      [
+        1,
+        11
+      ],
+      [
+        1,
+        10
+      ],
+      [
+        1,
+        9
+      ],
+      [
+        1,
+        8
+      ]
+    ]
+  },
+  "testConnector": {
+    "reference": "TP2",
+    "pins": {
+      "1": "GND",
+      "2": "TEST_DRIVE after R6",
+      "3": "COM_IN"
+    }
+  }
+}

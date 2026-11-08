@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id), app=$('test-app'), de=app.dataset.langu
 const tr=(a,b)=>de?a:b, ns='http://www.w3.org/2000/svg';
 let seenProfilesRevision=-1;
 let board, state, catalog=[], busy=false, shown=-1, cells=[], socketLeds=[], contactLeds=[], portItems=[], activeMarker;
-const colors=['#94a3b8','#5fbea6','#35dc73','#ff4747','#ff4747','#ff4747'];
+const colors=['#94a3b8','#5fbea6','#35dc73','#ff4747','#ff4747','#ff4747','#ffbf42','#35dc73','#5fbea6'];
 const verdicts=[tr('ungeprüft','pending'),tr('bestanden','passed'),tr('Fehler','failed'),tr('unvollständig','incomplete')];
 const verdictColors=['#94a3b8','#35dc73','#ff4747','#ffbf42'];
 const kind={gpio:'GPIO / JST-PH',i2c:'I²C / JST-SH',module:tr('Modul / 2×7','Module / 2×7')};
@@ -28,31 +28,74 @@ function matrix(c){
 }
 function paint(){
  const c=board.connectors[state.step], phase=state.phase, pendingBoard=$('test-board').value!==board.id;
+ $('fixture-current').textContent=tr('Aktiv: ','Active: ')+state.fixture+tr(' · Hardwareauswahl wird gespeichert.',' · Hardware selection is saved.');
+ for(const id of ['fixture-controller','fixture-adapter','fixture-confirm','fixture-apply'])$(id).disabled=busy||phase===2||!state.fixtureSelectable;
+ if(!$('fixture-controller').dataset.edited){$('fixture-controller').value=state.controllerProfile;$('fixture-adapter').value=state.adapterProfile;}
+ const pendingFixture=$('fixture-controller').value!==state.controllerProfile||$('fixture-adapter').value!==state.adapterProfile;
+ $('test-mode').value=state.simulation?'simulation':'physical';$('test-mode').disabled=busy||phase===2||!state.physicalAvailable;
+ $('test-mode-label').textContent=state.simulation?'SIMULATION':tr('REALE MESSUNG','PHYSICAL MEASUREMENT');
+ $('test-mode-note').textContent=state.simulation?tr('Keine elektrische Messung; Ergebnisse werden simuliert.','No electrical measurement; results are simulated.'):tr('Hardware gemäß bestätigter Auswahl. Vorläufige ADC-Grenzen: LOW/Trennung ≤ 200, Durchgang 800–3800; Zwischenwerte oder instabiles Signal = Messfehler.','Hardware according to confirmed selection. Provisional ADC limits: LOW/isolation ≤ 200, continuity 800–3800; ambiguous/unstable readings = measurement error.');
+ $('test-fault-wrap').hidden=!state.simulation;$('test-confirm-wrap').hidden=state.simulation;$('test-confirm').disabled=busy||phase===2;
  if(shown!==state.step)matrix(c);
- $('test-board').disabled=busy||phase===2;$('test-load').disabled=busy||phase===2;$('test-start').disabled=busy||pendingBoard||![1,3].includes(phase);$('test-start').textContent=phase===3?tr('Verbunden – erneut prüfen','Connected – test again'):tr('Verbunden – Prüfung starten','Connected – start test');$('test-next').disabled=busy||pendingBoard||phase!==3;$('test-abort').disabled=busy||![1,2,3].includes(phase);$('test-fault').disabled=busy||pendingBoard||![1,3].includes(phase);
+ $('test-board').disabled=busy||phase===2;$('test-load').disabled=busy||phase===2;$('test-start').disabled=busy||pendingBoard||pendingFixture||![1,3].includes(phase);$('test-start').textContent=phase===3?tr('Verbunden – erneut prüfen','Connected – test again'):tr('Verbunden – Prüfung starten','Connected – start test');$('test-next').disabled=busy||pendingBoard||phase!==3;$('test-abort').disabled=busy||![1,2,3].includes(phase);$('test-fault').disabled=busy||pendingBoard||![1,3].includes(phase);
  const active=[1,2,3].includes(phase)&&c;
  if(active){const xs=c.pins.map(p=>p.x),ys=c.pins.map(p=>p.y);for(const[k,v]of Object.entries({x:Math.min(...xs)-2,y:Math.min(...ys)-2,width:Math.max(...xs)-Math.min(...xs)+4,height:Math.max(...ys)-Math.min(...ys)+4,visibility:'visible'}))activeMarker.setAttribute(k,v);}else activeMarker.setAttribute('visibility','hidden');
  $('test-instruction').textContent=phase===3&&c?c.id+tr(' – Prüfung abgeschlossen',' – test complete'):active?tr(`Verbinde den ${kind[c.pigtail]}-Pigtail mit ${c.label||c.id} von ${board.name}.`,`Connect the ${kind[c.pigtail]} pigtail to ${c.label||c.id} on ${board.name}.`):phase===4?tr('Testlauf abgeschlossen','Session complete'):phase===5?tr('Testlauf abgebrochen','Session aborted'):tr('Board laden, um zu beginnen','Load a board to begin');
  $('test-refresh').disabled=busy||phase===2;
+ $('test-export').disabled=busy||phase===2||!state.board;
+ const diodeFault=$('test-fault').querySelector('option[value="diode-short"]');
+ diodeFault.disabled=!state.measurementPolicy;if(diodeFault.disabled&&$('test-fault').value==='diode-short')$('test-fault').value='none';
+ $('test-directed').textContent=state.measurementPolicy?(tr('Gerichtete Board-Pfade: ','Directed board paths: ')+(state.directionChecks||[]).map(x=>x.from+' → '+(x.reverseSource||x.to)+': '+(x.reverse===1?tr('Sperrrichtung bestätigt','reverse blocking verified'):x.reverse===2?tr('FEHLER: Rückrichtung leitet','ERROR: reverse direction conducts'):tr('gültige Gegenprüfung fehlt','valid reverse check missing'))).join(' · ')):tr('Keine ergänzenden gerichteten Messregeln für dieses Profil.','No additional directed measurement rules for this profile.');
  const profileStatus={ready:tr('Remote-Katalog verfügbar.','Remote catalog available.'),waiting:tr('Eingebaute Profile; Remote-Abfrage wartet auf Netzwerk und Zeit.','Embedded profiles; remote lookup waits for network and time.'),unavailable:tr('Remote-Katalog nicht erreichbar oder ungültig; eingebaute Profile verfügbar.','Remote catalog unavailable or invalid; embedded profiles available.'),'profile-fallback':tr('Remote-Profil nicht ladbar; passendes eingebautes Profil wird verwendet, sofern vorhanden.','Remote profile unavailable; using matching embedded profile where available.'),'revision-conflict':tr('Geändertes Profil mit gleicher Revisions-ID abgelehnt.','Changed profile with the same revision ID rejected.'),embedded:tr('Eingebaute Profile.','Embedded profiles.')};
  $('test-profile-status').textContent=profileStatus[state.profilesStatus]||state.profilesStatus||'';
- $('test-reference').textContent=board.socket.length===40?tr('Referenzkabel an TP1 anschließen: Pin 1 GND, Pin 2 3V3_SYS. Prüfling ohne ESP32 und ohne Versorgung prüfen. Diodenpfade sind noch elektrisch zu validieren.','Connect reference cable to TP1: pin 1 GND, pin 2 3V3_SYS. Test unpowered target without its ESP32. Diode paths still require physical validation.'):'';
- $('test-summary').textContent=pendingBoard?tr('Bitte das ausgewählte Board laden.','Load the selected board.'):phase===2?tr(`Prüfung läuft: ${state.completed} / ${c.pins.length*board.socket.length}`,`Test running: ${state.completed} / ${c.pins.length*board.socket.length}`):phase===3?tr(`Anschluss: ${verdicts[state.verdicts[state.step]]}. Für den nächsten Schritt den Pigtail umstecken.`,`Connector: ${verdicts[state.verdicts[state.step]]}. Move the pigtail for the next step.`):phase===4?tr(`Gesamtergebnis: ${verdicts[state.overall]} – Simulation.`,`Overall result: ${verdicts[state.overall]} – simulation.`):tr('Jeder Anschluss muss vor seinem Test ausdrücklich bestätigt werden.','Confirm the connection before each connector test.');
+ $('test-reference').textContent=board.socket.length===40?tr('Referenzkabel an TP1 anschließen: Pin 1 GND, Pin 2 3V3_SYS. Prüfling ohne ESP32 und ohne Versorgung prüfen. Diodenpfade werden in Vorwärtsrichtung geprüft; Grenzwerte am ersten Board validieren.','Connect reference cable to TP1: pin 1 GND, pin 2 3V3_SYS. Test unpowered target without its ESP32. Diode paths are measured forward; validate thresholds on the first board.'):'';
+ $('test-summary').textContent=pendingFixture?tr('Bitte die geänderte Hardwareauswahl übernehmen oder zurückstellen.','Apply or revert the changed hardware selection.'):pendingBoard?tr('Bitte das ausgewählte Board laden.','Load the selected board.'):phase===2?tr(`Prüfung läuft: ${state.completed} / ${c.pins.length*board.socket.length}`,`Test running: ${state.completed} / ${c.pins.length*board.socket.length}`):phase===3?tr(`Anschluss: ${verdicts[state.verdicts[state.step]]}. Für den nächsten Schritt den Pigtail umstecken.`,`Connector: ${verdicts[state.verdicts[state.step]]}. Move the pigtail for the next step.`):phase===4?tr(`Gesamtergebnis: ${verdicts[state.overall]} – ${state.simulation?'Simulation':'reale Messung'}.`,`Overall result: ${verdicts[state.overall]} – ${state.simulation?'simulation':'physical measurement'}.`):tr('Jeder Anschluss muss vor seinem Test ausdrücklich bestätigt werden.','Confirm the connection before each connector test.');
  $('test-progress').max=c?c.pins.length*board.socket.length:1;$('test-progress').value=phase===4?$('test-progress').max:state.completed;
  portItems.forEach((li,i)=>{li.textContent=`${board.connectors[i].label||board.connectors[i].id} · ${verdicts[state.verdicts[i]||0]}`;li.disabled=busy||pendingBoard||phase===0||phase===2;li.setAttribute('aria-pressed',String(!!active&&i===state.step));li.parentElement.classList.toggle('current',!!active&&i===state.step);});
  board.connectors.forEach((port,i)=>contactLeds[i].forEach((led,p)=>{let color=verdictColors[Number((state.contacts||'')[i*14+p])||0];if(!port.pins[p].covered&&color!==verdictColors[2])color='#ffbf42';led.setAttribute('fill',color);}));
  socketLeds.forEach(el=>el.setAttribute('fill',colors[0]));
  if(!c)return;
- const values=Array.from(state.results,Number), symbols=['·','○','●','!','×','E'];
- values.forEach((v,i)=>{if(cells[i]){cells[i].textContent=symbols[v];cells[i].style.color=v>=3?'#a32828':v?'#177245':'#777';}});
- c.pins.forEach((p,i)=>{const row=values.slice(i*board.socket.length,(i+1)*board.socket.length),done=row.every(v=>v>0),fail=row.some(v=>v>=3);contactLeds[state.step][i].setAttribute('fill',fail?'#ff4747':!p.covered?'#ffbf42':done?'#35dc73':colors[0]);});
+ const values=Array.from(state.results,Number), symbols=['·','○','●','!','×','E','D?','D','S'];
+ values.forEach((v,i)=>{if(cells[i]){cells[i].textContent=symbols[v];cells[i].style.color=[3,4,5].includes(v)?'#a32828':v===6?'#9c7100':v?'#177245':'#777';cells[i].title=v<6?`${c.id}/${c.pins[Math.floor(i/board.socket.length)].number} → ${board.socket[i%board.socket.length].label||i%board.socket.length+1}: ${[tr('ungeprüft','pending'),tr('getrennt','isolated'),tr('Durchgang','continuity'),tr('unerwarteter Durchgang','unexpected continuity'),tr('Durchgang fehlt','missing continuity'),tr('Messfehler','measurement error')][v]}`:v===6?tr('Gerichteter Pfad beobachtet; positiver Anschlussnachweis oder gültige Sperr-Gegenprüfung fehlt noch.','Directed conduction observed; positive connection or valid reverse check still missing.'):v===7?tr('Vorwärts leitend, Gegenrichtung mit positivem Anschlussnachweis gesperrt.','Forward conduction; reverse blocking and positive connection verified.'):tr('Vorgeschriebene Sperrrichtung ist getrennt.','Required reverse direction is isolated.');}});
+ c.pins.forEach((p,i)=>{const row=values.slice(i*board.socket.length,(i+1)*board.socket.length),done=row.every(v=>v>0),fail=row.some(v=>[3,4,5].includes(v)),waiting=row.some(v=>v===6);contactLeds[state.step][i].setAttribute('fill',fail?'#ff4747':!p.covered||waiting?'#ffbf42':done?'#35dc73':colors[0]);});
  const currentRow=Math.min(c.pins.length-1,Math.floor(Math.max(0,state.completed-(phase===2?0:1))/board.socket.length));
  for(let i=0;i<board.socket.length;i++)socketLeds[i].setAttribute('fill',colors[values[currentRow*board.socket.length+i]||0]);
  if(phase===2&&state.completed<c.pins.length*board.socket.length){socketLeds[state.completed%board.socket.length].setAttribute('fill','#57baff');contactLeds[state.step][Math.floor(state.completed/board.socket.length)].setAttribute('fill','#57baff');}
 }
 async function command(action, extra={}){
- if(busy||!state)return;busy=true;paint();$('test-error').textContent='';
- try{const response=await fetch('/test/action',{method:'POST',body:new URLSearchParams({action,generation:state.generation,board:action==='load'?$('test-board').value:board.id,fault:$('test-fault').value,...extra})});const body=await response.json();if(!response.ok)throw Error(body.error||response.status);if(action==='load')displayBoard(await definition(body.board));await acceptState(body);shown=-1;paint();}catch(e){$('test-error').textContent=e.message;}finally{busy=false;paint();}
+ if(busy||!state)return;if(action==='fixture'&&!$('fixture-confirm').checked){$('test-error').textContent=tr('Hardwareauswahl und getrennten Prüfling bestätigen.','Confirm hardware selection and disconnected target.');return;}if(action==='start'&&!state.simulation&&!$('test-confirm').checked){$('test-error').textContent=tr('Bitte den spannungslosen Aufbau und die Verbindung bestätigen.','Please confirm the unpowered target and connection.');return;}busy=true;paint();$('test-error').textContent='';
+ try{const response=await fetch('/test/action',{method:'POST',body:new URLSearchParams({action,generation:state.generation,board:action==='load'?$('test-board').value:board.id,confirm:$('test-confirm').checked?'yes':'no',fault:$('test-fault').value,...extra})});const body=await response.json();if(!response.ok)throw Error(body.error||response.status);if(action==='fixture'){$('fixture-controller').dataset.edited='';$('fixture-confirm').checked=false;}$('fixture-confirm').checked=false;if(['load','select','next','mode','abort','fixture'].includes(action))$('test-confirm').checked=false;if(action==='load')displayBoard(await definition(body.board));await acceptState(body);shown=-1;paint();}catch(e){$('test-error').textContent=e.message;}finally{busy=false;paint();}
+}
+async function downloadReport(){
+ if(busy||!state||!state.board||state.phase===2)return;
+ const snapshot=JSON.parse(JSON.stringify(state)),model=JSON.parse(JSON.stringify(board));
+ busy=true;paint();$('test-error').textContent='';
+ try{
+  const report={schema:1,kind:'envnode-board-test',capturedAtBrowser:new Date().toISOString(),
+   board:model,state:snapshot,resultCodes:['pending','isolated','connected','unexpected','open','measurement-error','directed-pending','directed-connected','directed-blocked'],
+   reasonCodes:['none','unavailable','selection-failed','timeout','low-not-low','high-ambiguous'],
+   verdictCodes:['untested','passed','failed','incomplete'],thresholds:{lowMaximum:200,connectedMinimum:800,highMaximum:3800,settleMs:100,samplesPerPhase:8,sampleIntervalMinimumMs:2},connectors:[]};
+  for(let c=0;c<model.connectors.length;c++){
+   const source=model.connectors[c];let row,offset=0,history=[];
+   do{
+    const response=await fetch('/test/report?'+new URLSearchParams({generation:snapshot.generation,connector:c,offset}),{cache:'no-store'});
+    const page=await response.json();if(!response.ok)throw Error(page.error||response.status);
+    if(page.generation!==snapshot.generation||page.boardId!==model.id)throw Error('Session changed during export');
+    if(!row)row=page;history.push(...page.diagnostics);offset=page.nextOffset;
+   }while(offset!==null);
+   report.firmware=row.firmware;report.gitCommit=row.gitCommit;report.buildNumber=row.buildNumber;
+   report.diagnostics={capacity:row.diagnosticCapacity,dropped:row.diagnosticsDropped,scope:'latest 128 unexpected/open/error observations; includes previous attempts in this session'};
+   const entry={id:source.id,pigtail:source.pigtail,verdict:row.verdict,completed:row.completed,contacts:[]};
+   source.pins.forEach((pin,p)=>{const from=p*model.socket.length,to=from+model.socket.length;
+    entry.contacts.push({contact:pin.number,verdict:Number(row.contactVerdicts[p]),completed:Math.max(0,Math.min(model.socket.length,row.completed-from)),results:row.results.slice(from,to),rawResults:row.rawResults.slice(from,to),diagnostics:history.filter(d=>d.contact===pin.number)});
+   });
+   report.connectors.push(entry);$('test-export').textContent=tr('Protokoll laden: ','Loading report: ')+(c+1)+'/'+model.connectors.length;
+  }
+  const last=await fetch('/test/state',{cache:'no-store'});if(!last.ok)throw Error(last.status);
+  const finalState=await last.json();if(finalState.fixture!==snapshot.fixture||finalState.generation!==snapshot.generation||finalState.board!==model.id||finalState.simulation!==snapshot.simulation)throw Error('Session changed during export');
+  const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');
+  a.href=url;a.download='envnode-pruefergebnis-'+model.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(e){$('test-error').textContent=e.message;}finally{busy=false;$('test-export').textContent=tr('Prüfprotokoll herunterladen (JSON)','Download test report (JSON)');paint();}
 }
 async function poll(){
  try{if(!busy){const response=await fetch('/test/state',{cache:'no-store'});if(!response.ok)throw Error(response.status);const next=await response.json();await acceptState(next);}}catch(e){$('test-error').textContent=tr('Statusverbindung unterbrochen: ','Status connection interrupted: ')+e.message;}finally{setTimeout(poll,180);}
@@ -82,14 +125,20 @@ async function acceptState(next){
  const model=wanted===board.id?board:await definition(wanted);
  if(state&&next.generation<state.generation&&next.phase!==0)return;
  if(model.id!==board.id)displayBoard(model);
+ if(state&&(next.step!==state.step||next.board!==state.board||next.simulation!==state.simulation))$('test-confirm').checked=false;
  state=next;paint();
 }
 (async()=>{try{
  await refreshCatalog();
  displayBoard(await definition(catalog[0].id));
+ $('fixture-controller').onchange=$('fixture-adapter').onchange=()=>{$('fixture-controller').dataset.edited='yes';$('fixture-confirm').checked=false;};
+ $('fixture-apply').onclick=()=>command('fixture',{controller:$('fixture-controller').value,adapter:$('fixture-adapter').value,confirm:$('fixture-confirm').checked?'yes':'no'});
+ $('test-export').onclick=downloadReport;
+ $('test-mode').onchange=()=>command('mode',{mode:$('test-mode').value});
  $('test-board').onchange=()=>{if(state)paint();};
  for(const [id,action]of [['test-refresh','refresh'],['test-load','load'],['test-start','start'],['test-next','next'],['test-abort','abort']])$(id).onclick=()=>command(action);
  await poll();
 }catch(e){$('test-error').textContent=e.message;}})();
+addEventListener('pagehide',()=>{if(state&&state.phase===2)navigator.sendBeacon('/test/action',new URLSearchParams({action:'abort',generation:state.generation}));});
 })();
 )SCRIPT";

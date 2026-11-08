@@ -62,9 +62,12 @@ void test_new_revisions_use_40_inputs_and_forward_reference_paths() {
                 if(!strcmp(c.contacts[p].net,"GND")) TEST_ASSERT_TRUE((c.contacts[p].expected>>39)&1);
                 if(!strcmp(c.contacts[p].net,"+3V3_SYS")) TEST_ASSERT_TRUE((c.contacts[p].expected>>38)&1);
             }
-            total+=runner.completed();TEST_ASSERT_EQUAL(Verdict::Passed,runner.verdict(i));runner.next();
+            total+=runner.completed();
+            TEST_ASSERT_NOT_EQUAL(Verdict::Failed,runner.verdict(i));runner.next();
         }
-        TEST_ASSERT_EQUAL(Verdict::Passed,runner.overall());TEST_ASSERT_EQUAL(b->count==8?2080:3440,total);
+        TEST_ASSERT_EQUAL(Verdict::Passed,runner.overall());
+        for(size_t i=0;i<b->count;++i) TEST_ASSERT_EQUAL(Verdict::Passed,runner.verdict(i));
+        TEST_ASSERT_EQUAL(b->count==8?2080:3440,total);
     }
     const auto* mini=findBoard("mini-0.9-pcb0.9.0");
     TEST_ASSERT_EQUAL_STRING("J7",mini->connectors[2].id);TEST_ASSERT_EQUAL_STRING("J10",mini->connectors[5].id);
@@ -76,6 +79,7 @@ void test_published_profiles_decode_to_exact_builtin_expectations_and_positions(
         const auto& e=c.entries[i];auto data=file(e.filename);auto p=std::unique_ptr<OwnedProfile>(new OwnedProfile());
         TEST_ASSERT_TRUE(decodeProfile(data.data(),data.size(),e,*p));
         const auto* b=findBoard(e.id);TEST_ASSERT_NOT_NULL(b);TEST_ASSERT_EQUAL(b->count,p->board.count);TEST_ASSERT_EQUAL(b->inputCount,p->board.inputCount);
+        TEST_ASSERT_NOT_NULL(measurementPolicy(p->board));
         for(size_t n=0;n<b->inputCount;++n) {
             TEST_ASSERT_EQUAL_STRING(b->socket[n].net,p->inputs[n].net);
             TEST_ASSERT_FLOAT_WITHIN(.0001,b->socket[n].x,p->inputs[n].x);
