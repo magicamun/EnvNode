@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.12.0) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.12.1) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Seventy-nine tests exercise configuration isolation,
+composition and shared libraries. Eighty tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history

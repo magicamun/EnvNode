@@ -16,6 +16,11 @@ Nicht beide Arbeitsabläufe gleichzeitig verkabeln. Vor einem Wechsel Versorgung
 trennen und die Verkabelung gezielt ändern. Eine Anzeige oder Profilauswahl allein
 schreibt noch nichts ins EEPROM.
 
+Die Boardauswahl ist ab 0.12.1 nach Namen und danach numerisch aufsteigender
+Revision sortiert. Die gelesene Identität bleibt ausgewählt. Für Weather 0.3 sind
+Lesen, Schreiben, Rücklesen und Erhalt nach vollständigem Stromausfall praktisch
+bestätigt; die übrigen Boardtypen müssen bei Bedarf separat real erprobt werden.
+
 ## Externe Boardidentität schreiben
 
 1. Alle Messpigtails, das Referenzkabel und den Input-Adapter vom Prüfling trennen.

@@ -1,6 +1,6 @@
 # Test/Provisioning
 
-**Stand: Test-Firmware 0.12.0, Hardware-Inbetriebnahme.** Die Prüfanwendung verwendet
+**Stand: Test-Firmware 0.12.1, Hardware-Inbetriebnahme.** Die Prüfanwendung verwendet
 Netzwerk, Weboberfläche, Sprache/Zeit, Logs und OTA aus der gemeinsamen Basis,
 führt aber keine EnvNode-Sensoren, Aktoren oder lokalen Controller aus.
 
@@ -19,8 +19,8 @@ führt aber keine EnvNode-Sensoren, Aktoren oder lokalen Controller aus.
 Die reale Anschlussprüfung ist seit 0.9.0 integriert. Die Grundansteuerung der
 Multiplexer und der ADC-Rückweg wurden am aufgebauten Controller/Input-Adapter
 mit Schleifenverbindungen bestätigt. Mainboardmessungen und gerichtete Pfade wurden
-praktisch erprobt. **Die Abnahme der neuen Hardwareprofile und des externen
-Provisionings am neuen Aufbau steht noch aus.**
+praktisch erprobt. Das externe Provisioning wurde an Weather 0.3 einschließlich Stromausfall erprobt.
+**Die Abnahme der neuen Hardwareprofile steht noch aus.**
 ADC-Grenzen sind deshalb vorläufige Inbetriebnahmewerte.
 
 ## Passende Hardware

@@ -66,6 +66,6 @@ praktische Inbetriebnahme hat sich **100 ms** als sinnvoll erwiesen.
 Die Legacy-Kombination und die Mainboard-Messlogik wurden praktisch erprobt.
 Neue Controller-/Adapterprofile sind aus den gespeicherten PCBs geprüft, durch
 Softwaretests abgesichert und müssen nach Fertigung am realen Aufbau abgenommen werden.
-Mainboard-Provisioning bleibt ein eigener Ablauf über SDA16/SCL5; seine praktische
-Erprobung und Vervollständigung ist der nächste Arbeitsschritt. Modul-Provisioning
+Mainboard-Provisioning bleibt ein eigener Ablauf über SDA16/SCL5; Lesen, Schreiben und Persistenz wurden an Weather 0.3 praktisch bestätigt;
+weitere Boardtypen bleiben bei Bedarf real zu erproben. Modul-Provisioning
 ist weiterhin deaktiviert.

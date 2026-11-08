@@ -187,8 +187,22 @@ void test_invalid_or_ambiguous_revision_keys_never_touch_the_bus() {
     TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(before,Wire.begins);
 }
 
+void test_provisioning_dropdown_is_sorted_and_keeps_selected_identity() {
+    Fixture f;f.server.arguments={{"boardProfileKey","1:0.3"},{"serialNumber","ORDER-TEST"},{"confirmProvisioning","1"}};
+    f.server.request("/hardware/board-identity/write",HTTP_POST);
+    f.server.request("/hardware",HTTP_GET);
+    const char* previous=nullptr;
+    for(const char* label:{"EnvNode Mainboard 0.3</option>","EnvNode Mini 0.8</option>","EnvNode Mini 0.9</option>","EnvNode Weather 0.2</option>","EnvNode Weather 0.3</option>"}) {
+        const char* current=strstr(f.pages.content.c_str(),label);TEST_ASSERT_NOT_NULL(current);
+        if(previous)TEST_ASSERT_TRUE(previous<current);previous=current;
+    }
+    TEST_ASSERT_NOT_NULL(strstr(f.pages.content.c_str(),"value='1:0.3' selected"));
+    ProvisioningBoardProfile invalid;TEST_ASSERT_FALSE(f.administration.provisioningProfileAt(5,invalid));
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_provisioning_dropdown_is_sorted_and_keeps_selected_identity);
     RUN_TEST(test_no_bus_at_boot_and_no_module_routes);
     RUN_TEST(test_overview_reads_only_external_address_then_releases_bus);
     RUN_TEST(test_confirmation_and_invalid_identity_cannot_touch_i2c);

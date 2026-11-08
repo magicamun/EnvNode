@@ -1,6 +1,7 @@
 // EnvNode: see repository LICENSE.
 #include "TestBoardProvisioning.h"
 #include "BoardIdentityProfiles.h"
+#include <cstring>
 namespace EnvNode {
 TestBoardProvisioning::TestBoardProvisioning(IProvisioningConnection& connection,
     BoardIdentityStore& store, std::function<bool()> available)
@@ -22,9 +23,25 @@ BoardIdentity TestBoardProvisioning::provisioningBoardIdentity() const {
 }
 size_t TestBoardProvisioning::provisioningProfileCount() const { return boardIdentityProfileCount(); }
 bool TestBoardProvisioning::provisioningProfileAt(size_t index, ProvisioningBoardProfile& profile) const {
-    const auto* p=boardIdentityProfileAt(index);
-    if(!p)return false;
-    profile={p->id,p->displayName,p->revision};return true;
+    const size_t count=boardIdentityProfileCount();
+    if(index>=count)return false;
+    // Enumerate by display name and numeric revision without changing registry IDs
+    // or the default revision used by legacy callers. The small list needs no heap.
+    for(size_t i=0;i<count;++i) {
+        const auto* candidate=boardIdentityProfileAt(i);size_t rank=0;
+        for(size_t j=0;j<count;++j) {
+            const auto* other=boardIdentityProfileAt(j);
+            const int name=std::strcmp(other->displayName,candidate->displayName);
+            const bool earlier=name<0 || (name==0 &&
+                (other->revision.major<candidate->revision.major ||
+                 (other->revision.major==candidate->revision.major &&
+                  (other->revision.minor<candidate->revision.minor ||
+                   (other->revision.minor==candidate->revision.minor && j<i)))));
+            if(earlier)++rank;
+        }
+        if(rank==index){profile={candidate->id,candidate->displayName,candidate->revision};return true;}
+    }
+    return false;
 }
 bool TestBoardProvisioning::provisioningProfile(BoardProfileId id, ProvisioningBoardProfile& profile) const {
     const auto* p=defaultBoardIdentityProfile(id);

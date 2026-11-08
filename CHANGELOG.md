@@ -4,6 +4,9 @@
 
 ### Added
 
+- Testboard 0.12.1: sort provisioning board choices by name and numeric revision,
+  preserving profile IDs, defaults and the currently selected identity.
+
 - Testboard 0.12.0: select and persist independent Controller 0.1/0.2 and Legacy/
   ESP32 DevKitC 0.3 adapter profiles. Derive mapping from PCB, preserve produced
   hardware, adapt guided TP2 self-tests and isolate results/history by fixture.
