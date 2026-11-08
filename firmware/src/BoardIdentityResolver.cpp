@@ -30,7 +30,12 @@ const BoardIdentityResolution& BoardIdentityResolver::resolve() {
         }
         const auto mapResult = maps_->read(*portMap_);
         resolution_.portMapStatus = mapResult.status;
-        if (mapResult.status != BoardPortMapStatus::NotProvisioned) {
+        // An unavailable EEPROM is also the normal development-board case when
+        // no identity device is fitted. Let the legacy identity path classify
+        // that condition and apply its explicit build fallback. Evidence of a
+        // stored but invalid port map must still fail closed.
+        if (mapResult.status != BoardPortMapStatus::NotProvisioned
+            && mapResult.status != BoardPortMapStatus::Unavailable) {
             const auto identity = store_.read(false);
             resolution_.identity = identity.identity;
             resolution_.recordStatus = identity.status;

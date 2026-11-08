@@ -152,10 +152,13 @@ void test_failed_map_readback_does_not_change_enid_or_report_success() {
     TEST_ASSERT_EQUAL(BoardProvisioningStatus::ReadbackFailed,writer.provision(identity(p),true).status);
     TEST_ASSERT_EQUAL(BoardIdentityStatus::NotProvisioned,enid.read().status);
 }
-void test_unavailable_map_storage_never_activates_a_compiled_mapping() {
+void test_unavailable_identity_eeprom_uses_visible_build_fallback() {
     Memory m;m.unavailable=true;
-    TEST_ASSERT_FALSE(resolve(m).normalRuntimeAllowed);
-    TEST_ASSERT_EQUAL(BoardPortMapStatus::Unavailable,resolve(m).portMapStatus);
+    const auto result=resolve(m);
+    TEST_ASSERT_EQUAL(BoardIdentitySource::BuildFallback,result.source);
+    TEST_ASSERT_EQUAL(BoardIdentityStatus::StorageUnavailable,result.recordStatus);
+    TEST_ASSERT_EQUAL(BoardPortMapStatus::Unavailable,result.portMapStatus);
+    TEST_ASSERT_TRUE(result.normalRuntimeAllowed);
 }
 void test_unknown_map_format_is_not_replaced_by_an_older_bank() {
     Memory m;BoardPortMapStore maps(m);auto p=mini();
@@ -218,7 +221,7 @@ int main(int,char**) {
     RUN_TEST(test_cross_record_interruption_fails_closed_and_retry_recovers);
     RUN_TEST(test_builtin_provisioning_migrates_enid_only_board_without_erasing_other_data);
     RUN_TEST(test_failed_map_readback_does_not_change_enid_or_report_success);
-    RUN_TEST(test_unavailable_map_storage_never_activates_a_compiled_mapping);
+    RUN_TEST(test_unavailable_identity_eeprom_uses_visible_build_fallback);
     RUN_TEST(test_unknown_map_format_is_not_replaced_by_an_older_bank);
     RUN_TEST(test_generation_wraparound_selects_the_newest_committed_bank);
     RUN_TEST(test_runtime_owns_loaded_data_after_decode_buffer_is_released);
