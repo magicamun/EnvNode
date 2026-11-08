@@ -1,6 +1,6 @@
 # Input Adapter — revision 0.1
 
-Passive-DUT measurement adapter for the [Test Controller](../Test-Controller/README.md).
+Passive-DUT measurement adapter for the [Test Controller](../../MainBoards/Test-Controller/README.md).
 Three CD74HC4067 multiplexers select one of **40 independent measurement inputs**:
 38 ESP32 socket contacts plus MB_3V3_SYS and MB_GND. The adapter contains no ESP32.
 

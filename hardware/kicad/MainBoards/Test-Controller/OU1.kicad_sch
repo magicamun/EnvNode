@@ -1134,6 +1134,26 @@
 		)
 		(uuid "0bf58e41-c225-4c08-9ecf-80770ead74cf")
 	)
+	(label "I2C3"
+		(at 187.96 110.49 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "0da98136-ada4-4258-b1fe-ee5cf1b0a9f1")
+	)
+	(label "GPIO1"
+		(at 189.23 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "17182cae-121a-480a-bbbf-46c1fc74e7a0")
+	)
 	(label "GPIO2"
 		(at 156.21 83.82 180)
 		(effects
@@ -1144,6 +1164,16 @@
 		)
 		(uuid "27ec51e3-6dd8-4d3a-a896-c9373ad76367")
 	)
+	(label "GPIO3"
+		(at 189.23 81.28 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "299e2e98-67a9-4350-951c-8f082de44aa4")
+	)
 	(label "GPIO2"
 		(at 130.81 101.6 0)
 		(effects
@@ -1153,6 +1183,16 @@
 			(justify left bottom)
 		)
 		(uuid "343fdcc7-5c9f-45d9-9e41-1de0bc698bd7")
+	)
+	(label "I2C2"
+		(at 187.96 113.03 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3d48fb76-34a2-4e01-885f-09c20b7e7ea6")
 	)
 	(label "I2C4"
 		(at 156.21 95.25 180)
@@ -1224,6 +1264,16 @@
 		)
 		(uuid "6e078e0f-a2cf-41e9-b8e5-b2bd05e2a89c")
 	)
+	(label "GPIO2"
+		(at 189.23 83.82 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "7273adde-4e39-4e69-a7bf-59d9e4040aee")
+	)
 	(label "GPIO4"
 		(at 130.81 106.68 0)
 		(effects
@@ -1263,6 +1313,36 @@
 			(justify right bottom)
 		)
 		(uuid "9b3a175d-4f7e-4842-86a6-792ca582a64c")
+	)
+	(label "GPIO4"
+		(at 189.23 78.74 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "b5a3a3d3-84c4-4526-8a8a-6b55d83fa138")
+	)
+	(label "I2C4"
+		(at 187.96 107.95 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "c1ce5698-55a3-46a4-b3b6-9766b1cc7c15")
+	)
+	(label "I2C1"
+		(at 187.96 115.57 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d5371e6a-0e60-4c50-934b-a1827dee2695")
 	)
 	(label "I2C3"
 		(at 130.81 91.44 0)
@@ -1789,6 +1869,91 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:Conn_01x04_Pin")
+		(at 193.04 113.03 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "73aa722b-1206-4672-81ad-5f8b96d20438")
+		(property "Reference" "J7"
+			(at 202.184 110.998 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x04_Pin"
+			(at 202.184 113.538 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical"
+			(at 193.04 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x04, script generated"
+			(at 193.04 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "3c682a5c-4bf9-4390-94f3-6a8f0d664392")
+		)
+		(pin "2"
+			(uuid "b726beec-a512-4635-a148-e08cbd6fc1a4")
+		)
+		(pin "4"
+			(uuid "a6a91293-b433-4f6e-a5f5-86fdc0045fc1")
+		)
+		(pin "1"
+			(uuid "81dcd024-cbb3-4547-89c7-a6441a5ed106")
+		)
+		(instances
+			(project "Test-Controller"
+				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
+					(reference "J7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "74xx:CD74HC4067M")
 		(at 118.11 96.52 0)
 		(unit 1)
@@ -1932,6 +2097,94 @@
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
 					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x04_Pin")
+		(at 194.31 83.82 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fbe61e31-5850-498f-90a9-5a75a09d129f")
+		(property "Reference" "J4"
+			(at 195.58 81.2799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "Conn_01x04_Pin"
+			(at 195.58 83.8199 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical"
+			(at 194.31 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 194.31 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x04, script generated"
+			(at 194.31 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "fcca50a4-b393-48c6-844d-1172c761e049")
+		)
+		(pin "2"
+			(uuid "14745cf9-843f-4e5a-ac32-ccc452a04b40")
+		)
+		(pin "4"
+			(uuid "47bd4578-ef08-40aa-901d-b10acfdca693")
+		)
+		(pin "1"
+			(uuid "121b5be2-8eb9-4e54-b797-e6399858c8be")
+		)
+		(instances
+			(project "Test-Controller"
+				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
+					(reference "J4")
 					(unit 1)
 				)
 			)

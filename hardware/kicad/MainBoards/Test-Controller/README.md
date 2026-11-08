@@ -1,4 +1,4 @@
-# Test Controller — revision 0.1
+# Test Controller — revision 0.2
 
 ESP32-DevKitC controller for passive mainboard continuity tests and a separate
 I²C provisioning connection. Used with the [Input Adapter](../Input-Adapter/README.md)
@@ -79,3 +79,13 @@ reported separately; rerun ERC/DRC and inspect antenna clearance after changes.
 Only the saved project rules are checked; no physical validation has occurred.
 
 EnvNode-owned files follow the repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+
+## Revision 0.2
+
+Uses the Weather-size enclosure template. The additional TP2 header is:
+1 GND, 2 TEST_DRIVE (after R6), 3 COM_IN. Select Controller 0.2 in the tester for
+TP2 self-test instructions. GPIO assignments and output mux channel mapping remain
+compatible with 0.1. CAD reviewed; physical acceptance of 0.2 remains pending.
+
+Adapters now live in `hardware/kicad/Adapter/`. The produced Input-Adapter 0.1
+remains available as Legacy; the new ESP32 DevKitC adapter is revision 0.3.
