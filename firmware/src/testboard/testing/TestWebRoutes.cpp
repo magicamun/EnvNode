@@ -5,6 +5,8 @@
 #include <cstring>
 #include "JsonWriter.h"
 #include <limits>
+#include <algorithm>
+#include "../TestBoardFirmwareVersion.h"
 namespace EnvNode { namespace Testing {
 #include "TestPageScript.inc"
 namespace {
@@ -79,6 +81,7 @@ void TestWebRoutes::registerRoutes(WebServer& server) {
         host_.server().sendHeader("Cache-Control", "no-cache");
         host_.server().send_P(200, "application/javascript; charset=utf-8", TestPageScript, sizeof(TestPageScript) - 1);
     });
+    server.on("/test/report", HTTP_GET, [this]() { reportContact(); });
     server.on("/test/state", HTTP_GET, [this]() { state(); });
     server.on("/test/action", HTTP_POST, [this]() { action(); });
 }
@@ -130,6 +133,7 @@ void TestWebRoutes::state() {
     host_.server().sendHeader("Cache-Control", "no-store");
     host_.server().send(200, "application/json; charset=utf-8", json);
 }
+#include "TestReport.inc"
 void TestWebRoutes::action() {
     auto& server = host_.server(); uint32_t generation;
     if (!unsignedValue(server.arg("generation"), generation) || generation != runner_.generation()) {

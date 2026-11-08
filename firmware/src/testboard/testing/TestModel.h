@@ -25,6 +25,12 @@ struct FixtureRouting {
     MuxAddress socket[MaxInputs];
     MuxAddress gpio[4], i2c[4], module[MaxContacts];
 };
+enum class MeasurementReason : uint8_t { None, Unavailable, SelectionFailed, Timeout, LowNotLow, HighAmbiguous };
+struct MeasurementTrace {
+    uint16_t low[8]={},high[8]={};
+    uint8_t lowCount=0,highCount=0;
+    MeasurementReason reason=MeasurementReason::Unavailable;
+};
 // Physical I/O remains inactive until assembled-fixture validation.
 class ITestFixture {
 public:
@@ -34,5 +40,6 @@ public:
     virtual bool select(Pigtail pigtail, uint8_t contact, uint8_t socket) = 0;
     virtual Sample read(bool& connected) = 0;
     virtual void release() = 0;
+    virtual bool trace(MeasurementTrace&) const { return false; }
 };
 } }

@@ -1,6 +1,6 @@
 # Ein Mainboard prüfen
 
-**Stand 0.10.1:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
+**Stand 0.11.0:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
 Die vollständige Boardabnahme einschließlich der Diodenpfade wird jetzt erstmals
 praktisch erprobt. Vor einer Bewertung zunächst
 [Controller, Adapter und Pigtails prüfen](selbsttests.md).
@@ -182,7 +182,41 @@ Kontakte bleiben je nach Profil ausdrücklich unvollständig prüfbar. Die vier
 Steckerkontakte einfach fehlerfrei durchzulaufen, beweist ohne einen positiven
 Prüfpfad noch keinen Durchgang dieses Kontakts.
 
-Anschlussprüfergebnisse bleiben derzeit im RAM und gehen beim Neustart oder Laden
-einer neuen Sitzung verloren. Der JSON-Download des Hardware-Selbsttests ist ein
-eigenes Protokoll; eine Speicherung der Mainboard-Prüfergebnisse im EEPROM des
-Prüflings ist noch nicht implementiert.
+## Prüfprotokoll herunterladen
+
+**Prüfprotokoll herunterladen (JSON)** exportiert den gesamten aktuellen Boardlauf,
+auch wenn er noch nicht vollständig ist oder abgebrochen wurde. Während einer
+laufenden Anschlussmessung ist der Download gesperrt. Die Ausgabe enthält:
+
+- Firmwareversion, Build-/Commitkennung, tatsächlichen Messmodus und Fixture;
+- Boarddefinition einschließlich Revision, Profilquelle, Prüferwartungen und
+  Socket-/Referenzzuordnung;
+- alle Anschluss- und Kontaktbewertungen, vollständig ausgewertete Matrizen und
+  die ursprünglichen Beobachtungscodes vor gerichteter Neubewertung;
+- die gerichteten Gegenprüfungsnachweise und verwendeten ADC-Grenzen;
+- zu auffälligen Messungen (`E`, `!`, `×`) die vorhandenen LOW/HIGH-Einzelwerte,
+  Fehlergrund, Eingang, Versuchskennung und Erfassungszeit als Geräte-Uptime.
+
+Die **letzten 128 auffälligen Messungen** werden speicherbegrenzt aufbewahrt.
+Eine erfolgreiche Wiederholung entfernt diese historischen Beobachtungen nicht;
+aktuelle Matrizen und alte Versuche sind im Protokoll getrennt zu lesen. Wenn ältere
+Einträge überschrieben werden, nennt `diagnostics.dropped` die Anzahl. Unauffällige
+Messungen behalten ihren Ergebniscode, aber keine ADC-Einzelwerte. Simulation und
+Backends ohne Rohwerterfassung liefern leere Wertefelder, keine erfundenen Messwerte.
+
+`low-not-low` bezeichnet eine zu hohe LOW-Phase, `high-ambiguous` eine uneindeutige
+HIGH-Phase. Die Einzelwerte unterscheiden Zwischenpegel, Schwankungen und Sättigung.
+`timeout`, `selection-failed` und `unavailable` kennzeichnen fehlende oder unvollständige
+Messwerte. Teilweise erfasste Phasen enthalten nur die tatsächlich gelesenen Werte.
+
+Der Browser lädt kleine, unveränderliche Abschnitte und setzt daraus eine JSON-Datei
+zusammen. Dabei wird weder umgeschaltet noch erneut gemessen. Ändert ein anderer
+Browser die Sitzung während des Downloads, wird der Export abgelehnt. Das Board
+bleibt auf dem ausgewählten Anschluss stehen. Die Uhrzeit der Dateierstellung kommt
+vom Browser; Versuchszeitpunkte sind Uptime-Werte und keine Kalenderzeit.
+
+Ergebnisse und Rohwerthistorie liegen im ESP32-RAM. Neustart, neuer Boardlauf oder
+Moduswechsel löschen sie. Der Download speichert die Datei auf dem Computer; eine
+Speicherung im EEPROM des Prüflings ist nicht implementiert. Das Selbsttest-Protokoll
+bleibt ein eigener Download. Rohwerte älterer Firmwarestände lassen sich nicht
+nachträglich rekonstruieren.

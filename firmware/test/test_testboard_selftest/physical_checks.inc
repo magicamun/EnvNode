@@ -19,6 +19,10 @@ void test_physical_measurement_classifies_only_observed_levels() {
         TEST_ASSERT_EQUAL(unsigned(valid?ITestFixture::Sample::Ready:ITestFixture::Sample::Error),unsigned(sample));
         TEST_ASSERT_EQUAL(high>=800&&high<=3800,connected);
         TEST_ASSERT_EQUAL(high,fixture.readings().high);TEST_ASSERT_FALSE(io.active);
+        MeasurementTrace trace;TEST_ASSERT_TRUE(fixture.trace(trace));
+        TEST_ASSERT_EQUAL(8,trace.lowCount);TEST_ASSERT_EQUAL(8,trace.highCount);
+        TEST_ASSERT_EQUAL(high,trace.high[7]);
+        TEST_ASSERT_EQUAL(unsigned(valid?MeasurementReason::None:MeasurementReason::HighAmbiguous),unsigned(trace.reason));
     }
 }
 void test_physical_low_fault_timeout_invalid_and_release() {
@@ -31,8 +35,12 @@ void test_physical_low_fault_timeout_invalid_and_release() {
     io.low=300;auto sample=ITestFixture::Sample::Busy;
     for(now=0;now<500&&sample==ITestFixture::Sample::Busy;now+=2)sample=fixture.read(connected);
     TEST_ASSERT_EQUAL(unsigned(ITestFixture::Sample::Error),unsigned(sample));TEST_ASSERT_FALSE(io.active);
+    MeasurementTrace trace;fixture.trace(trace);TEST_ASSERT_EQUAL(8,trace.lowCount);TEST_ASSERT_EQUAL(0,trace.highCount);
+    TEST_ASSERT_EQUAL(300,trace.low[0]);TEST_ASSERT_EQUAL(unsigned(MeasurementReason::LowNotLow),unsigned(trace.reason));
     io.low=0;now=1000;fixture.select(Pigtail::Gpio,1,1);now=1500;
     TEST_ASSERT_EQUAL(unsigned(ITestFixture::Sample::Error),unsigned(fixture.read(connected)));TEST_ASSERT_FALSE(io.active);
+    fixture.trace(trace);TEST_ASSERT_EQUAL(unsigned(MeasurementReason::Timeout),unsigned(trace.reason));
+    TEST_ASSERT_EQUAL(0,trace.lowCount);TEST_ASSERT_EQUAL(0,trace.highCount);
     fixture.select(Pigtail::Gpio,1,1);fixture.release();TEST_ASSERT_FALSE(io.active);
     TEST_ASSERT_EQUAL(unsigned(ITestFixture::Sample::Error),unsigned(fixture.read(connected)));
 }

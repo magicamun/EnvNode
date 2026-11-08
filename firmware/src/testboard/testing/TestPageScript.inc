@@ -38,6 +38,7 @@ function paint(){
  if(active){const xs=c.pins.map(p=>p.x),ys=c.pins.map(p=>p.y);for(const[k,v]of Object.entries({x:Math.min(...xs)-2,y:Math.min(...ys)-2,width:Math.max(...xs)-Math.min(...xs)+4,height:Math.max(...ys)-Math.min(...ys)+4,visibility:'visible'}))activeMarker.setAttribute(k,v);}else activeMarker.setAttribute('visibility','hidden');
  $('test-instruction').textContent=phase===3&&c?c.id+tr(' – Prüfung abgeschlossen',' – test complete'):active?tr(`Verbinde den ${kind[c.pigtail]}-Pigtail mit ${c.label||c.id} von ${board.name}.`,`Connect the ${kind[c.pigtail]} pigtail to ${c.label||c.id} on ${board.name}.`):phase===4?tr('Testlauf abgeschlossen','Session complete'):phase===5?tr('Testlauf abgebrochen','Session aborted'):tr('Board laden, um zu beginnen','Load a board to begin');
  $('test-refresh').disabled=busy||phase===2;
+ $('test-export').disabled=busy||phase===2||!state.board;
  const diodeFault=$('test-fault').querySelector('option[value="diode-short"]');
  diodeFault.disabled=!state.measurementPolicy;if(diodeFault.disabled&&$('test-fault').value==='diode-short')$('test-fault').value='none';
  $('test-directed').textContent=state.measurementPolicy?(tr('Gerichtete Board-Pfade: ','Directed board paths: ')+(state.directionChecks||[]).map(x=>x.from+' → '+(x.reverseSource||x.to)+': '+(x.reverse===1?tr('Sperrrichtung bestätigt','reverse blocking verified'):x.reverse===2?tr('FEHLER: Rückrichtung leitet','ERROR: reverse direction conducts'):tr('gültige Gegenprüfung fehlt','valid reverse check missing'))).join(' · ')):tr('Keine ergänzenden gerichteten Messregeln für dieses Profil.','No additional directed measurement rules for this profile.');
@@ -60,6 +61,37 @@ function paint(){
 async function command(action, extra={}){
  if(busy||!state)return;if(action==='start'&&!state.simulation&&!$('test-confirm').checked){$('test-error').textContent=tr('Bitte den spannungslosen Aufbau und die Verbindung bestätigen.','Please confirm the unpowered target and connection.');return;}busy=true;paint();$('test-error').textContent='';
  try{const response=await fetch('/test/action',{method:'POST',body:new URLSearchParams({action,generation:state.generation,board:action==='load'?$('test-board').value:board.id,confirm:$('test-confirm').checked?'yes':'no',fault:$('test-fault').value,...extra})});const body=await response.json();if(!response.ok)throw Error(body.error||response.status);if(['load','select','next','mode','abort'].includes(action))$('test-confirm').checked=false;if(action==='load')displayBoard(await definition(body.board));await acceptState(body);shown=-1;paint();}catch(e){$('test-error').textContent=e.message;}finally{busy=false;paint();}
+}
+async function downloadReport(){
+ if(busy||!state||!state.board||state.phase===2)return;
+ const snapshot=JSON.parse(JSON.stringify(state)),model=JSON.parse(JSON.stringify(board));
+ busy=true;paint();$('test-error').textContent='';
+ try{
+  const report={schema:1,kind:'envnode-board-test',capturedAtBrowser:new Date().toISOString(),
+   board:model,state:snapshot,resultCodes:['pending','isolated','connected','unexpected','open','measurement-error','directed-pending','directed-connected','directed-blocked'],
+   reasonCodes:['none','unavailable','selection-failed','timeout','low-not-low','high-ambiguous'],
+   verdictCodes:['untested','passed','failed','incomplete'],thresholds:{lowMaximum:200,connectedMinimum:800,highMaximum:3800,settleMs:100,samplesPerPhase:8,sampleIntervalMinimumMs:2},connectors:[]};
+  for(let c=0;c<model.connectors.length;c++){
+   const source=model.connectors[c];let row,offset=0,history=[];
+   do{
+    const response=await fetch('/test/report?'+new URLSearchParams({generation:snapshot.generation,connector:c,offset}),{cache:'no-store'});
+    const page=await response.json();if(!response.ok)throw Error(page.error||response.status);
+    if(page.generation!==snapshot.generation||page.boardId!==model.id)throw Error('Session changed during export');
+    if(!row)row=page;history.push(...page.diagnostics);offset=page.nextOffset;
+   }while(offset!==null);
+   report.firmware=row.firmware;report.gitCommit=row.gitCommit;report.buildNumber=row.buildNumber;
+   report.diagnostics={capacity:row.diagnosticCapacity,dropped:row.diagnosticsDropped,scope:'latest 128 unexpected/open/error observations; includes previous attempts in this session'};
+   const entry={id:source.id,pigtail:source.pigtail,verdict:row.verdict,completed:row.completed,contacts:[]};
+   source.pins.forEach((pin,p)=>{const from=p*model.socket.length,to=from+model.socket.length;
+    entry.contacts.push({contact:pin.number,verdict:Number(row.contactVerdicts[p]),completed:Math.max(0,Math.min(model.socket.length,row.completed-from)),results:row.results.slice(from,to),rawResults:row.rawResults.slice(from,to),diagnostics:history.filter(d=>d.contact===pin.number)});
+   });
+   report.connectors.push(entry);$('test-export').textContent=tr('Protokoll laden: ','Loading report: ')+(c+1)+'/'+model.connectors.length;
+  }
+  const last=await fetch('/test/state',{cache:'no-store'});if(!last.ok)throw Error(last.status);
+  const finalState=await last.json();if(finalState.generation!==snapshot.generation||finalState.board!==model.id||finalState.simulation!==snapshot.simulation)throw Error('Session changed during export');
+  const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');
+  a.href=url;a.download='envnode-pruefergebnis-'+model.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(e){$('test-error').textContent=e.message;}finally{busy=false;$('test-export').textContent=tr('Prüfprotokoll herunterladen (JSON)','Download test report (JSON)');paint();}
 }
 async function poll(){
  try{if(!busy){const response=await fetch('/test/state',{cache:'no-store'});if(!response.ok)throw Error(response.status);const next=await response.json();await acceptState(next);}}catch(e){$('test-error').textContent=tr('Statusverbindung unterbrochen: ','Status connection interrupted: ')+e.message;}finally{setTimeout(poll,180);}
@@ -95,6 +127,7 @@ async function acceptState(next){
 (async()=>{try{
  await refreshCatalog();
  displayBoard(await definition(catalog[0].id));
+ $('test-export').onclick=downloadReport;
  $('test-mode').onchange=()=>command('mode',{mode:$('test-mode').value});
  $('test-board').onchange=()=>{if(state)paint();};
  for(const [id,action]of [['test-refresh','refresh'],['test-load','load'],['test-start','start'],['test-next','next'],['test-abort','abort']])$(id).onclick=()=>command(action);

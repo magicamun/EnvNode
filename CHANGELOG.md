@@ -4,6 +4,11 @@
 
 ### Added
 
+- Testboard 0.11.0: download complete board-session JSON reports with bounded,
+  read-only paging; retain the latest 128 unexpected/open/error observations with
+  actual LOW/HIGH samples, reason, attempt and uptime across successful retests.
+  Include profile, directed evidence, all matrices, build identity and eviction counts.
+
 - Testboard 0.10.1: validate Weather 0.3 GND→SYS reference conduction using
   SYS pigtail excitation for the reverse check and mandatory positive reference
   continuity. Keep shorts and open reference cables detectable; scope the new

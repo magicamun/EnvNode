@@ -55,7 +55,7 @@ Mainboardkontakts speist die Testhardware nur ihr begrenztes 3,3-V-Testsignal ei
 
 ## Erste Anmeldung
 
-Auf der Startseite Version **Testboard 0.10.1** kontrollieren. Netzwerk, Sprache,
+Auf der Startseite Version **Testboard 0.11.0** kontrollieren. Netzwerk, Sprache,
 Zeitzone, Logs und Firmwareverwaltung stehen unabhängig von einem Prüfling bereit.
 Die gemeinsamen HTTP-Verbesserungen aus EnvNode sind übernommen. Ein expliziter
 Remote-Profildownload kann weiterhin kurz blockieren; während aktiver Messung

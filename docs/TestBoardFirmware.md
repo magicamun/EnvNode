@@ -8,7 +8,7 @@ EnvNode-owned materials follow the repository LICENSE
 | PlatformIO environment | Application | Version source | Output relative to firmware/ |
 | --- | --- | --- | --- |
 | `esp32dev` | Existing EnvNode | `include/FirmwareVersion.h` (0.8.2) | `.pio/build/esp32dev/firmware.bin` |
-| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.10.1) | `.pio/build/testboard/firmware.bin` |
+| `testboard` | Fixture base | `src/testboard/TestBoardFirmwareVersion.h` (0.11.0) | `.pio/build/testboard/firmware.bin` |
 
 From `firmware/`, build explicitly:
 
@@ -82,7 +82,7 @@ node test/browser/page_editor_test.cjs
 ```
 
 The separate `testboard_native` environment links only fixture settings/web
-composition and shared libraries. Seventy-one tests exercise configuration isolation,
+composition and shared libraries. Seventy-four tests exercise configuration isolation,
 reboot/reset, setup-mode pages and route inventory, persistence, locale, explicit
 restart, OTA staging and the guided simulation, including all 3268 comparisons,
 open/extra connections, incomplete coverage, free connector selection, result history
@@ -329,3 +329,27 @@ blocking; reverse conduction fails. Reference-diode reverse protection itself is
 not certified. Other revisions retain their original policy until measured.
 The web state exposes `reverseSource`; the UI names the actual rail. Physical
 thresholds, settling, GPIO roles and published profile bytes remain unchanged.
+
+## Board-session JSON report and measurement history (0.11.0)
+
+`ITestFixture::trace` optionally returns the actual eight LOW/HIGH readings with
+phase counts and a reason code. `PhysicalFixture` retains partial phases, timeout,
+high LOW and ambiguous HIGH diagnostics without changing timing or thresholds.
+The selectable wrapper forwards traces only from its actual backend.
+
+The runner retains the latest 128 raw unexpected/open/error measurements in a
+fixed ring (~6 KiB), with connector/cell, attempt generation and uptime. Repeating
+a test keeps previous anomalies; loading a board or switching mode clears them.
+Evictions are counted. Normal cells retain result codes only. No unavailable ADC
+samples are fabricated. Directed reclassification itself creates no new reading.
+
+Read-only `/test/report?generation=G&connector=C[&contact=P][&offset=N]` uses zero-based
+connector/contact selectors. Omit contact to batch the whole connector. It rejects running/stale sessions and invalid indices;
+responses contain the requested matrix and at most 16 history records plus a cursor.
+The browser gathers all connector pages and final-checks generation before downloading
+`envnode-pruefergebnis-<profile-id>.json`. This avoids a large all-session JSON buffer
+on the ESP32. Export does not change selection, generation, proof or GPIO state.
+The artifact includes schema/kind, board model, backend, firmware/build/commit,
+thresholds, result/reason/verdict legends, current matrices, raw observations and
+history/eviction metadata. A successful current run can coexist with older failed
+attempts in history. JSON export is separate from guided hardware-selftest reports.

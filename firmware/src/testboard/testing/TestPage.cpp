@@ -18,6 +18,8 @@ String buildTestPage(Locale locale, bool physicalAvailable) {
     html += de ? "Board laden / neuer Testlauf" : "Load board / new session";
     html += "</button><button id='test-refresh'>";
     html += de ? "Remote-Profile aktualisieren" : "Refresh remote profiles";
+    html += "</button><button id='test-export' disabled>";
+    html += de ? "Prüfprotokoll herunterladen (JSON)" : "Download test report (JSON)";
     html += "</button><p id='test-profile-status' role='status'></p><p id='test-reference' class='help'></p><p id='test-directed' class='help'></p><details><summary>";
     html += de ? "Quelle der Prüfdaten" : "Test data source";
     html += "</summary><p id='test-source' class='help'></p></details></section><section class='card'><h2 id='test-instruction'></h2><p id='test-summary' role='status' aria-live='polite'></p><label id='test-fault-wrap'>";

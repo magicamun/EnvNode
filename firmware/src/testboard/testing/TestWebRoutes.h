@@ -11,6 +11,7 @@ namespace EnvNode { namespace Testing {
 class TestWebRoutes : public IWebRoutes {
 public:
     TestWebRoutes(WebHost& host, IWebPagePresenter& pages, TestRunner& runner, SimulatedFixture& fixture);
+    void setBuildIdentity(const char* commit,const char* build) {gitCommit_=commit;buildNumber_=build;}
     void attachMeasurement(SelectableFixture& fixture) { measurement_ = &fixture; }
     void attachProfiles(ProfileRepository& profiles) { profiles_ = &profiles; }
     void setHardwareBusy(std::function<bool()> busy) { hardwareBusy_ = busy; }
@@ -21,6 +22,9 @@ private:
     void page();
     void state();
     void action();
+    void reportContact();
+    const char* gitCommit_="";
+    const char* buildNumber_="";
     WebHost& host_;
     IWebPagePresenter& pages_;
     SimulatedFixture& fixture_;

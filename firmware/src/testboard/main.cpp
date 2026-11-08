@@ -103,6 +103,7 @@ void setupTestBoard() {
     delay(500);
     if (!settings.load()) logger.error("Testboard settings unavailable; using defaults");
     testRoutes.attachProfiles(profiles);
+    testRoutes.setBuildIdentity(FirmwareBuildInfo::GitCommit,FirmwareBuildInfo::BuildNumber);
     testRoutes.attachMeasurement(measurement);
     testRoutes.setHardwareBusy([]() { return diagnostics.active(); });
     web.attachTestRoutes(testRoutes);

@@ -6,6 +6,13 @@ namespace EnvNode { namespace Testing {
 enum class Phase : uint8_t { Empty, AwaitingConnection, Running, Review, Complete, Aborted };
 enum class Result : uint8_t { Pending, Isolated, Connected, Unexpected, Open, Error, DirectedPending, DirectedConnected, DirectedBlocked };
 enum class Verdict : uint8_t { Untested, Passed, Failed, Incomplete };
+struct MeasurementRecord {
+    uint32_t attempt=0,atMs=0;
+    uint16_t cell=0;
+    uint8_t connector=0;
+    Result result=Result::Error;
+    MeasurementTrace trace;
+};
 class TestRunner {
 public:
     explicit TestRunner(ITestFixture& fixture) : fixture_(fixture) {}
@@ -22,6 +29,13 @@ public:
     size_t step() const { return step_; }
     size_t completed() const { return completed_; }
     Result result(size_t index) const;
+    Result resultAt(size_t connector,size_t cell) const;
+    Result rawResultAt(size_t connector,size_t cell) const;
+    size_t completedAt(size_t connector) const {return connector<MaxConnectors?completedByConnector_[connector]:0;}
+    static constexpr size_t DiagnosticCapacity=128;
+    size_t diagnosticCount() const {return diagnosticCount_;}
+    uint32_t diagnosticsDropped() const {return diagnosticsDropped_;}
+    const MeasurementRecord& diagnosticAt(size_t index) const {return diagnostics_[(diagnosticNext_+DiagnosticCapacity-diagnosticCount_+index)%DiagnosticCapacity];}
     Verdict verdict(size_t step) const;
     Verdict overall() const;
     Verdict contactVerdict(size_t step, size_t contact) const;
@@ -29,6 +43,10 @@ public:
     uint8_t reverseEvidence(size_t rule) const { return rule<MaxDirectedRules?reverseEvidence_[rule]:0; }
     uint32_t generation() const { return generation_; }
 private:
+    void recordDiagnostic(Result result,uint32_t now,MeasurementReason fallback);
+    MeasurementRecord diagnostics_[DiagnosticCapacity];
+    size_t diagnosticCount_=0,diagnosticNext_=0;
+    uint32_t diagnosticsDropped_=0;
     bool select();
     void refreshVerdicts();
     bool positivePath(size_t connector,size_t contact) const;

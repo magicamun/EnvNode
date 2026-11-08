@@ -436,11 +436,15 @@ void test_hardware_diagnostics_lock_real_test_actions() {
 }
 
 #include "directed_checks.inc"
+#include "report_checks.inc"
 
 int main() {
     // Directed-path regressions are independent of the physical ADC driver.
 
     UNITY_BEGIN();
+    RUN_TEST(test_fault_history_retains_raw_samples_across_successful_retest_and_is_bounded);
+    RUN_TEST(test_report_pages_are_read_only_guarded_and_include_unselected_connectors);
+    RUN_TEST(test_report_history_pagination_is_bounded_and_keeps_previous_attempts);
     RUN_TEST(test_weather_rail_path_uses_pigtail_drive_and_requires_reference_anchor);
     RUN_TEST(test_directed_paths_wait_for_valid_countercheck_and_recompute_history);
     RUN_TEST(test_directed_short_overrides_good_counterchecks_and_retest_removes_proof);

@@ -11,11 +11,13 @@ public:
     bool select(Pigtail pigtail,uint8_t contact,uint8_t input) override;
     Sample read(bool& connected) override;
     void release() override;
+    bool trace(MeasurementTrace& value) const override {value=trace_;return true;}
     const Readings& readings() const {return readings_;}
 private:
     IDiagnosticIo& io_;std::function<uint32_t()> clock_;
     DiagnosticPath path_{{0,0},-1,0,false};
     Readings readings_;
+    MeasurementTrace trace_;
     uint32_t switched_=0,lastSample_=0,started_=0,sum_=0;
     uint16_t minimum_=4095,maximum_=0;
     uint8_t samples_=0;
@@ -34,7 +36,9 @@ public:
     bool select(Pigtail p,uint8_t c,uint8_t i) override {return current().select(p,c,i);}
     Sample read(bool& connected) override {return current().read(connected);}
     void release() override {current().release();}
+    bool trace(MeasurementTrace& value) const override {return current().trace(value);}
 private:
+    const ITestFixture& current() const {return simulated_?simulation_:*physical_;}
     ITestFixture& current(){return simulated_?simulation_:*physical_;}
     ITestFixture& simulation_;ITestFixture* physical_;bool simulated_;
 };
