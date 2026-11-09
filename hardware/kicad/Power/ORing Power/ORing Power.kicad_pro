@@ -40,8 +40,8 @@
         "other_text_upright": false,
         "pads": {
           "drill": 0.0,
-          "height": 1.8,
-          "width": 1.325
+          "height": 3.0,
+          "width": 1.6
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -108,7 +108,7 @@
           ""
         ],
         [
-          "silk_over_copper|111082000|105898000|a5d1d7d9-1445-487a-b514-983a4497638d|c368bf97-ae3f-4c6d-886c-2135cf17ba4f",
+          "silk_over_copper|111082000|105898000|a5d1d7d9-1445-487a-b514-983a4497638d|570d2f12-bb33-4f43-bdbb-4accc2d36402",
           ""
         ],
         [

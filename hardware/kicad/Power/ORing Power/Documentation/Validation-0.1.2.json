@@ -1,0 +1,46 @@
+{
+  "revision": "0.1.2",
+  "checked_on": "2026-11-09",
+  "tool": "KiCad 10.0.5",
+  "ERC": {
+    "violations": 0
+  },
+  "DRC": {
+    "violations": 0,
+    "unconnected_items": 0,
+    "schematic_parity": 0
+  },
+  "ignored_DRC_checks": [
+    {
+      "description": "Board edge clearance violation",
+      "key": "copper_edge_clearance"
+    },
+    {
+      "description": "Footprint has no courtyard defined",
+      "key": "missing_courtyard"
+    },
+    {
+      "description": "Track endpoint not centered on via",
+      "key": "track_not_centered_on_via"
+    },
+    {
+      "description": "Tuning profile track geometries",
+      "key": "tuning_profile_track_geometries"
+    },
+    {
+      "description": "Footprint doesn't match symbol's footprint filters",
+      "key": "footprint_filters_mismatch"
+    },
+    {
+      "description": "Footprint component type doesn't match footprint pads",
+      "key": "footprint_type_mismatch"
+    }
+  ],
+  "sources": {
+    "ORing Power.kicad_pcb": "da90e5c28ec42640f35436c5ba8bd8dc76312a2dac58793f9f6dee7f289c1ea8",
+    "ORing Power.kicad_sch": "6efe1b2d10811228670b1826724e74e6d04d692f00b5c89c898ed08f5b3bb745"
+  },
+  "physical_tests": "Not performed; load, thermal, source handover and fabrication qualification remain open.",
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see ../../../../../LICENSE",
+  "review": "C2=47uF after D1/D2; C4=47uF directly at regulator output. J1 MP pads explicitly grounded. Schematic and PCB consistent."
+}

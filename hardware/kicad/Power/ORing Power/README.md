@@ -55,9 +55,9 @@ The castellated-hole geometry must be confirmed with the PCB manufacturer before
 | U1 | 3.3 V regulator | `LM3940IMP-3.3/NOPB`, SOT-223 |
 | D1, D2 | 3.3 V source ORing | SS14, SMA |
 | C1, C5 | Local bypass | 100 nF, 1206 |
-| C2 | Regulator output capacitor | 10 µF electrolytic, `CP_Elec_5x5.4`; polarity required |
+| C2 | System rail bulk capacitor after D1/D2 | 47 µF / 6.3 V, Nichicon `UWG0J470MCL1GB`, `CP_Elec_5x5.4`; polarity required |
 | C3 | 5 V input capacitor | 10 µF ceramic, 1206 |
-| C4 | System rail bulk capacitor | 47 µF tantalum, EIA-3528-21; polarity required |
+| C4 | Regulator output capacitor before D1 | 47 µF tantalum, EIA-3528-21; polarity required |
 
 ## Mainboard Use
 
@@ -112,3 +112,34 @@ The [web guide](../../../../docs/site/mainboards/oring-power/index.md) contains 
 same overview and test-point table. Measurements use U2.1 / GND as their reference.
 The native PCB/STEP render omits the unavailable J1 housing model; its actual
 footprint remains visible. See [render provenance and sources](../../../../images/oring-power/testpoints/README.md).
+
+## Assembly specification 0.1.2 (8 November 2026)
+
+C2 changes from 10 µF to 47 µF / 6.3 V, Nichicon `UWG0J470MCL1GB`.
+The existing `CP_Elec_5x5.4` footprint, signal routing and mounting geometry
+remain unchanged. J1 uses the project symbol with its MP mounting pads explicitly
+connected to GND; the silkscreen boundary clears these pads. C2 is the system reservoir on `+3V3_SYS` after
+D1/D2. C4, already 47 µF tantalum on `+3V3_EXT`, is the actual LM3940
+output capacitor. Earlier prose interchanged these functions; the schematic
+and PCB connections agree. Increasing C2 is additional system buffering,
+not a correction of an allegedly undersized LM3940 output capacitor.
+
+Revision 0.1.2 is the user's explicit assembly-specification exception to the
+usual documentation-only PCB patch convention. Existing 0.1.1 bare PCBs can
+use this BOM; a populated board needs C2 replacement to match 0.1.2.
+The ORing module has no identity EEPROM; mainboard profiles and provisioning
+are unaffected. Historical PDFs and render provenance remain at their original
+revision. The reusable design block remains the historical snapshot and must
+not be used as the 0.1.2 BOM without adopting this C2 substitution.
+
+Sourcing and dimensional verification are recorded in
+[C2 procurement](Documentation/C2-procurement-0.1.2.json): DigiKey
+`493-9737-1-ND`, cut tape, minimum one piece. This is a separate 47 µF part;
+ENP-00056 and its 10 µF stock must not be relabeled. The new InvenTree part is
+ENP-00179 (part 200), with Nichicon MPN and DigiKey SKU verified. Physical load-step/temperature validation remains open.
+
+Latest saved-state check: 2026-11-09, KiCad 10.0.5, ERC 0, DRC 0,
+no unconnected items or schematic/PCB mismatches. See
+[validation record](Documentation/Validation-0.1.2.json). Current product images
+are generated separately as `oring-power-0.1.2`; historical guide images retain
+their original 0.1.1 provenance.

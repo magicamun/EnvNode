@@ -1,13 +1,13 @@
-# ORing Power 0.1.1
+# ORing Power 0.1.2
 
 ORing Power ist der aufgelötete Versorgungsbaustein für EnvNode-Mainboards.
 Er verbindet einen 5-V-Eingang, einen 3,3-V-Regler und die Zusammenführung zweier
-3,3-V-Quellen auf einer **39 × 15 mm** großen Tochterplatine. Diese Seite beschreibt **PCB-Revision 0.1.1**.
+3,3-V-Quellen auf einer **39 × 15 mm** großen Tochterplatine. Diese Seite beschreibt **Bestückungsrevision 0.1.2**.
 
-Dokumentstand: **18. Oktober 2026**, für PCB **0.1.1**. Die Basisanleitung 0.1
-mit ergänzter Prüfpunktseite gilt für diesen Beschriftungsstand. Er ergänzt Titel, Revision und die
-5-V-/GND-Beschriftung am JST-PH-Eingang; Elektrik und Mechanik bleiben unverändert.
-Es ist keine Neuprovisionierung erforderlich.
+Dokumentstand: **8. November 2026**, Revision **0.1.2**. C2 steigt von
+10 µF auf 47 µF / 6,3 V (Nichicon UWG0J470MCL1GB) bei gleichem Footprint.
+Leiterbahnen, Pads und Mechanik bleiben unverändert. Die ältere Bestückung
+kann durch Austausch von C2 angepasst werden. Es ist keine Neuprovisionierung erforderlich.
 
 [Bestückung und Bring-up](index.md){ .md-button }
 
@@ -68,9 +68,9 @@ Die Systemversorgung wird über `+3V3_SYS` geführt.
 | D1, D2 | Quellenzusammenführung | SS14, SMA |
 | R1, R2 | USB-C-CC-Widerstände | Je 5,1 kΩ |
 | C1, C5 | Lokale Abblockung | Je 100 nF, 1206 |
-| C2 | Reglerausgang | 10 µF Elektrolyt, polarisiert |
+| C2 | Systemversorgung hinter D1/D2 | 47 µF / 6,3 V Elektrolyt, Ø5 × 5,4 mm |
 | C3 | 5-V-Eingang | 10 µF Keramik, 1206 |
-| C4 | Systemversorgung | 47 µF Tantal, polarisiert |
+| C4 | Reglerausgang vor D1 | 47 µF Tantal, polarisiert |
 | J1 | Alternativer 5-V-Eingang | Zweipoliger JST-PH |
 | J3 | 5-V-USB-C-Eingang | GCT USB4125-GF-A-0190 |
 

@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | [EnvNode Mini](mini/index.md) | Kompaktes Mainboard mit zwei Modulslots | PCB 0.9.0; TP1 und steckbare Pull-ups |
 | [EnvNode Weather / Weatherstation](weatherstation/index.md) | Mainboard mit einem Modulslot und zusätzlichen direkten Anschlüssen | PCB 0.3.0; TP1 und steckbare Pull-ups |
-| [ORing Power](oring-power/index.md) | Aufgelöteter Versorgungsbaustein für Mainboards | PCB 0.1.1; Basisanleitung 0.1 |
+| [ORing Power](oring-power/index.md) | Aufgelöteter Versorgungsbaustein für Mainboards | Bestückung 0.1.2; C2 mit 47 µF |
 
 Die Produktseiten enthalten Anschlüsse, Versorgung, Bestückung und erste Inbetriebnahme
 sowie die zugehörigen PDF-Anleitungen. Revisionsangaben beziehen sich auf die

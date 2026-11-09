@@ -1,0 +1,53 @@
+{
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see ../../../../../LICENSE",
+  "checked_on": "2026-11-08",
+  "reference": "C2",
+  "board_revision": "0.1.2",
+  "name": "Aluminium-Elko, 47 µF, 6,3 V, ±20 %, SMD 5 x 5,4 mm",
+  "category_path": "Electronic Components/Capacitors",
+  "manufacturer": "Nichicon",
+  "MPN": "UWG0J470MCL1GB",
+  "IPN": "ENP-00179",
+  "catalog_status": "Created and verified in InvenTree",
+  "replaces_for_this_bom": "ENP-00056 (10 µF); keep original part and stock unchanged",
+  "parameters": {
+    "capacitance_uF": 47,
+    "tolerance_percent": 20,
+    "rated_voltage_V": 6.3,
+    "diameter_mm": 5,
+    "height_nominal_mm": 5.4,
+    "height_max_mm": 5.5,
+    "base_mm": [
+      5.3,
+      5.3
+    ],
+    "temperature_C": [
+      -55,
+      105
+    ],
+    "impedance_max_ohm_at_100kHz_20C": 1.8,
+    "ripple_mA_at_100kHz_105C": 95,
+    "endurance_hours_at_105C": 1000
+  },
+  "footprint": "Capacitor_SMD:CP_Elec_5x5.4",
+  "datasheet": "https://www.nichicon.co.jp/english/series_items/catalog_pdf/e-uwg.pdf",
+  "suppliers": [
+    {
+      "supplier": "DigiKey",
+      "SKU": "493-9737-1-ND",
+      "packaging": "Cut Tape",
+      "minimum_order_quantity": 1,
+      "link": "https://www.digikey.de/de/products/detail/nichicon/UWG0J470MCL1GB/2550684"
+    }
+  ],
+  "verification": {
+    "mechanical": "Existing 5 mm body / 5.3 mm base footprint; 3 x 1.6 mm pads at x=±2.2 mm. Nichicon E=1.3 mm, terminal width 0.5..0.8 mm. Compatible geometry; same nominal 5.4 mm height (datasheet +0.1/-0.2 mm).",
+    "electrical": "C2 is across +3V3_SYS and GND AFTER D1/D2. 6.3 V rating exceeds 3.3 V rail; 47 µF minimum initial capacitance 37.6 µF. C4 (47 µF tantalum) is the regulator output capacitor BEFORE D1. No claim that C2 meets the LM3940 output-capacitor ESR window.",
+    "physical": "Soldering, load-step and temperature qualification pending; no measurements claimed."
+  },
+  "purchase_order_created": false,
+  "stock_booked": false,
+  "inventree_part_id": 200,
+  "inventree_url": "http://inventree.thielemann.intern/web/part/200/suppliers",
+  "inventree_manufacturer_id": 50
+}

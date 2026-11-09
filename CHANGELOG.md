@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- ORing Power 0.1.2: C2 system reservoir changes from 10 µF to 47 µF / 6.3 V,
+  Nichicon UWG0J470MCL1GB (DigiKey 493-9737-1-ND), retaining CP_Elec_5x5.4.
+  Correct the interchanged C2/C4 functional descriptions: C4 is the existing
+  47 µF tantalum at the LM3940 output. Signal routing and board dimensions are unchanged.
+  J1 mounting pads are now explicitly grounded in schematic and PCB; silkscreen
+  clearance is corrected. Procurement record and InvenTree article ENP-00179
+  added with manufacturer and supplier linkage.
+
+
 ### Added
 
 - EnvNode 0.8.8 / Testboard 0.13.0: integrate tester measurements, fixture profiles,

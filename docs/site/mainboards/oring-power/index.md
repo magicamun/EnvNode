@@ -1,26 +1,26 @@
 ---
 title: ORing Power - Bestückung und Inbetriebnahme
 pdf:
-  id: oring-0.1.1
+  id: oring-0.1.2
   title: ORing Power
   subtitle: Bestückungs- und Bring-up-Anleitung
-  hardware_revision: 0.1.1
-  document_version: '1.2'
-  document_date: '2026-10-28'
-  source_document_date: '2026-10-18'
+  hardware_revision: 0.1.2
+  document_version: '1.3'
+  document_date: '2026-11-08'
+  source_document_date: '2026-11-08'
   status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
 ---
 
 # ORing Power - Bestückung und Inbetriebnahme
 
-Castellated-Versorgungsmodul mit 5-V-Eingang, LM3940 und Dioden-ORing der beiden 3,3-V-Quellen. J1 und USB-C J3 liegen direkt parallel; nur eine eindeutig festgelegte 5-V-Quelle verwenden. Enthalten ist die letzte Prüfpunktergänzung für Beschriftungsstand 0.1.1.
+Castellated-Versorgungsmodul mit 5-V-Eingang, LM3940 und Dioden-ORing der beiden 3,3-V-Quellen. J1 und USB-C J3 liegen direkt parallel; nur eine eindeutig festgelegte 5-V-Quelle verwenden. Revision 0.1.2 erhöht C2 auf 47 µF bei unverändertem Footprint; die Prüfpunktabbildungen zeigen den geometrisch gleichen Stand 0.1.1.
 
-[Anleitung als PDF](../../assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf){ .md-button }
+[Anleitung als PDF](../../assets/downloads/ORing_Power_Rev0.1.2_Anleitung.pdf){ .md-button }
 
 [Produktübersicht](overview.md){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
 
-**Dokumentation abgeschlossen am 28. Oktober 2026.** Der dokumentierte Hardwareprüfstand bleibt separat ausgewiesen.
+**Dokumentstand 8. November 2026; Bestückungsrevision 0.1.2.** Der dokumentierte Hardwareprüfstand bleibt separat ausgewiesen.
 
 ## 3D-Ansicht
 
@@ -34,7 +34,7 @@ J1 ist in der ursprünglichen KiCad-Ansicht nicht dargestellt, da für den verwe
 
 ### Geltungsbereich
 
-Diese Anleitung gilt für das eigenständige EnvNode ORing Power Modul Revision 0.1. Das 39 x 15 mm große Modul stellt den 5-V-Eingang, den LM3940-Regler und die Dioden-ORing-Funktion als castellated Tochterplatine bereit. Orientierungshinweise beziehen sich auf die Bestückungsseite.
+Diese Anleitung gilt für das eigenständige EnvNode ORing Power Modul Revision 0.1.2. Das 39 x 15 mm große Modul stellt den 5-V-Eingang, den LM3940-Regler und die Dioden-ORing-Funktion als castellated Tochterplatine bereit. Orientierungshinweise beziehen sich auf die Bestückungsseite.
 
 J1 und USB-C J3 liegen direkt parallel auf +5 V. Sie sind keine gegeneinander entkoppelten Eingänge. Das Modul darf nur mit einer eindeutig festgelegten 5-V-Quelle betrieben werden.
 
@@ -45,7 +45,7 @@ J1 und USB-C J3 liegen direkt parallel auf +5 V. Sie sind keine gegeneinander en
 | Ref. | Anz. | Wert / Funktion | EnvNode-Part | Gehäuse / Footprint |
 | --- | --- | --- | --- | --- |
 | C1, C5 | 2 | 100 nF, 10 %, X7R | ENP-00006 | 1206 / 3216 Metric |
-| C2 | 1 | 10 µF, 25 V, Aluminium-Elko | ENP-00056 | SMD Ø5 x 5,4 mm |
+| C2 | 1 | 47 µF, 6,3 V, ±20 %, Aluminium-Elko | ENP-00179 | SMD Ø5 x 5,4 mm |
 | C3 | 1 | 10 µF, 25 V, X7R | ENP-00007 | 1206 / 3216 Metric |
 | C4 | 1 | 47 µF, 10 V, Tantal, polarisiert | ENP-00008 | EIA 3528-21, Bauform B |
 | D1, D2 | 2 | SS14, Schottky, 1 A / 40 V | ENP-00055 | SMA / DO-214AC |
@@ -56,6 +56,32 @@ J1 und USB-C J3 liegen direkt parallel auf +5 V. Sie sind keine gegeneinander en
 | PCB | 1 | ORing Power Modul PCB Rev. 0.1 | ENP-00118 | 39 x 15 mm, castellated |
 
 U2 bezeichnet im Schaltplan und Layout die fünfpolige Modul-Schnittstelle. U2 ist kein separat zu bestückendes Bauteil; seine Pads werden als castellated Halblöcher gefertigt.
+
+
+### C2: Änderung und Beschaffung für 0.1.2
+
+C2 puffert **+3V3_SYS hinter D1/D2**. Der Reglerausgang **+3V3_EXT vor D1**
+ist bereits mit C4 (47 µF Tantal) beschaltet. Frühere Texte vertauschten diese
+Funktionen. Die 33-µF-Mindestforderung des LM3940 betrifft C4, nicht C2.
+Die C2-Erhöhung ist zusätzliche Systempufferung; sie beweist keine Behebung
+der beobachteten Leerlaufspannung. Eine Oszilloskopprüfung unter Lastwechseln
+und bei den vorgesehenen Temperaturen bleibt erforderlich.
+
+Beschaffung: **Nichicon UWG0J470MCL1GB**, DigiKey **493-9737-1-ND**, Cut Tape,
+einzeln bestellbar. [DigiKey](https://www.digikey.de/de/products/detail/nichicon/UWG0J470MCL1GB/2550684),
+[Herstellerdatenblatt](https://www.nichicon.co.jp/english/series_items/catalog_pdf/e-uwg.pdf).
+47 µF ±20 %, 6,3 V, -55 bis +105 °C; Impedanz maximal 1,8 Ω bei 100 kHz/20 °C
+(kein garantierter ESR-Wert). Gehäuse Ø5 mm, Sockel 5,3 × 5,3 mm,
+Nennhöhe 5,4 mm (+0,1/-0,2 mm), Anschlussbreite 0,5 bis 0,8 mm.
+Die vorhandenen Pads (3 × 1,6 mm, Mitte bei ±2,2 mm) bleiben erhalten.
+
+Der Beschaffungsdatensatz liegt unter
+`hardware/kicad/Power/ORing Power/Documentation/C2-procurement-0.1.2.json`.
+Der Artikel ist in InvenTree als **ENP-00179** mit Nichicon-Herstellerteil und
+DigiKey-Bestellnummer angelegt und geprüft; **ENP-00056 bleibt der 10-µF-Artikel**. Es wurde keine Bestellung oder Bestandsbuchung ausgelöst.
+Die Revision 0.1.2 ist die ausdrücklich gewünschte Ausnahme zur sonst rein
+redaktionellen Patch-Regel. Bestehende 0.1.1-Leiterplatten können mit der neuen
+Stückliste bestückt werden; Mainboard-Provisionierung und Anschlüsse bleiben gleich.
 
 ### 1.2 Polarität und Orientierung
 
@@ -85,8 +111,8 @@ Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötst
 | Bereich | Bauteile | Prüfschwerpunkt |
 | --- | --- | --- |
 | 5-V-Eingänge | J1, J3, R1, R2, C3 | Parallele Einspeisung, CC-Widerstände, Kurzschlussfreiheit |
-| Regler | U1, C2, C3, D1 | Polarität, Tab-Anbindung, +3V3_EXT |
-| ORing | D1, D2, C4, C5 | Diodenrichtung, +3V3_SYS, Rückspeisung |
+| Regler | U1, C4, C3, D1 | Polarität, Tab-Anbindung, +3V3_EXT |
+| ORing | D1, D2, C2, C1 | Diodenrichtung, +3V3_SYS, Rückspeisung |
 | Modulschnittstelle | U2 / fünf Castellated-Pads | Netzreihenfolge, Kantenmetallisierung, Lötbarkeit |
 
 ### 2.2 Mechanik und Fertigung
@@ -228,7 +254,7 @@ Nach der Montage die Widerstands- und Durchgangsprüfungen aus Abschnitt 5 wiede
 
 | Beobachtung | Zuerst prüfen |
 | --- | --- |
-| Keine 3,3 V aus dem Regler | 5-V-Eingang, U1, D1, C2/C3, Kurzschluss auf +3V3_EXT oder +3V3_SYS. |
+| Keine 3,3 V aus dem Regler | 5-V-Eingang, U1, D1, C4/C3, Kurzschluss auf +3V3_EXT oder +3V3_SYS. |
 | Hoher Strom ohne Mainboard | Sofort ausschalten; J1, J3, U1, D1/D2 und polarisierte Kondensatoren prüfen. |
 | USB-C versorgt nicht | Kabel/Netzteil, R1/R2, VBUS-Pads, Shield-/GND-Verbindung und Kontaktbrücken. |
 | J1 versorgt nicht | Pinbelegung, SMD-Signalpads, mechanische Haltepads und +5-V-Leiterbahn. |
@@ -245,10 +271,19 @@ J1 und J3 dürfen im Betrieb nicht mit unabhängigen 5-V-Quellen gleichzeitig ge
 
 ## 9. Revisionsnachweis
 
+Aktuelle Quellen für die Bestückungsrevision 0.1.2:
+
 | Quelle | SHA-256 |
 | --- | --- |
-| ORing Power.kicad_pcb | `7f16d98ad92b0bd15eb0112ce4af3d6d42d2c357af48cb1347d8e3da8ae329c2` |
-| ORing Power.kicad_sch | `33e3890765b487b416dd0c90f3f7fe25a810ee3baf4796301dd48e67064acdff` |
+| ORing Power.kicad_pcb (0.1.2) | `c4f98fcf28930747ca06208b356f2232e7f0a93d1ca57ce2ffff5bc622223774` |
+| ORing Power.kicad_sch (0.1.2) | `f63c51d72904effd3c97b5f505ec37399a4918fbf12ce332d89471c5ec75c690` |
+
+Historische Quellen der übernommenen Abbildungen und Basisanleitung:
+
+| Quelle | SHA-256 |
+| --- | --- |
+| Historischer ORing Power.kicad_pcb (0.1.1) | `7f16d98ad92b0bd15eb0112ce4af3d6d42d2c357af48cb1347d8e3da8ae329c2` |
+| Historischer ORing Power.kicad_sch (10 µF) | `33e3890765b487b416dd0c90f3f7fe25a810ee3baf4796301dd48e67064acdff` |
 | EnvNode_Parts.xlsx | `3bb63f242b939543a27f5b79b89820097739af125a416112dbe87014f2855517` |
 
 ### Dokumentierte Ausführung

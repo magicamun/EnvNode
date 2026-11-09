@@ -38,6 +38,8 @@ DOWNLOADS = {
 
 # Explicit historical archive; preserve original files and revision labels.
 DOWNLOADS.update({
+    "assets/downloads/old-revisions/ORing_Power_Rev0.1.1_Anleitung.pdf":
+        "docs/pdf/reference/ORing_Power_Rev0.1.1_Anleitung.pdf",
     'assets/downloads/old-revisions/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.6.pdf':
         'hardware/kicad/MainBoards/EnvNode Mini/Documentation/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.6.pdf',
     'assets/downloads/old-revisions/EnvNode_Mini_Bestueckungs_und_Bringup_Rev0.3.pdf':

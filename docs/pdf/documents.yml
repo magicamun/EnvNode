@@ -41,7 +41,7 @@
   archive: true
   preview: docs/pdf/reference/Weatherstation_Rev0.2.1_Anleitung.pdf
 - source: mainboards/oring-power/index.md
-  target: assets/downloads/ORing_Power_Rev0.1.1_Anleitung.pdf
+  target: assets/downloads/ORing_Power_Rev0.1.2_Anleitung.pdf
   original: hardware/kicad/Power/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf
   images: docs/site/assets/images/oring-assembly
   required_text:
@@ -49,7 +49,7 @@
   - D1
   - Rückspeisung
   - U2.1
-  preview: docs/pdf/reference/ORing_Power_Rev0.1.1_Anleitung.pdf
+  preview: docs/pdf/reference/ORing_Power_Rev0.1.2_Anleitung.pdf
 - source: modules/analog-hydro-pressure/revisions/0.5.md
   target: assets/downloads/AnalogHydroPressure_Rev0.5_Anleitung.pdf
   original: hardware/kicad/Modules/FullSize/AnalogHydroPressure/Documentation/AnalogHydroPressure_Bestueckungs_und_Bringup_Rev0.5.pdf
