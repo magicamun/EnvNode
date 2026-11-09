@@ -1,6 +1,25 @@
 # EnvNode Mini
 
-`EnvNode Mini` is the compact EnvNode mainboard with two module slots, ESP32 processing, dual I²C access, configurable I²C pull-ups, and two direct ADC/GPIO inputs. This directory contains the KiCad design for hardware Revision 0.8.
+`EnvNode Mini` is the compact EnvNode mainboard with two module slots, ESP32 processing, dual I²C access, configurable I²C pull-ups, and two direct ADC/GPIO inputs. This directory contains the KiCad design for hardware Revision 0.10.0.
+
+## Current revision 0.10.0
+
+- **RST1**, two-pin JST-PH: **pin 1 GND, pin 2 ESP32 EN/CHIP_PU** (U3 pin 2).
+  A normally open pushbutton between these contacts resets the fitted DevKit.
+- **TP1** retains the diode-protected MB_GND/MB_3V3_SYS reference contacts.
+- **C2**, 100 nF, decouples the EEPROM supply. I²C pull-ups use removable jumpers.
+- JST-SH MP mounting pads are explicitly tied to GND.
+- For passive testing, remove the ESP32 and disconnect all power and provisioning.
+  The reset pigtail tests both contacts; the 38-pin socket plus two references
+  still use 40 input-adapter channels.
+
+Module slots remain J1/J2; I²C connectors remain J7–J10.
+
+KiCad 10.0.5 checks on 2026-11-09: ERC 0, DRC 0, no unconnected items or
+schematic/PCB mismatches. The report in `Documentation/Validation-0.10.0.json`
+binds the check to the saved PCB and all schematic sheets. Physical bring-up
+of this revision remains open. The older assembly guides and revision notes
+below retain their historical scope.
 
 ## Project Files
 

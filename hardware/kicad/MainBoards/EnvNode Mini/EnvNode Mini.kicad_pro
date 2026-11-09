@@ -775,7 +775,7 @@
         "uuid": "bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
       }
     ],
-    "used_designators": "ADC1-2,D1-4,#PWR1-28,NT1-2,J1-4,J6-14,U1-5,C1-2,C5-12,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
+    "used_designators": "TP2,ADC1-2,C1-2,C5-12,U1-5,D1-4,#PWR1-28,NT1-2,J1-4,J6-14,#FLG1-8,I2C0_1-2,JP1-4,H1-10,R1-8,JP_I2C0_SCL1,JP_I2C0_SDA1,JP_I2C1_SCL1,JP_I2C1_SDA1",
     "variants": []
   },
   "sheets": [

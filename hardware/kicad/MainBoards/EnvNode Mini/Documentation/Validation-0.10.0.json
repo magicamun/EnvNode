@@ -1,0 +1,52 @@
+{
+  "revision": "0.10.0",
+  "checked_on": "2026-11-09",
+  "tool": "KiCad 10.0.5",
+  "ERC": 0,
+  "DRC": 0,
+  "unconnected_items": 0,
+  "schematic_parity": 0,
+  "reset": {
+    "connector": "RST1",
+    "pin1": "GND",
+    "pin2": "U3.2 EN/CHIP_PU"
+  },
+  "ignored_DRC_checks": [
+    {
+      "description": "Footprint has no courtyard defined",
+      "key": "missing_courtyard"
+    },
+    {
+      "description": "Track endpoint not centered on via",
+      "key": "track_not_centered_on_via"
+    },
+    {
+      "description": "Tuning profile track geometries",
+      "key": "tuning_profile_track_geometries"
+    },
+    {
+      "description": "Footprint doesn't match symbol's footprint filters",
+      "key": "footprint_filters_mismatch"
+    },
+    {
+      "description": "Text height out of range",
+      "key": "text_height"
+    },
+    {
+      "description": "Footprint component type doesn't match footprint pads",
+      "key": "footprint_type_mismatch"
+    }
+  ],
+  "sources": {
+    "ADC.kicad_sch": "ff48076ff5b82145a34fdf95a253e811a9e1ee4cfc0862605f8838f099209a8e",
+    "ESP32Core.kicad_sch": "7f6e2e2a8c92021bd73f1c4c7555a34124466d30ac3b51473269ae8001f170e5",
+    "EnvNode Mini.kicad_sch": "e23d63de0ff0f61e0654bff5e1d76df7bccc1a441dc57dc565a2f921cabf1953",
+    "PCB.kicad_sch": "ed19908459ebba8a0c0957a70928c7e5f7a28a7906c4574dc2a22a69e9126551",
+    "Power.kicad_sch": "e31c045d9ccf359a5704e7f459512f885d122886f80038bd971eea93a1a3da0a",
+    "SlotA.kicad_sch": "6acc11c48da4dce5fd633a443f920c35c617c4472b92fc866cc63f65c99d06f2",
+    "SlotB.kicad_sch": "649abacbdd409d99a35778051c58a5466877563ed6fda753ce3fb25c828c579d",
+    "EnvNode Mini.kicad_pcb": "5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557"
+  },
+  "physical_tests": "Not performed for this revision",
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see repository LICENSE"
+}

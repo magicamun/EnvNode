@@ -5,6 +5,187 @@
 	(uuid "8b66c284-64d9-4b4e-b644-164710047457")
 	(paper "A4")
 	(lib_symbols
+		(symbol "Connector:Conn_01x02_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Pin"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x02_Pin_1_1"
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:C"
 			(pin_numbers
 				(hide yes)
@@ -1318,10 +1499,6 @@
 		(uuid "2e77aef2-8ea9-4122-b0bd-bc343debf1a2")
 	)
 	(no_connect
-		(at 86.36 41.91)
-		(uuid "46df5ea9-cc3b-4305-8000-d26d8b39e007")
-	)
-	(no_connect
 		(at 152.4 44.45)
 		(uuid "519b110e-99ca-4c78-adcd-94285ff5ef74")
 	)
@@ -1356,6 +1533,16 @@
 	(no_connect
 		(at 152.4 41.91)
 		(uuid "fd643251-eefb-4347-b681-f5a2c5c74d6e")
+	)
+	(wire
+		(pts
+			(xy 66.04 41.91) (xy 86.36 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3f720cb2-0491-419c-869f-59dd09b2d24a")
 	)
 	(global_label "+5V"
 		(shape input)
@@ -1694,6 +1881,86 @@
 			(justify left)
 		)
 		(uuid "fab8f32c-fc85-4642-a49b-3771ba60abb8")
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 60.96 39.37 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "08ced0bd-2f73-4031-a742-749c39a8b97a")
+		(property "Reference" "RST1"
+			(at 61.595 34.29 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 61.595 36.83 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+			(at 60.96 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60.96 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 60.96 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a9f104b3-a3ab-42ec-9ded-7ec5ff71aaa5")
+		)
+		(pin "2"
+			(uuid "39832b04-1fad-45ca-b912-25b8b0192e39")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/58c5c7a7-de73-4602-8652-83d350ff8bac"
+					(reference "RST1")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
 		(lib_id "Memory_EEPROM:24LC32")
@@ -2144,6 +2411,85 @@
 			(project "EnvNode Mini"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/58c5c7a7-de73-4602-8652-83d350ff8bac"
 					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 66.04 39.37 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "499cc0cd-114e-4ba5-ae96-93ab9a4d7389")
+		(property "Reference" "#PWR021"
+			(at 72.39 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 69.85 39.3699 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 66.04 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 66.04 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 66.04 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4dc3ae65-4337-4f0c-9ce8-727dd8041c7c")
+		)
+		(instances
+			(project "EnvNode Mini"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/58c5c7a7-de73-4602-8652-83d350ff8bac"
+					(reference "#PWR021")
 					(unit 1)
 				)
 			)
@@ -2877,24 +3223,23 @@
 			"25ee2df4-468e-4988-aabf-d4a52a74f9d7" "2acb52b0-4edb-4a5e-a60e-0be5034cfac8"
 			"2c03ff3e-08c0-4d5e-a40b-91cabd075a7e" "2e77aef2-8ea9-4122-b0bd-bc343debf1a2"
 			"32a5c880-d9ec-4c4d-995f-28b04b648e7f" "32b5e358-947b-4aca-af90-4d89f7eba8a0"
-			"46df5ea9-cc3b-4305-8000-d26d8b39e007" "519b110e-99ca-4c78-adcd-94285ff5ef74"
-			"526d4b19-7bba-42e2-9490-dc97ad398f6b" "52b9b8ce-ae64-48d2-8b28-0abba1c98c6b"
-			"535514dc-1130-4223-9390-ca6101dd822d" "580f559f-b540-491e-9c9d-eccbdb0e95da"
-			"5c4bb78f-c427-4f66-9eb8-bb084ec06fce" "67e6e93e-ee19-463d-bf7c-e3cf3210d8ff"
-			"7cf40b9c-7bcc-4c51-bec3-39b4eab465d5" "7e96d66a-97a3-49e2-bede-bb76c3655775"
-			"845b2290-7baa-4e85-b18e-a11a22d8c215" "8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2"
-			"971d596a-f403-4783-a6fd-0a18e923b96d" "9f8848f8-03c5-4d8f-951b-2995a9cfec29"
-			"a8bef646-c841-4969-b095-ef4b8244d253" "a9756495-e5f6-46a6-846c-e70ba4e6cd4c"
-			"b18e180c-3778-4dbb-97c2-148c33dd2364" "b57ea3cb-83be-4ccd-ab7b-85861c3b4c4c"
-			"b7acf95c-82a5-4620-bc03-0ee778f6e8cf" "d13912cf-b719-4cd3-bda6-6b43962ecf7b"
-			"d5e58bc5-798d-45cc-a902-998205d13e71" "d76cc588-52bc-4e48-9005-56bd783dcf03"
-			"dab79f3e-9a58-4628-9209-331c52194a26" "e18dd701-6d6f-4565-a93f-337c8d6fef80"
-			"e4bc7543-55cf-453c-ae63-298db7209256" "e6314200-410e-4e5b-ae78-fb508927545b"
-			"e82c95c4-6863-4d96-8d8e-5a4915949383" "eafa4701-3097-4475-950e-e83ca2db56cd"
-			"f3733fb7-63cb-4028-bcd6-7b8aef72f932" "f4faf7ac-bb5e-4a25-98f7-13a7452644bb"
-			"f6376b12-e2bc-4b4a-8c46-e54aef210492" "f6f30b18-dd6e-4d02-95ff-5829b1006818"
-			"fab8f32c-fc85-4642-a49b-3771ba60abb8" "fd643251-eefb-4347-b681-f5a2c5c74d6e"
-			"ff08bfdf-d720-423b-9e3b-109e61cd0e23"
+			"519b110e-99ca-4c78-adcd-94285ff5ef74" "526d4b19-7bba-42e2-9490-dc97ad398f6b"
+			"52b9b8ce-ae64-48d2-8b28-0abba1c98c6b" "535514dc-1130-4223-9390-ca6101dd822d"
+			"580f559f-b540-491e-9c9d-eccbdb0e95da" "5c4bb78f-c427-4f66-9eb8-bb084ec06fce"
+			"67e6e93e-ee19-463d-bf7c-e3cf3210d8ff" "7cf40b9c-7bcc-4c51-bec3-39b4eab465d5"
+			"7e96d66a-97a3-49e2-bede-bb76c3655775" "845b2290-7baa-4e85-b18e-a11a22d8c215"
+			"8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2" "971d596a-f403-4783-a6fd-0a18e923b96d"
+			"9f8848f8-03c5-4d8f-951b-2995a9cfec29" "a8bef646-c841-4969-b095-ef4b8244d253"
+			"a9756495-e5f6-46a6-846c-e70ba4e6cd4c" "b18e180c-3778-4dbb-97c2-148c33dd2364"
+			"b57ea3cb-83be-4ccd-ab7b-85861c3b4c4c" "b7acf95c-82a5-4620-bc03-0ee778f6e8cf"
+			"d13912cf-b719-4cd3-bda6-6b43962ecf7b" "d5e58bc5-798d-45cc-a902-998205d13e71"
+			"d76cc588-52bc-4e48-9005-56bd783dcf03" "dab79f3e-9a58-4628-9209-331c52194a26"
+			"e18dd701-6d6f-4565-a93f-337c8d6fef80" "e4bc7543-55cf-453c-ae63-298db7209256"
+			"e6314200-410e-4e5b-ae78-fb508927545b" "e82c95c4-6863-4d96-8d8e-5a4915949383"
+			"eafa4701-3097-4475-950e-e83ca2db56cd" "f3733fb7-63cb-4028-bcd6-7b8aef72f932"
+			"f4faf7ac-bb5e-4a25-98f7-13a7452644bb" "f6376b12-e2bc-4b4a-8c46-e54aef210492"
+			"f6f30b18-dd6e-4d02-95ff-5829b1006818" "fab8f32c-fc85-4642-a49b-3771ba60abb8"
+			"fd643251-eefb-4347-b681-f5a2c5c74d6e" "ff08bfdf-d720-423b-9e3b-109e61cd0e23"
 		)
 	)
 )
