@@ -1,0 +1,46 @@
+{
+  "revision": "0.1",
+  "checked_on": "2026-11-09",
+  "tool": "KiCad 10.0.5",
+  "ERC": {
+    "violations": 0
+  },
+  "DRC": {
+    "violations": 0,
+    "unconnected_items": 0,
+    "schematic_parity": 0
+  },
+  "ignored_DRC_checks": [
+    {
+      "description": "Board edge clearance violation",
+      "key": "copper_edge_clearance"
+    },
+    {
+      "description": "Footprint has no courtyard defined",
+      "key": "missing_courtyard"
+    },
+    {
+      "description": "Track endpoint not centered on via",
+      "key": "track_not_centered_on_via"
+    },
+    {
+      "description": "Tuning profile track geometries",
+      "key": "tuning_profile_track_geometries"
+    },
+    {
+      "description": "Footprint doesn't match symbol's footprint filters",
+      "key": "footprint_filters_mismatch"
+    },
+    {
+      "description": "Footprint component type doesn't match footprint pads",
+      "key": "footprint_type_mismatch"
+    }
+  ],
+  "sources": {
+    "ORing Power S3.kicad_pcb": "c6f8f426dc673405a085de0bb6ecca74cffb628f9af90720784cb4a07d02ca7e",
+    "ORing Power S3.kicad_sch": "cba1a22907ccf24332ee371e917bdce08265023673adcde812b2fac31008262f"
+  },
+  "physical_tests": "Not performed; load, thermal, source handover and fabrication qualification remain open.",
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see ../../../../../LICENSE",
+  "review": "39 x 8.5 mm compact module, five castellated signals, no external input connectors. GND power flag and silkscreen label corrected without rerouting."
+}
