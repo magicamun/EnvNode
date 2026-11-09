@@ -5,6 +5,39 @@ namespace EnvNode {
 constexpr const char PageEditorScript[] = R"EDITOR(
 (function () {
 if (!document.getElementById('page-formats')) return;
+const rowTemplate = document.getElementById('page-row-template');
+const groups = document.getElementById('page-sources');
+const savedFields = JSON.parse(document.getElementById('page-fields').textContent);
+for (let line = 0; line < 6; ++line) {
+    const row = rowTemplate.content.firstElementChild.cloneNode(true);
+    row.querySelector('legend').textContent = globalThis.EnvNodeUi.Line + ' ' + (line + 1);
+    row.querySelectorAll('[name], [id], [for], [data-boolean-source], [data-enum-source]').forEach(el => {
+        ['name', 'id', 'for', 'data-boolean-source', 'data-enum-source'].forEach(attr => {
+            const value = el.getAttribute(attr);
+            if (value) el.setAttribute(attr, value.replace(/^(f|s|true|false|e)0(?=_|$)/, (_, prefix) => prefix + line));
+        });
+    });
+    row.querySelectorAll('[name]').forEach(input => {
+        const value = savedFields[input.name] || '';
+        if (input.matches('select') && value) input.add(new Option(value, value));
+        input.value = value;
+    });
+    row.querySelectorAll('[data-enum-source]').forEach(panel => {
+        const prefix = 'e' + panel.dataset.enumSource.slice(1) + '_';
+        for (const [name, value] of Object.entries(savedFields)) {
+            if (!name.startsWith(prefix)) continue;
+            const input = document.createElement('input');
+            input.name = name; input.dataset.code = name.slice(prefix.length); input.value = value;
+            panel.querySelector('[data-enum-fields]').appendChild(input);
+        }
+    });
+    row.querySelectorAll('[data-boolean-source]').forEach(panel => {
+        panel.open = Array.from(panel.querySelectorAll('input')).some(input => input.value);
+    });
+    groups.appendChild(row);
+}
+rowTemplate.remove();
+
 const previewOutput = document.getElementById('preview-output');
 const refreshPreview = () => {
     const id = previewOutput.value === 'full' ? 'page-rendered' : 'page-rendered-' + previewOutput.value;
@@ -36,6 +69,7 @@ refreshPreview();
         };
         source.addEventListener('input', update);
         source.addEventListener('change', update);
+        update();
     });
     const states = new Map(Array.from(options, option => [option.value, JSON.parse(option.dataset.enum || '[]')]));
     document.querySelectorAll('[data-enum-source]').forEach(panel => {
@@ -60,6 +94,7 @@ refreshPreview();
         };
         source.addEventListener('input', update);
         source.addEventListener('change', update);
+        update();
     });
 })();
 })();
@@ -191,11 +226,16 @@ const DisplayPageEditor = (() => {
         rows.forEach((row, i) => {
             const count = Number(row.dataset.count);
             for (let j = count; j < 4; ++j) {
-                e.formData.set('s' + i + '_' + j, '');
-                e.formData.set('true' + i + '_' + j, ''); e.formData.set('false' + i + '_' + j, '');
+                e.formData.delete('s' + i + '_' + j);
+                e.formData.delete('true' + i + '_' + j); e.formData.delete('false' + i + '_' + j);
                 for (const key of Array.from(e.formData.keys())) if (key.startsWith('e' + i + '_' + j + '_')) e.formData.delete(key);
             }
         });
+        // The server treats absent fields as empty. Avoid dozens of empty
+        // arguments occupying its heap while rendering the next preview.
+        for (const [key, value] of Array.from(e.formData.entries())) {
+            if (value === '' && key !== 'f0') e.formData.delete(key);
+        }
     });
     update(true);
     editor.disabled = false;

@@ -188,7 +188,7 @@ void test_web_preview_keeps_selection_and_escapes_all_user_text() {
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Value 22.5"));
     html = buildPropertyPreviewHtml(reader, options, source, "%s", true, true);
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Format does not match"));
-    TEST_ASSERT_NULL(strstr(html.c_str(), "<pre"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "id='page-rendered'"));
     reader.known = false;
     html = buildPropertyPreviewHtml(reader, "", source, "%f", true, false);
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Selected source unavailable"));
@@ -200,7 +200,7 @@ void test_web_does_not_read_before_submission_and_handles_empty_inventory() {
     const String html = buildPropertyPreviewHtml(reader, "", "", "", false, false);
     TEST_ASSERT_EQUAL_UINT32(0, reader.reads);
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "No supported sources"));
-    TEST_ASSERT_NULL(strstr(html.c_str(), "<pre"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "id='page-rendered'"));
 }
 
 class OrderedReader : public Reader {
@@ -287,8 +287,8 @@ void test_six_line_page_preserves_layout_and_isolates_row_errors() {
     page.formats[5] = "<End>";
     String html = buildPropertyPagePreviewHtml(reader, "", page, true);
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "RainControl\nLevel: 21 l 52%\nTrue\nReason: Hold\n\n&lt;End&gt;\n"));
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='f5'"));
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='s5_3'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;f5&quot;:&quot;&lt;End&gt;&quot;"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "id='page-row-template'"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "name='f6'"));
     page.sources[1][1] = "sensor/99/value";
     html = buildPropertyPagePreviewHtml(reader, "", page, true);
@@ -301,7 +301,7 @@ void test_six_line_page_preserves_layout_and_isolates_row_errors() {
     const unsigned reads = reader.reads;
     html = buildPropertyPagePreviewHtml(reader, "", page, false);
     TEST_ASSERT_EQUAL_UINT32(reads, reader.reads);
-    TEST_ASSERT_NULL(strstr(html.c_str(), "<pre"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "id='page-rendered'"));
 }
 
 void test_load_saved_submits_an_independent_form() {
@@ -357,7 +357,7 @@ void test_translated_preview_escapes_html_and_rejects_invalid_labels() {
     page.labels[0][0].falseText = "Hauswasser";
     String html = buildPropertyPagePreviewHtml(reader, "", page, true);
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Valve: &lt;Tank&gt;"));
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='true0_0' maxlength='16' value='&lt;Tank&gt;'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;true0_0&quot;:&quot;&lt;Tank&gt;&quot;"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "Valve: <Tank>"));
     page.labels[0][0].trueText = "Bad\nText";
     html = buildPropertyPagePreviewHtml(reader, "", page, true);
@@ -374,19 +374,19 @@ void test_display_navigation_routes_and_boolean_visibility() {
     page.labels[0][0].trueText = "Zisterne";
     reader.description.valueKind = PropertyValueKind::Boolean;
     String html = buildPropertyPagePreviewHtml(reader, "", page, false);
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' open>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;true0_0&quot;:&quot;Zisterne&quot;"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_1' hidden>"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "action='/display#text-preview'"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "/measurements"));
     reader.description.valueKind = PropertyValueKind::FloatingPoint;
     html = buildPropertyPagePreviewHtml(reader, "", page, false);
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' hidden open>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;true0_0&quot;:&quot;Zisterne&quot;"));
     reader.description.valueKind = PropertyValueKind::Enumeration;
     html = buildPropertyPagePreviewHtml(reader, "", page, false);
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' hidden open>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;true0_0&quot;:&quot;Zisterne&quot;"));
     reader.known = false;
     html = buildPropertyPagePreviewHtml(reader, "", page, false);
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "<details data-boolean-source='s0_0' hidden open>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;true0_0&quot;:&quot;Zisterne&quot;"));
     reader.description.valueKind = PropertyValueKind::Boolean;
     String option = buildPropertySourceOption(Source, reader.description, "Valve", "");
     TEST_ASSERT_NOT_NULL(strstr(option.c_str(), "data-boolean='1'"));
@@ -411,8 +411,8 @@ void test_controller_translation_uses_code_and_preserves_fallback() {
     reader.snapshot.value=PropertyValue::enumeration(options[1]);
     TEST_ASSERT_EQUAL_STRING("Status: On threshold",formatDisplayLine(reader,page,0).value.text);
     String html=buildPropertyPagePreviewHtml(reader,"",page,true);
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"name='e0_0_hysteresis_hold' value='Halten %n'"));
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"<details data-enum-source='s0_0'>"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"&quot;e0_0_hysteresis_hold&quot;:&quot;Halten %n&quot;"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(),"<details data-enum-source='s0_0' hidden>"));
     const String option=buildPropertySourceOption({PropertyComponentKind::Controller,1,"reason"},reader.description,"Controller","");
     TEST_ASSERT_NOT_NULL(strstr(option.c_str(),"data-enum='"));
     TEST_ASSERT_NOT_NULL(strstr(option.c_str(),"hysteresis_hold"));
@@ -425,7 +425,7 @@ void test_second_page_editor_preserves_assignment_and_load_target() {
     page.formats[0] = "First content"; page.secondPage.formats[0] = "Second content";
     page.secondHardware.enabled = true; page.secondHardware.bus = I2CBus::I2C1;
     String html = buildPropertyPagePreviewHtml(reader, "", page, true, 1);
-    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "name='f0' maxlength='128' value='Second content'"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&quot;f0&quot;:&quot;Second content&quot;"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "First content"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "name='displayEnabled2'"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "name='displayPage2'>"));
@@ -443,6 +443,21 @@ void test_hardware_dialog_contains_no_page_content_fields() {
     TEST_ASSERT_NULL(strstr(html.c_str(), "name='f0'"));
     TEST_ASSERT_NULL(strstr(html.c_str(), "Saved content"));
 }
+void test_page_editor_compact_render_and_allocation_failure() {
+    Reader reader; PropertyPreviewPage page;
+    page.formats[0] = "</pre><script>bad()</script>";
+    const String html = buildPropertyPagePreviewHtml(reader, "", page, true);
+    TEST_ASSERT_LESS_THAN_UINT32(9000, html.length());
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&lt;/pre&gt;&lt;script&gt;bad()&lt;/script&gt;"));
+    TEST_ASSERT_NULL(strstr(html.c_str(), "<script>bad()"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "id='page-fields'"));
+    const size_t previous = String::reservationLimit();
+    String::reservationLimit() = 1024;
+    const String failed = buildPropertyPagePreviewHtml(reader, "", page, true);
+    String::reservationLimit() = previous;
+    TEST_ASSERT_TRUE(failed.isEmpty());
+}
+
 void test_page_editor_layout_and_optional_browser_fixture() {
     Reader reader; PropertyPreviewPage page;
     page.formats[1] = "Level: %.1f l %.0f%%";
@@ -586,7 +601,7 @@ void test_locale_decimal_separator_preserves_padding_literals_and_canonical_data
     TEST_ASSERT_EQUAL_STRING("33948.000 Hz",formatPropertyText(reader,Source,"%.3f Hz").text);
 }
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_locale_decimal_separator_preserves_padding_literals_and_canonical_data); RUN_TEST(test_frequency_presentation_applies_kilohertz_before_width_precision); RUN_TEST(test_presentation_converts_before_formatting_and_tracks_live_units); RUN_TEST(test_presentation_preserves_untyped_values_and_invalid_states); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
+    UNITY_BEGIN(); RUN_TEST(test_page_editor_compact_render_and_allocation_failure); RUN_TEST(test_locale_decimal_separator_preserves_padding_literals_and_canonical_data); RUN_TEST(test_frequency_presentation_applies_kilohertz_before_width_precision); RUN_TEST(test_presentation_converts_before_formatting_and_tracks_live_units); RUN_TEST(test_presentation_preserves_untyped_values_and_invalid_states); RUN_TEST(test_preview_clips_per_assigned_display_and_retains_full_page); RUN_TEST(test_page_editor_layout_and_optional_browser_fixture); RUN_TEST(test_hardware_dialog_contains_no_page_content_fields); RUN_TEST(test_second_page_editor_preserves_assignment_and_load_target);
     RUN_TEST(test_controller_translation_uses_code_and_preserves_fallback);
     RUN_TEST(test_display_navigation_routes_and_boolean_visibility);
     RUN_TEST(test_boolean_labels_are_positional_literal_and_optional);

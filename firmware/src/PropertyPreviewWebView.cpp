@@ -168,10 +168,29 @@ String buildDisplayOutputsHtml(const DisplayConfiguration& page, Locale locale) 
     return html;
 }
 
+namespace {
+// A failed Arduino String append otherwise silently leaves truncated HTML.
+class DisplayPageHtml {
+public:
+    explicit DisplayPageHtml(const String& initial) { *this += initial; }
+    void operator+=(const String& value) { append(value.c_str(), value.length()); }
+    void operator+=(const char* value) { append(value, strlen(value)); }
+    void operator+=(char value) { append(&value, 1); }
+    void fail() { valid_ = false; }
+    String finish() { return valid_ ? std::move(html_) : String(); }
+private:
+    void append(const char* value, size_t length) {
+        if (valid_ && !html_.concat(value, length)) valid_ = false;
+    }
+    String html_;
+    bool valid_ = true;
+};
+}
+
 String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String& optionsHtml,
     const PropertyPreviewPage& page, bool submitted, size_t pageIndex, int previewOutput, Locale locale) {
     const auto& contentPage = page.page(pageIndex);
-    String html((String("<section class='card' id='text-preview'><h2>") + webText(locale, TextId::SixLineTextPreview) + "</h2>"));
+    DisplayPageHtml html((String("<section class='card' id='text-preview'><h2>") + webText(locale, TextId::SixLineTextPreview) + "</h2>"));
     html += buildDisplayTabs(pageIndex + 1, locale).c_str();
     html += (String("<h3>") + webText(locale, TextId::Page) + " " + ""); html += String(static_cast<unsigned>(pageIndex + 1)).c_str();
     html += (String("</h3><p class='help'>") + webText(locale, TextId::SaveEditsBeforeSwitchingTabsOnlyThisPage) + "</p>");
@@ -201,79 +220,69 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
         html += "</option>";
     }
     html += "</select></label></div></div><p id='page-editor-note' class='help' role='status'></p><div id='page-sources'>";
-    for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
-        const String number(static_cast<unsigned int>(line));
-        html += (String("<fieldset data-page-row><legend>") + webText(locale, TextId::Line) + " " + "");
-        html += String(static_cast<unsigned int>(line + 1)).c_str();
-        html += "</legend><div class='page-source-fields'><label hidden for='f";
-        html += number.c_str();
-        html += "'>Format</label><input hidden data-format id='f";
-        html += number.c_str();
-        html += "' name='f";
-        html += number.c_str();
-        html += "' maxlength='128' value='";
-        if (contentPage.formats[line].length() <= MaxPropertyFormatLength) html += escapeHtml(contentPage.formats[line]).c_str();
-        html += "'>";
-        for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
-            const String field = "s" + number + "_" + String(static_cast<unsigned int>(source));
-            html += "<div data-source-slot><label for='";
-            html += field.c_str();
-            html += (String("'>") + webText(locale, TextId::Source) + " " + "");
-            html += String(static_cast<unsigned int>(source + 1)).c_str();
-            html += "</label><select data-property-source id='";
-            html += field.c_str();
-            html += "' name='";
-            html += field.c_str();
-            html += (String("'><option value=''>") + webText(locale, TextId::NoSource) + "</option>");
-            if (!contentPage.sources[line][source].isEmpty()
-                && contentPage.sources[line][source].length() <= MaxPropertySourceLength) {
-                html += "<option selected value='";
-                html += escapeHtml(contentPage.sources[line][source]).c_str();
-                html += "'>";
-                html += escapeHtml(contentPage.sources[line][source]).c_str();
-                html += "</option>";
-            }
-            html += "</select>";
-            const auto& labels = contentPage.labels[line][source];
-            PropertySourceInput selected;
-            PropertyDescription description;
-            const bool isBoolean = parsePropertySource(contentPage.sources[line][source].c_str(), selected)
-                && reader.describe(selected.reference(), description)
-                && description.valueKind == PropertyValueKind::Boolean;
-            html += "<details data-boolean-source='";
-            html += field.c_str();
-            html += "'";
-            if (!isBoolean) html += " hidden";
-            if (!labels.trueText.isEmpty() || !labels.falseText.isEmpty()) html += " open";
-            html += ">";
-            html += (String("<summary>") + webText(locale, TextId::BooleanTextOptional) + "</summary>");
-            const String suffix = number + "_" + String(static_cast<unsigned int>(source));
-            const auto labelInput = [&](const char* prefix, const char* title, const String& value) {
-                html += "<label>"; html += title;
-                html += "<input name='"; html += prefix; html += suffix.c_str();
-                html += "' maxlength='16' value='";
-                if (value.length() <= MaxDisplayBooleanLabelLength) html += escapeHtml(value).c_str();
-                html += "'></label>";
-            };
-            labelInput("true", webText(locale, TextId::TrueOnText), labels.trueText);
-            labelInput("false", webText(locale, TextId::FalseOffText), labels.falseText);
-            html += "</details>";
-            html += "<details data-enum-source='"; html += field.c_str(); html += "'";
-            const bool isEnum = description.valueKind == PropertyValueKind::Enumeration;
-            if (!isEnum) html += " hidden";
-            html += (String("><summary>") + webText(locale, TextId::StateTextOptional) + "</summary><div data-enum-fields>");
-            if (isEnum) for (size_t index = 0; index < description.enumOptionCount; ++index) {
-                const auto& option = description.enumOptions[index];
-                html += "<label>"; html += escapeHtml(String(option.displayText)).c_str();
-                html += "<input maxlength='16' data-code='"; html += escapeHtml(String(option.stableCode)).c_str();
-                html += "' name='e"; html += suffix.c_str(); html += "_"; html += escapeHtml(String(option.stableCode)).c_str();
-                html += "' value='"; html += escapeHtml(String(displayEnumText(contentPage, line, source, option.stableCode))).c_str();
-                html += "'></label>";
-            }
-            html += (String("</div><p class='help'>") + webText(locale, TextId::EmptyKeepsTheOriginalStateTextUpTo) + "</p></details></div>");
-        }
-        html += "</div></fieldset>";
+    // Send one empty row, expanded in the browser. Repeating all controls six
+    // times can exceed the ESP32's largest contiguous free heap block.
+    html += "<template id='page-row-template'><fieldset data-page-row><legend>";
+    html += webText(locale, TextId::Line);
+    html += " 1</legend><div class='page-source-fields'><input hidden data-format id='f0' name='f0' maxlength='128' value=''>";
+    for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+        const String suffix = "0_" + String(static_cast<unsigned>(source));
+        const String field = "s" + suffix;
+        html += "<div data-source-slot><label for='"; html += field;
+        html += "'>"; html += webText(locale, TextId::Source); html += " ";
+        html += String(static_cast<unsigned>(source + 1));
+        html += "</label><select data-property-source id='"; html += field;
+        html += "' name='"; html += field;
+        html += "'><option value=''>"; html += webText(locale, TextId::NoSource);
+        html += "</option></select><details data-boolean-source='"; html += field;
+        html += "' hidden><summary>"; html += webText(locale, TextId::BooleanTextOptional);
+        html += "</summary>";
+        const auto labelInput = [&](const char* prefix, const char* title) {
+            html += "<label>"; html += title;
+            html += "<input name='"; html += prefix; html += suffix;
+            html += "' maxlength='16' value=''></label>";
+        };
+        labelInput("true", webText(locale, TextId::TrueOnText));
+        labelInput("false", webText(locale, TextId::FalseOffText));
+        html += "</details><details data-enum-source='"; html += field;
+        html += "' hidden><summary>"; html += webText(locale, TextId::StateTextOptional);
+        html += "</summary><div data-enum-fields></div><p class='help'>";
+        html += webText(locale, TextId::EmptyKeepsTheOriginalStateTextUpTo);
+        html += "</p></details></div>";
     }
+    html += "</div></fieldset>";
+    html += "</template><pre hidden id='page-fields'>";
+    html += '{';
+    bool firstField = true;
+    const auto field = [&](const String& name, const String& value) {
+        if (value.isEmpty()) return;
+        if (!firstField) html += ',';
+        firstField = false;
+        String encoded;
+        // JSON escaping needs at most six bytes per input byte, plus punctuation.
+        if (!encoded.reserve((name.length() + value.length()) * 6 + 8)) {
+            html.fail(); return;
+        }
+        appendJsonString(encoded, name.c_str()); encoded += ':';
+        appendJsonString(encoded, value.c_str());
+        html += escapeHtml(encoded);
+    };
+    for (size_t line = 0; line < PropertyPreviewLineCount; ++line) {
+        const String number(static_cast<unsigned>(line));
+        field("f" + number, contentPage.formats[line]);
+        for (size_t source = 0; source < MaxPropertySourcesPerLine; ++source) {
+            const String suffix = number + "_" + String(static_cast<unsigned>(source));
+            field("s" + suffix, contentPage.sources[line][source]);
+            field("true" + suffix, contentPage.labels[line][source].trueText);
+            field("false" + suffix, contentPage.labels[line][source].falseText);
+        }
+    }
+    for (const auto& translation : contentPage.enumTranslations) {
+        field("e" + String(static_cast<unsigned>(translation.line)) + "_"
+            + String(static_cast<unsigned>(translation.source)) + "_" + translation.code,
+            translation.text);
+    }
+    html += "}</pre>"; // textContent decodes entities; data is never executable.
     html += (String("</div><div class='actions'><button disabled data-editor-submit type='submit' name='preview' value='1'>") + webText(locale, TextId::PreviewRefreshAllLines) + "</button><button disabled data-editor-submit type='submit' formmethod='post' formaction='/display/save'>" + webText(locale, TextId::SaveOnDevice) + "</button><button type='submit' form='display-load'>" + webText(locale, TextId::LoadSavedSettings) + "</button></div></form><form id='display-load' method='get' action='/display#text-preview'><input type='hidden' name='loadDisplay' value='1'><input type='hidden' name='page' value='"); html += String(static_cast<unsigned>(pageIndex + 1)).c_str(); html += "'></form>";
     html += (String("<p class='help'>") + webText(locale, TextId::UseFForDecimalsUForUnsignedIntegers) + "</p>");
     html += (String("<p class='help'>") + webText(locale, TextId::PreviewUsesTheSelectedDisplayFontLimitsNot) + "</p>");
@@ -320,7 +329,7 @@ String buildPropertyPagePreviewHtml(const IPropertyReader& reader, const String&
     }
     html += "<script src='/display-editor.js' defer></script>";
     html += "</section>";
-    return html;
+    return html.finish();
 }
 
 } // namespace EnvNode
