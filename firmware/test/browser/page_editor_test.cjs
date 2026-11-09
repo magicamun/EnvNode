@@ -40,3 +40,31 @@ assert.equal(duplicateMapping[0], 2);
 assert.throws(() => editor.placeholders('%d'), error => error.message === EnvNodeUi.InvalidPlaceholderUseFUSOr);
 console.log(`Page editor: placeholder validation and line mapping passed (${language}).`);
 }
+
+// Exercise the actual submission preparation for both preview and save.
+{
+    const context = vm.createContext({document: {getElementById: () => null}});
+    vm.runInContext(source, context);
+    const editor = vm.runInContext('DisplayPageEditor', context);
+    for (const page of ['1', '2']) for (const saving of [false, true]) {
+        const data = new URLSearchParams({page, f0: '%s', s0_0: 'system/1/device_name'});
+        for (let i = 0; i < 6; ++i) {
+            if (i) data.set('f' + i, '');
+            for (let j = 0; j < 4; ++j) {
+                if (i || j) data.set('s' + i + '_' + j, '');
+                data.set('true' + i + '_' + j, ''); data.set('false' + i + '_' + j, '');
+            }
+        }
+        data.set('s5_3', 'stale/source'); data.set('e5_3_old', 'stale translation');
+        editor.prepareFormData(data, [1,0,0,0,0,0], saving);
+        assert.equal(data.get('page'), page);
+        assert.equal(data.get('s0_0'), 'system/1/device_name');
+        assert.equal(data.has('e5_3_old'), false);
+        for (let i = 0; i < 6; ++i) {
+            assert.equal(data.has('f' + i), saving || i === 0);
+            for (let j = 0; j < 4; ++j) assert.equal(data.has('s' + i + '_' + j), saving || (i === 0 && j === 0));
+        }
+        assert.equal(data.get('s5_3'), saving ? '' : null);
+    }
+    console.log('Page editor: complete save fields and compact preview passed.');
+}

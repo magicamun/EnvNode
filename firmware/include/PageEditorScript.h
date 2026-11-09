@@ -135,7 +135,23 @@ const DisplayPageEditor = (() => {
         });
         return mapping;
     }
-    return {placeholders, matchLines};
+    function prepareFormData(data, counts, saving) {
+        counts.forEach((count, i) => {
+            for (let j = count; j < 4; ++j) {
+                for (const prefix of ['s', 'true', 'false']) {
+                    const key = prefix + i + '_' + j;
+                    if (saving) data.set(key, ''); else data.delete(key);
+                }
+                for (const key of Array.from(data.keys())) if (key.startsWith('e' + i + '_' + j + '_')) data.delete(key);
+            }
+        });
+        // Saving requires every format and source field to detect incomplete
+        // requests. Only the read-only preview may omit empty arguments.
+        if (!saving) for (const [key, value] of Array.from(data.entries())) {
+            if (value === '' && key !== 'f0') data.delete(key);
+        }
+    }
+    return {placeholders, matchLines, prepareFormData};
 })();
 (function () {
     const editor = document.getElementById('page-formats');
@@ -213,7 +229,9 @@ const DisplayPageEditor = (() => {
     });
     editor.addEventListener('input', () => update());
     form.addEventListener('input', e => { if (e.target !== editor && e.target.id !== 'preview-output') note.textContent = (globalThis.EnvNodeUi.PreviewIsOutOfDatePleaseRefresh); });
+    let savingPage = false;
     form.addEventListener('submit', e => {
+        savingPage = ((e.submitter && e.submitter.getAttribute('formmethod')) || form.method).toLowerCase() === 'post';
         update(true);
         const pending = rows.some(r => r.dataset.review === '1');
         const missing = rows.some(r => Array.from(r.querySelectorAll('[data-source-slot]')).some(f => !f.hidden && !f.querySelector('select').value));
@@ -222,20 +240,7 @@ const DisplayPageEditor = (() => {
         }
     });
     form.addEventListener('formdata', e => {
-        // Keep the existing bounded server protocol; dormant controls never leak into a saved page.
-        rows.forEach((row, i) => {
-            const count = Number(row.dataset.count);
-            for (let j = count; j < 4; ++j) {
-                e.formData.delete('s' + i + '_' + j);
-                e.formData.delete('true' + i + '_' + j); e.formData.delete('false' + i + '_' + j);
-                for (const key of Array.from(e.formData.keys())) if (key.startsWith('e' + i + '_' + j + '_')) e.formData.delete(key);
-            }
-        });
-        // The server treats absent fields as empty. Avoid dozens of empty
-        // arguments occupying its heap while rendering the next preview.
-        for (const [key, value] of Array.from(e.formData.entries())) {
-            if (value === '' && key !== 'f0') e.formData.delete(key);
-        }
+        DisplayPageEditor.prepareFormData(e.formData, rows.map(row => Number(row.dataset.count)), savingPage);
     });
     update(true);
     editor.disabled = false;
