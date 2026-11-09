@@ -1,0 +1,52 @@
+{
+  "revision": "0.4",
+  "checked_on": "2026-11-09",
+  "tool": "KiCad 10.0.5",
+  "ERC": 0,
+  "DRC": 0,
+  "unconnected_items": 0,
+  "schematic_parity": 0,
+  "reset": {
+    "connector": "RST1",
+    "pin1": "GND",
+    "pin2": "U3.2 EN/CHIP_PU"
+  },
+  "ignored_DRC_checks": [
+    {
+      "description": "Footprint has no courtyard defined",
+      "key": "missing_courtyard"
+    },
+    {
+      "description": "Track endpoint not centered on via",
+      "key": "track_not_centered_on_via"
+    },
+    {
+      "description": "Tuning profile track geometries",
+      "key": "tuning_profile_track_geometries"
+    },
+    {
+      "description": "Footprint doesn't match symbol's footprint filters",
+      "key": "footprint_filters_mismatch"
+    },
+    {
+      "description": "Text height out of range",
+      "key": "text_height"
+    },
+    {
+      "description": "Footprint component type doesn't match footprint pads",
+      "key": "footprint_type_mismatch"
+    }
+  ],
+  "sources": {
+    "ESP32.kicad_sch": "d5dd9370dd2c42443912b3fc4810d5889f1d16a17ef51d9f1a2e9c0f5f2242cf",
+    "PCB.kicad_sch": "04b61087758ed3db550336a319e9a180bac551b3461eb8a1879add806ebccd1d",
+    "Power.kicad_sch": "0eda23c20646c65e58757d06f3592da27191447fdf0a93d01fa3b8344cdeab50",
+    "SlotA.kicad_sch": "6afb54876498eadeed558dcd410a9a2874034bb71f8f59541e0dfc12fb3f4415",
+    "Weatherstation.kicad_sch": "f597b50c3cbbccf8ce60dc6998ed9e9757d6b16519bb6fcc5e3b36151662452a",
+    "gpio.kicad_sch": "5ce04632b9cb45270dd099b84d357740694d44d82a40aee21ffa70c7af939cb2",
+    "qwiic.kicad_sch": "60205f61633ada59ba581e467f19053063dfd2c3cab10b4604105b8166a6514b",
+    "Weatherstation.kicad_pcb": "6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f"
+  },
+  "physical_tests": "Not performed for this revision",
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see repository LICENSE"
+}

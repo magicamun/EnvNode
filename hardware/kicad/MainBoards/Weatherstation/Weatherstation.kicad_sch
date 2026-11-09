@@ -2058,7 +2058,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "03048b8a-2675-4507-a82f-d35c6e902236")
-		(property "Reference" "J3"
+		(property "Reference" "J2"
 			(at 45.72 137.7949 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2122,7 +2122,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J3")
+					(reference "J2")
 					(unit 1)
 				)
 			)
@@ -2321,7 +2321,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3fd2b6ac-4bf3-4ae0-9159-b7cd27c42b0c")
-		(property "Reference" "#PWR011"
+		(property "Reference" "#PWR01"
 			(at 57.15 59.69 0)
 			(hide yes)
 			(show_name no)
@@ -2383,7 +2383,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "#PWR011")
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)
@@ -2661,7 +2661,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ae00074e-6a54-49ee-840c-ee643754682f")
-		(property "Reference" "J4"
+		(property "Reference" "J3"
 			(at 45.72 149.2249 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2725,7 +2725,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J4")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -2823,7 +2823,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e05b0092-f56d-4b76-a919-4fc06034c19d")
-		(property "Reference" "J2"
+		(property "Reference" "J1"
 			(at 45.72 120.0149 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2887,7 +2887,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J2")
+					(reference "J1")
 					(unit 1)
 				)
 			)
@@ -2905,7 +2905,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fac7548f-45b1-44b0-aba3-08ddc1a69dc2")
-		(property "Reference" "J5"
+		(property "Reference" "J4"
 			(at 45.72 159.3849 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2969,7 +2969,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1"
-					(reference "J5")
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -3007,7 +3007,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
 			(at 29.21 59.69 0)
 			(hide yes)
 			(show_name no)

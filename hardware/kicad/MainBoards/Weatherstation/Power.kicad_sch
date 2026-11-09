@@ -708,7 +708,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "69942389-5ae4-4bf7-a8fa-70992bc0d360")
-		(property "Reference" "#PWR02"
+		(property "Reference" "#PWR03"
 			(at 118.11 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -769,7 +769,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/9b31db05-eafb-48ad-a1a1-f8bfed50e2e7"
-					(reference "#PWR02")
+					(reference "#PWR03")
 					(unit 1)
 				)
 			)

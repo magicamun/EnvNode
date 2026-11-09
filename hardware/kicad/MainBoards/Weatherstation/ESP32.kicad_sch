@@ -5,6 +5,187 @@
 	(uuid "b2e64e96-d38c-401c-b647-d2c98887e6ec")
 	(paper "A4")
 	(lib_symbols
+		(symbol "Connector:Conn_01x02_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Pin"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x02_Pin_1_1"
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:C"
 			(pin_numbers
 				(hide yes)
@@ -1334,10 +1515,6 @@
 		(uuid "49609b6a-66b0-4409-a8ae-34bf626020a7")
 	)
 	(no_connect
-		(at 97.79 58.42)
-		(uuid "8b7692d2-ab13-4c18-902e-a63c611d554b")
-	)
-	(no_connect
 		(at 163.83 109.22)
 		(uuid "b8dce876-c0b4-4311-bfda-f2c429115502")
 	)
@@ -1356,6 +1533,36 @@
 	(no_connect
 		(at 163.83 68.58)
 		(uuid "ff160447-d0c5-4b1f-955b-c4b7420f6791")
+	)
+	(wire
+		(pts
+			(xy 90.17 57.15) (xy 80.01 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "99bcab04-e759-4c4c-9bbb-21d11565aa65")
+	)
+	(wire
+		(pts
+			(xy 90.17 58.42) (xy 90.17 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b8e811bc-2936-4775-917a-4d984d4138f8")
+	)
+	(wire
+		(pts
+			(xy 97.79 58.42) (xy 90.17 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dd9c5c9d-9db1-4ef0-9f86-6776277904cb")
 	)
 	(global_label "+5V"
 		(shape input)
@@ -1707,7 +1914,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "070452cf-5bdf-4486-bb6e-8413de15387e")
-		(property "Reference" "#PWR09"
+		(property "Reference" "#PWR020"
 			(at 130.81 130.81 0)
 			(hide yes)
 			(show_name no)
@@ -1773,7 +1980,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR09")
+					(reference "#PWR020")
 					(unit 1)
 				)
 			)
@@ -1903,7 +2110,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "14e43a0d-a388-4fbc-8a29-66f115882c0b")
-		(property "Reference" "#PWR07"
+		(property "Reference" "#PWR018"
 			(at 116.84 157.48 0)
 			(hide yes)
 			(show_name no)
@@ -1969,7 +2176,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR07")
+					(reference "#PWR018")
 					(unit 1)
 				)
 			)
@@ -1993,7 +2200,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1bd24757-cf04-4dee-b7bd-4de84e2f858e")
-		(property "Reference" "#PWR04"
+		(property "Reference" "#PWR014"
 			(at 100.33 140.97 0)
 			(hide yes)
 			(show_name no)
@@ -2060,7 +2267,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR04")
+					(reference "#PWR014")
 					(unit 1)
 				)
 			)
@@ -2374,7 +2581,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2")
-		(property "Reference" "#PWR03"
+		(property "Reference" "#PWR013"
 			(at 80.01 123.19 0)
 			(hide yes)
 			(show_name no)
@@ -2441,7 +2648,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR03")
+					(reference "#PWR013")
 					(unit 1)
 				)
 			)
@@ -2459,7 +2666,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "971d596a-f403-4783-a6fd-0a18e923b96d")
-		(property "Reference" "#PWR08"
+		(property "Reference" "#PWR019"
 			(at 133.35 146.05 0)
 			(hide yes)
 			(show_name no)
@@ -2526,7 +2733,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR08")
+					(reference "#PWR019")
 					(unit 1)
 				)
 			)
@@ -2544,7 +2751,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "97fdbaa5-e444-4ae3-a359-f5228ee75394")
-		(property "Reference" "#PWR010"
+		(property "Reference" "#PWR017"
 			(at 102.87 135.89 0)
 			(hide yes)
 			(show_name no)
@@ -2605,7 +2812,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR010")
+					(reference "#PWR017")
 					(unit 1)
 				)
 			)
@@ -2703,7 +2910,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9f8848f8-03c5-4d8f-951b-2995a9cfec29")
-		(property "Reference" "#PWR06"
+		(property "Reference" "#PWR016"
 			(at 100.33 146.05 0)
 			(hide yes)
 			(show_name no)
@@ -2770,7 +2977,166 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR06")
+					(reference "#PWR016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 74.93 54.61 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bc4a6080-f69c-43da-86fa-00f041cd0a9b")
+		(property "Reference" "RST1"
+			(at 75.565 49.53 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 75.565 52.07 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+			(at 74.93 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 74.93 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 74.93 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6dd1bcc3-033e-4789-88f5-92f2d05b193d")
+		)
+		(pin "2"
+			(uuid "1144466a-96b1-4e62-a396-3d9852ad0427")
+		)
+		(instances
+			(project "Weatherstation"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
+					(reference "RST1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 80.01 54.61 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bf9d99d0-1360-4742-8c45-3fe6a32ec79d")
+		(property "Reference" "#PWR012"
+			(at 86.36 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 83.82 54.6099 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 80.01 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 80.01 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 80.01 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a22e765f-e327-44d9-807f-d97ad38eca8b")
+		)
+		(instances
+			(project "Weatherstation"
+				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
+					(reference "#PWR012")
 					(unit 1)
 				)
 			)
@@ -2788,7 +3154,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ff08bfdf-d720-423b-9e3b-109e61cd0e23")
-		(property "Reference" "#PWR05"
+		(property "Reference" "#PWR015"
 			(at 100.33 143.51 0)
 			(hide yes)
 			(show_name no)
@@ -2855,7 +3221,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/0178cf39-3ed8-4f9c-a939-b4df62f92d57"
-					(reference "#PWR05")
+					(reference "#PWR015")
 					(unit 1)
 				)
 			)
@@ -2884,12 +3250,13 @@
 			"535514dc-1130-4223-9390-ca6101dd822d" "580f559f-b540-491e-9c9d-eccbdb0e95da"
 			"67e6e93e-ee19-463d-bf7c-e3cf3210d8ff" "7cf40b9c-7bcc-4c51-bec3-39b4eab465d5"
 			"7e96d66a-97a3-49e2-bede-bb76c3655775" "845b2290-7baa-4e85-b18e-a11a22d8c215"
-			"8b7692d2-ab13-4c18-902e-a63c611d554b" "8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2"
-			"931626c2-8300-401b-9dc8-8c12a63b1643" "971d596a-f403-4783-a6fd-0a18e923b96d"
+			"8bfffb06-c0e3-4690-bd5e-c3bfa30f14e2" "931626c2-8300-401b-9dc8-8c12a63b1643"
+			"971d596a-f403-4783-a6fd-0a18e923b96d" "99bcab04-e759-4c4c-9bbb-21d11565aa65"
 			"9f8848f8-03c5-4d8f-951b-2995a9cfec29" "a8bef646-c841-4969-b095-ef4b8244d253"
 			"a9756495-e5f6-46a6-846c-e70ba4e6cd4c" "b18e180c-3778-4dbb-97c2-148c33dd2364"
 			"b57ea3cb-83be-4ccd-ab7b-85861c3b4c4c" "b8dce876-c0b4-4311-bfda-f2c429115502"
-			"d13912cf-b719-4cd3-bda6-6b43962ecf7b" "dad40e11-a556-4013-bda2-847594a519bd"
+			"b8e811bc-2936-4775-917a-4d984d4138f8" "d13912cf-b719-4cd3-bda6-6b43962ecf7b"
+			"dad40e11-a556-4013-bda2-847594a519bd" "dd9c5c9d-9db1-4ef0-9f86-6776277904cb"
 			"e6314200-410e-4e5b-ae78-fb508927545b" "e82c95c4-6863-4d96-8d8e-5a4915949383"
 			"ebdb0d14-c00a-4faf-8a7b-71ed603181d7" "f3733fb7-63cb-4028-bcd6-7b8aef72f932"
 			"f384c841-c8e6-4552-bafe-2eb6ae57e444" "f4faf7ac-bb5e-4a25-98f7-13a7452644bb"

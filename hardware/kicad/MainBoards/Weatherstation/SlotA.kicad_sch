@@ -989,7 +989,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8200fe30-f733-44e9-9184-064f93666423")
-		(property "Reference" "J1"
+		(property "Reference" "J5"
 			(at 128.27 58.42 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1093,7 +1093,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/a050e99e-b00d-4afc-833b-44ff53194a3e"
-					(reference "J1")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -1193,7 +1193,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b9f75ff1-0a0c-42ab-9382-8e2ac2097468")
-		(property "Reference" "#PWR01"
+		(property "Reference" "#PWR02"
 			(at 115.57 64.77 0)
 			(hide yes)
 			(show_name no)
@@ -1260,7 +1260,7 @@
 			)
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/a050e99e-b00d-4afc-833b-44ff53194a3e"
-					(reference "#PWR01")
+					(reference "#PWR02")
 					(unit 1)
 				)
 			)

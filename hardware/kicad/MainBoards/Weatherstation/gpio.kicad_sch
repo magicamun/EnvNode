@@ -1441,7 +1441,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2a27eaff-6b4f-4045-b4c7-8c6f8a17037c")
-		(property "Reference" "GPIO27"
+		(property "Reference" "GPIO4"
 			(at 223.52 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1509,7 +1509,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO27")
+					(reference "GPIO4")
 					(unit 1)
 				)
 			)
@@ -1527,7 +1527,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5dd3bd4c-ddf4-4eeb-83a9-bb3e9c6cf573")
-		(property "Reference" "GPIO17"
+		(property "Reference" "GPIO3"
 			(at 204.47 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1595,7 +1595,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO17")
+					(reference "GPIO3")
 					(unit 1)
 				)
 			)
@@ -1613,7 +1613,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "621d7465-4d16-45f8-b6d7-d2d23d738670")
-		(property "Reference" "GPIO14"
+		(property "Reference" "GPIO1"
 			(at 166.37 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1681,7 +1681,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO14")
+					(reference "GPIO1")
 					(unit 1)
 				)
 			)
@@ -1785,7 +1785,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c0b7ef55-4b9e-446a-ab73-234b5a170812")
-		(property "Reference" "GPIO16"
+		(property "Reference" "GPIO2"
 			(at 186.69 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1853,7 +1853,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO16")
+					(reference "GPIO2")
 					(unit 1)
 				)
 			)
@@ -1957,7 +1957,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e91f5cd7-47f5-4563-b6f9-d104a6fe637f")
-		(property "Reference" "GPIO4"
+		(property "Reference" "GPIO6"
 			(at 261.62 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2025,7 +2025,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO4")
+					(reference "GPIO6")
 					(unit 1)
 				)
 			)
@@ -2129,7 +2129,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fc8259d0-b0c7-4122-867b-61df880fb29c")
-		(property "Reference" "GPIO32"
+		(property "Reference" "GPIO5"
 			(at 242.57 92.71 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2197,7 +2197,7 @@
 		(instances
 			(project "Weatherstation"
 				(path "/bb35dba2-ff1a-441b-885c-8dff8d3b7ea1/52d09e00-3392-4a75-97d4-fe6c18a37b92"
-					(reference "GPIO32")
+					(reference "GPIO5")
 					(unit 1)
 				)
 			)
