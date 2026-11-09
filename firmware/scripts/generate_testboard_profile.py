@@ -151,8 +151,8 @@ def extract_profile_from_pcb(profile):
     connectors = []
     for ref in refs:
         pins = pads(footprints[ref])
-        kind = 'module' if ref in profile['modules'] else 'i2c' if ref.startswith('I2C') or ref in profile['i2c'] else 'gpio'
-        assert len(pins) == (14 if kind == 'module' else 4)
+        kind = 'reset' if ref in profile.get('reset',[]) else 'module' if ref in profile['modules'] else 'i2c' if ref.startswith('I2C') or ref in profile['i2c'] else 'gpio'
+        assert len(pins) == (14 if kind == 'module' else 2 if kind == 'reset' else 4)
         for pin in pins:
             pin['expected'] = [s['number'] for s in socket if pin['net'] and canonical(s['net']) == canonical(pin['net'])]
             for path in reference_paths:

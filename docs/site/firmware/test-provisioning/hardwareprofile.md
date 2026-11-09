@@ -71,18 +71,17 @@ weitere Boardtypen bleiben bei Bedarf real zu erproben. Modul-Provisioning ist i
 
 ## Reset-Prüfpigtail am Controller 0.2
 
-RST1 (Pinheader) und RST2 (JST-PH) sind parallel: **Pin 1 EN → U1/I15**,
-**Pin 2 Prüflings-GND → U1/I0**. Der zweite Kontakt ist ein Messpfad und wird
+RST1 (Pinheader) und RST2 (JST-PH) sind parallel: **Pin 1 Prüflings-GND → U1/I0**,
+**Pin 2 EN → U1/I15**. Der GND-Kontakt ist ein Messpfad und wird
 nicht dauerhaft mit der Controller-Masse verbunden. Die 40 Eingänge des aktuellen
 Adapters bleiben unverändert; ein zukünftiger 44-Pin-S3-Adapter benötigt mit den
 beiden Referenzen 46 Eingänge.
 
-Ab Test-Firmware 0.14.0 erscheinen beim Controller 0.2 zwei zusätzliche
+Ab Test-Firmware 0.15.0 erscheinen beim Controller 0.2 zwei zusätzliche
 Output-Selbsttests am Ende der Liste (64 statt 62 Kontakte). Jeweils genau einen
 Kontakt mit TP2/3 COM_IN verbinden. LOW/HIGH und Trennung zu allen 23 anderen
 Output-Pfaden sowie zum abgeschalteten Multiplexer werden geprüft. Kein Prüfling
 anschließen. Controller 0.1 bietet diese beiden Pfade nicht an.
 
-Die Firmware unterstützt zweipolige Reset-Anschlüsse in neuen Prüfprofilen.
-Bestehende Mini-/Weather-Profile erhalten keinen erfundenen Anschluss; Mini 0.10
-und Weather 0.4 benötigen nach der Hardware-Freigabe ihre eigenen Profile.
+Mini 0.10.0 und Weather 0.4 haben eigene Prüf- und Provisioningprofile einschließlich RST1.
+Ältere Profile bleiben unverändert. Die physische Abnahme der neuen Revisionen bleibt offen.

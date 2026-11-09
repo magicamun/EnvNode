@@ -40,8 +40,8 @@ nav:
       - Übersicht: hardware/index.md
       - Mainboards:
           - Übersicht: mainboards/index.md
-          - Mini: mainboards/mini/index.md
-          - Weather: mainboards/weatherstation/index.md
+          - Mini: mainboards/mini/revisions/0.10.0.md
+          - Weather: mainboards/weatherstation/revisions/0.4.md
           - ORing Power: mainboards/oring-power/index.md
       - Module:
           - Übersicht: modules/index.md

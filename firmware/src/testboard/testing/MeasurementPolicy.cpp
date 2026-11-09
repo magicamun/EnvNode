@@ -11,7 +11,9 @@ const DirectedRule WeatherRules[]={
     {"GND","Net-(D2-K)","+3V3_SYS"}
 };
 const MeasurementPolicy WeatherPolicy={"weather-ground-clamps-v2",WeatherRules,3};
-const char* const ReviewedProfiles[]={"weather-0.2-pcb0.2.1","mini-0.8-pcb0.8.1","weather-0.3-pcb0.3.0","mini-0.9-pcb0.9.0"};
+// New reset headers are passive. EEPROM/reference-diode topology is unchanged
+// on reviewed Mini 0.10.0 and Weather 0.4; physical acceptance remains open.
+const char* const ReviewedProfiles[]={"weather-0.2-pcb0.2.1","mini-0.8-pcb0.8.1","weather-0.3-pcb0.3.0","mini-0.9-pcb0.9.0","mini-0.10-pcb0.10.0","weather-0.4-pcb0.4"};
 const MeasurementPolicy Policy={"eeprom-ground-clamp-v1",Rules,2};
 bool equal(const char* a,const char* b){return a&&b&&!strcmp(a,b);}
 }
@@ -30,7 +32,7 @@ const MeasurementPolicy* measurementPolicy(const BoardDefinition& b) {
         for(size_t j=0;j<x.count;++j)if(x.contacts[j].number!=y.contacts[j].number||
             x.contacts[j].expected!=y.contacts[j].expected||!equal(x.contacts[j].net,y.contacts[j].net))return nullptr;
     }
-    return equal(b.id,"weather-0.3-pcb0.3.0")?&WeatherPolicy:&Policy;
+    return (equal(b.id,"weather-0.3-pcb0.3.0")||equal(b.id,"weather-0.4-pcb0.4"))?&WeatherPolicy:&Policy;
 }
 int forwardRule(const MeasurementPolicy* p,const char* a,const char* b){
     if(p&&a&&b)for(size_t i=0;i<p->count;++i)if(equal(a,p->rules[i].from)&&equal(b,p->rules[i].to))return int(i);

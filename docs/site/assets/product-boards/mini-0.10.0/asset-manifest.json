@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "id": "mini-0.10.0",
+  "guide": "mainboards/mini/revisions/0.10.0.md",
+  "pcb_source": "main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
+  "pcb_sha256": "5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557",
+  "repository_commit": "e12484ff4e307556ce0821ca8ad457b1390616ba",
+  "generator": "tools/product_assets.py",
+  "renderer": "KiCad pcb render",
+  "bare_render_policy": "Component model entries are removed from a temporary PCB copy; source copper, mask, silkscreen, footprints and pads are unchanged.",
+  "removed_component_models": 23,
+  "assets": {
+    "3d-assembled-front.png": {
+      "sha256": "0688a61f91fdc06f1f1392efe1b6838aaa8874d3866994ab848f96da18f2edf7",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "front",
+      "projection": "perspective",
+      "component_models": true
+    },
+    "3d-assembled-back.png": {
+      "sha256": "a72d26abe52f3d6da2cc43307e7ac93aefb848130065fb854837162ca75c802f",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "back",
+      "projection": "perspective",
+      "component_models": true
+    },
+    "3d-bare-front.png": {
+      "sha256": "58a76e8b0f53094607d3dd2fc005cd01bce4f7826284479ba16e290750429c4d",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "front",
+      "projection": "perspective",
+      "component_models": false
+    },
+    "3d-bare-back.png": {
+      "sha256": "951403ee3a32162c62f355d4eb410fdb8a3f5230fdb9c1583049a3610e96fc92",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "back",
+      "projection": "perspective",
+      "component_models": false
+    },
+    "2d-assembled-front.png": {
+      "sha256": "1674db25d04538821f0074b1f9f72a569565d18fb4afe0a25a8bc552e17156fa",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "front",
+      "projection": "orthographic",
+      "component_models": true
+    },
+    "2d-assembled-back.png": {
+      "sha256": "7a4865dbb25682cc3cffc8f0b19d800c88fb528acf09d0352bf34fbf5a8c34a8",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "back",
+      "projection": "orthographic",
+      "component_models": true
+    },
+    "2d-bare-front.png": {
+      "sha256": "7cb3733ea5f7b9818f3ec285b6aca7f4022f2914f4624768813225276c9ed599",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "front",
+      "projection": "orthographic",
+      "component_models": false
+    },
+    "2d-bare-back.png": {
+      "sha256": "0b08e8c6c3a87e35c76747be8878310888452e8c441cc3934e36dadba2787c8f",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "back",
+      "projection": "orthographic",
+      "component_models": false
+    }
+  }
+}

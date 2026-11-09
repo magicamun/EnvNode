@@ -43,7 +43,13 @@ void test_all_generated_maps_round_trip_with_original_pin_mappings() {
         const auto* record=boardIdentityProfileAt(i);BoardPortMap p;
         TEST_ASSERT_TRUE(BoardPortMapCodec::decode(record->portMap,record->portMapSize,p));
         const auto* original=boardProfile(record->id,record->revision);TEST_ASSERT_NOT_NULL(original);
-        TEST_ASSERT_TRUE(boardPortMapRuntimeSupported(p,{0,8,2}));
+        TEST_ASSERT_TRUE(boardPortMapRuntimeSupported(p,p.minimumFirmware));
+        if((record->id==BoardProfileId::EnvNodeMini&&record->revision.minor==10)||
+           (record->id==BoardProfileId::EnvNodeWeather&&record->revision.minor==4)) {
+            TEST_ASSERT_EQUAL(0,p.minimumFirmware.major);TEST_ASSERT_EQUAL(8,p.minimumFirmware.minor);
+            TEST_ASSERT_EQUAL(11,p.minimumFirmware.patch);
+            TEST_ASSERT_FALSE(boardPortMapRuntimeSupported(p,{0,8,10}));
+        }
         TEST_ASSERT_EQUAL(original->gpioCount,p.gpioCount);TEST_ASSERT_EQUAL(original->i2cBusCount,p.busCount);
         for(size_t g=0;g<p.gpioCount;++g){TEST_ASSERT_EQUAL(original->gpios[g].resource.number,p.gpios[g].pin);TEST_ASSERT_EQUAL(static_cast<uint8_t>(original->gpios[g].capabilities),p.gpios[g].capabilities);}
         uint8_t bytes[1024];size_t n=0;TEST_ASSERT_TRUE(BoardPortMapCodec::encode(p,bytes,sizeof(bytes),n));

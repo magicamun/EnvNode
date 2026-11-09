@@ -62,16 +62,16 @@ void test_reset_outputs_are_gated_by_controller_and_selftest_isolates_all_paths(
         TEST_ASSERT_TRUE(test.start(loop.test,0,100));finish(test);
         TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Passed),unsigned(test.result(loop.test).verdict));
         TEST_ASSERT_EQUAL(0,loop.selections.front().output.device);
-        TEST_ASSERT_EQUAL(pin?0:15,loop.selections.front().output.channel);
+        TEST_ASSERT_EQUAL(pin?15:0,loop.selections.front().output.channel);
         TEST_ASSERT_EQUAL(208,loop.reads);TEST_ASSERT_FALSE(loop.enabled);
     }
     MuxAddress out{9,9},in{9,9};
     TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Reset,1,2,out,in));
     TEST_ASSERT_EQUAL(9,out.device);
     TEST_ASSERT_TRUE(resolveFixturePath(selection.definition(),Pigtail::Reset,1,2,out,in));
-    TEST_ASSERT_EQUAL(0,out.device);TEST_ASSERT_EQUAL(15,out.channel);
+    TEST_ASSERT_EQUAL(0,out.device);TEST_ASSERT_EQUAL(0,out.channel);
     TEST_ASSERT_TRUE(resolveFixturePath(selection.definition(),Pigtail::Reset,2,14,out,in));
-    TEST_ASSERT_EQUAL(0,out.channel);
+    TEST_ASSERT_EQUAL(15,out.channel);
     TEST_ASSERT_FALSE(resolveFixturePath(selection.definition(),Pigtail::Reset,3,14,out,in));
 }
 

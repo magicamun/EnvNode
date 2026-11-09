@@ -2,17 +2,30 @@
 # Exact source boards for native PCB renderings.
 - id: mini-0.9.0
   guide: mainboards/mini/index.md
-  pcb: main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb
+  git_ref: 98704fb24562baecc5ebb4e343ff43aa8d2e41db
+  git_path: hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb
   sha256: dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105
   hero_front: assets/images/mini-0.9.0/top.png
   hero_back: assets/images/mini-0.9.0/bottom.png
+  archive: true
+- id: mini-0.10.0
+  guide: mainboards/mini/revisions/0.10.0.md
+  shop_assets: true
+  pcb: main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb
+  sha256: 5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557
 - id: weatherstation-0.3.0
   guide: mainboards/weatherstation/index.md
-  shop_assets: true
-  pcb: main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb
+  git_ref: 98704fb24562baecc5ebb4e343ff43aa8d2e41db
+  git_path: hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb
   sha256: 283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf
   hero_front: assets/images/weatherstation-0.3.0/top.png
   hero_back: assets/images/weatherstation-0.3.0/bottom.png
+  archive: true
+- id: weatherstation-0.4
+  guide: mainboards/weatherstation/revisions/0.4.md
+  shop_assets: true
+  pcb: main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb
+  sha256: 6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f
 - id: analog-0.6
   guide: modules/analog-hydro-pressure/index.md
   pcb: analog-hydro-pressure/hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb

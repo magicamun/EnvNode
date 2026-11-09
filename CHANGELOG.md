@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Mini 0.10.0 and Weather 0.4: reviewed reset headers (GND/EN), grounded
+  mounting pads, revision-bound hardware/continuity/provisioning profiles and
+  current board images. EnvNode 0.8.11 / Tester 0.15.0 add these revisions;
+  Controller 0.2 reset routing matches the mainboards with a 1:1 cable.
+
 - ORing Power 0.1.2: C2 system reservoir changes from 10 µF to 47 µF / 6.3 V,
   Nichicon UWG0J470MCL1GB (DigiKey 493-9737-1-ND), retaining CP_Elec_5x5.4.
   Correct the interchanged C2/C4 functional descriptions: C4 is the existing

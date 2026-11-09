@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "id": "weatherstation-0.4",
+  "guide": "mainboards/weatherstation/revisions/0.4.md",
+  "pcb_source": "main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
+  "pcb_sha256": "6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f",
+  "repository_commit": "e12484ff4e307556ce0821ca8ad457b1390616ba",
+  "generator": "tools/product_assets.py",
+  "renderer": "KiCad pcb render",
+  "bare_render_policy": "Component model entries are removed from a temporary PCB copy; source copper, mask, silkscreen, footprints and pads are unchanged.",
+  "removed_component_models": 34,
+  "assets": {
+    "3d-assembled-front.png": {
+      "sha256": "eba81cc42301fe2010f12fb6168f6629403c4f49fd6fb19eb4f67d1a66885616",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "front",
+      "projection": "perspective",
+      "component_models": true
+    },
+    "3d-assembled-back.png": {
+      "sha256": "9f9dbcc6b6f55eeb2022e345e0464d42e132d81a8a18055638559cbfaa2e3392",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "back",
+      "projection": "perspective",
+      "component_models": true
+    },
+    "3d-bare-front.png": {
+      "sha256": "428c5158a98d16e8bce9a0337d2ea83424dc474f917fb0cfa7dc857c1f1620e0",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "front",
+      "projection": "perspective",
+      "component_models": false
+    },
+    "3d-bare-back.png": {
+      "sha256": "2b7df49f4c4587026d5496a5917a76d71297579a2afde31fa1085b7f0fdf739c",
+      "size_px": [
+        1768,
+        1768
+      ],
+      "side": "back",
+      "projection": "perspective",
+      "component_models": false
+    },
+    "2d-assembled-front.png": {
+      "sha256": "25e3e3796c410a214bfbe2a20be8250bafd352cd16ca52a9f5b5e60120f587cf",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "front",
+      "projection": "orthographic",
+      "component_models": true
+    },
+    "2d-assembled-back.png": {
+      "sha256": "3b37a05053e7a707328723b91ac29d24969b6a781963ddda6775e432f32acba9",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "back",
+      "projection": "orthographic",
+      "component_models": true
+    },
+    "2d-bare-front.png": {
+      "sha256": "dd4e8c444021a9edacb69ffa33a7a1536cfd190ac7f310b5839896e4cb710ebf",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "front",
+      "projection": "orthographic",
+      "component_models": false
+    },
+    "2d-bare-back.png": {
+      "sha256": "373fb51f6746ac93febea3076cf1122b98807ef83e79f91384fb67cf8eedbe13",
+      "size_px": [
+        2384,
+        2384
+      ],
+      "side": "back",
+      "projection": "orthographic",
+      "component_models": false
+    }
+  }
+}

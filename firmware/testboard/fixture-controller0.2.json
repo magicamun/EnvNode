@@ -4,7 +4,7 @@
   "id": "controller-0.2",
   "revision": "0.2",
   "source": "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb",
-  "sha256": "6eff429a96edeca8d780727fbe87ebd33315a2b54fc0e0a33c5a901c69c7e48d",
+  "sha256": "54f346a9bd8d84590356683723dcc649b2601897429a01b7920e011ac3eb759f",
   "gpios": {
     "inputSelect": [
       32,
@@ -130,11 +130,11 @@
     "reset": [
       [
         0,
-        15
+        0
       ],
       [
         0,
-        0
+        15
       ]
     ]
   },

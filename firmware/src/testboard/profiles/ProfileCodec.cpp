@@ -82,7 +82,7 @@ bool decodeCatalog(const uint8_t* data, size_t size, RemoteCatalog& out) {
         auto& e=out.entries[i];
         if (!array(r,7) || !text(r,e.id,sizeof(e.id)) || !safeProfileFilename(e.id)
             || !text(r,e.name,sizeof(e.name)) || !text(r,e.identity,sizeof(e.identity)) || !revision(e.identity,1)
-            || !text(r,e.pcb,sizeof(e.pcb)) || !revision(e.pcb,2)
+            || !text(r,e.pcb,sizeof(e.pcb)) || (!revision(e.pcb,2) && !revision(e.pcb,1))
             || !text(r,e.filename,sizeof(e.filename)) || !safeProfileFilename(e.filename)
             || !number(r,MaximumProfileBytes,e.bytes) || !e.bytes || !text(r,e.sha256,sizeof(e.sha256)) || !hex(e.sha256)) return false;
         const String expected=String(e.id)+"."+e.sha256+".cbor";

@@ -7,7 +7,8 @@
       "profiles": [
         "weather-0.2-pcb0.2.1",
         "mini-0.8-pcb0.8.1",
-        "mini-0.9-pcb0.9.0"
+        "mini-0.9-pcb0.9.0",
+        "mini-0.10-pcb0.10.0"
       ],
       "binding": "Exact built-in ID, hardware/PCB revision, input numbers/nets and connector IDs/types/contact numbers/nets/expected masks. Unknown or changed electrical profiles have no exceptions.",
       "rules": [
@@ -27,7 +28,8 @@
     {
       "id": "weather-ground-clamps-v2",
       "profiles": [
-        "weather-0.3-pcb0.3.0"
+        "weather-0.3-pcb0.3.0",
+        "weather-0.4-pcb0.4"
       ],
       "binding": "Exact built-in ID, hardware/PCB revision, input numbers/nets and connector IDs/types/contact numbers/nets/expected masks. Unknown or changed electrical profiles have no exceptions.",
       "rules": [

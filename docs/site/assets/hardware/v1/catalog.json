@@ -40,6 +40,22 @@
       "portMap": "mini-0.9-pcb0.9.0.67ec5da85b34040190ca7fbb7509e9405e6259d97f221f6524a0bff415e5846b.portmap.cbor",
       "portMapSha256": "67ec5da85b34040190ca7fbb7509e9405e6259d97f221f6524a0bff415e5846b",
       "portMapBytes": 120
+    },
+    {
+      "id": "mini-0.10-pcb0.10.0",
+      "filename": "mini-0.10-pcb0.10.0.11f656b75a386a12c4e8889d64ed59902f2e5f54f59a8e28d8670b3318f05772.json",
+      "sha256": "11f656b75a386a12c4e8889d64ed59902f2e5f54f59a8e28d8670b3318f05772",
+      "portMap": "mini-0.10-pcb0.10.0.ff157c28e16d2ab1ff8f608088e6dbc0d3f0172f4034ec42775cb1d6a3a7bc8b.portmap.cbor",
+      "portMapSha256": "ff157c28e16d2ab1ff8f608088e6dbc0d3f0172f4034ec42775cb1d6a3a7bc8b",
+      "portMapBytes": 120
+    },
+    {
+      "id": "weather-0.4-pcb0.4",
+      "filename": "weather-0.4-pcb0.4.7bcb6e992a9d3ccb68d2696cf12750040e7567df5fb8563bdf8e2825df3656ba.json",
+      "sha256": "7bcb6e992a9d3ccb68d2696cf12750040e7567df5fb8563bdf8e2825df3656ba",
+      "portMap": "weather-0.4-pcb0.4.105f821aed1f033b6f0b59262e34ed8e02a062dca6ba1d8acd62d1d5399627d1.portmap.cbor",
+      "portMapSha256": "105f821aed1f033b6f0b59262e34ed8e02a062dca6ba1d8acd62d1d5399627d1",
+      "portMapBytes": 110
     }
   ]
 }

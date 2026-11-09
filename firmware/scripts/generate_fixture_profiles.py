@@ -47,7 +47,7 @@ def generate_profiles():
         hits=[(d,c) for d,ref in enumerate(('U1','U2')) for c,pad in enumerate(CHANNEL_PADS) if f[ref][pad]==f['RST1'][pin]]
         assert len(hits)==1,(pin,hits)
         reset.append(hits[0])
-    assert reset==[(0,15),(0,0)]
+    assert reset==[(0,0),(0,15)]
     reset_header='// EnvNode: see repository LICENSE. Generated from Controller 0.2 PCB.\nstatic const FixtureDefinition FixtureRevision02 = [] { auto f = FixtureRevision01; f.routing.reset[0] = {%d,%d}; f.routing.reset[1] = {%d,%d}; return f; }();\n'%(*reset[0],*reset[1])
     assert f['TP2']=={1:'GND',2:'/TEST_DRIVE',3:'/COM_IN'}
     assert set(f['R6'].values())=={'/COM_OUT','/TEST_DRIVE'}

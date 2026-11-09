@@ -73,8 +73,28 @@ void test_new_revisions_use_40_inputs_and_forward_reference_paths() {
     TEST_ASSERT_EQUAL_STRING("J7",mini->connectors[2].id);TEST_ASSERT_EQUAL_STRING("J10",mini->connectors[5].id);
     TEST_ASSERT_TRUE((mini->connectors[7].contacts[2].expected>>38)&1); // Slot B address strap
 }
+void test_new_board_revisions_have_explicit_reset_profiles_and_preserve_legacy() {
+    FixtureSelection selection;TEST_ASSERT_TRUE(selection.selectCode(3));
+    for(const char* id:{"mini-0.10-pcb0.10.0","weather-0.4-pcb0.4"}) {
+        const auto* b=findBoard(id);TEST_ASSERT_NOT_NULL(b);TEST_ASSERT_EQUAL(40,b->inputCount);
+        const auto& reset=b->connectors[b->count-1];
+        TEST_ASSERT_EQUAL_STRING("RST1",reset.id);TEST_ASSERT_EQUAL(unsigned(Pigtail::Reset),unsigned(reset.pigtail));
+        TEST_ASSERT_EQUAL(2,reset.count);TEST_ASSERT_EQUAL_STRING("GND",reset.contacts[0].net);
+        TEST_ASSERT_EQUAL_UINT64(uint64_t(1)<<1,reset.contacts[1].expected);
+        TEST_ASSERT_EQUAL_UINT64((uint64_t(1)<<13)|(uint64_t(1)<<31)|(uint64_t(1)<<37)|(uint64_t(1)<<39),reset.contacts[0].expected);
+        SimulatedFixture fixture(&selection);TestRunner runner(fixture);uint32_t now=0;
+        TEST_ASSERT_TRUE(runner.load(*b));
+        for(size_t i=0;i<b->count;++i) {
+            fixture.connect(*b,i,SimulatedFault::None);TEST_ASSERT_TRUE(runner.start(now));finish(runner,now);runner.next();
+        }
+        TEST_ASSERT_EQUAL(Verdict::Passed,runner.overall());
+    }
+    TEST_ASSERT_EQUAL(8,findBoard("mini-0.9-pcb0.9.0")->count);
+    TEST_ASSERT_EQUAL(19,findBoard("weather-0.3-pcb0.3.0")->count);
+}
+
 void test_published_profiles_decode_to_exact_builtin_expectations_and_positions() {
-    auto c=catalog();TEST_ASSERT_EQUAL(4,c.count);
+    auto c=catalog();TEST_ASSERT_EQUAL(boardCount(),c.count);
     for(size_t i=0;i<c.count;++i) {
         const auto& e=c.entries[i];auto data=file(e.filename);auto p=std::unique_ptr<OwnedProfile>(new OwnedProfile());
         TEST_ASSERT_TRUE(decodeProfile(data.data(),data.size(),e,*p));
@@ -108,6 +128,19 @@ void test_catalog_and_filename_limits_reject_unknown_schema_truncation_and_paths
     for(const char* path:{"","../test.cbor","https://evil/profile.cbor","a/b.cbor","a\\b.cbor",".secret","abc?x=1"}) TEST_ASSERT_FALSE(safeProfileFilename(path));
     TEST_ASSERT_TRUE(safeProfileFilename("mini-0.9-pcb0.9.0.cbor"));
 }
+void test_pcb_revisions_allow_actual_two_or_three_part_cad_versions_only() {
+    for(const char* revision:{"0.4","0.4.0"}) {
+        auto c=catalog();strcpy(c.entries[c.count-1].pcb,revision);
+        auto bytes=encodedCatalog(c);RemoteCatalog decoded;
+        TEST_ASSERT_TRUE(decodeCatalog(bytes.data(),bytes.size(),decoded));
+    }
+    for(const char* revision:{"0","0.4.","0..4","0.4.0.0","0.256","256.4","0.4x"}) {
+        auto c=catalog();strcpy(c.entries[c.count-1].pcb,revision);
+        auto bytes=encodedCatalog(c);RemoteCatalog decoded;
+        TEST_ASSERT_FALSE(decodeCatalog(bytes.data(),bytes.size(),decoded));
+    }
+}
+
 void test_profile_rejects_truncation_metadata_conflicts_and_unknown_schema() {
     auto c=catalog();auto e=c.entries[2];auto data=file(e.filename);auto p=std::unique_ptr<OwnedProfile>(new OwnedProfile());
     TEST_ASSERT_FALSE(decodeProfile(data.data(),data.size()-1,e,*p));
@@ -144,7 +177,7 @@ std::vector<uint8_t> encodedProfile(const BoardDefinition& b, int fault, RemoteP
     w.writeText("");TEST_ASSERT_EQUAL(CompactCborStatus::Success,w.status());bytes.resize(w.size());e.bytes=bytes.size();return bytes;
 }
 void test_reset_profile_decodes_and_runs_two_contacts_with_selected_controller() {
-    Contact contacts[]={{1,"EN",0,0,uint64_t(1)<<1},{2,"GND",1,0,(uint64_t(1)<<13)|(uint64_t(1)<<31)|(uint64_t(1)<<37)|(uint64_t(1)<<39)}};
+    Contact contacts[]={{1,"GND",0,0,(uint64_t(1)<<13)|(uint64_t(1)<<31)|(uint64_t(1)<<37)|(uint64_t(1)<<39)},{2,"EN",1,0,uint64_t(1)<<1}};
     Connector connector{"RST",Pigtail::Reset,2,contacts};
     BoardDefinition board=*findBoard("mini-0.9-pcb0.9.0");
     board.id="reset-test-profile";board.connectors=&connector;board.count=1;
@@ -171,14 +204,14 @@ void test_profile_semantics_reject_invalid_geometry_indices_masks_and_reference_
 void test_repository_keeps_embedded_profiles_offline_and_defers_during_measurement() {
     Transport t;t.offline=true;ProfileRepository repo(t);
     repo.service(false,false);repo.service(true,true);TEST_ASSERT_EQUAL(0,t.calls);
-    repo.service(true,false);TEST_ASSERT_EQUAL(1,t.calls);TEST_ASSERT_EQUAL(4,repo.count());
+    repo.service(true,false);TEST_ASSERT_EQUAL(1,t.calls);TEST_ASSERT_EQUAL(boardCount(),repo.count());
     SimulatedFixture f;TestRunner r(f);TEST_ASSERT_TRUE(repo.load("mini-0.9-pcb0.9.0",r));
     TEST_ASSERT_EQUAL_PTR(findBoard("mini-0.9-pcb0.9.0"),r.board());
     f.connect(*r.board(),0,SimulatedFault::None);r.start(0);
     repo.requestRefresh();repo.service(true,true);TEST_ASSERT_FALSE(repo.load("weather-0.3-pcb0.3.0",r));TEST_ASSERT_EQUAL(1,t.calls);
 }
 void test_remote_load_is_atomic_and_failed_download_falls_back_to_same_revision() {
-    Transport t;ProfileRepository repo(t);repo.service(true,false);TEST_ASSERT_EQUAL_STRING("ready",repo.status());TEST_ASSERT_EQUAL(4,repo.count());
+    Transport t;ProfileRepository repo(t);repo.service(true,false);TEST_ASSERT_EQUAL_STRING("ready",repo.status());TEST_ASSERT_EQUAL(boardCount(),repo.count());
     SimulatedFixture f;TestRunner r(f);TEST_ASSERT_TRUE(repo.load("mini-0.9-pcb0.9.0",r));
     TEST_ASSERT_NOT_EQUAL(findBoard("mini-0.9-pcb0.9.0"),r.board());
     const auto* saved=r.board();TEST_ASSERT_NOT_NULL(repo.active(saved->id));TEST_ASSERT_EQUAL(64,t.expectedHash.length());
@@ -191,7 +224,7 @@ void test_failed_catalog_refresh_preserves_active_profile_and_catalog() {
     Transport t;ProfileRepository repo(t);repo.service(true,false);SimulatedFixture f;TestRunner r(f);
     repo.load("mini-0.9-pcb0.9.0",r);const auto* saved=r.board();
     t.badCatalog=true;repo.requestRefresh();repo.service(true,false);
-    TEST_ASSERT_EQUAL_PTR(saved,r.board());TEST_ASSERT_EQUAL(4,repo.count());TEST_ASSERT_EQUAL_STRING("unavailable",repo.status());
+    TEST_ASSERT_EQUAL_PTR(saved,r.board());TEST_ASSERT_EQUAL(boardCount(),repo.count());TEST_ASSERT_EQUAL_STRING("unavailable",repo.status());
     RemoteProfileEntry e{};bool remote=false;TEST_ASSERT_TRUE(repo.entryAt(0,e,remote));TEST_ASSERT_TRUE(remote);
 }
 void test_catalog_revision_conflict_is_rejected_without_touching_active_data() {
@@ -209,14 +242,14 @@ void test_remote_only_board_can_be_loaded_and_survives_catalog_removal_for_its_s
     const auto filename=std::string(e.id)+"."+e.sha256+".cbor";strcpy(e.filename,filename.c_str());
     auto c=catalog();c.entries[c.count++]=e;
     Transport t;t.replacements["catalog.cbor"]=encodedCatalog(c);t.replacements[e.filename]=bytes;
-    ProfileRepository repo(t);repo.service(true,false);TEST_ASSERT_EQUAL(5,repo.count());
+    ProfileRepository repo(t);repo.service(true,false);TEST_ASSERT_EQUAL(boardCount()+1,repo.count());
     SimulatedFixture f;TestRunner r(f);TEST_ASSERT_TRUE(repo.load(e.id,r));TEST_ASSERT_EQUAL_STRING(e.id,r.board()->id);
     const auto* saved=r.board();t.replacements.erase("catalog.cbor");repo.requestRefresh();repo.service(true,false);
     TEST_ASSERT_EQUAL_PTR(saved,r.board());TEST_ASSERT_TRUE(repo.load(e.id,r));
     f.connect(*r.board(),0,SimulatedFault::None);r.start(0);uint32_t now=0;finish(r,now);TEST_ASSERT_EQUAL(Verdict::Passed,r.verdict(0));
     strcpy(e.sha256,std::string(64,'d').c_str());
     strcpy(e.filename,(std::string(e.id)+"."+e.sha256+".cbor").c_str());
-    c.entries[4]=e;t.replacements["catalog.cbor"]=encodedCatalog(c);repo.requestRefresh();repo.service(true,false);
+    c.entries[c.count-1]=e;t.replacements["catalog.cbor"]=encodedCatalog(c);repo.requestRefresh();repo.service(true,false);
     TEST_ASSERT_EQUAL_STRING("revision-conflict",repo.status());TEST_ASSERT_EQUAL_PTR(saved,r.board());
 }
 struct Logger : ILogger {
@@ -254,6 +287,8 @@ void test_web_routes_use_the_loaded_remote_model_and_lock_refresh_during_test() 
 
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_pcb_revisions_allow_actual_two_or_three_part_cad_versions_only);
+    RUN_TEST(test_new_board_revisions_have_explicit_reset_profiles_and_preserve_legacy);
     RUN_TEST(test_reset_profile_decodes_and_runs_two_contacts_with_selected_controller);
     RUN_TEST(test_new_revisions_use_40_inputs_and_forward_reference_paths);
     RUN_TEST(test_published_profiles_decode_to_exact_builtin_expectations_and_positions);

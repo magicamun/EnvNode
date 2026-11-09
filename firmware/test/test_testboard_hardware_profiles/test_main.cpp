@@ -93,9 +93,9 @@ struct Fixture {
 void setUp(){Wire=TwoWire();Wire1=TwoWire();}
 void tearDown(){}
 void test_generated_catalog_and_all_profiles_decode_and_match_metadata(){
-    Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());TEST_ASSERT_EQUAL(7,repo.count());
+    Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());TEST_ASSERT_EQUAL(9,repo.count());
     for(size_t i=0;i<repo.count();++i){const auto& e=*repo.at(i);const auto* loaded=repo.load(e.id,e.sha256);TEST_ASSERT_NOT_NULL(loaded);TEST_ASSERT_EQUAL(e.bytes,loaded->size);}
-    TEST_ASSERT_EQUAL(7,t.verified);
+    TEST_ASSERT_EQUAL(9,t.verified);
 }
 void test_catalog_rejects_truncation_duplicate_ids_paths_and_unknown_schema(){
     auto c=catalog();auto bytes=catalogBytes(*c);HardwareProfileCatalog rejected;
@@ -108,7 +108,7 @@ void test_catalog_rejects_truncation_duplicate_ids_paths_and_unknown_schema(){
 void test_failed_refresh_and_hash_failure_preserve_catalog_and_loaded_profile(){
     Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());auto e=*repo.at(0);
     const auto* first=repo.load(e.id,e.sha256);TEST_ASSERT_NOT_NULL(first);
-    t.offline=true;TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL(7,repo.count());TEST_ASSERT_EQUAL_PTR(first,repo.load(e.id,e.sha256));
+    t.offline=true;TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL(9,repo.count());TEST_ASSERT_EQUAL_PTR(first,repo.load(e.id,e.sha256));
     t.offline=false;t.rejectDigest=true;auto second=*repo.at(1);TEST_ASSERT_NULL(repo.load(second.id,second.sha256));
     TEST_ASSERT_EQUAL_PTR(first,repo.load(e.id,e.sha256));
     TEST_ASSERT_NULL(repo.load(e.id,"stale"));
@@ -116,7 +116,7 @@ void test_failed_refresh_and_hash_failure_preserve_catalog_and_loaded_profile(){
 void test_catalog_content_conflict_and_profile_metadata_mismatch_are_rejected(){
     Transport t;HardwareProfileRepository repo(t);TEST_ASSERT_TRUE(repo.refresh());auto c=catalog();
     strcpy(c->entries[0].name,"Conflicting name");t.overrides["provisioning-catalog.cbor"]=catalogBytes(*c);
-    TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL_STRING("identity-conflict",repo.status());TEST_ASSERT_EQUAL(7,repo.count());
+    TEST_ASSERT_FALSE(repo.refresh());TEST_ASSERT_EQUAL_STRING("identity-conflict",repo.status());TEST_ASSERT_EQUAL(9,repo.count());
     c=catalog();auto bytes=file(c->entries[0].filename);BoardPortMap map;TEST_ASSERT_TRUE(BoardPortMapCodec::decode(bytes.data(),bytes.size(),map));
     strcpy(map.name,"Wrong board");bytes.resize(1024);size_t n=0;TEST_ASSERT_TRUE(BoardPortMapCodec::encode(map,bytes.data(),bytes.size(),n));bytes.resize(n);
     t.overrides[c->entries[0].filename]=bytes;TEST_ASSERT_NULL(repo.load(c->entries[0].id,c->entries[0].sha256));

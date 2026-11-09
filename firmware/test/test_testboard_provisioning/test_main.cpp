@@ -95,7 +95,7 @@ void test_confirmation_and_invalid_identity_cannot_touch_i2c() {
     f.form(); f.server.arguments["serialNumber"] = "bad<value>";
     f.server.request("/device/board-identity/write", HTTP_POST);
     TEST_ASSERT_EQUAL(400, f.pages.status); TEST_ASSERT_EQUAL(0, Wire.begins);
-    auto identity = f.identity(); identity.revision.minor = 10;
+    auto identity = f.identity(); identity.revision.minor = 99;
     TEST_ASSERT_EQUAL(BoardProvisioningStatus::InvalidIdentity, f.administration.provisionBoardIdentity(identity, true).status);
     TEST_ASSERT_EQUAL(0, Wire.begins);
 }
@@ -183,7 +183,7 @@ void test_explicit_revision_selection_preserves_legacy_and_supports_new_boards()
     TEST_ASSERT_EQUAL(200,legacy.pages.status);TEST_ASSERT_EQUAL(8,legacy.administration.provisioningBoardIdentity().revision.minor);
 }
 void test_invalid_or_ambiguous_revision_keys_never_touch_the_bus() {
-    for(const char* key:{"","2","2:0","2:0.10","2:0.9x","2:-0.9","2:256.9","2:0.256","2:0.9.0","65536:0.9","1:0.9"}) {
+    for(const char* key:{"","2","2:0","2:0.99","2:0.9x","2:-0.9","2:256.9","2:0.256","2:0.9.0","65536:0.9","1:0.9"}) {
         Fixture f;f.server.arguments={{"boardProfileKey",key},{"serialNumber","INVALID"},{"confirmProvisioning","1"}};
         const int before=Wire.begins;f.server.request("/hardware/board-identity/write",HTTP_POST);
         TEST_ASSERT_EQUAL(400,f.pages.status);TEST_ASSERT_EQUAL(before,Wire.begins);
@@ -285,9 +285,9 @@ void test_external_board_provisioning_writes_self_contained_map_and_identity() {
 }
 
 void test_provisioning_choices_remain_sorted_after_core_integration() {
-    Fixture f;const char* names[]={"EnvNode Mainboard","EnvNode Mini","EnvNode Mini","EnvNode Weather","EnvNode Weather"};
-    const unsigned minors[]={3,8,9,2,3};
-    for(size_t i=0;i<5;++i){ProvisioningBoardProfile p;TEST_ASSERT_TRUE(f.administration.provisioningProfileAt(i,p));
+    Fixture f;const char* names[]={"EnvNode Mainboard","EnvNode Mini","EnvNode Mini","EnvNode Mini","EnvNode Weather","EnvNode Weather","EnvNode Weather"};
+    const unsigned minors[]={3,8,9,10,2,3,4};
+    for(size_t i=0;i<7;++i){ProvisioningBoardProfile p;TEST_ASSERT_TRUE(f.administration.provisioningProfileAt(i,p));
         TEST_ASSERT_EQUAL_STRING(names[i],p.displayName);TEST_ASSERT_EQUAL(minors[i],p.revision.minor);}
 }
 
