@@ -5631,7 +5631,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9894466d-a968-432e-97d6-4e8c2005b174")
-		(property "Reference" "J9"
+		(property "Reference" "I2C0_2"
 			(at 226.314 131.318 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5699,7 +5699,7 @@
 		(instances
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34"
-					(reference "J9")
+					(reference "I2C0_2")
 					(unit 1)
 				)
 			)
@@ -6277,7 +6277,7 @@
 		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "f4d8149e-ddc7-4f5a-9911-d57fc86804e7")
-		(property "Reference" "I2C0"
+		(property "Reference" "I2C0_1"
 			(at 184.15 130.8099 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6347,7 +6347,7 @@
 		(instances
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34"
-					(reference "I2C0")
+					(reference "I2C0_1")
 					(unit 1)
 				)
 			)

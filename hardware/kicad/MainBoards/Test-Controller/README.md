@@ -1,8 +1,8 @@
 # Test Controller — revision 0.2
 
 ESP32-DevKitC controller for passive mainboard continuity tests and a separate
-I²C provisioning connection. Used with the [Input Adapter](../Input-Adapter/README.md)
-and [Module Adapter](../Module-Adapter/README.md). This project supersedes the
+I²C provisioning connection. Used with the [Input Adapter](../../Adapter/Input-Adapter/README.md)
+and [Module Adapter](../../Adapter/Module-Adapter/README.md). This project supersedes the
 controller/output section of the former monolithic Test-Provisioning board.
 
 ## Components and connections
@@ -10,8 +10,8 @@ controller/output section of the former monolithic Test-Provisioning board.
 - **U3:** removable 38-pin ESP32 DevKitC. GPIO34 reads COM_IN; GPIO17 drives
   COM_OUT through **R6, 1 kΩ**. **R9, 2.2 kΩ**, and **C6, 100 nF**, connect
   COM_IN to controller GND. Input multiplexer COMs arrive through J8 pin 9.
-- **U1:** CD74HC4067 for one four-contact GPIO pigtail on J1 and one four-contact
-  I²C test pigtail on J2. These are test channels, not permanently powered ports.
+- **U1:** CD74HC4067 for one four-contact GPIO pigtail on GPIO1/GPIO2, one four-contact
+  I²C test pigtail on I2C1/I2C2, and the two-contact reset pigtail on RST1/RST2. These are test channels, not permanently powered ports.
 - **U2:** CD74HC4067 for the 14 module-test channels on J3.
 - **J8:** ten-wire IDC connection to Input Adapter J1, including supply and GND.
 - **U7:** ORing Power module; +5V feeds the DevKit and module, 3V3_SYS powers
@@ -42,8 +42,10 @@ controller/output section of the former monolithic Test-Provisioning board.
 | OUT_S0, S1, S2, S3 | GPIO18, GPIO19, GPIO21, GPIO22 |
 | OUT_EN1 (U1), OUT_EN2 (U2) | GPIO23, GPIO4 |
 | Output drive | GPIO17 via R6, shared by U1/U2 COM |
-| GPIO pigtail J1 pins 1–4 | U1 I8, I9, I10, I11 |
-| I²C test pigtail J2 pins 1–4 | U1 I7, I6, I5, I4 |
+| GPIO1/GPIO2 pins 1–4 | U1 I8, I9, I10, I11 |
+| I2C1/I2C2 pins 1–4 | U1 I7, I6, I5, I4 |
+| RST1/RST2 pin 1: EN | U1 I15 |
+| RST1/RST2 pin 2: DUT GND | U1 I0 |
 | Module J3 pins 1–7 | U2 I7, I6, I5, I4, I3, I2, I1 |
 | Module J3 pins 8–14 | U2 I14, I13, I12, I11, I10, I9, I8 |
 
@@ -54,7 +56,7 @@ Keep unselected input and output multiplexers disabled before changing addresses
 
 ## Separate provisioning I²C
 
-The **I2C0** header uses pins 1 GND, 2 3V3_SYS, 3 SDA (**GPIO16**), 4 SCL
+The **I2C0_1/I2C0_2** connectors uses pins 1 GND, 2 3V3_SYS, 3 SDA (**GPIO16**), 4 SCL
 (**GPIO5**). It bypasses the test multiplexers. J5 enables the SDA pull-up through
 R8 (4.7 kΩ); J6 enables the SCL pull-up through R7 (4.7 kΩ). This connector can
 power the target and must be disconnected during passive continuity testing.
@@ -62,23 +64,16 @@ Provisioning and continuity are separate operating phases.
 
 ## Firmware and validation status
 
-The `testboard` PlatformIO target currently provides a guided simulation; physical
-mux/ADC control is not yet implemented. Firmware 0.5.0 provides real external
-board-identity provisioning via GPIO16/5 and EEPROM address 0x50, with explicit
-write confirmation, readback and no tester reboot. It does not switch DUT power.
-Mini 0.9/Weather 0.3 and module provisioning are not supported yet. The split
-fixture mapping and J8 GPIO assignments above are implemented in firmware 0.4.0.
-Its simulation supports profiles with 38 or 40 inputs (38 socket pads plus two
-references); new reference-aware mainboard profiles remain to be added. Do not equate
-MB_GND with supply GND or MB_3V3_SYS with DevKit 3V3. Measurement thresholds,
-diode effects and settling times require validation on assembled hardware.
+The `testboard` firmware supports real passive continuity testing, guided
+loopback self-tests, simulated measurements and separate board/module provisioning.
+The reset pigtail adds two output paths; it does not consume input-adapter channels.
+RST1/RST2 pin 2 is a **measurement contact**, not permanent controller GND.
+Do not connect the two reset contacts together during the continuity test.
+The target must remain unpowered, without ESP32, and with provisioning disconnected.
 
-The last review found no electrical ERC errors, open PCB connections or schematic
-parity errors. Silkscreen text overlap and the ESP32 PCB-antenna clearance were
-reported separately; rerun ERC/DRC and inspect antenna clearance after changes.
-Only the saved project rules are checked; no physical validation has occurred.
-
-EnvNode-owned files follow the repository LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+This saved controller PCB passes KiCad 10.0.5 ERC, DRC and schematic parity
+(2026-11-09): no violations, no unrouted connections, no mismatches. The
+new connector arrangement still requires physical validation.
 
 ## Revision 0.2
 
