@@ -36,14 +36,24 @@ def generate_profiles():
     for key,prefix,count in [('inputSelect','/IN_S',4),('inputEnable','/IN_EN',3),('outputSelect','/OUT_S',4),('outputEnable','/OUT_EN',2)]:
         assert [gpio(prefix+str(i+(1 if 'Enable' in key else 0))) for i in range(count)]==g[key]
     assert [gpio(n) for n in ('/COM_IN','/COM_OUT','/SDA','/SCL')]==[g[n] for n in ('sense','drive','sda','scl')]
-    for key,ref,count in [('gpio','J1',4),('i2c','J2',4),('module','J3',14)]:
+    for key,ref,count in [('gpio','GPIO1',4),('i2c','I2C1',4),('module','J3',14)]:
         for pin in range(1,count+1):
             d,c=legacy['outputs'][key][pin-1];assert f['U'+str(d+1)][CHANNEL_PADS[c]]==f[ref][pin]
+    assert f['GPIO1']==f['GPIO2']
+    assert all(f['I2C1'][p]==f['I2C2'][p] for p in range(1,5))
+    assert f['RST1']==f['RST2']
+    reset=[]
+    for pin in (1,2):
+        hits=[(d,c) for d,ref in enumerate(('U1','U2')) for c,pad in enumerate(CHANNEL_PADS) if f[ref][pad]==f['RST1'][pin]]
+        assert len(hits)==1,(pin,hits)
+        reset.append(hits[0])
+    assert reset==[(0,15),(0,0)]
+    reset_header='// EnvNode: see repository LICENSE. Generated from Controller 0.2 PCB.\nstatic const FixtureDefinition FixtureRevision02 = [] { auto f = FixtureRevision01; f.routing.reset[0] = {%d,%d}; f.routing.reset[1] = {%d,%d}; return f; }();\n'%(*reset[0],*reset[1])
     assert f['TP2']=={1:'GND',2:'/TEST_DRIVE',3:'/COM_IN'}
     assert set(f['R6'].values())=={'/COM_OUT','/TEST_DRIVE'}
     assert f['U1'][1]==f['U2'][1]=='/TEST_DRIVE'
-    controller=dict(license='EnvNode-owned material; see repository LICENSE',schema=1,id='controller-0.2',revision='0.2',source=str(path),sha256=hashlib.sha256(data).hexdigest(),gpios=g,outputs=legacy['outputs'],testConnector={'reference':'TP2','pins':{'1':'GND','2':'TEST_DRIVE after R6','3':'COM_IN'}})
-    return {'firmware/src/testboard/testing/Esp32Adapter03.inc':header,'firmware/testboard/fixture-esp32-devkitc0.3.json':json.dumps(adapter,indent=2)+'\n','firmware/testboard/fixture-controller0.2.json':json.dumps(controller,indent=2)+'\n'}
+    controller=dict(license='EnvNode-owned material; see repository LICENSE',schema=1,id='controller-0.2',revision='0.2',source=str(path),sha256=hashlib.sha256(data).hexdigest(),gpios=g,outputs=dict(legacy['outputs'],reset=reset),testConnector={'reference':'TP2','pins':{'1':'GND','2':'TEST_DRIVE after R6','3':'COM_IN'}})
+    return {'firmware/src/testboard/testing/Controller02.inc':reset_header,'firmware/src/testboard/testing/Esp32Adapter03.inc':header,'firmware/testboard/fixture-esp32-devkitc0.3.json':json.dumps(adapter,indent=2)+'\n','firmware/testboard/fixture-controller0.2.json':json.dumps(controller,indent=2)+'\n'}
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--check',action='store_true');args=parser.parse_args()
     for name,content in generate_profiles().items():

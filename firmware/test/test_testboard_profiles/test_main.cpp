@@ -143,6 +143,24 @@ std::vector<uint8_t> encodedProfile(const BoardDefinition& b, int fault, RemoteP
     }
     w.writeText("");TEST_ASSERT_EQUAL(CompactCborStatus::Success,w.status());bytes.resize(w.size());e.bytes=bytes.size();return bytes;
 }
+void test_reset_profile_decodes_and_runs_two_contacts_with_selected_controller() {
+    Contact contacts[]={{1,"EN",0,0,uint64_t(1)<<1},{2,"GND",1,0,(uint64_t(1)<<13)|(uint64_t(1)<<31)|(uint64_t(1)<<37)|(uint64_t(1)<<39)}};
+    Connector connector{"RST",Pigtail::Reset,2,contacts};
+    BoardDefinition board=*findBoard("mini-0.9-pcb0.9.0");
+    board.id="reset-test-profile";board.connectors=&connector;board.count=1;
+    RemoteProfileEntry entry{};auto bytes=encodedProfile(board,0,entry);
+    auto decoded=std::unique_ptr<OwnedProfile>(new OwnedProfile());
+    TEST_ASSERT_TRUE(decodeProfile(bytes.data(),bytes.size(),entry,*decoded));
+    TEST_ASSERT_EQUAL(unsigned(Pigtail::Reset),unsigned(decoded->connectors[0].pigtail));
+    TEST_ASSERT_EQUAL(2,decoded->connectors[0].count);
+    TEST_ASSERT_NOT_NULL(strstr(profileJson(*decoded).c_str(),"\"pigtail\":\"reset\""));
+    FixtureSelection selection;TEST_ASSERT_TRUE(selection.selectCode(3));
+    SimulatedFixture fixture(&selection);TestRunner runner(fixture);uint32_t now=0;
+    TEST_ASSERT_TRUE(runner.load(decoded->board));fixture.connect(decoded->board,0,SimulatedFault::None);
+    TEST_ASSERT_TRUE(runner.start(now));finish(runner,now);
+    TEST_ASSERT_EQUAL(80,runner.completed());TEST_ASSERT_EQUAL(Verdict::Passed,runner.overall());
+}
+
 void test_profile_semantics_reject_invalid_geometry_indices_masks_and_reference_wiring() {
     const auto& b=*findBoard("mini-0.9-pcb0.9.0");
     for(int fault=0;fault<=9;++fault) {
@@ -236,6 +254,7 @@ void test_web_routes_use_the_loaded_remote_model_and_lock_refresh_during_test() 
 
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_reset_profile_decodes_and_runs_two_contacts_with_selected_controller);
     RUN_TEST(test_new_revisions_use_40_inputs_and_forward_reference_paths);
     RUN_TEST(test_published_profiles_decode_to_exact_builtin_expectations_and_positions);
     RUN_TEST(test_catalog_and_filename_limits_reject_unknown_schema_truncation_and_paths);

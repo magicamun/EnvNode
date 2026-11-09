@@ -8,7 +8,7 @@ let board, state, catalog=[], busy=false, shown=-1, cells=[], socketLeds=[], con
 const colors=['#94a3b8','#5fbea6','#35dc73','#ff4747','#ff4747','#ff4747','#ffbf42','#35dc73','#5fbea6'];
 const verdicts=[tr('ungeprüft','pending'),tr('bestanden','passed'),tr('Fehler','failed'),tr('unvollständig','incomplete')];
 const verdictColors=['#94a3b8','#35dc73','#ff4747','#ffbf42'];
-const kind={gpio:'GPIO / JST-PH',i2c:'I²C / JST-SH',module:tr('Modul / 2×7','Module / 2×7')};
+const kind={reset:'Reset / JST-PH',gpio:'GPIO / JST-PH',i2c:'I²C / JST-SH',module:tr('Modul / 2×7','Module / 2×7')};
 const svg=(name,attrs,parent)=>{const el=document.createElementNS(ns,name);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);parent.appendChild(el);return el;};
 function drawing(){
  shown=-1;cells=[];socketLeds=[];contactLeds=[];portItems=[];

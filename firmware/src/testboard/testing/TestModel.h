@@ -5,7 +5,7 @@
 namespace EnvNode { namespace Testing {
 constexpr size_t SocketPins = 38, MaxInputs = 40, MaxContacts = 14, MaxConnectors = 32;
 constexpr uint8_t Mainboard3V3Input = 39, MainboardGroundInput = 40;
-enum class Pigtail : uint8_t { Gpio, I2c, Module };
+enum class Pigtail : uint8_t { Gpio, I2c, Module, Reset };
 struct Contact { uint8_t number; const char* net; float x, y; uint64_t expected; };
 struct SocketContact { uint8_t number; const char* net; float x, y; };
 struct Connector { const char* id; Pigtail pigtail; uint8_t count; const Contact* contacts; };
@@ -24,6 +24,7 @@ struct MuxAddress { uint8_t device; uint8_t channel; };
 struct FixtureRouting {
     MuxAddress socket[MaxInputs];
     MuxAddress gpio[4], i2c[4], module[MaxContacts];
+    MuxAddress reset[2]; // Unsupported on legacy controllers.
 };
 enum class MeasurementReason : uint8_t { None, Unavailable, SelectionFailed, Timeout, LowNotLow, HighAmbiguous };
 struct MeasurementTrace {

@@ -14,6 +14,7 @@ void digitalWrite(unsigned char,int) {}
 void setUp() {}
 void tearDown() {}
 struct Io : IDiagnosticIo {
+    const FixtureDefinition* wiring=&fixtureRevision01();
     DiagnosticPath current{{0,0},-1,0,false};
     size_t test=0; int fault=0; bool enabled=false; unsigned releases=0,reads=0;
     std::vector<DiagnosticPath> selections;
@@ -23,9 +24,9 @@ struct Io : IDiagnosticIo {
         ++reads;
         if(fault==2)return 2400; // foreign voltage / short to high
         if(!enabled||!current.high||fault==1)return 0;
-        const auto target=GuidedSelfTest::output(test<GuidedSelfTest::OutputCount?test:9);
+        const auto target=GuidedSelfTest::output(GuidedSelfTest::inputTest(test)?9:test,*wiring);
         bool connected=current.output.device==target.device&&current.output.channel==target.channel;
-        if(test<GuidedSelfTest::OutputCount)connected &= current.inputDevice==-1;
+        if(!GuidedSelfTest::inputTest(test))connected &= current.inputDevice==-1;
         else {
             const auto in=fixtureRevision01().routing.socket[test-GuidedSelfTest::OutputCount];
             connected &= current.inputDevice==in.device&&current.inputChannel==in.channel;
@@ -40,7 +41,7 @@ void finish(GuidedSelfTest& runner,uint32_t start=0) {
     TEST_ASSERT_FALSE(runner.running());
 }
 void test_all_contacts_use_the_committed_routing_and_release_outputs() {
-    for(size_t i=0;i<GuidedSelfTest::Count;++i) {
+    for(size_t i=0;i<GuidedSelfTest::ResetStart;++i) {
         Io io;io.test=i;GuidedSelfTest runner(io);
         TEST_ASSERT_TRUE(runner.start(i,0));finish(runner);
         TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Passed),unsigned(runner.result(i).verdict));
@@ -49,6 +50,31 @@ void test_all_contacts_use_the_committed_routing_and_release_outputs() {
         TEST_ASSERT_EQUAL(8*(i<22?24:42),io.reads);
     }
 }
+void test_reset_outputs_are_gated_by_controller_and_selftest_isolates_all_paths() {
+    Io io; GuidedSelfTest legacy(io);
+    TEST_ASSERT_EQUAL(62,legacy.count());
+    TEST_ASSERT_FALSE(legacy.start(GuidedSelfTest::ResetStart,0));
+    TEST_ASSERT_TRUE(io.selections.empty());
+    FixtureSelection selection; TEST_ASSERT_TRUE(selection.select("controller-0.2","esp32-devkitc-0.3"));
+    for(size_t pin=0;pin<2;++pin) {
+        Io loop; loop.test=GuidedSelfTest::ResetStart+pin;loop.wiring=&selection.definition();
+        GuidedSelfTest test(loop,&selection);TEST_ASSERT_EQUAL(64,test.count());
+        TEST_ASSERT_TRUE(test.start(loop.test,0,100));finish(test);
+        TEST_ASSERT_EQUAL(unsigned(SelfTestVerdict::Passed),unsigned(test.result(loop.test).verdict));
+        TEST_ASSERT_EQUAL(0,loop.selections.front().output.device);
+        TEST_ASSERT_EQUAL(pin?0:15,loop.selections.front().output.channel);
+        TEST_ASSERT_EQUAL(208,loop.reads);TEST_ASSERT_FALSE(loop.enabled);
+    }
+    MuxAddress out{9,9},in{9,9};
+    TEST_ASSERT_FALSE(resolveFixturePath(Pigtail::Reset,1,2,out,in));
+    TEST_ASSERT_EQUAL(9,out.device);
+    TEST_ASSERT_TRUE(resolveFixturePath(selection.definition(),Pigtail::Reset,1,2,out,in));
+    TEST_ASSERT_EQUAL(0,out.device);TEST_ASSERT_EQUAL(15,out.channel);
+    TEST_ASSERT_TRUE(resolveFixturePath(selection.definition(),Pigtail::Reset,2,14,out,in));
+    TEST_ASSERT_EQUAL(0,out.channel);
+    TEST_ASSERT_FALSE(resolveFixturePath(selection.definition(),Pigtail::Reset,3,14,out,in));
+}
+
 void test_open_short_crosstalk_and_saturation_fail() {
     for(int fault=1;fault<=5;++fault)for(size_t i : {size_t(9),size_t(22)}) {
         Io io;io.test=i;io.fault=fault;GuidedSelfTest runner(io);runner.start(i,0);finish(runner);
@@ -94,6 +120,7 @@ int main() { UNITY_BEGIN();
     RUN_TEST(test_physical_measurement_classifies_only_observed_levels);
     RUN_TEST(test_physical_low_fault_timeout_invalid_and_release);
     RUN_TEST(test_selectable_fixture_does_not_drive_at_boot_or_keep_old_outputs);
+    RUN_TEST(test_reset_outputs_are_gated_by_controller_and_selftest_isolates_all_paths);
     RUN_TEST(test_all_contacts_use_the_committed_routing_and_release_outputs);
     RUN_TEST(test_open_short_crosstalk_and_saturation_fail);
     RUN_TEST(test_invalid_and_busy_start_do_not_switch_hardware);

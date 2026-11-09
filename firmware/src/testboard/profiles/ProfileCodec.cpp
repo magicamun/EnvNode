@@ -121,7 +121,7 @@ bool decodeProfile(const uint8_t* data, size_t size, const RemoteProfileEntry& e
         auto& c=p.connectors[i]; size_t kind,count;
         if (!array(r,4)) return false;
         c.id=stored(r,p,64); p.labels[i]=stored(r,p,96);
-        if (!c.id || !p.labels[i] || !number(r,2,kind) || !r.enterArray(count) || count!=(kind==2?14:4)
+        if (!c.id || !p.labels[i] || !number(r,3,kind) || !r.enterArray(count) || count!=(kind==2?14:kind==3?2:4)
             || total+count>MaximumProfileContacts) return false;
         for (size_t j=0; j<i; ++j) if (!strcmp(c.id,p.connectors[j].id)) return false;
         c.pigtail=static_cast<Pigtail>(kind); c.count=count; c.contacts=p.contacts+total;
@@ -172,7 +172,7 @@ String profileJson(const OwnedProfile& p) {
         coordinates(json,pin.x,pin.y);json+='}';
     }
     json+="],\"connectors\":[";
-    const char* kinds[]={"gpio","i2c","module"};
+    const char* kinds[]={"gpio","i2c","module","reset"};
     for(size_t i=0;i<p.board.count;++i) {
         if(i)json+=',';const auto& c=p.connectors[i];json+='{';member(json,"id",c.id);json+=',';member(json,"label",p.labels[i]);
         json+=',';member(json,"pigtail",kinds[static_cast<unsigned>(c.pigtail)]);json+=",\"pins\":[";

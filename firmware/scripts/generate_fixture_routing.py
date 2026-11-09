@@ -64,7 +64,7 @@ def generate():
     def numbers(values): return '{' + ', '.join(map(str,values)) + '}'
     header = '// EnvNode: see repository LICENSE. Generated; do not edit.\n'
     header += 'static const FixtureDefinition FixtureRevision01 = {\n    "controller0.1-input0.1-module0.1",\n'
-    header += '    {' + ',\n     '.join(pairs(v) for v in [inputs,outputs['gpio'],outputs['i2c'],outputs['module']]) + '},\n'
+    header += '    {' + ',\n     '.join(pairs(v) for v in [inputs,outputs['gpio'],outputs['i2c'],outputs['module'],[(255,0),(255,0)]]) + '},\n'
     header += '    ' + ', '.join(numbers(controls[k]) for k in ('inputSelect','inputEnable','outputSelect','outputEnable')) + ',\n'
     header += '    %d, %d, %d, %d\n};\n' % tuple(controls[k] for k in ('sense','drive','sda','scl'))
     definition = dict(schema=1,sourceCommit=commit,id='controller0.1-input0.1-module0.1',sources=sources,

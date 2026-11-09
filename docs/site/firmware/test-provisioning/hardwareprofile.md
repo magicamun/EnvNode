@@ -47,7 +47,7 @@ TP2 hat **Pin 1 GND, Pin 2 TEST_DRIVE, Pin 3 COM_IN**. TEST_DRIVE liegt hinter
 R6 (1 kΩ), vor beiden Output-Multiplexern. Es ist ein geschaltetes Testsignal,
 keine permanente 3,3-V-Versorgung.
 
-- **Outputs:** Den jeweils angezeigten J1-/J2-/J3-Kontakt mit **TP2/3 COM_IN**
+- **Outputs:** Den jeweils angezeigten GPIO1/GPIO2-, I2C1/I2C2-, J3- oder RST1/RST2-Kontakt mit **TP2/3 COM_IN**
   verbinden. Input-Adapter abziehen. Der Ablauf prüft LOW/HIGH, abgeschalteten
   Output-Pfad und Trennung zu den anderen Output-Kanälen.
 - **Inputs:** Adapter anschließen. **TP2/2 TEST_DRIVE** mit genau dem angezeigten
@@ -67,5 +67,22 @@ Die Legacy-Kombination und die Mainboard-Messlogik wurden praktisch erprobt.
 Neue Controller-/Adapterprofile sind aus den gespeicherten PCBs geprüft, durch
 Softwaretests abgesichert und müssen nach Fertigung am realen Aufbau abgenommen werden.
 Mainboard-Provisioning bleibt ein eigener Ablauf über SDA16/SCL5; Lesen, Schreiben und Persistenz wurden an Weather 0.3 praktisch bestätigt;
-weitere Boardtypen bleiben bei Bedarf real zu erproben. Modul-Provisioning ist im gemeinsamen Core angebunden; die praktische Abnahme
-am externen Prüfling steht noch aus.
+weitere Boardtypen bleiben bei Bedarf real zu erproben. Modul-Provisioning ist im gemeinsamen Core angebunden und ebenfalls praktisch bestätigt.
+
+## Reset-Prüfpigtail am Controller 0.2
+
+RST1 (Pinheader) und RST2 (JST-PH) sind parallel: **Pin 1 EN → U1/I15**,
+**Pin 2 Prüflings-GND → U1/I0**. Der zweite Kontakt ist ein Messpfad und wird
+nicht dauerhaft mit der Controller-Masse verbunden. Die 40 Eingänge des aktuellen
+Adapters bleiben unverändert; ein zukünftiger 44-Pin-S3-Adapter benötigt mit den
+beiden Referenzen 46 Eingänge.
+
+Ab Test-Firmware 0.14.0 erscheinen beim Controller 0.2 zwei zusätzliche
+Output-Selbsttests am Ende der Liste (64 statt 62 Kontakte). Jeweils genau einen
+Kontakt mit TP2/3 COM_IN verbinden. LOW/HIGH und Trennung zu allen 23 anderen
+Output-Pfaden sowie zum abgeschalteten Multiplexer werden geprüft. Kein Prüfling
+anschließen. Controller 0.1 bietet diese beiden Pfade nicht an.
+
+Die Firmware unterstützt zweipolige Reset-Anschlüsse in neuen Prüfprofilen.
+Bestehende Mini-/Weather-Profile erhalten keinen erfundenen Anschluss; Mini 0.10
+und Weather 0.4 benötigen nach der Hardware-Freigabe ihre eigenen Profile.

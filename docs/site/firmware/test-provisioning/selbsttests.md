@@ -112,3 +112,7 @@ Manuelle Diagnose, geführter Selbsttest, Anschlussprüfung und Provisioning tei
 sich die Hardware und sperren konkurrierende Eingriffe. **Stopp / abschalten** beendet den Selbsttest auch vorzeitig. Das Verlassen der Seite sendet
 zusätzlich einen bestmöglichen Stop-Befehl; ein Kommunikationsabbruch ist kein
 bestandenes Prüfergebnis.
+
+Controller 0.2 bietet ab 0.14.0 zusätzlich die beiden Reset-Outputs RST1/RST2
+(Pin 1 EN, Pin 2 Prüflings-GND). Sie werden gegen TP2/3 COM_IN geprüft; Details
+und Multiplexerkanäle stehen unter [Hardwareprofile](hardwareprofile.md#reset-prufpigtail-am-controller-02).

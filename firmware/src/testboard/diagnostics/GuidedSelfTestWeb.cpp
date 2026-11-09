@@ -12,7 +12,9 @@ bool indexValue(const String& text, uint32_t& value) {
     }
     return true;
 }
-String outputLabel(size_t index) {
+String outputLabel(size_t index,bool modern=false) {
+    if(index>=Testing::GuidedSelfTest::ResetStart) return String("RST1/RST2 · Pin ")+String(unsigned(index-Testing::GuidedSelfTest::ResetStart+1));
+    if(modern&&index<8) return String(index<4?"GPIO1/GPIO2 · Pin ":"I2C1/I2C2 · Pin ")+String(unsigned(index<4?index+1:index-3));
     return String(index<4 ? "J1 · Pin " : index<8 ? "J2 · Pin " : "J3 · Pin ")+
         String(unsigned(index<4 ? index+1 : index<8 ? index-3 : index-7));
 }
@@ -31,16 +33,16 @@ void HardwareDiagnostics::selfTestState() {
     json+=",\"controllerProfile\":\""+String(selection_?selection_->controller().id:"controller-0.1")+"\"";
     json+=",\"adapterProfile\":\""+String(selection_?selection_->adapter().id:"input-0.1")+"\"";
     json+=",\"generation\":"+String(selfGeneration_)+",\"results\":[";
-    for(size_t i=0;i<GuidedSelfTest::Count;++i) {
+    for(size_t i=0;i<selfTest_.count();++i) {
         if(i)json+=',';
         const auto& r=selfTest_.result(i);
         json+='[';json+=String(unsigned(r.verdict));json+=',';json+=String(r.low);json+=',';
         json+=String(r.high);json+=',';json+=String(r.isolation);json+=']';
     }
     json+="],\"settleMs\":[";
-    for(size_t i=0;i<GuidedSelfTest::Count;++i){if(i)json+=',';json+=String(selfTest_.result(i).settleMs);}
+    for(size_t i=0;i<selfTest_.count();++i){if(i)json+=',';json+=String(selfTest_.result(i).settleMs);}
     json+="],\"isolationDetails\":[";
-    for(size_t i=0;i<GuidedSelfTest::Count;++i) {
+    for(size_t i=0;i<selfTest_.count();++i) {
         if(i)json+=',';
         const auto& r=selfTest_.result(i);
         if(r.isolationPath==255){json+="null";continue;}
@@ -69,7 +71,7 @@ void HardwareDiagnostics::selfTestAction() {
         stop();selfTest_.clear();++selfGeneration_;selfTestState();return;
     }
     if(s.arg("action")=="select") {
-        if(!indexValue(s.arg("index"),index)||index>=Testing::GuidedSelfTest::Count) {
+        if(!indexValue(s.arg("index"),index)||index>=selfTest_.count()) {
             s.send(400,"text/plain","Ungültiger Kontakt");return;
         }
         stop();selfSelected_=index;++selfGeneration_;selfTestState();return;
@@ -112,26 +114,27 @@ void HardwareDiagnostics::selfTestPage() {
 <p>Output-Gruppe: Adapter und weitere Brücken abziehen, Kontakt direkt gegen den angegebenen COM_IN-Anschluss. Input-Gruppe: Adapter anschließen und die angegebene TEST_DRIVE- beziehungsweise J3/2-Brücke setzen. GND ist Controller-Masse und wird nicht mit Prüflingskontakten gebrückt. TP1 benennt die späteren Mainboard-Referenzkontakte und darf hier an keinem Mainboard hängen.</p>
 <p><a href='/diagnostics'>Manuelle Hardwarediagnose</a></p></section><script>(()=>{)HTML";
     html+="const fixtureId='"+String(selection_?selection_->definition().id:Testing::fixtureRevision01().id)+"';const cases=[";
-    for(size_t i=0;i<GuidedSelfTest::Count;++i) {
+    for(size_t i=0;i<selfTest_.count();++i) {
         if(i)html+=',';
-        const bool in=i>=GuidedSelfTest::OutputCount;
-        String label=in?inputLabel(i-GuidedSelfTest::OutputCount,selection_?selection_->adapter().socketReference:"J4"):outputLabel(i);
+        const bool in=GuidedSelfTest::inputTest(i);
+        String label=in?inputLabel(i-GuidedSelfTest::OutputCount,selection_?selection_->adapter().socketReference:"J4"):outputLabel(i,direct);
         String instruction=in?inputSource+" ↔ "+label:
             String("Controller ")+label+" ↔ "+outputSense+". Adapter abziehen.";
-        auto source=GuidedSelfTest::output(in?9:i);
+        auto source=GuidedSelfTest::output(in?9:i,selection_?selection_->definition():Testing::fixtureRevision01());
         if(in&&direct)source.device=255;
         const auto input=in?(selection_?selection_->definition():Testing::fixtureRevision01()).routing.socket[i-GuidedSelfTest::OutputCount]:Testing::MuxAddress{0,0};
-        html+="{sourceDevice:"+String(unsigned(source.device))+",sourceChannel:"+String(unsigned(source.channel))+
+        html+=String("{input:")+(in?"true":"false")+",sourceDevice:"+String(unsigned(source.device))+",sourceChannel:"+String(unsigned(source.channel))+
             ",inputDevice:"+String(in?int(input.device):-1)+",inputChannel:"+String(unsigned(input.channel))+",label:'"+label+"',instruction:'"+instruction+"'}";
     }
     html+=R"HTML(];let state=null,busy=false;const storageKey='envnode-guided-'+fixtureId+'-v3';let saved=Array(cases.length).fill(null);try{const previous=JSON.parse(sessionStorage.getItem(storageKey)||(fixtureId==='controller0.1-input0.1-module0.1'?(sessionStorage.getItem('envnode-guided-controller01-input01-v2')||sessionStorage.getItem('envnode-guided-controller01-input01-v1')):null));if(Array.isArray(previous)&&previous.length===cases.length)saved=previous;}catch(e){}const $=id=>document.getElementById(id),names=['Offen','Läuft','Bestanden','Fehler','Abgebrochen'];
-const rows=cases.map((c,i)=>{const tr=document.createElement('tr'),cell=document.createElement('td'),b=document.createElement('button');b.type='button';b.textContent=(i<22?'Output · ':'Input · ')+c.label;b.onclick=()=>command('select',{index:i});cell.append(b);tr.append(cell);for(let j=0;j<5;j++)tr.append(document.createElement('td'));$('rows').append(tr);return {tr,b};});
+const outputCases=cases.filter(c=>!c.input),inputCases=cases.filter(c=>c.input);
+const rows=cases.map((c,i)=>{const tr=document.createElement('tr'),cell=document.createElement('td'),b=document.createElement('button');b.type='button';b.textContent=(c.input?'Input · ':'Output · ')+c.label;b.onclick=()=>command('select',{index:i});cell.append(b);tr.append(cell);for(let j=0;j<5;j++)tr.append(document.createElement('td'));$('rows').append(tr);return {tr,b};});
 const controlRow=document.createElement('tr'),controlCell=document.createElement('td');controlCell.colSpan=6;controlCell.appendChild($('channel-controls'));controlRow.appendChild(controlCell);$('rows').appendChild(controlRow);
 function values(s,i){const r=s.results[i];return r[0]===0&&saved[i]?saved[i].values:r;}
 function timing(s,i){return s.results[i][0]===0&&saved[i]?(saved[i].settleMs||15):((s.settleMs||[])[i]||15);}
 function detail(s,i){return s.results[i][0]===0&&saved[i]?(saved[i].detail||null):((s.isolationDetails||[])[i]||null);}
-function pathLabel(i,d){if(d[0]===0)return i<22?'Beide Output-Multiplexer aus':'Alle Input-Multiplexer aus';const c=cases[(i<22?0:22)+d[0]-1];return i<22?c.label+' · U'+(c.sourceDevice+1)+'/I'+c.sourceChannel:c.label+' · U'+(c.inputDevice+4)+'/I'+c.inputChannel;}
-function summary(s,i,full=false){const d=detail(s,i);if(!d)return s.results[i][0]===0&&!saved[i]?'—':'Keine Detaildaten – Kontakt erneut prüfen.';const text=pathLabel(i,d)+' · Wartezeit '+timing(s,i)+' ms\nMittel '+d[1]+' · Minimum '+d[2]+' · über 200: '+d[3]+'/8';if(!full)return text;const c=cases[i],other=d[0]?cases[(i<22?0:22)+d[0]-1]:null;const out=i>=22?(c.sourceDevice===255?'Beide aus (TEST_DRIVE)':'U'+(c.sourceDevice+1)+'/I'+c.sourceChannel):other?'U'+(other.sourceDevice+1)+'/I'+other.sourceChannel:'Beide aus';const input=i<22||!other?'Alle aus':'U'+(other.inputDevice+4)+'/I'+other.inputChannel;return 'Fenster mit höchstem Einzelwert: '+text+'\n8 Einzelwerte: '+d.slice(7).join(', ')+'\nAlle Trennungsfenster: '+d[4]+'/'+d[5]+' Werte über 200 in '+d[6]+' Fenstern.'+'\nZum Nachmessen: Brücke unverändert lassen. Manuelle Diagnose: Output '+out+', HIGH; Input '+input+'. Danach aktiv schalten und COM_IN gegen GND messen.';}
+function pathLabel(i,d){if(d[0]===0)return !cases[i].input?'Beide Output-Multiplexer aus':'Alle Input-Multiplexer aus';const c=(cases[i].input?inputCases:outputCases)[d[0]-1];return !cases[i].input?c.label+' · U'+(c.sourceDevice+1)+'/I'+c.sourceChannel:c.label+' · U'+(c.inputDevice+4)+'/I'+c.inputChannel;}
+function summary(s,i,full=false){const d=detail(s,i);if(!d)return s.results[i][0]===0&&!saved[i]?'—':'Keine Detaildaten – Kontakt erneut prüfen.';const text=pathLabel(i,d)+' · Wartezeit '+timing(s,i)+' ms\nMittel '+d[1]+' · Minimum '+d[2]+' · über 200: '+d[3]+'/8';if(!full)return text;const c=cases[i],other=d[0]?(cases[i].input?inputCases:outputCases)[d[0]-1]:null;const out=c.input?(c.sourceDevice===255?'Beide aus (TEST_DRIVE)':'U'+(c.sourceDevice+1)+'/I'+c.sourceChannel):other?'U'+(other.sourceDevice+1)+'/I'+other.sourceChannel:'Beide aus';const input=!c.input||!other?'Alle aus':'U'+(other.inputDevice+4)+'/I'+other.inputChannel;return 'Fenster mit höchstem Einzelwert: '+text+'\n8 Einzelwerte: '+d.slice(7).join(', ')+'\nAlle Trennungsfenster: '+d[4]+'/'+d[5]+' Werte über 200 in '+d[6]+' Fenstern.'+'\nZum Nachmessen: Brücke unverändert lassen. Manuelle Diagnose: Output '+out+', HIGH; Input '+input+'. Danach aktiv schalten und COM_IN gegen GND messen.';}
 function render(s){if(s.fixture!==fixtureId){location.reload();return;}state=s;if(rows[s.selected].tr.nextElementSibling!==controlRow)rows[s.selected].tr.after(controlRow);let changed=false;s.results.forEach((r,i)=>{const collected=r[0]===1?[4,r[1],r[2],r[3]]:r;const diagnostic=(s.isolationDetails||[])[i]||null,settle=(s.settleMs||[])[i]||15;if(r[0]>=1&&(!saved[i]||JSON.stringify(saved[i].values)!==JSON.stringify(collected)||JSON.stringify(saved[i].detail||null)!==JSON.stringify(diagnostic)||(saved[i].settleMs||15)!==settle)){saved[i]={values:collected,detail:diagnostic,settleMs:settle,at:new Date().toISOString()};changed=true;}});if(changed)try{sessionStorage.setItem(storageKey,JSON.stringify(saved));}catch(e){$('error').textContent='Browser-Sitzungsspeicher nicht verfügbar. Protokoll vor Neustart herunterladen.';}const c=cases[s.selected];$('chosen').textContent=c.label;$('instruction').textContent=c.instruction;$('isolation-detail').textContent=summary(s,s.selected,true);$('run').disabled=busy||s.running;$('settle').disabled=busy||s.running;$('next').disabled=busy||s.running||s.selected===cases.length-1;$('export').disabled=busy||s.running;$('clear').disabled=busy||s.running;
 let pass=0,fail=0;rows.forEach((r,i)=>{const v=values(s,i);r.b.disabled=busy||s.running;r.tr.style.background=i===s.selected?'#fff0d7':'';r.tr.cells[1].textContent=names[v[0]];r.tr.cells[2].textContent=v[0]===0?'—':v[1];r.tr.cells[3].textContent=v[0]===0?'—':v[2];r.tr.cells[4].textContent=v[0]===0?'—':v[3];r.tr.cells[5].textContent=summary(s,i);r.tr.cells[5].style.whiteSpace='pre-line';if(v[0]===2)pass++;if(v[0]===3)fail++;});$('progress').textContent=(s.running?'Messung läuft … ':s.active?'Manuelle Diagnose aktiv. ':'Ausgänge abgeschaltet. ')+pass+' bestanden · '+fail+' fehlerhaft · '+cases.length+' Kontakte insgesamt';}
 async function command(action,extra={}){if(busy||!state)return;if(action==='run'&&!$('confirm').checked){$('error').textContent='Bitte die Verbindung bestätigen.';return;}busy=true;render(state);try{const p=new URLSearchParams({action,settleMs:$('settle').value,generation:state.generation,index:state.selected,confirm:$('confirm').checked?'yes':'',...extra});const r=await fetch('/selftest/action',{method:'POST',body:p});if(!r.ok)throw Error(await r.text());render(await r.json());$('error').textContent='';if(action==='select'){$('confirm').checked=false;$('channel-controls').scrollIntoView({block:'nearest',behavior:'smooth'});}if(action==='clear'){saved=Array(cases.length).fill(null);try{sessionStorage.removeItem(storageKey);if(fixtureId==='controller0.1-input0.1-module0.1'){sessionStorage.removeItem('envnode-guided-controller01-input01-v1');sessionStorage.removeItem('envnode-guided-controller01-input01-v2');}}catch(e){}render(state);}}catch(e){$('error').textContent=e.message;}finally{busy=false;if(state)render(state);}}

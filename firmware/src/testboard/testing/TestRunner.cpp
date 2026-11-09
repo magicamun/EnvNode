@@ -27,7 +27,7 @@ bool TestRunner::load(const BoardDefinition& board) {
         || (board.inputCount != SocketPins && board.inputCount != MaxInputs)) return false;
     for (size_t i = 0; i < board.count; ++i) {
         const auto& c = board.connectors[i];
-        if (!c.contacts || c.count != (c.pigtail == Pigtail::Module ? MaxContacts : 4)) return false;
+        if (!c.contacts || c.count != (c.pigtail == Pigtail::Module ? MaxContacts : c.pigtail == Pigtail::Reset ? 2 : 4)) return false;
         for (size_t p = 0; p < c.count; ++p)
             if (c.contacts[p].number != p + 1 || (c.contacts[p].expected >> board.inputCount)) return false;
     }

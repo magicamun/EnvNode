@@ -41,7 +41,7 @@ def wire_profile(d,image):
     return cbor([1,d['id'],d['name'],d['identityRevision'],d['pcbRevision'],d['sha256'],d['source'],
         [float(n) for n in d['bounds']],
         [[p['number'],p['net'],float(p['x']),float(p['y'])] for p in d['socket']],
-        [[c['id'],c['label'],['gpio','i2c','module'].index(c['pigtail']),
+        [[c['id'],c['label'],['gpio','i2c','module','reset'].index(c['pigtail']),
           [[p['number'],p['net'],float(p['x']),float(p['y']),sum(1<<(n-1) for n in p['expected'])] for p in c['pins']]]
          for c in d['connectors']],image,
         [[p['input'],p['reference'],p['pin'],p['diode'],p['anode'],p['cathode']] for p in d.get('referencePaths',[])],
@@ -214,7 +214,7 @@ def emit_test_profile(profile, definition, svg):
         model += '};\n'
     model += f'static const Connector {symbol}Connectors[] = {{\n'
     for i, c in enumerate(connectors):
-        kind = dict(gpio='Gpio', i2c='I2c', module='Module')[c['pigtail']]
+        kind = dict(gpio='Gpio', i2c='I2c', module='Module', reset='Reset')[c['pigtail']]
         model += f'    {{"{c["id"]}", Pigtail::{kind}, {len(c["pins"])}, {symbol}Contacts{i}}},\n'
     model += f'}};\nstatic const BoardDefinition {symbol}Board{{'
     model += ', '.join(json.dumps(definition[k]) for k in ('id', 'name', 'identityRevision', 'pcbRevision'))

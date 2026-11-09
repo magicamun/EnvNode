@@ -26,7 +26,7 @@ struct SelfTestResult {
 // Controller 0.1 + original produced Input-Adapter 0.1 only. Not a DUT profile.
 class GuidedSelfTest {
 public:
-    static constexpr size_t OutputCount = 22, Count = OutputCount + MaxInputs;
+    static constexpr size_t OutputCount = 22, ResetStart = OutputCount + MaxInputs, Count = ResetStart + 2;
     static constexpr uint16_t LowMaximum = 200, HighMinimum = 1000, HighMaximum = 3800;
     explicit GuidedSelfTest(IDiagnosticIo& io,FixtureSelection* selection=nullptr) : selection_(selection),io_(io) {}
     bool start(size_t index, uint32_t now, uint16_t settleMs = 15);
@@ -36,7 +36,9 @@ public:
     bool running() const { return running_; }
     size_t selected() const { return selected_; }
     const SelfTestResult& result(size_t index) const { return results_[index]; }
-    static MuxAddress output(size_t index);
+    static bool inputTest(size_t index) { return index>=OutputCount && index<ResetStart; }
+    size_t count() const { return definition().routing.reset[0].device<2 ? Count : ResetStart; }
+    static MuxAddress output(size_t index, const FixtureDefinition& fixture=fixtureRevision01());
 private:
     void switchStep(uint32_t now);
     const FixtureDefinition& definition() const {return selection_?selection_->definition():fixtureRevision01();}
