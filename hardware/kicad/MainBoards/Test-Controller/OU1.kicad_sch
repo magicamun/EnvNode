@@ -538,6 +538,187 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Connector:Conn_01x02_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Pin"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x02_Pin_1_1"
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Connector:Conn_01x04_Pin"
 			(pin_names
 				(offset 1.016)
@@ -1085,10 +1266,6 @@
 		(uuid "4fa83a30-d8d7-4890-97d6-3d94a8393d5e")
 	)
 	(no_connect
-		(at 130.81 78.74)
-		(uuid "6d8e7882-c73e-4e16-9d62-020e2de7ca4e")
-	)
-	(no_connect
 		(at 130.81 83.82)
 		(uuid "a489845e-81eb-4dc3-9cfd-8bb26c184251")
 	)
@@ -1099,10 +1276,6 @@
 	(no_connect
 		(at 130.81 111.76)
 		(uuid "bc663eb5-8c24-45c3-936f-25f1f8b5489b")
-	)
-	(no_connect
-		(at 130.81 116.84)
-		(uuid "da7f981b-4ed3-4b44-a241-9af6de10fcfa")
 	)
 	(wire
 		(pts
@@ -1124,6 +1297,26 @@
 		)
 		(uuid "467bb734-91d2-4b3d-8c2d-97beba72093b")
 	)
+	(label "RST_GND"
+		(at 156.21 62.23 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "077fd391-6e28-4f3b-95ae-a839b183523b")
+	)
+	(label "RST_EN"
+		(at 156.21 64.77 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "082fa173-c58f-4518-992c-522aa6f5f386")
+	)
 	(label "I2C4"
 		(at 130.81 88.9 0)
 		(effects
@@ -1135,7 +1328,7 @@
 		(uuid "0bf58e41-c225-4c08-9ecf-80770ead74cf")
 	)
 	(label "I2C3"
-		(at 187.96 110.49 180)
+		(at 189.23 96.52 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1185,7 +1378,7 @@
 		(uuid "343fdcc7-5c9f-45d9-9e41-1de0bc698bd7")
 	)
 	(label "I2C2"
-		(at 187.96 113.03 180)
+		(at 189.23 99.06 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1254,6 +1447,26 @@
 		)
 		(uuid "6ad6d89d-8439-4287-9dfc-07ad56fd5df6")
 	)
+	(label "RST_GND"
+		(at 186.69 62.23 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "6ce9bd21-4e99-466a-8969-4bb2551d06f3")
+	)
+	(label "RST_GND"
+		(at 130.81 78.74 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "6db03c77-85ba-48dc-a589-28b8b20f1f8a")
+	)
 	(label "I2C3"
 		(at 156.21 97.79 180)
 		(effects
@@ -1294,6 +1507,16 @@
 		)
 		(uuid "83ee0762-323c-49b3-bc22-fd31df38328a")
 	)
+	(label "RST_EN"
+		(at 130.81 116.84 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "86d03185-a2f0-42fd-be38-fb419be8ec14")
+	)
 	(label "I2C1"
 		(at 130.81 96.52 0)
 		(effects
@@ -1314,6 +1537,16 @@
 		)
 		(uuid "9b3a175d-4f7e-4842-86a6-792ca582a64c")
 	)
+	(label "RST_EN"
+		(at 186.69 64.77 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a3ce2228-a4a4-4b47-827c-15070366e6d5")
+	)
 	(label "GPIO4"
 		(at 189.23 78.74 180)
 		(effects
@@ -1325,7 +1558,7 @@
 		(uuid "b5a3a3d3-84c4-4526-8a8a-6b55d83fa138")
 	)
 	(label "I2C4"
-		(at 187.96 107.95 180)
+		(at 189.23 93.98 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1335,7 +1568,7 @@
 		(uuid "c1ce5698-55a3-46a4-b3b6-9766b1cc7c15")
 	)
 	(label "I2C1"
-		(at 187.96 115.57 180)
+		(at 189.23 101.6 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1466,7 +1699,7 @@
 		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "03989062-76fb-420c-b5d9-87afa22269c2")
-		(property "Reference" "J1"
+		(property "Reference" "GPIO1"
 			(at 162.56 81.2799 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1536,7 +1769,7 @@
 		(instances
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
-					(reference "J1")
+					(reference "GPIO1")
 					(unit 1)
 				)
 			)
@@ -1636,7 +1869,7 @@
 		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "3029f677-7c8a-4824-9b3a-4b9cc70a9718")
-		(property "Reference" "J2"
+		(property "Reference" "I2C1"
 			(at 162.56 97.7899 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1706,7 +1939,7 @@
 		(instances
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
-					(reference "J2")
+					(reference "I2C1")
 					(unit 1)
 				)
 			)
@@ -1870,7 +2103,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x04_Pin")
-		(at 193.04 113.03 180)
+		(at 194.31 99.06 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1879,8 +2112,8 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "73aa722b-1206-4672-81ad-5f8b96d20438")
-		(property "Reference" "J7"
-			(at 202.184 110.998 0)
+		(property "Reference" "I2C2"
+			(at 203.454 97.028 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1890,7 +2123,7 @@
 			)
 		)
 		(property "Value" "Conn_01x04_Pin"
-			(at 202.184 113.538 0)
+			(at 203.454 99.568 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1900,7 +2133,7 @@
 			)
 		)
 		(property "Footprint" "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical"
-			(at 193.04 113.03 0)
+			(at 194.31 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1911,7 +2144,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 193.04 113.03 0)
+			(at 194.31 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1922,7 +2155,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x04, script generated"
-			(at 193.04 113.03 0)
+			(at 194.31 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1947,7 +2180,7 @@
 		(instances
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
-					(reference "J7")
+					(reference "I2C2")
 					(unit 1)
 				)
 			)
@@ -2103,6 +2336,170 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 161.29 64.77 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "baf7acd2-8ed4-492c-971e-40fd80de0b81")
+		(property "Reference" "RST1"
+			(at 162.56 62.2299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 162.56 64.7699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 161.29 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 161.29 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 161.29 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3690a875-46f8-42c6-a362-c614bdd3848d")
+		)
+		(pin "2"
+			(uuid "eb640340-1d8f-4ca3-bb61-11286cdfbc0c")
+		)
+		(instances
+			(project "Test-Controller"
+				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
+					(reference "RST1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 191.77 64.77 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d5000ee3-d4a9-4555-b8e4-5d373c1dfee9")
+		(property "Reference" "RST2"
+			(at 193.04 62.2299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "Conn_01x02_Pin"
+			(at 193.04 64.7699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+			(at 191.77 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 191.77 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 191.77 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4a192ba0-99f3-46d8-914b-2f3326fa1180")
+		)
+		(pin "2"
+			(uuid "e631259e-276e-489a-b06c-0abd9be62389")
+		)
+		(instances
+			(project "Test-Controller"
+				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
+					(reference "RST2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x04_Pin")
 		(at 194.31 83.82 180)
 		(unit 1)
@@ -2114,7 +2511,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fbe61e31-5850-498f-90a9-5a75a09d129f")
-		(property "Reference" "J4"
+		(property "Reference" "GPIO2"
 			(at 195.58 81.2799 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2184,7 +2581,7 @@
 		(instances
 			(project "Test-Controller"
 				(path "/8e8be5f8-638f-4444-a554-6e489d9dce34/e9dfd3b1-67c0-44b1-a15f-53de12c59d51"
-					(reference "J4")
+					(reference "GPIO2")
 					(unit 1)
 				)
 			)
