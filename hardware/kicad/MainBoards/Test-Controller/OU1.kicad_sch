@@ -1298,7 +1298,7 @@
 		(uuid "467bb734-91d2-4b3d-8c2d-97beba72093b")
 	)
 	(label "RST_GND"
-		(at 156.21 62.23 180)
+		(at 156.21 64.77 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1308,7 +1308,7 @@
 		(uuid "077fd391-6e28-4f3b-95ae-a839b183523b")
 	)
 	(label "RST_EN"
-		(at 156.21 64.77 180)
+		(at 156.21 62.23 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1448,7 +1448,7 @@
 		(uuid "6ad6d89d-8439-4287-9dfc-07ad56fd5df6")
 	)
 	(label "RST_GND"
-		(at 186.69 62.23 180)
+		(at 186.69 64.77 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1538,7 +1538,7 @@
 		(uuid "9b3a175d-4f7e-4842-86a6-792ca582a64c")
 	)
 	(label "RST_EN"
-		(at 186.69 64.77 180)
+		(at 186.69 62.23 180)
 		(effects
 			(font
 				(size 1.27 1.27)

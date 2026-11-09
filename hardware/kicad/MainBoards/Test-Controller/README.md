@@ -44,8 +44,8 @@ controller/output section of the former monolithic Test-Provisioning board.
 | Output drive | GPIO17 via R6, shared by U1/U2 COM |
 | GPIO1/GPIO2 pins 1–4 | U1 I8, I9, I10, I11 |
 | I2C1/I2C2 pins 1–4 | U1 I7, I6, I5, I4 |
-| RST1/RST2 pin 1: EN | U1 I15 |
-| RST1/RST2 pin 2: DUT GND | U1 I0 |
+| RST1/RST2 pin 1: DUT GND | U1 I0 |
+| RST1/RST2 pin 2: EN | U1 I15 |
 | Module J3 pins 1–7 | U2 I7, I6, I5, I4, I3, I2, I1 |
 | Module J3 pins 8–14 | U2 I14, I13, I12, I11, I10, I9, I8 |
 
@@ -67,7 +67,7 @@ Provisioning and continuity are separate operating phases.
 The `testboard` firmware supports real passive continuity testing, guided
 loopback self-tests, simulated measurements and separate board/module provisioning.
 The reset pigtail adds two output paths; it does not consume input-adapter channels.
-RST1/RST2 pin 2 is a **measurement contact**, not permanent controller GND.
+RST1/RST2 pin 1 is a **measurement contact**, not permanent controller GND.
 Do not connect the two reset contacts together during the continuity test.
 The target must remain unpowered, without ESP32, and with provisioning disconnected.
 
