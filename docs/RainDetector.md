@@ -257,7 +257,9 @@ restart prevention without renewed dry confirmation. The unchanged 5-second
 heater-transition guard suppresses direct switching effects on edge detection;
 longer thermal effects remain an experimental limitation to observe outdoors.
 
-The web form offers one paired-capability source and localized decimal inputs
+The source dropdown identifies each eligible sensor by slot ID, configured name
+and implementation type; it selects the sensor directly, not a second enable
+switch. The web form offers one paired-capability source and localized decimal inputs
 for the two limits. NVS keys `rclim`, `rdon`, `rdoff` persist the setting. Backup/
 record schema 8 appends source/on/off fields; versions 1–7 remain readable and
 explicitly disable prevention, even when the current configuration enables it.

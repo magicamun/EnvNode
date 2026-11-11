@@ -1967,7 +1967,8 @@ void WebService::handleControllerEdit() {
             humidity |= meta->measurementTypes[i]==MeasurementType::RelativeHumidity;
         }
         if (temperature && humidity) c += "<option value='"+String(sensor.slotId)+"'"
-            +(rain.climateSensorId==sensor.slotId?" selected":"")+">"+escapeHtml(sensor.name)+"</option>";
+            +(rain.climateSensorId==sensor.slotId?" selected":"")+">#"+String(sensor.slotId)
+            +" · "+escapeHtml(sensor.name)+" ("+escapeHtml(meta->displayType)+")</option>";
     }
     c += "</select></label>";
     c += "<label>"+String(uiText(TextId::RainDewOn))+"<input name='rainDewOn' inputmode='decimal' value='"
