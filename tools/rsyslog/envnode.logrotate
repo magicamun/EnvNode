@@ -1,8 +1,7 @@
 # EnvNode-owned: see repository LICENSE.
-# Ownership and systemctl service name are distribution-specific; adapt first.
-/var/log/envnode/*.jsonl /var/log/envnode/unrecognized.log {
+# Debian receiver: daily timer, 14 archives per nonempty file; no copytruncate.
+/var/log/envnode/*.jsonl /var/log/envnode/*/*.jsonl /var/log/envnode/*/by-source/*.jsonl /var/log/envnode/unrecognized.log /var/log/envnode/unrouted.log {
     daily
-    maxsize 32M
     rotate 14
     missingok
     notifempty
@@ -12,6 +11,6 @@
     su root adm
     sharedscripts
     postrotate
-        /bin/systemctl kill --kill-who=main --signal=HUP rsyslog.service
+        /usr/bin/systemctl kill --kill-whom=main --signal=HUP rsyslog.service
     endscript
 }

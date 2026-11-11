@@ -15,6 +15,13 @@ public:
     bool pressureReductionStatus(PressureReductionStatus& status) const override {
         return sensor_->pressureReductionStatus(status);
     }
+    // Preserve direct acquisition capabilities through the full sensor composition.
+    void rainFrequencyHeaterChanged() override {
+        if (sensor_) sensor_->rainFrequencyHeaterChanged();
+    }
+    bool rainFrequencySnapshot(RainFrequencySnapshot& result) const override {
+        return sensor_ && sensor_->rainFrequencySnapshot(result);
+    }
     void begin() override { sensor_->begin(); }
     SensorOperationResult service(IMeasurementSink& output) override;
     SensorOperationResult sample(IMeasurementSink& output) override;

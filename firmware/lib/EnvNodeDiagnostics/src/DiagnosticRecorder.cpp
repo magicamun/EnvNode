@@ -59,17 +59,24 @@ bool BufferedDiagnosticRecorder::selected(DiagnosticSource s) const {
 }
 bool BufferedDiagnosticRecorder::enabled(DiagnosticSource s) const {return available()&&selected(s);}
 DiagnosticRecordResult BufferedDiagnosticRecorder::record(DiagnosticSource source,const DiagnosticEvent& event) {
+    return recordImpl(source,event,false);
+}
+DiagnosticRecordResult BufferedDiagnosticRecorder::recordMarker(const DiagnosticEvent& event) {
+    if(strcmp(event.name(),"test_marker")){++invalid_;return DiagnosticRecordResult::Invalid;}
+    return recordImpl({DiagnosticSourceKind::System,0},event,true);
+}
+DiagnosticRecordResult BufferedDiagnosticRecorder::recordImpl(DiagnosticSource source,const DiagnosticEvent& event,bool marker) {
     if(!event.valid()){++invalid_;return DiagnosticRecordResult::Invalid;}
     const auto kind=static_cast<unsigned>(source.kind);
     if(kind>=static_cast<unsigned>(DiagnosticSourceKind::Count)||(source.kind==DiagnosticSourceKind::System?source.id!=0:source.id<1||source.id>32)){++invalid_;return DiagnosticRecordResult::Invalid;}
-    if(!selected(source))return DiagnosticRecordResult::Disabled;
+    if(!marker && !selected(source))return DiagnosticRecordResult::Disabled;
     const uint32_t sequence=sequence_.fetch_add(1)+1;
     if(!available()){++unavailable_;return DiagnosticRecordResult::Unavailable;}
     if(lock_.test_and_set(std::memory_order_acquire)){++busy_;return DiagnosticRecordResult::Busy;}
     if(!available()) {++unavailable_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Unavailable;}
     const size_t count=count_.load();
     if(count==DiagnosticQueueEntries){++full_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Full;}
-    auto& r=records_[(head_+count)%DiagnosticQueueEntries];r.source=source;r.event=event;r.sequence=sequence;
+    auto& r=records_[(head_+count)%DiagnosticQueueEntries];r.source=source;r.event=event;r.sequence=sequence;r.explicitMarker=marker;
     r.uptimeMs=clock_.monotonicMs();r.wallClockValid=clock_.wallClockEpochSeconds(r.epochSeconds);r.generation=generation_.load();
     count_.store(count+1);if(count+1>highWater_.load())highWater_.store(count+1);++accepted_;lock_.clear(std::memory_order_release);return DiagnosticRecordResult::Accepted;
 }
@@ -77,7 +84,7 @@ bool BufferedDiagnosticRecorder::pop(DiagnosticRecord& record) {
     if(lock_.test_and_set(std::memory_order_acquire))return false;
     bool found=false;
     while(count_.load()) {
-        const auto& r=records_[head_];const bool selectedNow=r.generation==generation_.load()&&selected(r.source);
+        const auto& r=records_[head_];const bool selectedNow=r.explicitMarker || (r.generation==generation_.load()&&selected(r.source));
         if(selectedNow){record=r;found=true;}else ++stale_;
         head_=(head_+1)%DiagnosticQueueEntries;count_.fetch_sub(1);if(found)break;
     }

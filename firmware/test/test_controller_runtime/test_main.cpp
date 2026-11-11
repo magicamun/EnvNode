@@ -1,6 +1,9 @@
 #include <unity.h>
 
 #include <vector>
+#include <cstring>
+#include "IDiagnosticRecorder.h"
+#include "GpioPwmActuator.h"
 
 #include "ActuatorRuntime.h"
 #include "BlinkController.h"
@@ -533,8 +536,98 @@ void test_runtime_rejects_module_slot_alias_without_stopping_current_controller(
     TEST_ASSERT_EQUAL_UINT32(1, runtime.runtimeCount());
     TEST_ASSERT_EQUAL_UINT32(writes, actuator.setCount);
 }
+
+class OutputDiagnosticCapture : public IDiagnosticRecorder {
+public:
+    bool selected = true;
+    bool verifyGpio = false;
+    DiagnosticRecordResult result = DiagnosticRecordResult::Accepted;
+    std::vector<DiagnosticEvent> events;
+    std::vector<DiagnosticSource> sources;
+    bool enabled(DiagnosticSource source) const override { return selected && source.id == 1; }
+    DiagnosticRecordResult record(DiagnosticSource source, const DiagnosticEvent& event) override {
+        TEST_ASSERT_TRUE(event.valid());
+        if (verifyGpio && source.kind == DiagnosticSourceKind::Actuator) {
+            for (size_t i=0;i<event.count();++i)
+                if (!strcmp(event.field(i).key,"output_percent"))
+                    TEST_ASSERT_EQUAL_INT(event.field(i).integer ? HIGH : LOW,gpioValues[16]);
+        }
+        events.push_back(event); sources.push_back(source);
+        return result;
+    }
+    const DiagnosticField& field(const char* key) const {
+        for (size_t i=0;i<events.back().count();++i)
+            if (!strcmp(events.back().field(i).key,key)) return events.back().field(i);
+        TEST_FAIL_MESSAGE("Missing diagnostic field"); return events.back().field(0);
+    }
+};
+void test_actuator_diagnostics_cover_pwm_changes_rejection_and_shutdown_without_repeated_writes() {
+    TestLogger logger; OutputDiagnosticCapture capture;
+    installDiagnosticRecorder(&capture);
+    GpioPwmActuator actor(HardwareResourceAssignment::gpioResource(GpioResource(16)),0,logger,1);
+    actor.setLevel(ActuatorLevel::full());
+    TEST_ASSERT_EQUAL_STRING("not_initialized",capture.field("operation").text);
+    actor.begin();
+    TEST_ASSERT_EQUAL_STRING("begin",capture.field("action").text);
+    ActuatorLevel half; ActuatorLevel::tryCreate(50,half);
+    actor.setLevel(half);
+    TEST_ASSERT_EQUAL_STRING("actuator_output",capture.events.back().name());
+    TEST_ASSERT_EQUAL_INT(50,capture.field("output_percent").integer);
+    TEST_ASSERT_EQUAL_INT(0,capture.field("previous_percent").integer);
+    const auto count=capture.events.size(); actor.setLevel(half);
+    TEST_ASSERT_EQUAL(count,capture.events.size());
+    actor.setLevel(ActuatorLevel::full()); actor.shutdown();
+    TEST_ASSERT_EQUAL_INT(100,capture.field("previous_percent").integer);
+    TEST_ASSERT_EQUAL_INT(0,capture.field("output_percent").integer);
+    TEST_ASSERT_EQUAL_STRING("shutdown",capture.field("action").text);
+    capture.selected=false; actor.begin(); actor.setLevel(half);
+    TEST_ASSERT_EQUAL(count+2,capture.events.size());
+    capture.selected=true; capture.result=DiagnosticRecordResult::Full;
+    actor.setLevel(ActuatorLevel::full());
+    TEST_ASSERT_EQUAL_INT(100,actor.outputPercent());
+    actor.shutdown(); TEST_ASSERT_EQUAL_INT(0,actor.outputPercent());
+    installDiagnosticRecorder(nullptr);
+}
+void test_onoff_diagnostic_is_emitted_after_gpio_write_and_factory_assigns_source() {
+    TestLogger logger; OutputDiagnosticCapture capture; installDiagnosticRecorder(&capture);
+    capture.verifyGpio=true;
+    ActuatorFactory factory(logger); ActuatorSlotConfiguration slot;
+    slot.slotId=1; configureActuatorSlot(slot,16);
+    ActuatorFactoryResult result;
+    auto instance=factory.create(0,slot,result); TEST_ASSERT_NOT_NULL(instance.onOff);
+    instance.onOff->begin(); instance.onOff->setState(OnOffState::On);
+    TEST_ASSERT_EQUAL_INT(HIGH,gpioValues[16]);
+    TEST_ASSERT_EQUAL_INT(1,capture.sources.back().id);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(DiagnosticSourceKind::Actuator),static_cast<int>(capture.sources.back().kind));
+    TEST_ASSERT_EQUAL_INT(100,capture.field("output_percent").integer);
+    instance.onOff->shutdown(); TEST_ASSERT_EQUAL_INT(0,capture.field("output_percent").integer);
+    installDiagnosticRecorder(nullptr);
+}
+void test_controller_diagnostics_cover_blink_transitions_stop_and_checkbox_enable() {
+    TestLogger logger; TestClock clock; TestActuator actuator; TestResolver resolver;
+    resolver.targets[0]=&actuator; MeasurementSnapshotCache measurements;
+    ControllerFactory factory(measurements,resolver,clock,logger);
+    ControllerRuntime runtime(factory,logger); ControllerSlotConfiguration slots[MaxControllerSlotCount];
+    initializeControllerSlots(slots); configureBlinkSlot(slots[0],1,100,200);
+    OutputDiagnosticCapture capture; capture.selected=false; installDiagnosticRecorder(&capture);
+    TEST_ASSERT_TRUE(runtime.initialize(slots)); TEST_ASSERT_EQUAL(0,capture.events.size());
+    capture.selected=true; runtime.loop(); TEST_ASSERT_EQUAL(2,capture.events.size());
+    TEST_ASSERT_EQUAL_STRING("controller_decision",capture.events.back().name());
+    TEST_ASSERT_EQUAL_STRING("on",capture.field("phase").text);
+    runtime.loop(); TEST_ASSERT_EQUAL(2,capture.events.size());
+    clock.now=100; runtime.loop(); TEST_ASSERT_EQUAL(4,capture.events.size());
+    TEST_ASSERT_EQUAL_STRING("off",capture.field("phase").text);
+    runtime.stopController(1); TEST_ASSERT_EQUAL_STRING("stopped",capture.field("phase").text);
+    const auto count=capture.events.size(); capture.selected=false; runtime.startController(1);
+    TEST_ASSERT_EQUAL(count,capture.events.size());
+    installDiagnosticRecorder(nullptr);
+}
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_runtime_rejects_module_slot_alias_without_stopping_current_controller);
+    UNITY_BEGIN();
+    RUN_TEST(test_actuator_diagnostics_cover_pwm_changes_rejection_and_shutdown_without_repeated_writes);
+    RUN_TEST(test_onoff_diagnostic_is_emitted_after_gpio_write_and_factory_assigns_source);
+    RUN_TEST(test_controller_diagnostics_cover_blink_transitions_stop_and_checkbox_enable);
+    RUN_TEST(test_runtime_rejects_module_slot_alias_without_stopping_current_controller);
     RUN_TEST(test_blink_begin_and_deadline_transitions_are_non_blocking);
     RUN_TEST(test_blink_deadline_is_wrap_safe);
     RUN_TEST(test_unavailable_target_restarts_fresh_cycle_when_available);

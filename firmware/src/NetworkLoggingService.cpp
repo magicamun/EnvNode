@@ -48,6 +48,7 @@ SocketTransport transport;
 UdpLogIdentity identity;
 uint32_t maxServiceUs=0,maxApplicationUs=0;
 bool active=false;
+TestMarkerSession testMarkers;
 void configure(const Configuration& c) {
     if(!buffer)return;
     active=c.networkLogging.enabled&&validNetworkLogging(c.networkLogging);
@@ -85,6 +86,21 @@ void serviceNetworkLogging(const Configuration& c,uint32_t applicationUs) {
     if(applicationUs>maxApplicationUs)maxApplicationUs=applicationUs;
     if(!buffer)return;const uint32_t start=micros();configure(c);buffer->service(transport,identity);
     const uint32_t elapsed=micros()-start;if(elapsed>maxServiceUs)maxServiceUs=elapsed;
+}
+const TestMarkerSession& networkTestMarkers(){return testMarkers;}
+const char* networkLoggingBootId(){return identity.boot;}
+TestMarkerResult recordNetworkTestMarker(const Configuration& c,TestMarkerAction action,
+    const char* label,const char* note,uint32_t expectedActiveId) {
+    if(!buffer)return TestMarkerResult::Unavailable;
+    configure(c);
+    if(!active)return TestMarkerResult::Disabled;
+    if(WiFi.status()!=WL_CONNECTED)return TestMarkerResult::Unavailable;
+    struct Sink : ITestMarkerRecorder {
+        BufferedDiagnosticRecorder& recorder;
+        explicit Sink(BufferedDiagnosticRecorder& value):recorder(value){}
+        DiagnosticRecordResult recordMarker(const DiagnosticEvent& event) override {return recorder.recordMarker(event);}
+    } sink(buffer->diagnostics());
+    return testMarkers.submit(action,label,note,expectedActiveId,sink);
 }
 void enqueueNetworkSystemLog(const LogEntry& entry){if(buffer)buffer->recordSystem(entry);}
 bool networkLoggingAvailable(){return buffer!=nullptr;}

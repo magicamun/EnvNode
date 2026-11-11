@@ -1,6 +1,7 @@
 // EnvNode-owned: see ../../LICENSE (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
 #include "RainDetectorController.h"
 #include <cstring>
+#include <cmath>
 namespace EnvNode {
 namespace {
 const char* operationName(ControllerOperationResult operation) {
@@ -35,8 +36,9 @@ ControllerOperationResult RainDetectorController::apply(bool heating) {
 }
 ControllerOperationResult RainDetectorController::begin() {
     policy_.disable(); processed_=false; applied_=false; wettingCount_=0;
+    dewDemand_=climateValid_=false; dewGapC_=NAN; dewDiagnosticKnown_=false;
     rainStartKnown_ = rainEndDetectionKnown_ = false;
-    if (!config_.policy.valid() || !policy_.configure(config_.policy))
+    if (!config_.policy.valid() || !config_.dewConfigurationValid() || !policy_.configure(config_.policy))
         return report(ControllerOperationResult::InvalidConfiguration,"invalid_configuration");
     policy_.enable(); running_=true;
     return report(apply(false),"start");
@@ -45,7 +47,7 @@ ControllerOperationResult RainDetectorController::stop() {
     return stopWithReason("stop");
 }
 ControllerOperationResult RainDetectorController::stopWithReason(const char* reason) {
-    running_=false; policy_.disable(); processed_=false;
+    running_=false; policy_.disable(); processed_=false; dewDemand_=climateValid_=false;
     return report(apply(false),reason);
 }
 ControllerOperationResult RainDetectorController::service() {
@@ -53,6 +55,7 @@ ControllerOperationResult RainDetectorController::service() {
     auto* actor=target();
     if (!actor || !actor->initialized()) {
         policy_.update(clock_.nowMs(),NAN,0);
+        dewDemand_=climateValid_=false;
         applied_=false;
         return report(ControllerOperationResult::TargetUnavailable,"target_unavailable");
     }
@@ -78,7 +81,7 @@ ControllerOperationResult RainDetectorController::service() {
         policy_.update(snapshot.window.endUs/1000,
             snapshot.window.valid()?snapshot.window.frequencyHz:NAN,
             actor->outputPercent());
-    } else return report(ControllerOperationResult::NoAction,reason);
+    } else return applyDemand(reason);
     const auto& result=policy_.result();
     if (result.heating && !before.heating && !result.wetting)
         logger_.info("RainDetector: startup frequency below dry threshold; full drying heat requested");
@@ -98,10 +101,51 @@ ControllerOperationResult RainDetectorController::service() {
     if (result.wetting || result.valid!=before.valid || result.rain!=before.rain || result.heating!=before.heating || result.dry!=before.dry)
         logger_.infof("RainDetector: rain=%s valid=%u wetting=%u heating=%u dry=%u",
             rainDetectorRainStateName(result.rain),result.valid,result.wetting,result.heating,result.dry);
-    return report(apply(result.heating),reason);
+    if (!available || stale || !snapshot.window.valid()) dewDemand_=false;
+    return applyDemand(reason);
+}
+
+void RainDetectorController::updateDewDemand() {
+    climateValid_=false; dewGapC_=NAN;
+    if (!config_.climateSensorId || !climate_) { dewDemand_=false; return; }
+    MeasurementSnapshot temperature, dew;
+    float t=0, td=0;
+    const auto usable = [&](const MeasurementSnapshot& sample, MeasurementType type, float& value) {
+        return sample.measurement.source==config_.climateSensorId && sample.measurement.type==type
+            && sample.measurement.valid && sample.measurement.value.tryGetFloatingPoint(value)
+            && std::isfinite(value)
+            && static_cast<uint32_t>(clock_.nowMs()-sample.acceptedMonotonicMs)<=120000;
+    };
+    if (!climate_->latest({config_.climateSensorId,MeasurementType::Temperature},temperature)
+        || !climate_->latest({config_.climateSensorId,MeasurementType::DewPoint},dew)
+        || !usable(temperature,MeasurementType::Temperature,t)
+        || !usable(dew,MeasurementType::DewPoint,td)
+        || t < -45 || t > 60 || td > t + 0.1F) { dewDemand_=false; return; }
+    // Acceptance occurs per emitted channel; allow bounded skew across one sample.
+    const uint32_t forward=temperature.acceptedMonotonicMs-dew.acceptedMonotonicMs;
+    const uint32_t backward=dew.acceptedMonotonicMs-temperature.acceptedMonotonicMs;
+    if (forward>1000 && backward>1000) { dewDemand_=false; return; }
+    climateValid_=true; dewGapC_=t-td;
+    if (dewGapC_<=config_.dewOnC) dewDemand_=true;
+    else if (dewGapC_>=config_.dewOffC) dewDemand_=false;
+}
+ControllerOperationResult RainDetectorController::applyDemand(const char* reason) {
+    updateDewDemand();
+    RainFrequencySnapshot frequency;
+    const bool healthy=source_.rainFrequencySnapshot(config_.sourceSensorId,frequency)
+        && frequency.window.valid()
+        && static_cast<uint32_t>(clock_.nowMs()-frequency.acceptedMs)<=1500;
+    if (!healthy) dewDemand_=false;
+    const bool preventive=healthy && policy_.result().dry && dewDemand_;
+    const bool drying=policy_.result().heating;
+    return report(apply(drying || preventive),preventive && !drying ? "dew_prevention" : reason);
 }
 
 ControllerOperationResult RainDetectorController::report(ControllerOperationResult operation,const char* reason) {
+    effectiveResult_=policy_.result();
+    auto* appliedActor=target();
+    effectiveResult_.heating=running_ && appliedActor && appliedActor->initialized()
+        && appliedActor->outputPercent()==100;
     const DiagnosticSource source(DiagnosticSourceKind::Controller,id_);
     if (!diagnostics_.enabled(source)) {
         diagnosticsActive_=false;
@@ -112,6 +156,20 @@ ControllerOperationResult RainDetectorController::report(ControllerOperationResu
         diagnosticsActive_=true;diagnosticContextAtMs_=now;
         diagnosticDecisionKnown_=diagnosticOutputKnown_=false;
         recordDiagnosticContext(source);
+        dewDiagnosticKnown_=false;
+    }
+    const uint8_t dewFlags=(climateValid_?1:0)|(dewDemand_?2:0)|(policy_.result().heating?4:0)
+        |(policy_.result().dry?8:0);
+    if (config_.climateSensorId && (!dewDiagnosticKnown_ || dewFlags!=dewDiagnosticFlags_)) {
+        DiagnosticEvent event("rain_dew");
+        event.integer("climate_sensor_id",config_.climateSensorId);
+        event.boolean("valid",climateValid_);
+        event.boolean("demand",dewDemand_);
+        event.boolean("drying",policy_.result().heating);
+        event.boolean("dry",policy_.result().dry);
+        if (climateValid_) event.number("gap_c",dewGapC_);
+        (void)diagnostics_.record(source,event);
+        dewDiagnosticKnown_=true; dewDiagnosticFlags_=dewFlags;
     }
     recordDiagnosticDecision(source);
     recordDiagnosticOutput(source,operation,reason);
@@ -119,6 +177,14 @@ ControllerOperationResult RainDetectorController::report(ControllerOperationResu
 }
 
 void RainDetectorController::recordDiagnosticContext(DiagnosticSource source) {
+    if (config_.climateSensorId) {
+        DiagnosticEvent event("rain_dew_config");
+        event.integer("climate_sensor_id",config_.climateSensorId);
+        event.number("on_gap_c",config_.dewOnC);
+        event.number("off_gap_c",config_.dewOffC);
+        event.integer("max_age_ms",120000);
+        (void)diagnostics_.record(source,event);
+    }
     {
         DiagnosticEvent event("rain_config");
         event.integer("sensor_id",config_.sourceSensorId);
@@ -140,7 +206,7 @@ void RainDetectorController::recordDiagnosticContext(DiagnosticSource source) {
 }
 
 void RainDetectorController::recordDiagnosticDecision(DiagnosticSource source) {
-    const auto& result=policy_.result();
+    const auto& result=effectiveResult_;
     const uint8_t flags=(result.valid?1:0)|(result.wetting?2:0)|
         (static_cast<uint8_t>(result.rain)<<2)|(result.heating?16:0)|(result.dry?32:0);
     if (diagnosticDecisionKnown_ && diagnosticDecisionFlags_==flags) return;

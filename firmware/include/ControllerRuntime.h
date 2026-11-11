@@ -74,6 +74,10 @@ public:
 private:
     struct RuntimeEntry {
         ControllerRuntimeInfo info;
+        bool diagnosticKnown = false;
+        uint64_t diagnosticSignature = 0;
+        uint32_t diagnosticWettingCount = 0;
+        uint32_t diagnosticAtMs = 0;
         IController* controller = nullptr;
         BlinkController* blink = nullptr;
         ThresholdController* threshold = nullptr;
@@ -90,6 +94,7 @@ private:
     bool beginComposition(RuntimeEntry* entries, size_t runtimeCount) const;
     void stopComposition(RuntimeEntry* entries, size_t runtimeCount) const;
     void updateRuntimeInfo(RuntimeEntry& entry) const;
+    void recordDiagnostics(RuntimeEntry& entry) const;
     RuntimeEntry* findEntry(ControllerId id);
 
     ControllerFactory* activeFactory_;

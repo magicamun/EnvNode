@@ -8,6 +8,10 @@
 #include "RainDetectorController.h"
 #include "ControllerRuntime.h"
 #include "UnitConverter.h"
+#include "HumidityDerivedSensor.h"
+#include "SeaLevelPressureSensor.h"
+#include "SensorManager.h"
+#include "MeasurementSnapshotCache.h"
 #include "MqttTopic.h"
 #include "BufferedDiagnosticRecorder.h"
 #include <cstring>
@@ -367,6 +371,57 @@ public:
     String iso8601Local(time_t) const override { return ""; }
     uint32_t epoch() const override { return now(); }
 };
+void test_composed_rain_sensor_recovers_from_empty_boot_and_forwards_heater_gate_restart() {
+    FrequencyTestClock clock; EventTestTime time(clock); TestFrequencyInput input;
+    FrequencyMeasurementSink output; MeasurementSnapshotCache cache;
+    RainDetectorSensor physical(4,27,input,clock);
+    GeoPosition position; SeaLevelPressureSensor pressure; pressure.bind(physical,position);
+    HumidityDerivedSensor humidity; humidity.bind(pressure);
+    SensorManager manager(time,clock,output,cache);
+    TEST_ASSERT_TRUE(manager.registerSensor(humidity,SensorSchedule::periodic(5000))
+        ==SensorRegistrationResult::Registered);
+    manager.begin();
+    RainDetectorControllerConfiguration cfg; cfg.sourceSensorId=4; cfg.targetActuatorId=1;
+    RainTestActors actors; RainTestLogger logger;
+    RainDetectorController controller(cfg,ModuleActuatorReference{},manager,actors,clock,logger);
+    controller.begin(); controller.service();
+    TEST_ASSERT_FALSE(controller.result().valid);
+    TEST_ASSERT_TRUE(controller.running());
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    RainFrequencySnapshot snapshot;
+    TEST_ASSERT_FALSE(manager.rainFrequencySnapshot(4,snapshot));
+    const auto frame=[&](uint32_t pulses) {
+        clock.now+=250; input.next=RainFrequencyPoll::Window;
+        input.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,pulses,false);
+        manager.loop(); controller.service();
+    };
+    frame(8500);
+    TEST_ASSERT_TRUE(manager.rainFrequencySnapshot(4,snapshot));
+    TEST_ASSERT_TRUE(snapshot.window.valid());
+    TEST_ASSERT_EQUAL_UINT32(1,snapshot.revision);
+    TEST_ASSERT_EQUAL_UINT32(250,snapshot.acceptedMs);
+    RainFrequencySnapshot wrong;
+    TEST_ASSERT_FALSE(manager.rainFrequencySnapshot(3,wrong));
+    for(unsigned i=0;i<70;++i)frame(8500);
+    TEST_ASSERT_TRUE(controller.result().valid);
+    TEST_ASSERT_TRUE(controller.result().dry);
+    const unsigned stops=input.stopped;
+    frame(7500);
+    TEST_ASSERT_TRUE(controller.result().wetting);
+    TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    TEST_ASSERT_GREATER_THAN_UINT(stops,input.stopped);
+    frame(0);
+    TEST_ASSERT_TRUE(manager.rainFrequencySnapshot(4,snapshot));
+    TEST_ASSERT_FALSE(snapshot.window.valid());
+    TEST_ASSERT_FALSE(controller.result().valid);
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    for(unsigned i=0;i<26;++i)frame(7500);
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    frame(7000);
+    TEST_ASSERT_TRUE(controller.result().wetting);
+    TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+}
+
 void test_rain_event_times_resolve_after_sync_and_track_each_rain_episode() {
     RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
     EmptyRainMeasurements measurements; EventTestTime time(clock);
@@ -653,8 +708,104 @@ void test_rain_producers_use_real_buffer_and_finite_jsonl_without_storage_depend
     TEST_ASSERT_GREATER_THAN_UINT(0,decisions);TEST_ASSERT_GREATER_THAN_UINT(0,outputs);
     TEST_ASSERT_EQUAL_UINT(0,recorder.stats().invalid);TEST_ASSERT_EQUAL_UINT(0,recorder.stats().full);
 }
+
+void test_dew_prevention_uses_one_source_hysteresis_freshness_and_binary_output() {
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    MeasurementSnapshotCache climate;
+    RainDetectorControllerConfiguration config; config.sourceSensorId=1; config.targetActuatorId=1;
+    config.climateSensorId=2;
+    RainDetectorController controller(config,{},source,actors,clock,logger,1,diagnosticRecorder(),&climate);
+    const auto put=[&](float gap,bool valid=true) {
+        Measurement value; value.source=2; value.valid=valid;
+        value.type=MeasurementType::Temperature; value.value=MeasurementValue::floatingPoint(20);
+        climate.observe(value,clock.now);
+        value.type=MeasurementType::DewPoint; value.value=MeasurementValue::floatingPoint(20-gap);
+        climate.observe(value,clock.now);
+    };
+    const auto frame=[&](float hz) {
+        clock.now+=250;source.frame.acceptedMs=clock.now;++source.frame.revision;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,hz/4,false);
+        controller.service();
+    };
+    put(5); controller.begin();
+    for(unsigned i=0;i<70;++i)frame(34000);
+    TEST_ASSERT_TRUE(controller.result().dry); TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    put(2);controller.service();TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    TEST_ASSERT_TRUE(controller.result().heating);
+    TEST_ASSERT_TRUE(controller.result().rain==RainDetectorRainState::Unknown);
+    for(unsigned i=0;i<25;++i)frame(34000); // guard cannot oscillate preventive heat
+    put(3);controller.service();TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    put(4);controller.service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    put(3);controller.service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    put(1);controller.service();TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    put(1,false);controller.service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    put(1);controller.service();TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    for(unsigned i=0;i<481;++i)frame(34000);
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent()); // stale climate, fresh frequency
+    put(1);controller.service();TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    clock.now+=1501;controller.service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    TEST_ASSERT_TRUE(controller.running());
+}
+void test_dew_missing_climate_never_interrupts_rain_drying_and_stop_always_turns_off() {
+    RainTestSource source; RainTestActors actors; FrequencyTestClock clock; RainTestLogger logger;
+    MeasurementSnapshotCache climate;
+    RainDetectorControllerConfiguration config;config.sourceSensorId=1;config.targetActuatorId=1;config.climateSensorId=2;
+    RainDetectorController controller(config,{},source,actors,clock,logger,1,diagnosticRecorder(),&climate);
+    const auto put=[&](float gap) {
+        Measurement value;value.source=2;value.valid=true;
+        value.type=MeasurementType::Temperature;value.value=MeasurementValue::floatingPoint(20);climate.observe(value,clock.now);
+        value.type=MeasurementType::DewPoint;value.value=MeasurementValue::floatingPoint(20-gap);climate.observe(value,clock.now);
+    };
+    const auto frame=[&](float hz) {
+        clock.now+=250;source.frame.acceptedMs=clock.now;++source.frame.revision;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,hz/4,false);
+        controller.service();
+    };
+    put(5);controller.begin();for(unsigned i=0;i<70;++i)frame(34000);
+    frame(30000);TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    climate.clear();for(unsigned i=0;i<26;++i)frame(30000);
+    TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    put(1);for(unsigned i=0;i<45;++i)frame(34000);
+    TEST_ASSERT_TRUE(controller.result().dry);TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    put(5);controller.service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    put(1);controller.service();TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    controller.stop();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    TEST_ASSERT_FALSE(controller.running());
+}
+void test_factory_injects_climate_resolver_and_unusable_pairs_do_not_heat() {
+    RainTestSource source;RainTestActors actors;FrequencyTestClock clock;RainTestLogger logger;
+    MeasurementSnapshotCache climate;ControllerFactory factory(climate,actors,clock,logger,nullptr,&source);
+    ControllerSlotConfiguration slot;slot.slotId=1;slot.enabled=true;slot.name="Rain";
+    slot.implementation=ControllerImplementation::RainDetector;
+    auto& cfg=slot.implementationConfiguration.rainDetector;cfg.sourceSensorId=1;cfg.targetActuatorId=1;cfg.climateSensorId=2;
+    ControllerFactoryResult result;auto instance=factory.create(0,slot,result);
+    TEST_ASSERT_NOT_NULL(instance.rainDetector);instance.controller->begin();
+    const auto frame=[&]() {
+        clock.now+=250;source.frame.acceptedMs=clock.now;++source.frame.revision;
+        source.frame.window=rainFrequencyWindow((clock.now-250)*1000ULL,clock.now*1000ULL,8500,false);
+        instance.controller->service();
+    };
+    for(unsigned i=0;i<70;++i)frame();
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    Measurement value;value.source=2;value.valid=true;value.type=MeasurementType::Temperature;
+    value.value=MeasurementValue::floatingPoint(20);climate.observe(value,clock.now);
+    instance.controller->service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent()); // no dew point
+    value.type=MeasurementType::DewPoint;value.value=MeasurementValue::floatingPoint(19);
+    climate.observe(value,clock.now-1001);instance.controller->service();
+    TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent()); // incoherent pair
+    climate.observe(value,clock.now);instance.controller->service();
+    TEST_ASSERT_EQUAL_INT(100,actors.actor.outputPercent());
+    value.value=MeasurementValue::floatingPoint(NAN);climate.observe(value,clock.now);
+    instance.controller->service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent());
+    value.value=MeasurementValue::floatingPoint(22);climate.observe(value,clock.now);
+    instance.controller->service();TEST_ASSERT_EQUAL_INT(0,actors.actor.outputPercent()); // impossible Td > T
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_factory_injects_climate_resolver_and_unusable_pairs_do_not_heat);
+    RUN_TEST(test_dew_prevention_uses_one_source_hysteresis_freshness_and_binary_output);
+    RUN_TEST(test_dew_missing_climate_never_interrupts_rain_drying_and_stop_always_turns_off);
+    RUN_TEST(test_composed_rain_sensor_recovers_from_empty_boot_and_forwards_heater_gate_restart);
     RUN_TEST(test_startup_above_threshold_confirms_dry_without_heat_or_rain);
     RUN_TEST(test_rain_event_times_resolve_after_sync_and_track_each_rain_episode);
     RUN_TEST(test_controller_initial_drying_has_no_wetting_and_target_recovery_stays_off);

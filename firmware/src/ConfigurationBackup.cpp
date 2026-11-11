@@ -282,12 +282,17 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
     bool legacySystemDiagnostics=!f.reading() && c.networkLogging.systemDiagnostics;
     unsigned legacySlot=0;
     if (f.reading()) {
+        for (auto& slot:c.controllerSlots) {
+            slot.implementationConfiguration.rainDetector.climateSensorId=0;
+            slot.implementationConfiguration.rainDetector.dewOnC=2;
+            slot.implementationConfiguration.rainDetector.dewOffC=4;
+        }
         c.presentation.rainDetectorFrequency = PresentationUnit::Hertz;
         for(auto& slot:c.sensorSlots) slot.extendedDiagnostics=false;
         for(auto& slot:c.actuatorSlots) slot.extendedDiagnostics=false;
         for(auto& slot:c.controllerSlots) slot.extendedDiagnostics=false;
         c.networkLogging = NetworkLoggingConfiguration{}; c.geoPosition = GeoPosition{}; c.pressureReduction = PressureReductionConfiguration{}; }
-    if (version == "2" || version == "3" || (version == "4" || version == "5" || version == "6" || version == "7")) {
+    if (version == "2" || version == "3" || (version == "4" || version == "5" || version == "6" || (version == "7" || version == "8"))) {
         f.boolean("geo.latitude.configured", c.geoPosition.latitude.configured);
         f.floating("geo.latitude.value", c.geoPosition.latitude.value);
         f.boolean("geo.longitude.configured", c.geoPosition.longitude.configured);
@@ -296,12 +301,12 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         f.floating("geo.altitude.value", c.geoPosition.altitude.value);
         if (!validGeoPosition(c.geoPosition)) f.ok = false;
     }
-    if (version == "3" || (version == "4" || version == "5" || version == "6" || version == "7")) {
+    if (version == "3" || (version == "4" || version == "5" || version == "6" || (version == "7" || version == "8"))) {
         f.number("pressure.temperatureSensorId", c.pressureReduction.temperatureSensorId, MaxSensorSlotCount);
         f.number("pressure.maxTemperatureAgeMs", c.pressureReduction.maxTemperatureAgeMs, INT32_MAX);
         if (c.pressureReduction.maxTemperatureAgeMs == 0) f.ok = false;
     }
-    if(version=="4" || version=="5" || version=="6" || version=="7") {
+    if(version=="4" || version=="5" || version=="6" || (version=="7" || version=="8")) {
         f.boolean("sd.enabled",legacyEnabled);
         f.number("sd.slot",legacySlot,1);
         f.boolean("sd.systemLog",legacySystemLog);
@@ -407,15 +412,15 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         if (!decodeDisplayConfiguration(display, c.display) || !decodeValueConfiguration(values, c.values)) f.ok = false;
         c.display.configured = configured;
     }
-    if(version=="5" || version=="6" || version=="7") {
+    if(version=="5" || version=="6" || (version=="7" || version=="8")) {
         f.boolean("sd.systemDiagnostics",legacySystemDiagnostics);
         for(size_t i=0;i<MaxSensorSlotCount;++i) f.boolean("diagnostic.sensor."+String(static_cast<unsigned>(i+1)),c.sensorSlots[i].extendedDiagnostics);
         for(size_t i=0;i<MaxActuatorSlotCount;++i) f.boolean("diagnostic.actuator."+String(static_cast<unsigned>(i+1)),c.actuatorSlots[i].extendedDiagnostics);
         for(size_t i=0;i<MaxControllerSlotCount;++i) f.boolean("diagnostic.controller."+String(static_cast<unsigned>(i+1)),c.controllerSlots[i].extendedDiagnostics);
     }
 
-    if (version == "6" || version == "7") f.number("presentation.rainDetectorFrequency", c.presentation.rainDetectorFrequency, 255);
-    if(version=="7") {
+    if (version == "6" || (version == "7" || version == "8")) f.number("presentation.rainDetectorFrequency", c.presentation.rainDetectorFrequency, 255);
+    if((version=="7" || version=="8")) {
         f.boolean("logging.enabled",c.networkLogging.enabled);
         f.text("logging.address",c.networkLogging.address);
         f.number("logging.port",c.networkLogging.port,65535);
@@ -427,6 +432,16 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         c.networkLogging.systemDiagnostics=legacySystemDiagnostics;
     }
 
+    if (version=="8") {
+        for (size_t i=0;i<MaxControllerSlotCount;++i) {
+            auto& rain=c.controllerSlots[i].implementationConfiguration.rainDetector;
+            const String p="controller."+String(static_cast<unsigned>(i+1))+".rain.dew";
+            f.number(p+"Source",rain.climateSensorId,MaxSensorSlotCount);
+            f.floating(p+"OnC",rain.dewOnC); f.floating(p+"OffC",rain.dewOffC);
+            if (!rain.dewConfigurationValid()) f.ok=false;
+        }
+    }
+
 }
 void header(Fields& f, bool& passwords, String& firmware, String& version) {
     String format("EnvNode-configuration");
@@ -434,7 +449,7 @@ void header(Fields& f, bool& passwords, String& firmware, String& version) {
     unsigned int profile = static_cast<unsigned int>(currentBoardProfile().id);
     f.text("format", format); f.text("version", version); f.text("license", license);
     f.text("firmware", firmware); f.number("boardProfile", profile, 255); f.boolean("includesPasswords", passwords);
-    if (format != "EnvNode-configuration" || (version != "1" && version != "2" && version != "3" && version != "4" && version != "5" && version != "6" && version != "7")
+    if (format != "EnvNode-configuration" || (version != "1" && version != "2" && version != "3" && version != "4" && version != "5" && version != "6" && version != "7" && version != "8")
         || profile != static_cast<unsigned int>(currentBoardProfile().id)) f.ok = false;
 }
 }
@@ -443,7 +458,7 @@ bool encodeConfigurationBackup(const Configuration& configuration, bool includeP
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
     if (!copy) return false;
     String result("{\n"), firmware(firmwareVersion);
-    Fields f(result); String version("7"); header(f, includePasswords, firmware, version); configurationFields(f, *copy, includePasswords, version);
+    Fields f(result); String version("8"); header(f, includePasswords, firmware, version); configurationFields(f, *copy, includePasswords, version);
     const size_t expected = result.length() + 3;
     result += "\n}\n";
     if (!f.ok || result.length() != expected || result.length() > MaxConfigurationBackupLength) return false;
@@ -457,7 +472,7 @@ bool decodeConfigurationBackupCandidate(const String& input, const Configuration
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(current));
     if (!copy) return false;
     bool passwords = false; String firmware;
-    Fields f(object); String version("7"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
+    Fields f(object); String version("8"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !object.empty()) return false;
     candidate = std::move(copy); includesPasswords = passwords; return true;
 }
@@ -474,7 +489,7 @@ bool encodeConfigurationRecordBuffer(const Configuration& configuration,
     std::unique_ptr<uint8_t[]>& output, size_t& size) {
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(configuration));
     if (!copy) return false;
-    bool passwords = true; String firmware, version("7");
+    bool passwords = true; String firmware, version("8");
     Fields count(nullptr, 0);
     header(count, passwords, firmware, version); configurationFields(count, *copy, true, version);
     if (!count.ok) return false;
@@ -491,7 +506,7 @@ bool encodeConfigurationRecord(const Configuration& configuration, std::vector<u
     if (!copy) return false;
     std::vector<uint8_t> result;
     Fields f(result, true); bool passwords = true; String firmware;
-    String version("7"); header(f, passwords, firmware, version); configurationFields(f, *copy, true, version);
+    String version("8"); header(f, passwords, firmware, version); configurationFields(f, *copy, true, version);
     if (!f.ok || result.size() > MaxConfigurationBackupLength) return false;
     output.swap(result); return true;
 }
@@ -501,7 +516,7 @@ bool decodeConfigurationRecord(const std::vector<uint8_t>& input, const Configur
     std::unique_ptr<Configuration> copy(new (std::nothrow) Configuration(current));
     if (!copy) return false;
     Fields f(input); bool passwords = true; String firmware;
-    String version("7"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
+    String version("8"); header(f, passwords, firmware, version); configurationFields(f, *copy, passwords, version);
     if (!f.ok || !f.complete() || !passwords) return false;
     candidate = *copy; return true;
 }

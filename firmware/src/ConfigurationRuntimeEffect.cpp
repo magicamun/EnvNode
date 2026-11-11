@@ -55,6 +55,7 @@ bool sameController(const ControllerSlotConfiguration& a,const ControllerSlotCon
         case ControllerImplementation::RainDetector: {
             const auto& r=x.rainDetector;const auto& s=y.rainDetector;const auto& p=r.policy;const auto& q=s.policy;
             return r.sourceSensorId==s.sourceSensorId && r.targetActuatorId==s.targetActuatorId
+                && r.climateSensorId==s.climateSensorId && r.dewOnC==s.dewOnC && r.dewOffC==s.dewOffC
                 && r.temperatureSource==s.temperatureSource && r.humiditySource==s.humiditySource
                 && p.edgeMs==q.edgeMs && p.dropHz==q.dropHz && p.dropPermille==q.dropPermille
                 && p.endSeconds==q.endSeconds && p.dryHz==q.dryHz && p.hysteresisHz==q.hysteresisHz && p.drySeconds==q.drySeconds;

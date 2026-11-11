@@ -20,6 +20,20 @@ Diagnose-Checkboxen beim Sensor, Aktor und Controller bleiben erhalten. Ein
 Netzausfall setzt sie nicht zurück. Für RainDetector beide relevanten Quellen
 aktivieren; die Systemdiagnose ist keine Voraussetzung dafür.
 
+GPIO-/PWM-Aktoren melden Änderungen als `actuator_output` direkt nach dem
+Schreibaufruf: bisheriger, angeforderter und angewendeter Prozentwert sowie
+Ergebnis und Aktion. Unveränderte Wiederholungen erzeugen keine weiteren
+Schaltpunkte. Die Meldung bestätigt den Software-Ausgang, keine elektrische
+Rückmessung. Die Aktor-Checkbox aktiviert diese Meldungen.
+
+Controller melden Zustands-/Entscheidungsänderungen als `controller_state` und
+`controller_decision`, zusätzlich alle 60 Sekunden einen aktuellen Stand.
+Dazu gehören Laufzustand, Verfügbarkeit, Ergebnis und je nach Controller die
+Blinkphase, Schwellwertentscheidung oder Regen-/Trockenzustand. Die bisherigen
+RainDetector-Detailereignisse bleiben erhalten. Für Heizversuche Aktor **und**
+Controller freigeben. Zur Zuordnung die geräteinterne `uptime_ms` verwenden;
+der spätere Empfangszeitpunkt ist nicht der Schaltzeitpunkt.
+
 UDP bestätigt keinen Empfang. Pufferüberlauf, Netzwerkausfall und Serverausfall
 können Lücken verursachen. Es gibt keine Nachlieferung aus persistentem Speicher.
 Die Statusseite zeigt lokale Sende-/Verlustzähler, Queuefüllstände, Heapwerte und
@@ -45,3 +59,8 @@ aktiviert aber keinen Treiber. SX1262 ist ebenfalls kein unterstützter Treiber.
 Historische SD-Stände sind über Git verfügbar, insbesondere Commit `6bb9b1c`
 vor der Entfernung. Hardwareprofile und EEPROM-Identitäten bleiben unabhängig
 von der jeweiligen Firmware-Treiberunterstützung.
+
+Bei ausgewählter Klimaquelle ergänzt RainDetector `rain_dew_config` und
+`rain_dew`: Taupunktabstandsgrenzen, Quellgültigkeit, Heizanforderung und
+Trocknungsvorrang. Die Aktorereignisse zeigen weiterhin den tatsächlich
+angewendeten Software-Heizwert (nur 0/100 %).

@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <cstdint>
+#include <cmath>
 #include <RainDetectorPolicy.h>
 
 #include "ActuatorId.h"
@@ -90,6 +91,14 @@ struct RainDetectorControllerConfiguration {
     ActuatorId targetActuatorId = InvalidActuatorId;
     MeasurementSourceReference temperatureSource;
     MeasurementSourceReference humiditySource;
+    // Zero disables preventive heating; temperature and dew point share this sensor.
+    SensorId climateSensorId = InvalidSensorId;
+    float dewOnC = 2.0F;
+    float dewOffC = 4.0F;
+    bool dewConfigurationValid() const {
+        return std::isfinite(dewOnC) && std::isfinite(dewOffC)
+            && dewOnC >= 0 && dewOffC <= 30 && dewOffC > dewOnC;
+    }
     RainDetectorPolicyConfig policy;
 };
 

@@ -133,6 +133,7 @@ private:
     void handleNetworkLogging();
     void handleNetworkLoggingSave();
     void handleNetworkLoggingTest();
+    void handleNetworkLoggingMarker();
     void handleDiagnostics();
     void handleI2CScan();
     void handleMqttSave();

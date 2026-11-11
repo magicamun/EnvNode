@@ -192,3 +192,96 @@ updates its own value; a new rain episode keeps the previous end-decision time
 until a subsequent end is detected. Initialization heating/dry confirmation does
 not create rain timestamps. They are volatile: explicit Start/rebuild/reboot
 clears them, while Stop or a signal fault retains the last events.
+
+## Startup input availability and composed sensors
+
+Immediately after boot, `no_input` is expected until the first acquisition
+window is available. The controller remains armed with heating off, polls again
+on each service call, and accepts the first available window automatically;
+a restart or artificial startup delay is not required. The normal evaluation
+and heater guards still apply before wetting/dry decisions become valid.
+
+A persistent `no_input` despite valid `rain_window` events was traced on
+2026-11-05 to the humidity-derived sensor wrapper used for all runtime sensors.
+The outer wrapper did not forward the direct frequency-snapshot capability or
+heater-change notification, hiding the working RainDetector behind ISensor's
+no-input defaults. It now forwards both, like the pressure wrapper already did.
+This leaves acquisition timing and thresholds unchanged.
+
+The regression test follows the production composition: RainDetectorSensor →
+SeaLevelPressureSensor → HumidityDerivedSensor → SensorManager → rain controller.
+It covers empty startup, first-window recovery independent of periodic sample
+publication, dry confirmation, wetting/full heat, acquisition restart on heater
+change, invalid signal/heater off, and fresh wetting after signal recovery.
+The test failed at the first snapshot before the fix and passes with forwarding.
+Build/flash and physical validation remain with the user.
+
+## Preventive dew-point heating (binary output)
+
+The RainDetector controller optionally selects **one** enabled temperature and
+humidity sensor. Its existing derived `DewPoint` and canonical `Temperature`
+channels are read through the measurement resolver. No humidity/dew-point
+formula is duplicated in the controller, and no head temperature is inferred.
+The actual head surface can be colder or warmer than the protected air sensor.
+
+Source ID 0 (default) disables prevention and preserves the existing rain-only
+behavior, including pending laboratory wetting tests. The old optional,
+reserved independent temperature/humidity references do not activate this mode.
+
+Configuration uses two gap thresholds in degrees Celsius:
+
+- `gap = air temperature - dew point`.
+- `gap <= dewOnC`: latch a preventive heating demand.
+- `gap >= dewOffC`: clear that demand.
+- Between thresholds, retain the previous demand; startup demand is off.
+- Require finite `0 <= dewOnC < dewOffC <= 30`. Initial editable values are
+  2 °C / 4 °C, experimental starting points, not field-validated limits.
+
+Prevention applies only after the detector has confirmed dry. Existing startup
+classification and rain drying retain priority: wetting/full drying demands
+100 %, independent of climate-source availability. When dry is confirmed,
+preventive demand can keep the output at 100 % without an off/on pulse. Otherwise
+it switches off. A preventive demand never creates a rain event. The displayed
+heating status reflects the combined actual software output; `dry=true` and
+heating can therefore coexist. All output commands remain exclusively 0/100 %.
+
+Temperature and dew point must be valid, finite, correctly typed/from the selected
+source, no older than 120 s, and their acceptance times within 1 s of each other.
+This accommodates per-channel timestamp capture within one sensor operation.
+Air temperature is restricted to the existing derived-dew calculation range
+(-45…60 °C); dew point above air temperature by more than 0.1 °C is rejected.
+Missing, stale or invalid climate input clears only the preventive demand.
+Detector signal loss/staleness, target loss, Stop and manual override retain the
+existing heater-off safety behavior. A detector fault does not autonomously
+restart prevention without renewed dry confirmation. The unchanged 5-second
+heater-transition guard suppresses direct switching effects on edge detection;
+longer thermal effects remain an experimental limitation to observe outdoors.
+
+The source dropdown identifies each eligible sensor by slot ID, configured name
+and implementation type; it selects the sensor directly, not a second enable
+switch. The web form offers one paired-capability source and localized decimal inputs
+for the two limits. NVS keys `rclim`, `rdon`, `rdoff` persist the setting. Backup/
+record schema 8 appends source/on/off fields; versions 1–7 remain readable and
+explicitly disable prevention, even when the current configuration enables it.
+Source/limit edits require the usual controller-runtime configuration apply.
+Source availability checks prevent disabling/replacing the required paired
+sensor while an enabled RainDetector references it.
+
+Extended controller diagnostics add `rain_dew_config` (source, limits, maximum
+age) and `rain_dew` (validity, demand, drying priority, dry state, gap when valid).
+They use the existing source checkbox and UDP recorder. `actuator_output` remains
+the authoritative software application timestamp. Existing rain events and
+recognition parameters are retained. No frost override or analog/PWM power curve
+is introduced by this step.
+
+Validation (2026-11-11): 133 distinct native cases passed across RainDetector
+policy (24), controller configuration (40), configuration backup/migration (20),
+controller runtime (17), controller MQTT (19), property resolver (7) and derived
+measurements (6). New coverage includes binary hysteresis and boundary values,
+missing/stale/nonfinite/incoherent climate pairs, factory resolver injection,
+frequency failure safety, drying priority/hand-over, localized form parsing,
+persisted settings, source dependency validation, runtime-apply classification,
+and schema-7 JSON/record import with prevention explicitly disabled. Translation
+audit found no new uncatalogued strings in this feature; pre-existing findings
+outside this scope were left unchanged. ESP32 build, flash and physical dew-point
+validation remain pending with the user.

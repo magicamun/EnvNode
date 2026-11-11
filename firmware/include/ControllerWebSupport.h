@@ -1,4 +1,5 @@
 #pragma once
+#include "EnvNode/Locale.h"
 
 #include <Arduino.h>
 
@@ -40,5 +41,8 @@ bool applyThresholdControllerWebFields(
     const String& offThreshold,
     const String& maxMeasurementAge,
     ControllerSlotConfiguration& slot);
+
+bool applyRainDewWebFields(const String& source, const String& onGap,
+    const String& offGap, Locale locale, RainDetectorControllerConfiguration& result);
 
 } // namespace EnvNode

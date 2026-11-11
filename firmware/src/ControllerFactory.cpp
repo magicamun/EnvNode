@@ -1,3 +1,4 @@
+#include "SensorSlotConfiguration.h"
 #include "ControllerFactory.h"
 
 #include <climits>
@@ -49,13 +50,14 @@ ControllerFactoryInstance ControllerFactory::create(
     void* target = &storage_[storageIndex];
     if (slot.implementation == ControllerImplementation::RainDetector) {
         const auto& config = slot.implementationConfiguration.rainDetector;
-        if (!rainSource_ || !config.policy.valid() || !isValidSensorId(config.sourceSensorId)
+        if (!rainSource_ || !config.policy.valid() || !config.dewConfigurationValid()
+            || config.climateSensorId > MaxSensorSlotCount || !isValidSensorId(config.sourceSensorId)
             || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(config.targetActuatorId))) {
             result = ControllerFactoryResult::InvalidConfiguration; return instance;
         }
         auto* storage = new (target) RainDetectorStorage;
         storage->controller.reset(new (std::nothrow) RainDetectorController(config,slot.moduleTarget,
-            *rainSource_,actuatorResolver_,monotonicClock_,logger_,slot.slotId));
+            *rainSource_,actuatorResolver_,monotonicClock_,logger_,slot.slotId,diagnosticRecorder(),&measurementResolver_));
         if (!storage->controller) {
             storage->~RainDetectorStorage();
             result = ControllerFactoryResult::InvalidConfiguration;

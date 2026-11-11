@@ -1,5 +1,7 @@
+#include "SensorSlotConfiguration.h"
 #include "ControllerTargetIdentity.h"
 #include "ControllerRuntime.h"
+#include "IDiagnosticRecorder.h"
 
 #include <climits>
 #include <cmath>
@@ -152,7 +154,8 @@ bool ControllerRuntime::validateComposition(
         if (!slot.enabled || slot.implementation == ControllerImplementation::None) continue;
         if (slot.implementation == ControllerImplementation::RainDetector) {
             const auto& rain = slot.implementationConfiguration.rainDetector;
-            if (!rain.policy.valid() || !isValidSensorId(rain.sourceSensorId)
+            if (!rain.policy.valid() || !rain.dewConfigurationValid()
+                || rain.climateSensorId > MaxSensorSlotCount || !isValidSensorId(rain.sourceSensorId)
                 || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(rain.targetActuatorId))) return false;
         } else if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
@@ -227,7 +230,8 @@ bool ControllerRuntime::constructComposition(
         entry.info.implementation = slot.implementation;
         if (slot.implementation == ControllerImplementation::RainDetector) {
             const auto& rain = slot.implementationConfiguration.rainDetector;
-            if (!rain.policy.valid() || !isValidSensorId(rain.sourceSensorId)
+            if (!rain.policy.valid() || !rain.dewConfigurationValid()
+                || rain.climateSensorId > MaxSensorSlotCount || !isValidSensorId(rain.sourceSensorId)
                 || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(rain.targetActuatorId))) return false;
         } else if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
@@ -371,6 +375,79 @@ void ControllerRuntime::updateRuntimeInfo(RuntimeEntry& entry) const {
         entry.info.outputApplicationPending =
             entry.threshold->outputApplicationPending();
     }
+    recordDiagnostics(entry);
+}
+
+
+void ControllerRuntime::recordDiagnostics(RuntimeEntry& entry) const {
+    auto& recorder = diagnosticRecorder();
+    const DiagnosticSource source(DiagnosticSourceKind::Controller, entry.info.id);
+    if (!recorder.enabled(source)) { entry.diagnosticKnown = false; return; }
+    const auto& info = entry.info;
+    const uint8_t reason = entry.threshold ? static_cast<uint8_t>(entry.threshold->reason()) : 0;
+    // Only discrete status changes, never continuously changing measurement ages/values.
+    const uint64_t signature = static_cast<uint64_t>(info.lastOperationResult)
+        | (static_cast<uint64_t>(info.thresholdDecision) << 8)
+        | (static_cast<uint64_t>(info.blinkPhase) << 16)
+        | (static_cast<uint64_t>(reason) << 24)
+        | (static_cast<uint64_t>(info.rainDetector.rain) << 32)
+        | (static_cast<uint64_t>(info.running) << 40)
+        | (static_cast<uint64_t>(info.targetAvailable) << 41)
+        | (static_cast<uint64_t>(info.sourceAvailable) << 42)
+        | (static_cast<uint64_t>(info.outputApplicationPending) << 43)
+        | (static_cast<uint64_t>(info.rainDetector.dry) << 44)
+        | (static_cast<uint64_t>(info.rainDetector.heating) << 45)
+        | (static_cast<uint64_t>(info.rainDetector.valid) << 46);
+    const uint32_t now = activeFactory_->monotonicClock().nowMs();
+    if (entry.diagnosticKnown && signature == entry.diagnosticSignature
+        && info.rainWettingCount == entry.diagnosticWettingCount
+        && static_cast<uint32_t>(now - entry.diagnosticAtMs) < 60000) return;
+    const auto* metadata = ControllerImplementationRegistry::find(info.implementation);
+    const char* operations[] = {"completed", "no_action", "target_unavailable",
+        "actuator_failed", "invalid_configuration", "not_running", "controller_not_found"};
+    DiagnosticEvent state("controller_state");
+    state.text("implementation", metadata ? metadata->stableId : "unknown");
+    state.boolean("running", info.running);
+    state.boolean("target_available", info.targetAvailable);
+    state.boolean("source_available", info.sourceAvailable);
+    state.boolean("output_pending", info.outputApplicationPending);
+    state.text("operation", operations[static_cast<unsigned>(info.lastOperationResult)]);
+    (void)recorder.record(source, state);
+    DiagnosticEvent decision("controller_decision");
+    if (entry.rainDetector) {
+        decision.text("rain", rainDetectorRainStateName(info.rainDetector.rain));
+        decision.boolean("valid", info.rainDetector.valid);
+        decision.boolean("dry", info.rainDetector.dry);
+        decision.boolean("heating", info.rainDetector.heating);
+        decision.integer("wetting_count", info.rainWettingCount);
+    } else if (entry.blink) {
+        const char* phases[] = {"stopped", "waiting_for_target", "on", "off"};
+        decision.text("phase", phases[static_cast<unsigned>(info.blinkPhase)]);
+        decision.integer("on_ms", info.onDurationMs);
+        decision.integer("off_ms", info.offDurationMs);
+    } else {
+        const char* decisions[] = {"unknown", "on", "off"};
+        decision.text("decision", decisions[static_cast<unsigned>(info.thresholdDecision)]);
+        if (entry.threshold) {
+            const char* reasons[] = {"not_started", "stopped", "invalid_configuration", "no_measurement",
+                "invalid_measurement", "stale_measurement", "on_threshold", "off_threshold",
+                "hysteresis_hold", "awaiting_threshold"};
+            decision.text("reason", reasons[reason]);
+            decision.integer("source_sensor_id", info.sourceSensorId);
+            decision.boolean("measurement_stale", info.latestSnapshotStale);
+            if (info.latestNumericValueAvailable && std::isfinite(info.latestNumericValue))
+                decision.number("input_value", info.latestNumericValue);
+        } else if (entry.selector) {
+            decision.integer("mode_value_id", info.modeValueId);
+            decision.integer("automatic_controller_id", info.automaticControllerId);
+        }
+    }
+    decision.integer("target_actuator_id", info.targetActuatorId);
+    (void)recorder.record(source, decision);
+    entry.diagnosticKnown = true;
+    entry.diagnosticSignature = signature;
+    entry.diagnosticWettingCount = info.rainWettingCount;
+    entry.diagnosticAtMs = now;
 }
 
 ControllerRuntime::RuntimeEntry* ControllerRuntime::findEntry(ControllerId id) {

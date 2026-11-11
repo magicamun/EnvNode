@@ -3,6 +3,8 @@
 #include "NetworkLoggingService.h"
 #include "SystemDiagnostics.h"
 #include "HtmlEscaping.h"
+#include "TestMarkerWebView.h"
+#include <cstring>
 namespace EnvNode {
 void WebService::handleNetworkLogging() {
     const bool de=configurationService_.getLocale()==Locale::GermanGermany;
@@ -20,6 +22,11 @@ void WebService::handleNetworkLogging() {
     html+=de?"Sensor-, Aktor- und Controllerdiagnosen bleiben in den jeweiligen Einstellungen wählbar. UDP bestätigt keinen Empfang; Ausfälle und volle Puffer verursachen Aufzeichnungslücken.":"Select sensor, actuator and controller diagnostics in their own settings. UDP does not confirm delivery; outages and full buffers cause recording gaps.";
     html+="</p><p>"+escapeHtml(networkLoggingStatus())+"</p><p>"+escapeHtml(extendedDiagnosticsStatus())+"</p>";
     html+="<form method='post' action='/network-logging/test'><button type='submit'>"+String(de?"Diagnoseereignis erzeugen":"Generate diagnostic event")+"</button></form></section>";
+    if(server_.arg("marker")=="accepted") {
+        html+="<p class='notice'>";html+=testMarkerResultText(TestMarkerResult::Accepted,configurationService_.getLocale());html+="</p>";
+    }
+    html+=buildTestMarkerHtml(networkTestMarkers(),configurationService_.getLocale(),
+        networkLoggingAvailable()&&c.enabled&&validNetworkLogging(c)&&wifiService_.connected(),networkLoggingBootId());
     sendPage("UDP / rsyslog","/network-logging",std::move(html));
 }
 void WebService::handleNetworkLoggingSave() {
@@ -39,4 +46,24 @@ void WebService::handleNetworkLoggingTest() {
     const bool accepted=recordDiagnosticTest()==DiagnosticRecordResult::Accepted;
     server_.send(accepted?200:503,"text/plain",accepted?"Accepted into RAM queue; delivery is not confirmed":"Not accepted; enable system diagnostics and check local logger status");
 }
+void WebService::handleNetworkLoggingMarker() {
+    if(!administrationAvailable()){server_.send(503,"text/plain","Unavailable");return;}
+    const String phase=server_.arg("phase"),label=server_.arg("markerLabel"),note=server_.arg("markerNote");
+    uint32_t expectedId=0;
+    if((phase!="begin"&&phase!="note"&&phase!="end") || !parseTestMarkerId(server_.arg("markerId"),expectedId)
+        || label.length()>=DiagnosticTextBytes || note.length()>=DiagnosticTextBytes
+        || strlen(label.c_str())!=label.length() || strlen(note.c_str())!=note.length()) {
+        server_.send(400,"text/plain; charset=utf-8",testMarkerResultText(TestMarkerResult::Invalid,configurationService_.getLocale()));return;
+    }
+    if(!matchingTestMarkerBoot(server_.arg("markerBoot"),networkLoggingBootId())) {
+        server_.send(409,"text/plain; charset=utf-8",testMarkerResultText(TestMarkerResult::Conflict,configurationService_.getLocale()));return;
+    }
+    const auto action=phase=="begin"?TestMarkerAction::Begin:phase=="end"?TestMarkerAction::End:TestMarkerAction::Note;
+    const auto result=recordNetworkTestMarker(configurationService_.getConfiguration(),action,label.c_str(),note.c_str(),expectedId);
+    if(result==TestMarkerResult::Accepted) {
+        server_.sendHeader("Location","/network-logging?marker=accepted#test-markers",true);server_.send(303,"text/plain","");return;
+    }
+    server_.send(testMarkerHttpStatus(result),"text/plain; charset=utf-8",testMarkerResultText(result,configurationService_.getLocale()));
+}
+
 }

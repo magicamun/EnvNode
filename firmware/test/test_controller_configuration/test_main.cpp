@@ -11,6 +11,7 @@
 #include "ControllerWebSupport.h"
 #include "SelectorWebView.h"
 #include "ConfigurationBackup.h"
+#include "ConfigurationRuntimeEffect.h"
 #include "WebLocalization.h"
 
 using namespace EnvNode;
@@ -811,8 +812,49 @@ void test_rain_detector_configuration_roundtrip_bounds_and_source_integrity() {
     TEST_ASSERT_EQUAL_UINT(300,restored.controllerSlots[0].implementationConfiguration.rainDetector.policy.endSeconds);
 }
 
+void test_rain_dew_configuration_single_source_bounds_persistence_and_locale() {
+    Fixture fixture;
+    auto sensor=fixture.service.getConfiguration().sensorSlots[4];
+    sensor.enabled=true;sensor.name="Rain";sensor.implementation=SensorImplementation::RainDetector;
+    sensor.hardware=HardwareResourceAssignment::gpioResource(GpioResource(17));
+    sensor.schedule=SensorSchedule::periodic(5000);
+    TEST_ASSERT_TRUE(fixture.service.setSensorSlotConfiguration(sensor));
+    auto climate=fixture.service.getConfiguration().sensorSlots[3];
+    TEST_ASSERT_TRUE(climate.enabled); // Default AM2302 supplies both channels.
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(fixture.enabledActuator()));
+    auto slot=fixture.service.getConfiguration().controllerSlots[0];
+    slot.enabled=true;slot.name="Rain";slot.implementation=ControllerImplementation::RainDetector;
+    auto& rain=slot.implementationConfiguration.rainDetector;rain.sourceSensorId=5;rain.targetActuatorId=1;
+    TEST_ASSERT_TRUE(applyRainDewWebFields("4","1,5","3,25",Locale::GermanGermany,rain));
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(slot));
+    auto changed=slot;changed.implementationConfiguration.rainDetector.dewOnC=1.6F;
+    TEST_ASSERT_TRUE(runtimeActionForChange(slot,changed)==RuntimeAction::RestartControllerRuntime);
+    changed=slot;changed.implementationConfiguration.rainDetector.climateSensorId=0;
+    TEST_ASSERT_TRUE(runtimeActionForChange(slot,changed)==RuntimeAction::RestartControllerRuntime);
+    ConfigurationService reboot;reboot.loadConfiguration();
+    const auto& saved=reboot.getConfiguration().controllerSlots[0].implementationConfiguration.rainDetector;
+    TEST_ASSERT_EQUAL_UINT(4,saved.climateSensorId);TEST_ASSERT_EQUAL_FLOAT(1.5F,saved.dewOnC);
+    TEST_ASSERT_EQUAL_FLOAT(3.25F,saved.dewOffC);
+    for (const auto* value:{"nan","inf","-1","3.25","31"}) {
+        auto invalid=rain;TEST_ASSERT_FALSE(applyRainDewWebFields("4",value,"3.25",Locale::EnglishUnitedKingdom,invalid));
+        TEST_ASSERT_EQUAL_FLOAT(rain.dewOnC,invalid.dewOnC);
+    }
+    rain.climateSensorId=1; // Existing temperature-only simulation cannot supply dew point.
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
+    rain.climateSensorId=4;rain.dewOnC=rain.dewOffC;
+    TEST_ASSERT_FALSE(fixture.service.setControllerSlotConfiguration(slot));
+    rain.dewOnC=1.5F;
+    climate.enabled=false;climate.schedule.enabled=false;
+    TEST_ASSERT_FALSE(fixture.service.setSensorSlotConfiguration(climate));
+    String backup;Configuration restored;bool passwords=false;
+    TEST_ASSERT_TRUE(encodeConfigurationBackup(reboot.getConfiguration(),false,"test",backup));
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,reboot.getConfiguration(),restored,passwords));
+    TEST_ASSERT_EQUAL_UINT(4,restored.controllerSlots[0].implementationConfiguration.rainDetector.climateSensorId);
+    TEST_ASSERT_EQUAL_FLOAT(3.25F,restored.controllerSlots[0].implementationConfiguration.rainDetector.dewOffC);
+}
+
 int main(int, char**) {
-    UNITY_BEGIN(); RUN_TEST(test_rain_detector_configuration_roundtrip_bounds_and_source_integrity); RUN_TEST(test_slot_and_module_alias_cannot_claim_same_output);
+    UNITY_BEGIN(); RUN_TEST(test_rain_dew_configuration_single_source_bounds_persistence_and_locale); RUN_TEST(test_rain_detector_configuration_roundtrip_bounds_and_source_integrity); RUN_TEST(test_slot_and_module_alias_cannot_claim_same_output);
     RUN_TEST(test_selector_persistence_dependencies_and_exclusive_target);
     RUN_TEST(test_controller_registry_uses_stable_ids_and_on_off_requirement);
     RUN_TEST(test_threshold_registry_uses_stable_id_and_on_off_requirement);
