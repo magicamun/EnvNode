@@ -107,7 +107,7 @@ static SensorManager sensorManager(
     measurementSnapshotCache);
 static ControllerFactory controllerFactory(
     measurementSnapshotCache, actuatorRuntime, monotonicClock, logger, &valueRuntime, &sensorManager);
-static ControllerRuntime controllerRuntime(controllerFactory, logger);
+static ControllerRuntime controllerRuntime(controllerFactory, logger, &timeService);
 static SensorFactory firstSensorFactory(monotonicClock, i2cBusManager, logger, &configurationService, &timeService);
 static SensorFactory secondSensorFactory(monotonicClock, i2cBusManager, logger, &configurationService, &timeService);
 static SensorRuntime sensorRuntime(
