@@ -2083,7 +2083,34 @@ void WebService::renderDiagnostics() {
                                     : hardwareDescriptorStoreStatusName(module->descriptorStoreStatus)) + "</span>";
                         }
                     } else {
-                        c += uiText(TextId::UnidentifiedICDevice);
+                        // A scan only proves presence. Label configured assignments separately
+                        // from devices identified through their EEPROM descriptors.
+                        String assignments;
+                        for (size_t sensorIndex = 0; sensorIndex < sensorManager_.sensorCount(); ++sensorIndex) {
+                            SensorRuntimeInfo info;
+                            if (!sensorManager_.runtimeInfo(sensorIndex, info)
+                                || info.provenance != SensorProvenance::Physical
+                                || info.hardware.kind != HardwareResourceKind::I2C
+                                || info.hardware.i2c.bus != bus.bus
+                                || info.hardware.i2c.address != result.addresses[addressIndex]) continue;
+                            if (assignments.length() > 0) assignments += "<br>";
+                            assignments += String(uiText(TextId::Sensor)) + " " + String(info.id)
+                                + " · " + escapeHtml(info.name) + " (" + escapeHtml(info.type) + ")";
+                        }
+                        const auto& displayConfiguration = configurationService_.getConfiguration().display;
+                        for (size_t outputIndex = 0; outputIndex < 2; ++outputIndex) {
+                            const auto& output = displayConfiguration.output(outputIndex);
+                            if (!output.enabled || output.bus != bus.bus
+                                || output.address != result.addresses[addressIndex]) continue;
+                            if (assignments.length() > 0) assignments += "<br>";
+                            assignments += String(uiText(TextId::Display)) + " " + String(outputIndex + 1)
+                                + " · " + escapeHtml(textDisplayTypeName(output.type));
+                        }
+                        if (assignments.length() > 0) {
+                            c += String(uiText(TextId::AssignedICDevice)) + "<br>" + assignments;
+                        } else {
+                            c += uiText(TextId::UnidentifiedICDevice);
+                        }
                     }
                     c += "</td></tr>";
                 }
