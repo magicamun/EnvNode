@@ -818,3 +818,8 @@ ENVNODE_WEB_TEXT(RainEndConfirmedAt, "Rain end detected at", "Regenende erkannt 
 ENVNODE_WEB_TEXT(FrequencyUnit, "Frequency", "Frequenz")
 
 ENVNODE_WEB_TEXT(NetworkLogging, "Network logging", "Netzwerklogging")
+
+ENVNODE_WEB_TEXT(RainDewSource, "Preventive heating: temperature/humidity source", "Vorbeugende Heizung: Temperatur-/Feuchtequelle")
+ENVNODE_WEB_TEXT(RainDewOn, "Heat on at dew-point gap <= (C)", "Heizung an bei Taupunktabstand <= (°C)")
+ENVNODE_WEB_TEXT(RainDewOff, "Heat off at dew-point gap >= (C)", "Heizung aus bei Taupunktabstand >= (°C)")
+ENVNODE_WEB_TEXT(RainDewHelp, "Gap = air temperature minus dew point, from the same source. 0 <= on < off <= 30 C. Only 0/100%; drying takes priority. Missing or older-than-120s climate values disable prevention, not active drying. Source disabled preserves the previous rain-only behavior.", "Abstand = Lufttemperatur minus Taupunkt aus derselben Quelle. 0 <= an < aus <= 30 °C. Nur 0/100 %; Trocknung hat Vorrang. Fehlende oder über 120 s alte Klimawerte beenden nur die Vorbeugung. Ohne Quelle bleibt das bisherige Regenverhalten erhalten.")

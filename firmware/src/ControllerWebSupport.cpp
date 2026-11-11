@@ -1,4 +1,5 @@
 #include "ControllerWebSupport.h"
+#include "LocalizedDecimal.h"
 
 #include <climits>
 #include <cmath>
@@ -169,6 +170,21 @@ bool applyThresholdControllerWebFields(
     return applyThresholdControllerWebFields(
         sourceSensor, measurementType, targetActuator,
         onThreshold, offThreshold, "on_above", maxMeasurementAge, slot);
+}
+
+bool applyRainDewWebFields(const String& source, const String& onGap,
+    const String& offGap, Locale locale, RainDetectorControllerConfiguration& result) {
+    if (source.isEmpty()) return false;
+    for (size_t i=0;i<source.length();++i) if (source[i]<'0' || source[i]>'9') return false;
+    char* end=nullptr; const unsigned long id=strtoul(source.c_str(),&end,10);
+    if (!end || *end || id>MaxSensorSlotCount) return false;
+    String on,off;
+    if (!normalizeDecimalInput(onGap,locale,on) || !normalizeDecimalInput(offGap,locale,off)) return false;
+    auto candidate=result;
+    candidate.climateSensorId=static_cast<SensorId>(id);
+    if (!parseFiniteFloat(on,candidate.dewOnC) || !parseFiniteFloat(off,candidate.dewOffC)
+        || !candidate.dewConfigurationValid()) return false;
+    result=candidate; return true;
 }
 
 } // namespace EnvNode

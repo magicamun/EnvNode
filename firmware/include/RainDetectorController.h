@@ -8,15 +8,17 @@
 #include "Logger.h"
 #include "ControllerId.h"
 #include "IDiagnosticRecorder.h"
+#include "IMeasurementResolver.h"
 namespace EnvNode {
 class RainDetectorController : public IController {
 public:
     RainDetectorController(const RainDetectorControllerConfiguration& config,
         const ModuleActuatorReference& module, IRainFrequencyResolver& source,
         IOnOffActuatorResolver& actors, IMonotonicClock& clock, ILogger& logger,
-        ControllerId id = InvalidControllerId, IDiagnosticRecorder& diagnostics = diagnosticRecorder())
+        ControllerId id = InvalidControllerId, IDiagnosticRecorder& diagnostics = diagnosticRecorder(),
+        const IMeasurementResolver* climate = nullptr)
         : config_(config), module_(module), source_(source), actors_(actors), clock_(clock), logger_(logger),
-          id_(id), diagnostics_(diagnostics) {}
+          id_(id), diagnostics_(diagnostics), climate_(climate) {}
     ControllerOperationResult begin() override;
     ControllerOperationResult stop() override;
     ControllerOperationResult service() override;
@@ -31,8 +33,10 @@ public:
     uint32_t rainEndConfirmationAgeMs() const { return clock_.nowMs() - rainEndConfirmationMs_; }
     bool running() const { return running_; }
     bool targetAvailable() const { return target()!=nullptr; }
-    const RainDetectorPolicyResult& result() const { return policy_.result(); }
+    const RainDetectorPolicyResult& result() const { return effectiveResult_; }
 private:
+    void updateDewDemand();
+    ControllerOperationResult applyDemand(const char* reason);
     IOnOffActuator* target() const;
     ControllerOperationResult apply(bool heating);
     ControllerOperationResult stopWithReason(const char* reason);
@@ -48,6 +52,12 @@ private:
     ILogger& logger_;
     ControllerId id_;
     IDiagnosticRecorder& diagnostics_;
+    const IMeasurementResolver* climate_;
+    RainDetectorPolicyResult effectiveResult_;
+    bool dewDemand_ = false, climateValid_ = false;
+    float dewGapC_ = NAN;
+    bool dewDiagnosticKnown_ = false;
+    uint8_t dewDiagnosticFlags_ = 0;
     RainDetectorPolicy policy_;
     bool running_ = false, processed_ = false, applied_ = false;
     uint32_t revision_ = 0, wettingCount_ = 0;

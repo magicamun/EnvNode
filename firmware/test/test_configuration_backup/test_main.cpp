@@ -60,7 +60,7 @@ void test_reject_malformed_and_incompatible() {
     String backup; Configuration candidate; bool passwords;
     TEST_ASSERT_TRUE(encodeConfigurationBackup(service.getConfiguration(), false, "", backup));
     for (const auto& input : {
-            replace(backup, "\"version\": \"7\"", "\"version\": \"99\""),
+            replace(backup, "\"version\": \"8\"", "\"version\": \"99\""),
             replace(backup, "\"boardProfile\": \"0\"", "\"boardProfile\": \"255\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"65536\""),
             replace(backup, "\"mqtt.port\": \"1883\"", "\"mqtt.port\": \"-1\""),
@@ -259,7 +259,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
     auto end = legacy.find("\"device.name\"", begin);
     TEST_ASSERT_TRUE(begin != std::string::npos && end != std::string::npos);
     legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"7\"", "\"version\": \"1\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"8\"", "\"version\": \"1\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, decoded, passwords));
     TEST_ASSERT_FALSE(decoded.geoPosition.altitude.configured);
     TEST_ASSERT_FALSE(decoded.geoPosition.latitude.configured);
@@ -272,7 +272,7 @@ void test_new_backup_roundtrip_and_legacy_json_and_snapshot_migration() {
         const size_t length = record[i] | (record[i + 1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data() + i), length); i += length;
     }
-    fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());
+    fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+4*MaxControllerSlotCount),fields.end());
     fields[1] = "1"; fields.erase(fields.begin() + 6, fields.begin() + 17);
     record.clear();
     for (const auto& field : fields) {
@@ -337,7 +337,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
     TEST_ASSERT_EQUAL(1, rebooted.getConfiguration().pressureReduction.temperatureSensorId);
     std::string legacy(withoutDiagnosticTail(backup).c_str()); auto begin = legacy.find("\"pressure.temperatureSensorId\"");
     auto end = legacy.find("\"device.name\"", begin); legacy.erase(begin, end - begin);
-    backup = replace(String(legacy.c_str()), "\"version\": \"7\"", "\"version\": \"2\"");
+    backup = replace(String(legacy.c_str()), "\"version\": \"8\"", "\"version\": \"2\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup, current, candidate, passwords));
     TEST_ASSERT_EQUAL(0, candidate.pressureReduction.temperatureSensorId);
     TEST_ASSERT_TRUE(candidate.geoPosition.altitude.configured); TEST_ASSERT_EQUAL_FLOAT(694, candidate.geoPosition.altitude.value);
@@ -347,7 +347,7 @@ void test_temperature_settings_backup_v3_and_v2_migration() {
         size_t size = record[i] | (record[i+1] << 8); i += 2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data()+i), size); i += size;
     }
-    fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());
+    fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+4*MaxControllerSlotCount),fields.end());
     fields[1] = "2"; fields.erase(fields.begin()+12, fields.begin()+17); record.clear();
     for (const auto& field : fields) {
         record.push_back(field.size() & 255); record.push_back(field.size() >> 8);
@@ -369,12 +369,12 @@ void test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration
     TEST_ASSERT_TRUE(c.sensorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.actuatorSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.controllerSlots[0].extendedDiagnostics);TEST_ASSERT_TRUE(c.networkLogging.systemDiagnostics);
     String backup;bool passwords;Configuration decoded;TEST_ASSERT_TRUE(encodeConfigurationBackup(c,true,"",backup));
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,c,decoded,passwords));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.actuatorSlots[0].extendedDiagnostics && decoded.controllerSlots[0].extendedDiagnostics && decoded.networkLogging.systemDiagnostics);
-    const String old=replace(withoutDiagnosticTail(backup),"\"version\": \"7\"","\"version\": \"4\"");
+    const String old=replace(withoutDiagnosticTail(backup),"\"version\": \"8\"","\"version\": \"4\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(old,c,decoded,passwords));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.networkLogging.systemDiagnostics);
     std::vector<uint8_t> record;TEST_ASSERT_TRUE(encodeConfigurationRecord(c,record));TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_TRUE(decoded.sensorSlots[0].extendedDiagnostics && decoded.networkLogging.systemDiagnostics);
     std::vector<std::string> fields;
     for(size_t i=0;i<record.size();){const size_t n=record[i]|(record[i+1]<<8);i+=2;fields.emplace_back(reinterpret_cast<const char*>(record.data()+i),n);i+=n;}
-    fields[1]="4";fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+MaxControllerSlotCount),fields.end());record.clear();
+    fields[1]="4";fields.erase(fields.end()-(7+MaxSensorSlotCount+MaxActuatorSlotCount+4*MaxControllerSlotCount),fields.end());record.clear();
     for(const auto& field:fields){record.push_back(field.size()&255);record.push_back(field.size()>>8);record.insert(record.end(),field.begin(),field.end());}
     TEST_ASSERT_TRUE(decodeConfigurationRecord(record,c,decoded));TEST_ASSERT_FALSE(decoded.sensorSlots[0].extendedDiagnostics || decoded.actuatorSlots[0].extendedDiagnostics || decoded.controllerSlots[0].extendedDiagnostics || decoded.networkLogging.systemDiagnostics);
 }
@@ -411,7 +411,7 @@ void test_frequency_units_persist_and_backup_v6_migrates_v5() {
     std::string legacy(backup.c_str());
     const auto tail=legacy.find(",\n\"presentation.rainDetectorFrequency\"");
     TEST_ASSERT_TRUE(tail!=std::string::npos);legacy.erase(tail);legacy+="\n}\n";
-    backup=replace(String(legacy.c_str()),"\"version\": \"7\"","\"version\": \"5\"");
+    backup=replace(String(legacy.c_str()),"\"version\": \"8\"","\"version\": \"5\"");
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),candidate,passwords));
     TEST_ASSERT_TRUE(candidate.presentation.rainDetectorFrequency==PresentationUnit::Hertz);
     TEST_ASSERT_TRUE(service.resetToDefaults());
@@ -431,8 +431,8 @@ void test_v5_record_defaults_frequency_without_losing_diagnostics() {
         const size_t size=record[offset]|(record[offset+1]<<8);offset+=2;
         fields.emplace_back(reinterpret_cast<const char*>(record.data()+offset),size);offset+=size;
     }
-    TEST_ASSERT_EQUAL_STRING("7",fields[1].c_str());
-    fields.erase(fields.end()-5,fields.end());
+    TEST_ASSERT_EQUAL_STRING("8",fields[1].c_str());
+    fields.erase(fields.end()-(5+3*MaxControllerSlotCount),fields.end());
     TEST_ASSERT_EQUAL_STRING("16",fields.back().c_str());
     fields[1]="5";fields.pop_back();record.clear();
     for(const auto& field:fields) {
@@ -496,8 +496,33 @@ void test_network_logging_migration_atomic_persistence_and_backup() {
     c=NetworkLoggingConfiguration{};TEST_ASSERT_TRUE(rebooted.setNetworkLoggingConfiguration(c));
     ConfigurationService cleared;cleared.loadConfiguration();TEST_ASSERT_FALSE(cleared.getConfiguration().networkLogging.systemDiagnostics);
 }
+void test_version7_import_disables_new_dew_heating_instead_of_inheriting_current_source() {
+    ConfigurationService service;service.loadConfiguration();Configuration current=service.getConfiguration();
+    current.controllerSlots[0].implementationConfiguration.rainDetector.climateSensorId=3;
+    current.controllerSlots[0].implementationConfiguration.rainDetector.dewOnC=1.5F;
+    current.controllerSlots[0].implementationConfiguration.rainDetector.dewOffC=3.5F;
+    String backup;TEST_ASSERT_TRUE(encodeConfigurationBackup(current,false,"test",backup));
+    std::string old(backup.c_str());const auto tail=old.find(",\n\"controller.1.rain.dewSource\"");
+    TEST_ASSERT_TRUE(tail!=std::string::npos);old.erase(tail);old+="\n}\n";
+    backup=replace(String(old.c_str()),"\"version\": \"8\"","\"version\": \"7\"");
+    Configuration decoded;bool passwords=false;
+    TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,current,decoded,passwords));
+    TEST_ASSERT_EQUAL_UINT(0,decoded.controllerSlots[0].implementationConfiguration.rainDetector.climateSensorId);
+    TEST_ASSERT_EQUAL_FLOAT(2,decoded.controllerSlots[0].implementationConfiguration.rainDetector.dewOnC);
+    std::vector<uint8_t> record;TEST_ASSERT_TRUE(encodeConfigurationRecord(current,record));
+    std::vector<std::string> fields;
+    for(size_t i=0;i<record.size();) {size_t n=record[i]|(record[i+1]<<8);i+=2;
+        fields.emplace_back(reinterpret_cast<const char*>(record.data()+i),n);i+=n;}
+    fields.erase(fields.end()-3*MaxControllerSlotCount,fields.end());fields[1]="7";record.clear();
+    for(const auto& field:fields) {record.push_back(field.size()&255);record.push_back(field.size()>>8);
+        record.insert(record.end(),field.begin(),field.end());}
+    TEST_ASSERT_TRUE(decodeConfigurationRecord(record,current,decoded));
+    TEST_ASSERT_EQUAL_UINT(0,decoded.controllerSlots[0].implementationConfiguration.rainDetector.climateSensorId);
+}
+
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_version7_import_disables_new_dew_heating_instead_of_inheriting_current_source);
     RUN_TEST(test_network_logging_migration_atomic_persistence_and_backup);
     RUN_TEST(test_solar_position_slot_survives_reboot_and_backup);
     RUN_TEST(test_extended_diagnostic_preferences_survive_reboot_backup_and_v4_migration);

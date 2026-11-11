@@ -1957,19 +1957,24 @@ void WebService::handleControllerEdit() {
         c += "<label>" + String(uiText(label)) + "<input type='number' name='" + key + "' min='" + String(low)
             + "' max='" + String(high) + "' value='" + String(value) + "'></label>";
     };
-    const auto climateSelect = [&](const char* name, const char* label, MeasurementType type, SensorId selected) {
-        c += "<label>"+String(label)+"<select name='"+name+"'><option value='0'>—</option>";
-        for (const auto& sensor : configuration.sensorSlots) {
-            const auto* meta=SensorImplementationRegistry::find(sensor.implementation);
-            if (!sensor.enabled || !meta) continue;
-            bool supported=false;
-            for (size_t i=0;i<meta->measurementTypeCount;++i) if (meta->measurementTypes[i]==type) supported=true;
-            if (supported) c += "<option value='"+String(sensor.slotId)+"'"+(selected==sensor.slotId?" selected":"")+">"+escapeHtml(sensor.name)+"</option>";
+    c += "<label>"+String(uiText(TextId::RainDewSource))+"<select name='rainClimate'><option value='0'>"+String(uiText(TextId::Disabled))+"</option>";
+    for (const auto& sensor:configuration.sensorSlots) {
+        const auto* meta=SensorImplementationRegistry::find(sensor.implementation);
+        if (!sensor.enabled || !meta) continue;
+        bool temperature=false,humidity=false;
+        for (size_t i=0;i<meta->measurementTypeCount;++i) {
+            temperature |= meta->measurementTypes[i]==MeasurementType::Temperature;
+            humidity |= meta->measurementTypes[i]==MeasurementType::RelativeHumidity;
         }
-        c += "</select></label>";
-    };
-    climateSelect("rainTemperature",uiText(TextId::RainTemperatureOptional),MeasurementType::Temperature,rain.temperatureSource.sensorId);
-    climateSelect("rainHumidity",uiText(TextId::RainHumidityOptional),MeasurementType::RelativeHumidity,rain.humiditySource.sensorId);
+        if (temperature && humidity) c += "<option value='"+String(sensor.slotId)+"'"
+            +(rain.climateSensorId==sensor.slotId?" selected":"")+">"+escapeHtml(sensor.name)+"</option>";
+    }
+    c += "</select></label>";
+    c += "<label>"+String(uiText(TextId::RainDewOn))+"<input name='rainDewOn' inputmode='decimal' value='"
+        +formatDecimalInput(rain.dewOnC,2,configurationService_.getLocale())+"'></label>";
+    c += "<label>"+String(uiText(TextId::RainDewOff))+"<input name='rainDewOff' inputmode='decimal' value='"
+        +formatDecimalInput(rain.dewOffC,2,configurationService_.getLocale())+"'></label>";
+    c += "<p class='hint'>"+String(uiText(TextId::RainDewHelp))+"</p>";
     rainNumber("rainEdge",TextId::RainEdgeMs,rain.policy.edgeMs,250,2000);
     rainNumber("rainDrop",TextId::RainDropHz,rain.policy.dropHz,20,10000);
     rainNumber("rainRelative",TextId::RainRelative,rain.policy.dropPermille,1,200);
@@ -2421,20 +2426,16 @@ void WebService::handleControllerSave() {
                 if (!end || *end || n>100000) return false;
                 value=static_cast<unsigned>(n); return true;
             };
-            unsigned source=0,target=0,temperature=0,humidity=0;
+            unsigned source=0,target=0;
             ok = number("rainSource",source) && source>0 && source<=MaxSensorSlotCount
                 && number("rainTarget",target) && target>0 && target<=MaxActuatorSlotCount
                 && number("rainEdge",candidate.policy.edgeMs) && number("rainDrop",candidate.policy.dropHz)
                 && number("rainRelative",candidate.policy.dropPermille) && number("rainEnd",candidate.policy.endSeconds)
                 && number("rainDry",candidate.policy.dryHz) && number("rainHysteresis",candidate.policy.hysteresisHz)
                 && number("rainConfirm",candidate.policy.drySeconds) && candidate.policy.valid()
-                && number("rainTemperature",temperature) && temperature<=MaxSensorSlotCount
-                && number("rainHumidity",humidity) && humidity<=MaxSensorSlotCount;
+                && applyRainDewWebFields(server_.arg("rainClimate"),server_.arg("rainDewOn"),
+                    server_.arg("rainDewOff"),configurationService_.getLocale(),candidate);
             if (ok) {
-                candidate.temperatureSource.sensorId=temperature;
-                candidate.temperatureSource.measurementType=MeasurementType::Temperature;
-                candidate.humiditySource.sensorId=humidity;
-                candidate.humiditySource.measurementType=MeasurementType::RelativeHumidity;
                 candidate.sourceSensorId=source; candidate.targetActuatorId=target;
                 slot.moduleTarget=ModuleActuatorReference{};
                 slot.implementationConfiguration.rainDetector=candidate;

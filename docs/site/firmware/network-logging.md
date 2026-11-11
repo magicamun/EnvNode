@@ -59,3 +59,8 @@ aktiviert aber keinen Treiber. SX1262 ist ebenfalls kein unterstützter Treiber.
 Historische SD-Stände sind über Git verfügbar, insbesondere Commit `6bb9b1c`
 vor der Entfernung. Hardwareprofile und EEPROM-Identitäten bleiben unabhängig
 von der jeweiligen Firmware-Treiberunterstützung.
+
+Bei ausgewählter Klimaquelle ergänzt RainDetector `rain_dew_config` und
+`rain_dew`: Taupunktabstandsgrenzen, Quellgültigkeit, Heizanforderung und
+Trocknungsvorrang. Die Aktorereignisse zeigen weiterhin den tatsächlich
+angewendeten Software-Heizwert (nur 0/100 %).

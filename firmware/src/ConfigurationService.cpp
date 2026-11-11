@@ -454,6 +454,9 @@ void ConfigurationService::loadControllerSlots() {
                 ? storage_.preferences().getString(controllerKey(expectedId, "seloff").c_str(), "") : String();
         }
         auto& rain = loaded[index].implementationConfiguration.rainDetector;
+        rain.climateSensorId=storage_.preferences().getUInt(controllerKey(expectedId,"rclim").c_str(),0);
+        rain.dewOnC=storage_.preferences().getFloat(controllerKey(expectedId,"rdon").c_str(),2.0F);
+        rain.dewOffC=storage_.preferences().getFloat(controllerKey(expectedId,"rdoff").c_str(),4.0F);
         rain.temperatureSource.sensorId=storage_.preferences().getUInt(controllerKey(expectedId,"rtemp").c_str(),0);
         rain.temperatureSource.measurementType=MeasurementType::Temperature;
         rain.humiditySource.sensorId=storage_.preferences().getUInt(controllerKey(expectedId,"rhum").c_str(),0);
@@ -831,8 +834,20 @@ bool ConfigurationService::validateControllerSlot(
 
     if (slot.implementation == ControllerImplementation::RainDetector) {
         const auto& rain = slot.implementationConfiguration.rainDetector;
-        if (!rain.policy.valid() || !sensorSlots || !isValidSensorId(rain.sourceSensorId)
+        if (!rain.policy.valid() || !rain.dewConfigurationValid() || !sensorSlots || !isValidSensorId(rain.sourceSensorId)
             || rain.sourceSensorId > MaxSensorSlotCount) return false;
+        if (rain.climateSensorId) {
+            if (rain.climateSensorId>MaxSensorSlotCount) return false;
+            const auto& climate=sensorSlots[rain.climateSensorId-1];
+            const auto* metadata=SensorImplementationRegistry::find(climate.implementation);
+            bool temperature=false,humidity=false;
+            if (!climate.enabled || !metadata) return false;
+            for (size_t i=0;i<metadata->measurementTypeCount;++i) {
+                temperature |= metadata->measurementTypes[i]==MeasurementType::Temperature;
+                humidity |= metadata->measurementTypes[i]==MeasurementType::RelativeHumidity;
+            }
+            if (!temperature || !humidity) return false;
+        }
         const auto& source = sensorSlots[rain.sourceSensorId-1];
         if (!source.enabled || source.implementation != SensorImplementation::RainDetector) return false;
         const auto optionalSource = [&](const MeasurementSourceReference& reference, MeasurementType expected) {
@@ -1101,7 +1116,10 @@ bool ConfigurationService::persistControllerSlot(
     };
     const auto& rain = slot.implementationConfiguration.rainDetector;
     if (slot.implementation == ControllerImplementation::RainDetector) {
-        if (!persistUInt(controllerKey(id,"rtemp").c_str(),rain.temperatureSource.sensorId)
+        if (!persistUInt(controllerKey(id,"rclim").c_str(),rain.climateSensorId)
+            || !persistFloat(controllerKey(id,"rdon").c_str(),rain.dewOnC)
+            || !persistFloat(controllerKey(id,"rdoff").c_str(),rain.dewOffC)
+            || !persistUInt(controllerKey(id,"rtemp").c_str(),rain.temperatureSource.sensorId)
             || !persistUInt(controllerKey(id,"rhum").c_str(),rain.humiditySource.sensorId)
             || !persistUInt(controllerKey(id,"rsrc").c_str(),rain.sourceSensorId)
             || !persistUInt(controllerKey(id,"ract").c_str(),rain.targetActuatorId)

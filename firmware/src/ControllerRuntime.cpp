@@ -1,3 +1,4 @@
+#include "SensorSlotConfiguration.h"
 #include "ControllerTargetIdentity.h"
 #include "ControllerRuntime.h"
 #include "IDiagnosticRecorder.h"
@@ -153,7 +154,8 @@ bool ControllerRuntime::validateComposition(
         if (!slot.enabled || slot.implementation == ControllerImplementation::None) continue;
         if (slot.implementation == ControllerImplementation::RainDetector) {
             const auto& rain = slot.implementationConfiguration.rainDetector;
-            if (!rain.policy.valid() || !isValidSensorId(rain.sourceSensorId)
+            if (!rain.policy.valid() || !rain.dewConfigurationValid()
+                || rain.climateSensorId > MaxSensorSlotCount || !isValidSensorId(rain.sourceSensorId)
                 || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(rain.targetActuatorId))) return false;
         } else if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
@@ -228,7 +230,8 @@ bool ControllerRuntime::constructComposition(
         entry.info.implementation = slot.implementation;
         if (slot.implementation == ControllerImplementation::RainDetector) {
             const auto& rain = slot.implementationConfiguration.rainDetector;
-            if (!rain.policy.valid() || !isValidSensorId(rain.sourceSensorId)
+            if (!rain.policy.valid() || !rain.dewConfigurationValid()
+                || rain.climateSensorId > MaxSensorSlotCount || !isValidSensorId(rain.sourceSensorId)
                 || (!validModuleActuatorReference(slot.moduleTarget) && !isValidActuatorId(rain.targetActuatorId))) return false;
         } else if (slot.implementation == ControllerImplementation::Blink) {
             const BlinkControllerConfiguration& blink =
