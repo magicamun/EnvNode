@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- EnvNode 0.8.12: integrate tested RainDetector acquisition and heating fixes,
+  configurable binary dew-point prevention, timestamp values for displays,
+  structured actuator/controller diagnostics and manual test markers. Identify
+  assigned devices in the I2C scan. Dew-point prevention still awaits a physical
+  test with a connected climate source.
+
 - Mini 0.10.0 and Weather 0.4: reviewed reset headers (GND/EN), grounded
   mounting pads, revision-bound hardware/continuity/provisioning profiles and
   current board images. EnvNode 0.8.11 / Tester 0.15.0 add these revisions;
