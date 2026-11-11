@@ -22,7 +22,7 @@ vollständiger Hardwarequalifikation.
 
 ## Neue Hardwaredokumentation vom 28. Oktober 2026
 
-Aktuelle Anleitungen: [Mini 0.9.0](mainboards/mini/index.md), [Weather 0.3.0](mainboards/weatherstation/index.md), [AnalogHydroPressure 0.6](modules/analog-hydro-pressure/index.md), [SD-Card 0.1](modules/sd-card/index.md), [RainDetectorController 0.4](sensors/rain-detector-controller/assembly.md) und [Head 0.2](sensors/rain-detector-head/assembly.md). Der redaktionelle Abschluss bestätigt keine neue Firmware-/Hardwarekombination. SD-Card 0.1 ist am Mini aufgebaut und funktional geprüft; der öffentliche integrierte Funktionsstand ist Firmware 0.8.7. Descriptor-Minimum 0.8.6 und tatsächlich enthaltener SD-Treiber sind getrennt zu prüfen. Siehe [SD-Bedienung](firmware/sd-card.md). Die nachfolgenden früheren Betriebsnachweise bleiben ihren jeweiligen Revisionen zugeordnet.
+Aktuelle Anleitungen: [Mini 0.9.0](mainboards/mini/index.md), [Weather 0.3.0](mainboards/weatherstation/index.md), [AnalogHydroPressure 0.6](modules/analog-hydro-pressure/index.md), [RainDetectorController 0.4](sensors/rain-detector-controller/assembly.md) und [Head 0.2](sensors/rain-detector-head/assembly.md). Der redaktionelle Abschluss bestätigt keine neue Firmware-/Hardwarekombination. Die nachfolgenden früheren Betriebsnachweise bleiben ihren jeweiligen Revisionen zugeordnet.
 
 ## Mainboards und Firmware
 

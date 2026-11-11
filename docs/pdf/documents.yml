@@ -124,18 +124,6 @@
   - '0x4B'
   - 0,600 V
   - SDR1005-R68ML
-- source: modules/sd-card/index.md
-  target: assets/downloads/SD_Card_Rev0.1_Anleitung.pdf
-  preview: docs/pdf/reference/SD_Card_Rev0.1_Anleitung.pdf
-  images: docs/site/assets/images/sd-card-0.1
-  required_text:
-  - '0.1'
-  - ENP-00137
-  - 3V3_REG
-  - Firmware-Mindestversion
-  - 0.8.7
-  - storage.sd
-  - ENK-00022
 - source: sensors/rain-detector-controller/assembly.md
   target: assets/downloads/RainDetectorController_Rev0.4_Anleitung.pdf
   preview: docs/pdf/reference/RainDetectorController_Rev0.4_Anleitung.pdf

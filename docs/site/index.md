@@ -18,14 +18,21 @@ Der Einstieg führt dich mit einem Mini und BME280 vom geprüften Aufbau bis zum
 ersten lokalen Messwert. Die Gesamtübersicht erklärt Hardware, Firmware und den
 Weg der Daten bis zu einer externen Anwendung.
 
-## Direkt zu den Details
+## Was möchtest du mit EnvNode machen?
+
+[Ich möchte messen](applications/measurements.md){ .md-button }
+
+Wähle zuerst die gewünschte Messgröße und einen dafür unterstützten Sensor.
+Die Anwendungsseite führt von dieser Auswahl zur Einrichtung in der Weboberfläche.
+
+## Technische Dokumentation
 
 - [Hardwareübersicht](hardware/index.md): Mainboards, Module, Sensoren und Schnittstellen.
 
 - [Kompatibilität](compatibility.md): passende Hardware und Firmware auswählen.
 - [Mainboards](mainboards/index.md): Mini, Weatherstation und ORing Power.
 - [Aufbauanleitungen](guides/index.md): Bestückung und elektrische Prüfungen.
-- [Sensoren](sensors/index.md): unterstützte Treiber und Sensoranschlüsse.
+- [Sensorhardware](sensors/index.md): Baugruppen, Sensoranschlüsse und technische Details.
 - [Module](modules/index.md): Erweiterungen für zusätzliche Aufgaben.
 - [Displays](displays/index.md): Anzeigen und deren Konfiguration.
 - [Firmware](firmware/overview.md): EnvNode sowie Test/Provisioning mit Hardware-Selbsttests und Mainboardprüfung.
@@ -33,7 +40,7 @@ Weg der Daten bis zu einer externen Anwendung.
 ## Umfang dieser Dokumentation
 
 Die Dokumentation umfasst EnvNode Mini, Weatherstation, ORing Power,
-AnalogHydroPressure, DuoRelay, SD-Card, die dreiteilige Testhardware, die Anbindung normaler I²C-Sensoren und die Firmware.
+AnalogHydroPressure, DuoRelay, die dreiteilige Testhardware, die Anbindung normaler I²C-Sensoren und die Firmware.
 Mini, Weatherstation, ORing Power, DuoRelay und AnalogHydroPressure besitzen ausgearbeitete Produktseiten.
 Sensor- und Displayübersichten sowie eine Firmware-Anleitung ergänzen die Produktseiten.
 

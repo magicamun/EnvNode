@@ -7,7 +7,6 @@ Die folgenden senkrechten Vorderseitenpläne werden in den Aufbauanleitungen ver
 | [mini-0.9.0](../mainboards/mini/index.md) | [PNG](../assets/board-views/mini-0.9.0/assembly-front.png) |
 | [weatherstation-0.3.0](../mainboards/weatherstation/index.md) | [PNG](../assets/board-views/weatherstation-0.3.0/assembly-front.png) |
 | [analog-0.6](../modules/analog-hydro-pressure/index.md) | [PNG](../assets/board-views/analog-0.6/assembly-front.png) |
-| [sd-card-0.1](../modules/sd-card/index.md) | [PNG](../assets/board-views/sd-card-0.1/assembly-front.png) |
 | [rain-controller-0.4](../sensors/rain-detector-controller/assembly.md) | [PNG](../assets/board-views/rain-controller-0.4/assembly-front.png) |
 | [rain-head-0.2](../sensors/rain-detector-head/assembly.md) | [PNG](../assets/board-views/rain-head-0.2/assembly-front.png) |
 | [test-controller-0.1](../mainboards/test-controller/index.md) | [PNG](../assets/board-views/test-controller-0.1/assembly-front.png) |

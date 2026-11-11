@@ -4,8 +4,7 @@ Die separate Prüfanwendung ist unter [Test/Provisioning](test-provisioning/inde
 
 Diese Anleitung führt von der ersten Verbindung mit EnvNode bis zu Messung,
 Schalten, Anzeige und MQTT. Die einzelnen Kapitel nennen bei Bedarf ihren
-Funktionsstand. Der klassische ESP32 verwendet nun UDP-Netzwerklogging;
-die SD-Beschreibung dokumentiert den historischen Stand. Die Sprache der Oberfläche ist einstellbar; englische
+Funktionsstand. Die Sprache der Oberfläche ist einstellbar; englische
 Seitennamen stehen hier zur eindeutigen Zuordnung in Klammern.
 
 Du beginnst gerade mit EnvNode? [Der Einstieg](../getting-started/index.md) erklärt
@@ -22,6 +21,10 @@ begleitet die Einrichtung von Sensoren, Aktoren, Controllern und Displays.
 
 Aufnahme von Firmware 0.5.0 auf Mini 0.3 mit DuoRelay 0.3. Die Hardwarebelegung
 ist aufbauspezifisch; die Aufnahme dient der Orientierung in der Bedienoberfläche.
+
+Welche Sensoren passen zu deiner Messaufgabe? Die
+[Sensorwahl nach Messgröße](../applications/measurements.md) führt zur passenden
+Einrichtung; dieses Kapitel erklärt die Bedienung der Oberfläche.
 
 ## Der Weg zur ersten Anwendung
 
@@ -50,8 +53,7 @@ Die Funktion steht ab Firmware 0.6.0 zur Verfügung.
 ## Diagnoseaufzeichnung
 
 [Netzwerklogging](network-logging.md) beschreibt den rsyslog-Empfänger,
-Diagnoseauswahl, Verlustzähler und Rotation. [SD-Karte](sd-card.md) bleibt als
-historische Referenz erhalten; der klassische ESP32 unterstützt sie nicht mehr.
+Diagnoseauswahl, Verlustzähler und Rotation.
 
 ## Zwei durchgehende Beispiele
 

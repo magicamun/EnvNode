@@ -60,8 +60,6 @@ der Neustart ist deshalb Bestandteil des Ablaufs.
 ## Modul schreiben
 
 Für DuoRelay bietet die Webfunktion die Descriptor-Vorlage **DuoRelay 0.3**.
-Ein SD-Card-Descriptor kann aus dem Hardwarekatalog geschrieben werden, wird
-im klassischen ESP32-Build aber nicht als Laufzeitgerät unterstützt.
 Slot A oder B passend zum eingesetzten Modul wählen, die angebotenen
 Fertigungsangaben prüfen und die ausdrückliche Bestätigung verwenden.
 Ergebnis und die anschließend erkannte Identität kontrollieren.
@@ -70,27 +68,6 @@ Andere Module werden nicht durch Auswahl der DuoRelay-Vorlage provisioniert.
 Ein leeres EEPROM muss mit einem passenden Descriptor provisioniert
 werden. Die hier dokumentierte Webfunktion bietet noch keine passende Vorlage
 für AnalogHydroPressure; dafür niemals die DuoRelay-Vorlage verwenden.
-
-## SD-Card 0.1: historischer Betriebsablauf
-
-Die folgenden Schritte beziehen sich auf den früheren SD-Build. Der aktuelle
-klassische ESP32 meldet fehlende Treiberunterstützung und bietet keine SD-Seite.
-Ein EEPROM-Descriptor allein aktiviert keinen Treiber.
-
-1. Einen historischen SD-fähigen Build von **0.8.7** verwenden.
-2. Das stromlos eingesetzte Modul und seinen tatsächlichen Slot A oder B feststellen.
-3. Unter **Hardware** den gemeinsamen Hardwarekatalog laden und **EnvNode SD-Card 0.1** (`sd-card-0.1`) auswählen. Kein DuoRelay-Profil als Ersatz verwenden.
-4. Slot, Profil und Fertigungsangaben prüfen, Schreiben ausdrücklich bestätigen und erfolgreiche Schreib-/Rückleseprüfung abwarten. Ein bereits gültiges SD-EEPROM muss nicht erneut geschrieben werden.
-5. Neu starten. Im Geräteinventar muss `sd.1` als Infrastruktur mit Treiber `sd-spi v1`, Fähigkeit `storage.sd` und Status `Ready` erscheinen.
-6. Unter **SD-Karte** Kartenzustand und Dateiliste prüfen. Slot und SD-Zugriff stammen automatisch aus dem Descriptor; Systemlog und Diagnoseaufzeichnung separat einschalten.
-
-Das Profilminimum 0.8.6 prüft nur einen Teil der Kompatibilität. Ältere Builds
-dieser Version können das Profil schreiben, aber noch keinen SD-Treiber enthalten.
-Die öffentliche integrierte Version ist 0.8.7. Bei `unknown` oder
-`UnsupportedDeviceKind` zuerst Firmwarestand und Treiberunterstützung prüfen.
-Bei Modulkonflikt oder nicht unterstütztem Vertrag bleibt der Zugriff gesperrt.
-
-[Aufbauanleitung](../modules/sd-card/index.md) · [SD-Bedienung](sd-card.md)
 
 ## Was danach noch nötig ist
 

@@ -1,4 +1,8 @@
-# Sensoren
+# Sensorhardware
+
+Du suchst einen Sensor für eine bestimmte Aufgabe? Beginne mit
+[Ich möchte messen](../applications/measurements.md). Hier stehen die technischen
+Anschlüsse, unterstützten Implementierungen und eigenen Sensorbaugruppen im Vordergrund.
 
 EnvNode verbindet Sensoren mit einer gemeinsamen Messwertverarbeitung.
 Entscheidend sind die elektrische Schnittstelle und eine passende Firmware-Implementierung.
@@ -13,6 +17,7 @@ Eine erreichbare I²C-Adresse allein bedeutet noch keine Treiberunterstützung.
 | [I²C](i2c.md) | SHTC3 | Temperatur, relative Feuchte |
 | GPIO | AM2302 / DHT22 | Temperatur, relative Feuchte |
 | GPIO-Interrupt | Rain Gauge / Kippwaage | Kippereignisse und Niederschlagszuwachs |
+| GPIO-Frequenzeingang | RainDetector | Frequenz der kapazitiven Sensorfläche |
 
 Außerdem sind Simulationen für Temperatur, Feuchte und Luftdruck verfügbar.
 Die Liste folgt der Sensorregistry im dokumentierten Firmwarestand.
@@ -20,7 +25,8 @@ Die Liste folgt der Sensorregistry im dokumentierten Firmwarestand.
 ## Eigene Sensorhardware
 
 - [RainDetectorController und Head](rain-detector/index.md): kapazitive Sensorfläche,
-  Frequenzauswertung und Heizung; Entwicklungsstand mit separater Laborfirmware.
+  Frequenzauswertung und Heizung; in der gemeinsamen Firmware integriert,
+  Kalibrierung und Eignung des Aufbaus für den Einsatz prüfen.
 - [SCT013 und SCT013Head](sct013/index.md): Stromwandler mit Spannungsaufbereitung;
   Entwicklungsstand ohne integrierten Firmware-Treiber. Die
   [Aufbauanleitung Rev. 0.1](sct013-head/assembly.md) beschreibt Bestückung und
@@ -28,4 +34,4 @@ Die Liste folgt der Sensorregistry im dokumentierten Firmwarestand.
 - [AnalogHydroPressure](../modules/analog-hydro-pressure/index.md): Modul für eine
   4–20-mA-Drucksonde; Hardwareanleitung und Status der Firmware-Anbindung.
 
-[Sensoren konfigurieren](../firmware/configuration.md)
+[Sensoren in der Weboberfläche einrichten](../firmware/sensors.md)

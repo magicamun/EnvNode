@@ -31,6 +31,9 @@ Die Weboberfläche wird vom EnvNode selbst bereitgestellt. Auf deinem Rechner od
 Telefon öffnest du dafür einen Browser. Für die erste lokale Messung brauchst du
 weder Home Assistant noch einen MQTT-Broker.
 
+Du möchtest eine andere Größe messen? Unter [Ich möchte messen](../applications/measurements.md)
+findest du die Auswahl nach Messaufgabe.
+
 ## Was brauchst du für das erste Beispiel?
 
 | Bestandteil | Aufgabe / Auswahl |

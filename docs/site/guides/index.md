@@ -9,7 +9,6 @@ Die vollständige Dokumentation steht direkt unter dem jeweiligen Boardlink. All
 | EnvNode Mini | 0.9.0 | [Web](../mainboards/mini/index.md) |
 | Weatherstation | 0.3.0 | [Web](../mainboards/weatherstation/index.md) |
 | AnalogHydroPressure | 0.6 | [Web](../modules/analog-hydro-pressure/index.md) |
-| SD-Card | 0.1 | [Web](../modules/sd-card/index.md) |
 | RainDetectorController | 0.4 | [Web](../sensors/rain-detector-controller/assembly.md) |
 | RainDetectorHead | 0.2 | [Web](../sensors/rain-detector-head/assembly.md) |
 | Test-Controller | 0.1 | [Web](../mainboards/test-controller/index.md) |

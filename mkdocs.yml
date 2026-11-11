@@ -6,6 +6,10 @@ repo_name: magicamun/EnvNode
 docs_dir: docs/site
 site_dir: site
 strict: true
+# Keep unsupported SD documentation in the repository, outside the published site.
+exclude_docs: |
+  modules/sd-card/**
+  firmware/sd-card.md
 copyright: '© 2026 Lutz Thielemann · <a href="https://github.com/magicamun/EnvNode/blob/main/LICENSE">Lizenz und Nutzung</a>'
 theme:
   name: material
@@ -34,6 +38,8 @@ hooks:
 nav:
   - Start: index.md
   - Dein erstes EnvNode: getting-started/index.md
+  - Anwendungen:
+      - Ich möchte messen: applications/measurements.md
   - Grundlagen:
       - Gesamtübersicht: concepts/index.md
   - Hardware:
@@ -47,7 +53,6 @@ nav:
           - Übersicht: modules/index.md
           - DuoRelay: modules/duo-relay/index.md
           - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
-          - SD-Card: modules/sd-card/index.md
           - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
       - Sensoren:
           - Übersicht: sensors/index.md
@@ -88,7 +93,6 @@ nav:
           - Beispiele:
               - Mini mit SHT4x: firmware/example-measurement.md
               - DuoRelay mit Blink: firmware/example-relay.md
-          - SD-Karte (historisch): firmware/sd-card.md
       - Test/Provisioning:
           - Übersicht und Stand: firmware/test-provisioning/index.md
           - Firmware und Inbetriebnahme: firmware/test-provisioning/inbetriebnahme.md

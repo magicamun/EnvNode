@@ -10,7 +10,6 @@
 
 - [RainDetectorController](../sensors/rain-detector-controller/old-revisions.md)
 - [RainDetectorHead](../sensors/rain-detector-head/old-revisions.md)
-- [SD-Card](../modules/sd-card/old-revisions.md)
 - [Test-Controller](../mainboards/test-controller/old-revisions.md)
 - [Input-Adapter](../mainboards/input-adapter/old-revisions.md)
 - [Modul-Adapter](../mainboards/module-adapter/old-revisions.md)

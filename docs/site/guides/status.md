@@ -1,16 +1,16 @@
 # Dokumentationsstand
 
-Stand: **3. November 2026** (SD-Card und Firmwarezuordnung aktualisiert). „Abgeschlossen“ bezeichnet die redaktionell vollständige Aufbau- und Bring-up-Anleitung. Der reale Fertigungs-/Prüfstand steht jeweils in der Anleitung.
+Stand: **3. November 2026**. „Abgeschlossen“ bezeichnet die redaktionell vollständige Aufbau- und Bring-up-Anleitung. Der reale Fertigungs-/Prüfstand steht jeweils in der Anleitung.
 
 ## Abgeschlossen
 
 - EnvNode Mini 0.9.0 und Weatherstation 0.3.0
 - ORing Power 0.1.1 und DuoRelay 0.3
-- AnalogHydroPressure 0.6 und SD-Card 0.1
+- AnalogHydroPressure 0.6
 - RainDetectorController 0.4 und RainDetectorHead 0.2
 - Test-Controller, Input-Adapter und Modul-Adapter, jeweils 0.1
 
-[Zu den Anleitungen](index.md). SD-Card 0.1 ist aufgebaut und funktional geprüft; öffentliche Unterstützung ab Firmware 0.8.7. Elektrisches Messprotokoll und Feldqualifikation bleiben offen.
+[Zu den Anleitungen](index.md).
 
 ## Teilumfang
 

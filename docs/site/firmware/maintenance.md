@@ -48,11 +48,10 @@ als Ursache angenommen werden.
 ## Netzwerkaufzeichnung
 
 Systemlogs und freigegebene Diagnosen werden über UDP an rsyslog gesendet.
-Die RAM-Loganzeige bleibt davon unabhängig. Der klassische ESP32 unterstützt
-keine SD-Aufzeichnung mehr. Aufbewahrung und Rotation erfolgen beim Empfänger.
+Die RAM-Loganzeige bleibt davon unabhängig. Aufbewahrung und Rotation erfolgen
+beim Empfänger.
 
-[Einrichtung und Verlustzähler](network-logging.md) ·
-[Historischer SD-Betrieb](sd-card.md)
+[Einrichtung und Verlustzähler](network-logging.md)
 
 ## Factory Reset
 

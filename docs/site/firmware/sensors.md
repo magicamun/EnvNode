@@ -14,6 +14,10 @@ Simulation bestätigt den Softwareablauf, nicht die reale Verkabelung.
 | SHTC3 | I²C | Bus, Adresse 0x70 |
 | AM2302 / DHT22 | GPIO | Geeigneter Einleitungs-GPIO |
 | Rain Gauge | GPIO-Interrupt | GPIO, Millimeter pro Kippung, Entprellung |
+| RainDetector (frequency) | GPIO-Frequenzeingang | GPIO für das Frequenzsignal des Controllers |
+| Solar Position | Berechnung | Konfigurierte Koordinaten und synchronisierte Zeit |
+
+Die Auswahl nach Messaufgabe findest du unter [Ich möchte messen](../applications/measurements.md).
 
 Die tatsächliche Adresse und Pegel müssen zum Sensorboard passen.
 [Anschluss und Pull-ups](../sensors/i2c.md) vor dem Einschalten prüfen.
