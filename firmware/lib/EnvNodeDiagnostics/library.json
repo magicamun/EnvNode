@@ -1,1 +1,14 @@
-{"name":"EnvNodeDiagnostics","version":"0.1.0","description":"Bounded typed diagnostic events and a storage-independent recorder. See repository LICENSE.","build":{"includeDir":"include","srcDir":"src"}}
+{
+  "name": "EnvNodeDiagnostics",
+  "version": "0.1.0",
+  "description": "Bounded typed diagnostic events and a storage-independent recorder. See repository LICENSE.",
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src"
+  },
+  "dependencies": [
+    {
+      "name": "EnvNodeLogging"
+    }
+  ]
+}
