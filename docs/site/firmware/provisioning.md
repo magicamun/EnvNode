@@ -71,8 +71,11 @@ für AnalogHydroPressure; dafür niemals die DuoRelay-Vorlage verwenden.
 
 ## Was danach noch nötig ist
 
-Identifikation erzeugt nicht automatisch eine fertige Anwendung.
-Sensoren, Aktoren und Controller separat konfigurieren und ihre Änderungen anwenden.
+Identifikation ersetzt keine vollständige Anwendungskonfiguration. Ein kompatibler
+Descriptor kann passende Modulaktoren bereitstellen; ihre Zuordnung und Aktivierung
+sind zu prüfen. Sensoren und lokale Controller werden passend zur Anwendung
+eingerichtet. Für DuoRelay führt die
+[Inbetriebnahmeanleitung](../modules/duo-relay/commissioning.md) durch diese Prüfung.
 Die ADS1115-Adresse am AnalogHydroPressure ist unabhängig von der Identity-Adresse;
 dessen Buswahljumper betreffen den ADC, nicht das Identity-EEPROM.
 

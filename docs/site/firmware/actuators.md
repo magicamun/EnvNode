@@ -31,9 +31,14 @@ Lastfunktion muss zusätzlich geprüft werden.
 Bei einem Neustart gelten wieder gespeicherte Einstellungen. Einen momentan
 ausgeschalteten Ausgang deshalb nicht mit einer dauerhaft deaktivierten Funktion verwechseln.
 
-[DuoRelay-Beispiel](example-relay.md) · [Controller](controllers.md)
+[DuoRelay in Betrieb nehmen](../modules/duo-relay/commissioning.md) · [Controller](controllers.md)
 
 ## Descriptor-basierter Modulaktor
+
+Ein kompatibler Modul-Descriptor kann verfügbare Ausgänge automatisch als
+Modulaktoren bereitstellen. Prüfe die angezeigte Zuordnung, bevor du zusätzliche
+freie GPIO-Aktoren einrichtest. Die baugruppenspezifische Prüfung steht einmalig
+unter [DuoRelay in Betrieb nehmen](../modules/duo-relay/commissioning.md).
 
 Aufnahme: Firmware 0.5.0, Mini Revision 0.3 und DuoRelay Revision 0.3.
 Die gezeigten Ressourcen gelten für diesen Aufbau; das tatsächliche Boardprofil

@@ -40,6 +40,9 @@ nav:
   - Dein erstes EnvNode: getting-started/index.md
   - Anwendungen:
       - Ich möchte messen: applications/measurements.md
+      - Relais schalten: firmware/example-relay.md
+  - Inbetriebnahme:
+      - DuoRelay einrichten: modules/duo-relay/commissioning.md
   - Grundlagen:
       - Gesamtübersicht: concepts/index.md
   - Hardware:
@@ -51,7 +54,9 @@ nav:
           - ORing Power: mainboards/oring-power/index.md
       - Module:
           - Übersicht: modules/index.md
-          - DuoRelay: modules/duo-relay/index.md
+          - DuoRelay:
+              - Übersicht: modules/duo-relay/index.md
+              - Aufbau und elektrische Prüfung: modules/duo-relay/assembly.md
           - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
           - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
       - Sensoren:
@@ -92,7 +97,6 @@ nav:
           - Wartung und Diagnose: firmware/maintenance.md
           - Beispiele:
               - Mini mit SHT4x: firmware/example-measurement.md
-              - DuoRelay mit Blink: firmware/example-relay.md
       - Test/Provisioning:
           - Übersicht und Stand: firmware/test-provisioning/index.md
           - Firmware und Inbetriebnahme: firmware/test-provisioning/inbetriebnahme.md

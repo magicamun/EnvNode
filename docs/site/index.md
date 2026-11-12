@@ -21,9 +21,13 @@ Weg der Daten bis zu einer externen Anwendung.
 ## Was möchtest du mit EnvNode machen?
 
 [Ich möchte messen](applications/measurements.md){ .md-button }
+[Ich möchte Relais schalten](firmware/example-relay.md){ .md-button }
 
 Wähle zuerst die gewünschte Messgröße und einen dafür unterstützten Sensor.
-Die Anwendungsseite führt von dieser Auswahl zur Einrichtung in der Weboberfläche.
+Die Anwendungsseiten führen zur passenden Einrichtung und Bedienung.
+Für DuoRelay sind [Aufbau](modules/duo-relay/assembly.md),
+[Inbetriebnahme](modules/duo-relay/commissioning.md) und
+[Anwendung](firmware/example-relay.md) getrennt beschrieben.
 
 ## Technische Dokumentation
 

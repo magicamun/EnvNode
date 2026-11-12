@@ -1,47 +1,63 @@
-# Beispiel: DuoRelay manuell und mit Blink
+# Relais schalten mit DuoRelay
 
-Ziel: Ein Relais zunächst manuell prüfen und anschließend periodisch schalten.
-Beispielaufbau: DuoRelay in **Mini Slot A**, ohne Netzspannung und ohne reale Last.
-Andere Slots benötigen die dort angegebenen GPIOs.
+Du möchtest einen Ausgang manuell ein- und ausschalten oder regelmäßig schalten
+lassen. DuoRelay stellt dafür zwei Relaiskanäle bereit. Diese Seite beschreibt
+die Anwendung mit **bereits eingerichteten und geprüften Relaisaktoren**.
 
-## Einrichtungsvariante wählen
+[Relais zuerst einrichten und in Betrieb nehmen](../modules/duo-relay/commissioning.md){ .md-button }
 
-Bei vorhandener Descriptor-basierter Modulzuordnung kann der Kanal als
-**Module On/Off** eingerichtet sein. Dann definiert der Descriptor die Ressource;
-die GPIOs werden nicht frei ausgewählt. Aktivierung und Name prüfen,
-speichern und Änderungen anwenden. [Screenshot](actuators.md#descriptor-basierter-modulaktor).
+## Welchen Betrieb brauchst du?
 
-Das folgende Beispiel beschreibt die freie GPIO-Variante für die genannte
-Board-/Slotbelegung. Sie darf nicht ungeprüft auf Mini Revision 0.3 übertragen
-oder zusätzlich auf derselben bereits belegten Ressource eingerichtet werden.
+| Dein Ziel | Der passende Weg |
+| --- | --- |
+| Einen Kanal selbst ein- oder ausschalten. | Manuelle Bedienung unter **Aktoren**. |
+| Einen Kanal regelmäßig ein- und ausschalten. | Ein lokaler **Blink**-Controller mit diesem Aktor als Ziel. |
+| Abhängig von einem Messwert schalten. | Ein lokaler [Threshold-Controller](controllers.md#threshold-verstehen). |
+| Von einem externen System aus schalten. | [MQTT-Befehle und zugehörigen Status](mqtt.md). |
 
-## Kanal 1 konfigurieren
+Die Einrichtungsanleitung prüft die Zuordnung zum richtigen Relais.
+Die [allgemeine Aktorbedienung](actuators.md#manuelle-bedienung-und-controller)
+erklärt das Zusammenspiel von Handbedienung und laufenden Controllern.
 
-1. Versorgung ausschalten, Modul korrekt einsetzen und nach Hardwareanleitung prüfen.
-2. Unter Aktoren einen freien Platz als GPIO-On/Off einrichten.
-3. Namen „Relais 1“, GPIO33 und aktiven HIGH-Pegel wählen.
-4. Gewünschten sicheren Start-/Aus-Zustand prüfen, speichern und anwenden.
-5. Manuell einschalten: Kanal-1-LED leuchtet und das Relais zieht an.
-6. Ausschalten: LED aus, Relais fällt ab.
-7. Kontakte spannungsfrei beziehungsweise mit geeigneten Testmitteln nach Anleitung prüfen.
+## Manuell bedienen
 
-Kanal 2 verwendet in Mini Slot A GPIO13. Die vollständige Zuordnung steht auf der
-[DuoRelay-Seite](../modules/duo-relay/index.md). Eine Module Identity ersetzt diese Einrichtung nicht.
+Öffne **Aktoren (Actuators)** und schalte den eingerichteten Kanal über dessen
+Ein-/Aus-Bedienung. Prüfe den angezeigten Zustand und die vorgesehene Wirkung.
+Für eine eindeutige Handbedienung muss klar sein, ob ein lokaler Controller oder
+ein externes System denselben Aktor ansteuert.
 
-## Blink hinzufügen
+Eine leuchtende Kanal-LED zeigt die elektrische Ansteuerung an. Ob die angeschlossene
+Anwendung tatsächlich wie vorgesehen arbeitet, prüfst du am eigenen Aufbau.
+Verwende Last, Anschluss und Schutzbeschaltung innerhalb der in der
+[Hardwareanleitung](../modules/duo-relay/assembly.md) beschriebenen Einsatzgrenzen.
 
-1. Erst nach erfolgreichem manuellem Test einen Blink-Controller anlegen.
-2. Den gerade eingerichteten Kanal-1-Aktor als Ziel wählen.
-3. Zum Beispiel je 2000 ms Ein-Dauer und Aus-Dauer setzen.
-4. Aktivierung und Parameter speichern, ausstehende Controlleränderungen anwenden.
-5. Start ausführen und wiederholtes Ein/Aus beobachten.
-6. Stop ausführen und den tatsächlich verbleibenden Aktorzustand prüfen.
+## Beispiel: Einen Kanal mit Blink betreiben
 
-Erwartung: Nur der gewählte Kanal wird periodisch angesteuert.
-Kein anderer aktivierter Controller darf denselben Zielaktor beanspruchen.
+Führe dieses Beispiel ohne reale Last aus. Der Relaisaktor wurde bereits nach der
+[Inbetriebnahmeanleitung](../modules/duo-relay/commissioning.md) geprüft;
+seine GPIO- oder Modulzuordnung wird hier nicht erneut eingerichtet.
 
-## Abschluss
+1. Unter **Controller (Controllers)** einen freien Platz als **Blink** einrichten.
+2. Den gewünschten, eindeutig benannten Relaisaktor als Ziel auswählen.
+3. Zum Beispiel **2000 ms Ein-Dauer** und **2000 ms Aus-Dauer** einstellen.
+4. Dauerhafte Aktivierung und Parameter speichern und ausstehende
+   Controlleränderungen anwenden.
+5. Den Controller starten und wiederholtes Ein/Aus beobachten.
+6. Den Controller stoppen und den tatsächlich verbleibenden Aktorzustand prüfen.
 
-Für einen reinen Test den Controller dauerhaft deaktivieren, speichern und anwenden,
-bevor der Aufbau unbeaufsichtigt neu startet. Das aktuelle STOP allein ersetzt
-keine dauerhaft deaktivierte Konfiguration. Neustartverhalten kontrollieren.
+**Erwartung:** Nur der ausgewählte Kanal schaltet periodisch. Ein weiterer
+aktivierter Controller darf denselben Zielaktor nicht beanspruchen.
+Die gemeinsamen Bedienregeln erklärt [Lokale Controller](controllers.md).
+
+## Vom Test zum vorgesehenen Betrieb
+
+Für einen reinen Versuch den Blink-Controller dauerhaft deaktivieren, speichern
+und die Änderungen anwenden. Ein momentanes **STOP** allein verhindert keinen
+späteren Start aufgrund gespeicherter Einstellungen. Prüfe das Verhalten nach
+Neustart, bevor du den Aufbau im vorgesehenen Betrieb verwendest.
+
+Für messwertabhängiges oder externes Schalten verwendest du denselben geprüften
+Aktor weiter. Die jeweiligen Einstellungen stehen einmalig unter
+[Threshold](controllers.md#threshold-verstehen) beziehungsweise [MQTT](mqtt.md).
+
+[DuoRelay im Überblick](../modules/duo-relay/index.md)

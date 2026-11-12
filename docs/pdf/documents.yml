@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
 # Explicit current and archived guides; revision selection is editorial.
-- source: modules/duo-relay/index.md
+- source: modules/duo-relay/assembly.md
   target: assets/downloads/DuoRelay_Rev0.3_Anleitung.pdf
   original: hardware/kicad/Modules/FullSize/DuoRelay/Documentation/DuoRelay_Bestueckungs_und_Bringup_Rev0.3.pdf
   images: docs/site/assets/images/duorelay-assembly

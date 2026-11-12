@@ -1,10 +1,10 @@
 # Aufbauanleitungen
 
-Die vollständige Dokumentation steht direkt unter dem jeweiligen Boardlink. Alle folgenden vollständigen Anleitungen sind redaktionell **abgeschlossen**; Fertigung, reale Erprobung und Firmware-Zuordnung werden darin getrennt ausgewiesen.
+Die folgende Übersicht führt zu den technischen Aufbau- und Prüfanleitungen. Alle folgenden vollständigen Anleitungen sind redaktionell **abgeschlossen**; Fertigung, reale Erprobung und Firmware-Zuordnung werden darin getrennt ausgewiesen.
 
 | Board | Revision | Dokumentation |
 | --- | --- | --- |
-| DuoRelay | 0.3 | [Web](../modules/duo-relay/index.md) |
+| DuoRelay | 0.3 | [Aufbau und elektrische Prüfung](../modules/duo-relay/assembly.md) |
 | ORing Power | 0.1.1 | [Web](../mainboards/oring-power/index.md) |
 | EnvNode Mini | 0.9.0 | [Web](../mainboards/mini/index.md) |
 | Weatherstation | 0.3.0 | [Web](../mainboards/weatherstation/index.md) |

@@ -58,7 +58,10 @@ Diagnoseauswahl, Verlustzähler und Rotation.
 ## Zwei durchgehende Beispiele
 
 - [Mini mit SHT4x: von der Verdrahtung zur MQTT-Messung](example-measurement.md)
-- [DuoRelay: manuell schalten und anschließend mit Blink betreiben](example-relay.md)
+- [DuoRelay: Relais bedienen und mit Blink betreiben](example-relay.md)
+
+Die [DuoRelay-Inbetriebnahme](../modules/duo-relay/commissioning.md) führt zuvor
+durch Modulidentität, Aktorzuordnung und Funktionstest mit der Firmware.
 
 Die Hardwareanleitungen erklären Bestückung und elektrische Prüfungen.
 Diese Bedienungsanleitung setzt einen entsprechend geprüften Aufbau voraus.

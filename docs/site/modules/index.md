@@ -1,6 +1,7 @@
 # Erweiterungsmodule
 
-Die vollständigen Aufbauanleitungen stehen direkt auf den jeweiligen Modulseiten:
+Die Modulseiten erklären die Aufgabe der Baugruppen und führen zu den jeweiligen
+Anleitungen für Aufbau und Verwendung:
 
 | Modul | Aufgabe | Dokumentierter Stand |
 | --- | --- | --- |
