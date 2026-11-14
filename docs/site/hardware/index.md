@@ -1,6 +1,6 @@
 # Hardware
 
-Hier findest du die Hardware von EnvNode, ihre Anschlüsse und die jeweils dokumentierten Revisionen. Die Boardseiten führen direkt zur aktuellen Aufbauanleitung; frühere Stände sind dort unter „Alte Revisionen“ verlinkt.
+Hier findest du die Hardware von EnvNode, ihre Anschlüsse und die jeweils dokumentierten Revisionen. Die Boardseiten führen zur passenden technischen Aufbauanleitung und zur Software-Inbetriebnahme. Frühere Stände sind unter „Alte Revisionen“ verlinkt.
 
 | Bereich | Inhalt |
 | --- | --- |

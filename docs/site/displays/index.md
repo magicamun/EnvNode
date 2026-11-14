@@ -18,25 +18,15 @@ Display spannungsfrei anschließen und Versorgung, Logikpegel und Steckerbelegun
 Der Mainboard-I²C-Anschluss führt GND, +3V3_SYS, SDA und SCL.
 Vorhandene Pull-ups und die tatsächliche Adresse des Displays berücksichtigen.
 
-## Konfiguration in der Firmware
+## Was möchtest du tun?
 
-1. Die Weboberfläche **Display** öffnen.
-2. Ausgang aktivieren und den passenden Controllertyp auswählen.
-3. I2C0 oder I2C1 sowie 0x3C oder 0x3D passend zur Verdrahtung setzen.
-4. Anzeigeseite zuordnen und deren Zeilen mit Quellen und Formatierung konfigurieren.
-5. Speichern und Vorschau sowie reale Ausgabe prüfen.
+| Dein Ausgangspunkt | Hier geht es weiter |
+| --- | --- |
+| Display anschließen | Anschlussbedingungen oben und [HW-Schnittstellen](../interfaces/index.md) |
+| Geprüftes Display einrichten | [Displayausgänge und Inhaltsseiten](../firmware/values-displays.md#displays) |
+| Messwerte oder Zustände anzeigen | [Quellen, Formate und Beispiel mit zwei Displays](../firmware/values-displays.md) |
 
-Es gibt zwei Displayausgänge und zwei konfigurierbare Seiten mit jeweils sechs Zeilen.
-Jeder Ausgang erhält eine Seite; beide können dieselbe Seite anzeigen.
-Zwei aktive Ausgänge dürfen nicht dieselbe Adresse am selben Bus belegen.
-
-## Anzeigeinhalte
-
-Die Zeilen verwenden die gemeinsame Eigenschaftsauflösung der Firmware:
-Sensorwerte, Aktor- und Controller-Eigenschaften sowie Systeminformationen können
-als Quellen ausgewählt werden. Eigene Values stellen weitere Eigenschaften bereit.
-Boolesche Werte können eigene Texte für wahr/falsch erhalten;
-Enum-Codes können in passende Anzeigetexte übersetzt werden.
+Die Firmware-Anleitung ist die gemeinsame Quelle für die Einrichtung.
 
 ## Fehlersuche
 

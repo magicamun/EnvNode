@@ -1,5 +1,9 @@
 # SCT013 und SCT013Head
 
+Aktueller Head: **Rev. 0.2**. Sie korrigiert den falsch angeschlossenen
+Lumberg-Signalkontakt der Rev. 0.1: Tip an J1.2/R1, Sleeve an J1.1/VBIAS.
+Rev. 0.1 benötigt vor Verwendung diese Anschlusskorrektur.
+
 ## In der Firmware einrichten
 
 Unter **Sensoren** einen freien Slot als **SCT013 AC RMS** konfigurieren. Am Mini ist ADC1 GPIO34 und ADC2 GPIO35; beide verwenden die ADC-Einheit 1 des ESP32. Nur ein im Boardprofil verfügbarer, freier Analogport kann belegt werden. Ausgabe: Effektivstrom in Ampere (`electric_current`), auch über MQTT und Home Assistant. Der Treiber berechnet keine Leistung oder Energie.
@@ -52,9 +56,9 @@ Eine garantierte Überstromfestigkeit oder Schutzbeschaltung ist nicht nachgewie
 
 ## Aufbau und Erstprüfung
 
-Die [Bestückungs- und Bring-up-Anleitung Rev. 0.1](../sct013-head/assembly.md) enthält die aktuelle Artikelzuordnung aus dem Artikelpool, die Pigtail-Belegung und Prüfungen ohne Klinkenbuchse und Sensor.
+Die [Aufbau- und Prüfanleitung Rev. 0.2](../sct013-head/assembly.md) enthält die aktuelle Artikelzuordnung aus dem Artikelpool, die Pigtail-Belegung und Prüfungen ohne Klinkenbuchse und Sensor.
 
-R1-R4 werden einheitlich mit 10 kΩ (ENP-00018, vier Stück) bestückt. Der ältere Vermerk zu R1 = 1 kΩ ist für diesen Aufbau überholt. Die dort beschriebene Rev. 0.1 benötigt für den getesteten Tip/Sleeve-Sensor die oben genannte Korrektur.
+R1-R4 werden einheitlich mit 10 kΩ (ENP-00018, vier Stück) bestückt. Der ältere Vermerk zu R1 = 1 kΩ ist für diesen Aufbau überholt. Die Anleitung berücksichtigt die korrigierte Buchsenbelegung; die vorhandenen Renderings zeigen noch Rev. 0.1.
 
 **Portauswahl:** Auf bekannten Mini- und Weather-Profilen zeigt das Formular
 die Anschlussbezeichnung der Platine: ADC1/ADC2 am Mini, ADC1 bis ADC4 an der Weatherstation.

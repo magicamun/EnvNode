@@ -114,7 +114,7 @@ sind die beiden Signalleitungen neben Versorgung und Masse.
 Prüfe am konkreten Sensorboard und Kabel die vier Verbindungen **GND, 3,3 V, SDA und
 SCL** sowie die Pull-ups des Busses. Die Details stehen unter
 [I²C-Sensoren anschließen](../sensors/i2c.md) und bei den
-[Mini-I²C-Anschlüssen](../mainboards/mini/index.md#41-i2c-qwiic).
+[Mini-I²C-Anschlüssen](../mainboards/mini/assembly.md#41-i2c-qwiic).
 Ein passender Stecker allein bestätigt noch keine passende Kabelbelegung.
 
 Schalte wieder ein und führe unter **Diagnose** einen Scan von I2C1 aus.

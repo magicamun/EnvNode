@@ -1,28 +1,42 @@
 ---
-title: SCT013Head - Bestückung und Inbetriebnahme
+title: SCT013Head 0.2 - Aufbau und elektrische Prüfung
 pdf:
-  id: sct013-head-0.1
+  id: sct013-head-0.2
   title: SCT013Head
   subtitle: Bestückungs- und Bring-up-Anleitung
-  hardware_revision: '0.1'
-  document_version: '1.2'
-  document_date: '2026-10-28'
+  hardware_revision: '0.2'
+  document_version: '1.3'
+  document_date: '2026-11-14'
   source_document_date: '2026-10-24'
   status: Nullmessung am Mini geprüft - Sensorbetrieb und Mechanik offen
 ---
 
-# SCT013Head - Bestückung und Inbetriebnahme
+# SCT013Head 0.2 - Aufbau und elektrische Prüfung
 
-!!! warning "Buchsenkorrektur nach Erprobung"
-    Diese Anleitung dokumentiert den ursprünglichen Rev.-0.1-Stand. Die dort als Tip bezeichnete Leiterbahn von **J1.3** greift bei der Lumberg 1503 09 den **Ring** ab. Für den geprüften Tip/Sleeve-Sensor muss stattdessen **J1.2 (Tip) an R1.1** liegen; **J1.1 (Sleeve) bleibt an VBIAS**. Rev. 0.2 enthält die Korrektur. Auf einem reparierten Head gelten die Sensor-Tip-Messungen entsprechend an J1.2 und nicht an J1.3. Siehe [Treiber und geprüfte Einstellungen](../sct013/index.md).
+Aktueller Hardwarestand ist **Rev. 0.2**. Bei Rev. 0.1 war die Lumberg-1503-09-Buchse
+falsch angeschlossen: Der Signalpfad griff den Ring statt der Spitze ab.
+Rev. 0.2 korrigiert diese Verbindung. Für den Tip/Sleeve-Sensor gilt:
+**J1.2 (Tip) an R1.1**, **J1.1 (Sleeve) an VBIAS**; J1.3 bleibt unbeschaltet.
+Diese Referenzen gelten für die im Projekt verwendete Buchsenbelegung.
 
+Ein unveränderter Head Rev. 0.1 darf für diesen Sensor nicht nach der alten
+Kontaktzuordnung in Betrieb genommen werden. Vor Verwendung ist die Verbindung
+zu korrigieren und mit einem Prüfstecker durchzumessen.
 
-Kompakter passiver Sensorkopf für SCT013-Stromwandler mit integrierter Bürde und Spannungsausgang. Diese Anleitung beschreibt die Bestückung der Platine Rev. 0.1, den ersten Test ohne Sensor und ohne Klinkenbuchse sowie die spätere Montage der Buchse. Ein neu aufgebauter Head hat die nachstehenden Widerstands- und Gleichspannungsprüfungen bestanden. Eine erste Nullmessung am Mini ohne Sensor ist dokumentiert; Sensorbetrieb und mechanische Buchsenmontage stehen noch aus.
+Diese Anleitung beschreibt Bestückung und elektrische Prüfung des passiven Heads.
+Die dokumentierten Nullmessungen stammen aus dem früheren Prüfaufbau; sie sind
+keine separate Abnahme einer neu gefertigten Rev.-0.2-Platine.
+[Software-Einrichtung und geprüfte Einstellungen](../sct013/index.md#in-der-firmware-einrichten).
 
 !!! note "Jetzt aufbauen, Buchse später ergänzen"
     R1-R4, C1, C2 und das Pigtail werden jetzt bestückt. J1 bleibt zunächst vollständig frei. Der ADC-Ausgang erhält über R4 trotzdem seine Vorspannung; für diesen Test ist keine Brücke an J1 erforderlich. Ein fehlender Sensor wird von dieser Schaltung nicht automatisch erkannt.
 
 ## 3D-Ansicht
+
+Die vorhandenen Renderings und Bestückungspläne zeigen **Rev. 0.1**. Sie dienen
+zur Bauteilorientierung; die korrigierte Leiterbahn der Rev. 0.2 ist dort nicht
+abgebildet. Für den Buchsenanschluss gelten die Kontaktzuordnung unten und der
+aktuelle CAD-Stand Rev. 0.2.
 
 ![sct013-head-0.1: 3D-Vorderseite](../../assets/images/sct013-assembly/top.png){ .hero-paired-view }
 ![sct013-head-0.1: 3D-Rückseite](../../assets/images/sct013-assembly/bottom.png){ .hero-paired-view }
@@ -40,7 +54,7 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 | C2 | 1 | 10 µF, 25 V, ±10 %, X7R; Kyocera AVX 12063C106KAT2A | ENP-00007 | 1206; B.Cu; ungepolt |
 | ADC1 | 1 | JST-PH-kompatibles Kabel-Pigtail, 4-polig, 100 mm | ENP-00127 | Freie Litzen direkt in die vier Lötaugen; Stecker zum Mainboard |
 | J1 | 1 | Klinkeneinbaubuchse Lumberg 1503 09 | ENP-00125 | Oberseite F.Cu; später bestücken |
-| PCB | 1 | SCT013Head PCB Rev. 0.1 | ENP-00126 | Ca. 20,9 × 14,0 mm |
+| PCB | 1 | SCT013Head PCB Rev. 0.2 | Artikelzuordnung für Rev. 0.2 prüfen | Ca. 20,9 × 14,0 mm |
 
 Die Zuordnung stammt aus dem InvenTree-Artikelpool, gelesen am 23.10.2026. Mengen sind der Bedarf für einen vollständigen Head, keine Aussage über verfügbare Stückzahlen, Reservierungen oder Liefertermine. Es werden keine Lagerbewegungen oder Änderungen am Artikelpool vorgenommen.
 
@@ -104,8 +118,8 @@ Die aktuelle Referenz im Layout ist **ADC1** (nicht J2). Die Lötaugen haben 2,5
 | Kontakt | Netz / Funktion |
 | --- | --- |
 | J1.1 | Sleeve; VBIAS, ausdrücklich nicht GND |
-| J1.3 | Tip; Sensorsignal zu R1.1 |
-| J1.2 | Ring; unbeschaltet |
+| J1.2 | Tip; Sensorsignal zu R1.1 |
+| J1.3 | Ring; unbeschaltet |
 | J1.4, J1.5 | Schaltkontakte; unbeschaltet |
 
 ### 3.3 Zugängliche Messpunkte
@@ -116,7 +130,7 @@ Die aktuelle Referenz im Layout ist **ADC1** (nicht J2). Die Lötaugen haben 2,5
 | 3,3 V | ADC1.4, R2.1 |
 | VBIAS | J1.1, C2.1, R2.2, R3.1, R4.2, C1.1 |
 | ADC | ADC1.3, R1.2, R4.1, C1.2 |
-| Sensor-Tip | J1.3, R1.1 |
+| Sensor-Tip | J1.2, R1.1 |
 
 Messleitungen möglichst spannungsfrei anbringen. Die unbestückten J1-Pads sind beim ersten Aufbau gut zugänglich, aber keine zusätzlichen Massepunkte.
 
@@ -131,7 +145,7 @@ Mainboard, Sensor und alle Versorgungen abziehen. Kondensatoren entladen lassen;
 - ☐ ADC1.4 zu R2.1: Durchgang.
 - ☐ J1.1 zu C2.1 und R4.2: Durchgang; insbesondere die VBIAS-Verbindung prüfen.
 - ☐ ADC1.3 zu R1.2, R4.1 und C1.2: Durchgang.
-- ☐ ADC1.2 sowie J1.2/J1.4/J1.5 ohne Verbindung zu den Nutznetzen.
+- ☐ ADC1.2 sowie J1.3/J1.4/J1.5 ohne Verbindung zu den Nutznetzen.
 - ☐ Zwischen 3,3 V und GND kein dauerhafter niederohmiger Kurzschluss.
 
 ### 4.1 Widerstandsmessung mit festem GND-Bezug
@@ -144,7 +158,7 @@ unterbrochen ist. Den Zahlenwert oder ausdrücklich `OL` dokumentieren.
 
 | Messpunkt gegen ADC1.1 | Erwarteter Widerstand | Pfad |
 | --- | --- | --- |
-| R1.1 / J1.3 | ca. 30 kΩ | R1 + R4 + R3 |
+| R1.1 / J1.2 | ca. 30 kΩ | R1 + R4 + R3 |
 | R1.2 / ADC1.3 | ca. 20 kΩ | R4 + R3 |
 | R2.1 / ADC1.4 | ca. 20 kΩ | R2 + R3 |
 | R2.2 / VBIAS | ca. 10 kΩ | R3 |
@@ -187,7 +201,7 @@ Am neuen Head wurden Versorgung, VBIAS und Ausgang als passend bestätigt, ohne
 separate Zahlenwerte zu protokollieren.
 
 Bei schwer zugänglichem Pigtail können die freien Buchsenpads helfen:
-**J1.1 ist VBIAS, nicht GND. J1.3 führt über R1 zum ADC-Ausgang** und sollte ohne
+**J1.1 ist VBIAS, nicht GND. J1.2 führt über R1 zum ADC-Ausgang** und sollte ohne
 Sensor bei hochohmiger Spannungsmessung ebenfalls ungefähr VBIAS zeigen.
 Messleitungen möglichst vor dem Einschalten sicher anbringen.
 
@@ -290,7 +304,7 @@ Rauschen oberhalb der Schwelle nicht.
 
 1. Aufbau ausschalten und alle Kabel abziehen. J1 mit der gelieferten Lumberg 1503 09 mechanisch prüfen: Pins, Gehäusewand, Gewinde, Mutter und Freiraum zu den SMD-Bauteilen müssen passen.
 2. Buchse von der Oberseite einsetzen. Zunächst einen Anschluss fixieren, bündige und spannungsfreie Lage prüfen, danach die übrigen Anschlüsse verlöten. Auch die elektrisch ungenutzten Buchsenpins gehören zur mechanischen Befestigung.
-3. Tip/Sleeve mit einem passenden unbelasteten Prüfstecker durchmessen: Tip zu J1.3/R1.1, Sleeve zu J1.1/VBIAS. Ring und Schaltkontakte dürfen die Nutznetze nicht kurzschließen.
+3. Tip/Sleeve mit einem passenden unbelasteten Prüfstecker durchmessen: Tip zu J1.2/R1.1, Sleeve zu J1.1/VBIAS. Ring und Schaltkontakte dürfen die Nutznetze nicht kurzschließen.
 4. Gehäuseverschraubung so montieren, dass die Buchse Kräfte beim Stecken aufnimmt. Pigtail im Gehäuse separat zugentlasten; die kleine Platine nicht durch Kabelzug belasten.
 5. Spannungsfreie Prüfung und Nullmessung wiederholen. Erst dann einen Sensor mit integrierter Bürde anschließen.
 
@@ -307,7 +321,7 @@ Für die beiden vorhandenen 5-A-Sensoren gilt bei R1 = R4 = 10 kΩ:
 
 | Prüfung / Aufbau | Erwartung oder Eintrag | Ist / Datum |
 | --- | --- | --- |
-| Platine und Bauteile | Rev. 0.1; R1-R4 10 kΩ; C1 10 nF; C2 10 µF | |
+| Platine und Bauteile | Rev. 0.2; R1-R4 10 kΩ; C1 10 nF; C2 10 µF | |
 | Versorgung | Board, Versorgungspfad, USB/Dock und gemessene 3,3 V | |
 | Gleichspannung | VBIAS und ADC gegen GND etwa Versorgung / 2 | |
 | Normaler ADC-Ausgang | GPIO, Sensor abgezogen, C1 vorhanden, keine Zusatzkapazität | |
@@ -331,7 +345,11 @@ Für die beiden vorhandenen 5-A-Sensoren gilt bei R1 = R4 = 10 kΩ:
 
 Die Artikelzuordnung wurde am 23.10.2026 live im InvenTree-Artikelpool geprüft. C1 und C2 wurden zusätzlich anhand der dort gespeicherten Hersteller- und Lieferantenartikel abgeglichen. Eine Verfügbarkeitsprüfung war nicht Gegenstand der Zuordnung.
 
-Quellen: `hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb`, zugehöriger Schaltplan, `Lumberg_1503_09_Footprint.md`, aktuelle Netzliste sowie die dokumentierten Lab-Versuche. Der aktuelle Arbeitsstand im Checkout `analog-hydro-pressure` unterscheidet sich vom `main`-Schaltplan nur durch das DNP-Attribut von ADC1; die Leiterplatten sind identisch. Diese Anleitung verwendet ADC1 bewusst als Lötaugen für das Pigtail.
+Aktueller Revisionsbezug: `hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb`
+und zugehöriger Schaltplan, Rev. 0.2 (Anschluss-Fix). Die unten aufgeführten Hashes
+und die dokumentierten Nullmessungen gehören zum historischen Rev.-0.1-Prüfstand.
+Die Übernahme der Anschlusskorrektur ist keine neue ERC-/DRC- oder Hardwareabnahme.
+ADC1 wird als Lötaugenanschluss für das Pigtail verwendet.
 
 Die Netze und Bestückungswerte wurden aus den CAD-Quellen nachvollzogen. Der für diese Dokumentation gestartete vollständige DRC-Lauf endete ohne Bericht durch einen Programmabbruch; daraus wird keine erfolgreiche DRC-Prüfung abgeleitet. Historische Review-Notizen sind keine erneute Prüfung der gelieferten Platine. Die Durchgangsprüfungen dieser Anleitung sind vor dem Einschalten durchzuführen. Die erste Nullmessung des neuen Heads ist in Abschnitt 5.5 dokumentiert. Sensorbetrieb unter Last, Kalibrierung und mechanische Buchsen-Passprobe bleiben offen.
 
@@ -345,7 +363,7 @@ stabiler Nullmessungsbefund und Grenzen der Fehlerdiagnose. Keine Änderung an
 Schaltung oder Layout, keine neue ERC-/DRC-Prüfung. Artikelabgleich und CAD-Hashes
 beziehen sich weiterhin auf den dokumentierten Stand vom 23.10.2026.
 
-### SHA-256 der verwendeten Quellen
+### SHA-256 der historischen Rev.-0.1-Quellen
 
 `SCT013Head.kicad_pcb`
 

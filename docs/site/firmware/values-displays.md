@@ -16,6 +16,8 @@ macht daraus die Anwendung.
 Unter **Display** werden Ausgabehardware und Inhaltsseiten getrennt eingerichtet.
 Die unterstützten 128×64-I²C-Treiber sind SSD1309, SSD1306 und SH1106.
 Bus und Adresse (0x3C oder 0x3D) müssen zur Hardware passen.
+Es gibt zwei Displayausgänge und zwei Inhaltsseiten mit jeweils bis zu sechs Zeilen.
+Jeder Ausgang erhält eine Seite; beide dürfen dieselbe Seite verwenden.
 Zwei aktive Displays dürfen nicht dieselbe Adresse am selben Bus besitzen.
 
 1. Ausgabe aktivieren und passenden Treiber, Bus und Adresse wählen.

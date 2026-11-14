@@ -1,38 +1,25 @@
 # Beispiel: Mini mit SHT4x bis zur MQTT-Messung
 
 Ziel: Temperatur und relative Feuchte lokal sehen und über MQTT empfangen.
-Voraussetzung sind ein geprüftes Mini-Mainboard, passende Firmware und ein
-3,3-V-kompatibles SHT4x-I²C-Sensorboard mit Adresse 0x44.
+Du benötigst ein geprüftes Mini-Mainboard und ein geeignetes 3,3-V-SHT4x-Sensorboard.
 
-## Anschließen
+## Sensor zuerst in Betrieb nehmen
 
-1. Versorgung ausschalten.
-2. Sensor an einen I2C0-Anschluss verbinden: GND, 3,3 V, SDA, SCL korrekt zuordnen.
-3. Pull-ups des Sensorboards und die Mainboard-Jumper abgleichen.
-4. Einschalten und Weboberfläche öffnen.
-
-## Einrichten und lokal prüfen
-
-1. Unter Hardware das aktive Mini-Profil prüfen.
-2. Unter Diagnose I2C0 scannen: 0x44 muss erreichbar sein.
-3. Unter Sensoren einen freien Platz als SHT4x, Bus I2C0, Adresse 0x44 einrichten.
-4. Einen Namen wie „Umgebung“ vergeben, speichern und gegebenenfalls anwenden.
-5. Unter Messwerte Temperatur und relative Feuchte des richtigen Sensorplatzes prüfen.
-
-Erwartung: Physische Werte werden aktualisiert, der Sensor meldet keinen
-unerklärten Fehler. Ein erfolgreicher Scan ohne Messungen genügt nicht.
+Die [I²C-Inbetriebnahme](../commissioning/i2c-sensors.md) ist die maßgebliche
+Anleitung für Anschluss, Einrichtung und lokale Messwertprüfung.
+Für dieses Beispiel verwende I2C0, SHT4x an 0x44 und den Namen „Umgebung“.
+Erst mit aktuellen, gültigen lokalen Werten folgt die externe Anbindung.
 
 ## MQTT anschließen
 
-1. Broker unter MQTT eintragen und Verbindung prüfen.
-2. Mit einem MQTT-Client `envnode/<device>/sensor/#` abonnieren.
-3. Quelle und Werte mit der lokalen Anzeige vergleichen.
-4. Bei Home Assistant die MQTT-Integration voraussetzen und Discovery prüfen.
+Die [MQTT-Anleitung](mqtt.md) beschreibt Brokerverbindung und Discovery.
+Mit einem MQTT-Client `envnode/<device>/sensor/#` abonnieren und die Quelle
+sowie Werte mit der lokalen Anzeige vergleichen. `<device>` durch den
+tatsächlichen Topic-Gerätenamen ersetzen.
 
-`<device>` durch den verwendeten Topic-Gerätenamen ersetzen.
-Keine erfundenen Beispielmesswerte als reale Testergebnisse übernehmen.
+Für Home Assistant müssen MQTT-Integration und Discovery eingerichtet sein.
+Die extern angezeigte Messung muss zur lokalen Quelle gehören und bei weiteren
+Messungen aktualisiert werden. Fehlende Daten sind kein Wert von null.
 
-## Abschluss
-
-Neustart durchführen und erneute Verbindung sowie Messung prüfen.
-[Konfiguration sichern](maintenance.md), wenn der Aufbau funktioniert.
+Nach Neustart erneute Verbindung und Messung prüfen und
+[Konfiguration sichern](maintenance.md).

@@ -27,15 +27,10 @@ Bus I2C0 oder I2C1 passend zum Aufbau wählen. Die Adresse muss zum
 Sensorboard und zum Treiber passen. Weitere Familien wie ADS1115 oder BMP390
 sind nicht automatisch durch diese Liste unterstützt.
 
-## Firmware
+## Weiter zur Software-Inbetriebnahme
 
-Die Firmware registriert BME280, SHT4x und SHTC3.
-Konfiguriere einen Sensorplatz mit der passenden Implementierung, dem Bus und der Adresse.
-Prüfe anschließend Diagnose und Messwerte, bevor du die MQTT-Integration einrichtest.
+[Passenden I²C-Sensor einrichten und Messwerte prüfen](../commissioning/i2c-sensors.md).
+Ein beliebiger I²C-Sensor ist nicht automatisch unterstützt; die Implementierung
+muss zum Sensor passen.
 
-Ein beliebiger I²C-Sensor ist nicht automatisch unterstützt. Ein konkreter Sensor muss
-zur verfügbaren Firmware-Implementierung passen. Der
-[Einstieg mit Mini und BME280](../getting-started/index.md) verbindet Anschluss,
-Einrichtung und lokale Messwertprüfung.
-
-[Anschlüsse des EnvNode Mini](../mainboards/mini/index.md#41-i2c-qwiic)
+[Anschlüsse und Pinouts](../interfaces/index.md)

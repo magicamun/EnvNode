@@ -14,6 +14,7 @@ gemeinsamen EnvNode-Firmware einrichten kannst.
 | Luftdruck messen | BME280 | Örtlichen Luftdruck am Messort. |
 | Temperatur, Feuchte und Luftdruck gemeinsam erfassen | BME280 | Alle drei Messgrößen mit einem Sensor. |
 | Niederschlag mit einer Kippwaage erfassen | Regenmesser mit unterstütztem Kippkontakt, Implementierung **Rain Gauge** | Kippereignisse und Niederschlagszuwachs mit konfigurierten Millimetern pro Kippung. |
+| Wechselstrom messen | SCT013 mit passendem Spannungsausgang und SCT013Head, Implementierung **SCT013 AC RMS** | Effektivstrom in Ampere; keine Leistung oder Energie. |
 | Benetzung einer Sensorfläche erkennen | RainDetectorController mit RainDetectorHead, Implementierung **RainDetector (frequency)** | Frequenz des Sensors; mit dem zugehörigen lokalen Controller Benetzungserkennung und Heizsteuerung. |
 
 Ein RainDetector beobachtet die Benetzung seiner Fläche. Eine Kippwaage erfasst
@@ -61,24 +62,20 @@ Simulationen sind von echten Sensormessungen zu unterscheiden.
 
 ## Vom ausgewählten Sensor zum Messwert
 
-1. **Sensor auswählen:** Nutze die Messaufgabe oben und die tatsächliche
-   Firmwareunterstützung als Ausgangspunkt.
-2. **Einmal passend anschließen:** Prüfe am konkreten Sensor Versorgung,
-   Anschlussbelegung und benötigte Ressourcen. Die
-   [Anschlussübersicht](../interfaces/index.md) erklärt die Hardwareseite zentral;
-   [I²C-Sensoren](../sensors/i2c.md) ergänzen die Hinweise für BME280, SHT4x und SHTC3.
-   Vor Änderungen an der Verdrahtung die Versorgung ausschalten.
-3. **In der Weboberfläche einrichten:** Unter **Sensoren (Sensors)** die passende
-   Implementierung und den tatsächlichen Anschluss auswählen, Sensor aktivieren,
-   speichern und ausstehende Änderungen anwenden.
-4. **Ergebnis ansehen:** Unter **Messwerte (Measurements)** Quelle, Einheit,
-   Gültigkeit und Aktualisierung prüfen.
+Die [Inbetriebnahmeübersicht](../commissioning/index.md) führt zur passenden
+Anleitung. Für die häufigsten Aufgaben kannst du direkt einsteigen:
 
-[Sensoren einrichten und Messwerte prüfen](../firmware/sensors.md){ .md-button }
+| Deine Auswahl | Einrichten und prüfen |
+| --- | --- |
+| BME280, SHT4x oder SHTC3 | [I²C-Sensoren](../commissioning/i2c-sensors.md) |
+| AM2302 / DHT22 | [Sensorformular und GPIO-Auswahl](../firmware/sensors.md) |
+| Regenwippe | [Kippkontakt, Kalibrierwert und Zählprüfung](../commissioning/rain-gauge.md) |
+| RainDetector | [Frequenzsensor, Heizaktor und Controller](../commissioning/rain-detector.md) |
+| SCT013 | [SCT013 einrichten und prüfen](../sensors/sct013/index.md#in-der-firmware-einrichten) |
 
-Die Firmware-Anleitung erklärt die Felder und Aktionen der Oberfläche.
-Bestückungs- und Bring-up-Anleitungen brauchst du, wenn du die Hardware selbst
-aufbaust oder deren technische Umsetzung prüfen möchtest.
+Die [Firmware-Anleitung](../firmware/index.md) erklärt die gemeinsamen
+Bedienelemente. Aufbauanleitungen brauchst du, wenn du Hardware selbst bestückst
+oder deren technische Umsetzung prüfst.
 
 ## Wo sollen deine Messwerte erscheinen?
 
@@ -87,18 +84,12 @@ am Gerät richtest du ein [Display](../firmware/values-displays.md) ein. Für di
 Weitergabe an ein anderes System folgt die [MQTT-Einrichtung](../firmware/mqtt.md),
 beispielsweise für Home Assistant. Die Sensorwahl bleibt dabei dieselbe.
 
-## Weitere Messaufgaben mit eigener Hardware
+## Druck und Füllstand mit einer 4–20-mA-Sonde
 
-Für **Strommessung mit SCT013** und **Druck-/Füllstandsmessung mit einer
-4–20-mA-Sonde über AnalogHydroPressure** gibt es eigene Hardwareprojekte.
-Im aktuellen gemeinsamen Sensorregistry sind diese Messpfade nicht als fertige
-Auswahl enthalten. Sie werden deshalb hier nicht als direkt einrichtbare Sensoren
-aufgeführt.
+[AnalogHydroPressure](../modules/analog-hydro-pressure/index.md) ist ein eigenes
+Hardwareprojekt. Der Messpfad ist noch nicht als fertige Auswahl in der gemeinsamen
+Firmware integriert. Der technische Aufbau ist dokumentiert; eine Software-
+Inbetriebnahme folgt mit der Unterstützung.
 
-Wenn du diese technische Umsetzung verfolgen möchtest:
-[SCT013](../sensors/sct013/index.md) ·
-[AnalogHydroPressure](../modules/analog-hydro-pressure/index.md).
-
-Die [Sensorhardware](../sensors/index.md) enthält weitere technische Details;
-die [Kompatibilitätsübersicht](../compatibility.md) ordnet die unterstützten
-Kombinationen ein.
+Die [Sensorhardware](../sensors/index.md) enthält technische Details;
+die [Kompatibilitätsübersicht](../compatibility.md) ordnet die Kombinationen ein.

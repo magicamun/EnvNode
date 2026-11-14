@@ -1,103 +1,33 @@
 # RainDetectorController und Head
 
-!!! note "Entwicklungsstand / Feldtest ausstehend"
-    Die gemeinsame Firmware unterstützt Frequenzmessung, Benetzungserkennung,
-    Regenende-Schätzung und automatisches Trockenheizen. Die Regeln sind im Labor
-    erprobt; Feldlogging und Feldtests folgen mit dem neuen mechanischen Aufbau.
+Der RainDetector besteht aus einer kapazitiven Sensorfläche mit Heizwiderständen
+und einem Controller für Frequenzsignal und Heizschalter. Er erkennt Benetzung;
+eine Niederschlagsmenge in Millimetern liefert eine separate Kippwaage.
 
-[Controller: Bestückung und Bring-up](../rain-detector-controller/assembly.md){ .md-button }
-[Head: Bestückung und Bring-up](../rain-detector-head/assembly.md){ .md-button }
+## Was möchtest du tun?
 
-Dokumentation abgeschlossen für die neue Kontur **62,12 × 54,52 mm** mit Platz für die Dichtung. Die bisherigen Bring-ups stehen unter [Controller: Alte Revisionen](../rain-detector-controller/old-revisions.md) und [Head: Alte Revisionen](../rain-detector-head/old-revisions.md).
+| Dein Ausgangspunkt | Hier geht es weiter |
+| --- | --- |
+| Benetzung beobachten und Zustände verstehen | [Anwendung: Benetzung beobachten](../../applications/rain-detector.md) |
+| Controller selbst aufbauen und prüfen | [Controller 0.4: Aufbau und elektrische Prüfung](../rain-detector-controller/assembly.md) |
+| Sensorfläche selbst aufbauen und prüfen | [Head 0.2: Aufbau und elektrische Prüfung](../rain-detector-head/assembly.md) |
+| Geprüfte Hardware mit EnvNode einrichten | [RainDetector in Betrieb nehmen](../../commissioning/rain-detector.md) |
 
-## Zwei getrennte Baugruppen
+## Zwei Baugruppen
 
-| Baugruppe | Revision | Aufgabe |
-| --- | --- | --- |
-| RainDetectorController | 0.4 | ICM7555-Frequenzfront-end und AO3400A-Heizschalter |
-| RainDetectorHead | 0.2 | Passive kapazitive Sensorfläche und Heizwiderstände |
-
-Beide Platinen haben eine Kontur von **62,12 × 54,52 mm**. Die Vergrößerung
-unterstützt die Gehäuseabdichtung; C1 und die Positionen der Interconnects bleiben
-unverändert. Neue PCB-Artikel: Controller **ENP-00138**, Head **ENP-00139**.
-Kits und Assemblies werden separat aktualisiert.
+| Baugruppe | Aufgabe |
+| --- | --- |
+| RainDetectorController 0.4 | Frequenzfront-end und Schalter für die Heizung |
+| RainDetectorHead 0.2 | Kapazitive Sensorfläche und Heizwiderstände |
 
 ![Controller 0.4](../../assets/images/rain-detector/RainDetectorController-Rev0.4-top.png)
 
 ![Head 0.2](../../assets/images/rain-detector/RainDetectorHead-Rev0.2-top.png)
 
-Die Sensorfläche besitzt zwei von Lötstopplack bedeckte, ineinandergreifende
-Kupferelektroden. Der Controller wandelt das Sensorsignal in einen digitalen
-3,3-V-Frequenzausgang um. Eine Frequenzänderung ist noch kein kalibrierter
-Niederschlagswert und ersetzt keine Kippwaagenmessung.
+Anschlussbelegungen, Heizlast, Beschichtung und mechanische Prüfungen sind in den
+jeweiligen Aufbauanleitungen dokumentiert. Die Laborerprobung der Firmware ist
+von Feldtests und der Abnahme des realen Aufbaus zu unterscheiden.
 
-## Verbindungen zum Mainboard
-
-| Anschluss | Pin 1 | Pin 2 | Pin 3 | Pin 4 |
-| --- | --- | --- | --- | --- |
-| J3 | GND | +5V | HEATER_EN | +3V3 |
-| J4 | GND | +5V | RAIN_FREQ | +3V3 |
-
-Die Versorgungspins sind gemeinsam geführt. J3/J4 sind in der vorhandenen
-Bestückungsbasis DNP; Anschlussvariante und passende Stecker müssen für den
-konkreten Aufbau ausgewählt werden. HEATER_EN benötigt einen geeigneten
-Digitalausgang, RAIN_FREQ einen geeigneten Frequenzmesseingang.
-
-## Verbindung zwischen Head und Controller
-
-| Head-Kontakt | Signal | Controller-Kontakt |
-| --- | --- | --- |
-| J1.1 | HEATER+ | J1.1 |
-| J1.4 | GND / Elektrode 2 | J1.4 |
-| J2.1 | SENSE / Elektrode 1 | J2.1 |
-| J2.4 | HEATER− | J2.4 |
-| Pins 2 und 3 | Mechanische Stützung, elektrisch unverbunden | Entsprechend unverbunden |
-
-Die Unterseiten beider Platinen zeigen zueinander. Die 2×2-Steckverbindungen
-müssen elektrisch und mechanisch korrekt ausgerichtet sein; die Tabelle allein
-bestätigt weder die Kontaktlage noch die reale Steckhöhe.
-
-## Heizung und Fertigung
-
-Zwanzig 15-Ω-Widerstände bilden fünf parallele Stränge mit jeweils vier
-Widerständen. Das ergibt nominal 12 Ω, etwa 417 mA und 2,08 W an 5 V.
-Versorgung und Kabel müssen diese Last zusätzlich zu den übrigen Systemlasten tragen.
-Die Anleitung sieht Widerstände mit mindestens 0,25 W und Beachtung der
-Temperaturabhängigkeit ihrer Belastbarkeit vor.
-
-C1 des Heads bezeichnet die gefertigte Kupfer-Sensorstruktur, kein aufzulötendes Bauteil.
-Via-Verschluss, Beschichtung und Wasserausschluss müssen mit dem Fertiger abgestimmt
-und am aufgebauten Head geprüft werden. Lötstopplack allein ist keine Zusage der Dichtheit.
-
-## Getrennte Inbetriebnahme
-
-1. Beide Platinen spannungsfrei auf richtige Kontaktzuordnung und Kurzschlüsse prüfen.
-2. Controller-Versorgung und 3,3-V-Frequenzausgang separat prüfen.
-3. Frequenz mit trockenem und benetztem Head vergleichen und mit einem Messgerät kontrollieren.
-4. Heizpfad separat prüfen: Stromaufnahme, Erwärmung, Abschaltung und Temperaturverhalten.
-5. Erst danach den vollständigen mechanischen Aufbau und Wasserausschluss qualifizieren.
-
-## Firmwarestand
-
-Regendetektor (Benetzung/Frequenz) und Regenmesser (Kippwaage) sind getrennte
-Implementierungen. Beim Regendetektor starten aktivierte Sensoren und Controller
-nach Boot automatisch. Die Heizung startet aus. Nach gültigem Signal und Wartezeit
-prüft der Controller einmalig den Ausgangszustand: unterhalb der Trockenschwelle
-100 % zum Trocknen, ab der Schwelle Trockenbestätigung ohne Heizung. Dies erzeugt
-keine Regenmeldung. Danach fordert neue Benetzung 100 % an.
-Nach voreingestellt 60 Sekunden ohne neue Benetzung wird Regenende geschätzt.
-Die Heizung bleibt bis zur bestätigten Trockenfrequenz an. Messintervall 5000 ms
-betrifft die Veröffentlichung; lokale Messfenster sind etwa 250 ms lang.
-Parameter und Teststand: [Firmware-Dokumentation im Repository](https://github.com/magicamun/EnvNode/blob/codex/rain-detector/docs/RainDetector.md).
-
-Die separate Lab-Firmware bietet manuelle Heizung, Intervallversuche und Automatik.
-Temperatur-/Taupunktregelung und Feldlogging sind noch nicht umgesetzt.
-
-## Anleitungen und Prüfstand
-
-- [Controller: Bestückung und Bring-up (PDF)](../../assets/downloads/RainDetectorController_Bestueckungs_und_Bringup_Rev0.4.pdf)
-- [Head: Bestückung und Bring-up (PDF)](../../assets/downloads/RainDetectorHead_Bestueckungs_und_Bringup_Rev0.2.pdf)
-
-Die dokumentierten ERC/DRC-Prüfungen vom 14. September 2026 liegen vor den
-anschließenden Stecker- und Konturänderungen. Vor Fertigung sind aktuelle Prüfungen
-nötig. Steckhöhe, reale Heizwirkung, Beschichtung und Wasserausschluss sind noch offen.
+[Kompatibilität](../../compatibility.md) ·
+[Controller: alte Revisionen](../rain-detector-controller/old-revisions.md) ·
+[Head: alte Revisionen](../rain-detector-head/old-revisions.md)

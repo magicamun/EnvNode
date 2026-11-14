@@ -1,5 +1,8 @@
 # Sensoren einrichten und Messwerte prüfen
 
+Für die passende Reihenfolge am konkreten Sensor beginne mit der
+[Inbetriebnahmeübersicht](../commissioning/index.md). Diese Seite erklärt das gemeinsame Sensorformular.
+
 ## Sensorplatz vorbereiten
 
 Unter **Sensoren (Sensors)** einen freien Platz bearbeiten, einen verständlichen
@@ -15,6 +18,7 @@ Simulation bestätigt den Softwareablauf, nicht die reale Verkabelung.
 | AM2302 / DHT22 | GPIO | Geeigneter Einleitungs-GPIO |
 | Rain Gauge | GPIO-Interrupt | GPIO, Millimeter pro Kippung, Entprellung |
 | RainDetector (frequency) | GPIO-Frequenzeingang | GPIO für das Frequenzsignal des Controllers |
+| SCT013 AC RMS | ADC1 | Freier Analogport, Sensorprofil, Kalibrierung und Nullschwellen |
 | Solar Position | Berechnung | Konfigurierte Koordinaten und synchronisierte Zeit |
 
 Die Auswahl nach Messaufgabe findest du unter [Ich möchte messen](../applications/measurements.md).

@@ -66,5 +66,5 @@ durch Modulidentität, Aktorzuordnung und Funktionstest mit der Firmware.
 Die Hardwareanleitungen erklären Bestückung und elektrische Prüfungen.
 Diese Bedienungsanleitung setzt einen entsprechend geprüften Aufbau voraus.
 Firmwareunterstützung und Hardware-Reifegrad werden getrennt beschrieben;
-RainDetector ist im klassischen Build integriert. SCT013 und weitere
-Analogpfade benötigen eigene Integration und gemessene Ressourcenbudgets.
+RainDetector und SCT013 sind im klassischen Build integriert. Für weitere
+Analogpfade ist die jeweils dokumentierte Firmwareunterstützung maßgeblich.

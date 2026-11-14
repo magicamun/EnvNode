@@ -40,8 +40,15 @@ nav:
   - Dein erstes EnvNode: getting-started/index.md
   - Anwendungen:
       - Ich möchte messen: applications/measurements.md
+      - Benetzung beobachten: applications/rain-detector.md
       - Relais schalten: firmware/example-relay.md
   - Inbetriebnahme:
+      - Übersicht: commissioning/index.md
+      - Gerät und Netzwerk: firmware/configuration.md
+      - I²C-Sensoren: commissioning/i2c-sensors.md
+      - Regenwippe: commissioning/rain-gauge.md
+      - RainDetector: commissioning/rain-detector.md
+      - Displays: firmware/values-displays.md
       - DuoRelay einrichten: modules/duo-relay/commissioning.md
   - Grundlagen:
       - Gesamtübersicht: concepts/index.md
@@ -49,16 +56,28 @@ nav:
       - Übersicht: hardware/index.md
       - Mainboards:
           - Übersicht: mainboards/index.md
-          - Mini: mainboards/mini/revisions/0.10.0.md
-          - Weather: mainboards/weatherstation/revisions/0.4.md
-          - ORing Power: mainboards/oring-power/index.md
+          - Mini:
+              - Übersicht: mainboards/mini/index.md
+              - Revision 0.10.0: mainboards/mini/revisions/0.10.0.md
+              - Aufbau und Prüfung 0.9.0: mainboards/mini/assembly.md
+          - Weather:
+              - Übersicht: mainboards/weatherstation/index.md
+              - Revision 0.4: mainboards/weatherstation/revisions/0.4.md
+              - Aufbau und Prüfung 0.3.0: mainboards/weatherstation/assembly.md
+          - ORing Power:
+              - Übersicht: mainboards/oring-power/index.md
+              - Aufbau und elektrische Prüfung: mainboards/oring-power/assembly.md
       - Module:
           - Übersicht: modules/index.md
           - DuoRelay:
               - Übersicht: modules/duo-relay/index.md
               - Aufbau und elektrische Prüfung: modules/duo-relay/assembly.md
-          - AnalogHydroPressure: modules/analog-hydro-pressure/index.md
-          - I²C Carrier HalfSize: modules/i2c-carrier/assembly.md
+          - AnalogHydroPressure:
+              - Übersicht: modules/analog-hydro-pressure/index.md
+              - Aufbau und elektrische Prüfung: modules/analog-hydro-pressure/assembly.md
+          - I²C Carrier HalfSize:
+              - Übersicht: modules/i2c-carrier/index.md
+              - Aufbau und Jumper: modules/i2c-carrier/assembly.md
       - Sensoren:
           - Übersicht: sensors/index.md
           - I²C-Sensoren: sensors/i2c.md

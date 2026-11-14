@@ -25,9 +25,9 @@ Weg der Daten bis zu einer externen Anwendung.
 
 Wähle zuerst die gewünschte Messgröße und einen dafür unterstützten Sensor.
 Die Anwendungsseiten führen zur passenden Einrichtung und Bedienung.
-Für DuoRelay sind [Aufbau](modules/duo-relay/assembly.md),
-[Inbetriebnahme](modules/duo-relay/commissioning.md) und
-[Anwendung](firmware/example-relay.md) getrennt beschrieben.
+Die [Inbetriebnahmeübersicht](commissioning/index.md) führt zur Einrichtung
+der gewählten Sensoren, Module und Displays. Technische Aufbauanleitungen
+sind getrennt davon erreichbar.
 
 ## Technische Dokumentation
 
@@ -36,6 +36,7 @@ Für DuoRelay sind [Aufbau](modules/duo-relay/assembly.md),
 - [Kompatibilität](compatibility.md): passende Hardware und Firmware auswählen.
 - [Mainboards](mainboards/index.md): Mini, Weatherstation und ORing Power.
 - [Aufbauanleitungen](guides/index.md): Bestückung und elektrische Prüfungen.
+- [Inbetriebnahme](commissioning/index.md): geprüfte Hardware mit der Software einrichten.
 - [Sensorhardware](sensors/index.md): Baugruppen, Sensoranschlüsse und technische Details.
 - [Module](modules/index.md): Erweiterungen für zusätzliche Aufgaben.
 - [Displays](displays/index.md): Anzeigen und deren Konfiguration.

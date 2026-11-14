@@ -14,7 +14,7 @@ Stand: **3. November 2026**. „Abgeschlossen“ bezeichnet die redaktionell vol
 
 ## Teilumfang
 
-- SCT013Head 0.1: Erstaufbau/Nullmessung beschrieben; Sensorbetrieb und Buchsenmechanik ergänzen.
+- SCT013Head 0.2: korrigierter Lumberg-Anschluss dokumentiert; Abbildungen und Nullmessungsprotokolle zeigen noch Rev. 0.1. Die Firmware-Einrichtung ist auf der Sensorseite beschrieben.
 - I²C Carrier HalfSize 0.1: Montage und Jumper beschrieben; vollständiger Bring-up fehlt.
 
 ## Noch zu erstellen

@@ -40,7 +40,7 @@
   - Provisioniert am / durch
   archive: true
   preview: docs/pdf/reference/Weatherstation_Rev0.2.1_Anleitung.pdf
-- source: mainboards/oring-power/index.md
+- source: mainboards/oring-power/assembly.md
   target: assets/downloads/ORing_Power_Rev0.1.2_Anleitung.pdf
   original: hardware/kicad/Power/ORing Power/Documentation/ORing_Power_Bestueckungs_und_Bringup_Rev0.1.pdf
   images: docs/site/assets/images/oring-assembly
@@ -94,7 +94,7 @@
   - '0x52'
   - '0x53'
   preview: docs/pdf/reference/I2C_Carrier_HalfSize_Rev0.1_Anleitung.pdf
-- source: mainboards/mini/index.md
+- source: mainboards/mini/assembly.md
   target: assets/downloads/EnvNode_Mini_Rev0.9.0_Anleitung.pdf
   preview: docs/pdf/reference/EnvNode_Mini_Rev0.9.0_Anleitung.pdf
   images: docs/site/assets/images/mini-0.9.0
@@ -104,7 +104,7 @@
   - C2
   - J3-J6
   - BoardProfileId
-- source: mainboards/weatherstation/index.md
+- source: mainboards/weatherstation/assembly.md
   target: assets/downloads/Weatherstation_Rev0.3.0_Anleitung.pdf
   preview: docs/pdf/reference/Weatherstation_Rev0.3.0_Anleitung.pdf
   images: docs/site/assets/images/weatherstation-0.3.0
@@ -114,7 +114,7 @@
   - C2
   - J2-J5
   - GPIO33
-- source: modules/analog-hydro-pressure/index.md
+- source: modules/analog-hydro-pressure/assembly.md
   target: assets/downloads/AnalogHydroPressure_Rev0.6_Anleitung.pdf
   preview: docs/pdf/reference/AnalogHydroPressure_Rev0.6_Anleitung.pdf
   images: docs/site/assets/images/analog-0.6
