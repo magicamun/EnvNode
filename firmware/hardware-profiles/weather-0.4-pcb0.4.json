@@ -7,7 +7,7 @@
   "boardProfileId": 1,
   "identityRevision": "0.4",
   "minimumRuntimeFirmwareVersion": "0.8.11",
-  "image": "https://docs.envnode.de/assets/testboard/v1/2881ac09140e129635564b5f274c51769e285a60337481196cf43e339e04e256.svg",
+  "image": "https://docs.envnode.de/assets/board-views/weatherstation-0.4/3d-front.png",
   "provisioning": {
     "identityBus": "I2C0",
     "identityAddress": 80,

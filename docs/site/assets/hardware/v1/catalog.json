@@ -43,16 +43,16 @@
     },
     {
       "id": "mini-0.10-pcb0.10.0",
-      "filename": "mini-0.10-pcb0.10.0.0a07e3d20be5b80e5a582d3bc387a3015db1ec36d23ca08ba3469a039c1d8365.json",
-      "sha256": "0a07e3d20be5b80e5a582d3bc387a3015db1ec36d23ca08ba3469a039c1d8365",
+      "filename": "mini-0.10-pcb0.10.0.890cca0c6830641808e3fb434aa591a94aacb0f2b5347f304715c68033404d6a.json",
+      "sha256": "890cca0c6830641808e3fb434aa591a94aacb0f2b5347f304715c68033404d6a",
       "portMap": "mini-0.10-pcb0.10.0.ff157c28e16d2ab1ff8f608088e6dbc0d3f0172f4034ec42775cb1d6a3a7bc8b.portmap.cbor",
       "portMapSha256": "ff157c28e16d2ab1ff8f608088e6dbc0d3f0172f4034ec42775cb1d6a3a7bc8b",
       "portMapBytes": 120
     },
     {
       "id": "weather-0.4-pcb0.4",
-      "filename": "weather-0.4-pcb0.4.50c8f851cef06bcb11b4abf7881ef5205613ec84dad21504e4c7ee5a6720e79f.json",
-      "sha256": "50c8f851cef06bcb11b4abf7881ef5205613ec84dad21504e4c7ee5a6720e79f",
+      "filename": "weather-0.4-pcb0.4.9eef70820397c79392d41e977a2c03cddfa8381a2a0c0927b23ae109ab3a9528.json",
+      "sha256": "9eef70820397c79392d41e977a2c03cddfa8381a2a0c0927b23ae109ab3a9528",
       "portMap": "weather-0.4-pcb0.4.105f821aed1f033b6f0b59262e34ed8e02a062dca6ba1d8acd62d1d5399627d1.portmap.cbor",
       "portMapSha256": "105f821aed1f033b6f0b59262e34ed8e02a062dca6ba1d8acd62d1d5399627d1",
       "portMapBytes": 110
