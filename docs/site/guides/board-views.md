@@ -4,6 +4,8 @@ Die folgenden senkrechten Vorderseitenpläne werden in den Aufbauanleitungen ver
 
 | Board / Revision | Vorderseite PNG |
 | --- | --- |
+| [Mini 0.10.0](../mainboards/mini/revisions/0.10.0.md) | [PNG](../assets/board-views/mini-0.10.0/assembly-front.png) |
+| [Weather 0.4](../mainboards/weatherstation/revisions/0.4.md) | [PNG](../assets/board-views/weatherstation-0.4/assembly-front.png) |
 | [mini-0.9.0](../mainboards/mini/assembly.md) | [PNG](../assets/board-views/mini-0.9.0/assembly-front.png) |
 | [weatherstation-0.3.0](../mainboards/weatherstation/assembly.md) | [PNG](../assets/board-views/weatherstation-0.3.0/assembly-front.png) |
 | [analog-0.6](../modules/analog-hydro-pressure/assembly.md) | [PNG](../assets/board-views/analog-0.6/assembly-front.png) |

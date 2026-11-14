@@ -71,7 +71,7 @@ Anleitung. Für die häufigsten Aufgaben kannst du direkt einsteigen:
 | AM2302 / DHT22 | [Sensorformular und GPIO-Auswahl](../firmware/sensors.md) |
 | Regenwippe | [Kippkontakt, Kalibrierwert und Zählprüfung](../commissioning/rain-gauge.md) |
 | RainDetector | [Frequenzsensor, Heizaktor und Controller](../commissioning/rain-detector.md) |
-| SCT013 | [SCT013 einrichten und prüfen](../sensors/sct013/index.md#in-der-firmware-einrichten) |
+| SCT013 | [SCT013 einrichten und prüfen](../sensors/sct013/commissioning.md) |
 
 Die [Firmware-Anleitung](../firmware/index.md) erklärt die gemeinsamen
 Bedienelemente. Aufbauanleitungen brauchst du, wenn du Hardware selbst bestückst

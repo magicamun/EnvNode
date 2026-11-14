@@ -130,9 +130,11 @@ Input-Adapter trennen, bevor der Provisioning-Stecker angeschlossen wird. Das
 Kabel vor einer passiven Durchgangsprüfung wieder abziehen; die Firmware schaltet
 dessen Versorgung nicht ab.
 
-Die **Anschlussprüfung ist derzeit eine Simulation**. Das Provisioning greift
-dagegen auf das echte EEPROM zu und muss mit der fertigen Tester-Hardware noch
-physisch validiert werden. Eine laufende Anschlussprüfung sperrt Provisioning.
+Die **Anschlussprüfung kann real messen**; eine ausdrücklich gewählte Simulation
+ist davon getrennt. Board-Provisioning schreibt und liest das echte EEPROM und
+wurde an Weather 0.3 einschließlich Stromausfall erprobt. Die Abnahme der neuen
+Hardwareprofile und das reale Modul-Provisioning am Tester sind davon getrennt.
+Eine laufende Anschlussprüfung sperrt Provisioning.
 Für Module steht zunächst die DuoRelay-0.3-Vorlage zur Verfügung. Der Tester
 validiert und schreibt denselben ENHD-Datensatz wie die normale Firmware, ohne
 den Modulbetrieb zu unterstützen. Fehlende Treiber oder eine höhere erforderliche

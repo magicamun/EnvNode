@@ -51,6 +51,22 @@ Das Sensor-Ausgabeintervall (voreingestellt 5000 ms) bestimmt die Veröffentlich
 Die lokale Frequenzmessung arbeitet unabhängig davon in ungefähr 250-ms-Fenstern.
 Die Automatik verwendet Heizung aus oder 100 %, auch bei einem PWM-Aktor.
 
+## Optional: vorbeugend nach Taupunktabstand heizen
+
+Ab Firmware 0.8.12 kann im RainDetector-Controller eine lokale Klimaquelle
+gewählt werden, die Temperatur und Taupunkt liefert. Mit leerer Auswahl bleibt
+vorbeugendes Heizen aus. Ein- und Ausschaltschwelle beziehen sich auf den Abstand
+**Temperatur minus Taupunkt**; die Einschaltschwelle muss kleiner als die
+Ausschaltschwelle sein. Werte passend zum vorgesehenen Aufbau wählen.
+
+Die Zusatzanforderung gilt nur bei gültiger Frequenz und bestätigtem trockenen
+Head. Ungültige oder über 120 Sekunden alte Klimawerte unterdrücken sie.
+Die Heizung bleibt eine 0-/100-%-Ansteuerung; der Entscheidungsgrund
+`dew_prevention` unterscheidet die Anforderung von der Benetzungstrocknung.
+Die Implementierung ist vorhanden, der dokumentierte Praxistest mit
+angeschlossener Klimaquelle steht noch aus. Zunächst den Grundablauf unten mit
+deaktiviertem Taupunktheizen prüfen und die Zusatzfunktion anschließend separat testen.
+
 ## Funktion und Abschaltung prüfen
 
 Aktivierte Sensoren und Controller starten nach Boot oder Laufzeitübernahme
@@ -68,7 +84,8 @@ Regenende und trocken sind verschiedene Zustände.
 die Automatik; für erneuten Automatikbetrieb ist **Start** erforderlich.
 Ungültige oder fehlende Frequenz muss die Heizung abschalten und den Regenzustand
 auf unbekannt setzen. Signalwiederkehr allein ist nach verbrauchter Startprüfung
-kein automatischer neuer Heizauftrag; danach ist neue Benetzung erforderlich.
+kein automatischer neuer Heizauftrag; für die Benetzungstrocknung ist danach neue Benetzung erforderlich.
+Optionales Taupunktheizen hat eine eigene Anforderung gemäß dem Abschnitt oben.
 Verdrahtungsänderungen für Prüfungen nur spannungsfrei vornehmen.
 
 Nach Neustart Zuordnungen und Parameter kontrollieren. Für dauerhaft abgeschaltete

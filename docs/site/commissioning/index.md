@@ -11,7 +11,7 @@ zur Einrichtung mit der Firmware und zum ersten überprüften Ergebnis.
 | AM2302 / DHT22 | [Sensorformular und GPIO-Auswahl](../firmware/sensors.md) |
 | Niederschlag mit einer Kippwaage | [Regenwippe](rain-gauge.md) |
 | Benetzung und Trockenheizung | [RainDetector](rain-detector.md) |
-| Wechselstrom mit SCT013 | [SCT013 einrichten und prüfen](../sensors/sct013/index.md#in-der-firmware-einrichten) |
+| Wechselstrom mit SCT013 | [SCT013 einrichten und prüfen](../sensors/sct013/commissioning.md) |
 | Zwei Relaisausgänge | [DuoRelay](../modules/duo-relay/commissioning.md) |
 | Messwerte am Gerät anzeigen | [Displays einrichten](../firmware/values-displays.md#displays) |
 | Prüf- und Provisioninghardware | [Separate Test-Firmware](../firmware/test-provisioning/inbetriebnahme.md) |

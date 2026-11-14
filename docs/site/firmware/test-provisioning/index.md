@@ -11,7 +11,7 @@ führt aber keine EnvNode-Sensoren, Aktoren oder lokalen Controller aus.
 | Hardwarediagnose `/diagnostics` | Reale manuelle Kanal-/Enable-Auswahl, LOW/HIGH und GPIO34-ADC |
 | Hardware-Selbsttest `/selftest` | Geführte reale Schleifenprüfung von 22 Output- und 40 Input-Kontakten |
 | Anschlussprüfung `/test` | Reale LOW/HIGH-Messung oder ausdrücklich gewählte Simulation; Boardbild, LEDs und Einzelmatrix |
-| Prüfprofile | Vier eingebaute Profile; validierte Remote-Profile von docs.envnode.de mit lokalem Fallback |
+| Prüfprofile | Sechs eingebaute Mainboardprofile; validierte Remote-Profile von docs.envnode.de mit lokalem Fallback |
 | Board-Provisioning `/hardware` | Reales Schreiben und Rücklesen eines externen Board-EEPROMs über SDA16/SCL5 |
 | Modul-Provisioning | Gemeinsamer Provisioning-Core, externe EEPROMs 0x52/0x53; reale Abnahme am Tester folgt |
 | Hardwareprofile | Controller 0.1/0.2 und Legacy-/ESP32-DevKitC-Adapter getrennt auswählbar |

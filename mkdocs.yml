@@ -47,6 +47,7 @@ nav:
       - Gerät und Netzwerk: firmware/configuration.md
       - I²C-Sensoren: commissioning/i2c-sensors.md
       - Regenwippe: commissioning/rain-gauge.md
+      - SCT013: sensors/sct013/commissioning.md
       - RainDetector: commissioning/rain-detector.md
       - Displays: firmware/values-displays.md
       - DuoRelay einrichten: modules/duo-relay/commissioning.md

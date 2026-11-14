@@ -8,6 +8,7 @@ Wetterauswertung und ersetzen keine externen Langzeit-Automationen.
 | --- | --- |
 | Blink | On/Off-Aktor mit Ein- und Aus-Dauer periodisch schalten |
 | Threshold / Hysteresis | On/Off-Aktor abhängig von einem numerischen Messwert steuern |
+| RainDetector | Frequenzsensor und Heizaktor für Benetzungserkennung, Trocknung und optionales Taupunktheizen verbinden |
 | Selector | Zwischen automatischer Entscheidung und festem Ein/Aus anhand eines Enum-Values wählen |
 
 ## Grundablauf
@@ -43,3 +44,11 @@ Die passenden Enum-Codes in der Oberfläche auswählen, nicht beliebige Texte al
 vermeintlich gleichwertige Betriebsarten eintragen.
 
 [Praktischer Einstieg mit Blink](example-relay.md)
+
+## RainDetector einrichten
+
+RainDetector verbindet einen passenden Frequenzsensor mit einem Heizaktor.
+Die [baugruppenspezifische Inbetriebnahme](../commissioning/rain-detector.md)
+ist die maßgebliche Anleitung für Quellen, Schwellen, Startprüfung und Abschaltung.
+Sie erklärt auch die optionale Klimaquelle für vorbeugendes Heizen.
+Die [Anwendungsseite](../applications/rain-detector.md) erläutert die Zustände.

@@ -26,7 +26,7 @@ zu korrigieren und mit einem Prüfstecker durchzumessen.
 Diese Anleitung beschreibt Bestückung und elektrische Prüfung des passiven Heads.
 Die dokumentierten Nullmessungen stammen aus dem früheren Prüfaufbau; sie sind
 keine separate Abnahme einer neu gefertigten Rev.-0.2-Platine.
-[Software-Einrichtung und geprüfte Einstellungen](../sct013/index.md#in-der-firmware-einrichten).
+[Software-Einrichtung und geprüfte Einstellungen](../sct013/commissioning.md).
 
 !!! note "Jetzt aufbauen, Buchse später ergänzen"
     R1-R4, C1, C2 und das Pigtail werden jetzt bestückt. J1 bleibt zunächst vollständig frei. Der ADC-Ausgang erhält über R4 trotzdem seine Vorspannung; für diesen Test ist keine Brücke an J1 erforderlich. Ein fehlender Sensor wird von dieser Schaltung nicht automatisch erkannt.
