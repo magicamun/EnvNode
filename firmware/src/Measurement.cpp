@@ -5,6 +5,7 @@
 namespace EnvNode {
 namespace {
 
+const PresentationUnit CurrentUnits[] = {PresentationUnit::Ampere};
 const PresentationUnit FrequencyUnits[] = {PresentationUnit::Hertz, PresentationUnit::Kilohertz};
 const PresentationUnit NoUnit[] = {PresentationUnit::None};
 const PresentationUnit TemperatureUnits[] = {
@@ -97,6 +98,8 @@ const MeasurementTypeMetadata MeasurementMetadata[] = {
     {MeasurementType::RainDetectorFrequency, "rain_detector_frequency", "Rain Detector Frequency", ValueKind::FloatingPoint,
         PresentationUnit::Hertz, 1, MeasurementSemantics::State,
         FrequencyUnits, unitCount(FrequencyUnits), PresentationUnit::Hertz},
+    {MeasurementType::ElectricCurrent, "electric_current", "AC RMS current", ValueKind::FloatingPoint,
+        PresentationUnit::Ampere, 3, MeasurementSemantics::State, CurrentUnits, unitCount(CurrentUnits), PresentationUnit::Ampere},
 };
 
 constexpr size_t MeasurementMetadataCount =

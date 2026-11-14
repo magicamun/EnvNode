@@ -149,3 +149,46 @@ PlatformIO if multiple devices are connected. No upload is performed by building
 
 EnvNode-owned source and documentation follow the repository LICENSE
 (LicenseRef-EnvNode-Use-and-Redistribution-1.0).
+
+## Optional low-pass comparison (2026-11-10)
+
+The filter is OFF after every reset. Select `filter 200` for the initial lab
+comparison; `filter 100`, `filter 300`, `filter 500` and `filter off` are also
+accepted. `status` and dumps show the selection. This experimental diagnostic
+setting is session-only and never writes NVS.
+
+The existing CSV current and all SAMPLE rows remain unfiltered. An additional
+`# FILTER` line reports raw and filtered RMS (mV and A) from the SAME last 1800
+samples. A second-order Butterworth is applied after acquisition, using nominal
+2000 Hz, the measured full-window mean removed, and zero initial states for each
+window. The first 200 samples (100 ms) are discarded for both comparison values.
+This reproduces the offline method, avoids carrying states across acquisition
+pauses, and leaves sampling timing unchanged. The original CSV still uses all
+2000 samples, so compare the two values within FILTER, not across window lengths.
+Original range/clipping/timing flags are repeated in FILTER; filtering does not
+make an invalid acquisition valid. FILTER values have no threshold or gain compensation.
+
+The filtered value is bandwidth-limited: real current harmonics are attenuated.
+It is not an established general-purpose true-RMS current measurement, and it
+cannot undo aliasing introduced at acquisition. The 50 Hz gain check alone does
+not validate arbitrary loads.
+
+After upload: `pause`, `port adc2`, `sensor 1000`, `cal 1`, `filter 200`, `status`,
+`diag on`. Capture three `dump full` windows with the lamp off, then three with
+the lamp on after settling. Keep the sensor and wiring unchanged. Save the log;
+no additional dumps are needed with filter off because original samples and
+both RMS values are emitted together.
+
+## Nullschwelle testen: 5 A / 1 V am Mini
+
+Nach dem Upload im Monitor: `port adc2`, `sensor 1000`, `cal 1`, `filter 200`,
+dann `gate 60 80`. Die beiden Schwellen werden in ganzen mA angegeben. Die
+zusätzliche GATE-Zeile zeigt den Ausgabestrom. Ausgangszustand: null. Über
+80 mA wird der gefilterte Effektivstrom ausgegeben, unter 60 mA null. Zwischen
+den Grenzen (inklusive Gleichheit) bleibt der Zustand erhalten; im aktiven
+Zustand folgt der Ausgabewert weiter dem gefilterten Strom. Fehlerhafte
+Messfenster liefern NA und verändern den Zustand nicht. CSV, FILTER und
+Rohwert-Dumps bleiben unverändert. Nach Neustart oder Änderung von Filter,
+Profil, Kalibrierung oder Port muss die Schwelle erneut eingeschaltet werden.
+`gate off` schaltet sie manuell ab. Testfolge bei laufendem Logging: Lampe
+aus, an, aus. Für andere Sensorprofile die Schwellen separat ermitteln.

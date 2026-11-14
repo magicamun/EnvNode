@@ -67,7 +67,15 @@ bool selectCurrentBoardPortMap(const BoardPortMap& p) {
     auto* owned=new(std::nothrow) OwnedBoardProfile;
     if(!owned)return false;
     memcpy(owned->name,p.name,sizeof(owned->name));
+    const auto* named=boardProfile(static_cast<BoardProfileId>(p.profileId),p.revision);
     for(size_t i=0;i<p.gpioCount;++i){snprintf(owned->labels[i],sizeof(owned->labels[i]),"GPIO%u",p.gpios[i].pin);
+        if(named && (p.gpios[i].capabilities & static_cast<uint8_t>(GpioCapability::AnalogInput))) {
+            for(size_t j=0;j<named->gpioCount;++j) {
+                const auto& g=named->gpios[j];
+                if(g.resource.number==p.gpios[i].pin && !strncmp(g.displayName,"ADC",3))
+                    snprintf(owned->labels[i],sizeof(owned->labels[i]),"%s",g.displayName);
+            }
+        }
         owned->gpios[i]={GpioResource(p.gpios[i].pin),owned->labels[i],static_cast<GpioCapability>(p.gpios[i].capabilities)};}
     for(size_t i=0;i<p.busCount;++i){const auto& b=p.buses[i];owned->buses[i]={static_cast<I2CBus>(b.bus),GpioResource(b.sda),GpioResource(b.scl)};}
     for(size_t i=0;i<p.slotCount;++i){const auto& s=p.slots[i];owned->slots[i]={static_cast<ModuleSlot>(s.slot),s.address,GpioResource(s.aux1),GpioResource(s.aux2),GpioResource(s.cs),s.fiveVolt};}
@@ -75,6 +83,13 @@ bool selectCurrentBoardPortMap(const BoardPortMap& p) {
         owned->slots,p.slotCount,GpioResource(p.spiClock),GpioResource(p.spiMiso),GpioResource(p.spiMosi)};
     // One immutable boot-time selection owns the backing memory for the device lifetime.
     selectedProfile=&owned->profile;selectionFrozen=true;return true;
+}
+
+bool supportsSctPort(uint8_t pin) {
+    if (pin==34 || pin==35) return true;
+    const auto* gpio=BoardCapabilities::current().gpio(GpioResource(pin));
+    return gpio && ((pin==36 && !strcmp(gpio->displayName,"ADC3")) ||
+        (pin==39 && !strcmp(gpio->displayName,"ADC4")));
 }
 
 const BoardProfile& currentBoardProfile() {

@@ -39,3 +39,7 @@
 !SCT013-ADC/tests/rms_test.cpp
 !RainDetector-PCNT/include/LabRainAutomation.h
 !RainDetector-PCNT/tests/test_lab_rain_automation.cpp
+
+!SCT013-ADC/include/LowPass.h
+
+!SCT013-ADC/include/CurrentGate.h

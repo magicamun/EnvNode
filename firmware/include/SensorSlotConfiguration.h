@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "HardwareResources.h"
+#include "Sct013Settings.h"
 #include "SensorId.h"
 #include "SensorImplementationRegistry.h"
 #include "SensorSchedule.h"
@@ -69,6 +70,7 @@ struct SensorImplementationConfiguration {
     SHT4xConfiguration sht4x;
     SHTC3Configuration shtc3;
     RainGaugeConfiguration rainGauge;
+    Sct013Settings sct013;
 };
 
 struct SensorSlotConfiguration {

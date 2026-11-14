@@ -24,11 +24,12 @@ enum class MeasurementType : uint8_t {
     SolarAzimuth,
     SolarElevation,
     RainDetectorFrequency,
+    ElectricCurrent,
 
 };
 
 constexpr uint8_t SupportedMeasurementTypeCount =
-    static_cast<uint8_t>(MeasurementType::RainDetectorFrequency);
+    static_cast<uint8_t>(MeasurementType::ElectricCurrent);
 
 enum class MeasurementSemantics : uint8_t {
     Unknown,

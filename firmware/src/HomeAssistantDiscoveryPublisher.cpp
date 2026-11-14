@@ -24,6 +24,7 @@ const MeasurementType DiscoverableMeasurementTypes[] = {
 
     MeasurementType::SolarIrradiance,
     MeasurementType::SolarCellTemperature,
+    MeasurementType::ElectricCurrent,
     MeasurementType::RainDetectorFrequency,
     MeasurementType::RainDetectorLevel,
     MeasurementType::RainDetectorWet,
@@ -53,6 +54,7 @@ bool supports(const SensorRuntimeInfo& info, MeasurementType type) {
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
         case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
+        case MeasurementType::ElectricCurrent: return info.supportsElectricCurrent;
         case MeasurementType::RainDetectorFrequency: return info.supportsRainDetectorFrequency;
         case MeasurementType::RainDetectorLevel: return info.supportsRainDetectorLevel;
         case MeasurementType::RainDetectorWet: return info.supportsRainDetectorWet;
@@ -76,6 +78,7 @@ const char* deviceClass(MeasurementType type) {
         case MeasurementType::RelativeHumidity: return "humidity";
         case MeasurementType::SeaLevelPressure:
         case MeasurementType::AtmosphericPressure: return "atmospheric_pressure";
+        case MeasurementType::ElectricCurrent: return "current";
         case MeasurementType::SolarIrradiance: return "irradiance";
         case MeasurementType::RainDetectorWet: return "moisture";
         default: return nullptr;

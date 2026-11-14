@@ -13,6 +13,10 @@ pdf:
 
 # SCT013Head - Bestückung und Inbetriebnahme
 
+!!! warning "Buchsenkorrektur nach Erprobung"
+    Diese Anleitung dokumentiert den ursprünglichen Rev.-0.1-Stand. Die dort als Tip bezeichnete Leiterbahn von **J1.3** greift bei der Lumberg 1503 09 den **Ring** ab. Für den geprüften Tip/Sleeve-Sensor muss stattdessen **J1.2 (Tip) an R1.1** liegen; **J1.1 (Sleeve) bleibt an VBIAS**. Rev. 0.2 enthält die Korrektur. Auf einem reparierten Head gelten die Sensor-Tip-Messungen entsprechend an J1.2 und nicht an J1.3. Siehe [Treiber und geprüfte Einstellungen](../sct013/index.md).
+
+
 Kompakter passiver Sensorkopf für SCT013-Stromwandler mit integrierter Bürde und Spannungsausgang. Diese Anleitung beschreibt die Bestückung der Platine Rev. 0.1, den ersten Test ohne Sensor und ohne Klinkenbuchse sowie die spätere Montage der Buchse. Ein neu aufgebauter Head hat die nachstehenden Widerstands- und Gleichspannungsprüfungen bestanden. Eine erste Nullmessung am Mini ohne Sensor ist dokumentiert; Sensorbetrieb und mechanische Buchsenmontage stehen noch aus.
 
 !!! note "Jetzt aufbauen, Buchse später ergänzen"

@@ -5,6 +5,7 @@
 namespace EnvNode {
 const char* webMeasurementName(Locale locale, MeasurementType value) {
     switch (value) {
+        case MeasurementType::ElectricCurrent: return webText(locale, TextId::SctCurrent);
         case MeasurementType::RainDetectorFrequency: return webText(locale, TextId::RainFrequency);
         case MeasurementType::Temperature: return webText(locale, TextId::Temperature);
         case MeasurementType::RelativeHumidity: return webText(locale, TextId::RelativeHumidity);

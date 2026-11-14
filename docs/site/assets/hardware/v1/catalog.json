@@ -11,48 +11,48 @@
     },
     {
       "id": "weather-0.2-pcb0.2.1",
-      "filename": "weather-0.2-pcb0.2.1.2709ca56ec4c3f86ad243c068fe7784e020aacb98079393f52b638dee0a2756d.json",
-      "sha256": "2709ca56ec4c3f86ad243c068fe7784e020aacb98079393f52b638dee0a2756d",
+      "filename": "weather-0.2-pcb0.2.1.4b80e10c8329ca1acc58bc6f6f48085060f9f4b6199a100881a7b456eca4d7a2.json",
+      "sha256": "4b80e10c8329ca1acc58bc6f6f48085060f9f4b6199a100881a7b456eca4d7a2",
       "portMap": "weather-0.2-pcb0.2.1.8c1ee8c69d8a7c365723573e0dfc7e29c7ae7dc2ec3acef9d44ab8c273526ae1.portmap.cbor",
       "portMapSha256": "8c1ee8c69d8a7c365723573e0dfc7e29c7ae7dc2ec3acef9d44ab8c273526ae1",
       "portMapBytes": 110
     },
     {
       "id": "mini-0.8-pcb0.8.1",
-      "filename": "mini-0.8-pcb0.8.1.4cd1b16a9ade4d387ab64d2ea870433024235cdd39392bcf1876eaa656e3742d.json",
-      "sha256": "4cd1b16a9ade4d387ab64d2ea870433024235cdd39392bcf1876eaa656e3742d",
+      "filename": "mini-0.8-pcb0.8.1.3374a0c9db404de5373cd5941042e2c8a5fe13459e84c472332eb505d57247ab.json",
+      "sha256": "3374a0c9db404de5373cd5941042e2c8a5fe13459e84c472332eb505d57247ab",
       "portMap": "mini-0.8-pcb0.8.1.6456b8732cbb59fc4c0d75d9eb60bfcb487f0c6434ce4ffd6bb6d28135e2258a.portmap.cbor",
       "portMapSha256": "6456b8732cbb59fc4c0d75d9eb60bfcb487f0c6434ce4ffd6bb6d28135e2258a",
       "portMapBytes": 120
     },
     {
       "id": "weather-0.3-pcb0.3.0",
-      "filename": "weather-0.3-pcb0.3.0.2d8d8d4223dee5ce5f4aff6c3390273c48f224d7e1075002450df1903a80f413.json",
-      "sha256": "2d8d8d4223dee5ce5f4aff6c3390273c48f224d7e1075002450df1903a80f413",
+      "filename": "weather-0.3-pcb0.3.0.4241d3bfb84ef93a15ed8a0353e4eed24623ba5a894003ca608e5e896bdd0963.json",
+      "sha256": "4241d3bfb84ef93a15ed8a0353e4eed24623ba5a894003ca608e5e896bdd0963",
       "portMap": "weather-0.3-pcb0.3.0.620e65c20aacf7113dbbf8e2e4ec290984979ab9966eea7d86673f7ac6d62277.portmap.cbor",
       "portMapSha256": "620e65c20aacf7113dbbf8e2e4ec290984979ab9966eea7d86673f7ac6d62277",
       "portMapBytes": 110
     },
     {
       "id": "mini-0.9-pcb0.9.0",
-      "filename": "mini-0.9-pcb0.9.0.1bc0a33aecd279268a80bc4ac227b5f718576f595133f70164e73ed122db527f.json",
-      "sha256": "1bc0a33aecd279268a80bc4ac227b5f718576f595133f70164e73ed122db527f",
+      "filename": "mini-0.9-pcb0.9.0.b9064c105a63a95e5ab56a90a3318c843ecaea2932b61a1e0099f03e4644385a.json",
+      "sha256": "b9064c105a63a95e5ab56a90a3318c843ecaea2932b61a1e0099f03e4644385a",
       "portMap": "mini-0.9-pcb0.9.0.67ec5da85b34040190ca7fbb7509e9405e6259d97f221f6524a0bff415e5846b.portmap.cbor",
       "portMapSha256": "67ec5da85b34040190ca7fbb7509e9405e6259d97f221f6524a0bff415e5846b",
       "portMapBytes": 120
     },
     {
       "id": "mini-0.10-pcb0.10.0",
-      "filename": "mini-0.10-pcb0.10.0.11f656b75a386a12c4e8889d64ed59902f2e5f54f59a8e28d8670b3318f05772.json",
-      "sha256": "11f656b75a386a12c4e8889d64ed59902f2e5f54f59a8e28d8670b3318f05772",
+      "filename": "mini-0.10-pcb0.10.0.0a07e3d20be5b80e5a582d3bc387a3015db1ec36d23ca08ba3469a039c1d8365.json",
+      "sha256": "0a07e3d20be5b80e5a582d3bc387a3015db1ec36d23ca08ba3469a039c1d8365",
       "portMap": "mini-0.10-pcb0.10.0.ff157c28e16d2ab1ff8f608088e6dbc0d3f0172f4034ec42775cb1d6a3a7bc8b.portmap.cbor",
       "portMapSha256": "ff157c28e16d2ab1ff8f608088e6dbc0d3f0172f4034ec42775cb1d6a3a7bc8b",
       "portMapBytes": 120
     },
     {
       "id": "weather-0.4-pcb0.4",
-      "filename": "weather-0.4-pcb0.4.7bcb6e992a9d3ccb68d2696cf12750040e7567df5fb8563bdf8e2825df3656ba.json",
-      "sha256": "7bcb6e992a9d3ccb68d2696cf12750040e7567df5fb8563bdf8e2825df3656ba",
+      "filename": "weather-0.4-pcb0.4.50c8f851cef06bcb11b4abf7881ef5205613ec84dad21504e4c7ee5a6720e79f.json",
+      "sha256": "50c8f851cef06bcb11b4abf7881ef5205613ec84dad21504e4c7ee5a6720e79f",
       "portMap": "weather-0.4-pcb0.4.105f821aed1f033b6f0b59262e34ed8e02a062dca6ba1d8acd62d1d5399627d1.portmap.cbor",
       "portMapSha256": "105f821aed1f033b6f0b59262e34ed8e02a062dca6ba1d8acd62d1d5399627d1",
       "portMapBytes": 110

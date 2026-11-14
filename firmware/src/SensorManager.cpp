@@ -194,6 +194,7 @@ bool SensorManager::runtimeInfo(size_t index, SensorRuntimeInfo& info) const {
     info.supportsAtmosphericPressure = entry.sensor->supports(MeasurementType::AtmosphericPressure);
     info.supportsSolarIrradiance = entry.sensor->supports(MeasurementType::SolarIrradiance);
     info.supportsSolarCellTemperature = entry.sensor->supports(MeasurementType::SolarCellTemperature);
+    info.supportsElectricCurrent = entry.sensor->supports(MeasurementType::ElectricCurrent);
     info.supportsRainDetectorFrequency = entry.sensor->supports(MeasurementType::RainDetectorFrequency);
     info.supportsRainDetectorLevel = entry.sensor->supports(MeasurementType::RainDetectorLevel);
     info.supportsRainDetectorWet = entry.sensor->supports(MeasurementType::RainDetectorWet);

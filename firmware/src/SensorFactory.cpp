@@ -1,3 +1,4 @@
+#include "BoardProfile.h"
 #include "SensorFactory.h"
 
 #include <new>
@@ -102,6 +103,14 @@ ISensor* SensorFactory::create(
                 monotonicClock_,
                 logger_);
             break;
+        case SensorImplementation::SCT013: {
+            if (!slot.implementationConfiguration.sct013.valid() ||
+                !supportsSctPort(slot.hardware.gpio.number)) {
+                result = SensorFactoryResult::InvalidResource; return nullptr;
+            }
+            sensor = &(new (target) SctInstance(slot,monotonicClock_))->sensor;
+            break;
+        }
         case SensorImplementation::RainDetector: {
             auto* instance = new (target) RainDetectorInstance(slot.slotId, slot.hardware.gpio.number, monotonicClock_);
             sensor = &instance->sensor;
@@ -158,6 +167,9 @@ void SensorFactory::destroy(size_t storageIndex) {
             break;
         case SensorImplementation::AM2302:
             static_cast<AM2302Sensor*>(target)->~AM2302Sensor();
+            break;
+        case SensorImplementation::SCT013:
+            static_cast<SctInstance*>(target)->~SctInstance();
             break;
         case SensorImplementation::RainDetector:
             static_cast<RainDetectorInstance*>(target)->~RainDetectorInstance();

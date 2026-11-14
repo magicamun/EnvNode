@@ -5,6 +5,8 @@
 #include <esp_adc_cal.h>
 #include "RmsWindow.h"
 #include "RawDiagnostics.h"
+#include "LowPass.h"
+#include "CurrentGate.h"
 
 namespace {
 constexpr uint32_t samplePeriodUs = 500; // 2 ksample/s
@@ -15,6 +17,9 @@ Preferences preferences;
 esp_adc_cal_characteristics_t adcCalibration;
 float ratedVolts = 0.333f;
 float correction = 1.0f;
+uint16_t filterHz = 0; // Session-only experimental diagnostic; default off.
+CurrentGate gate;
+bool gateEnabled = false;
 bool diagnostics = false;
 bool paused = false;
 uint32_t dumpCount = 0;
@@ -46,11 +51,16 @@ public:
 GpioSampler hardware;
 
 void settings() {
+    Serial.printf("# gate=%s; off_mA=%d; on_mA=%d\n", gateEnabled ? "on" : "off", gate.offMa, gate.onMa);
+    Serial.printf("# filter_hz=%u; compare_skip=200; filter setting is session-only\n", filterHz);
     Serial.printf("# Mini port=%s; GPIO%u; sensor=5A/%.3fV; divider=0.5; calibration=%.5f; A/V=%.5f\n",
                   hardware.pin == 35 ? "ADC2" : "ADC1", hardware.pin, ratedVolts, correction, ratedAmps / (ratedVolts * dividerGain) * correction);
 }
 void help() {
     Serial.println("# Commands (Enter): sensor 333 | sensor 1000 | cal <factor> | port adc1 | port adc2 | pin 34 | pin 35 | status | help");
+    Serial.println("# Gate: gate <off_mA> <on_mA> (example: gate 60 80) | gate off; enable filter first.");
+    Serial.println("# Filter: filter off | filter 100 | filter 200 | filter 300 | filter 500");
+    Serial.println("# FILTER compares raw/filtered RMS over the SAME last 1800 samples; original CSV and dumps stay raw.");
     Serial.println("# Diagnostics: diag on | diag off | dump | dump full | pause | resume");
     Serial.println("# Dump captures the next window, prints 200 or all 2000 samples, then pauses.");
     Serial.println("# Pin, sensor and calibration saved in NVS. Sensor change resets calibration to 1.");
@@ -61,12 +71,14 @@ void command(const String &s) {
     if (s == "sensor 333" || s == "sensor 1000") {
         ratedVolts = s == "sensor 333" ? 0.333f : 1.0f;
         correction = 1;
+        gateEnabled = false; gate.active = false;
         preferences.putFloat("ratedV", ratedVolts);
         preferences.putFloat("correction", correction);
         settings();
     } else if (s == "pin 34" || s == "pin 35" || s == "port adc1" || s == "port adc2") {
         if (hardware.select((s == "pin 35" || s == "port adc2") ? 35 : 34)) {
             preferences.putUChar("adcPin", hardware.pin);
+        gateEnabled = false; gate.active = false;
             settings();
         } else Serial.println("# ADC pin configuration failed; selection unchanged.");
     } else if (s.startsWith("cal ")) {
@@ -77,9 +89,36 @@ void command(const String &s) {
             Serial.println("# Invalid calibration; use factor 0.1..10, decimal point.");
         } else {
             correction = value;
+        gateEnabled = false; gate.active = false;
             preferences.putFloat("correction", correction);
             settings();
         }
+    } else if (s == "gate off") {
+        gateEnabled = false;
+        gate.active = false;
+        settings();
+    } else if (s.startsWith("gate ")) {
+        const char *arg = s.c_str() + 5;
+        char *end;
+        long low = strtol(arg, &end, 10);
+        if (end == arg || *end != ' ') { Serial.println("# Use gate <off_mA> <on_mA>."); return; }
+        const char *second = end + 1;
+        long high = strtol(second, &end, 10);
+        if (end == second || *end || low < 1 || high <= low || high > 5000) {
+            Serial.println("# Require 1 <= off_mA < on_mA <= 5000."); return;
+        }
+        if (!filterHz) { Serial.println("# Enable filter first."); return; }
+        gate.offMa = low; gate.onMa = high; gate.active = false; gateEnabled = true;
+        settings();
+    } else if (s.startsWith("filter ")) {
+        if (s == "filter off") filterHz = 0;
+        else if (s == "filter 100") filterHz = 100;
+        else if (s == "filter 200") filterHz = 200;
+        else if (s == "filter 300") filterHz = 300;
+        else if (s == "filter 500") filterHz = 500;
+        else { Serial.println("# Invalid filter: off, 100, 200, 300 or 500 Hz."); return; }
+        gateEnabled = false; gate.active = false;
+        settings();
     } else if (s == "diag on" || s == "diag off") {
         diagnostics = s == "diag on";
         Serial.printf("# Diagnostics %s\n", diagnostics ? "on" : "off");
@@ -139,6 +178,32 @@ void measure(AnalogSampler &sampler) {
                   static_cast<unsigned long>(millis()), window.mean, window.acRmsMv(), amps,
                   window.minimum, window.maximum, static_cast<unsigned long>(window.count),
                   static_cast<unsigned long>(late), flags.c_str());
+    if (filterHz) {
+        // Post-process captured values: no extra work or serial output during sampling.
+        LowPass filter(filterHz, 1000000.0 / samplePeriodUs);
+        RmsWindow rawComparison, filteredComparison;
+        for (uint32_t i = 0; i < samplesPerWindow; ++i) {
+            const double centered = mvSamples[i] - window.mean;
+            const double filtered = filter.add(centered);
+            if (i >= 200) {
+                rawComparison.add(centered);
+                filteredComparison.add(filtered);
+            }
+        }
+        const double scale = ratedAmps / (ratedVolts * dividerGain) * correction / 1000;
+        Serial.printf("# FILTER hz=%u,raw_rms_mV=%.3f,filtered_rms_mV=%.3f,raw_A=%.5f,filtered_A=%.5f,samples=%lu,skip=200,flags=%s\n",
+                      filterHz, rawComparison.acRmsMv(), filteredComparison.acRmsMv(),
+                      rawComparison.acRmsMv()*scale, filteredComparison.acRmsMv()*scale,
+                      (unsigned long)filteredComparison.count, flags.c_str());
+        if (gateEnabled) {
+            if (flags == "OK") {
+                const double output = gate.apply(filteredComparison.acRmsMv() * scale);
+                Serial.printf("# GATE output_A=%.5f,state=%s\n", output, gate.active ? "on" : "zero");
+            } else {
+                Serial.printf("# GATE output_A=NA,flags=%s\n", flags.c_str());
+            }
+        }
+    }
     if (diagnostics || dumpCount) {
         rawDiagnostics.calculate(rawSamples, mvSamples, window.mean);
         const auto &r = rawDiagnostics;
@@ -170,6 +235,7 @@ void setup() {
     if (fabsf(ratedVolts - 0.333f) > 0.0001f && fabsf(ratedVolts - 1.0f) > 0.0001f) ratedVolts = 0.333f;
     correction = preferences.getFloat("correction", 1.0f);
     if (!isfinite(correction) || correction < 0.1f || correction > 10) correction = 1;
+        gateEnabled = false; gate.active = false;
     adc1_config_width(ADC_WIDTH_BIT_12);
     uint8_t savedPin = preferences.getUChar("adcPin", 35);
     if (savedPin != 34 && savedPin != 35) savedPin = 35;

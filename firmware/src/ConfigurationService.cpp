@@ -318,6 +318,7 @@ void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
             ? I2CBus::I2C1 : I2CBus::I2C0;
         if (loaded[index].implementation == SensorImplementation::AM2302
             || loaded[index].implementation == SensorImplementation::RainGauge
+            || loaded[index].implementation == SensorImplementation::SCT013
             || loaded[index].implementation == SensorImplementation::RainDetector) {
             loaded[index].hardware = HardwareResourceAssignment::gpioResource(GpioResource(gpio));
         } else if (loaded[index].implementation == SensorImplementation::BME280
@@ -335,6 +336,15 @@ void ConfigurationService::loadSensorSlots(bool checkOccupancy) {
             I2CResource(i2cBus, i2cAddress));
         loaded[index].implementationConfiguration.shtc3 = SHTC3Configuration(
             I2CResource(i2cBus, i2cAddress));
+        if (loaded[index].implementation == SensorImplementation::SCT013) {
+            auto& c = loaded[index].implementationConfiguration.sct013;
+            c.ratedA = storage_.preferences().getFloat(sensorKey(expectedId, "ratedA").c_str(), c.ratedA);
+            c.ratedMv = storage_.preferences().getUInt(sensorKey(expectedId, "ratedMv").c_str(), c.ratedMv);
+            c.cal = storage_.preferences().getFloat(sensorKey(expectedId, "cal").c_str(), c.cal);
+            c.filterHz = storage_.preferences().getUInt(sensorKey(expectedId, "filterHz").c_str(), c.filterHz);
+            c.offMa = storage_.preferences().getUInt(sensorKey(expectedId, "offMa").c_str(), c.offMa);
+            c.onMa = storage_.preferences().getUInt(sensorKey(expectedId, "onMa").c_str(), c.onMa);
+        }
         loaded[index].implementationConfiguration.rainGauge = RainGaugeConfiguration(
             GpioResource(gpio),
             storage_.preferences().getFloat(sensorKey(expectedId, "rgmm").c_str(), 0.2794F),
@@ -739,6 +749,9 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
         return slot.hardware.kind == HardwareResourceKind::GPIO
             && slot.implementationConfiguration.am2302.gpio.number == slot.hardware.gpio.number;
     }
+    if (slot.implementation == SensorImplementation::SCT013)
+        return slot.implementationConfiguration.sct013.valid() && slot.schedule.acquisitionMode == AcquisitionMode::Periodic
+            && supportsSctPort(slot.hardware.gpio.number);
     if (slot.implementation == SensorImplementation::RainDetector) {
         return slot.hardware.kind == HardwareResourceKind::GPIO;
     }
@@ -773,7 +786,12 @@ bool ConfigurationService::validateSensorSlot(const SensorSlotConfiguration& slo
 }
 
 bool ConfigurationService::validateSensorSlots(const SensorSlotConfiguration* slots) const {
+    bool adcDmaClaimed = false;
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
+        if (slots[index].enabled && slots[index].implementation == SensorImplementation::SCT013) {
+            if (adcDmaClaimed) return false;
+            adcDmaClaimed = true;
+        }
         if (slots[index].slotId != index + 1 || !validateSensorSlot(slots[index])) return false;
     }
     return true;
@@ -1017,6 +1035,15 @@ bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot
     const SensorImplementationMetadata* metadata = SensorImplementationRegistry::find(slot.implementation);
     if (metadata == nullptr) return false;
     const SensorId id = slot.slotId;
+    if (slot.implementation == SensorImplementation::SCT013) {
+        const auto& c = slot.implementationConfiguration.sct013;
+        if (!(persistFloat(sensorKey(id, "ratedA").c_str(), c.ratedA)
+              && persistUInt(sensorKey(id, "ratedMv").c_str(), c.ratedMv)
+              && persistFloat(sensorKey(id, "cal").c_str(), c.cal)
+              && persistUInt(sensorKey(id, "filterHz").c_str(), c.filterHz)
+              && persistUInt(sensorKey(id, "offMa").c_str(), c.offMa)
+              && persistUInt(sensorKey(id, "onMa").c_str(), c.onMa))) return false;
+    }
     return persistUInt(sensorKey(id, "id").c_str(), id)
         && persistUInt(sensorKey(id, "en").c_str(), slot.enabled ? 1 : 0)
         && persistUInt(sensorKey(id,"diag").c_str(),slot.extendedDiagnostics ? 1 : 0)

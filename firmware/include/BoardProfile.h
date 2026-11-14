@@ -37,6 +37,8 @@ struct BoardProfile {
 bool boardPortMapRuntimeSupported(const BoardPortMap&, DescriptorSemanticVersion);
 bool selectCurrentBoardPortMap(const BoardPortMap&);
 const BoardProfile& currentBoardProfile();
+// ADC3/4 are selectable only on profiles that identify those physical ports.
+bool supportsSctPort(uint8_t pin);
 const BoardProfile* boardProfile(BoardProfileId id);
 const BoardProfile* boardProfile(BoardProfileId id, BoardRevision revision);
 size_t boardProfileCount();

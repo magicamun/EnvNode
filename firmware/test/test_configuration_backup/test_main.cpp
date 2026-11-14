@@ -459,6 +459,16 @@ void test_solar_and_rain_sensor_ids_coexist_in_backup_and_persistence() {
     rain.hardware=HardwareResourceAssignment::gpioResource(GpioResource(17));
     rain.schedule=SensorSchedule::periodic(5000);
     TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(rain));
+    auto ct=service.getConfiguration().sensorSlots[13];
+    ct.enabled=true;ct.name="SCT";ct.implementation=SensorImplementation::SCT013;
+    ct.hardware=HardwareResourceAssignment::gpioResource(GpioResource(35));ct.schedule=SensorSchedule::periodic(5000);
+    auto& params=ct.implementationConfiguration.sct013;
+    params.cal=1.48F;params.offMa=90;params.onMa=120;
+    TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(ct));
+    auto second=ct;second.slotId=13;second.hardware=HardwareResourceAssignment::gpioResource(GpioResource(34));
+    TEST_ASSERT_FALSE(service.setSensorSlotConfiguration(second));
+    second.enabled=false;second.schedule.enabled=false;
+    TEST_ASSERT_TRUE(service.setSensorSlotConfiguration(second));
     ConfigurationService rebooted;rebooted.loadConfiguration();
     TEST_ASSERT_TRUE(rebooted.getConfiguration().sensorSlots[15].implementation==SensorImplementation::SolarPosition);
     TEST_ASSERT_TRUE(rebooted.getConfiguration().sensorSlots[14].implementation==SensorImplementation::RainDetector);
@@ -466,6 +476,9 @@ void test_solar_and_rain_sensor_ids_coexist_in_backup_and_persistence() {
     TEST_ASSERT_TRUE(encodeConfigurationBackup(rebooted.getConfiguration(),false,"",backup));
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,service.getConfiguration(),decoded,passwords));
     TEST_ASSERT_TRUE(service.validateRestore(decoded));
+    TEST_ASSERT_TRUE(rebooted.getConfiguration().sensorSlots[13].implementationConfiguration.sct013==params);
+    TEST_ASSERT_TRUE(decoded.sensorSlots[13].implementationConfiguration.sct013==params);
+    TEST_ASSERT_EQUAL_UINT8(35,decoded.sensorSlots[13].hardware.gpio.number);
     TEST_ASSERT_TRUE(decoded.sensorSlots[15].implementation==SensorImplementation::SolarPosition);
     TEST_ASSERT_TRUE(decoded.sensorSlots[14].implementation==SensorImplementation::RainDetector);
 }

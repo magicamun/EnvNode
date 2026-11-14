@@ -38,10 +38,10 @@ const BoardGpioCapability Hardware1Gpios[] = {
     {GpioResource(23), "GPIO23", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
     {GpioResource(32), "GPIO32", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
     {GpioResource(33), "GPIO33", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
-    {GpioResource(34), "GPIO34", GpioCapability::AnalogInput},
-    {GpioResource(35), "GPIO35", GpioCapability::AnalogInput},
-    {GpioResource(36), "GPIO36", GpioCapability::AnalogInput},
-    {GpioResource(39), "GPIO39", GpioCapability::AnalogInput},
+    {GpioResource(34), "ADC1", GpioCapability::AnalogInput},
+    {GpioResource(35), "ADC2", GpioCapability::AnalogInput},
+    {GpioResource(36), "ADC3", GpioCapability::AnalogInput},
+    {GpioResource(39), "ADC4", GpioCapability::AnalogInput},
 };
 const BoardI2CBusCapability Hardware1Buses[] = {
     {I2CBus::I2C0, GpioResource(21), GpioResource(22)},
@@ -65,8 +65,8 @@ const BoardGpioCapability Hardware2Gpios[] = {
     {GpioResource(27), "GPIO27", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup},
     {GpioResource(32), "GPIO32", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
     {GpioResource(33), "GPIO33", GpioCapability::DigitalInput | GpioCapability::DigitalOutput | GpioCapability::Interrupt | GpioCapability::InternalPullup | GpioCapability::AnalogInput},
-    {GpioResource(34), "GPIO34", GpioCapability::AnalogInput},
-    {GpioResource(35), "GPIO35", GpioCapability::AnalogInput},
+    {GpioResource(34), "ADC1", GpioCapability::AnalogInput},
+    {GpioResource(35), "ADC2", GpioCapability::AnalogInput},
     {GpioResource(36), "GPIO36", GpioCapability::AnalogInput},
     {GpioResource(39), "GPIO39", GpioCapability::AnalogInput},
 };

@@ -146,14 +146,14 @@
       },
       {
         "gpio": 34,
-        "name": "GPIO34",
+        "name": "ADC1",
         "capabilities": [
           "GpioCapability::AnalogInput"
         ]
       },
       {
         "gpio": 35,
-        "name": "GPIO35",
+        "name": "ADC2",
         "capabilities": [
           "GpioCapability::AnalogInput"
         ]

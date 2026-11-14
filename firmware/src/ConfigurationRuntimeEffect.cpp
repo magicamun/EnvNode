@@ -25,6 +25,7 @@ bool sameSensor(const SensorSlotConfiguration& a,const SensorSlotConfiguration& 
         || a.schedule.sampleIntervalMs!=b.schedule.sampleIntervalMs || !sameHardware(a.hardware,b.hardware))return false;
     const auto& x=a.implementationConfiguration;const auto& y=b.implementationConfiguration;
     switch(a.implementation) {
+        case SensorImplementation::SCT013: return x.sct013 == y.sct013;
         case SensorImplementation::RainGauge:return x.rainGauge.gpio.number==y.rainGauge.gpio.number
             && x.rainGauge.millimetersPerTip==y.rainGauge.millimetersPerTip && x.rainGauge.debounceMs==y.rainGauge.debounceMs;
         case SensorImplementation::AM2302:return x.am2302.gpio.number==y.am2302.gpio.number;

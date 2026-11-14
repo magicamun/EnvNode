@@ -348,6 +348,15 @@ void configurationFields(Fields& f, Configuration& c, bool passwords, const Stri
         f.number(p + ".bme280.bus", a.bme280.i2c.bus, 1); f.number(p + ".bme280.address", a.bme280.i2c.address, 127);
         f.number(p + ".sht4x.bus", a.sht4x.i2c.bus, 1); f.number(p + ".sht4x.address", a.sht4x.i2c.address, 127);
         f.number(p + ".shtc3.bus", a.shtc3.i2c.bus, 1); f.number(p + ".shtc3.address", a.shtc3.i2c.address, 127);
+        if (s.implementation == SensorImplementation::SCT013) {
+            auto& ct = a.sct013;
+            f.floating(p + ".ct.ratedA", ct.ratedA);
+            f.floating(p + ".ct.cal", ct.cal);
+            f.number(p + ".ct.ratedMv", ct.ratedMv, UINT32_MAX);
+            f.number(p + ".ct.filterHz", ct.filterHz, UINT32_MAX);
+            f.number(p + ".ct.offMa", ct.offMa, UINT32_MAX);
+            f.number(p + ".ct.onMa", ct.onMa, UINT32_MAX);
+        }
         f.number(p + ".rain.gpio", a.rainGauge.gpio.number, 255);
         f.floating(p + ".rain.mmPerTip", a.rainGauge.millimetersPerTip);
         f.number(p + ".rain.debounceMs", a.rainGauge.debounceMs, UINT32_MAX);

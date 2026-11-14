@@ -22,6 +22,7 @@ enum class PresentationUnit : uint8_t {
     Degree = 14,
     Hertz = 15,
     Kilohertz = 16,
+    Ampere = 17,
 };
 
 } // namespace EnvNode

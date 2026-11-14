@@ -28,7 +28,7 @@ Die Liste folgt der Sensorregistry im dokumentierten Firmwarestand.
   Frequenzauswertung und Heizung; in der gemeinsamen Firmware integriert,
   Kalibrierung und Eignung des Aufbaus für den Einsatz prüfen.
 - [SCT013 und SCT013Head](sct013/index.md): Stromwandler mit Spannungsaufbereitung;
-  Entwicklungsstand ohne integrierten Firmware-Treiber. Die
+  Effektivstrom in Ampere über einen analogen GPIO. Die
   [Aufbauanleitung Rev. 0.1](sct013-head/assembly.md) beschreibt Bestückung und
   Erstprüfung, auch ohne Klinkenbuchse und Sensor.
 - [AnalogHydroPressure](../modules/analog-hydro-pressure/index.md): Modul für eine

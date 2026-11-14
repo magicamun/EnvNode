@@ -60,8 +60,7 @@ vergleichen: Ein eingerichteter Sensor muss auch aktuelle, gültige Messungen li
 | Gespeichert, aber keine Änderung | Ausstehende Änderungen angewendet? |
 | Lokal Werte, extern keine | MQTT-Verbindung und Topics |
 
-RainDetector ist kein Rain-Gauge-Treiber. SCT013 und ADS1115 sind im aktuellen
-Sensorregistry nicht als fertige Auswahl enthalten.
+RainDetector ist kein Rain-Gauge-Treiber. Der [SCT013](../sensors/sct013/index.md) liefert Effektivstrom in Ampere; ADS1115 ist weiterhin nicht als eigener Sensor auswählbar.
 
 [Durchgehendes SHT4x-Beispiel](example-measurement.md)
 

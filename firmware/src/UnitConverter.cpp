@@ -62,6 +62,7 @@ bool UnitConverter::convert(
         case PresentationUnit::WattPerSquareMetre:
         case PresentationUnit::Ratio:
         case PresentationUnit::Metre:
+        case PresentationUnit::Ampere:
         case PresentationUnit::Hertz:
             presentationValue = canonicalValue;
             return true;
@@ -77,6 +78,7 @@ const char* UnitConverter::symbol(PresentationUnit unit) {
         case PresentationUnit::Degree: return "\xC2\xB0";
 
         case PresentationUnit::Kilohertz: return "kHz";
+        case PresentationUnit::Ampere: return "A";
         case PresentationUnit::Hertz: return "Hz";
         case PresentationUnit::DegreeCelsius: return "\xC2\xB0" "C";
         case PresentationUnit::DegreeFahrenheit: return "\xC2\xB0" "F";
@@ -101,6 +103,7 @@ const char* UnitConverter::displayName(PresentationUnit unit) {
         case PresentationUnit::Degree: return "Degree";
 
         case PresentationUnit::Kilohertz: return "Kilohertz";
+        case PresentationUnit::Ampere: return "Ampere";
         case PresentationUnit::Hertz: return "Hertz";
         case PresentationUnit::DegreeCelsius: return "Celsius";
         case PresentationUnit::DegreeFahrenheit: return "Fahrenheit";
@@ -125,6 +128,7 @@ const char* UnitConverter::stableKey(PresentationUnit unit) {
         case PresentationUnit::Degree: return "degree";
 
         case PresentationUnit::Kilohertz: return "kilohertz";
+        case PresentationUnit::Ampere: return "ampere";
         case PresentationUnit::Hertz: return "hertz";
         case PresentationUnit::None: return "none";
         case PresentationUnit::DegreeCelsius: return "degree_celsius";
@@ -148,7 +152,7 @@ bool UnitConverter::parseStableKey(const char* key, PresentationUnit& unit) {
         return false;
     }
     for (uint8_t value = static_cast<uint8_t>(PresentationUnit::None);
-         value <= static_cast<uint8_t>(PresentationUnit::Kilohertz);
+         value <= static_cast<uint8_t>(PresentationUnit::Ampere);
          ++value) {
         const PresentationUnit candidate = static_cast<PresentationUnit>(value);
         const char* candidateKey = stableKey(candidate);

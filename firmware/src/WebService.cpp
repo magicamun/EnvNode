@@ -231,6 +231,7 @@ String measurementTypes(const SensorRuntimeInfo& info, Locale locale) {
     appendType(info.supportsSeaLevelPressure, MeasurementType::SeaLevelPressure);
     appendType(info.supportsSolarIrradiance, MeasurementType::SolarIrradiance);
     appendType(info.supportsSolarCellTemperature, MeasurementType::SolarCellTemperature);
+    appendType(info.supportsElectricCurrent, MeasurementType::ElectricCurrent);
     appendType(info.supportsRainDetectorFrequency, MeasurementType::RainDetectorFrequency);
     appendType(info.supportsRainDetectorLevel, MeasurementType::RainDetectorLevel);
     appendType(info.supportsRainDetectorWet, MeasurementType::RainDetectorWet);
@@ -242,9 +243,14 @@ String measurementTypes(const SensorRuntimeInfo& info, Locale locale) {
     return result;
 }
 
+String sensorPortLabel(uint8_t pin) {
+    const auto* g=BoardCapabilities::current().gpio(GpioResource(pin));
+    return g ? String(g->displayName) : "GPIO" + String(pin);
+}
+
 String hardwareAssignment(const SensorRuntimeInfo& info, Locale locale) {
     if (info.hardware.kind == HardwareResourceKind::GPIO) {
-        return "GPIO" + String(info.hardware.gpio.number);
+        return sensorPortLabel(info.hardware.gpio.number);
     }
     if (info.hardware.kind == HardwareResourceKind::I2C) {
         return String(i2cBusName(info.hardware.i2c.bus)) + " / 0x"
@@ -344,6 +350,7 @@ bool runtimeSupportsMeasurement(const SensorRuntimeInfo& info, MeasurementType t
         case MeasurementType::AtmosphericPressure: return info.supportsAtmosphericPressure;
         case MeasurementType::SolarIrradiance: return info.supportsSolarIrradiance;
         case MeasurementType::SolarCellTemperature: return info.supportsSolarCellTemperature;
+        case MeasurementType::ElectricCurrent: return info.supportsElectricCurrent;
         case MeasurementType::RainDetectorFrequency: return info.supportsRainDetectorFrequency;
         case MeasurementType::RainDetectorLevel: return info.supportsRainDetectorLevel;
         case MeasurementType::RainDetectorWet: return info.supportsRainDetectorWet;
@@ -898,7 +905,7 @@ void WebService::handleSensors() {
         c += "<tr><td class='sensor-technical'>" + String(slot.slotId) + "</td><td>" + escapeHtml(slot.name) + "</td><td>";
         c += slot.enabled ? badge(uiText(TextId::Enabled), "good") : badge(uiText(TextId::Disabled), "warn");
         c += "<br>" + escapeHtml(metadata == nullptr ? uiText(TextId::Invalid) : webSensorImplementationName(configurationService_.getLocale(), metadata->implementation));
-        c += "</td><td class='sensor-technical'>" + configuredHardwareAssignment(slot.hardware, configurationService_.getLocale()) + "</td><td class='sensor-technical'>";
+        c += "</td><td class='sensor-technical'>" + (slot.hardware.kind==HardwareResourceKind::GPIO ? sensorPortLabel(slot.hardware.gpio.number) : configuredHardwareAssignment(slot.hardware,configurationService_.getLocale())) + "</td><td class='sensor-technical'>";
         c += slot.schedule.acquisitionMode == AcquisitionMode::Periodic
             ? String(slot.schedule.sampleIntervalMs) + " ms" : uiText(TextId::EventOnly);
         c += "</td><td>";
@@ -1580,6 +1587,7 @@ void WebService::handleSensorEdit() {
             continue;
         }
         gpioOptions += "<option value='" + String(gpio->resource.number)
+            + "' data-sct='" + (supportsSctPort(gpio->resource.number) ? "1" : "0")
             + "' data-capabilities='"
             + String(static_cast<unsigned>(gpio->capabilities)) + "'";
         if (slot.hardware.kind == HardwareResourceKind::GPIO
@@ -1601,8 +1609,21 @@ void WebService::handleSensorEdit() {
     c += renderExtendedDiagnosticsCheckbox(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),configurationService_.getLocale());
     c += (String("<label>") + uiText(TextId::Name) + "<input name='name' maxlength='") + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += (String("<label>") + uiText(TextId::Implementation) + "<select id='sensorImplementation' name='implementation'>") + options + "</select></label>";
-    c += "<div id='gpioConfiguration'><label>GPIO<select name='gpio'>" + gpioOptions + (String("</select></label><p class='help'>") + uiText(TextId::AM2302UsesACustomSingleWireProtocolRain) + "</p></div>");
+    c += "<div id='gpioConfiguration'><label><span id='sensorPortKind'>GPIO</span><select name='gpio'>" + gpioOptions + (String("</select></label><p class='help'>") + uiText(TextId::AM2302UsesACustomSingleWireProtocolRain) + "</p></div>");
     c += (String("<div id='i2cConfiguration'><label>") + uiText(TextId::Bus) + "<select name='i2cBus'>") + i2cBusOptions + (String("</select></label><label>") + uiText(TextId::ICAddress) + "<select id='i2cAddress' name='i2cAddress'><option value='68'") + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x44 ? " selected" : "") + ">0x44</option><option value='112'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x70 ? " selected" : "") + ">0x70</option><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label></div>";
+    const auto& ct = slot.implementationConfiguration.sct013;
+    c += "<fieldset id='ctFields'><legend>SCT013</legend>";
+    auto field = [&](const char* name, const char* label, String value, const char* step) {
+        c += String("<label>") + label + "<input type='number' name='" + name +
+            "' step='" + step + "' value='" + value + "'></label>";
+    };
+    field("ratedA", uiText(TextId::SctRatedCurrent), String(ct.ratedA,3), "any");
+    field("ratedMv", uiText(TextId::SctRatedVoltage), String(ct.ratedMv), "1");
+    field("cal", uiText(TextId::SctCalibration), String(ct.cal,5), "any");
+    field("filterHz", uiText(TextId::SctFilter), String(ct.filterHz), "1");
+    field("offMa", uiText(TextId::SctGateOff), String(ct.offMa), "1");
+    field("onMa", uiText(TextId::SctGateOn), String(ct.onMa), "1");
+    c += String("<small>") + uiText(TextId::SctGateHint) + "</small></fieldset>";
     c += (String("<div id='rainGaugeConfiguration'><label>") + uiText(TextId::MillimetresPerTip) + "<input type='number' name='millimetersPerTip' min='0.0001' max='100' step='0.0001' value='") + String(slot.implementationConfiguration.rainGauge.millimetersPerTip, 4) + (String("'></label><label>") + uiText(TextId::DebounceTimeMs) + "<input type='number' name='debounceMs' min='1' max='5000' value='") + String(slot.implementationConfiguration.rainGauge.debounceMs) + "'></label></div>";
     c += (String("<label>") + uiText(TextId::SampleIntervalMs) + "<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='") + String(slot.schedule.sampleIntervalMs) + "'></label>";
     c += String("<p id='rainIntervalHelp' class='help'>") + uiText(TextId::RainIntervalHelp) + "</p>";
@@ -1612,7 +1633,7 @@ void WebService::handleSensorEdit() {
         + uiText(TextId::Interface) + "</span><span id='sensorMetadataInterface'></span><span>"
         + uiText(TextId::Provenance) + "</span><span id='sensorMetadataProvenance'></span><span>"
         + uiText(TextId::Measurements) + "</span><span id='sensorMetadataMeasurements'></span></div></section>";
-    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('sensorMetadataType').textContent=o.textContent;document.getElementById('sensorMetadataInterface').textContent=o.dataset.interface+' / '+o.dataset.description;document.getElementById('sensorMetadataProvenance').textContent=o.dataset.provenance;document.getElementById('sensorMetadataMeasurements').textContent=o.dataset.measurements;document.getElementById('rainIntervalHelp').style.display=o.dataset.kind==='rain_detector'?'block':'none';document.getElementById('gpioConfiguration').style.display=o.dataset.interface==='GPIO'?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r;if(reset&&o.dataset.interface==='GPIO'&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='shtc3'?x.value!=='112':o.dataset.kind==='bme280'?(x.value!=='118'&&x.value!=='119'):false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='shtc3')a.value='112';if(reset&&o.dataset.kind==='bme280'&&(a.value==='68'||a.value==='112'))a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
+    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('sensorMetadataType').textContent=o.textContent;document.getElementById('sensorMetadataInterface').textContent=o.dataset.interface+' / '+o.dataset.description;document.getElementById('sensorMetadataProvenance').textContent=o.dataset.provenance;document.getElementById('sensorMetadataMeasurements').textContent=o.dataset.measurements;document.getElementById('rainIntervalHelp').style.display=o.dataset.kind==='rain_detector'?'block':'none';const ct=o.dataset.kind==='sct013';document.getElementById('sensorPortKind').textContent=ct?'ADC-Port':'GPIO';const fields=document.getElementById('ctFields');fields.hidden=!ct;fields.disabled=!ct;document.getElementById('gpioConfiguration').style.display=(ct||o.dataset.interface==='GPIO')?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r||(ct&&x.dataset.sct!=='1');if(reset&&(ct||o.dataset.interface==='GPIO')&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='shtc3'?x.value!=='112':o.dataset.kind==='bme280'?(x.value!=='118'&&x.value!=='119'):false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='shtc3')a.value='112';if(reset&&o.dataset.kind==='bme280'&&(a.value==='68'||a.value==='112'))a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
     sendPage(uiText(TextId::ConfigureSensorSlot), "/sensors", std::move(c));
 }
 
@@ -2210,6 +2231,7 @@ void WebService::handleSensorSave() {
         }
         if (slot.implementation == SensorImplementation::AM2302
             || slot.implementation == SensorImplementation::RainGauge
+            || slot.implementation == SensorImplementation::SCT013
             || slot.implementation == SensorImplementation::RainDetector) {
             const long gpio = server_.arg("gpio").toInt();
             if (gpio < 0 || gpio > 255) ok = false;
@@ -2218,6 +2240,27 @@ void WebService::handleSensorSave() {
                 slot.hardware = HardwareResourceAssignment::gpioResource(resource);
                 if (slot.implementation == SensorImplementation::AM2302) {
                     slot.implementationConfiguration.am2302 = AM2302Configuration(resource);
+                } else if (slot.implementation == SensorImplementation::SCT013) {
+                    auto& ct = slot.implementationConfiguration.sct013;
+                    auto decimal = [&](const char* key, float& out) {
+                        String value = server_.arg(key);
+                        char* end = nullptr;
+                        out = strtof(value.c_str(), &end);
+                        return end != value.c_str() && !*end && std::isfinite(out);
+                    };
+                    auto integer = [&](const char* key, uint32_t& out) {
+                        String value = server_.arg(key);
+                        if (!value.length() || value.length()>7) return false;
+                        uint32_t n=0;
+                        for (unsigned i=0; i<value.length(); ++i) {
+                            if (value[i]<'0' || value[i]>'9') return false;
+                            n=n*10+value[i]-'0';
+                        }
+                        out=n; return true;
+                    };
+                    ok = ok && decimal("ratedA",ct.ratedA) && decimal("cal",ct.cal)
+                        && integer("ratedMv",ct.ratedMv) && integer("filterHz",ct.filterHz)
+                        && integer("offMa",ct.offMa) && integer("onMa",ct.onMa) && ct.valid();
                 } else if (slot.implementation == SensorImplementation::RainGauge) {
                     char* millimetersEnd = nullptr;
                     const String millimetersText = server_.arg("millimetersPerTip");

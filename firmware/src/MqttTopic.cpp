@@ -49,6 +49,7 @@ const char* mqttMeasurementTypeTopic(MeasurementType type) {
         case MeasurementType::AtmosphericPressure: return "atmospheric_pressure";
         case MeasurementType::SolarIrradiance: return "solar_irradiance";
         case MeasurementType::SolarCellTemperature: return "solar_cell_temperature";
+        case MeasurementType::ElectricCurrent: return "electric_current";
         case MeasurementType::RainDetectorFrequency: return "rain_detector_frequency";
         case MeasurementType::RainDetectorLevel: return "rain_detector_level";
         case MeasurementType::RainDetectorWet: return "rain_detector_wet";

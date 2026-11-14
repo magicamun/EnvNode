@@ -17,6 +17,7 @@
 #include "SensorSlotConfiguration.h"
 #include "RainGaugeSensor.h"
 #include "RainDetectorSensor.h"
+#include "Sct013Sensor.h"
 #include "Esp32RainFrequencyInput.h"
 #include "I2CBusManager.h"
 
@@ -51,6 +52,12 @@ private:
         RainDetectorInstance(SensorId id, uint8_t gpio, IMonotonicClock& clock)
             : input(), sensor(id,gpio,input,clock) {}
     };
+    struct SctInstance {
+        EspSctInput input;
+        Sct013Sensor sensor;
+        SctInstance(const SensorSlotConfiguration& slot, IMonotonicClock& clock)
+            : sensor(slot.slotId,slot.hardware.gpio.number,slot.implementationConfiguration.sct013,input,clock) {}
+    };
     using SensorStorage = typename std::aligned_union<0,
         SimulatedTemperatureSensor,
         SimulatedHumiditySensor,
@@ -60,7 +67,7 @@ private:
         SHT4xSensor,
         SHTC3Sensor,
         SolarPositionSensor,
-        RainGaugeSensor, RainDetectorInstance>::type;
+        RainGaugeSensor, SctInstance, RainDetectorInstance>::type;
 
     void destroy(size_t storageIndex);
 

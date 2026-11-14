@@ -64,6 +64,7 @@ struct SensorRuntimeInfo {
     bool supportsSeaLevelPressure = false;
     bool supportsSolarIrradiance = false;
     bool supportsSolarCellTemperature = false;
+    bool supportsElectricCurrent = false;
     bool supportsRainDetectorFrequency = false;
     bool supportsRainDetectorLevel = false;
     bool supportsRainDetectorWet = false;
