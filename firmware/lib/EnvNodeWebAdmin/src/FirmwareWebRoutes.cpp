@@ -131,7 +131,7 @@ void FirmwareWebRoutes::handleFirmwareUpload() {
     if (firmwareUploadRequestAccepted_ && otaService_.firmwareStaged()) {
         String content;
         content.reserve(520);
-        content = (String("<div class='notice success'><strong>") + uiText(TextId::FirmwareUploadedSuccessfully) + "</strong><p>" + uiText(TextId::FirmwareIsStaged) + "</p><p>" + uiText(TextId::DeviceRestartIsRequiredToActivateTheNew) + "</p></div><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/firmware'>" + uiText(TextId::RestartLater) + "</a>");
+        content = (String("<div class='notice success'><strong>") + uiText(TextId::FirmwareUploadedSuccessfully) + "</strong><p>" + uiText(TextId::FirmwareIsStaged) + "</p><p>" + uiText(TextId::DeviceRestartIsRequiredToActivateTheNew) + "</p></div><div class='actions equal'><form method='post' action='/restart' onsubmit='return confirm(globalThis.EnvNodeUi.RestartTheDeviceNow)'><button>" + uiText(TextId::RestartNow) + "</button></form><a class='button' href='/firmware'>" + uiText(TextId::RestartLater) + "</a></div>");
         sendPage(uiText(TextId::FirmwareStaged), "/firmware", content);
         return;
     }

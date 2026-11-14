@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- EnvNode 0.8.15: use the full available web content width, improve sensor
+  table column sizing and row spacing with minimal additional HTML, and align
+  firmware restart actions with equal button sizes and responsive spacing.
+  Navigation and runtime behavior remain unchanged.
+
 - EnvNode 0.8.12: integrate tested RainDetector acquisition and heating fixes,
   configurable binary dew-point prevention, timestamp values for displays,
   structured actuator/controller diagnostics and manual test markers. Identify
