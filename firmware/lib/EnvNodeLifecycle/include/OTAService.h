@@ -17,9 +17,17 @@ enum class OTAState : uint8_t {
 
 const char* otaStateName(OTAState state);
 
+// Optional acquisition guard: hold resources until failure or device restart.
+class IOTAUploadGuard {
+public:
+    virtual ~IOTAUploadGuard() = default;
+    virtual bool pauseForUpload() = 0;
+    virtual void resumeAfterUploadFailure() = 0;
+};
+
 class OTAService {
 public:
-    OTAService(ILogger& logger, IDeviceRestart& deviceRestart);
+    OTAService(ILogger& logger, IDeviceRestart& deviceRestart, IOTAUploadGuard* guard = nullptr);
 
     bool beginUpload(size_t totalBytes = 0);
     bool writeChunk(uint8_t* data, size_t length);
@@ -41,6 +49,8 @@ private:
     void fail(const String& reason, bool abortUpdate);
     String updateError(const char* fallback) const;
 
+    IOTAUploadGuard* guard_;
+    bool guardHeld_ = false;
     ILogger& logger_;
     IDeviceRestart& deviceRestart_;
     OTAState state_ = OTAState::Idle;

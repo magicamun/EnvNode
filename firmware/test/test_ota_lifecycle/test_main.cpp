@@ -113,8 +113,51 @@ void test_ota_with_envnode_adapter_does_not_restart_during_staging() {
     TEST_ASSERT_TRUE(runtime.deviceRestartPending()); TEST_ASSERT_EQUAL(0, driver.calls);
     runtime.performPendingRestart(); TEST_ASSERT_EQUAL(1, driver.calls);
 }
+class UploadGuard : public IOTAUploadGuard {
+public:
+    int pauses=0,resumes=0; bool allowed=true;
+    bool pauseForUpload() override {
+        ++pauses;
+        TEST_ASSERT_FALSE(Update.isRunning());
+        return allowed;
+    }
+    void resumeAfterUploadFailure() override {
+        ++resumes;
+        TEST_ASSERT_FALSE(Update.isRunning());
+    }
+};
+void test_upload_guard_pauses_before_flash_and_holds_until_restart() {
+    TestLogger logger; Restart restart; UploadGuard guard;
+    OTAService ota(logger,restart,&guard); uint8_t data[4]={};
+    TEST_ASSERT_TRUE(ota.beginUpload(4));TEST_ASSERT_EQUAL(1,guard.pauses);
+    TEST_ASSERT_FALSE(ota.beginUpload(4));TEST_ASSERT_EQUAL(1,guard.pauses);
+    TEST_ASSERT_TRUE(ota.writeChunk(data,4));TEST_ASSERT_TRUE(ota.finishUpload());
+    TEST_ASSERT_EQUAL(0,guard.resumes);TEST_ASSERT_EQUAL(1,restart.requests);
+}
+void test_upload_guard_resumes_for_each_failure_and_abort() {
+    for(int mode=0;mode<6;++mode) {
+        Update=UpdateClass{};
+        TestLogger logger; Restart restart; UploadGuard guard;
+        OTAService ota(logger,restart,&guard);uint8_t data[4]={};
+        if(mode==0)guard.allowed=false;
+        if(mode==1)Update.beginOk=false;
+        if(mode<2)TEST_ASSERT_FALSE(ota.beginUpload(4));
+        else {
+            TEST_ASSERT_TRUE(ota.beginUpload(4));
+            if(mode==2)ota.abortUpload("cancelled");
+            if(mode==3){Update.writeLimit=2;TEST_ASSERT_FALSE(ota.writeChunk(data,4));}
+            if(mode==4){TEST_ASSERT_TRUE(ota.writeChunk(data,4));Update.endOk=false;TEST_ASSERT_FALSE(ota.finishUpload());}
+            if(mode==5)TEST_ASSERT_FALSE(ota.finishUpload());
+        }
+        TEST_ASSERT_EQUAL(1,guard.pauses);TEST_ASSERT_EQUAL(1,guard.resumes);
+        TEST_ASSERT_EQUAL(0,restart.requests);
+        ota.abortUpload("again");ota.rejectUpload("bad file");TEST_ASSERT_EQUAL(1,guard.resumes);
+    }
+}
 int main() {
     UNITY_BEGIN();
+    RUN_TEST(test_upload_guard_pauses_before_flash_and_holds_until_restart);
+    RUN_TEST(test_upload_guard_resumes_for_each_failure_and_abort);
     RUN_TEST(test_success_stages_known_size_and_requests_but_does_not_execute_restart);
     RUN_TEST(test_unknown_size_uses_explicit_unknown_finalize_mode);
     RUN_TEST(test_empty_upload_is_aborted_without_restart);

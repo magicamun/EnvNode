@@ -29,8 +29,8 @@ void esp_adc_cal_characterize(int,int,int,int,esp_adc_cal_characteristics_t*){}
 unsigned esp_adc_cal_raw_to_voltage(unsigned x,esp_adc_cal_characteristics_t*){return x;}
 int adc_digi_read_bytes(uint8_t* b,uint32_t len,uint32_t* n,int){++reads;*n=0;if(readError)return readError;if(!queued)return ESP_ERR_TIMEOUT;unsigned count=std::min(unsigned(queued),len/2);auto p=reinterpret_cast<adc_digi_output_data_t*>(b);for(unsigned i=0;i<count;++i){p[i].type1.channel=7;p[i].type1.data=1600;}queued-=count;*n=count*2;return 0;}
 namespace EnvNode {
-struct SctWindow{unsigned readErrors=0,channelErrors=0,pollErrors=0,lengthErrors=0,recoveryAttempts=0,recoverySuccesses=0,revision=0,endMs=0,timingErrors=0;int lastReadError=0,unexpectedChannel=-1,lastRecoveryError=0;float bias=0,minimum=0,maximum=0,rawMv=0,filteredMv=0;};
-class EspSctInput{int channel_=-1;public:~EspSctInput();bool begin(uint8_t,uint32_t);bool latest(SctWindow&);};
+struct SctWindow{bool pausedForUpload=false;unsigned readErrors=0,channelErrors=0,pollErrors=0,lengthErrors=0,recoveryAttempts=0,recoverySuccesses=0,revision=0,endMs=0,timingErrors=0;int lastReadError=0,unexpectedChannel=-1,lastRecoveryError=0;float bias=0,minimum=0,maximum=0,rawMv=0,filteredMv=0;};
+class EspSctInput{int channel_=-1;public:static bool pauseForUpload();static void resumeAfterUploadFailure();~EspSctInput();bool begin(uint8_t,uint32_t);bool latest(SctWindow&);};
 }
 '''
 h+='\n#include "'+str(r/'firmware/include/SctSignal/LowPass.h')+'"\n#include "'+str(r/'firmware/include/SctSignal/RmsWindow.h')+'"\n'
@@ -44,6 +44,14 @@ queued=10000;for(int i=0;i<2;++i){tick+=100;input.latest(w);}assert(w.timingErro
 queued=10000;for(int i=0;i<2;++i){tick+=100;input.latest(w);}assert(!w.timingErrors && w.bias==1600);
 tick+=300;input.latest(w);assert(w.timingErrors && w.pollErrors==1);
 input.latest(w);assert(w.recoveryAttempts==2);tick=10000;input.latest(w);assert(w.recoveryAttempts==3 && w.timingErrors);
+queued=10000;for(int i=0;i<2;++i){tick+=100;input.latest(w);}
+assert(EspSctInput::pauseForUpload());int pausedStarts=starts,pausedReads=reads;
+for(int i=0;i<20;++i){tick+=1000;input.latest(w);assert(w.pausedForUpload && w.timingErrors);}
+assert(starts==pausedStarts && reads==pausedReads);
+EspSctInput::resumeAfterUploadFailure();input.latest(w);assert(!w.pausedForUpload && w.timingErrors && starts==pausedStarts+1);
+queued=10000;for(int i=0;i<2;++i){tick+=100;input.latest(w);}assert(w.timingErrors);
+queued=10000;for(int i=0;i<2;++i){tick+=100;input.latest(w);}assert(!w.timingErrors);
+EspSctInput::resumeAfterUploadFailure();assert(starts==pausedStarts+1);
 }
 '''
 import subprocess

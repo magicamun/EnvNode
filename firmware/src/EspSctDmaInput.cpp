@@ -12,6 +12,7 @@ namespace {
 constexpr unsigned Rate=20000, Group=10;
 constexpr uint32_t PoolBytes=8192;
 EspSctInput* owner=nullptr;
+bool uploadPaused=false;
 esp_adc_cal_characteristics_t calibration;
 uint32_t cutoff, sum, n, lastPoll, lastErrorReport;
 constexpr uint32_t RecoveryIntervalMs=5000;
@@ -80,6 +81,26 @@ void accept(uint16_t code) {
     }
 }
 }
+bool EspSctInput::pauseForUpload() {
+    uploadPaused=true;
+    if(owner) {
+        invalidate();
+        result.pausedForUpload=true;
+        ++result.revision;
+    }
+    return releaseDma()==ESP_OK;
+}
+void EspSctInput::resumeAfterUploadFailure() {
+    if(!uploadPaused)return;
+    uploadPaused=false;
+    if(owner) {
+        invalidate();
+        result.pausedForUpload=false;
+        // A controlled resume must not wait for an earlier recovery's backoff.
+        recovering=true;attemptedRecovery=false;
+        ++result.revision;
+    }
+}
 EspSctInput::~EspSctInput(){
     if(owner==this){releaseDma();owner=nullptr;}
 }
@@ -93,14 +114,17 @@ bool EspSctInput::begin(uint8_t gpio,uint32_t hz){
         default:return false;
     }
     if(owner)return owner==this && channel_==ch && cutoff==hz;
-    if(startDma(ch)!=ESP_OK){releaseDma();return false;}
+    if(!uploadPaused && startDma(ch)!=ESP_OK){releaseDma();return false;}
     recovering=attemptedRecovery=false;lastRecovery=lastErrorReport=0;
     esp_adc_cal_characterize(ADC_UNIT_1,ADC_ATTEN_DB_12,ADC_WIDTH_BIT_12,1100,&calibration);
-    channel_=ch;cutoff=hz;owner=this;result={};resetWindow();lastPoll=millis();return true;
+    channel_=ch;cutoff=hz;owner=this;result={};resetWindow();lastPoll=millis();
+    if(uploadPaused){invalidate();result.pausedForUpload=true;}
+    return true;
 }
 bool EspSctInput::latest(SctWindow& w){
     if(owner!=this)return false;
     const uint32_t now=millis();
+    if(uploadPaused){invalidate();w=result;return true;}
     if(recovering) {
         invalidate();
         if(!attemptedRecovery || uint32_t(now-lastRecovery)>=RecoveryIntervalMs) {

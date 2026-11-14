@@ -85,3 +85,9 @@ wieder gültig sein. Wiederholte Neustartversuche erfolgen höchstens alle fünf
 Sekunden ohne Warteblockade der Hauptschleife. `sct013_dma_recovery` meldet
 `attempts`, `successes`, `last_code` (0 = Neustart erfolgreich) und den Messzustand.
 Ein erfolgreicher Neustart allein bedeutet noch keinen gültigen Stromwert.
+
+Während eines OTA-Firmwareuploads wird SCT013-DMA vor dem ersten Flash-Zugriff
+angehalten. Messungen sind währenddessen ungültig (Diagnose `sct013_ota_pause`),
+nicht 0 A. Bei Erfolg bleibt die Erfassung bis zum Geräteneustart gestoppt.
+Nach Uploadabbruch oder Fehler startet sie neu und wartet auf ein vollständiges
+Messfenster. Kann DMA nicht sicher angehalten werden, wird der Upload abgelehnt.

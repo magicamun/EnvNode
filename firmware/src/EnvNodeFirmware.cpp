@@ -24,6 +24,7 @@
 #include "LocaleFormatter.h"
 #include "RuntimeManager.h"
 #include "OTAService.h"
+#include "Sct013Sensor.h"
 #include "HardwareResources.h"
 #include "SensorImplementationRegistry.h"
 #include "SensorSlotConfiguration.h"
@@ -142,7 +143,17 @@ static U8g2TextDisplay oled(i2cBusManager, logger);
 static U8g2TextDisplay secondOled(i2cBusManager, logger);
 static DisplayService displayService(configurationService.getConfiguration().display,
     presentedDisplayProperties, oled, monotonicClock, logger, &secondOled);
+#ifdef ENVNODE_SCT_DMA
+class SctUploadGuard final : public IOTAUploadGuard {
+public:
+    bool pauseForUpload() override { return EspSctInput::pauseForUpload(); }
+    void resumeAfterUploadFailure() override { EspSctInput::resumeAfterUploadFailure(); }
+};
+static SctUploadGuard sctUploadGuard;
+static OTAService otaService(logger, runtimeManager, &sctUploadGuard);
+#else
 static OTAService otaService(logger, runtimeManager);
+#endif
 static WebService webService(logger, configurationService, valueRuntime, wifiService, mqttService, timeService, localeFormatter, sensorManager, actuatorRuntime, controllerRuntime, measurementSnapshotCache, recentLogStore, homeAssistantDiscoveryPublisher, runtimeManager, otaService, i2cBusManager, boardIdentityResolver.resolution(), boardProvisioningService, moduleDiscoveryService, moduleDescriptorProvisioningService);
 static Application app(logger, configurationService, wifiService, webService, mqttService, timeService, sensorManager, actuatorRuntime, controllerRuntime, runtimeManager, homeAssistantDiscoveryPublisher, mqttMessageRouter, actuatorMqttAdapter, actuatorStatePublisher, controllerMqttAdapter, controllerStatePublisher, mqttDescriptionPublisher, displayService, valueMqttAdapter, valueStatePublisher);
 static bool normalRuntimeStarted = false;

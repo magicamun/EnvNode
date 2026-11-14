@@ -23,6 +23,12 @@ SensorOperationResult Sct013Sensor::service(IMeasurementSink&) {
     DiagnosticSource source(DiagnosticSourceKind::Sensor,id_);
     if (recorder.enabled(source)) {
 #ifdef ENVNODE_SCT_DMA
+        if(w.pausedForUpload) {
+            DiagnosticEvent paused("sct013_ota_pause");
+            paused.text("state","paused");
+            recorder.record(source,paused);
+            return SensorOperationResult::NoData;
+        }
         if(w.recoveryAttempts) {
             DiagnosticEvent recovery("sct013_dma_recovery");
             recovery.integer("attempts",w.recoveryAttempts);

@@ -15,8 +15,8 @@ const char* otaStateName(OTAState state) {
     }
 }
 
-OTAService::OTAService(ILogger& logger, IDeviceRestart& deviceRestart)
-    : logger_(logger), deviceRestart_(deviceRestart) {
+OTAService::OTAService(ILogger& logger, IDeviceRestart& deviceRestart, IOTAUploadGuard* guard)
+    : guard_(guard), logger_(logger), deviceRestart_(deviceRestart) {
 }
 
 bool OTAService::beginUpload(size_t totalBytes) {
@@ -25,6 +25,13 @@ bool OTAService::beginUpload(size_t totalBytes) {
     bytesReceived_ = 0;
     totalBytes_ = totalBytes;
     lastError_ = String();
+    if (guard_) {
+        guardHeld_ = true;
+        if (!guard_->pauseForUpload()) {
+            fail("Unable to pause acquisition for firmware upload.", false);
+            return false;
+        }
+    }
     Update.clearError();
     const size_t updateSize = totalBytes_ == 0 ? UPDATE_SIZE_UNKNOWN : totalBytes_;
     if (!Update.begin(updateSize, U_FLASH)) {
@@ -70,7 +77,7 @@ bool OTAService::finishUpload() {
     // variant is used only for the explicit unknown-size Update API mode.
     const bool finalized = Update.end(!totalBytesKnown());
     if (!finalized || Update.hasError()) {
-        fail(updateError("Firmware verification or finalization failed."), false);
+        fail(updateError("Firmware verification or finalization failed."), true);
         return false;
     }
 
@@ -112,6 +119,10 @@ bool OTAService::busy() const {
 
 void OTAService::fail(const String& reason, bool abortUpdate) {
     if (abortUpdate && Update.isRunning()) Update.abort();
+    if (guardHeld_) {
+        guardHeld_ = false;
+        guard_->resumeAfterUploadFailure();
+    }
     state_ = OTAState::Failed;
     lastError_ = reason;
     logger_.errorf("OTA upload failed: %s", lastError_.c_str());

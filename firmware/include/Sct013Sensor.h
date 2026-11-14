@@ -15,6 +15,7 @@ struct SctTiming {
 };
 struct SctWindow {
 #ifdef ENVNODE_SCT_DMA
+    bool pausedForUpload=false;
     uint32_t readErrors=0, channelErrors=0, pollErrors=0, lengthErrors=0;
     uint32_t recoveryAttempts=0, recoverySuccesses=0;
     int lastRecoveryError=0;
@@ -34,6 +35,10 @@ public:
 class EspSctInput final : public ISctInput {
 public:
     ~EspSctInput();
+#ifdef ENVNODE_SCT_DMA
+    static bool pauseForUpload();
+    static void resumeAfterUploadFailure();
+#endif
     bool begin(uint8_t gpio,uint32_t cutoff) override;
     bool latest(SctWindow& window) override;
 private:
