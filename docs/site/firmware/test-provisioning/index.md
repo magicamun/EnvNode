@@ -9,7 +9,7 @@ führt aber keine EnvNode-Sensoren, Aktoren oder lokalen Controller aus.
 | Bereich | Stand |
 | --- | --- |
 | Hardwarediagnose `/diagnostics` | Reale manuelle Kanal-/Enable-Auswahl, LOW/HIGH und GPIO34-ADC |
-| Hardware-Selbsttest `/selftest` | Geführte reale Schleifenprüfung von 22 Output- und 40 Input-Kontakten |
+| Hardware-Selbsttest `/selftest` | Geführte reale Schleifenprüfung: 22 Output-Pfade bei Controller 0.1, 24 bei 0.2; jeweils 40 Input-Kontakte |
 | Anschlussprüfung `/test` | Reale LOW/HIGH-Messung oder ausdrücklich gewählte Simulation; Boardbild, LEDs und Einzelmatrix |
 | Prüfprofile | Sechs eingebaute Mainboardprofile; validierte Remote-Profile von docs.envnode.de mit lokalem Fallback |
 | Board-Provisioning `/hardware` | Reales Schreiben und Rücklesen eines externen Board-EEPROMs über SDA16/SCL5 |

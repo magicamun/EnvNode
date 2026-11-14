@@ -24,8 +24,8 @@ entscheidend ist ihre gemeinsame Wirkung am tatsächlich verwendeten Bus.
 | Mainboard / Revision | Zuschaltung der Mainboard-Pull-ups | Technische Anleitung |
 | --- | --- | --- |
 | Mini 0.8.1 | Normalerweise offene Lötjumper JP1–JP4 | [Historische Aufbauanleitung](../mainboards/mini/revisions/0.8.1.md) |
-| Mini 0.9.0 und 0.10.0 | Steckbare Jumperkappen; J3/J4 für I2C0, J5/J6 für I2C1 | [Mini: Pull-ups](../mainboards/mini/assembly.md#steckbare-i2c-pull-ups); [Revisionsstand 0.10.0](../mainboards/mini/revisions/0.10.0.md) |
-| Weather 0.3.0 | Steckbare Jumperkappen; J2/J3 für I2C0, J4/J5 für I2C1 | [Weather: Pull-ups](../mainboards/weatherstation/assembly.md#steckbare-i2c-pull-ups) |
+| Mini 0.9.0 und 0.10.0 | Steckbare Jumperkappen; J3/J4 für I2C0, J5/J6 für I2C1 | [Mini: Pull-ups](../mainboards/mini/revisions/0.9.0.md#steckbare-i2c-pull-ups); [Revisionsstand 0.10.0](../mainboards/mini/revisions/0.10.0.md) |
+| Weather 0.3.0 | Steckbare Jumperkappen; J2/J3 für I2C0, J4/J5 für I2C1 | [Weather: Pull-ups](../mainboards/weatherstation/revisions/0.3.0.md#steckbare-i2c-pull-ups) |
 | Weather 0.4 | Steckbare Jumperkappen; J1/J2 für I2C0, J3/J4 für I2C1 | [Revisionsstand 0.4](../mainboards/weatherstation/revisions/0.4.md) |
 
 Beide Pull-ups eines Busses gemeinsam zuschalten, wenn dieser Bus seine Pull-ups

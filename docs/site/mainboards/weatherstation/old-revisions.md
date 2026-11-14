@@ -1,5 +1,7 @@
 # Alte Revisionen
 
+- [Revision 0.3.0 (Web)](revisions/0.3.0.md)
+
 - [Revision 0.2.1 (Web)](revisions/0.2.1.md) · [PDF](../../assets/downloads/Weatherstation_Rev0.2.1_Anleitung.pdf)
 
 [Zur aktuellen Dokumentation](index.md)

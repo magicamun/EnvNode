@@ -1,6 +1,6 @@
 {
   "id": "mini-0.9.0",
-  "guide": "mainboards/mini/index.md",
+  "guide": "mainboards/mini/revisions/0.9.0.md",
   "pcb_source": "main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
   "pcb_sha256": "dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105",
   "back_components": [],

@@ -1,19 +1,22 @@
 # Testhardware
 
-Die drei Testboards bilden gemeinsam den passiven Tester für EnvNode-Mainboards. Die Anleitungen beschreiben Bestückung, Anschlüsse und Erstprüfung. Test-Firmware und Schaltschwellen sind separat zu validieren.
+Die Prüfvorrichtung besteht aus Controller, Input-Adapter und passivem Modul-Adapter.
+Die Aufbauanleitungen beschreiben Bestückung, Kontaktbelegung und elektrische Prüfung.
 
-| Board | Aufgabe |
-| --- | --- |
-| [Test-Controller](../../mainboards/test-controller/index.md) | Steuerung und Messpfade des Testers |
-| [Input-Adapter](../../mainboards/input-adapter/index.md) | Verbindung zu den DevKit-Kontakten des Prüflings |
-| [Modul-Adapter](../../mainboards/module-adapter/index.md) | Verbindung zur Modulschnittstelle des Prüflings |
+| Baugruppe | Aktuelle Revision | Technische Anleitung |
+| --- | --- | --- |
+| Test-Controller | 0.2 | [Aufbau und elektrische Prüfung](../../mainboards/test-controller/assembly.md) |
+| ESP32 DevKitC Adapter | 0.3 | [Aufbau und vollständige Kanalzuordnung](../../mainboards/input-adapter/assembly.md) |
+| Modul-Adapter | 0.2 | [Aufbau und 1:1-Kontaktprüfung](../../mainboards/module-adapter/assembly.md) |
+
+Der Legacy-Input-Adapter 0.1 bleibt mit seiner eigenen Kanalzuordnung unterstützt.
+Die [Adapterauswahl](../../firmware/test-provisioning/hardwareprofile.md) beschreibt
+zulässige Kombinationen und den Stand der physischen Abnahme.
 
 ## Software-Inbetriebnahme
 
-Für den aufgebauten Tester führt die bestehende Anleitung
-[Test-Firmware und Inbetriebnahme](../../firmware/test-provisioning/inbetriebnahme.md)
-durch Aufspielen und Einrichtung. Danach folgen die
-[Hardware-Selbsttests](../../firmware/test-provisioning/selbsttests.md) und
-die [Prüfung eines Mainboards](../../firmware/test-provisioning/board-pruefung.md).
+Nach der elektrischen Prüfung folgen [Tester einrichten](../../firmware/test-provisioning/inbetriebnahme.md),
+[Selbsttests](../../firmware/test-provisioning/selbsttests.md) und
+[Mainboard prüfen](../../firmware/test-provisioning/board-pruefung.md).
 
-[Hardwareübersicht](../index.md) · [Dokumentationsstand](../../guides/status.md)
+[Hardwareübersicht](../index.md) · [Alte Revisionen](../../guides/old-revisions.md)

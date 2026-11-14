@@ -4,7 +4,7 @@
   "boards": [
     {
       "id": "mini-0.9.0",
-      "guide": "mainboards/mini/index.md",
+      "guide": "mainboards/mini/revisions/0.9.0.md",
       "archive": true,
       "metadata": "assets/board-views/mini-0.9.0/views.json",
       "front": {
@@ -66,7 +66,7 @@
     },
     {
       "id": "weatherstation-0.3.0",
-      "guide": "mainboards/weatherstation/index.md",
+      "guide": "mainboards/weatherstation/revisions/0.3.0.md",
       "archive": true,
       "metadata": "assets/board-views/weatherstation-0.3.0/views.json",
       "front": {
@@ -286,8 +286,8 @@
     },
     {
       "id": "test-controller-0.1",
-      "guide": "mainboards/test-controller/index.md",
-      "archive": false,
+      "guide": "mainboards/test-controller/revisions/0.1.md",
+      "archive": true,
       "metadata": "assets/board-views/test-controller-0.1/views.json",
       "front": {
         "png": "assets/board-views/test-controller-0.1/assembly-front.png",
@@ -323,8 +323,8 @@
     },
     {
       "id": "input-adapter-0.1",
-      "guide": "mainboards/input-adapter/index.md",
-      "archive": false,
+      "guide": "mainboards/input-adapter/revisions/0.1.md",
+      "archive": true,
       "metadata": "assets/board-views/input-adapter-0.1/views.json",
       "front": {
         "png": "assets/board-views/input-adapter-0.1/assembly-front.png",
@@ -354,8 +354,8 @@
     },
     {
       "id": "module-adapter-0.1",
-      "guide": "mainboards/module-adapter/index.md",
-      "archive": false,
+      "guide": "mainboards/module-adapter/revisions/0.1.md",
+      "archive": true,
       "metadata": "assets/board-views/module-adapter-0.1/views.json",
       "front": {
         "png": "assets/board-views/module-adapter-0.1/assembly-front.png",
@@ -707,6 +707,107 @@
         "R7",
         "R8",
         "R9"
+      ]
+    },
+    {
+      "id": "test-controller-0.2",
+      "guide": "mainboards/test-controller/assembly.md",
+      "archive": false,
+      "metadata": "assets/board-views/test-controller-0.2/views.json",
+      "front": {
+        "png": "assets/board-views/test-controller-0.2/assembly-front.png",
+        "png_size_px": [
+          2213,
+          1841
+        ],
+        "side": "F.Cu",
+        "projection": "orthographic",
+        "component_models": false,
+        "renderer": "KiCad pcb render",
+        "quality": "high",
+        "canvas_size_px": [
+          2800,
+          2800
+        ],
+        "rotation_deg": [
+          0,
+          0,
+          0
+        ],
+        "zoom": 0.78,
+        "mirrored_for_back_view": false,
+        "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
+      },
+      "back_components": [
+        "C4",
+        "C5",
+        "R6",
+        "U1",
+        "U2"
+      ]
+    },
+    {
+      "id": "input-adapter-0.3",
+      "guide": "mainboards/input-adapter/assembly.md",
+      "archive": false,
+      "metadata": "assets/board-views/input-adapter-0.3/views.json",
+      "front": {
+        "png": "assets/board-views/input-adapter-0.3/assembly-front.png",
+        "png_size_px": [
+          1138,
+          2244
+        ],
+        "side": "F.Cu",
+        "projection": "orthographic",
+        "component_models": false,
+        "renderer": "KiCad pcb render",
+        "quality": "high",
+        "canvas_size_px": [
+          2800,
+          2800
+        ],
+        "rotation_deg": [
+          0,
+          0,
+          0
+        ],
+        "zoom": 0.78,
+        "mirrored_for_back_view": false,
+        "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
+      },
+      "back_components": []
+    },
+    {
+      "id": "module-adapter-0.2",
+      "guide": "mainboards/module-adapter/assembly.md",
+      "archive": false,
+      "metadata": "assets/board-views/module-adapter-0.2/views.json",
+      "front": {
+        "png": "assets/board-views/module-adapter-0.2/assembly-front.png",
+        "png_size_px": [
+          2319,
+          1987
+        ],
+        "side": "F.Cu",
+        "projection": "orthographic",
+        "component_models": false,
+        "renderer": "KiCad pcb render",
+        "quality": "high",
+        "canvas_size_px": [
+          2800,
+          2800
+        ],
+        "rotation_deg": [
+          0,
+          0,
+          0
+        ],
+        "zoom": 0.78,
+        "mirrored_for_back_view": false,
+        "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
+      },
+      "back_components": [
+        "J1"
       ]
     }
   ]

@@ -1,0 +1,24 @@
+{
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0",
+  "source_commit": "a245919334f2c747489a1f075857e04b6326a6b4",
+  "date": "2026-11-14",
+  "cad_files_sha256": {
+    "hardware/kicad/MainBoards/Weatherstation/ESP32.kicad_sch": "d5dd9370dd2c42443912b3fc4810d5889f1d16a17ef51d9f1a2e9c0f5f2242cf",
+    "hardware/kicad/MainBoards/Weatherstation/PCB.kicad_sch": "04b61087758ed3db550336a319e9a180bac551b3461eb8a1879add806ebccd1d",
+    "hardware/kicad/MainBoards/Weatherstation/Power.kicad_sch": "0eda23c20646c65e58757d06f3592da27191447fdf0a93d01fa3b8344cdeab50",
+    "hardware/kicad/MainBoards/Weatherstation/SlotA.kicad_sch": "6afb54876498eadeed558dcd410a9a2874034bb71f8f59541e0dfc12fb3f4415",
+    "hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb": "6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f",
+    "hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_sch": "f597b50c3cbbccf8ce60dc6998ed9e9757d6b16519bb6fcc5e3b36151662452a",
+    "hardware/kicad/MainBoards/Weatherstation/gpio.kicad_sch": "5ce04632b9cb45270dd099b84d357740694d44d82a40aee21ffa70c7af939cb2",
+    "hardware/kicad/MainBoards/Weatherstation/qwiic.kicad_sch": "60205f61633ada59ba581e467f19053063dfd2c3cab10b4604105b8166a6514b"
+  },
+  "pcb_schematic_net_check": {
+    "source": "hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
+    "pcb_sha256": "6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f",
+    "schematic_sha256": "f597b50c3cbbccf8ce60dc6998ed9e9757d6b16519bb6fcc5e3b36151662452a",
+    "netlist_sha256": "eb098720b5a762b764eced5d01a19087620db29f5e57d7d5b2addc998a88ed7d",
+    "checked_pins": 160,
+    "mismatches": []
+  },
+  "physical_acceptance": "pending"
+}

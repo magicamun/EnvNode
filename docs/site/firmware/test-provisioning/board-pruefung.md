@@ -35,7 +35,8 @@ dessen Quelle und PCB-Revision stehen unter **Quelle der Prüfdaten**. Die Zeich
 zeigt das zu prüfende Board von oben, nicht die Unterseite des Adapters.
 
 Eingebaute Profile sind Weather 0.2 / PCB 0.2.1, Weather 0.3 / PCB 0.3.0,
-Mini 0.8 / PCB 0.8.1 und Mini 0.9 / PCB 0.9.0. Weitere Remote-Einträge müssen
+Mini 0.8 / PCB 0.8.1 und Mini 0.9 / PCB 0.9.0 sowie ab Test-Firmware 0.15.0
+Mini 0.10 / PCB 0.10.0 und Weather 0.4 / PCB 0.4. Weitere Remote-Einträge müssen
 zum unterstützten Profilformat und zur 38-/40-Eingangs-Hardware passen.
 
 Die **Simulation** ist ein ausdrücklich anderer Modus. Dort werden die Sollverbindungen

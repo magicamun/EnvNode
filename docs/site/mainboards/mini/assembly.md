@@ -1,36 +1,26 @@
 ---
 title: EnvNode Mini - Aufbau und elektrische Prüfung
 pdf:
-  id: mini-0.9.0
+  id: mini-0.10.0
   title: EnvNode Mini
   subtitle: Aufbau und elektrische Prüfung
-  hardware_revision: '0.9.0'
-  document_version: '1.2'
+  hardware_revision: '0.10.0'
+  document_version: '1.0'
   document_date: '2026-11-14'
-  source_document_date: '2026-10-28'
-  status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
+  source_document_date: '2026-11-09'
+  status: CAD-Stand dokumentiert - physische Abnahme ausstehend
 ---
 
 # EnvNode Mini - Aufbau und elektrische Prüfung
 
 ESP32-Mainboard mit zwei Modulslots und zwei direkten ADC-Eingängen. C1 blockt die 5-V-Schiene ab; das Board-EEPROM wird zusätzlich durch C2 (100 nF) an +3V3_SYS abgeblockt.
 
-**PCB 0.9.0; Board Identity 0.9.**
+**PCB 0.10.0; Board Identity 0.10. EnvNode ab 0.8.11, Tester ab 0.15.0.**
 
-[Anleitung als PDF](../../assets/downloads/EnvNode_Mini_Rev0.9.0_Anleitung.pdf){ .md-button }
+[Anleitung als PDF](../../assets/downloads/EnvNode_Mini_Rev0.10.0_Anleitung.pdf){ .md-button }
 
 [Übersicht und nächste Schritte](index.md){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
-
-### Änderungen gegenüber 0.8.1
-
-- **TP1:** zweipoliger Referenzanschluss für den spannungsfreien Mainboardtest, über D1/D2 von GND und +3V3_SYS entkoppelt.
-- **Steckbare Pull-up-Jumper J3-J6:** abnehmbare Kappen statt bisheriger Lötjumper. Es sind Pull-ups nach +3V3_SYS, keine Pull-downs.
-- **C2:** 100 nF zur lokalen Abblockung der 3,3-V-EEPROM-Versorgung; C1 bleibt an +5V.
-- **I²C-Stecker:** jetzt J7/J8 für I2C0 und J9/J10 für I2C1; J3-J6 gehören zu den Pull-ups.
-
-**Dokumentation abgeschlossen am 28. Oktober 2026.**
-
 
 ### Weiter zur Software-Inbetriebnahme
 
@@ -41,7 +31,7 @@ Board Identity und Modulzuordnung beschreibt zentral
 
 ## 3D-Ansicht
 
-![mini-0.9.0: 3D-Vorderseite](../../assets/images/mini-0.9.0/top.png){ .hero-board-view }
+![mini-0.10.0: 3D-Vorderseite](../../assets/board-views/mini-0.10.0/3d-front.png){ .hero-board-view }
 
 Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteile. Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
@@ -55,6 +45,7 @@ Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteil
 | R1-R4 | 4 | 4,7 kOhm, 1 % | ENP-00005 | 1206, I2C-Pull-ups |
 | J3-J6 | 4 | Pull-up-Leiste 1×2 + Kappe | ENP-00145 / ENP-00101 | 2,54 mm; 8 Kontakte + 4 Kappen |
 | D1, D2 | 2 | 1N4148W, Testreferenz | ENP-00033 | SOD-123 auf D_1206-Pads; Passform siehe TP1 |
+| RST1 | 1 | Resetanschluss, JST-PH 1×2 | ENP-00132 | B2B-PH-K, 2,00 mm; Pin 1 GND, Pin 2 EN |
 | TP1 | 1 | Testreferenz 1×2 | ENP-00132 | JST-PH, 2,00 mm |
 | U1 | 1 | 24LC32, Board Identity | ENP-00102 | SOIC-8, I2C0-Adresse 0x50 |
 | U2 | 1 | ORing-Power Rev. 0.1 bestückt, gefertigt | ENK-00020 | 39 x 15 mm, castellated Carrier |
@@ -63,7 +54,7 @@ Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteil
 | J7-J10 | 4 | JST-SH, 4-polig, top-entry | ENP-00122 | BM04B-SRSS-TB, 1,00 mm |
 | ADC1, ADC2 | 2 | JST-PH, 4-polig, vertikal | ENP-00025 | B4B-PH-K, 2,00 mm |
 | NT1, NT2 | 2 | Net-Tie | - | PCB-Struktur; kein Kaufteil |
-| PCB | 1 | EnvNode Mini 0.9.0 | ENP-00160 | Revisionsgebundene Platine |
+| PCB | 1 | EnvNode Mini 0.10.0 | Artikelzuordnung prüfen | Revisionsgebundene Platine |
 | U3-Sockel | 2 | DevKit-Sockel 1×19 | ENP-00004 | Aus 1×20 auf 19 kürzen |
 
 Nicht auf dem Mainboard: Eingangsschutz, 5-V-Eingang, USB und 3,3-V-ORing gehören zum separat dokumentierten ORing-Power-Modul.
@@ -72,7 +63,7 @@ Nicht auf dem Mainboard: Eingangsschutz, 5-V-Eingang, USB und 3,3-V-ORing gehör
 
 | Teil | Anz. | Hinweis |
 | --- | --- | --- |
-| EnvNode Mini PCB Rev. 0.9.0 | 1 | Titelblock und Silkscreen müssen Rev. 0.9.0 zeigen |
+| EnvNode Mini PCB Rev. 0.10.0 | 1 | Titelblock und Silkscreen müssen Rev. 0.10.0 zeigen |
 | H1-H4 | 4 | M2,5-Stützpunkte für Tochterplatinen |
 | H5-H8 | 4 | 4,5-mm-NPTH für BOX4U-Gehäuse |
 
@@ -82,9 +73,9 @@ Den tatsächlich bestückten ORing-Modulstand im Protokoll erfassen. Jumperleist
 
 ### Vorderseite: Bestückungsplan
 
-![mini-0.9.0: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/mini-0.9.0/assembly-front.png){ .assembly-plan }
+![mini-0.10.0: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/mini-0.10.0/assembly-front.png){ .assembly-plan }
 
-[Plan als PNG](../../assets/board-views/mini-0.9.0/assembly-front.png){ .md-button }
+[Plan als PNG](../../assets/board-views/mini-0.10.0/assembly-front.png){ .md-button }
 
 Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
 
@@ -171,6 +162,24 @@ Der Signaleingang ist nicht 5-V-tolerant. Pin 2 liefert +5 V ausschließlich zur
 
 Ohne Kappe ist der jeweilige Pull-up getrennt. Die beiden Kappen eines Busses gemeinsam setzen, wenn dort keine ausreichenden externen Pull-ups vorhanden sind. Nur spannungsfrei umstecken.
 
+## RST1: externer Reset
+
+| Pin | Signal | Prüfung ohne Versorgung |
+| --- | --- | --- |
+| 1 | GND | Direkter Durchgang zur Mainboardmasse |
+| 2 | EN / CHIP_PU | Durchgang zu U3 Sockelpin 2 |
+
+Ein potentialfreier Schließertaster zwischen beiden Pins setzt das DevKit zurück.
+Ein dauerhafter Schluss hält den ESP32 deaktiviert. Vor dem Verdrahten ausschalten;
+keine externe Spannung einspeisen. RST1.1 ist echte DUT-Masse, während TP1.1 ein
+diodengetrennter Prüfkontakt ist. Beide Anschlüsse dürfen nicht vertauscht werden.
+
+Mit entfernter Versorgung den offenen Taster und die Pinfolge prüfen. Danach
+mit eingesetztem DevKit einschalten, kurz betätigen und erneuten Firmwarestart
+kontrollieren. Für die passive Testerprüfung DevKit und alle DUT-Versorgungen
+entfernen; das Reset-Prüfpigtail am Controller führt Messkontakte, keine permanente
+Verbindung zur Tester-Masse.
+
 ## TP1: Referenzen für den Testadapter
 
 | TP1-Pin | Verbindung am Mainboard | Erwartung im Diodentest |
@@ -245,7 +254,7 @@ Grundregel: Erste Inbetriebnahme ohne ESP32-DevKitC, Tochterplatinen und externe
 
 - ☐ I2C0-Scan: Mainboard-U1 muss auf 0x50 antworten.
 
-- ☐ Gültigen BoardIdentityRecord für Board-Identity-Revision 0.9 schreiben und vollständig zurücklesen.
+- ☐ Board Identity und ENPM für `mini-0.10-pcb0.10.0` gemäß [Provisioning](../../firmware/provisioning.md) schreiben und vollständig zurücklesen.
 
 - ☐ Unbestückte Slots dürfen keine Antwort auf 0x52 oder 0x53 erzeugen.
 
@@ -283,14 +292,14 @@ Module und Kabel nur spannungsfrei einsetzen. Reihenversatz, gedrehte Stecker od
 | Feld | Eintrag |
 | --- | --- |
 | BoardProfileId |  |
-| Board-Identity-Revision | 0.9 (passendes Profil erforderlich) |
+| Board-Identity-Revision | 0.10 (passendes Profil erforderlich) |
 | Seriennummer |  |
 | Provisioniert am / durch |  |
 | CRC / Read-back geprüft |  |
 
 ## 9. Abschluss und Prüfstand
 
-Die Aufbauanleitung für PCB 0.9.0 ist redaktionell abgeschlossen. Quellen und Renderings beziehen sich auf den gespeicherten KiCad-Stand. Kein neuer ERC-/DRC-Lauf oder physischer Bring-up; frühere Prüfergebnisse bleiben historisch.
+Die Aufbauanleitung für PCB 0.10.0 ist redaktionell abgeschlossen. Quellen und Renderings beziehen sich auf den gespeicherten KiCad-Stand. Der gespeicherte Prüfbericht vom 9. November 2026 nennt ERC 0, DRC 0, keine offenen Verbindungen und keine Schaltplanabweichungen. Für diese Anleitung wurde die physische Abnahme nicht nachgeholt.
 
 | Freigabeschritt | Eintrag |
 | --- | --- |
@@ -299,27 +308,36 @@ Die Aufbauanleitung für PCB 0.9.0 ist redaktionell abgeschlossen. Quellen und R
 | C1 und C2 / EEPROM 0x50 geprüft | |
 | Pull-up-Kappenstellung beider Busse | |
 | TP1-Diodenprüfung | |
+| RST1 / Resetfunktion | |
 | ADC-, I²C- und Modultest | |
 | Aufbau geprüft am / durch | |
 
-Board Identity: Für den neuen funktionalen Hardwarestand ist die Revisionszuordnung **0.9** vorgesehen. Einen passenden freigegebenen Descriptor bzw. ein passendes Boardprofil verwenden; diese Anleitung implementiert oder bestätigt kein neues Firmwareprofil. Die vollständige Patchrevision 0.9.0 bleibt im Hardwareprotokoll erhalten.
+Board Identity: Das Profil `mini-0.10-pcb0.10.0` ist ab EnvNode 0.8.11 und
+Tester 0.15.0 vorhanden. Im Hardwareprotokoll PCB 0.10.0 und Identity 0.10 getrennt festhalten.
 
 Elektrische Last-, Temperatur-, EMV-, ESD- und Fertigungsprüfungen werden durch den redaktionellen Abschluss nicht ersetzt.
 
+
+**Physische Abnahme ausstehend.** Für jede aufgebaute Platine Versorgung,
+Anschlüsse, Reset, Referenzpfade und Lastverhalten selbst prüfen und dokumentieren.
+
+Die gespeicherten ERC-/DRC-Zahlen gelten mit den im jeweiligen Prüfbericht
+aufgeführten ignorierten Prüfregeln. Der neue Dokumentationsabgleich ist kein
+zusätzlicher vollständiger ERC-/DRC-Lauf.
+
 ### Quellenstand
 
-KiCad-Arbeitsstand `main`, Basiscommit `ff90660`; die SHA-256 bestimmen die dokumentierten Dateien einschließlich lokaler Änderungen.
+Die Anleitung ist an die folgenden Hauptdateien gebunden. Der neue Netzlistenabgleich
+mit der gespeicherten Platine bestätigt die gemeinsamen elektrischen Pinzuordnungen;
+die physische Abnahme ist getrennt durchzuführen.
 
 | Quelle | SHA-256 |
 | --- | --- |
-| ADC.kicad_sch | `ff48076ff5b82145a34fdf95a253e811a9e1ee4cfc0862605f8838f099209a8e` |
-| ESP32Core.kicad_sch | `bf94fd4b7574112858502d14253b375606cfb2127f8e3209d7c1e6a214dbca3c` |
-| EnvNode Mini.kicad_pcb | `dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105` |
-| EnvNode Mini.kicad_pro | `a661c4137794305c178d1c2fb949855dc6e34a1d8023b7b6eb5cf200f9dab77a` |
-| EnvNode Mini.kicad_sch | `45d7af2e59a0f6668a6372a5ece9d94c20ad248f669ff8589a1a6c61c9e9a178` |
-| PCB.kicad_sch | `ed19908459ebba8a0c0957a70928c7e5f7a28a7906c4574dc2a22a69e9126551` |
-| Power.kicad_sch | `e31c045d9ccf359a5704e7f459512f885d122886f80038bd971eea93a1a3da0a` |
-| SlotA.kicad_sch | `6acc11c48da4dce5fd633a443f920c35c617c4472b92fc866cc63f65c99d06f2` |
-| SlotB.kicad_sch | `649abacbdd409d99a35778051c58a5466877563ed6fda753ce3fb25c828c579d` |
+| EnvNode Mini.kicad_pcb | `5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557` |
+| EnvNode Mini.kicad_sch | `e23d63de0ff0f61e0654bff5e1d76df7bccc1a441dc57dc565a2f921cabf1953` |
 
-[Rendernachweis](../../assets/images/mini-0.9.0/provenance.json). Dokumentation: LicenseRef-EnvNode-Use-and-Redistribution-1.0, siehe [Lizenz](../../license.md). Drittanbieterrechte an KiCad-Modellen und Bibliotheken bleiben bestehen.
+[Alle CAD-Dateihashes und Netzlistenabgleich](../../assets/board-views/mini-0.10.0/assembly-sources.json) ·
+[Rendernachweis](../../assets/board-views/mini-0.10.0/views.json).
+
+EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0,
+siehe [Lizenz](../../license.md). Drittanbieterrechte an Modellen bleiben bestehen.

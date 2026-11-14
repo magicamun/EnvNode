@@ -1,6 +1,6 @@
 {
   "id": "input-adapter-0.1",
-  "guide": "mainboards/input-adapter/index.md",
+  "guide": "mainboards/input-adapter/revisions/0.1.md",
   "pcb_source": "test-provision-board/hardware/kicad/MainBoards/Input-Adapter/Input-Adapter.kicad_pcb",
   "pcb_sha256": "1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c",
   "back_components": [],

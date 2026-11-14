@@ -4,23 +4,22 @@ Stand: **14. November 2026**. „Abgeschlossen“ bezeichnet die redaktionell vo
 
 ## Abgeschlossen
 
-- EnvNode Mini 0.9.0 und Weatherstation 0.3.0
+- EnvNode Mini 0.10.0 und Weatherstation 0.4
 - ORing Power 0.1.2 und DuoRelay 0.3
 - AnalogHydroPressure 0.6
 - RainDetectorController 0.4 und RainDetectorHead 0.2
-- Test-Controller, Input-Adapter und Modul-Adapter, jeweils 0.1
+- Test-Controller 0.2, ESP32 DevKitC Adapter 0.3 und Modul-Adapter 0.2
 
 [Zu den Anleitungen](index.md).
 
-## Aktuelle Revisionen mit ergänzender Dokumentation
+## Revisionsbindung und Abnahme
 
-- Mini 0.10.0 und Weather 0.4: eigene Revisionsseiten und aktuelle Grafiken vorhanden.
-  Die vollständigen Aufbauanleitungen und PDF-Exporte gelten noch für Mini 0.9.0
-  beziehungsweise Weather 0.3.0. Vollständige Anleitungen für die neuen Revisionen
-  sind nachzuziehen; die physische Abnahme ist gesondert auszuweisen.
-- Test-Controller 0.2, ESP32 DevKitC Adapter 0.3 und Modul-Adapter 0.2:
-  Software-Auswahl und Anwendung sind beschrieben; die vollständigen
-  Aufbauanleitungen/PDFs dokumentieren noch die jeweiligen 0.1-Stände.
+Die aktuellen Anleitungen und PDF-Ausgaben dokumentieren den jeweiligen
+CAD-Stand. Die bisherigen Anleitungen bleiben unter „Alte Revisionen“ erhalten.
+Für Mini 0.10.0, Weather 0.4, Test-Controller 0.2, DevKitC Adapter 0.3 und
+Modul-Adapter 0.2 steht die physische Abnahme am gefertigten Aufbau aus.
+Die revisionsgebundene PCB-Artikelzuordnung ist in den Stücklisten noch zu prüfen;
+bekannte Bauteilartikel bleiben ausgewiesen.
 
 ## Teilumfang
 

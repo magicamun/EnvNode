@@ -59,12 +59,10 @@ nav:
           - Übersicht: mainboards/index.md
           - Mini:
               - Übersicht: mainboards/mini/index.md
-              - Revision 0.10.0: mainboards/mini/revisions/0.10.0.md
-              - Aufbau und Prüfung 0.9.0: mainboards/mini/assembly.md
+              - Aufbau und Prüfung 0.10.0: mainboards/mini/assembly.md
           - Weather:
               - Übersicht: mainboards/weatherstation/index.md
-              - Revision 0.4: mainboards/weatherstation/revisions/0.4.md
-              - Aufbau und Prüfung 0.3.0: mainboards/weatherstation/assembly.md
+              - Aufbau und Prüfung 0.4: mainboards/weatherstation/assembly.md
           - ORing Power:
               - Übersicht: mainboards/oring-power/index.md
               - Aufbau und elektrische Prüfung: mainboards/oring-power/assembly.md
@@ -96,9 +94,15 @@ nav:
       - Kompatibilität: compatibility.md
       - Testhardware:
           - Übersicht: hardware/testhardware/index.md
-          - Test-Controller: mainboards/test-controller/index.md
-          - Input-Adapter: mainboards/input-adapter/index.md
-          - Modul-Adapter: mainboards/module-adapter/index.md
+          - Test-Controller:
+              - Übersicht: mainboards/test-controller/index.md
+              - Aufbau und elektrische Prüfung: mainboards/test-controller/assembly.md
+          - Input-Adapter:
+              - Übersicht: mainboards/input-adapter/index.md
+              - Aufbau und elektrische Prüfung: mainboards/input-adapter/assembly.md
+          - Modul-Adapter:
+              - Übersicht: mainboards/module-adapter/index.md
+              - Aufbau und elektrische Prüfung: mainboards/module-adapter/assembly.md
   - Firmware:
       - Übersicht: firmware/overview.md
       - Downloads: firmware/downloads.md

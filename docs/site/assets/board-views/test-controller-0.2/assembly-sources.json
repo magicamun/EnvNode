@@ -1,0 +1,21 @@
+{
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0",
+  "source_commit": "a245919334f2c747489a1f075857e04b6326a6b4",
+  "date": "2026-11-14",
+  "cad_files_sha256": {
+    "hardware/kicad/MainBoards/Test-Controller/INL.kicad_sch": "d997c7a458d4028ab6709aa2018255b760285d3a5f047a7abdc2853ecb74905c",
+    "hardware/kicad/MainBoards/Test-Controller/OU1.kicad_sch": "a650f497f112500308426ea7827d08bc6dbb44bb130463370e5750137a33c4aa",
+    "hardware/kicad/MainBoards/Test-Controller/OUT2.kicad_sch": "4a0550655b79f2b7135092b2bef4404ae10aa8281a209b2fcd528be4e2088701",
+    "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb": "54f346a9bd8d84590356683723dcc649b2601897429a01b7920e011ac3eb759f",
+    "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_sch": "f8e05f1d45c668788e54cf3b1911a4d966a7eb46465c814dbd43232791a2ff7f"
+  },
+  "pcb_schematic_net_check": {
+    "source": "hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb",
+    "pcb_sha256": "54f346a9bd8d84590356683723dcc649b2601897429a01b7920e011ac3eb759f",
+    "schematic_sha256": "f8e05f1d45c668788e54cf3b1911a4d966a7eb46465c814dbd43232791a2ff7f",
+    "netlist_sha256": "328fd613b19a2dcf1a713e868ec5bde3c1b1e694e1133dfaf7477535430135fd",
+    "checked_pins": 147,
+    "mismatches": []
+  },
+  "physical_acceptance": "pending"
+}

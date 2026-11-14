@@ -8,14 +8,14 @@ zur Einrichtung mit der Software. Wähle die Aufbauanleitung passend zur tatsäc
 | --- | --- | --- |
 | DuoRelay | 0.3 | [Aufbau und elektrische Prüfung](../modules/duo-relay/assembly.md) |
 | ORing Power | 0.1.2 | [Web](../mainboards/oring-power/assembly.md) |
-| EnvNode Mini | 0.9.0 | [Web](../mainboards/mini/assembly.md) |
-| Weatherstation | 0.3.0 | [Web](../mainboards/weatherstation/assembly.md) |
+| EnvNode Mini | 0.10.0 | [Web](../mainboards/mini/assembly.md) |
+| Weatherstation | 0.4 | [Web](../mainboards/weatherstation/assembly.md) |
 | AnalogHydroPressure | 0.6 | [Web](../modules/analog-hydro-pressure/assembly.md) |
 | RainDetectorController | 0.4 | [Web](../sensors/rain-detector-controller/assembly.md) |
 | RainDetectorHead | 0.2 | [Web](../sensors/rain-detector-head/assembly.md) |
-| Test-Controller | 0.1 | [Web](../mainboards/test-controller/index.md) |
-| Input-Adapter | 0.1 | [Web](../mainboards/input-adapter/index.md) |
-| Modul-Adapter | 0.1 | [Web](../mainboards/module-adapter/index.md) |
+| Test-Controller | 0.2 | [Web](../mainboards/test-controller/assembly.md) |
+| ESP32 DevKitC Adapter | 0.3 | [Web](../mainboards/input-adapter/assembly.md) |
+| Modul-Adapter | 0.2 | [Web](../mainboards/module-adapter/assembly.md) |
 
 ## Teilanleitungen
 

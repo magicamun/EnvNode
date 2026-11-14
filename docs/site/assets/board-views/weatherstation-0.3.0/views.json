@@ -1,6 +1,6 @@
 {
   "id": "weatherstation-0.3.0",
-  "guide": "mainboards/weatherstation/index.md",
+  "guide": "mainboards/weatherstation/revisions/0.3.0.md",
   "pcb_source": "main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
   "pcb_sha256": "283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf",
   "back_components": [],

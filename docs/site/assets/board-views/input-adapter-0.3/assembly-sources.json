@@ -1,0 +1,19 @@
+{
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0",
+  "source_commit": "a245919334f2c747489a1f075857e04b6326a6b4",
+  "date": "2026-11-14",
+  "cad_files_sha256": {
+    "hardware/kicad/Adapter/Adapter ESP32 DevKitC/Adapter ESP32 DevKitC.kicad_pcb": "690462aa0233847e88de4612d28afd77e36be17e3710c710956899d09baf2758",
+    "hardware/kicad/Adapter/Adapter ESP32 DevKitC/Adapter ESP32 DevKitC.kicad_sch": "d3cbce955b97858cfb0af56a3ce8659b88cff737abc9541ac39376f672ec572a",
+    "hardware/kicad/Adapter/Adapter ESP32 DevKitC/INL.kicad_sch": "8ef110fa112ea4356762473c81e943bbf17f973b3b907475bfcf489e58fa9cf1"
+  },
+  "pcb_schematic_net_check": {
+    "source": "hardware/kicad/Adapter/Adapter ESP32 DevKitC/Adapter ESP32 DevKitC.kicad_pcb",
+    "pcb_sha256": "690462aa0233847e88de4612d28afd77e36be17e3710c710956899d09baf2758",
+    "schematic_sha256": "d3cbce955b97858cfb0af56a3ce8659b88cff737abc9541ac39376f672ec572a",
+    "netlist_sha256": "a78776437735671a9d6140d2d32a6c9e8cbd8f7bb193b02c6472e39a9a30f700",
+    "checked_pins": 120,
+    "mismatches": []
+  },
+  "physical_acceptance": "pending"
+}

@@ -1,5 +1,7 @@
 # Alte Revisionen
 
+- [Revision 0.9.0 (Web)](revisions/0.9.0.md)
+
 - [Revision 0.8.1 (Web)](revisions/0.8.1.md) · [PDF](../../assets/downloads/EnvNode_Mini_Rev0.8.1_Anleitung.pdf)
 
 [Zur aktuellen Dokumentation](index.md)

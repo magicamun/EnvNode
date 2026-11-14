@@ -1,0 +1,24 @@
+{
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0",
+  "source_commit": "a245919334f2c747489a1f075857e04b6326a6b4",
+  "date": "2026-11-14",
+  "cad_files_sha256": {
+    "hardware/kicad/MainBoards/EnvNode Mini/ADC.kicad_sch": "ff48076ff5b82145a34fdf95a253e811a9e1ee4cfc0862605f8838f099209a8e",
+    "hardware/kicad/MainBoards/EnvNode Mini/ESP32Core.kicad_sch": "7f6e2e2a8c92021bd73f1c4c7555a34124466d30ac3b51473269ae8001f170e5",
+    "hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb": "5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557",
+    "hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_sch": "e23d63de0ff0f61e0654bff5e1d76df7bccc1a441dc57dc565a2f921cabf1953",
+    "hardware/kicad/MainBoards/EnvNode Mini/PCB.kicad_sch": "ed19908459ebba8a0c0957a70928c7e5f7a28a7906c4574dc2a22a69e9126551",
+    "hardware/kicad/MainBoards/EnvNode Mini/Power.kicad_sch": "e31c045d9ccf359a5704e7f459512f885d122886f80038bd971eea93a1a3da0a",
+    "hardware/kicad/MainBoards/EnvNode Mini/SlotA.kicad_sch": "6acc11c48da4dce5fd633a443f920c35c617c4472b92fc866cc63f65c99d06f2",
+    "hardware/kicad/MainBoards/EnvNode Mini/SlotB.kicad_sch": "649abacbdd409d99a35778051c58a5466877563ed6fda753ce3fb25c828c579d"
+  },
+  "pcb_schematic_net_check": {
+    "source": "hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb",
+    "pcb_sha256": "5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557",
+    "schematic_sha256": "e23d63de0ff0f61e0654bff5e1d76df7bccc1a441dc57dc565a2f921cabf1953",
+    "netlist_sha256": "86853cf24507a18c99a366697d1ce2b25946670e2e863706135052f2387720ca",
+    "checked_pins": 126,
+    "mismatches": []
+  },
+  "physical_acceptance": "pending"
+}

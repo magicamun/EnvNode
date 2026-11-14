@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
-# Exact source boards for native PCB renderings.
+# Exact revision sources; component models and PCB layers are unchanged.
 - id: mini-0.9.0
-  guide: mainboards/mini/index.md
+  guide: mainboards/mini/revisions/0.9.0.md
   git_ref: 98704fb24562baecc5ebb4e343ff43aa8d2e41db
   git_path: hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb
   sha256: dedcc65f34321b88156fd7b93a440469cc25cc61f6da9eb185e67ea6d8039105
@@ -14,7 +14,7 @@
   pcb: main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb
   sha256: 5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557
 - id: weatherstation-0.3.0
-  guide: mainboards/weatherstation/index.md
+  guide: mainboards/weatherstation/revisions/0.3.0.md
   git_ref: 98704fb24562baecc5ebb4e343ff43aa8d2e41db
   git_path: hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb
   sha256: 283af20eac9fc8edefeb13afd8426694a9446b5cae547c0964a1795a77c9efaf
@@ -52,23 +52,26 @@
   hero_front: assets/images/rain-head-0.2/top.png
   hero_back: assets/images/rain-head-0.2/bottom.png
 - id: test-controller-0.1
-  guide: mainboards/test-controller/index.md
+  guide: mainboards/test-controller/revisions/0.1.md
   pcb: test-provision-board/hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb
   sha256: bb6f4f2f0c016539785691c14dda86cc97bd94ba72e7a92f6113fda60ea6bf07
   hero_front: assets/images/test-controller-0.1/top.png
   hero_back: assets/images/test-controller-0.1/bottom.png
+  archive: true
 - id: input-adapter-0.1
-  guide: mainboards/input-adapter/index.md
+  guide: mainboards/input-adapter/revisions/0.1.md
   pcb: test-provision-board/hardware/kicad/MainBoards/Input-Adapter/Input-Adapter.kicad_pcb
   sha256: 1a679c7b5ab490e0d10f3b440de0cc60bdbb0584cd9eb3dee55e2a8b1af4037c
   hero_front: assets/images/input-adapter-0.1/top.png
   hero_back: assets/images/input-adapter-0.1/bottom.png
+  archive: true
 - id: module-adapter-0.1
-  guide: mainboards/module-adapter/index.md
+  guide: mainboards/module-adapter/revisions/0.1.md
   pcb: test-provision-board/hardware/kicad/MainBoards/Module-Adapter/Module-Adapter.kicad_pcb
   sha256: 92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1
   hero_front: assets/images/module-adapter-0.1/top.png
   hero_back: assets/images/module-adapter-0.1/bottom.png
+  archive: true
 - id: duo-relay-0.3
   guide: modules/duo-relay/index.md
   shop_assets: true
@@ -136,3 +139,18 @@
   hero_front: assets/images/rain-head-assembly/page-01-view-1.png
   archive: true
   hero_back: assets/images/rain-head-assembly/page-03-view-1.png
+- id: test-controller-0.2
+  guide: mainboards/test-controller/assembly.md
+  git_ref: a245919334f2c747489a1f075857e04b6326a6b4
+  git_path: hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb
+  sha256: 54f346a9bd8d84590356683723dcc649b2601897429a01b7920e011ac3eb759f
+- id: input-adapter-0.3
+  guide: mainboards/input-adapter/assembly.md
+  git_ref: a245919334f2c747489a1f075857e04b6326a6b4
+  git_path: hardware/kicad/Adapter/Adapter ESP32 DevKitC/Adapter ESP32 DevKitC.kicad_pcb
+  sha256: 690462aa0233847e88de4612d28afd77e36be17e3710c710956899d09baf2758
+- id: module-adapter-0.2
+  guide: mainboards/module-adapter/assembly.md
+  git_ref: a245919334f2c747489a1f075857e04b6326a6b4
+  git_path: hardware/kicad/Adapter/Module-Adapter/Module-Adapter.kicad_pcb
+  sha256: 569a30064ae7300ef6752b4cecf7e8ecb0eb2f52f3bc74a066fd05888c14cd4b
