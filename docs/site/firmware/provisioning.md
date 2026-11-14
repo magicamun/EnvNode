@@ -1,7 +1,9 @@
 # Hardware identifizieren und provisionieren
 
-Die eigenständige Test-Firmware und die Trennung von Messbetrieb und externem
-Provisioning beschreibt [Test/Provisioning](test-provisioning/provisioning-profile.md).
+Diese Seite beschreibt Hardwareidentifikation und Provisioning in der normalen
+EnvNode-Firmware. Für das Schreiben externer EEPROMs mit der separaten
+Testhardware führt [Test/Provisioning](../test-provisioning/operation/provisioning-profile.md)
+durch den passenden Ablauf.
 
 Provisioning schreibt die Identität einer Baugruppe in deren EEPROM.
 Es ist bei leerem oder fehlerhaftem Datensatz nötig, nicht bei jedem Neustart.
@@ -116,35 +118,15 @@ eintragen, schreiben und rücklesen lassen und anschließend neu starten. Danach
 müssen Quelle `PortMap` (bei alten ENID-only-Daten `EEPROM`), Status `Valid`, Profil **EnvNode Mini**, Revision `0.8`
 und zwei Modulslots angezeigt werden.
 
-## Separate Tester-Firmware
+## Mit dem separaten Tester provisionieren
 
-Das PlatformIO-Ziel `testboard` ist eine eigene Anwendung mit eigener
-Konfiguration. Sein Menü **Provisioning** schreibt ein extern angeschlossenes
-Board- oder Modul-EEPROM; dafür ist **kein Neustart des Testers** erforderlich. Ein leeres
-oder nicht erkanntes EEPROM setzt keine Revision voraus: Board und Revision
-müssen ausdrücklich gewählt werden. Die passende Boardansicht dient zur Kontrolle.
+Die eigenständige Test-Firmware verwendet eine eigene Prüfvorrichtung und einen
+getrennten I²C-Provisioning-Bus. Der vollständige Ablauf einschließlich
+Verkabelung, Board-/Modulauswahl und Rücklesen steht zentral unter
+[Test/Provisioning: Provisioning und Profile](../test-provisioning/operation/provisioning-profile.md).
 
-Der separate Bus verwendet **SDA GPIO16 / SCL GPIO5**, das Board-EEPROM Adresse
-`0x50`, die Modul-EEPROMs `0x52` (A) und `0x53` (B). ESP32 des Prüflings entfernen und andere Versorgungen, Mess-Pigtails und
-Input-Adapter trennen, bevor der Provisioning-Stecker angeschlossen wird. Das
-Kabel vor einer passiven Durchgangsprüfung wieder abziehen; die Firmware schaltet
-dessen Versorgung nicht ab.
-
-Die **Anschlussprüfung kann real messen**; eine ausdrücklich gewählte Simulation
-ist davon getrennt. Board-Provisioning schreibt und liest das echte EEPROM und
-wurde an Weather 0.3 einschließlich Stromausfall erprobt. Die Abnahme der neuen
-Hardwareprofile und das reale Modul-Provisioning am Tester sind davon getrennt.
-Eine laufende Anschlussprüfung sperrt Provisioning.
-Für Module steht zunächst die DuoRelay-0.3-Vorlage zur Verfügung. Der Tester
-validiert und schreibt denselben ENHD-Datensatz wie die normale Firmware, ohne
-den Modulbetrieb zu unterstützen. Fehlende Treiber oder eine höhere erforderliche
-Betriebs-Firmwareversion verhindern das Provisioning nicht. Modulschreibvorgänge
-sind ebenfalls während einer Anschlussprüfung gesperrt.
-
-Die Prüfprofile und Boardbilder werden über docs.envnode.de bereitgestellt.
-Eingebaute Profile bleiben ohne Netz verfügbar. Die unabhängige Signaturprüfung
-ist noch nicht implementiert; der aktuelle Abruf nutzt geprüftes HTTPS und
-SHA-256-Inhaltsprüfungen.
+Für einen neuen Tester beginne mit der
+[Tester-Inbetriebnahme](../test-provisioning/commissioning/index.md).
 
 ## Selbstbeschreibende Portzuordnung
 

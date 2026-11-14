@@ -9,8 +9,8 @@ keine I²C-Verbindung.
 
 | Bus / Anschluss | Nutzung |
 | --- | --- |
-| J2-Testpigtail | Einzelne Kontakte als LOW/HIGH-Messsignal auswählen |
-| I2C0-Provisioning-Anschluss | Echter I²C-Master: SDA GPIO16, SCL GPIO5, EEPROM 0x50 |
+| Multiplexer-Testpigtail | Einzelne Kontakte als LOW/HIGH-Messsignal auswählen; J2 bei Controller 0.1, I2C1/I2C2 bei 0.2 |
+| Getrennter Provisioning-Anschluss | Echter I²C-Master: SDA GPIO16, SCL GPIO5, Board-EEPROM 0x50; I2C0 bei Controller 0.1, I2C0_1/I2C0_2 bei 0.2 |
 
 Nicht beide Arbeitsabläufe gleichzeitig verkabeln. Vor einem Wechsel Versorgung
 trennen und die Verkabelung gezielt ändern. Eine Anzeige oder Profilauswahl allein
@@ -42,7 +42,7 @@ Board ist dadurch noch nicht elektrisch geprüft. Die Bestätigung bezieht sich 
 das externe Ziel; der Test-Controller muss anschließend nicht neu starten.
 Seit 0.13.0 nutzt der Tester denselben aktuellen Provisioning-Dialog und Core wie
 EnvNode. EEPROM-Anzeige, explizite Übernahme, Vorher/Nachher-Vergleich, Profile und
-Schreib-/Rückleseprüfung folgen dem [gemeinsamen Ablauf](../provisioning.md).
+Schreib-/Rückleseprüfung folgen dem [gemeinsamen Ablauf](../../firmware/provisioning.md).
 Die Identitäts-/Portprofile sind von den Durchgangs-Prüfmatrizen getrennt.
 
 ## Modul über das Mainboard provisionieren
@@ -81,7 +81,7 @@ abgenommen gekennzeichnet.
 
 Ein Remote-Prüfprofil ändert weder die Verdrahtung des Adapters noch die
 Hardwareansteuerung der normalen EnvNode-Anwendung. Ein neuer Adapter braucht ein
-eigenes Fixture-Mapping. Die [Hardwareauswahl](hardwareprofile.md) unterstützt
+eigenes Fixture-Mapping. Die [Hardwareauswahl](../commissioning/hardwareprofile.md) unterstützt
 bereits Legacy und ESP32 DevKitC; S3 folgt später.
 
 ## Remote-Prüfprofile

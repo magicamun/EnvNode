@@ -22,6 +22,7 @@ Weg der Daten bis zu einer externen Anwendung.
 
 [Ich möchte messen](applications/measurements.md){ .md-button }
 [Ich möchte Relais schalten](firmware/example-relay.md){ .md-button }
+[Ich möchte Hardware prüfen oder provisionieren](test-provisioning/index.md){ .md-button }
 
 Wähle zuerst die gewünschte Messgröße und einen dafür unterstützten Sensor.
 Die Anwendungsseiten führen zur passenden Einrichtung und Bedienung.
@@ -40,7 +41,8 @@ sind getrennt davon erreichbar.
 - [Sensorhardware](sensors/index.md): Baugruppen, Sensoranschlüsse und technische Details.
 - [Module](modules/index.md): Erweiterungen für zusätzliche Aufgaben.
 - [Displays](displays/index.md): Anzeigen und deren Konfiguration.
-- [Firmware](firmware/overview.md): EnvNode sowie Test/Provisioning mit Hardware-Selbsttests und Mainboardprüfung.
+- [Firmware](firmware/overview.md): EnvNode-Firmware bedienen und herunterladen.
+- [Test/Provisioning](test-provisioning/index.md): eigene Testhardware aufbauen, in Betrieb nehmen, Mainboards prüfen und Identitäten schreiben.
 
 ## Umfang dieser Dokumentation
 

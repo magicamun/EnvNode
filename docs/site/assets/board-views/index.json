@@ -286,7 +286,7 @@
     },
     {
       "id": "test-controller-0.1",
-      "guide": "mainboards/test-controller/revisions/0.1.md",
+      "guide": "test-provisioning/hardware/test-controller/revisions/0.1.md",
       "archive": true,
       "metadata": "assets/board-views/test-controller-0.1/views.json",
       "front": {
@@ -323,7 +323,7 @@
     },
     {
       "id": "input-adapter-0.1",
-      "guide": "mainboards/input-adapter/revisions/0.1.md",
+      "guide": "test-provisioning/hardware/input-adapter/revisions/0.1.md",
       "archive": true,
       "metadata": "assets/board-views/input-adapter-0.1/views.json",
       "front": {
@@ -354,7 +354,7 @@
     },
     {
       "id": "module-adapter-0.1",
-      "guide": "mainboards/module-adapter/revisions/0.1.md",
+      "guide": "test-provisioning/hardware/module-adapter/revisions/0.1.md",
       "archive": true,
       "metadata": "assets/board-views/module-adapter-0.1/views.json",
       "front": {
@@ -711,7 +711,7 @@
     },
     {
       "id": "test-controller-0.2",
-      "guide": "mainboards/test-controller/assembly.md",
+      "guide": "test-provisioning/hardware/test-controller/assembly.md",
       "archive": false,
       "metadata": "assets/board-views/test-controller-0.2/views.json",
       "front": {
@@ -748,7 +748,7 @@
     },
     {
       "id": "input-adapter-0.3",
-      "guide": "mainboards/input-adapter/assembly.md",
+      "guide": "test-provisioning/hardware/input-adapter/assembly.md",
       "archive": false,
       "metadata": "assets/board-views/input-adapter-0.3/views.json",
       "front": {
@@ -779,7 +779,7 @@
     },
     {
       "id": "module-adapter-0.2",
-      "guide": "mainboards/module-adapter/assembly.md",
+      "guide": "test-provisioning/hardware/module-adapter/assembly.md",
       "archive": false,
       "metadata": "assets/board-views/module-adapter-0.2/views.json",
       "front": {

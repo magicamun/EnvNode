@@ -1,6 +1,6 @@
 {
   "id": "input-adapter-0.3",
-  "guide": "mainboards/input-adapter/assembly.md",
+  "guide": "test-provisioning/hardware/input-adapter/assembly.md",
   "pcb_source": "a245919334f2c747489a1f075857e04b6326a6b4:hardware/kicad/Adapter/Adapter ESP32 DevKitC/Adapter ESP32 DevKitC.kicad_pcb",
   "pcb_sha256": "690462aa0233847e88de4612d28afd77e36be17e3710c710956899d09baf2758",
   "back_components": [],

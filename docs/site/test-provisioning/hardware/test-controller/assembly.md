@@ -17,7 +17,7 @@ ESP32-DevKitC-Steuerplatine für passive Mainboardtests mit separater I²C-Provi
 
 **Dokumentstand 14. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
 
-[Anleitung als PDF](../../assets/downloads/Test_Controller_Rev0.2_Anleitung.pdf){ .md-button }
+[Anleitung als PDF](../../../assets/downloads/Test_Controller_Rev0.2_Anleitung.pdf){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
 
 !!! warning "DUT nur spannungsfrei testen"
@@ -25,15 +25,15 @@ ESP32-DevKitC-Steuerplatine für passive Mainboardtests mit separater I²C-Provi
 
 ### Weiter zur Software-Inbetriebnahme
 
-Nach der elektrischen Prüfung folgen [Tester einrichten](../../firmware/test-provisioning/inbetriebnahme.md),
-[Controller und Adapter auswählen](../../firmware/test-provisioning/hardwareprofile.md)
-und die [geführten Selbsttests](../../firmware/test-provisioning/selbsttests.md).
+Nach der elektrischen Prüfung folgen [Tester einrichten](../../commissioning/index.md),
+[Controller und Adapter auswählen](../../commissioning/hardwareprofile.md)
+und die [geführten Selbsttests](../../commissioning/selbsttests.md).
 Die gemeinsame Softwareanleitung wird hier nicht wiederholt.
 
 ## 3D-Ansicht
 
-![test-controller-0.2: 3D-Vorderseite](../../assets/board-views/test-controller-0.2/3d-front.png){ .hero-paired-view }
-![test-controller-0.2: 3D-Rückseite](../../assets/board-views/test-controller-0.2/3d-back.png){ .hero-paired-view }
+![test-controller-0.2: 3D-Vorderseite](../../../assets/board-views/test-controller-0.2/3d-front.png){ .hero-paired-view }
+![test-controller-0.2: 3D-Rückseite](../../../assets/board-views/test-controller-0.2/3d-back.png){ .hero-paired-view }
 
 Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
@@ -69,15 +69,15 @@ U1/U2 sind **CD74HC4067M**, SOIC-24W; kein ungeprüfter HCT-Ersatz. U3 sitzt in 
 
 ### Vorderseite: Bestückungsplan
 
-![test-controller-0.2: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/test-controller-0.2/assembly-front.png){ .assembly-plan }
+![test-controller-0.2: senkrechter Bestückungsplan Vorderseite](../../../assets/board-views/test-controller-0.2/assembly-front.png){ .assembly-plan }
 
-[Plan als PNG](../../assets/board-views/test-controller-0.2/assembly-front.png){ .md-button }
+[Plan als PNG](../../../assets/board-views/test-controller-0.2/assembly-front.png){ .md-button }
 
 ### Rückseite: Bestückungsplan
 
-![test-controller-0.2: senkrechter Bestückungsplan Rückseite](../../assets/board-views/test-controller-0.2/assembly-back.png){ .assembly-plan }
+![test-controller-0.2: senkrechter Bestückungsplan Rückseite](../../../assets/board-views/test-controller-0.2/assembly-back.png){ .assembly-plan }
 
-[Plan als PNG](../../assets/board-views/test-controller-0.2/assembly-back.png){ .md-button }
+[Plan als PNG](../../../assets/board-views/test-controller-0.2/assembly-back.png){ .md-button }
 
 Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
 
@@ -205,7 +205,7 @@ Test-Firmware **0.15.0** unterstützt Controller 0.2 einschließlich Reset-Prüf
 reale Multiplexer-/ADC-Ansteuerung, geführte Selbsttests und getrenntes Provisioning.
 Controller **0.2 (TP2)** ausdrücklich auswählen. Die Input-Selbsttests speisen
 über TP2/2 TEST_DRIVE; Output-Selbsttests verwenden TP2/3 COM_IN.
-Die [Softwareanleitung](../../firmware/test-provisioning/hardwareprofile.md)
+Die [Softwareanleitung](../../commissioning/hardwareprofile.md)
 beschreibt die jeweils einzeln zu steckenden Brücken und die 64 Output-Selbsttestfälle.
 
 Die gespeicherte CAD-Prüfung vom 9. November 2026 nennt ERC 0, DRC 0,
@@ -232,8 +232,8 @@ die physische Abnahme ist getrennt durchzuführen.
 | Test-Controller.kicad_pcb | `54f346a9bd8d84590356683723dcc649b2601897429a01b7920e011ac3eb759f` |
 | Test-Controller.kicad_sch | `f8e05f1d45c668788e54cf3b1911a4d966a7eb46465c814dbd43232791a2ff7f` |
 
-[Alle CAD-Dateihashes und Netzlistenabgleich](../../assets/board-views/test-controller-0.2/assembly-sources.json) ·
-[Rendernachweis](../../assets/board-views/test-controller-0.2/views.json).
+[Alle CAD-Dateihashes und Netzlistenabgleich](../../../assets/board-views/test-controller-0.2/assembly-sources.json) ·
+[Rendernachweis](../../../assets/board-views/test-controller-0.2/views.json).
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0,
-siehe [Lizenz](../../license.md). Drittanbieterrechte an Modellen bleiben bestehen.
+siehe [Lizenz](../../../license.md). Drittanbieterrechte an Modellen bleiben bestehen.

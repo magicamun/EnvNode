@@ -1,6 +1,6 @@
 {
   "id": "module-adapter-0.1",
-  "guide": "mainboards/module-adapter/revisions/0.1.md",
+  "guide": "test-provisioning/hardware/module-adapter/revisions/0.1.md",
   "pcb_source": "test-provision-board/hardware/kicad/MainBoards/Module-Adapter/Module-Adapter.kicad_pcb",
   "pcb_sha256": "92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1",
   "back_components": [

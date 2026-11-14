@@ -92,17 +92,6 @@ nav:
           - Übersicht & Pinouts: interfaces/index.md
           - Modulschnittstelle im Detail: concepts/module-interface.md
       - Kompatibilität: compatibility.md
-      - Testhardware:
-          - Übersicht: hardware/testhardware/index.md
-          - Test-Controller:
-              - Übersicht: mainboards/test-controller/index.md
-              - Aufbau und elektrische Prüfung: mainboards/test-controller/assembly.md
-          - Input-Adapter:
-              - Übersicht: mainboards/input-adapter/index.md
-              - Aufbau und elektrische Prüfung: mainboards/input-adapter/assembly.md
-          - Modul-Adapter:
-              - Übersicht: mainboards/module-adapter/index.md
-              - Aufbau und elektrische Prüfung: mainboards/module-adapter/assembly.md
   - Firmware:
       - Übersicht: firmware/overview.md
       - Downloads: firmware/downloads.md
@@ -121,13 +110,26 @@ nav:
           - Wartung und Diagnose: firmware/maintenance.md
           - Beispiele:
               - Mini mit SHT4x: firmware/example-measurement.md
-      - Test/Provisioning:
-          - Übersicht und Stand: firmware/test-provisioning/index.md
-          - Firmware und Inbetriebnahme: firmware/test-provisioning/inbetriebnahme.md
-          - Controller und Adapter: firmware/test-provisioning/hardwareprofile.md
-          - Hardware-Selbsttests: firmware/test-provisioning/selbsttests.md
-          - Mainboards prüfen: firmware/test-provisioning/board-pruefung.md
-          - Provisioning und Profile: firmware/test-provisioning/provisioning-profile.md
+  - Test/Provisioning:
+      - Übersicht: test-provisioning/index.md
+      - Hardware und Aufbau:
+          - Übersicht: test-provisioning/hardware/index.md
+          - Test-Controller:
+              - Übersicht: test-provisioning/hardware/test-controller/index.md
+              - Aufbau und elektrische Prüfung: test-provisioning/hardware/test-controller/assembly.md
+          - ESP32 DevKitC Adapter:
+              - Übersicht: test-provisioning/hardware/input-adapter/index.md
+              - Aufbau und elektrische Prüfung: test-provisioning/hardware/input-adapter/assembly.md
+          - Modul-Adapter:
+              - Übersicht: test-provisioning/hardware/module-adapter/index.md
+              - Aufbau und elektrische Prüfung: test-provisioning/hardware/module-adapter/assembly.md
+      - Inbetriebnahme:
+          - Firmware und Versorgung: test-provisioning/commissioning/index.md
+          - Controller und Adapter auswählen: test-provisioning/commissioning/hardwareprofile.md
+          - Hardware-Selbsttests: test-provisioning/commissioning/selbsttests.md
+      - Bedienung:
+          - Mainboards prüfen: test-provisioning/operation/board-pruefung.md
+          - Provisioning und Profile: test-provisioning/operation/provisioning-profile.md
   - Aufbauanleitungen:
       - Übersicht: guides/index.md
       - Dokumentationsstand: guides/status.md

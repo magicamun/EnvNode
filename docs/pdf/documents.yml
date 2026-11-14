@@ -144,7 +144,7 @@
   - 44.78x37.25
   - ENP-00139
   - 12 Ohm
-- source: mainboards/test-controller/revisions/0.1.md
+- source: test-provisioning/hardware/test-controller/revisions/0.1.md
   target: assets/downloads/Test_Controller_Rev0.1_Anleitung.pdf
   preview: docs/pdf/reference/Test_Controller_Rev0.1_Anleitung.pdf
   images: docs/site/assets/images/test-controller-0.1
@@ -154,7 +154,7 @@
   - R9
   - Simulation
   archive: true
-- source: mainboards/input-adapter/revisions/0.1.md
+- source: test-provisioning/hardware/input-adapter/revisions/0.1.md
   target: assets/downloads/Input_Adapter_Rev0.1_Anleitung.pdf
   preview: docs/pdf/reference/Input_Adapter_Rev0.1_Anleitung.pdf
   images: docs/site/assets/images/input-adapter-0.1
@@ -165,7 +165,7 @@
   - I13
   - '40'
   archive: true
-- source: mainboards/module-adapter/revisions/0.1.md
+- source: test-provisioning/hardware/module-adapter/revisions/0.1.md
   target: assets/downloads/Module_Adapter_Rev0.1_Anleitung.pdf
   preview: docs/pdf/reference/Module_Adapter_Rev0.1_Anleitung.pdf
   images: docs/site/assets/images/module-adapter-0.1
@@ -194,7 +194,7 @@
   - J5
   - GPIO33
   - J1-J4
-- source: mainboards/test-controller/assembly.md
+- source: test-provisioning/hardware/test-controller/assembly.md
   target: assets/downloads/Test_Controller_Rev0.2_Anleitung.pdf
   preview: docs/pdf/reference/Test_Controller_Rev0.2_Anleitung.pdf
   images: docs/site/assets/board-views/test-controller-0.2
@@ -204,7 +204,7 @@
   - RST2
   - GPIO34
   - CD74HC4067
-- source: mainboards/input-adapter/assembly.md
+- source: test-provisioning/hardware/input-adapter/assembly.md
   target: assets/downloads/ESP32_DevKitC_Adapter_Rev0.3_Anleitung.pdf
   preview: docs/pdf/reference/ESP32_DevKitC_Adapter_Rev0.3_Anleitung.pdf
   images: docs/site/assets/board-views/input-adapter-0.3
@@ -215,7 +215,7 @@
   - I15
   - I0
   - '40'
-- source: mainboards/module-adapter/assembly.md
+- source: test-provisioning/hardware/module-adapter/assembly.md
   target: assets/downloads/Module_Adapter_Rev0.2_Anleitung.pdf
   preview: docs/pdf/reference/Module_Adapter_Rev0.2_Anleitung.pdf
   images: docs/site/assets/board-views/module-adapter-0.2

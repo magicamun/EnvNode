@@ -10,6 +10,8 @@ Hier findest du die Hardware von EnvNode, ihre Anschlüsse und die jeweils dokum
 | [Displays](../displays/index.md) | Unterstützte Anzeigen und Anschluss |
 | [HW-Schnittstellen](../interfaces/index.md) | Übersicht, Pinouts und Modulschnittstelle im Detail |
 | [Kompatibilität](../compatibility.md) | Passende Hardware und Firmware auswählen |
-| [Testhardware](testhardware/index.md) | Test-Controller, Input-Adapter und Modul-Adapter |
 
 [Aufbauanleitungen](../guides/index.md) · [Dokumentationsstand](../guides/status.md) · [Alte Revisionen](../guides/old-revisions.md)
+
+Die eigene Prüfvorrichtung mit Controller und Adaptern findest du unter
+[Test/Provisioning: Hardware und Aufbau](../test-provisioning/hardware/index.md).

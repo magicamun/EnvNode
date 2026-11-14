@@ -132,9 +132,50 @@ def on_files(files, config, **kwargs):
     return files
 
 
+def write_redirects(config):
+    """Keep moved public URLs working without duplicate Markdown/search pages."""
+    import html
+    import json
+    import posixpath
+    from urllib.parse import urljoin
+    import yaml
+
+    root = Path(config.config_file_path).resolve().parent
+    site = Path(config.site_dir).resolve()
+    redirects = yaml.safe_load((root / "docs/redirects.yml").read_text()) or {}
+    for old, new in redirects.items():
+        if not old.endswith("/") or not new.endswith("/") or old == new:
+            raise ValueError(f"Invalid documentation redirect: {old} -> {new}")
+        output = (site / old / "index.html").resolve()
+        target = (site / new / "index.html").resolve()
+        if not output.is_relative_to(site) or not target.is_relative_to(site):
+            raise ValueError("Documentation redirect must stay within the site")
+        marker = "<!-- EnvNode documentation redirect -->"
+        if (output.exists() and marker not in output.read_text()) or not target.is_file():
+            raise ValueError(f"Redirect collision or missing target: {old} -> {new}")
+        relative = posixpath.relpath(new.rstrip("/"), old.rstrip("/")) + "/"
+        escaped = html.escape(relative, quote=True)
+        canonical = html.escape(urljoin(config.site_url, new), quote=True)
+        script = ("const target = new URL(" + json.dumps(relative) + ", location.href);"
+                  "target.search = location.search; target.hash = location.hash;"
+                  "location.replace(target.href);")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            '<!doctype html>' + marker + '<html lang="de"><head><meta charset="utf-8">'
+            '<meta name="robots" content="noindex">'
+            '<title>Dokumentation verschoben</title>'
+            '<link rel="canonical" href="' + canonical + '">'
+            '<meta http-equiv="refresh" content="0; url=' + escaped + '">'
+            '<script>' + script + '</script></head><body>'
+            '<p>Diese Anleitung findest du unter <a href="' + escaped + '">'
+            'Test/Provisioning</a>.</p></body></html>'
+        )
+
+
 # Reserved downloads are replaced after HTML generation. Any PDF error prevents
 # a successful build and therefore prevents deployment of incomplete artifacts.
 def on_post_build(config, **kwargs):
+    write_redirects(config)
     if _preview:
         return
     import importlib.util

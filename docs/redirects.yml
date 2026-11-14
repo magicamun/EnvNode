@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: LicenseRef-EnvNode-Use-and-Redistribution-1.0
+# Permanent documentation moves; preserve public links and their fragments.
+firmware/test-provisioning/: test-provisioning/
+firmware/test-provisioning/board-pruefung/: test-provisioning/operation/board-pruefung/
+firmware/test-provisioning/hardwareprofile/: test-provisioning/commissioning/hardwareprofile/
+firmware/test-provisioning/inbetriebnahme/: test-provisioning/commissioning/
+firmware/test-provisioning/provisioning-profile/: test-provisioning/operation/provisioning-profile/
+firmware/test-provisioning/selbsttests/: test-provisioning/commissioning/selbsttests/
+hardware/testhardware/: test-provisioning/hardware/
+mainboards/input-adapter/: test-provisioning/hardware/input-adapter/
+mainboards/input-adapter/assembly/: test-provisioning/hardware/input-adapter/assembly/
+mainboards/input-adapter/old-revisions/: test-provisioning/hardware/input-adapter/old-revisions/
+mainboards/input-adapter/revisions/0.1/: test-provisioning/hardware/input-adapter/revisions/0.1/
+mainboards/module-adapter/: test-provisioning/hardware/module-adapter/
+mainboards/module-adapter/assembly/: test-provisioning/hardware/module-adapter/assembly/
+mainboards/module-adapter/old-revisions/: test-provisioning/hardware/module-adapter/old-revisions/
+mainboards/module-adapter/revisions/0.1/: test-provisioning/hardware/module-adapter/revisions/0.1/
+mainboards/test-controller/: test-provisioning/hardware/test-controller/
+mainboards/test-controller/assembly/: test-provisioning/hardware/test-controller/assembly/
+mainboards/test-controller/old-revisions/: test-provisioning/hardware/test-controller/old-revisions/
+mainboards/test-controller/revisions/0.1/: test-provisioning/hardware/test-controller/revisions/0.1/

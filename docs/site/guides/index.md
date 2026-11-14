@@ -13,9 +13,9 @@ zur Einrichtung mit der Software. Wähle die Aufbauanleitung passend zur tatsäc
 | AnalogHydroPressure | 0.6 | [Web](../modules/analog-hydro-pressure/assembly.md) |
 | RainDetectorController | 0.4 | [Web](../sensors/rain-detector-controller/assembly.md) |
 | RainDetectorHead | 0.2 | [Web](../sensors/rain-detector-head/assembly.md) |
-| Test-Controller | 0.2 | [Web](../mainboards/test-controller/assembly.md) |
-| ESP32 DevKitC Adapter | 0.3 | [Web](../mainboards/input-adapter/assembly.md) |
-| Modul-Adapter | 0.2 | [Web](../mainboards/module-adapter/assembly.md) |
+
+Die Aufbauanleitungen der Prüfvorrichtung stehen gesammelt unter
+[Test/Provisioning: Hardware und Aufbau](../test-provisioning/hardware/index.md).
 
 ## Teilanleitungen
 

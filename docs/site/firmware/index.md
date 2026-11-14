@@ -1,6 +1,6 @@
 # EnvNode-Firmware bedienen
 
-Die separate Prüfanwendung ist unter [Test/Provisioning](test-provisioning/index.md) dokumentiert.
+Die separate Prüfanwendung ist unter [Test/Provisioning](../test-provisioning/index.md) dokumentiert.
 
 Diese Anleitung führt von der ersten Verbindung mit EnvNode bis zu Messung,
 Schalten, Anzeige und MQTT. Die einzelnen Kapitel nennen bei Bedarf ihren

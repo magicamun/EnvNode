@@ -10,9 +10,9 @@
 
 - [RainDetectorController](../sensors/rain-detector-controller/old-revisions.md)
 - [RainDetectorHead](../sensors/rain-detector-head/old-revisions.md)
-- [Test-Controller](../mainboards/test-controller/old-revisions.md)
-- [Input-Adapter](../mainboards/input-adapter/old-revisions.md)
-- [Modul-Adapter](../mainboards/module-adapter/old-revisions.md)
+
+Frühere Revisionen der Prüfvorrichtung sind bei den jeweiligen Baugruppen unter
+[Test/Provisioning: Hardware und Aufbau](../test-provisioning/hardware/index.md) verlinkt.
 
 ## Historische Boardprojekte
 

@@ -9,6 +9,7 @@ on:
       - 'tools/firmware_downloads.py'
       - 'docs/pdf/**'
       - 'docs/board-views.yml'
+      - 'docs/redirects.yml'
       - 'docs/PRODUCT_ASSET_CONTRACT.md'
       - 'tools/docs_pdf.py'
       - 'tools/product_assets.py'

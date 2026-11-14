@@ -1,43 +1,54 @@
 ---
-title: Modul-Adapter 0.1 - Bestückung und Inbetriebnahme
+title: Modul-Adapter 0.2 - Aufbau und elektrische Prüfung
 pdf:
-  id: module-adapter-0.1
+  id: module-adapter-0.2
   title: Modul-Adapter
-  subtitle: Bestückungs- und Bring-up-Anleitung
-  hardware_revision: '0.1'
-  document_version: '1.2'
-  document_date: '2026-10-28'
+  subtitle: Aufbau und elektrische Prüfung
+  hardware_revision: '0.2'
+  document_version: '1.0'
+  document_date: '2026-11-14'
   source_document_date: '2026-10-28'
-  status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
+  status: CAD-Stand dokumentiert - physische Abnahme ausstehend
 ---
 
-# Modul-Adapter 0.1 - Bestückung und Inbetriebnahme
+# Modul-Adapter 0.2 - Aufbau und elektrische Prüfung
 
 Passiver 14-poliger Adapter zwischen Test-Controller J3 und dem DUT-Modulslot. Kein funktionales Sensormodul, kein EEPROM und keine lokale Versorgung: J4.n ist direkt mit J1.n verbunden.
 
-**Dokumentation abgeschlossen am 28. Oktober 2026.** Der Fertigungs- und Erprobungsstand wird im Abschlusskapitel getrennt geführt.
+**Dokumentstand 14. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
 
-[Anleitung als PDF](../../../assets/downloads/Module_Adapter_Rev0.1_Anleitung.pdf){ .md-button }
-[Alte Revisionen](../old-revisions.md){ .md-button }
+[Anleitung als PDF](../../../assets/downloads/Module_Adapter_Rev0.2_Anleitung.pdf){ .md-button }
+[Alte Revisionen](old-revisions.md){ .md-button }
 
 !!! warning "DUT nur spannungsfrei testen"
     Vor dem Kontaktieren alle DUT-Versorgungen und USB-Verbindungen trennen, den ESP32 aus dem DUT ziehen und das separate Provisioning-Kabel abziehen. Der Test Controller darf für seine eigene Elektronik versorgt sein. DUT-Masse und DUT-3,3-V-Referenz bleiben Messkontakte; nicht pauschal mit der Tester-Versorgung verbinden.
 
+### Weiter zur Software-Inbetriebnahme
+
+Nach der elektrischen Prüfung folgen [Tester einrichten](../../commissioning/index.md),
+[Controller und Adapter auswählen](../../commissioning/hardwareprofile.md)
+und die [geführten Selbsttests](../../commissioning/selbsttests.md).
+Die gemeinsame Softwareanleitung wird hier nicht wiederholt.
+
+Der IDC-Header J4 ist für die Kabelführung gedreht. Die elektrische Zuordnung
+bleibt **J4.n → J1.n**, ohne Umnummerierung. Ein gerades 1:1-IDC-Kabel verwenden
+und alle 14 Adern messen; die Steckrichtung nicht aus einem Bild der Rev. 0.1 ableiten.
+
 ## 3D-Ansicht
 
-![module-adapter-0.1: 3D-Vorderseite](../../../assets/images/module-adapter-0.1/top.png){ .hero-paired-view }
-![module-adapter-0.1: 3D-Rückseite](../../../assets/images/module-adapter-0.1/bottom.png){ .hero-paired-view }
+![module-adapter-0.2: 3D-Vorderseite](../../../assets/board-views/module-adapter-0.2/3d-front.png){ .hero-paired-view }
+![module-adapter-0.2: 3D-Rückseite](../../../assets/board-views/module-adapter-0.2/3d-back.png){ .hero-paired-view }
 
 Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
 ## 1. Teile und Vorbereitung
 | Ref. | Anz. / Einheit | Wert / Funktion | Artikel |
 | --- | --- | --- | --- |
-| PCB | 1 | Module-Adapter Rev.0.1 | ENP-00157 |
+| PCB | 1 | Module-Adapter Rev.0.2 | Revisionsgebundene Artikelzuordnung prüfen |
 | J4 | 1 | WSL 14G | ENP-00151 |
 | J1 | 1 | THT 2x7 auf Unterseite; keine Kabelbuchse | ENP-00059 |
 
-ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
+Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
 J1 ist eine Bottom-Mount-THT-Stiftleiste auf der Unterseite, keine Kabelbuchse. Zum Test Controller gehört ein passendes kodiertes 14-poliges 1:1-IDC-Kabel. H1 ist 2,7 mm für M2,5; isolierende Abstützung passend zum realen Aufbau wählen.
 
@@ -45,15 +56,15 @@ J1 ist eine Bottom-Mount-THT-Stiftleiste auf der Unterseite, keine Kabelbuchse. 
 
 ### Vorderseite: Bestückungsplan
 
-![module-adapter-0.1: senkrechter Bestückungsplan Vorderseite](../../../assets/board-views/module-adapter-0.1/assembly-front.png){ .assembly-plan }
+![module-adapter-0.2: senkrechter Bestückungsplan Vorderseite](../../../assets/board-views/module-adapter-0.2/assembly-front.png){ .assembly-plan }
 
-[Plan als PNG](../../../assets/board-views/module-adapter-0.1/assembly-front.png){ .md-button }
+[Plan als PNG](../../../assets/board-views/module-adapter-0.2/assembly-front.png){ .md-button }
 
 ### Rückseite: Bestückungsplan
 
-![module-adapter-0.1: senkrechter Bestückungsplan Rückseite](../../../assets/board-views/module-adapter-0.1/assembly-back.png){ .assembly-plan }
+![module-adapter-0.2: senkrechter Bestückungsplan Rückseite](../../../assets/board-views/module-adapter-0.2/assembly-back.png){ .assembly-plan }
 
-[Plan als PNG](../../../assets/board-views/module-adapter-0.1/assembly-back.png){ .md-button }
+[Plan als PNG](../../../assets/board-views/module-adapter-0.2/assembly-back.png){ .md-button }
 
 Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
 
@@ -134,20 +145,30 @@ Zusätzlich je Pin 1–14 Durchgang J4.n/J1.n, Kabelader und erwarteten DUT-Pfad
 | Falscher Slotbefund | EEPROM_A0, slotabhängiges Profil, AUX-/CS-Zuordnung |
 | Versorgung oder unzulässiger Prüfstrom am DUT | Fremdquelle, falsches Kabel, aktivierte parallele Ausgänge |
 
-Der Adapter kann mit dem Multimeter vollständig auf 1:1-Durchgang geprüft werden. Ein automatischer Gesamttest setzt zusätzlich reale Multiplexer-/ADC-Firmware und validierte Testprofile voraus; der bestehende Simulationsstand bestätigt dies nicht.
+Der Adapter kann mit dem Multimeter vollständig auf 1:1-Durchgang geprüft werden. Für den automatischen Gesamttest die reale Test-Firmware mit passendem Controller-, Adapter- und Prüflingsprofil verwenden. Der passive Modul-Adapter hat kein eigenes Softwareprofil; seine Prüfung erfolgt über die 14 Modul-Testkanäle. Die physische Abnahme der neuen Steckeranordnung bleibt erforderlich.
 
-## 9. Abschluss
+## 9. Abschluss und Prüfstand
 
-Die Dokumentation ist redaktionell abgeschlossen. Quellen und Pad-Netze wurden gegen eine neu exportierte Schaltplan-Netzliste abgeglichen; die gemeinsamen belegten Pins stimmen überein. Es wurde für diese Anleitung kein neuer vollständiger ERC-/DRC-Lauf und kein physischer Bring-up durchgeführt. Mechanische Passprobe, Schaltschwellen, Teststromrichtung, Einschwingzeit und Fertigungsqualität sind am Aufbau zu protokollieren.
+Die elektrischen Zuordnungen wurden gegen den gespeicherten PCB-Stand und,
+soweit anwendbar, die Firmware-Prüfprofile abgeglichen. Diese Dokumentation
+bestätigt keine Fertigung oder physische Abnahme der neuen Revision.
+Versorgung, Lötstellen, Steckrichtung, Kontaktmechanik und jeden Messpfad am
+realen Aufbau prüfen und im Protokoll festhalten. Frühere Betriebsnachweise
+gehören weiter zum jeweiligen alten Hardwarestand.
 
 ### Quellenstand
 
-Dokumentiert ist der gespeicherte KiCad-Stand aus `test-provision-board`, Projekt `Module-Adapter`, Basiscommit `08f55b1810812b1deb1e877ef2f7853d0797d5ad`. Die Prüfsummen bestimmen den tatsächlichen Arbeitsstand einschließlich lokaler Änderungen; der Commit allein beschreibt diese nicht.
+Die Anleitung ist an die folgenden Hauptdateien gebunden. Der neue Netzlistenabgleich
+mit der gespeicherten Platine bestätigt die gemeinsamen elektrischen Pinzuordnungen;
+die physische Abnahme ist getrennt durchzuführen.
 
 | Quelle | SHA-256 |
 | --- | --- |
-| Module-Adapter.kicad_pcb | `92b226456e13fd003e9b2b550233a6c4a4f5a1368186fd2fb4c23098fef7e0a1` |
-| Module-Adapter.kicad_pro | `b05cd35e919ecc45781aa0d66b834ad57a318423e2fb8da1c2ea52c689cbae0a` |
+| Module-Adapter.kicad_pcb | `569a30064ae7300ef6752b4cecf7e8ecb0eb2f52f3bc74a066fd05888c14cd4b` |
 | Module-Adapter.kicad_sch | `e32ba198aa4b170ad6ad0eee55a2898b225467d8caefdfbe51abdc62552ece17` |
 
-[Rendernachweis](../../../assets/images/module-adapter-0.1/provenance.json). Dokumentation: LicenseRef-EnvNode-Use-and-Redistribution-1.0, siehe [Lizenz](../../../license.md). Drittanbieterrechte an KiCad-Modellen und Bibliotheken bleiben bestehen.
+[Alle CAD-Dateihashes und Netzlistenabgleich](../../../assets/board-views/module-adapter-0.2/assembly-sources.json) ·
+[Rendernachweis](../../../assets/board-views/module-adapter-0.2/views.json).
+
+EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0,
+siehe [Lizenz](../../../license.md). Drittanbieterrechte an Modellen bleiben bestehen.

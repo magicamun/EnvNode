@@ -24,7 +24,7 @@ dies ist kein freigegebener 44-poliger S3-Prüfadapter.
 
 **Dokumentstand 14. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
 
-[Anleitung als PDF](../../assets/downloads/ESP32_DevKitC_Adapter_Rev0.3_Anleitung.pdf){ .md-button }
+[Anleitung als PDF](../../../assets/downloads/ESP32_DevKitC_Adapter_Rev0.3_Anleitung.pdf){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
 
 !!! warning "DUT nur spannungsfrei testen"
@@ -32,14 +32,14 @@ dies ist kein freigegebener 44-poliger S3-Prüfadapter.
 
 ### Weiter zur Software-Inbetriebnahme
 
-Nach der elektrischen Prüfung folgen [Tester einrichten](../../firmware/test-provisioning/inbetriebnahme.md),
-[Controller und Adapter auswählen](../../firmware/test-provisioning/hardwareprofile.md)
-und die [geführten Selbsttests](../../firmware/test-provisioning/selbsttests.md).
+Nach der elektrischen Prüfung folgen [Tester einrichten](../../commissioning/index.md),
+[Controller und Adapter auswählen](../../commissioning/hardwareprofile.md)
+und die [geführten Selbsttests](../../commissioning/selbsttests.md).
 Die gemeinsame Softwareanleitung wird hier nicht wiederholt.
 
 ## 3D-Ansicht
 
-![input-adapter-0.3: 3D-Vorderseite](../../assets/board-views/input-adapter-0.3/3d-front.png){ .hero-board-view }
+![input-adapter-0.3: 3D-Vorderseite](../../../assets/board-views/input-adapter-0.3/3d-front.png){ .hero-board-view }
 
 Gezeigt ist die Vorderseite. Die beiden Pinheader-Reihen J2 werden auf der **Rückseite** montiert; ihre Steckkontakte zeigen zum ESP32-Sockel des Prüflings. Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
@@ -60,9 +60,9 @@ Für J2 werden zwei gerade 1×19-Pinheader im Reihenabstand **25,40 mm** benöti
 
 ### Vorderseite: Bestückungsplan
 
-![input-adapter-0.3: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/input-adapter-0.3/assembly-front.png){ .assembly-plan }
+![input-adapter-0.3: senkrechter Bestückungsplan Vorderseite](../../../assets/board-views/input-adapter-0.3/assembly-front.png){ .assembly-plan }
 
-[Plan als PNG](../../assets/board-views/input-adapter-0.3/assembly-front.png){ .md-button }
+[Plan als PNG](../../../assets/board-views/input-adapter-0.3/assembly-front.png){ .md-button }
 
 Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
 
@@ -205,7 +205,7 @@ für den gemeinsamen Aufbau mit Reset-Prüfpigtail und den neuesten Mainboards
 ist **0.15.0** dokumentiert. Beide Controllerrevisionen 0.1 und 0.2 sind auswählbar.
 Die 40 Kontaktzuordnungen stammen aus `fixture-esp32-devkitc0.3.json` und wurden
 gegen die gespeicherte Platine geprüft. Die physische Abnahme des neuen Adapters
-steht aus. [Auswahl und Selbsttests](../../firmware/test-provisioning/hardwareprofile.md).
+steht aus. [Auswahl und Selbsttests](../../commissioning/hardwareprofile.md).
 
 ## 9. Abschluss und Prüfstand
 
@@ -227,8 +227,8 @@ die physische Abnahme ist getrennt durchzuführen.
 | Adapter ESP32 DevKitC.kicad_pcb | `690462aa0233847e88de4612d28afd77e36be17e3710c710956899d09baf2758` |
 | Adapter ESP32 DevKitC.kicad_sch | `d3cbce955b97858cfb0af56a3ce8659b88cff737abc9541ac39376f672ec572a` |
 
-[Alle CAD-Dateihashes und Netzlistenabgleich](../../assets/board-views/input-adapter-0.3/assembly-sources.json) ·
-[Rendernachweis](../../assets/board-views/input-adapter-0.3/views.json).
+[Alle CAD-Dateihashes und Netzlistenabgleich](../../../assets/board-views/input-adapter-0.3/assembly-sources.json) ·
+[Rendernachweis](../../../assets/board-views/input-adapter-0.3/views.json).
 
 EnvNode-eigene Inhalte: LicenseRef-EnvNode-Use-and-Redistribution-1.0,
-siehe [Lizenz](../../license.md). Drittanbieterrechte an Modellen bleiben bestehen.
+siehe [Lizenz](../../../license.md). Drittanbieterrechte an Modellen bleiben bestehen.

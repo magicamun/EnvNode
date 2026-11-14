@@ -1,6 +1,6 @@
 {
   "id": "test-controller-0.1",
-  "guide": "mainboards/test-controller/revisions/0.1.md",
+  "guide": "test-provisioning/hardware/test-controller/revisions/0.1.md",
   "pcb_source": "test-provision-board/hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb",
   "pcb_sha256": "bb6f4f2f0c016539785691c14dda86cc97bd94ba72e7a92f6113fda60ea6bf07",
   "back_components": [

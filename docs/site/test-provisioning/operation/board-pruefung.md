@@ -3,7 +3,7 @@
 **Stand 0.15.0:** Die Anschlussprüfung ist mit der echten Messhardware verbunden.
 Die vollständige Boardabnahme einschließlich der Diodenpfade wird jetzt erstmals
 praktisch erprobt. Vor einer Bewertung zunächst
-[Controller, Adapter und Pigtails prüfen](selbsttests.md).
+[Controller, Adapter und Pigtails prüfen](../commissioning/selbsttests.md).
 
 ## Prüfling vorbereiten
 
@@ -223,4 +223,4 @@ bleibt ein eigener Download. Rohwerte älterer Firmwarestände lassen sich nicht
 nachträglich rekonstruieren.
 
 Die Hardwarekombination vor der ersten Messung unter
-[Controller und Adapter](hardwareprofile.md) auswählen und bestätigen.
+[Controller und Adapter](../commissioning/hardwareprofile.md) auswählen und bestätigen.

@@ -14,7 +14,7 @@ zur Einrichtung mit der Firmware und zum ersten überprüften Ergebnis.
 | Wechselstrom mit SCT013 | [SCT013 einrichten und prüfen](../sensors/sct013/commissioning.md) |
 | Zwei Relaisausgänge | [DuoRelay](../modules/duo-relay/commissioning.md) |
 | Messwerte am Gerät anzeigen | [Displays einrichten](../firmware/values-displays.md#displays) |
-| Prüf- und Provisioninghardware | [Separate Test-Firmware](../firmware/test-provisioning/inbetriebnahme.md) |
+| Prüf- und Provisioninghardware | [Separate Test-Firmware](../test-provisioning/commissioning/index.md) |
 
 Die Links führen jeweils zur maßgeblichen Anleitung. Gemeinsame Bedienelemente
 beschreibt die [Firmware-Anleitung](../firmware/index.md); Bestückung und elektrische

@@ -12,9 +12,9 @@ vorhandenen Unterlagen; gleiche sie mit deiner eingesetzten Platine ab.
 
 ## Testhardware
 
-- [Test-Controller 0.1](test-controller/index.md)
-- [Input-Adapter 0.1](input-adapter/index.md)
-- [Modul-Adapter 0.1](module-adapter/index.md)
+- [Test-Controller 0.1](../test-provisioning/hardware/test-controller/index.md)
+- [Input-Adapter 0.1](../test-provisioning/hardware/input-adapter/index.md)
+- [Modul-Adapter 0.1](../test-provisioning/hardware/module-adapter/index.md)
 
 Die drei Testboards bilden gemeinsam den passiven Tester; die reale Test-Firmware und Schaltschwellen sind separat zu validieren.
 
