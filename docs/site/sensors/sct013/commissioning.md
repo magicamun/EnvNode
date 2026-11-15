@@ -15,8 +15,8 @@ Für den getesteten Head Rev. 0.2 bzw. reparierten Prototyp gelten folgende **La
 
 | Sensor | Nennstrom / Ausgang | Kalibrierfaktor | Tiefpass | Aus / Ein |
 | --- | --- | --- | --- | --- |
-| getesteter 1-V-Sensor | 5 A / 1000 mV | 1,48 | 200 Hz | 170 / 200 mA (DMA am Test-Mini) |
-| 0,333-V-Sensor | 5 A / 333 mV | 1,00 (nicht absolut kalibriert) | 200 Hz | 180 / 220 mA |
+| YHDC SCT013, 1 V | 5 A / 1000 mV | 1,48 | 200 Hz | 170 / 200 mA (DMA am Test-Mini) |
+| YHDC SCT013, 0,333 V | 5 A / 333 mV | 1,00 (nicht absolut kalibriert) | 200 Hz | 180 / 220 mA |
 
 Die Voreinstellung für neue Slots ist 5 A / 1000 mV, Faktor 1, Tiefpass 200 Hz, Schwellen 0/0 (aus). Einstellungen pro Sensor speichern. Ein Faktor korrigiert den Maßstab, die Schwellen betreffen den bereits kalibrierten Strom. Nach Profil- oder Faktorwechsel die Nullschwellen erneut prüfen. Ein aktives Gate hält seinen Zustand zwischen den Schwellen; ein stromloser oder fehlender Sensor ist nicht unterscheidbar.
 

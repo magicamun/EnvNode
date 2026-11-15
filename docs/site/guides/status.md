@@ -23,7 +23,7 @@ Die PCB- und Kit-Artikel sind anhand des abgeschlossenen InvenTree-Abgleichs vom
 
 ## Teilumfang
 
-- SCT013Head 0.2: korrigierter Lumberg-Anschluss dokumentiert; Abbildungen und Nullmessungsprotokolle zeigen noch Rev. 0.1. Die Firmware-Einrichtung ist auf der Sensorseite beschrieben.
+- SCT013Head 0.2: korrigierter Lumberg-Anschluss dokumentiert; Abbildungen zeigen Rev. 0.2; die historischen Nullmessungsprotokolle stammen aus dem früheren Prüfaufbau. Die Firmware-Einrichtung ist auf der Sensorseite beschrieben.
 - I²C Carrier HalfSize 0.1: Montage und Jumper beschrieben; vollständiger Bring-up fehlt.
 
 ## Noch zu erstellen

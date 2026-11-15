@@ -487,9 +487,47 @@
       ]
     },
     {
-      "id": "sct013-head-0.1",
+      "id": "sct013-head-0.2",
       "guide": "sensors/sct013-head/assembly.md",
       "archive": false,
+      "metadata": "assets/board-views/sct013-head-0.2/views.json",
+      "front": {
+        "png": "assets/board-views/sct013-head-0.2/assembly-front.png",
+        "png_size_px": [
+          2451,
+          1756
+        ],
+        "side": "F.Cu",
+        "projection": "orthographic",
+        "component_models": false,
+        "renderer": "KiCad pcb render",
+        "quality": "high",
+        "canvas_size_px": [
+          2800,
+          2800
+        ],
+        "rotation_deg": [
+          0,
+          0,
+          0
+        ],
+        "zoom": 0.78,
+        "mirrored_for_back_view": false,
+        "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
+      },
+      "back_components": [
+        "C1",
+        "C2",
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ]
+    },
+    {
+      "id": "sct013-head-0.1",
+      "guide": "sensors/sct013-head/assembly.md",
+      "archive": true,
       "metadata": "assets/board-views/sct013-head-0.1/views.json",
       "front": {
         "png": "assets/board-views/sct013-head-0.1/assembly-front.png",

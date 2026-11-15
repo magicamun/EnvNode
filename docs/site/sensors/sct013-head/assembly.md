@@ -5,8 +5,8 @@ pdf:
   title: SCT013Head
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.2'
-  document_version: '1.3'
-  document_date: '2026-11-14'
+  document_version: '1.4'
+  document_date: '2026-11-15'
   source_document_date: '2026-10-24'
   status: Nullmessung am Mini geprüft - Sensorbetrieb und Mechanik offen
 ---
@@ -33,13 +33,12 @@ keine separate Abnahme einer neu gefertigten Rev.-0.2-Platine.
 
 ## 3D-Ansicht
 
-Die vorhandenen Renderings und Bestückungspläne zeigen **Rev. 0.1**. Sie dienen
-zur Bauteilorientierung; die korrigierte Leiterbahn der Rev. 0.2 ist dort nicht
-abgebildet. Für den Buchsenanschluss gelten die Kontaktzuordnung unten und der
-aktuelle CAD-Stand Rev. 0.2.
+Die Renderings und Bestückungspläne zeigen den CAD-Stand **Rev. 0.2** mit
+korrigiertem Lumberg-Anschluss. Die unterstützten Stromwandler sind unter
+[YHDC SCT013](../sct013/index.md#verwendete-stromwandler) beschrieben.
 
-![sct013-head-0.1: 3D-Vorderseite](../../assets/images/sct013-assembly/top.png){ .hero-paired-view }
-![sct013-head-0.1: 3D-Rückseite](../../assets/images/sct013-assembly/bottom.png){ .hero-paired-view }
+![sct013-head-0.2: 3D-Vorderseite](../../assets/board-views/sct013-head-0.2/3d-front.png){ .hero-paired-view }
+![sct013-head-0.2: 3D-Rückseite](../../assets/board-views/sct013-head-0.2/3d-back.png){ .hero-paired-view }
 
 Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
@@ -72,20 +71,20 @@ Nur die Kleinspannungsseite gehört an den Head. Spätere Strommessungen erfolge
 
 ### Vorderseite: Bestückungsplan
 
-![sct013-head-0.1: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/sct013-head-0.1/assembly-front.png){ .assembly-plan }
+![sct013-head-0.2: senkrechter Bestückungsplan Vorderseite](../../assets/board-views/sct013-head-0.2/assembly-front.png){ .assembly-plan }
 
-[Plan als PNG](../../assets/board-views/sct013-head-0.1/assembly-front.png){ .md-button }
+[Plan als PNG](../../assets/board-views/sct013-head-0.2/assembly-front.png){ .md-button }
 
 ### Rückseite: Bestückungsplan
 
-![sct013-head-0.1: senkrechter Bestückungsplan Rückseite](../../assets/board-views/sct013-head-0.1/assembly-back.png){ .assembly-plan }
+![sct013-head-0.2: senkrechter Bestückungsplan Rückseite](../../assets/board-views/sct013-head-0.2/assembly-back.png){ .assembly-plan }
 
-[Plan als PNG](../../assets/board-views/sct013-head-0.1/assembly-back.png){ .md-button }
+[Plan als PNG](../../assets/board-views/sct013-head-0.2/assembly-back.png){ .md-button }
 
 Senkrechtes KiCad-Rendering der Leiterplatte ohne Bauteilmodelle. Kupfer, Lötstoppmaske und Bestückungsdruck entsprechen der PCB-Quelle. Rückseitenpläne werden von B.Cu aus betrachtet.
 
 
-Die sechs SMD-Bauteile sitzen auf der Unterseite. J1 wird später von oben eingesetzt. Die 3D-Ansichten oben zeigen den unveränderten PCB-Datenstand: Für J1 fehlt ein 3D-Modell; ADC1 erscheint mit dem hinterlegten Stiftleistenmodell. **Für den Pigtail-Aufbau wird dort keine Stiftleiste bestückt.** Die vier Pads werden als Lötaugen verwendet. Pin 1 hat ein rechteckiges Pad; die Blickrichtung der Unterseite kehrt links und rechts gegenüber der Oberseite um.
+Die sechs SMD-Bauteile sitzen auf der Unterseite. J1 wird später von oben eingesetzt. Die 3D-Ansichten oben zeigen den unveränderten PCB-Datenstand: J1 und das ADC1-Pigtail sind in diesen Ansichten nicht als Bauteilmodelle dargestellt. Im CAD ist für ADC1 noch ein Stiftleistenmodell hinterlegt. **Für den Pigtail-Aufbau wird dort keine Stiftleiste bestückt.** Die vier Pads werden als Lötaugen verwendet. Pin 1 hat ein rechteckiges Pad; die Blickrichtung der Unterseite kehrt links und rechts gegenüber der Oberseite um.
 
 ## Löt-Reihenfolge
 
@@ -353,7 +352,7 @@ ADC1 wird als Lötaugenanschluss für das Pigtail verwendet.
 
 Die Netze und Bestückungswerte wurden aus den CAD-Quellen nachvollzogen. Der für diese Dokumentation gestartete vollständige DRC-Lauf endete ohne Bericht durch einen Programmabbruch; daraus wird keine erfolgreiche DRC-Prüfung abgeleitet. Historische Review-Notizen sind keine erneute Prüfung der gelieferten Platine. Die Durchgangsprüfungen dieser Anleitung sind vor dem Einschalten durchzuführen. Die erste Nullmessung des neuen Heads ist in Abschnitt 5.5 dokumentiert. Sensorbetrieb unter Last, Kalibrierung und mechanische Buchsen-Passprobe bleiben offen.
 
-Die Abbildungen sind echte KiCad-Renderings der Rev.-0.1-Leiterplatte, keine Fotos des aufgebauten Heads. Dokumentquelle ist Markdown mit den gemeinsamen Metadaten; eine separate PDF wird in diesem Arbeitsschritt nicht erstellt.
+Die Abbildungen sind echte KiCad-Renderings der Rev.-0.2-Leiterplatte, keine Fotos des aufgebauten Heads. Die Renderquelle ist mit Git-Referenz und PCB-Hash im [Ansichtenkatalog](../../assets/board-views/sct013-head-0.2/views.json) dokumentiert. Dokumentquelle ist Markdown mit den gemeinsamen Metadaten; eine separate PDF wird in diesem Arbeitsschritt nicht erstellt.
 
 ### Dokumentänderung 1.1 - 24.10.2026
 

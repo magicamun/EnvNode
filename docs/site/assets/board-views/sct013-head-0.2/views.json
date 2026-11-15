@@ -1,0 +1,159 @@
+{
+  "id": "sct013-head-0.2",
+  "guide": "sensors/sct013-head/assembly.md",
+  "pcb_source": "9430e6f673e830a76d0034e5a8f6c50af9315007:hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb",
+  "pcb_sha256": "5f66b6a10c3b592183b61a96e72be8f14b9d0811caf7564979da34e47a5ab8ac",
+  "back_components": [
+    "C1",
+    "C2",
+    "R1",
+    "R2",
+    "R3",
+    "R4"
+  ],
+  "hero": {
+    "front": "assets/board-views/sct013-head-0.2/3d-front.png",
+    "back": "assets/board-views/sct013-head-0.2/3d-back.png"
+  },
+  "plans": {
+    "front": {
+      "png": "assets/board-views/sct013-head-0.2/assembly-front.png",
+      "png_size_px": [
+        2451,
+        1756
+      ],
+      "side": "F.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": false,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
+    },
+    "back": {
+      "png": "assets/board-views/sct013-head-0.2/assembly-back.png",
+      "png_size_px": [
+        2450,
+        1758
+      ],
+      "side": "B.Cu",
+      "projection": "orthographic",
+      "component_models": false,
+      "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
+      "rotation_deg": [
+        0,
+        0,
+        0
+      ],
+      "zoom": 0.78,
+      "mirrored_for_back_view": true,
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
+    }
+  },
+  "footprints": [
+    {
+      "reference": "J1",
+      "value": "Conn_01x05_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        86.31,
+        62.607
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "ADC1",
+      "value": "Conn_01x04_Pin",
+      "side": "F.Cu",
+      "position_mm": [
+        102.4,
+        58.547
+      ],
+      "rotation_deg": 0
+    },
+    {
+      "reference": "R3",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        99.822,
+        59.227
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "C1",
+      "value": "10nF",
+      "side": "B.Cu",
+      "position_mm": [
+        91.948,
+        63.78
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "C2",
+      "value": "10uF",
+      "side": "B.Cu",
+      "position_mm": [
+        97.028,
+        59.227
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R2",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        99.822,
+        65.487
+      ],
+      "rotation_deg": 90
+    },
+    {
+      "reference": "R1",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        89.154,
+        59.227
+      ],
+      "rotation_deg": -90
+    },
+    {
+      "reference": "R4",
+      "value": "10k",
+      "side": "B.Cu",
+      "position_mm": [
+        94.488,
+        63.78
+      ],
+      "rotation_deg": 90
+    }
+  ],
+  "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
+  "removed_model_entries": 7,
+  "asset_sha256": {
+    "assets/board-views/sct013-head-0.2/assembly-front.png": "9543202b7eea29f95e033c11e9217ea8731ee6d399fe2673eca6b304b6cf7012",
+    "assets/board-views/sct013-head-0.2/assembly-back.png": "7ba079701c97c7e9bc3bf6b3d2144b9cd15ff307b8ce7157a20383c04faa1b18",
+    "assets/board-views/sct013-head-0.2/3d-front.png": "835f020be8dbeef727266dec3825757fd0f0fdcf0aedad1d7fb7eb350f77e86b",
+    "assets/board-views/sct013-head-0.2/3d-back.png": "33603aa91d274907331e88322b801cf4ed2a19587ff895d0920038a808b50683"
+  },
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+}

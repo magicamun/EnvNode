@@ -95,7 +95,13 @@
   pcb: main/hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/I2C Carrier HalfSize.kicad_pcb
   sha256: b71e5b0ad27786db08d27ee1dfaf55b7bfcc75347c856eb36445d8a2ec0e7dae
   hero_front: assets/images/i2c-carrier-assembly/page-01-view-1.png
+- id: sct013-head-0.2
+  guide: sensors/sct013-head/assembly.md
+  git_ref: 9430e6f673e830a76d0034e5a8f6c50af9315007
+  git_path: hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb
+  sha256: 5f66b6a10c3b592183b61a96e72be8f14b9d0811caf7564979da34e47a5ab8ac
 - id: sct013-head-0.1
+  archive: true
   guide: sensors/sct013-head/assembly.md
   pcb: main/hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb
   sha256: 5361e2f392efc484dd3522dd2f4c0fc8d85c413e14519de21736decc2d476a8e

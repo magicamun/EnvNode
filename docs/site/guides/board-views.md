@@ -20,10 +20,7 @@ Die folgenden senkrechten Vorderseitenpläne werden in den Aufbauanleitungen ver
 | [duo-relay-0.3](../modules/duo-relay/assembly.md) | [PNG](../assets/board-views/duo-relay-0.3/assembly-front.png) |
 | [oring-power-0.1.1](../mainboards/oring-power/assembly.md) | [PNG](../assets/board-views/oring-power-0.1.1/assembly-front.png) |
 | [i2c-carrier-0.1](../modules/i2c-carrier/assembly.md) | [PNG](../assets/board-views/i2c-carrier-0.1/assembly-front.png) |
-| [SCT013Head: historische Ansicht 0.1](../sensors/sct013-head/assembly.md) | [PNG](../assets/board-views/sct013-head-0.1/assembly-front.png) |
-
-Die SCT013Head-Pläne zeigen Rev. 0.1. Die aktuelle Rev. 0.2 korrigiert die
-Lumberg-Buchsenverbindung; diese Leiterbahnkorrektur ist in den alten Bildern nicht enthalten.
+| [SCT013Head 0.2](../sensors/sct013-head/assembly.md) | [PNG](../assets/board-views/sct013-head-0.2/assembly-front.png) |
 
 ## Für die Testsoftware
 
