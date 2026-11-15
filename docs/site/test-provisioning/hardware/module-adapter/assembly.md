@@ -5,8 +5,8 @@ pdf:
   title: Modul-Adapter
   subtitle: Aufbau und elektrische Prüfung
   hardware_revision: '0.2'
-  document_version: '1.0'
-  document_date: '2026-11-14'
+  document_version: '1.1'
+  document_date: '2026-11-15'
   source_document_date: '2026-10-28'
   status: CAD-Stand dokumentiert - physische Abnahme ausstehend
 ---
@@ -15,13 +15,17 @@ pdf:
 
 Passiver 14-poliger Adapter zwischen Test-Controller J3 und dem DUT-Modulslot. Kein funktionales Sensormodul, kein EEPROM und keine lokale Versorgung: J4.n ist direkt mit J1.n verbunden.
 
-**Dokumentstand 14. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
+**Dokumentstand 15. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
 
 [Anleitung als PDF](../../../assets/downloads/Module_Adapter_Rev0.2_Anleitung.pdf){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
 
 !!! warning "DUT nur spannungsfrei testen"
     Vor dem Kontaktieren alle DUT-Versorgungen und USB-Verbindungen trennen, den ESP32 aus dem DUT ziehen und das separate Provisioning-Kabel abziehen. Der Test Controller darf für seine eigene Elektronik versorgt sein. DUT-Masse und DUT-3,3-V-Referenz bleiben Messkontakte; nicht pauschal mit der Tester-Versorgung verbinden.
+
+### Artikelzuordnung
+
+Leiterplatte **ENP-00184**, Bausatz **ENK-00051**.
 
 ### Weiter zur Software-Inbetriebnahme
 
@@ -44,7 +48,7 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 ## 1. Teile und Vorbereitung
 | Ref. | Anz. / Einheit | Wert / Funktion | Artikel |
 | --- | --- | --- | --- |
-| PCB | 1 | Module-Adapter Rev.0.2 | Revisionsgebundene Artikelzuordnung prüfen |
+| PCB | 1 | Module-Adapter Rev.0.2 | ENP-00184 |
 | J4 | 1 | WSL 14G | ENP-00151 |
 | J1 | 1 | THT 2x7 auf Unterseite; keine Kabelbuchse | ENP-00059 |
 

@@ -5,8 +5,8 @@ pdf:
   title: EnvNode Mini
   subtitle: Aufbau und elektrische Prüfung
   hardware_revision: '0.10.0'
-  document_version: '1.0'
-  document_date: '2026-11-14'
+  document_version: '1.1'
+  document_date: '2026-11-15'
   source_document_date: '2026-11-09'
   status: CAD-Stand dokumentiert - physische Abnahme ausstehend
 ---
@@ -21,6 +21,20 @@ ESP32-Mainboard mit zwei Modulslots und zwei direkten ADC-Eingängen. C1 blockt 
 
 [Übersicht und nächste Schritte](index.md){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
+
+### Artikel und Kit-Varianten
+
+| Ausführung | Artikel |
+| --- | --- |
+| Leiterplatte der dokumentierten Revision | ENP-00180 |
+| Bausatz ohne ORing | ENK-00044 |
+| Bausatz mit losem ORing-Bauteilsatz | ENK-00043 |
+| Bestückte Baugruppe | ENK-00045 |
+
+Der Bausatz mit ORing enthält den Grundbausatz und **ENK-00007** als lose
+ORing-Teile. Das ORing-Modul zuerst nach seiner [Aufbauanleitung](../oring-power/assembly.md)
+bestücken und prüfen. In der Mainboard-Bestückungsliste steht das fertig geprüfte
+Modul **ENK-00021** als einzusetzende Baugruppe.
 
 ### Weiter zur Software-Inbetriebnahme
 
@@ -43,18 +57,19 @@ Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteil
 | --- | --- | --- | --- | --- |
 | C1, C2 | 2 | 100 nF, X7R | ENP-00006 | 1206; C1: +5V, C2: +3V3_SYS |
 | R1-R4 | 4 | 4,7 kOhm, 1 % | ENP-00005 | 1206, I2C-Pull-ups |
-| J3-J6 | 4 | Pull-up-Leiste 1×2 + Kappe | ENP-00145 / ENP-00101 | 2,54 mm; 8 Kontakte + 4 Kappen |
+| J3-J6 | 8 Kontaktpositionen | Stiftleisten-Rohmaterial für vier Abschnitte 1×2 | ENP-00145 | 2,54 mm |
+| J3-J6 | 4 | Abnehmbare Jumperkappen | ENP-00101 | Für die Pull-up-Leisten |
 | D1, D2 | 2 | 1N4148W, Testreferenz | ENP-00033 | SOD-123 auf D_1206-Pads; Passform siehe TP1 |
 | RST1 | 1 | Resetanschluss, JST-PH 1×2 | ENP-00132 | B2B-PH-K, 2,00 mm; Pin 1 GND, Pin 2 EN |
-| TP1 | 1 | Testreferenz 1×2 | ENP-00132 | JST-PH, 2,00 mm |
+| TP1 | 2 Kontaktpositionen | Stiftleiste 1×2, Testreferenz | ENP-00145 | 2,54 mm; ein zweipoliger Abschnitt, keine Jumperkappe |
 | U1 | 1 | 24LC32, Board Identity | ENP-00102 | SOIC-8, I2C0-Adresse 0x50 |
-| U2 | 1 | ORing-Power Rev. 0.1 bestückt, gefertigt | ENK-00020 | 39 x 15 mm, castellated Carrier |
+| U2 | 1 | ORing-Power Rev. 0.1 bestückt, gefertigt | ENK-00021 | 39 x 15 mm, castellated Carrier |
 | U3 | 1 | ESP32-Entwicklungsboard | ENP-00010 | 38-polig; Pinout und Passform prüfen |
-| J1, J2 | 2 | Modulsockel 2 x 7 | ENP-00054 | 2,54 mm, vertikale Buchsenleiste |
+| J1, J2 | 2 | Modulsockel 2 x 7 | ENP-00109 | 2,54 mm, vertikale Buchsenleiste |
 | J7-J10 | 4 | JST-SH, 4-polig, top-entry | ENP-00122 | BM04B-SRSS-TB, 1,00 mm |
 | ADC1, ADC2 | 2 | JST-PH, 4-polig, vertikal | ENP-00025 | B4B-PH-K, 2,00 mm |
 | NT1, NT2 | 2 | Net-Tie | - | PCB-Struktur; kein Kaufteil |
-| PCB | 1 | EnvNode Mini 0.10.0 | Artikelzuordnung prüfen | Revisionsgebundene Platine |
+| PCB | 1 | EnvNode Mini 0.10.0 | ENP-00180 | Revisionsgebundene Platine |
 | U3-Sockel | 2 | DevKit-Sockel 1×19 | ENP-00004 | Aus 1×20 auf 19 kürzen |
 
 Nicht auf dem Mainboard: Eingangsschutz, 5-V-Eingang, USB und 3,3-V-ORing gehören zum separat dokumentierten ORing-Power-Modul.
@@ -181,6 +196,12 @@ entfernen; das Reset-Prüfpigtail am Controller führt Messkontakte, keine perma
 Verbindung zur Tester-Masse.
 
 ## TP1: Referenzen für den Testadapter
+
+TP1 ist ein **zweipoliger Pinheader im Raster 2,54 mm**. Er wird mit einem
+passenden zweipoligen Gegenstecker beziehungsweise einer Buchsenleiste kontaktiert.
+Keine Jumperkappe aufsetzen: Die beiden Pins sind getrennte Messkontakte.
+Der zweipolige **RST1** ist dagegen weiterhin **JST-PH mit 2,00 mm Raster**.
+
 
 | TP1-Pin | Verbindung am Mainboard | Erwartung im Diodentest |
 | --- | --- | --- |

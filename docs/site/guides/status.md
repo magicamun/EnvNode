@@ -1,6 +1,6 @@
 # Dokumentationsstand
 
-Stand: **14. November 2026**. „Abgeschlossen“ bezeichnet die redaktionell vollständige Aufbau- und Bring-up-Anleitung. Der reale Fertigungs-/Prüfstand steht jeweils in der Anleitung.
+Stand: **15. November 2026**. „Abgeschlossen“ bezeichnet die redaktionell vollständige Aufbau- und Bring-up-Anleitung. Der reale Fertigungs-/Prüfstand steht jeweils in der Anleitung.
 
 ## Abgeschlossen
 
@@ -18,8 +18,8 @@ Die aktuellen Anleitungen und PDF-Ausgaben dokumentieren den jeweiligen
 CAD-Stand. Die bisherigen Anleitungen bleiben unter „Alte Revisionen“ erhalten.
 Für Mini 0.10.0, Weather 0.4, Test-Controller 0.2, DevKitC Adapter 0.3 und
 Modul-Adapter 0.2 steht die physische Abnahme am gefertigten Aufbau aus.
-Die revisionsgebundene PCB-Artikelzuordnung ist in den Stücklisten noch zu prüfen;
-bekannte Bauteilartikel bleiben ausgewiesen.
+Die PCB- und Kit-Artikel sind anhand des abgeschlossenen InvenTree-Abgleichs vom
+15. November 2026 zugeordnet und in den aktuellen Anleitungen ausgewiesen.
 
 ## Teilumfang
 

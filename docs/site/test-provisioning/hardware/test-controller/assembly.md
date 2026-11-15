@@ -5,8 +5,8 @@ pdf:
   title: Test-Controller
   subtitle: Aufbau und elektrische Prüfung
   hardware_revision: '0.2'
-  document_version: '1.0'
-  document_date: '2026-11-14'
+  document_version: '1.1'
+  document_date: '2026-11-15'
   source_document_date: '2026-10-28'
   status: CAD-Stand dokumentiert - physische Abnahme ausstehend
 ---
@@ -15,13 +15,17 @@ pdf:
 
 ESP32-DevKitC-Steuerplatine für passive Mainboardtests mit separater I²C-Provisioning-Verbindung. Sie arbeitet mit dem ESP32 DevKitC Adapter 0.3 oder dem Legacy-Input-Adapter 0.1 zusammen. Controller 0.2 besitzt TP2 und zwei Reset-Prüfpfade; der passive Modul-Adapter 0.2 verbindet den Modulslot.
 
-**Dokumentstand 14. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
+**Dokumentstand 15. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
 
 [Anleitung als PDF](../../../assets/downloads/Test_Controller_Rev0.2_Anleitung.pdf){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
 
 !!! warning "DUT nur spannungsfrei testen"
     Vor dem Kontaktieren alle DUT-Versorgungen und USB-Verbindungen trennen, den ESP32 aus dem DUT ziehen und das separate Provisioning-Kabel abziehen. Der Test Controller darf für seine eigene Elektronik versorgt sein. DUT-Masse und DUT-3,3-V-Referenz bleiben Messkontakte; nicht pauschal mit der Tester-Versorgung verbinden.
+
+### Artikelzuordnung
+
+Leiterplatte **ENP-00182**, Bausatz **ENK-00049**.
 
 ### Weiter zur Software-Inbetriebnahme
 
@@ -40,7 +44,7 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 ## 1. Teile und Vorbereitung
 | Ref. | Anz. / Einheit | Wert / Funktion | Artikel |
 | --- | --- | --- | --- |
-| PCB | 1 | Test-Controller Rev. 0.2 | Revisionsgebundene Artikelzuordnung prüfen |
+| PCB | 1 | Test-Controller Rev. 0.2 | ENP-00182 |
 | U1, U2 | 2 | CD74HC4067M, SOIC-24W | ENP-00153 |
 | C4-C6 | 3 | 100 nF X7R 1206 | ENP-00006 |
 | R1-R5 | 5 | 10 kΩ Enable-Pull-ups | ENP-00094 |
@@ -49,10 +53,9 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 | R7, R8 | 2 | 4,7 kΩ | ENP-00005 |
 | U3 | 1 | ESP32 DevKitC, 38 Pins | ENP-00010 |
 | U3-Sockel | 2 | Je 19 Kontakte | ENP-00004 |
-| U7 | 1 | Geprüftes, bestücktes ORing-Power-Modul | Passende Assembly auswählen |
+| U7 | 1 | Geprüftes, bestücktes ORing-Power-Modul | ENK-00021 |
 | J8 | 1 | WSL 10G | ENP-00147 |
 | J3 | 1 | WSL 14G | ENP-00151 |
-| GPIO1, I2C1, I2C0_1 | 3 | Pinheader 1×4 | ENP-00108 |
 | GPIO2 | 1 | JST-PH, vierpolig | ENP-00025 |
 | I2C2, I2C0_2 | 2 | JST-SH, vierpolig | ENP-00122 |
 | RST1 | 2 Kontaktpositionen | Pinheader 1×2 | ENP-00145 |
@@ -60,6 +63,12 @@ Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modell
 | TP2 | 3 Kontaktpositionen | Pinheader 1×3 | ENP-00145 |
 | J5, J6 | 4 Kontaktpositionen | Zwei Pinheader 1×2 | ENP-00145 |
 | J5, J6 | 2 | Jumperkappen | ENP-00101 |
+
+**DNP / optionale Anschlussvarianten:** GPIO1, I2C1 und I2C0_1 sind im
+aktuellen CAD nicht zur Standardbestückung vorgesehen und im Bausatz nicht
+enthalten. Bei ausdrücklich gewählter Pinheader-Variante werden je vierpoliger
+Leiste ENP-00108 verwendet; die parallelen Signale sind an GPIO2, I2C2 und I2C0_2
+bereits zugänglich. Für den Standardaufbau diese drei Pinheaderplätze frei lassen.
 
 ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
@@ -90,7 +99,7 @@ Die Bestückungspläne zeigen die Leiterplatte senkrecht zur jeweiligen Seite. B
 
 1. R1-R9 und C4-C6 nach Stückliste bestücken; R6 = 1 kΩ, R9 = 2,2 kΩ nicht verwechseln.
 2. U1/U2 ausrichten, einen Pin fixieren, Lage prüfen und alle SOIC-Pins löten.
-3. J5/J6, GPIO1/2, I2C1/2, I2C0_1/2, RST1/2, TP2 und die IDC-Header J3/J8 montieren. Kodierung und Pin 1 prüfen.
+3. J5/J6, GPIO2, I2C2, I2C0_2, RST1/2, TP2 und die IDC-Header J3/J8 montieren. Die DNP-Plätze GPIO1, I2C1 und I2C0_1 im Standardaufbau frei lassen. Kodierung und Pin 1 prüfen.
 4. U3-Sockel parallel ausrichten und ORing-Modul U7 plan verlöten.
 5. Reinigen, spannungsfrei prüfen; U3 erst danach einsetzen. Erstprüfung ohne Adapter und DUT.
 

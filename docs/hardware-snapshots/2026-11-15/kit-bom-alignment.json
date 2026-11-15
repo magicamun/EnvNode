@@ -1,0 +1,451 @@
+{
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0",
+  "date": "2026-11-15",
+  "source": "Completed InvenTree revision alignment; saved imported and validated BOM records",
+  "bom_records": {
+    "bom-mini-ohne": [
+      {
+        "IPN": "ENP-00180",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00025",
+        "Quantity": "2",
+        "Reference": "ADC1,ADC2"
+      },
+      {
+        "IPN": "ENP-00006",
+        "Quantity": "2",
+        "Reference": "C1,C2"
+      },
+      {
+        "IPN": "ENP-00033",
+        "Quantity": "2",
+        "Reference": "D1,D2"
+      },
+      {
+        "IPN": "ENP-00109",
+        "Quantity": "2",
+        "Reference": "J1,J2"
+      },
+      {
+        "IPN": "ENP-00145",
+        "Quantity": "10",
+        "Reference": "J3-J6,TP1"
+      },
+      {
+        "IPN": "ENP-00101",
+        "Quantity": "4",
+        "Reference": "J3-J6"
+      },
+      {
+        "IPN": "ENP-00122",
+        "Quantity": "4",
+        "Reference": "J7-J10"
+      },
+      {
+        "IPN": "ENP-00005",
+        "Quantity": "4",
+        "Reference": "R1-R4"
+      },
+      {
+        "IPN": "ENP-00132",
+        "Quantity": "1",
+        "Reference": "RST1"
+      },
+      {
+        "IPN": "ENP-00102",
+        "Quantity": "1",
+        "Reference": "U1"
+      },
+      {
+        "IPN": "ENP-00010",
+        "Quantity": "1",
+        "Reference": "U3"
+      },
+      {
+        "IPN": "ENP-00004",
+        "Quantity": "2",
+        "Reference": "U3-Sockel"
+      }
+    ],
+    "bom-mini-mit": [
+      {
+        "IPN": "ENK-00044",
+        "Quantity": "1",
+        "Reference": "Grundbausatz"
+      },
+      {
+        "IPN": "ENK-00007",
+        "Quantity": "1",
+        "Reference": "U2"
+      }
+    ],
+    "bom-mini-fertig": [
+      {
+        "IPN": "ENP-00180",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00025",
+        "Quantity": "2",
+        "Reference": "ADC1,ADC2"
+      },
+      {
+        "IPN": "ENP-00006",
+        "Quantity": "2",
+        "Reference": "C1,C2"
+      },
+      {
+        "IPN": "ENP-00033",
+        "Quantity": "2",
+        "Reference": "D1,D2"
+      },
+      {
+        "IPN": "ENP-00109",
+        "Quantity": "2",
+        "Reference": "J1,J2"
+      },
+      {
+        "IPN": "ENP-00145",
+        "Quantity": "10",
+        "Reference": "J3-J6,TP1"
+      },
+      {
+        "IPN": "ENP-00101",
+        "Quantity": "4",
+        "Reference": "J3-J6"
+      },
+      {
+        "IPN": "ENP-00122",
+        "Quantity": "4",
+        "Reference": "J7-J10"
+      },
+      {
+        "IPN": "ENP-00005",
+        "Quantity": "4",
+        "Reference": "R1-R4"
+      },
+      {
+        "IPN": "ENP-00132",
+        "Quantity": "1",
+        "Reference": "RST1"
+      },
+      {
+        "IPN": "ENP-00102",
+        "Quantity": "1",
+        "Reference": "U1"
+      },
+      {
+        "IPN": "ENP-00010",
+        "Quantity": "1",
+        "Reference": "U3"
+      },
+      {
+        "IPN": "ENP-00004",
+        "Quantity": "2",
+        "Reference": "U3-Sockel"
+      },
+      {
+        "IPN": "ENK-00021",
+        "Quantity": "1",
+        "Reference": "U2"
+      }
+    ],
+    "bom-weather-ohne": [
+      {
+        "IPN": "ENP-00181",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00025",
+        "Quantity": "10",
+        "Reference": "ADC1-ADC4,GPIO1-GPIO6"
+      },
+      {
+        "IPN": "ENP-00006",
+        "Quantity": "2",
+        "Reference": "C1,C2"
+      },
+      {
+        "IPN": "ENP-00033",
+        "Quantity": "2",
+        "Reference": "D1,D2"
+      },
+      {
+        "IPN": "ENP-00122",
+        "Quantity": "8",
+        "Reference": "I2C0_1-I2C0_4,I2C1_1-I2C1_4"
+      },
+      {
+        "IPN": "ENP-00145",
+        "Quantity": "10",
+        "Reference": "J1-J4,TP1"
+      },
+      {
+        "IPN": "ENP-00101",
+        "Quantity": "4",
+        "Reference": "J1-J4"
+      },
+      {
+        "IPN": "ENP-00109",
+        "Quantity": "1",
+        "Reference": "J5"
+      },
+      {
+        "IPN": "ENP-00005",
+        "Quantity": "4",
+        "Reference": "R1-R4"
+      },
+      {
+        "IPN": "ENP-00132",
+        "Quantity": "1",
+        "Reference": "RST1"
+      },
+      {
+        "IPN": "ENP-00102",
+        "Quantity": "1",
+        "Reference": "U2"
+      },
+      {
+        "IPN": "ENP-00010",
+        "Quantity": "1",
+        "Reference": "U3"
+      },
+      {
+        "IPN": "ENP-00004",
+        "Quantity": "2",
+        "Reference": "U3-Sockel"
+      }
+    ],
+    "bom-weather-mit": [
+      {
+        "IPN": "ENK-00047",
+        "Quantity": "1",
+        "Reference": "Grundbausatz"
+      },
+      {
+        "IPN": "ENK-00007",
+        "Quantity": "1",
+        "Reference": "U1"
+      }
+    ],
+    "bom-weather-fertig": [
+      {
+        "IPN": "ENP-00181",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00025",
+        "Quantity": "10",
+        "Reference": "ADC1-ADC4,GPIO1-GPIO6"
+      },
+      {
+        "IPN": "ENP-00006",
+        "Quantity": "2",
+        "Reference": "C1,C2"
+      },
+      {
+        "IPN": "ENP-00033",
+        "Quantity": "2",
+        "Reference": "D1,D2"
+      },
+      {
+        "IPN": "ENP-00122",
+        "Quantity": "8",
+        "Reference": "I2C0_1-I2C0_4,I2C1_1-I2C1_4"
+      },
+      {
+        "IPN": "ENP-00145",
+        "Quantity": "10",
+        "Reference": "J1-J4,TP1"
+      },
+      {
+        "IPN": "ENP-00101",
+        "Quantity": "4",
+        "Reference": "J1-J4"
+      },
+      {
+        "IPN": "ENP-00109",
+        "Quantity": "1",
+        "Reference": "J5"
+      },
+      {
+        "IPN": "ENP-00005",
+        "Quantity": "4",
+        "Reference": "R1-R4"
+      },
+      {
+        "IPN": "ENP-00132",
+        "Quantity": "1",
+        "Reference": "RST1"
+      },
+      {
+        "IPN": "ENP-00102",
+        "Quantity": "1",
+        "Reference": "U2"
+      },
+      {
+        "IPN": "ENP-00010",
+        "Quantity": "1",
+        "Reference": "U3"
+      },
+      {
+        "IPN": "ENP-00004",
+        "Quantity": "2",
+        "Reference": "U3-Sockel"
+      },
+      {
+        "IPN": "ENK-00021",
+        "Quantity": "1",
+        "Reference": "U1"
+      }
+    ],
+    "bom-test": [
+      {
+        "IPN": "ENP-00182",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00006",
+        "Quantity": "3",
+        "Reference": "C4-C6"
+      },
+      {
+        "IPN": "ENP-00025",
+        "Quantity": "1",
+        "Reference": "GPIO2"
+      },
+      {
+        "IPN": "ENP-00122",
+        "Quantity": "2",
+        "Reference": "I2C0_2,I2C2"
+      },
+      {
+        "IPN": "ENP-00151",
+        "Quantity": "1",
+        "Reference": "J3"
+      },
+      {
+        "IPN": "ENP-00145",
+        "Quantity": "9",
+        "Reference": "J5,J6,RST1,TP2"
+      },
+      {
+        "IPN": "ENP-00101",
+        "Quantity": "2",
+        "Reference": "J5,J6"
+      },
+      {
+        "IPN": "ENP-00147",
+        "Quantity": "1",
+        "Reference": "J8"
+      },
+      {
+        "IPN": "ENP-00094",
+        "Quantity": "5",
+        "Reference": "R1-R5"
+      },
+      {
+        "IPN": "ENP-00099",
+        "Quantity": "1",
+        "Reference": "R6"
+      },
+      {
+        "IPN": "ENP-00005",
+        "Quantity": "2",
+        "Reference": "R7,R8"
+      },
+      {
+        "IPN": "ENP-00154",
+        "Quantity": "1",
+        "Reference": "R9"
+      },
+      {
+        "IPN": "ENP-00132",
+        "Quantity": "1",
+        "Reference": "RST2"
+      },
+      {
+        "IPN": "ENP-00153",
+        "Quantity": "2",
+        "Reference": "U1,U2"
+      },
+      {
+        "IPN": "ENP-00010",
+        "Quantity": "1",
+        "Reference": "U3"
+      },
+      {
+        "IPN": "ENP-00004",
+        "Quantity": "2",
+        "Reference": "U3-Sockel"
+      },
+      {
+        "IPN": "ENK-00021",
+        "Quantity": "1",
+        "Reference": "U7"
+      }
+    ],
+    "bom-devkit": [
+      {
+        "IPN": "ENP-00183",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00006",
+        "Quantity": "3",
+        "Reference": "C1-C3"
+      },
+      {
+        "IPN": "ENP-00147",
+        "Quantity": "1",
+        "Reference": "J1"
+      },
+      {
+        "IPN": "ENP-00145",
+        "Quantity": "38",
+        "Reference": "J2"
+      },
+      {
+        "IPN": "ENP-00153",
+        "Quantity": "3",
+        "Reference": "U4-U6"
+      }
+    ],
+    "bom-module": [
+      {
+        "IPN": "ENP-00184",
+        "Quantity": "1",
+        "Reference": "PCB"
+      },
+      {
+        "IPN": "ENP-00059",
+        "Quantity": "1",
+        "Reference": "J1"
+      },
+      {
+        "IPN": "ENP-00151",
+        "Quantity": "1",
+        "Reference": "J4"
+      }
+    ]
+  },
+  "kit_articles": {
+    "bom-mini-ohne": "ENK-00044",
+    "bom-mini-mit": "ENK-00043",
+    "bom-mini-fertig": "ENK-00045",
+    "bom-weather-ohne": "ENK-00047",
+    "bom-weather-mit": "ENK-00046",
+    "bom-weather-fertig": "ENK-00048",
+    "bom-test": "ENK-00049",
+    "bom-devkit": "ENK-00050",
+    "bom-module": "ENK-00051"
+  }
+}

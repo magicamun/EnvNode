@@ -5,8 +5,8 @@ pdf:
   title: ESP32 DevKitC Adapter
   subtitle: Aufbau und elektrische Prüfung
   hardware_revision: '0.3'
-  document_version: '1.0'
-  document_date: '2026-11-14'
+  document_version: '1.1'
+  document_date: '2026-11-15'
   source_document_date: '2026-10-28'
   status: CAD-Stand dokumentiert - physische Abnahme ausstehend
 ---
@@ -22,7 +22,7 @@ Im gespeicherten Platinenaufdruck können noch S3-Bezeichnungen stehen. Maßgebl
 sind der 38-polige J2-Footprint und das Profil für den klassischen ESP32 DevKitC;
 dies ist kein freigegebener 44-poliger S3-Prüfadapter.
 
-**Dokumentstand 14. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
+**Dokumentstand 15. November 2026.** Die neue Revision ist anhand der CAD-Dateien dokumentiert; die physische Abnahme am gefertigten Aufbau steht aus.
 
 [Anleitung als PDF](../../../assets/downloads/ESP32_DevKitC_Adapter_Rev0.3_Anleitung.pdf){ .md-button }
 [Alte Revisionen](old-revisions.md){ .md-button }
@@ -46,15 +46,17 @@ Gezeigt ist die Vorderseite. Die beiden Pinheader-Reihen J2 werden auf der **Rü
 ## 1. Teile und Vorbereitung
 | Ref. | Anz. / Einheit | Wert / Funktion | Artikel |
 | --- | --- | --- | --- |
-| PCB | 1 | ESP32 DevKitC Adapter Rev.0.3 | Revisionsgebundene Artikelzuordnung prüfen |
+| PCB | 1 | ESP32 DevKitC Adapter Rev.0.3 | ENP-00183 |
 | U4,U5,U6 | 3 | SOIC-24W; kein HCT | ENP-00153 |
 | C1,C2,C3 | 3 | 100 nF X7R 1206 | ENP-00006 |
 | J1 | 1 | WSL 10G | ENP-00147 |
 | J2 | 38 | Rohmaterial in Kontaktpositionen: 2× 1×19 für Testplug | ENP-00145 |
 
+**Bausatz:** ENK-00050.
+
 ENP-00145 wird in einzelnen Kontaktpositionen gezählt, nicht als Anzahl fertig zugeschnittener Leisten. Kabel, Zugentlastung, Gehäuse und Befestigung separat ergänzen.
 
-Für J2 werden zwei gerade 1×19-Pinheader im Reihenabstand **25,40 mm** benötigt. Beide werden auf der Rückseite montiert, damit der Adapter in den ESP32-Sockel des Prüflings gesteckt werden kann. An TP1 werden die beiden Adern des Referenzpigtails direkt angelötet. Eine 1×2-Stiftleiste wird dort nicht bestückt (DNP). Der **zweipolige JST-PH-Stecker sitzt am freien Kabelende in Richtung Prüfling**, nicht auf dem Input-Adapter. Die beiden DUT-Referenzen dürfen weder mit Adapter-GND noch mit 3V3_SYS gebrückt werden.
+Für J2 werden zwei gerade 1×19-Pinheader im Reihenabstand **25,40 mm** benötigt. Beide werden auf der Rückseite montiert, damit der Adapter in den ESP32-Sockel des Prüflings gesteckt werden kann. An TP1 werden die beiden Adern des Referenzpigtails direkt angelötet. Eine 1×2-Stiftleiste wird dort nicht bestückt (DNP). Der **Gegenstecker am freien Kabelende muss zum TP1-Anschluss des Prüflings passen**: Mini 0.10 und Weather 0.4 verwenden einen Pinheader 1×2 im Raster 2,54 mm. Dafür eine passende zweipolige Buchse verwenden. Frühere Mainboardrevisionen können einen anderen TP1-Steckverbinder besitzen. Die beiden DUT-Referenzen dürfen weder mit Adapter-GND noch mit 3V3_SYS gebrückt werden.
 
 ## 2. Bestückungsübersicht
 
@@ -76,7 +78,7 @@ Die Pinfolge folgt den tatsächlichen Padnummern. J2 von der Oberseite betrachte
 1. C1-C3 und anschließend U4-U6 ausrichten und bestücken; SOIC-24W-Pin 1 und feine Brücken prüfen.
 2. J1 mit korrekter IDC-Kodierung einsetzen und löten.
 3. Die beiden J2-Pinheader-Reihen auf der Rückseite mit den Steckkontakten zum Prüfling einsetzen und in einer maßhaltigen Vorrichtung mit 25,40-mm-Abstand ausrichten; zunächst Endpins fixieren, Passprobe spannungsfrei durchführen und erst dann fertig löten.
-4. Die beiden Pigtail-Adern direkt an TP1 anlöten; keine 1×2-Stiftleiste bestücken. Den zweipoligen JST-PH-Stecker am Kabelende zum Prüfling mit Pin 1/2 eindeutig zuordnen und beide Adern einzeln durchmessen.
+4. Die beiden Pigtail-Adern direkt an TP1 anlöten; keine 1×2-Stiftleiste bestücken. Den zum Prüfling passenden zweipoligen Gegenstecker am Kabelende mit Pin 1/2 eindeutig zuordnen und beide Adern einzeln durchmessen.
 5. Reinigen und Lötstellen sowie Abstände kontrollieren.
 
 ## 4. Anschlüsse und vollständige Kanalzuordnung
@@ -168,11 +170,11 @@ auf die beiden Messkontakte legen. Die Referenzzuordnung unterscheidet sich von 
 3. Mit geeigneter Diagnosefirmware nacheinander genau einen Mux und einen Kanal wählen; unbenutzte Muxe deaktiviert lassen.
 4. Zuerst bekannte Prüfschleifen verwenden, jeden der 38 Sockelkontakte und beide TP1-Pfade einzeln erfassen; Querpfade und ausgeschaltete Kanäle kontrollieren.
 5. Die TP1-Diodenpfade des neuen Mainboards mit passender Stromrichtung prüfen. ADC-Schwellwerte und Einschwingzeit am Referenzaufbau bestimmen.
-6. Vor Kontaktierung eines DUT ausschalten; DUT-DevKit entfernen, alle DUT-Quellen und Provisioning trennen und den Testplug korrekt einstecken. Den JST-PH-Stecker des TestPin-Kabels nur bei Mainboards mit passendem TP1-Anschluss verbinden.
+6. Vor Kontaktierung eines DUT ausschalten; DUT-DevKit entfernen, alle DUT-Quellen und Provisioning trennen und den Testplug korrekt einstecken. Das TestPin-Kabel nur mit passendem Gegenstecker und geprüfter Pinfolge am TP1-Anschluss verbinden.
 
 ### Firmware und Bedienung bei älteren Mainboards
 
-Bei älteren Mainboardrevisionen ohne TP1 bleibt das **zweipolige JST-PH-TestPin-Kabel unverbunden**. Der Test erfolgt dann über die 38 DevKit-Sockelkontakte; die beiden zusätzlichen Referenzmessungen stehen nicht zur Verfügung.
+Bei älteren Mainboardrevisionen ohne TP1 bleibt das **zweipolige TestPin-Kabel unverbunden**. Der Test erfolgt dann über die 38 DevKit-Sockelkontakte; die beiden zusätzlichen Referenzmessungen stehen nicht zur Verfügung.
 
 Die Test-Firmware muss das Testergebnis in diesem Fall als **„unvollständig“** ausweisen. Ein vollständiger Test setzt die beiden angeschlossenen und geprüften TP1-Referenzpfade voraus. Die Auswertung ist anhand des tatsächlich ausgewählten Prüflingsprofils und der Ergebnisanzeige zu kontrollieren.
 
