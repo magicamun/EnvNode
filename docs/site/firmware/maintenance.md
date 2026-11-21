@@ -47,11 +47,12 @@ als Ursache angenommen werden.
 
 ## Netzwerkaufzeichnung
 
-Systemlogs und freigegebene Diagnosen werden über UDP an rsyslog gesendet.
-Die RAM-Loganzeige bleibt davon unabhängig. Aufbewahrung und Rotation erfolgen
-beim Empfänger.
+Die Firmware kann Systemmeldungen und ausgewählte erweiterte Diagnosen über UDP
+an einen externen, konfigurierten und laufenden rsyslogd senden. Die lokale
+Protokollanzeige bleibt unabhängig davon verfügbar. Die Aufzeichnungen werden
+auf dem Empfänger verwaltet.
 
-[Einrichtung und Verlustzähler](network-logging.md)
+[Versand einrichten und Empfang prüfen](network-logging.md)
 
 ## Factory Reset
 

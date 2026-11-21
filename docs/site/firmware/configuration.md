@@ -31,6 +31,21 @@ Speichern und die Rückmeldung beachten. Nach dem Wechsel zurück ins normale WL
 die neue IP im Router oder in der seriellen Ausgabe ermitteln.
 Das Abbrechen der bisherigen Verbindung während eines Netzwerkwechsels ist erwartbar.
 
+### Netzwerkfelder unterscheiden
+
+| Feld | Bedeutung |
+| --- | --- |
+| Hostname | Netzwerkname des Geräts; unterscheidet sich vom frei gewählten Gerätenamen. |
+| SSID und Passwort | Zugang zum vorgesehenen WLAN. |
+| DHCP | Netzparameter vom Router beziehen; für den Einstieg die einfachste Auswahl. |
+| Statische IP | Feste, im eigenen Netz freie Geräteadresse. |
+| Netzmaske, Gateway, DNS | Müssen zum lokalen Netz passen; DNS wird für Namen von Broker und Zeitservern benötigt. |
+
+Vor dem Speichern Netzwerkangaben notieren und die Rückmeldung zur erforderlichen
+Laufzeitaktion beachten. Eine geänderte Adresse kann die bisherige Browseradresse
+ungültig machen. Nach Neustart auf der Statusseite prüfen, welche Verbindung und
+Adresse tatsächlich aktiv sind.
+
 ## 4. Gerät, Sprache und Zeit
 
 Unter **Gerät (Device)** die Geräteangaben prüfen. Unter **Sprache/Zeit** die

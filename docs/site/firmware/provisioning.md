@@ -159,9 +159,9 @@ dem Neustart angezeigt, reserviert seine Ports und bleibt funktional inaktiv.
 Die neue Hardwarekonfiguration wird im normalen EnvNode nach einem Neustart
 übernommen; der Tester schreibt weiterhin den externen Prüfling.
 
-Der Katalog enthält zunächst die vorhandenen fünf Boardrevisionen und DuoRelay
-0.3. SD und SX1262-Remote folgen mit geprüften Hardwareprofilen. Während einer
-laufenden Anschlussprüfung sind auch die neuen Remote-Aktionen gesperrt.
+Der verfügbare Profilkatalog wird im Dialog angezeigt. Wähle das zur tatsächlichen
+Hardware passende Profil und die richtige Revision. Während einer laufenden
+Anschlussprüfung sind auch die Remote-Aktionen gesperrt.
 
 ## Gemeinsamer Dialog ab EnvNode 0.8.5 / Tester 0.8.2
 

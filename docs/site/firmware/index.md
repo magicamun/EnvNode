@@ -19,8 +19,9 @@ begleitet die Einrichtung von Sensoren, Aktoren, Controllern und Displays.
 
 ![Weboberfläche mit Navigation und Konfigurationsseite](../assets/images/firmware/interface-overview.jpg)
 
-Aufnahme von Firmware 0.5.0 auf Mini 0.3 mit DuoRelay 0.3. Die Hardwarebelegung
-ist aufbauspezifisch; die Aufnahme dient der Orientierung in der Bedienoberfläche.
+Aufnahme vom 21.11.2026 mit Firmware **0.8.15** und deutscher Oberfläche.
+Der gezeigte Aufbau verwendet das Mini-Boardprofil 0.8 und DuoRelay 0.3; die
+Hardwarebelegung ist aufbauspezifisch. Die Aufnahme dient der Orientierung.
 
 Welche Sensoren passen zu deiner Messaufgabe? Die
 [Sensorwahl nach Messgröße](../applications/measurements.md) führt zur passenden
@@ -36,7 +37,7 @@ Einrichtung; dieses Kapitel erklärt die Bedienung der Oberfläche.
 | [4. Erste Messung](sensors.md) | Sensor konfigurieren und Werte prüfen |
 | [5. Ausgänge schalten](actuators.md) | Aktoren sicher einrichten und bedienen |
 | [6. Lokal automatisch steuern](controllers.md) | Controller mit einem Zielaktor verbinden |
-| [7. Values und Anzeigen](values-displays.md) | Eigene Werte und Displayinhalte einrichten |
+| [7. Values](values.md) und [Displays](values-displays.md) | Eigene Auswahlwerte definieren und Inhalte anzeigen |
 | [8. MQTT und Home Assistant](mqtt.md) | Messungen und Zustände extern verwenden |
 | [9. Wartung und Diagnose](maintenance.md) | Sichern, aktualisieren und Fehler eingrenzen |
 
@@ -52,8 +53,9 @@ Die Funktion steht ab Firmware 0.6.0 zur Verfügung.
 
 ## Diagnoseaufzeichnung
 
-[Netzwerklogging](network-logging.md) beschreibt den rsyslog-Empfänger,
-Diagnoseauswahl, Verlustzähler und Rotation.
+[Netzwerklogging](network-logging.md) erklärt, wie die Firmware Meldungen und
+erweiterte Diagnosen an einen bereits eingerichteten externen rsyslogd sendet
+und wie du den Empfang kontrollierst.
 
 ## Zwei durchgehende Beispiele
 

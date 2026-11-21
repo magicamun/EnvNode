@@ -1,62 +1,76 @@
-# Netzwerklogging über UDP
+# Netzwerklogging
+
+Die Firmware kann Systemmeldungen und erweiterte Diagnosen an einen externen,
+konfigurierten und laufenden **rsyslogd** senden. Dieser Dienst nimmt die
+Meldungen auf einem anderen Rechner entgegen und speichert sie dort. Damit
+lassen sich beispielsweise Sensorfehler oder der Ablauf einer Heizungssteuerung
+über längere Zeit nachvollziehen.
+
+Netzwerklogging ist optional. Die lokale Seite **Protokolle** bleibt davon
+unabhängig verfügbar. Die Einrichtung des externen rsyslogd wird hier vorausgesetzt.
+
+## Voraussetzungen
+
+- Ein eingerichteter und laufender rsyslogd muss Nachrichten über UDP annehmen.
+- Die IPv4-Adresse dieses Rechners und der dort konfigurierte UDP-Port müssen bekannt sein.
+- EnvNode muss den Empfänger über das Netzwerk erreichen können; dessen Firewall muss den Empfang zulassen.
+
+Ein MQTT-Broker ist kein Ersatz für diesen Empfänger. Die Firmware verwendet
+für Netzwerklogging eine numerische IPv4-Adresse; ein Hostname ist hier nicht vorgesehen.
+
+## Einstellungen auf EnvNode
+
+Öffne **Netzwerklogging** in der Weboberfläche.
+
+| Einstellung | Bedeutung |
+| --- | --- |
+| Netzwerklogging aktiv | Versand an den eingetragenen Empfänger einschalten. |
+| Empfänger IPv4 | Adresse des Rechners, auf dem rsyslogd läuft. Die Adresse gehört zum eigenen Netz. |
+| UDP-Port | Empfangsport des Dienstes, von 1 bis 65535. Häufig wird 514 verwendet; maßgeblich ist die tatsächliche Serverkonfiguration. |
+| Systemlogs senden | Allgemeine Meldungen über Betrieb, Ereignisse und Fehler übertragen. |
+| Erweiterte Systemdiagnose | Zusätzliche Diagnosen des Geräts übertragen, etwa zur Untersuchung von Ressourcen und Laufzeit. |
+
+Adresse, Port und gewünschte Freigaben eintragen und **Speichern** wählen.
+Die Einstellungen werden im laufenden Betrieb übernommen und bleiben nach
+Neustart erhalten. Für eine erste Kontrolle genügt es, die benötigten
+Meldungsarten gezielt einzuschalten.
+
+## Einzelne Komponenten untersuchen
+
+Zusätzliche Sensor-, Aktor- und Controllerdiagnosen werden in deren jeweiligen
+Einstellungen über **Erweiterte Diagnose** ausgewählt und gespeichert. Die
+Freigabe der erweiterten **System**diagnose schaltet diese Komponenten nicht
+pauschal mit ein.
+
+Für eine Heizungsprüfung beispielsweise Sensor, Heizaktor und zuständigen
+Controller auswählen: Die Sensordiagnose zeigt die Eingabe, die Controllerdiagnose
+die Entscheidung und die Aktordiagnose den angewendeten Software-Ausgang.
+Letztere ist keine elektrische Rückmessung der Heizung.
+
+Soweit die laufende Firmware **Testbeginn / Ende markieren** anbietet, können
+zusammengehörige Versuche in der externen Aufzeichnung gekennzeichnet werden.
+Damit lassen sich Ereignisse leichter einem Testabschnitt zuordnen.
+
+## Empfang kontrollieren
+
+1. Auf EnvNode Empfänger und Freigaben speichern.
+2. Für die angebotene Funktion **Diagnoseereignis erzeugen** die erweiterte
+   Systemdiagnose aktivieren und ein Testereignis erzeugen.
+3. Auf dem Empfänger prüfen, ob die Meldung tatsächlich eingetroffen ist.
+4. Anschließend einen bekannten Ablauf der ausgewählten Komponente beobachten
+   und mit der Aufzeichnung vergleichen.
+
+UDP bestätigt den Empfang nicht. Ein steigender lokaler Sendezähler bedeutet,
+dass EnvNode die Nachricht an seinen Netzwerkstack übergeben hat. Er bestätigt
+keine Speicherung auf dem Empfänger. Bei fehlenden Meldungen deshalb Adresse,
+Port, Erreichbarkeit, Firewall und den laufenden Empfangsdienst prüfen.
+
+Netzwerk- oder Serverausfälle und volle Puffer können Aufzeichnungslücken
+verursachen. Fehlende Meldungen werden später nicht aus einem dauerhaften
+Gerätespeicher nachgeliefert. Aufbewahrung und Löschen der Aufzeichnungen werden
+auf dem externen Rechner festgelegt.
+
+[Wartung und Diagnose](maintenance.md#diagnose) ·
+[Sensoren](sensors.md) · [Aktoren](actuators.md) · [Controller](controllers.md)
 
 Lizenz: siehe [Lizenz und Nutzung](../license.md).
-
-Der klassische ESP32 sendet Systemlogs und strukturierte Diagnosen
-an rsyslog. Das bestehende Framework bleibt erhalten. RainDetector erfasst
-weiterhin jedes Messfenster, normalerweise alle 250 ms. Die spätere Integration
-von Analog und SCT013 hängt von gemessenen Ressourcenbudgets ab. SD/SX1262 und
-ein Frameworkwechsel gehören zum späteren S3-Profil; der Anwendungskern bleibt
-gemeinsam.
-
-Unter **Netzwerklogging** die numerische Empfängeradresse, UDP-Port und die
-Freigaben speichern. Für den vereinbarten Testaufbau: `192.168.20.10`, Port `514`
-(Hostname des Servers: `iot-rsyslogd`). Hostnamen werden in der Firmware zunächst
-nicht aufgelöst. Die Empfängeradresse ist installationsspezifisch und wird nicht
-fest in die Firmware eingebaut.
-
-Systemlogs und erweiterte Systemdiagnose sind getrennt wählbar. Die vorhandenen
-Diagnose-Checkboxen beim Sensor, Aktor und Controller bleiben erhalten. Ein
-Netzausfall setzt sie nicht zurück. Für RainDetector beide relevanten Quellen
-aktivieren; die Systemdiagnose ist keine Voraussetzung dafür.
-
-GPIO-/PWM-Aktoren melden Änderungen als `actuator_output` direkt nach dem
-Schreibaufruf: bisheriger, angeforderter und angewendeter Prozentwert sowie
-Ergebnis und Aktion. Unveränderte Wiederholungen erzeugen keine weiteren
-Schaltpunkte. Die Meldung bestätigt den Software-Ausgang, keine elektrische
-Rückmessung. Die Aktor-Checkbox aktiviert diese Meldungen.
-
-Controller melden Zustands-/Entscheidungsänderungen als `controller_state` und
-`controller_decision`, zusätzlich alle 60 Sekunden einen aktuellen Stand.
-Dazu gehören Laufzustand, Verfügbarkeit, Ergebnis und je nach Controller die
-Blinkphase, Schwellwertentscheidung oder Regen-/Trockenzustand. Die bisherigen
-RainDetector-Detailereignisse bleiben erhalten. Für Heizversuche Aktor **und**
-Controller freigeben. Zur Zuordnung die geräteinterne `uptime_ms` verwenden;
-der spätere Empfangszeitpunkt ist nicht der Schaltzeitpunkt.
-
-UDP bestätigt keinen Empfang. Pufferüberlauf, Netzwerkausfall und Serverausfall
-können Lücken verursachen. Es gibt keine Nachlieferung aus persistentem Speicher.
-Die Statusseite zeigt lokale Sende-/Verlustzähler, Queuefüllstände, Heapwerte und
-maximale Anwendungs-/Logger-Servicezeiten. `sent_local` bedeutet ausschließlich,
-dass der lokale Netzwerkstack das Datagramm angenommen hat. Ein nicht laufender
-Empfänger kann daher trotz steigender sent_local-Zähler keine Daten speichern.
-
-Gerätekennung, Bootkennung, Firmwarebuild, Streamsequenz, Uptime und optionale
-UTC-Zeit ordnen Ereignisse zu. Sensorrevision und Gatezeiten bleiben in den
-Rain-Ereignissen erhalten. Sequenzen und Zähler laufen bei 32 Bit über; Vergleiche
-erfolgen modular. UDP kann außerdem umsortieren oder duplizieren.
-
-Empfänger- und Rotationsbeispiele liegen im Repository unter `tools/rsyslog/`.
-Systemlogs und Diagnosen werden separat gespeichert; die konkrete Aufbewahrung
-wird dort verwaltet. Der aktuelle Stand und noch offene Hardwareprüfungen stehen
-in `docs/UdpLoggingValidation.md`. Die lokale Validierung ersetzt keinen
-Dauertest auf Weather 0.2 unter gleichzeitiger Web-/WLAN-/MQTT-Last.
-
-
-SX1262 ist kein unterstützter Treiber. Hardwareprofile und EEPROM-Identitäten
-bleiben unabhängig von der jeweiligen Firmware-Treiberunterstützung.
-
-Bei ausgewählter Klimaquelle ergänzt RainDetector `rain_dew_config` und
-`rain_dew`: Taupunktabstandsgrenzen, Quellgültigkeit, Heizanforderung und
-Trocknungsvorrang. Die Aktorereignisse zeigen weiterhin den tatsächlich
-angewendeten Software-Heizwert (nur 0/100 %).

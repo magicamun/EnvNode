@@ -82,9 +82,11 @@ gewählte Luftdruckeinheit. Home Assistant Discovery legt für den Meereshöhend
 einen eigenen Sensor mit ausdrücklich abgeleitetem Namen an.
 
 Im Display-Editor die Quelle `sensor/<SensorId>/sea_level_pressure` auswählen.
-Die Property liefert wie der bestehende örtliche Druck den kanonischen Wert in
-**Pascal**; ein passender Text ist etwa `NN %.0f Pa`. Vorhandene Displayseiten
-werden nicht automatisch umgestellt.
+Im aktuellen Firmwarestand berücksichtigen Display und Vorschau die gewählte
+Darstellungseinheit. Bei gewählten hPa passt beispielsweise `NN %.1f hPa`.
+Der Einheitentext ist fester Bestandteil des Formats und muss bei einer
+Einheitenänderung ebenfalls angepasst werden. Vorhandene Displayseiten werden
+nicht automatisch umgeschrieben.
 
 ## Berechnung und Plausibilitätsprüfung
 

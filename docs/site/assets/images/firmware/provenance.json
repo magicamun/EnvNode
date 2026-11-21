@@ -1,0 +1,32 @@
+{
+  "captured_date": "2026-11-21",
+  "firmware_version": "0.8.15",
+  "firmware_build": "0.8.15+539.ge572c2d.dirty",
+  "locale": "de-DE",
+  "board_profile": "EnvNode Mini 0.8",
+  "module": "DuoRelay 0.3, Slot B",
+  "note": "Read-only screenshots of the running device. No configuration changes. Firmware build identity is not a claim about a published binary.",
+  "images": [
+    {
+      "file": "interface-overview.jpg",
+      "sha256": "28acab90bc85abb6f78afd4b8e9d87460a760b264a866a276ee4382b930be60a"
+    },
+    {
+      "file": "measurements.jpg",
+      "sha256": "8caa5facc8ba31e0dedbbecdfe4a2b335ed70482e14c3245b7b106e29d2883c6"
+    },
+    {
+      "file": "bme280-configuration.jpg",
+      "sha256": "8cf2ab03c167f8c7df91a1a6a290fdc8c3a8e7c65e3516a0c7bc2106fd28f669"
+    },
+    {
+      "file": "duorelay-channel.jpg",
+      "sha256": "67263f32ddf4935d1d14557cfcd6b17330c2172b3ec682323dafdd76c3a985b0"
+    },
+    {
+      "file": "displays.jpg",
+      "sha256": "a9349a3c908672f73819252140226c9305b763d7f2296b288d52e9e36b3d14e2"
+    }
+  ],
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see repository LICENSE"
+}

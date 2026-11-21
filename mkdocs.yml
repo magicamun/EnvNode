@@ -105,7 +105,8 @@ nav:
           - Sensoren und Messwerte: firmware/sensors.md
           - Ausgänge schalten: firmware/actuators.md
           - Lokale Controller: firmware/controllers.md
-          - Values und Anzeigen: firmware/values-displays.md
+          - Values: firmware/values.md
+          - Displays und Inhaltsseiten: firmware/values-displays.md
           - MQTT und Home Assistant: firmware/mqtt.md
           - Wartung und Diagnose: firmware/maintenance.md
           - Beispiele:

@@ -25,6 +25,24 @@ Sensor-Messungen werden nicht retained veröffentlicht; Aktor- und Controllersta
 sind retained. Steuerbefehle nicht retained senden, damit kein alter Befehl beim
 Wiederverbinden erneut angewendet wird.
 
+## Values und Befehlsrückmeldung
+
+[Values](values.md#uber-mqtt-bedienen) haben eigene Befehl- und Statustopics.
+Der Befehl enthält den Optionsschlüssel als Klartext; der retained Status meldet
+die tatsächlich angenommene Auswahl zurück. Die Values-Karte zeigt im aktuellen
+Quellstand beide Topics und einen Beispiel-Payload.
+
+Ein Value-Befehl wählt einen Modus, ein Aktorbefehl schaltet einen Ausgang und
+ein Controllerbefehl startet oder stoppt eine Regel. Diese Befehle sind nicht
+untereinander austauschbar. Ein laufender Controller kann eine manuelle
+Aktoränderung wieder überschreiben; die Betriebsart daher über den vorgesehenen
+Value/Selector ändern. Beim RainDetector entwaffnet eine manuelle Aktoränderung
+die Automatik; danach ist Start erforderlich.
+
+Die Versionsnummer eines bereits veröffentlichten Images muss die neueste
+Bedienhilfe noch nicht enthalten. Im Zweifel Build-Commit auf der Firmwareseite
+und im [Downloadkatalog](downloads.md) vergleichen.
+
 ## Erste Kontrolle
 
 1. MQTT-Broker im Gerät konfigurieren und Verbindung prüfen.

@@ -12,11 +12,17 @@ Aktuelle Plattformabgrenzung: [Classic ESP32 scope](ClassicEsp32Scope.md). RainD
 
 - [x] Controller-Zielauswahl: konfigurierten Aktor-Slot und automatisch erkanntes Modulrelais bei identischer Hardware als einen Eintrag mit Benutzername und Modulzuordnung anzeigen. Auch die exklusive Zielbelegung muss beide Referenzarten als dasselbe Ziel erkennen. Bestehende gespeicherte Referenzen kompatibel halten.
 
-- [ ] In einem separaten Thread eine Benutzerdokumentation der Web-Oberfläche erstellen: Seiten und Felder, Speichern/Anwenden/Neustart, Values und Neustartverhalten, Hysterese/Selector sowie Display-Quellen und Übersetzungen. RainControl als durchgängiges Konfigurationsbeispiel verwenden.
+- [x] Allgemeine Bedienkapitel zu Sensorfeldern, Aktoren, Speichern/Anwenden/Neustart, Enum-Values samt MQTT und Neustartregel, Threshold/Selector sowie Displayquellen, Formaten und Zustandsübersetzungen ergänzt. Regenwippen-Kalibrierung und RainDetector-Trockenschwelle eigenständig beschrieben. Stand: 21.11.2026; redaktioneller Abgleich mit Firmwarequellen, kein neuer Hardwaretest.
+- [ ] Die überarbeiteten Bedienkapitel am realen Gerät weiter gegenlesen und die beschriebenen Abläufe prüfen.
+- [x] Die fünf bisherigen Firmware-Screenshots mit deutschen Aufnahmen der laufenden Firmware 0.8.15 ersetzt; Bildbeschreibungen mit der tatsächlichen Konfiguration abgeglichen.
+- [ ] Später eine separate Anleitung zur Einrichtung eines externen rsyslogd ergänzen; die Bedienungsdoku setzt einen vorhandenen Empfänger voraus.
+- [ ] Nach Abschluss der allgemeinen Bedienkapitel: WeatherStation als durchgängiges Beispiel — Gehäuseklima, Außenklima, Luftdruck aus einem oder beiden Sensoren, Regenwippe mit mm/Kippung, RainDetector mit Kalibrierung und Heizungscontroller, Standort mit Sensorhöhe/Longitude/Latitude. Reihenfolge entspricht der schrittweisen Inbetriebnahme; Grundlagen bleiben in den Fachkapiteln.
+- [ ] Optional anschließend: WeatherStation in Home Assistant anzeigen und Regenwippen-Ereignisse zu Stunden-/Tagessummen aggregieren.
+- [ ] Später zweites durchgängiges Beispiel: AnalogHydroPressure-Sondenmessung mit Relais, Threshold und Betriebsarten; danach kurze HA-Anbindung für Relais, Modi und unterstützte Schwellwerte mit einer Demo-Kachel. Tatsächlichen Firmwareumfang vorab prüfen.
 
 - [x] Values-Seite: MQTT-Befehlstopic und Beispiel-Payload pro Value anzeigen; Befehl und Statusrückmeldung klar unterscheiden.
 
-- [ ] Font-/Clipping-Hardwaretest: zwei 128×64-Displays mit Fixed 6x10 (21×6) und Fixed 8x13 (16×4), lange Zeilen, Umlaute am rechten Rand, Fontwechsel und Neustart prüfen. Software, Speicherung und Vorschau sind umgesetzt und automatisiert geprüft; weitere Pixelgeometrien bleiben ein späterer Schritt.
+- [x] Font-/Clipping-Hardwaretest für die beiden 128×64-Displayfonts: vom Nutzer am 21.11.2026 im Konsolidierungschat als erledigt bestätigt. Software, Speicherung und Vorschau sind umgesetzt und automatisiert geprüft; weitere Pixelgeometrien bleiben ein späterer Schritt.
 
 ## Firmware-Releases nach Abschluss der Hardware-Dokumentationsrunde
 

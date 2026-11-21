@@ -51,12 +51,57 @@ Das Sensor-Ausgabeintervall (voreingestellt 5000 ms) bestimmt die Veröffentlich
 Die lokale Frequenzmessung arbeitet unabhängig davon in ungefähr 250-ms-Fenstern.
 Die Automatik verwendet Heizung aus oder 100 %, auch bei einem PWM-Aktor.
 
+### Bedeutung der Erkennungsparameter
+
+**Benetzung:** Die Firmware sucht einen ausreichend schnellen Frequenzabfall.
+Das Flankenfenster begrenzt den Vergleichszeitraum. Sowohl der absolute Abfall
+in Hz als auch der relative Abfall in Promille müssen erreicht werden.
+5 ‰ entsprechen 0,5 %, nicht 5 %. Eine Veränderung dieser Werte verändert die
+Empfindlichkeit gegenüber neuer Benetzung, nicht die Niederschlagsmenge in mm.
+
+**Regenende:** Die Ruhezeit beginnt mit der letzten erkannten neuen Benetzung.
+Ihr Ablauf bedeutet, dass keine neue Benetzung erkannt wurde; die Fläche kann
+weiterhin nass sein. Deshalb wird Trockenheit getrennt bestätigt.
+
+**Trockenschwelle:** Die steigende Frequenz muss die Schwelle erreichen, damit
+die Trockenbestätigung beginnen kann. Fällt sie anschließend unter
+`Trockenschwelle − Trockenhysterese`, wird diese Bestätigung zurückgesetzt.
+Die Hysterese muss größer null und kleiner als die Trockenschwelle sein.
+Die Bestätigungsdauer verhindert, dass ein kurzer hoher Frequenzwert bereits
+als verlässlich trocken gilt.
+
+### Trockenschwelle am eigenen Aufbau bestimmen
+
+1. Head in vorgesehener mechanischer Ausführung, mit finaler Beschichtung und
+   Verkabelung trocken betreiben. Automatische Heizanforderungen zunächst
+   stoppen; kontrollieren, dass die Heizung wirklich aus ist.
+2. Trockene Frequenz über mehrere Messungen beobachten und deren Schwankungsbereich
+   notieren. Eine einzelne Messung ist noch kein Referenzbereich.
+3. Die Sensorfläche kontrolliert benetzen und Frequenzabfall sowie anschließende
+   Erholung beim Trocknen beobachten. Andere Teile trocken halten.
+4. Die Trockenschwelle so wählen, dass der tatsächlich trockene Head sie
+   zuverlässig erreicht und eine noch benetzte Fläche nicht voreilig trocken
+   bestätigt wird. Die Trockenhysterese anhand der beobachteten Schwankungen
+   wählen; die Bestätigungsdauer ergänzt die Frequenzgrenze.
+5. Parameter speichern und Controlleränderungen anwenden. Startprüfung,
+   Benetzung und vollständiges Trocknen erneut durchlaufen lassen.
+6. Erst anschließend Empfindlichkeit und Regenende-Ruhezeit anhand der beobachteten
+   Ereignisse nachführen und im vorgesehenen Außenbetrieb überprüfen.
+
+Die trockene Grundfrequenz, Montagebedingungen und verwendeten Parameter notieren.
+Sind trockener und benetzter Bereich nicht ausreichend unterscheidbar, zuerst
+Aufbau und Signal untersuchen. Die Voreinstellung 32000 Hz ist kein universeller
+Kalibrierwert. Einen am Versuchsaufbau bestimmten Wert nach Änderung von Head,
+Beschichtung, Kabel oder Montage erneut prüfen.
+
 ## Optional: vorbeugend nach Taupunktabstand heizen
 
 Ab Firmware 0.8.12 kann im RainDetector-Controller eine lokale Klimaquelle
 gewählt werden, die Temperatur und Taupunkt liefert. Mit leerer Auswahl bleibt
-vorbeugendes Heizen aus. Ein- und Ausschaltschwelle beziehen sich auf den Abstand
-**Temperatur minus Taupunkt**; die Einschaltschwelle muss kleiner als die
+vorbeugendes Heizen aus. Als Klimaquelle den Sensor wählen, der die Außenbedingungen am Head möglichst
+gut beschreibt; ein Sensor im warmen Gehäuse ist dafür nicht automatisch geeignet.
+Ein- und Ausschaltschwelle beziehen sich auf den Abstand
+**Temperatur minus Taupunkt** in °C; die Einschaltschwelle muss kleiner als die
 Ausschaltschwelle sein. Werte passend zum vorgesehenen Aufbau wählen.
 
 Die Zusatzanforderung gilt nur bei gültiger Frequenz und bestätigtem trockenen
