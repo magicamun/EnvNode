@@ -11,6 +11,12 @@ thermischen Eigenschaften des eigenen Aufbaus.
 [Controller](../sensors/rain-detector-controller/assembly.md) und
 [Head](../sensors/rain-detector-head/assembly.md) müssen elektrisch geprüft sein.
 Dort stehen Kontaktbelegung, Versorgung, Heizlast und separate Funktionstests.
+**Verdrehsichere Steckverbindung:** Der Head kann auch um 180° gedreht auf den
+Controller gesteckt werden. Die Belegung ist absichtlich so ausgeführt, dass
+Sensorfläche und Heizung in beiden Steckrichtungen passend verbunden sind.
+Beide Steckverbinder spannungsfrei vollständig und ohne Versatz zusammenstecken.
+[Montage und Steckrichtungen](../sensors/rain-detector-head/assembly.md#head-auf-den-controller-stecken).
+
 Benötigt werden ein geeigneter Frequenzeingang für RAIN_FREQ und ein freier
 Digitalausgang für HEATER_EN. Wähle die Ressourcen nach tatsächlicher Verdrahtung
 und aktivem Boardprofil. Die 5-V-Versorgung muss die Heizlast mittragen.

@@ -5,8 +5,8 @@ pdf:
   title: RainDetectorController
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.4'
-  document_version: '1.1'
-  document_date: '2026-10-28'
+  document_version: '1.2'
+  document_date: '2026-11-21'
   source_document_date: '2026-10-28'
   status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
 ---
@@ -116,7 +116,15 @@ Die Versorgungspins von J3 und J4 sind direkt gemeinsam verbunden. Eine eindeuti
 | J2.1 | SENSE / Elektrode 1 | J2.1 |
 | J2.4 | HEATER- | J2.4 |
 
-Elektrische Zuordnung nach den aktuellen PCB-Padnetzen beider Projekte. Tatsächliche Kontaktachsen, Orientierung und Steckhöhe an den gewählten 2x2-Steckverbindern vor Montage prüfen; die Tabelle ersetzt keine mechanische Passprobe.
+Die Tabelle zeigt eine der beiden Steckrichtungen. Der Head darf auch **um 180°
+gedreht** aufgesteckt werden: Die Belegung verbindet Sensorfläche und Heizung in
+beiden Richtungen funktional richtig. Diese Verdrehsicherheit ist bewusst zur
+Vermeidung von Falschanschlüssen vorgesehen.
+
+Beide Steckverbinder vollständig und ohne Versatz zusammenstecken; Kontaktachsen,
+Steckhöhe und Montageabstand am Aufbau prüfen. Die
+[Head-Anleitung](../rain-detector-head/assembly.md#head-auf-den-controller-stecken)
+erklärt die beiden Steckrichtungen.
 
 ### Signale
 

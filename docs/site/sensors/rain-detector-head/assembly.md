@@ -5,8 +5,8 @@ pdf:
   title: RainDetectorHead
   subtitle: Bestückungs- und Bring-up-Anleitung
   hardware_revision: '0.2'
-  document_version: '1.1'
-  document_date: '2026-10-28'
+  document_version: '1.2'
+  document_date: '2026-11-21'
   source_document_date: '2026-10-28'
   status: Dokumentation abgeschlossen - Hardwareprüfstand siehe Anleitung
 ---
@@ -93,7 +93,7 @@ Der Abstand zwischen den Platinen muss für Widerstände, Steckverbinder, Lötst
 
 ## 3. Kontakte und Heiznetzwerk
 
-| Head | Funktion | Controller Rev. 0.4 |
+| Head | Funktion | Controller Rev. 0.4 in der gezeigten Steckrichtung |
 | --- | --- | --- |
 | J1.1 | HEATER+ / +5V | J1.1 |
 | J1.4 | GND / Elektrode 2 | J1.4 |
@@ -101,7 +101,23 @@ Der Abstand zwischen den Platinen muss für Widerstände, Steckverbinder, Lötst
 | J2.4 | HEATER- / geschalteter Rückleiter | J2.4 |
 | J1/J2 Pins 2 und 3 | Elektrisch unbeschaltet | Elektrisch unbeschaltet |
 
-Die Tabelle bildet die Netzzuordnung der aktuellen Quellen ab. SENSE liegt auf J2.1, HEATER- auf J2.4. Orientierung und Kontaktpaarung vor Montage durch eine mechanische Passprobe und Durchgangsprüfung bestätigen.
+Die Tabelle zeigt die Kontaktzuordnung in einer der beiden möglichen Steckrichtungen.
+SENSE liegt am Head auf J2.1, HEATER- auf J2.4.
+
+### Head auf den Controller stecken
+
+Der Head kann in **beiden um 180° versetzten Steckrichtungen** auf den Controller
+gesteckt werden. Die Stecker und Buchsen sind bewusst so angeordnet und belegt,
+dass **Sensorfläche und Heizung in beiden Richtungen funktional richtig verbunden**
+werden. Diese Verdrehsicherheit ist eine vorgesehene Maßnahme gegen Falschanschluss.
+
+Beim Drehen tauschen die beiden Anschlüsse der Heizung sowie die beiden
+Sensorelektroden jeweils untereinander. Heizwiderstände und kapazitive Sensorfläche
+sind für diesen Anschluss nicht gepolt; ihre Funktion bleibt erhalten.
+
+Beide Platinen zeigen weiterhin mit B.Cu zueinander. Beide Steckverbinder müssen
+vollständig und ohne Versatz ineinandergreifen; Kontaktpaarung, Steckhöhe und
+Montageabstand vor der Inbetriebnahme prüfen. Nur spannungsfrei zusammenstecken.
 
 ### Fünf parallele Heizstränge
 
