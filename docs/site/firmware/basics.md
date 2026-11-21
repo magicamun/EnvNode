@@ -28,11 +28,11 @@ nicht unmittelbar die physische Verdrahtung.
 | [Controller](controllers.md) | Lokale Steuerung konfigurieren und starten/stoppen |
 | [Werte (Values)](values.md) | Eigene Auswahlwerte definieren und ändern |
 | [Anzeige](values-displays.md) | Ausgabehardware und Textseiten einrichten |
-| [Netzwerk](configuration.md#3-netzwerk-einrichten) | WLAN, Hostname und IP-Konfiguration |
+| [Netzwerk](network.md) | WLAN, Hostname und IP-Konfiguration |
 | [MQTT](mqtt.md) | Broker und Discovery |
-| [Sprache & Zeit](configuration.md#4-gerat-sprache-und-zeit) | Oberflächensprache, Zeitzone und NTP |
-| [Einheiten](configuration.md#4-gerat-sprache-und-zeit) | Darstellungseinheiten auswählen |
-| [Gerät](configuration.md#4-gerat-sprache-und-zeit) | Geräteangaben und [Standort](geo-position-pressure.md#standort-eingeben) |
+| [Sprache & Zeit](language-time.md) | Oberflächensprache, Zeitzone und NTP |
+| [Einheiten](units.md) | Darstellungseinheiten auswählen |
+| [Gerät](device.md) | Geräteangaben und [Standort](device.md#standort-eingeben) |
 | [Konfiguration](maintenance.md#konfiguration-sichern-und-wiederherstellen) | Sicherung und Wiederherstellung |
 | [Hardware](provisioning.md) | Board Identity, Module und Provisioning |
 | [Diagnose](maintenance.md#diagnose) | Ressourcen und I²C-Scan |

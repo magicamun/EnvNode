@@ -5,7 +5,7 @@ zur Einrichtung mit der Firmware und zum ersten überprüften Ergebnis.
 
 | Was möchtest du einrichten? | Anleitung |
 | --- | --- |
-| EnvNode zum ersten Mal mit dem Netzwerk verbinden | [Gerät und Netzwerk einrichten](../firmware/configuration.md) |
+| EnvNode zum ersten Mal mit dem Netzwerk verbinden | [Erste Verbindung und Grundeinrichtung](../firmware/configuration.md) |
 | Board Identity oder Modulidentität zuordnen | [Hardware und Provisioning](../firmware/provisioning.md) |
 | BME280, SHT4x oder SHTC3 | [I²C-Sensoren](i2c-sensors.md) |
 | AM2302 / DHT22 | [Sensorformular und GPIO-Auswahl](../firmware/sensors.md) |

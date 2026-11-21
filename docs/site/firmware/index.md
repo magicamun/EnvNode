@@ -32,8 +32,8 @@ Einrichtung; dieses Kapitel erklärt die Bedienung der Oberfläche.
 | Schritt | Ziel |
 | --- | --- |
 | [1. Begriffe und Oberfläche](basics.md) | Verstehen, welche Aufgabe jede Komponente hat |
-| [2. Erste Inbetriebnahme](configuration.md) | Gerät erreichen und Netzwerk einrichten |
-| [3. Hardware und Provisioning](provisioning.md) | Board und Module richtig zuordnen |
+| [2. Gerät einrichten](configuration.md) | Erste Verbindung, Netzwerk und Grundeinstellungen |
+| [3. Hardwareerkennung und Provisioning](provisioning.md) | Board und Module richtig zuordnen |
 | [4. Erste Messung](sensors.md) | Sensor konfigurieren und Werte prüfen |
 | [5. Ausgänge schalten](actuators.md) | Aktoren sicher einrichten und bedienen |
 | [6. Lokal automatisch steuern](controllers.md) | Controller mit einem Zielaktor verbinden |
@@ -44,12 +44,20 @@ Einrichtung; dieses Kapitel erklärt die Bedienung der Oberfläche.
 Wenn das ESP32 noch keine passende Firmware hat, beginne mit
 [Bauen und Aufspielen](installation.md).
 
-## Standort und Luftdruck
+## Grundeinstellungen gezielt nachschlagen
 
-[GeoPosition und Meereshöhendruck](geo-position-pressure.md) beschreibt die
-optionalen Koordinaten, die tatsächliche Sensorhöhe, die lokale Temperaturauswahl
-und den getrennten abgeleiteten Druckwert einschließlich Qualität und Rückfallverhalten.
-Die Funktion steht ab Firmware 0.6.0 zur Verfügung.
+Unter **Gerät einrichten** sind die allgemeinen Einstellungen zusammengefasst:
+[Netzwerk](network.md), [Sprache und Zeit](language-time.md),
+[Gerät und Standort](device.md), [Einheiten](units.md) sowie
+[Hardwareerkennung und Provisioning](provisioning.md).
+Die [erste Verbindung und Grundeinrichtung](configuration.md) führt durch die Reihenfolge.
+
+## Luftdruck als Messfunktion
+
+[Luftdruck auf Meereshöhe](geo-position-pressure.md) erklärt die lokale
+Temperaturauswahl und den getrennten abgeleiteten Druckwert einschließlich
+Qualität und Rückfallverhalten. Die dafür benötigte Sensorhöhe wird unter
+[Gerät und Standort](device.md#standort-eingeben) eingegeben.
 
 ## Diagnoseaufzeichnung
 

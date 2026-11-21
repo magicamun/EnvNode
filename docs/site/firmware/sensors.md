@@ -63,7 +63,8 @@ Bei zwei Barometern bleiben beide örtlichen Druckmessungen getrennt. Benenne
 die Messstellen eindeutig und prüfe sie einzeln. Für die Berechnung des
 Meereshöhendrucks wird eine gemeinsame lokale Außentemperaturquelle ausgewählt;
 eine Gehäusetemperatur ist dafür nicht automatisch passend.
-[Standort, Sensorhöhe und Temperaturquelle](geo-position-pressure.md).
+[Sensorhöhe festlegen](device.md#standort-eingeben) und
+[Temperaturquelle für die Druckberechnung wählen](geo-position-pressure.md#lokale-temperaturquelle-wahlen).
 
 ## Speichern, anwenden, kontrollieren
 
@@ -147,4 +148,4 @@ Ein zusätzlicher abgeleiteter Druckwert nutzt die konfigurierte Sensorhöhe und
 optional einen aktuellen Temperaturwert eines lokalen Sensors. Die Erweiterung
 arbeitet auch mit simulierten Barometern.
 
-[GeoPosition, Temperaturauswahl und Druckberechnung einrichten](geo-position-pressure.md)
+[Temperaturauswahl und Druckberechnung einrichten](geo-position-pressure.md)

@@ -1,197 +1,149 @@
-# Hardware identifizieren und provisionieren
+# Hardwareerkennung und Provisioning
 
-Diese Seite beschreibt Hardwareidentifikation und Provisioning in der normalen
-EnvNode-Firmware. Für das Schreiben externer EEPROMs mit der separaten
-Testhardware führt [Test/Provisioning](../test-provisioning/operation/provisioning-profile.md)
-durch den passenden Ablauf.
+Die Seite **Hardware** zeigt, welches Mainboard und welche Module EnvNode erkannt
+hat. Das daraus gewählte Boardprofil bestimmt die verfügbaren Anschlüsse.
+Prüfe diese Zuordnung vor dem Einrichten von Sensoren und Ausgängen.
 
-Provisioning schreibt die Identität einer Baugruppe in deren EEPROM.
-Es ist bei leerem oder fehlerhaftem Datensatz nötig, nicht bei jedem Neustart.
+**Provisioning** schreibt die Identität einer Baugruppe in deren EEPROM.
+Es wird bei leerem oder fehlerhaftem Datensatz benötigt. Ein bereits korrekt
+erkanntes Board muss weder bei jedem Start noch nach jedem Firmwareupdate neu
+provisioniert werden.
 
-| Speicher | Aufgabe |
-| --- | --- |
-| Mainboard-EEPROM | Board Identity und Auswahl des passenden Boardprofils |
-| Modul-EEPROM | Module Identity beziehungsweise Descriptor und Kompatibilitätsprüfung |
-| ESP32-NVS | WLAN, MQTT und Anwendungs-Konfiguration |
+## Welche Daten liegen wo?
+
+| Speicher | Inhalt | Bedeutung für die Bedienung |
+| --- | --- | --- |
+| Mainboard-EEPROM | Boardidentität und Portzuordnung | Profil, Revision und zulässige Anschlüsse des Mainboards |
+| Modul-EEPROM | Modulbeschreibung (Descriptor) und individuelle Fertigungsdaten | Art und Fähigkeiten der Erweiterung im jeweiligen Slot |
+| ESP32-Konfigurationsspeicher (NVS) | Netzwerk, Gerätename, Sensoren, Aktoren und weitere Einstellungen | Deine Anwendungskonfiguration |
+
+Ein geänderter Gerätename ist keine neue Hardwareidentität. Eine
+[Konfigurationssicherung](maintenance.md#konfiguration-sichern-und-wiederherstellen)
+ersetzt keine separate Prüfung der EEPROM-Inhalte.
+
+<span id="selbstbeschreibende-portzuordnung"></span>
 
 ## Erkennung zuerst prüfen
 
-Unter **Hardware** erkannte Identität und aktives Profil kontrollieren;
-unter **Diagnose** gegebenenfalls I²C scannen. Ein nicht erreichbares EEPROM
-zuerst auf Bestückung, Versorgung und Verbindung prüfen. Ein I²C-Antwortsignal
-bestätigt noch keinen gültigen Datensatz.
+| Bereich auf der Hardwareseite | Was du prüfst |
+| --- | --- |
+| Platinenidentität | Profil und Hardwareversion stimmen mit der realen Platine überein. |
+| Quelle und Datensatzstatus | Die Zuordnung stammt aus einem gültigen EEPROM-Datensatz. `BuildFallback` ist lediglich eine Vorgabe des Firmwarebuilds, kein Nachweis korrekt provisionierter Hardware. |
+| Normalbetrieb | Die Firmware lässt den Betrieb mit dieser Identität zu; bei einer Sperre zuerst die Ursache klären. |
+| Modulidentität | Modul, Revision und tatsächlicher Slot stimmen überein. |
+| Erkannte Modulgeräte | Einzelne Geräte und Treiber des Moduls sind verfügbar und ihre Anschlüsse aufgelöst. |
 
-| EEPROM | Bus | Adresse |
-| --- | --- | --- |
-| Mainboard | I2C0 | 0x50 |
-| Modul Slot A | I2C0 | 0x52 |
-| Modul Slot B, wenn vorhanden | I2C0 | 0x53 |
+Ein gültiger Descriptor bedeutet nicht automatisch, dass jeder benötigte Treiber
+vorhanden ist. `MissingDriver` bezeichnet einen fehlenden Treiber; das lässt sich
+nicht durch Auswahl eines nur ähnlich benannten Modulprofils beheben.
 
-## Unterstützte Mainboard-Revisionen
+Wenn ein EEPROM nicht erreichbar ist, zuerst Versorgung und Anschluss anhand der
+Hardwareanleitung prüfen. Ein I²C-Scan unter **Diagnose** kann helfen:
+Mainboard-EEPROM `0x50`, Slot A `0x52`, Slot B `0x53`, jeweils auf I2C0, soweit
+der Slot am Mainboard vorhanden ist. Eine Antwort bestätigt noch keinen gültigen Inhalt.
 
-Ab **EnvNode 0.8.2** und **Testboard 0.7.0** sind diese Identitäten auswählbar:
+<span id="nachladbare-profile-ab-envnode-083-tester-080"></span>
 
-| Board | Hardware-Identität | Beispiel-PCB |
-| --- | --- | --- |
-| EnvNode Mainboard | 0.3 | ältere Mainboard-Ausführung |
-| EnvNode Weather | 0.2 oder 0.3 | 0.2.1 bzw. 0.3.0 |
-| EnvNode Mini | 0.8 oder 0.9 | 0.8.1 bzw. 0.9.0 |
+## Passendes Profil wählen
 
-Die tatsächliche Revision auswählen. Vorhandene EEPROM-Daten werden durch ein
-Firmwareupdate weder migriert noch automatisch auf eine neue Hardware-Revision
-umgeschrieben. Die normale Firmware verwendet nach dem Neustart die gespeicherte
-Revision und deren Ressourcen.
+<span id="unterstutzte-mainboard-revisionen"></span>
+<span id="weather-revision-02-provisionierung"></span>
+<span id="mini-revision-08-provisionierung"></span>
+
+Die tatsächliche PCB-Revision an der Platine feststellen und das dazu passende
+Profil im Dialog wählen. Bild und Versionsangabe dienen der Gegenprüfung.
+Keine höhere oder ähnlich aussehende Revision als Ersatz für ein fehlendes Profil wählen.
+Die [Kompatibilitätsübersicht](../compatibility.md) ordnet PCB-Revisionen und
+Firmwareunterstützung zu, einschließlich zusammengefasster Patchrevisionen.
+
+Im Abschnitt **Profilkatalog** lassen sich verfügbare Onlineprofile laden
+beziehungsweise aktualisieren. Dafür braucht der Browser sowohl Internetzugang
+als auch eine Verbindung zum EnvNode. Eingebaute Profile bleiben ohne Internet
+im selben Dialog verfügbar. Die angezeigte Betriebsmindestversion betrifft den
+späteren Betrieb; die Möglichkeit, ein Profil zu schreiben, bestätigt noch keine
+Treiberunterstützung der laufenden Firmware.
+
+<span id="gemeinsamer-dialog-ab-envnode-085-tester-082"></span>
+
+<span id="eeprom-inhalt-prufen-ab-envnode-086-tester-083"></span>
+
+## Felder des Provisioning-Dialogs
+
+| Feld / Bereich | Bedeutung |
+| --- | --- |
+| Hardwaretyp | Board oder Modul; legt das Ziel des Schreibens fest. |
+| Profil | Passender Typ und Revision der realen Baugruppe. |
+| Slot | Nur beim Modul: tatsächlicher EEPROM-Slot A oder B. |
+| Seriennummer | Individuelle Kennzeichnung; leer bedeutet noch nicht zugewiesen. Beim Board bis zu 17 Buchstaben, Ziffern, `-`, `_` oder `.`. |
+| Produktionscharge und Fertigungsdatum | Optionale, zur Baugruppe gehörende Angaben; Datumsformat wie im Formular angegeben. |
+| Aktuell im EEPROM | Frisch gelesener Inhalt einschließlich Lesestatus und vorhandener Fertigungsdaten. |
+| EEPROM erneut lesen | Istzustand vor einem Schreibvorgang aktualisieren. |
+| Vorhandene Fertigungsdaten übernehmen | Vorhandene Angaben ausdrücklich in die Eingabefelder kopieren. |
+| Neu zu schreiben | Geplanter Inhalt und Abweichungen gegenüber dem gelesenen Zustand. |
+| Schreibbestätigung | Bestätigung der aktuellen Auswahl und Angaben; nach Änderungen erneut kontrollieren. |
+
+Die Profilvorlage beschreibt die Hardwareart. Seriennummer, Charge und Datum
+bezeichnen die individuelle Baugruppe; sie sollten nicht unbesehen von einer
+anderen Baugruppe übernommen werden.
+
+<span id="1-mainboard-ohne-modul-provisionieren"></span>
 
 ## Mainboard schreiben
 
-1. Mainboard und reale PCB-Revision anhand der Platine feststellen.
-2. Unter **Hardware** das passende angebotene Boardprofil auswählen.
-3. Die Seriennummer eintragen. Erlaubt sind bis zu 17 Buchstaben, Ziffern sowie
-   `-`, `_` und `.`; ein leeres Feld kennzeichnet eine noch nicht zugewiesene
-   Seriennummer.
-4. Profil, zugehörige Revision und Seriennummer überprüfen.
-5. Die ausdrückliche Schreibbestätigung setzen und den Vorgang ausführen.
-6. Nur eine erfolgreiche Schreib- und Rückleseprüfung als Erfolg werten.
-7. Neustarten und aktives Boardprofil erneut prüfen.
+1. Unter **Hardware** im Provisioning-Dialog **Board** auswählen.
+2. Passendes Profil und Revision wählen.
+3. EEPROM-Inhalt lesen und vorhandene Fertigungsdaten prüfen. Bei Bedarf
+   ausdrücklich übernehmen oder die eigenen Angaben eintragen.
+4. **Neu zu schreiben** mit der realen Baugruppe und dem bisherigen Inhalt vergleichen.
+5. Schreibbestätigung setzen und **Board provisionieren** ausführen.
+6. Erfolgreiches Schreiben einschließlich Rückleseprüfung abwarten.
+7. EnvNode neu starten und Profil, Revision, Datensatzstatus und Normalbetrieb prüfen.
 
-Die Revision wird durch das gewählte unterstützte Profil bestimmt. Keine
-ähnliche oder höhere Version als Ersatz für ein fehlendes Profil wählen.
-Das Schreiben ändert das aktive Boardprofil des laufenden Boots nicht;
-der Neustart ist deshalb Bestandteil des Ablaufs.
+Das Schreiben ändert die aktive Portzuordnung des laufenden Boots nicht.
+Deshalb ist der Neustart Teil des Ablaufs. Ein Firmwareupdate schreibt die
+EEPROM-Revision nicht automatisch auf einen neueren Hardwarestand um.
 
 ## Modul schreiben
 
-Für DuoRelay bietet die Webfunktion die Descriptor-Vorlage **DuoRelay 0.3**.
-Slot A oder B passend zum eingesetzten Modul wählen, die angebotenen
-Fertigungsangaben prüfen und die ausdrückliche Bestätigung verwenden.
-Ergebnis und die anschließend erkannte Identität kontrollieren.
-Andere Module werden nicht durch Auswahl der DuoRelay-Vorlage provisioniert.
+1. Modul und tatsächlichen Slot feststellen; Verdrahtungsänderungen nur spannungsfrei vornehmen.
+2. Im Dialog **Modul** und das genau passende Profil auswählen.
+3. Slot A oder B wählen, EEPROM lesen und individuelle Fertigungsdaten prüfen.
+4. Geplanten Inhalt kontrollieren, Schreibbestätigung setzen und **Modul provisionieren** ausführen.
+5. Schreib- und Rückleseergebnis abwarten.
+6. EnvNode neu starten; anschließend Modulidentität und erkannte Modulgeräte prüfen.
 
-Ein leeres EEPROM muss mit einem passenden Descriptor provisioniert
-werden. Die hier dokumentierte Webfunktion bietet noch keine passende Vorlage
-für AnalogHydroPressure; dafür niemals die DuoRelay-Vorlage verwenden.
+Fehlt das passende Profil, den Vorgang nicht mit einer anderen Modulvorlage
+fortsetzen. Die Identity-Adresse des Moduls ist unabhängig von Adressen seiner
+Sensoren oder ADCs. Beispielsweise wählen die Busjumper von AnalogHydroPressure
+den ADC-Bus, nicht das Identity-EEPROM.
+
+## Bei Lesefehlern oder veränderten Daten
+
+Die Firmware prüft den EEPROM-Inhalt unmittelbar vor dem Schreiben erneut.
+Bei Änderungen oder Lesefehlern wird nicht geschrieben. Eingaben kontrollieren,
+EEPROM erneut lesen und die geplante Änderung neu bestätigen. Während Lesen und
+Schreiben Baugruppe und Versorgung nicht wechseln.
+
+Bei beschädigter Portzuordnung oder widersprüchlicher Identität kann der
+Normalbetrieb gesperrt bleiben. Ursache anhand der Diagnose und Protokolle
+klären, bevor mit einem passenden Profil neu provisioniert wird.
 
 ## Was danach noch nötig ist
 
-Identifikation ersetzt keine vollständige Anwendungskonfiguration. Ein kompatibler
-Descriptor kann passende Modulaktoren bereitstellen; ihre Zuordnung und Aktivierung
-sind zu prüfen. Sensoren und lokale Controller werden passend zur Anwendung
-eingerichtet. Für DuoRelay führt die
-[Inbetriebnahmeanleitung](../modules/duo-relay/commissioning.md) durch diese Prüfung.
-Die ADS1115-Adresse am AnalogHydroPressure ist unabhängig von der Identity-Adresse;
-dessen Buswahljumper betreffen den ADC, nicht das Identity-EEPROM.
+Ein erkannter Sensor muss für die Messung weiterhin unter **Sensoren** konfiguriert
+werden. Ein kompatibler Modul-Descriptor kann Modulaktoren bereitstellen; Name,
+Aktivierung und Kanalzuordnung sind zu prüfen. Controller und Displays werden
+anschließend passend zur Anwendung eingerichtet.
 
-[Mini](../mainboards/mini/index.md) · [Weather](../mainboards/weatherstation/index.md)
-· [DuoRelay](../modules/duo-relay/index.md)
-
-## Weather Revision 0.2: Provisionierung
-
-Dieser Ablauf gilt für das aufgebaute Weather 0.2; PCB 0.2.1 verwendet dieselbe
-Board Identity 0.2. Voraussetzung ist eine Firmware, die unter **Hardware** das
-Profil **EnvNode Weather**, Revision **0.2**, anbietet. Fehlt dieses Angebot,
-zuerst eine Firmware mit Weather-Profil bauen und installieren. Das ältere
-**EnvNode Mainboard 0.3** ist kein Ersatz: dessen Slot-A-GPIO1 ist GPIO4 statt GPIO33.
-
-### 1. Mainboard ohne Modul provisionieren
-
-1. Ohne Relais-Modul und RainDetector starten. Firmwareversion und Ausgangszustand
-   protokollieren. Bei leerem EEPROM ist `NotProvisioned` zu erwarten; das aktive
-   Profil kann bis zur Provisionierung aus `BuildFallback` stammen.
-2. I2C0 prüfen: das Board-EEPROM muss bei `0x50` antworten.
-3. Unter **Hardware** **EnvNode Weather / 0.2** auswählen. Eine für dieses Board
-   vergebene, dauerhaft dokumentierte alphanumerische Seriennummer eintragen.
-   Ein leeres Feld bedeutet noch nicht zugewiesen (`UnassignedSerial`).
-4. Schreibbestätigung setzen, provisionieren und erfolgreiche Rückleseprüfung abwarten.
-5. Neustarten. Erwartung: Status `Valid`, Quelle `PortMap` (bei alten ENID-only-Daten `EEPROM`), Profil **EnvNode Weather**,
-   Revision **0.2**, eigene Seriennummer, genau **Slot A**.
-6. Aus- und wieder einschalten und dieselben Angaben erneut prüfen.
-
-Erst nach diesen Prüfungen weitere Hardware anschließen. WLAN/MQTT-Konfiguration
-in NVS und Board Identity im EEPROM sind getrennte Datenbestände.
-
-## Mini Revision 0.8: Provisionierung
-
-Mini-PCBs `0.8.x` verwenden dasselbe Firmwareprofil und dieselbe Board Identity
-**EnvNode Mini 0.8**. Der Patchstand wird nicht im EEPROM gespeichert. Unter
-**Hardware** das Profil **EnvNode Mini / 0.8** auswählen, eine Seriennummer
-eintragen, schreiben und rücklesen lassen und anschließend neu starten. Danach
-müssen Quelle `PortMap` (bei alten ENID-only-Daten `EEPROM`), Status `Valid`, Profil **EnvNode Mini**, Revision `0.8`
-und zwei Modulslots angezeigt werden.
+[DuoRelay in Betrieb nehmen](../modules/duo-relay/commissioning.md) ·
+[Sensoren einrichten](sensors.md) · [Aktoren einrichten](actuators.md)
 
 ## Mit dem separaten Tester provisionieren
 
-Die eigenständige Test-Firmware verwendet eine eigene Prüfvorrichtung und einen
-getrennten I²C-Provisioning-Bus. Der vollständige Ablauf einschließlich
-Verkabelung, Board-/Modulauswahl und Rücklesen steht zentral unter
+Die normale EnvNode-Firmware schreibt die eigene Hardware. Die separate
+Test-Firmware schreibt dagegen einen extern angeschlossenen Prüfling und
+benötigt die dafür vorgesehene Testhardware. Ihr Ablauf steht einmalig unter
 [Test/Provisioning: Provisioning und Profile](../test-provisioning/operation/provisioning-profile.md).
 
-Für einen neuen Tester beginne mit der
-[Tester-Inbetriebnahme](../test-provisioning/commissioning/index.md).
-
-## Selbstbeschreibende Portzuordnung
-
-Board-Provisioning schreibt zusätzlich zur bisherigen ENID-Identität die
-Portzuordnung **ENPM 1**. Das gilt für die normale Firmware und den separaten
-Tester. Beim nächsten Start liest die normale Firmware GPIOs, Busse und
-Modulslots daraus. Für gültige alte Identitäten ohne ENPM bleiben die eingebauten
-Boardtabellen verfügbar; ein Start allein verändert das EEPROM nicht.
-
-Bei beschädigtem ENPM, widersprüchlicher Identität oder nicht erfüllten
-Betriebsanforderungen wird keine GPIO-Zuordnung aktiviert. Diagnose und Bootlog
-weisen den ENPM-Status aus. Die Migration erfolgt durch erneutes Provisioning.
-
-## Nachladbare Profile ab EnvNode 0.8.3 / Tester 0.8.0
-
-In derselben Provisioning-Ansicht steht zusätzlich **Nachladbare Hardwareprofile**
-zur Verfügung. Einmalig werden die verfügbaren Boards und Module aus dem
-Dokumentationskatalog geladen; **Profile aktualisieren** wiederholt die Anfrage.
-Seit EnvNode 0.8.4 / Tester 0.8.1 übernimmt der Browser HTTPS und die
-SHA-256-Prüfung; er lädt die geprüfte Vorlage anschließend lokal zum Gerät hoch.
-Der Browser benötigt Internetzugang und eine Verbindung zum Gerät. Die eingebauten Formulare bleiben
-auch ohne Internet verwendbar.
-
-Profil, Revision und Board-/Modulbild dienen zur Auswahl. Die angezeigte
-Mindestversion gilt für den Betrieb; sie sperrt das Provisioning nicht. Für ein
-Modul zusätzlich den EEPROM-Slot A/B wählen und die individuellen
-Herstellungsdaten eintragen. Erst die Schreibbestätigung löst Download,
-Validierung und EEPROM-Schreiben aus. Ohne passende Treiber wird das Modul nach
-dem Neustart angezeigt, reserviert seine Ports und bleibt funktional inaktiv.
-Die neue Hardwarekonfiguration wird im normalen EnvNode nach einem Neustart
-übernommen; der Tester schreibt weiterhin den externen Prüfling.
-
-Der verfügbare Profilkatalog wird im Dialog angezeigt. Wähle das zur tatsächlichen
-Hardware passende Profil und die richtige Revision. Während einer laufenden
-Anschlussprüfung sind auch die Remote-Aktionen gesperrt.
-
-## Gemeinsamer Dialog ab EnvNode 0.8.5 / Tester 0.8.2
-
-**Board** oder **Modul** auswählen, anschließend das konkrete Profil. Das Bild
-und die Betriebsmindestversion beziehen sich auf genau diese Auswahl. Passende
-Onlineprofile ersetzen eingebaute Listeneinträge; bei fehlendem Internet bleiben
-eingebaute Profile im selben Dialog verfügbar. Katalogaktionen und ausführliche
-Anschlusshinweise lassen sich aufklappen.
-
-Seriennummer, Produktionscharge und Fertigungsdatum sind für beide Typen optional;
-nur beim Modul wird zusätzlich der Slot gewählt. Nach Änderungen erneut das
-Schreiben bestätigen und **Board provisionieren** bzw. **Modul provisionieren**
-auslösen. Die Ziele bleiben getrennt: externer Prüfling beim Tester, eigene
-Hardware beim normalen EnvNode.
-
-Board-Charge und -Datum werden mit der Portzuordnung verifiziert gespeichert.
-Diese Erweiterung benötigt im Betrieb mindestens EnvNode 0.8.5, was die Anzeige
-während der Eingabe berücksichtigt. Bestehende Datensätze bleiben lesbar. Ohne
-Charge/Datum bleibt das bisherige Boardformat erhalten.
-
-## EEPROM-Inhalt prüfen ab EnvNode 0.8.6 / Tester 0.8.3
-
-**Aktuell im EEPROM** zeigt den frisch gelesenen Inhalt des gewählten Boards oder
-Modul-Slots einschließlich Lesestatus und Fertigungsdaten. **Neu zu schreiben**
-zeigt die geplanten Angaben und markiert Abweichungen in einer Zusammenfassung.
-**EEPROM erneut lesen** aktualisiert den Istzustand. Vorhandene Fertigungsdaten
-werden nur mit **Vorhandene Fertigungsdaten übernehmen** in die Eingaben kopiert.
-
-Vor dem Schreiben prüft die Firmware den EEPROM-Inhalt erneut. Bei Änderungen
-oder Lesefehlern wird nichts geschrieben; Eingaben bleiben erhalten und müssen
-nach erneutem Lesen neu bestätigt werden. Während einer Operation den Prüfling
-angeschlossen lassen. Ein anderer Prüfling mit exakt gleichem EEPROM-Inhalt lässt
-sich anhand des Inhalts allein nicht unterscheiden.
+Technische Details der Identität und Portzuordnung sind im
+[BoardIdentityRecord im Repository](https://github.com/magicamun/EnvNode/blob/main/docs/BoardIdentityRecord.md) dokumentiert.

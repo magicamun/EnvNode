@@ -1,35 +1,24 @@
-# GeoPosition und Luftdruck auf Meereshöhe
+# Luftdruck auf Meereshöhe
 
-Ab **Firmware 0.6.0** kann EnvNode Standortdaten speichern und neben dem örtlich
-gemessenen Luftdruck einen eigenen, abgeleiteten Meereshöhendruck bereitstellen.
-Der örtliche Druck bleibt unverändert. Die Erweiterung wurde auf dem Gerät geprüft.
+EnvNode kann neben dem örtlich gemessenen Luftdruck einen eigenen, abgeleiteten
+Meereshöhendruck bereitstellen. Die örtliche Druckmessung bleibt unverändert.
+Dieses Kapitel erklärt die Berechnung und ihre Eingaben; die Standortfelder
+stehen unter [Gerät und Standort](device.md#standort-eingeben).
 
 ## Standort eingeben
 
-Unter **Gerät (Device) → Standort (optional)** die bekannten Angaben eintragen:
-
-| Angabe | Format und Bereich | Bedeutung |
-| --- | --- | --- |
-| Latitude / Breitengrad | Dezimalgrad, −90 bis +90 | Nord positiv, Süd negativ |
-| Longitude / Längengrad | Dezimalgrad, −180 bis +180 | Ost positiv, West negativ |
-| Sensorhöhe | Meter, −1000 bis +10000 | Tatsächliche Sensorhöhe über Meereshöhe einschließlich Gebäude- oder Montagehöhe |
-
-Die Eingabe folgt ab **Firmware 0.6.1** der unter **Sprache/Zeit** gewählten Locale:
-Deutsch verwendet **Komma**, beispielsweise `48,137154` und `11,576124`;
-Englisch verwendet **Punkt**, beispielsweise `48.137154` und `11.576124`.
-Auch Sensorhöhe und Temperatur-Maximalalter verwenden dieses Dezimaltrennzeichen.
-Keine Tausendertrennzeichen und keine Grad/Minuten/Sekunden-Schreibweise verwenden.
-Die internen Zahlenwerte sowie MQTT-, NVS- und Backup-Formate bleiben locale-neutral.
-In Firmware 0.6.0 verwenden die Eingabefelder noch das neutrale Punktformat.
-Unbekannte Angaben leer lassen: **0 m ist eine gültige Höhe**, kein Platzhalter
-für „unbekannt“. Alle drei Felder sind unabhängig optional. Für die Druckberechnung
-wird ausschließlich die Sensorhöhe verwendet; Latitude und Longitude gehen nicht
-in die Formel ein. Ohne konfigurierte Höhe ist der Meereshöhendruck ungültig.
+Die tatsächliche **Sensorhöhe über Meereshöhe** unter
+[Gerät → Standort](device.md#standort-eingeben) eintragen und speichern.
+Latitude und Longitude sind für diese Berechnung nicht erforderlich.
+Ohne Sensorhöhe ist der zusätzliche Meereshöhendruck ungültig.
 
 ## Lokale Temperaturquelle wählen
 
-Unter **Berechnung des Meereshöhendrucks** eine Außentemperaturquelle und das
+Unter **Gerät → Berechnung des Meereshöhendrucks** eine Außentemperaturquelle und das
 maximale Alter ihres Messwerts auswählen. Voreingestellt sind **60 Sekunden**.
+Das Maximalalter wird in Sekunden mit dem Dezimaltrennzeichen der gewählten
+Sprache eingegeben; es begrenzt, wie lange eine Temperatur für die Berechnung
+als aktuell verwendet wird.
 
 Die Auswahl enthält aktivierte lokale Sensoren mit aktiviertem Messplan und einem
 Temperaturkanal, bezeichnet durch Slot und Namen. Simulierte Quellen sind markiert.

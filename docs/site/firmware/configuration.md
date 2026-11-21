@@ -1,10 +1,18 @@
-# Erste Inbetriebnahme
+# Erste Verbindung und Grundeinrichtung
+
+Diese Seite führt durch die erste Einrichtung eines elektrisch geprüften EnvNode.
+Die einzelnen Einstellungsseiten werden in den verlinkten Kapiteln erklärt.
+Zum Selbstaufbau beginne mit der passenden [Hardwareanleitung](../hardware/index.md).
 
 ## 1. Aufbau und Firmware prüfen
 
 Mainboard nach seiner Hardwareanleitung prüfen und zunächst ohne zusätzliche
 Lasten starten. USB-C am ORing-Power-Modul liefert nur Strom. Zum Flashen wird
 der USB-Datenanschluss des ESP32-DevKit verwendet.
+
+Falls noch keine passende Firmware installiert ist, folge
+[Bauen und Aufspielen](installation.md). Die [Downloads](downloads.md) nennen
+die unterstützte Hardware und den jeweiligen Firmwarestand.
 
 ## 2. Weboberfläche öffnen
 
@@ -13,76 +21,48 @@ Ohne eingerichtetes WLAN startet ein Setup-Access-Point mit dem Namen
 **http://192.168.4.1/** im Browser.
 
 Dieser Modus wird auch bei gespeicherten Zugangsdaten erreicht, wenn der
-WLAN-Verbindungsversuch beim Start zu lange erfolglos bleibt. Prüfe dann
-Router-Erreichbarkeit, SSID und Passwort. Die gespeicherten Einstellungen
-bleiben erhalten. Nach einer erfolgreichen WLAN-Verbindung gilt die dort
-zugewiesene IP-Adresse.
-
-Der Setup-Access-Point wird im aktuellen Code ohne WLAN-Passwort gestartet;
-führe die Einrichtung in einer kontrollierten Umgebung durch.
+WLAN-Verbindungsversuch beim Start zu lange erfolglos bleibt. Die gespeicherten
+Einstellungen bleiben erhalten. Der Setup-Access-Point wird ohne WLAN-Passwort
+gestartet; führe die Einrichtung in einer kontrollierten Umgebung durch.
 
 ## 3. Netzwerk einrichten
 
-Unter **Netzwerk (Network)** Hostname, WLAN-SSID und Passwort setzen.
-Für den ersten Betrieb DHCP verwenden. Eine statische Adresse benötigt zusätzlich
-passende IP, Netzmaske, Gateway und DNS; falsche Angaben können die Erreichbarkeit verhindern.
+Richte unter **Netzwerk** die Verbindung zu deinem WLAN ein. Für den Einstieg
+verwende DHCP. Nach dem Wechsel ist EnvNode unter der Adresse deines eigenen
+Netzes erreichbar; die bisherige Browserverbindung kann dabei abbrechen.
 
-Speichern und die Rückmeldung beachten. Nach dem Wechsel zurück ins normale WLAN
-die neue IP im Router oder in der seriellen Ausgabe ermitteln.
-Das Abbrechen der bisherigen Verbindung während eines Netzwerkwechsels ist erwartbar.
-
-### Netzwerkfelder unterscheiden
-
-| Feld | Bedeutung |
-| --- | --- |
-| Hostname | Netzwerkname des Geräts; unterscheidet sich vom frei gewählten Gerätenamen. |
-| SSID und Passwort | Zugang zum vorgesehenen WLAN. |
-| DHCP | Netzparameter vom Router beziehen; für den Einstieg die einfachste Auswahl. |
-| Statische IP | Feste, im eigenen Netz freie Geräteadresse. |
-| Netzmaske, Gateway, DNS | Müssen zum lokalen Netz passen; DNS wird für Namen von Broker und Zeitservern benötigt. |
-
-Vor dem Speichern Netzwerkangaben notieren und die Rückmeldung zur erforderlichen
-Laufzeitaktion beachten. Eine geänderte Adresse kann die bisherige Browseradresse
-ungültig machen. Nach Neustart auf der Statusseite prüfen, welche Verbindung und
-Adresse tatsächlich aktiv sind.
+[Netzwerkfelder, Passwortänderung und Verbindung prüfen](network.md).
 
 ## 4. Gerät, Sprache und Zeit
 
-Unter **Gerät (Device)** die Geräteangaben prüfen. Unter **Sprache/Zeit** die
-gewünschte Sprache, Zeitzone und NTP-Server einstellen. Synchronisierung kontrollieren.
-Unter **Einheiten (Units)** die gewünschten Darstellungseinheiten auswählen;
-diese Einstellungen können auch zukünftige MQTT-Ausgaben beeinflussen.
+Die Grundeinstellungen haben jeweils eine eigene Aufgabe:
 
-Die Zeitzonenauswahl umfasst weltweit alle 597 IANA-Bezeichner (Stand 2026e),
-einschließlich Aliasnamen. Gespeichert wird die zugehörige POSIX-Regel; nach dem
-Speichern kann deshalb ein gleichbedeutender Ortsname erscheinen. Unregelmäßige
-Zeitumstellungen wie die Ramadan-Ausnahmen in Marokko sind mit diesem Zeitmodell
-nicht vollständig abbildbar. Details und Aktualisierung:
-[Zeitzonenkonfiguration](https://github.com/magicamun/EnvNode/blob/main/docs/TimezoneConfiguration.md).
+| Einstellungsseite | Was du hier festlegst |
+| --- | --- |
+| [Sprache & Zeit](language-time.md) | Oberflächensprache, Zahlenformat, Zeitzone und Zeitserver |
+| [Gerät und Standort](device.md) | Gerätename sowie optionale Koordinaten und Sensorhöhe |
+| [Einheiten](units.md) | Gewünschte Darstellung der Messgrößen |
 
-### Optional: GeoPosition und Meereshöhendruck
-
-Ab Firmware 0.6.0 unter **Gerät (Device)** Breitengrad und Längengrad als
-Dezimalgrad gemäß der eingestellten Locale (ab 0.6.1: Deutsch Komma, Englisch Punkt)
-sowie die tatsächliche Sensorhöhe über Meereshöhe einschließlich
-Gebäudehöhe eintragen. Unbekannte Angaben bleiben leer; 0 m ist gültig.
-Optional eine lokale Außentemperaturquelle mit Maximalalter wählen (Standard
-60 Sekunden), speichern und die Sensoränderungen anwenden.
-
-[Anleitung, Qualitätsregeln und Prüfbeispiel](geo-position-pressure.md)
+Wähle die Sprache vor der Eingabe von Dezimalzahlen. Standortangaben können
+zunächst leer bleiben. Wenn du anschließend ein Barometer einrichtest, ergänzt
+[Luftdruck auf Meereshöhe](geo-position-pressure.md) die messungsbezogenen Einstellungen.
 
 ## 5. Hardware zuordnen
 
-[Hardware und Provisioning](provisioning.md) öffnen. Erst nach Kontrolle des
-aktiven Boardprofils die Sensor- und Aktorressourcen auswählen.
-Ein Diagnosehinweis auf einen Entwicklungs-Fallback ist kein Nachweis einer
-korrekt provisionierten Board Identity.
+Unter **Hardware** prüfen, ob erkanntes Mainboard, Revision und Modulslots zum
+realen Aufbau passen. Eine bereits gültige Identität muss nicht neu geschrieben
+werden. Bei leerem oder fehlerhaftem EEPROM führt
+[Hardwareerkennung und Provisioning](provisioning.md) durch die Auswahl und Prüfung.
+
+Erst mit passendem Profil die Sensor- und Aktorressourcen auswählen.
 
 ## 6. Grundfunktion prüfen
 
 - Status zeigt das erwartete Gerät und die Netzwerkverbindung.
-- Zeit ist synchronisiert oder ihre noch laufende Synchronisierung ist erklärbar.
+- Sprache und Ortszeit passen; die Zeitsynchronisierung ist erfolgt oder ihr Ausbleiben erklärbar.
 - Aktives Boardprofil passt zum aufgebauten Mainboard.
-- Keine unerklärten Fehler in den Logs.
+- Keine unerklärten Fehler in den Protokollen.
 
-[Weiter zur ersten Messung](sensors.md)
+Richte danach [Sensoren](sensors.md), [Aktoren](actuators.md) und bei Bedarf
+[Controller](controllers.md) ein. Sichere den funktionierenden Stand unter
+[Konfiguration](maintenance.md#konfiguration-sichern-und-wiederherstellen).

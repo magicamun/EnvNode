@@ -13,6 +13,7 @@ Aktuelle Plattformabgrenzung: [Classic ESP32 scope](ClassicEsp32Scope.md). RainD
 - [x] Controller-Zielauswahl: konfigurierten Aktor-Slot und automatisch erkanntes Modulrelais bei identischer Hardware als einen Eintrag mit Benutzername und Modulzuordnung anzeigen. Auch die exklusive Zielbelegung muss beide Referenzarten als dasselbe Ziel erkennen. Bestehende gespeicherte Referenzen kompatibel halten.
 
 - [x] Allgemeine Bedienkapitel zu Sensorfeldern, Aktoren, Speichern/Anwenden/Neustart, Enum-Values samt MQTT und Neustartregel, Threshold/Selector sowie Displayquellen, Formaten und Zustandsübersetzungen ergänzt. Regenwippen-Kalibrierung und RainDetector-Trockenschwelle eigenständig beschrieben. Stand: 21.11.2026; redaktioneller Abgleich mit Firmwarequellen, kein neuer Hardwaretest.
+- [x] Allgemeine Einstellungen unter „Gerät einrichten“ gebündelt: Erste Verbindung als Wegweiser; Netzwerk, Sprache/Zeit, Gerät/Standort und Einheiten als eigenständige Kapitel. Provisioning als aktueller zusammenhängender Ablauf; Luftdruckberechnung separat bei den Messfunktionen.
 - [ ] Die überarbeiteten Bedienkapitel am realen Gerät weiter gegenlesen und die beschriebenen Abläufe prüfen.
 - [x] Die fünf bisherigen Firmware-Screenshots mit deutschen Aufnahmen der laufenden Firmware 0.8.15 ersetzt; Bildbeschreibungen mit der tatsächlichen Konfiguration abgeglichen.
 - [ ] Später eine separate Anleitung zur Einrichtung eines externen rsyslogd ergänzen; die Bedienungsdoku setzt einen vorhandenen Empfänger voraus.

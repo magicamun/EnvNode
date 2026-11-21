@@ -44,7 +44,7 @@ nav:
       - Relais schalten: firmware/example-relay.md
   - Inbetriebnahme:
       - Übersicht: commissioning/index.md
-      - Gerät und Netzwerk: firmware/configuration.md
+      - Erste Verbindung und Grundeinrichtung: firmware/configuration.md
       - I²C-Sensoren: commissioning/i2c-sensors.md
       - Regenwippe: commissioning/rain-gauge.md
       - SCT013: sensors/sct013/commissioning.md
@@ -99,10 +99,15 @@ nav:
           - Bedienungsanleitung: firmware/index.md
           - Begriffe und Oberfläche: firmware/basics.md
           - Bauen und Aufspielen: firmware/installation.md
-          - Erste Inbetriebnahme: firmware/configuration.md
-          - GeoPosition und Meereshöhendruck: firmware/geo-position-pressure.md
-          - Hardware und Provisioning: firmware/provisioning.md
+          - Gerät einrichten:
+              - Erste Verbindung und Grundeinrichtung: firmware/configuration.md
+              - Netzwerk: firmware/network.md
+              - Sprache und Zeit: firmware/language-time.md
+              - Gerät und Standort: firmware/device.md
+              - Einheiten: firmware/units.md
+              - Hardwareerkennung und Provisioning: firmware/provisioning.md
           - Sensoren und Messwerte: firmware/sensors.md
+          - Luftdruck auf Meereshöhe: firmware/geo-position-pressure.md
           - Ausgänge schalten: firmware/actuators.md
           - Lokale Controller: firmware/controllers.md
           - Values: firmware/values.md
