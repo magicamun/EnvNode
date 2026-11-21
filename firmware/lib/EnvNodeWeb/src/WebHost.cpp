@@ -77,11 +77,10 @@ void WebHost::queuePage(String header,String content,int status,const char* type
     responseClient_=server_.client();responseRoute_=server_.uri();
     responseSteps_=responseBlocked_=responseMaxGapMs_=responseMaxStepMs_=0;
     responseLastStepMs_=millis();
-    server_.setContentLength(header.length()+content.length()+strlen(footer));
-    server_.captureResponseHeaders();
-    server_.send(status,type,String());
+    responseWriteErrno_=0;
     String wireHeader;
-    if(!server_.finishHeaderCapture(wireHeader)
+    server_.prepareDeferredHeader(wireHeader,status,type,header.length()+content.length()+strlen(footer));
+    if(wireHeader.length()>2048 || !wireHeader.endsWith("\r\n\r\n")
         || !response_.begin(std::move(wireHeader),std::move(header),std::move(content),footer,millis())) {
         logger_.warnf("HTTP response aborted: route=%s reason=buffer_limit_or_allocation",responseRoute_.c_str());
         responseClient_.stop();
@@ -91,7 +90,9 @@ bool WebHost::connected() {return responseClient_.connected();}
 int WebHost::send(const char* data,size_t size) {
 #if defined(ARDUINO_ARCH_ESP32)
     const int result=::send(responseClient_.fd(),data,size,MSG_DONTWAIT);
-    if(result<0 && (errno==EAGAIN || errno==EWOULDBLOCK || errno==EINTR))return 0;
+    responseWriteErrno_ = result < 0 ? errno : 0;
+    if(result<0 && (responseWriteErrno_==EAGAIN || responseWriteErrno_==EWOULDBLOCK
+        || responseWriteErrno_==EINTR))return 0;
     return result;
 #else
     return responseClient_.sendNonblocking(data,size);
@@ -113,13 +114,14 @@ void WebHost::serviceResponse() {
     if(state!=HttpResponseState::Complete || elapsed>=1000) {
         char message[256];
         snprintf(message,sizeof(message),
-            "HTTP response %s: route=%.40s elapsed_ms=%lu sent=%u expected=%u state=%u steps=%lu blocked_steps=%lu max_gap_ms=%lu max_step_ms=%lu heap=%u largest=%u",
+            "HTTP response %s: route=%.40s elapsed_ms=%lu sent=%u expected=%u state=%u steps=%lu blocked_steps=%lu max_gap_ms=%lu max_step_ms=%lu heap=%u largest=%u errno=%d",
             state==HttpResponseState::Complete?"complete":"aborted",responseRoute_.c_str(),
             static_cast<unsigned long>(elapsed),static_cast<unsigned>(response_.sent()),
             static_cast<unsigned>(response_.expected()),static_cast<unsigned>(state),
             static_cast<unsigned long>(responseSteps_),static_cast<unsigned long>(responseBlocked_),
             static_cast<unsigned long>(responseMaxGapMs_),static_cast<unsigned long>(responseMaxStepMs_),
-            static_cast<unsigned>(ESP.getFreeHeap()),static_cast<unsigned>(ESP.getMaxAllocHeap()));
+            static_cast<unsigned>(ESP.getFreeHeap()),static_cast<unsigned>(ESP.getMaxAllocHeap()),
+            responseWriteErrno_);
         logger_.log(state==HttpResponseState::Complete?LogLevel::Info:LogLevel::Warn,message);
     }
     responseClient_.stop();responseRoute_=String();afterResponseAt_=now;

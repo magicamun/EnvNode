@@ -98,8 +98,14 @@ private:
     void handleDisplayOutputsSave();
     bool readDisplayOutputs(DisplayConfiguration& configuration);
     bool readDisplayEnumTranslations(DisplayPage& page, const IPropertyReader& properties);
+    template <typename Slot, size_t Count>
+    void handleSlotReset(const Slot (&slots)[Count],
+        bool (IConfigurationService::*save)(const Slot&),
+        const char* namePrefix, const char* route);
+    String slotResetForm(const char* route, uint16_t id, bool moduleOverride = false) const;
     void handleSensorEdit();
     void handleSensorSave();
+    void handleSensorReset();
     void handleSensorApply();
     void handleActuatorEdit();
     void handleActuatorSave();

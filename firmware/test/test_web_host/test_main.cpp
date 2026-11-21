@@ -140,26 +140,37 @@ void test_backpressure_keeps_page_and_returns_to_measurement_loop() {
     TEST_ASSERT_EQUAL_UINT(75,millis());TEST_ASSERT_TRUE(server.clientState.state->sent.empty());
     const unsigned handled=server.handled;
     unsigned measurementTicks=0;
-    for(unsigned i=0;i<20;++i) {delay(250);host.loop();++measurementTicks;}
+    for(unsigned i=0;i<20;++i) {delay(100);host.loop();++measurementTicks;}
     TEST_ASSERT_EQUAL_UINT(20,measurementTicks);TEST_ASSERT_EQUAL_UINT(handled,server.handled);
     TEST_ASSERT_TRUE(logger.lastMessage.empty());
     server.clientState.state->blocked=false;server.clientState.state->maxWrite=113;
+    delay(HttpResponsePump::WriteRetryMs);
     finishPage(host);
     const std::string expected="header"+std::string(13000,'x')+webPageFooter();
     TEST_ASSERT_EQUAL_STRING(expected.c_str(),responseBody(host).c_str());
     TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"HTTP response complete: route=/slow"));
     TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"blocked_steps=21"));
-    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"max_gap_ms=250"));
+    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"max_gap_ms=100"));
     TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"max_step_ms=0"));
 }
 void test_stalled_page_times_out_explicitly_and_next_client_can_be_served() {
     TestWiFi wifi;wifi.online=true;TestLogger logger;WebHost host(logger,wifi);
-    host.server().clientState.state->blocked=true;
-    host.sendPage([](){return String("header");},"body",200,"offline","error");
-    host.loop();delay(10000);host.loop();
+    auto socket = host.server().clientState.state;
+    host.sendPage([](){return String("header");},String("body"),200,"offline","error");
+    // Stop accepting bytes after the first partial write.
+    socket->maxWrite=1;
+    host.loop();
+    const size_t sent = socket->sent.size();
+    TEST_ASSERT_TRUE(sent > 0);
+    socket->blocked=true;
+    delay(HttpResponsePump::StallTimeoutMs-1);
+    host.loop();
+    TEST_ASSERT_TRUE(host.server().clientState.connected());
+    TEST_ASSERT_EQUAL_UINT(sent,socket->sent.size());
+    delay(1);
+    host.loop();
     TEST_ASSERT_FALSE(host.server().clientState.connected());
     TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"HTTP response aborted:"));
-    TEST_ASSERT_NOT_NULL(strstr(logger.lastMessage.c_str(),"sent=0"));
     host.server().clientState.state=std::make_shared<WebServer::Client::State>();
     host.sendPage([](){return String("next");},"body",200,"offline","error");
     finishPage(host);TEST_ASSERT_NOT_NULL(strstr(responseBody(host).c_str(),"nextbody"));
@@ -186,6 +197,8 @@ void test_response_pump_preserves_partial_writes_backpressure_and_bounds_work() 
     TEST_ASSERT_TRUE(pump.begin(String("HTTP\r\n"),String("head"),String("bodyä"),"tail",0));
     sink.blocked=true;TEST_ASSERT_TRUE(pump.step(sink,100)==HttpResponseState::More);
     TEST_ASSERT_EQUAL_UINT(0,pump.sent());TEST_ASSERT_EQUAL_UINT(1,sink.calls);
+    TEST_ASSERT_TRUE(pump.step(sink,100+HttpResponsePump::WriteRetryMs-1)==HttpResponseState::More);
+    TEST_ASSERT_EQUAL_UINT(1,sink.calls);
     sink.blocked=false;
     for(unsigned i=0;i<100 && pump.active();++i) {
         const auto calls=sink.calls;pump.step(sink,200+i);
@@ -234,8 +247,8 @@ void test_response_pump_reports_socket_failure_disconnect_and_timeout_across_wra
     TEST_ASSERT_TRUE(pump.step(sink,1)==HttpResponseState::Disconnected);
     sink.online=true;sink.blocked=true;const uint32_t start=0xFFFFFF00U;
     TEST_ASSERT_TRUE(pump.begin(String("H"),String(),String("body"),"",start));
-    TEST_ASSERT_TRUE(pump.step(sink,start+9999)==HttpResponseState::More);
-    TEST_ASSERT_TRUE(pump.step(sink,start+10000)==HttpResponseState::Timeout);
+    TEST_ASSERT_TRUE(pump.step(sink,start+HttpResponsePump::StallTimeoutMs-1)==HttpResponseState::More);
+    TEST_ASSERT_TRUE(pump.step(sink,start+HttpResponsePump::StallTimeoutMs)==HttpResponseState::Timeout);
 }
 void test_response_pump_rejects_oversized_page_before_transmission() {
     HttpResponsePump pump;String huge;for(unsigned i=0;i<HttpResponsePump::MaxBytes;++i)huge+='x';
@@ -340,7 +353,9 @@ void test_static_flash_asset_uses_deferred_pump_without_html_wrapper() {
     host.sendStaticContent("application/javascript",script.c_str());host.loop();
     TEST_ASSERT_TRUE(host.server().clientState.state->sent.empty());
     TEST_ASSERT_EQUAL_STRING("no-cache",host.server().cacheControl.c_str());
-    host.server().clientState.state->blocked=false;finishPage(host);
+    host.server().clientState.state->blocked=false;
+    delay(HttpResponsePump::WriteRetryMs);
+    finishPage(host);
     TEST_ASSERT_EQUAL_STRING(script.c_str(),responseBody(host).c_str());
     TEST_ASSERT_EQUAL_UINT(script.size(),host.server().declaredLength);
 }

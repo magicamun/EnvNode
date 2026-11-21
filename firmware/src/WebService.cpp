@@ -52,6 +52,21 @@
 namespace EnvNode {
 namespace {
 
+template <typename Slot>
+Slot emptySlot(uint16_t id, const char* namePrefix) {
+    Slot slot{};
+    slot.slotId = id;
+    slot.name = String(namePrefix) + id;
+    return slot;
+}
+
+template <typename Slot>
+bool canResetSlot(const Slot& slot, const char* namePrefix) {
+    return slot.extendedDiagnostics
+        || runtimeActionForChange(slot, emptySlot<Slot>(slot.slotId, namePrefix))
+            != RuntimeAction::None;
+}
+
 String moduleActuatorToken(const ModuleActuatorReference& reference) {
     String token;
     const auto append = [&token](const uint8_t* bytes, size_t length) {
@@ -446,6 +461,36 @@ WebService::WebService(ILogger& logger, IConfigurationService& configurationServ
       networkRoutes_(webHost_, configurationService, wifiService, *this, *this),
       logRoutes_(webHost_, *this, logReader) {}
 
+template <typename Slot, size_t Count>
+void WebService::handleSlotReset(const Slot (&slots)[Count],
+    bool (IConfigurationService::*save)(const Slot&),
+    const char* namePrefix, const char* route) {
+    ValueId id;
+    if (!parseValueId(server_.arg("slot"), id) || id > Count) {
+        sendResult(uiText(TextId::SlotResetFailed), route,
+            uiText(TextId::TheRequestedSlotDoesNotExist), false);
+        return;
+    }
+
+    const Slot empty = emptySlot<Slot>(id, namePrefix);
+    const RuntimeAction action = runtimeActionForChange(slots[id - 1], empty);
+    const bool saved = (configurationService_.*save)(empty);
+    sendConfigurationResult({saved, saved ? action : RuntimeAction::None},
+        uiText(TextId::SlotReset), uiText(TextId::SlotResetFailed), route,
+        uiText(TextId::SlotResetCheckDependencies));
+}
+
+String WebService::slotResetForm(const char* route, uint16_t id, bool moduleOverride) const {
+    const char* confirmation = uiText(moduleOverride
+        ? TextId::ConfirmModuleSlotReset : TextId::ConfirmSlotReset);
+    return String("<form class='actions' method='post' action='") + route
+        + "/reset' data-confirm='" + escapeHtml(confirmation)
+        + "' onsubmit='return confirm(this.dataset.confirm)'>"
+          "<input type='hidden' name='slot' value='" + id
+        + "'><button class='danger' type='submit'>"
+        + uiText(TextId::ResetSlot) + "</button></form>";
+}
+
 void WebService::begin() {
     webHost_.registerRoutes(*this);
     webHost_.registerRoutes(networkRoutes_);
@@ -540,13 +585,22 @@ void WebService::registerRoutes(WebServer& server) {
     server.on("/pressure/save", HTTP_POST, [this]() { handlePressureReductionSave(); });
     server.on("/location/save", HTTP_POST, [this]() { handleGeoPositionSave(); });
     server.on("/sensors/save", HTTP_POST, [this]() { handleSensorSave(); });
+    server.on("/sensors/reset", HTTP_POST, [this]() { handleSensorReset(); });
     server.on("/sensors/apply", HTTP_POST, [this]() { handleSensorApply(); });
     server.on("/actuators/save", HTTP_POST, [this]() { handleActuatorSave(); });
+    server.on("/actuators/reset", HTTP_POST, [this]() {
+        handleSlotReset(configurationService_.getConfiguration().actuatorSlots,
+            &IConfigurationService::setActuatorSlotConfiguration, "Actuator Slot ", "/actuators");
+    });
     server.on("/actuators/apply", HTTP_POST, [this]() { handleActuatorApply(); });
     server.on("/actuators/on", HTTP_POST, [this]() { handleActuatorOn(); });
     server.on("/actuators/off", HTTP_POST, [this]() { handleActuatorOff(); });
     server.on("/actuators/level", HTTP_POST, [this]() { handleActuatorLevel(); });
     server.on("/controllers/save", HTTP_POST, [this]() { handleControllerSave(); });
+    server.on("/controllers/reset", HTTP_POST, [this]() {
+        handleSlotReset(configurationService_.getConfiguration().controllerSlots,
+            &IConfigurationService::setControllerSlotConfiguration, "Controller Slot ", "/controllers");
+    });
     server.on("/controllers/apply", HTTP_POST, [this]() { handleControllerApply(); });
     server.on("/controllers/start", HTTP_POST, [this]() { handleControllerStart(); });
     server.on("/controllers/stop", HTTP_POST, [this]() { handleControllerStop(); });
@@ -1558,6 +1612,15 @@ void WebService::handleSensorEdit() {
     }
     const SensorSlotConfiguration& slot =
         configurationService_.getConfiguration().sensorSlots[requestedSlot - 1];
+    const auto* selected = SensorImplementationRegistry::find(slot.implementation);
+    const bool currentMonitor = slot.implementation == SensorImplementation::SCT013;
+    const bool gpioSensor = currentMonitor
+        || (selected && selected->interfaceKind == HardwareInterfaceKind::GPIO);
+    const bool i2cSensor = selected && selected->interfaceKind == HardwareInterfaceKind::I2C;
+    const bool rainGauge = slot.implementation == SensorImplementation::RainGauge;
+    const bool rainDetector = slot.implementation == SensorImplementation::RainDetector;
+    const bool periodic = selected
+        && selected->defaultSchedule.acquisitionMode == AcquisitionMode::Periodic;
     String options;
     for (size_t index = 0; index < SensorImplementationRegistry::count(); ++index) {
         const SensorImplementationMetadata* metadata = SensorImplementationRegistry::at(index);
@@ -1609,10 +1672,12 @@ void WebService::handleSensorEdit() {
     c += renderExtendedDiagnosticsCheckbox(slot.extendedDiagnostics,extendedDiagnosticsAvailable(),configurationService_.getLocale());
     c += (String("<label>") + uiText(TextId::Name) + "<input name='name' maxlength='") + String(MaxSensorSlotNameLength) + "' required value='" + escapeHtml(slot.name) + "'></label>";
     c += (String("<label>") + uiText(TextId::Implementation) + "<select id='sensorImplementation' name='implementation'>") + options + "</select></label>";
-    c += "<div id='gpioConfiguration'><label><span id='sensorPortKind'>GPIO</span><select name='gpio'>" + gpioOptions + (String("</select></label><p class='help'>") + uiText(TextId::AM2302UsesACustomSingleWireProtocolRain) + "</p></div>");
-    c += (String("<div id='i2cConfiguration'><label>") + uiText(TextId::Bus) + "<select name='i2cBus'>") + i2cBusOptions + (String("</select></label><label>") + uiText(TextId::ICAddress) + "<select id='i2cAddress' name='i2cAddress'><option value='68'") + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x44 ? " selected" : "") + ">0x44</option><option value='112'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x70 ? " selected" : "") + ">0x70</option><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label></div>";
+    c += String("<div id='gpioConfiguration'") + (gpioSensor ? "" : " hidden")
+        + "><label><span id='sensorPortKind'>" + (currentMonitor ? "ADC-Port" : "GPIO")
+        + "</span><select name='gpio'>" + gpioOptions + (String("</select></label><p class='help'>") + uiText(TextId::AM2302UsesACustomSingleWireProtocolRain) + "</p></div>");
+    c += (String("<div id='i2cConfiguration'") + (i2cSensor ? "" : " hidden") + "><label>" + uiText(TextId::Bus) + "<select name='i2cBus'>") + i2cBusOptions + (String("</select></label><label>") + uiText(TextId::ICAddress) + "<select id='i2cAddress' name='i2cAddress'><option value='68'") + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x44 ? " selected" : "") + ">0x44</option><option value='112'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x70 ? " selected" : "") + ">0x70</option><option value='118'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x76 ? " selected" : "") + ">0x76</option><option value='119'" + String(slot.hardware.kind == HardwareResourceKind::I2C && slot.hardware.i2c.address == 0x77 ? " selected" : "") + ">0x77</option></select></label></div>";
     const auto& ct = slot.implementationConfiguration.sct013;
-    c += "<fieldset id='ctFields'><legend>SCT013</legend>";
+    c += String("<fieldset id='ctFields'") + (currentMonitor ? "" : " hidden disabled") + "><legend>SCT013</legend>";
     auto field = [&](const char* name, const char* label, String value, const char* step) {
         c += String("<label>") + label + "<input type='number' name='" + name +
             "' step='" + step + "' value='" + value + "'></label>";
@@ -1624,16 +1689,20 @@ void WebService::handleSensorEdit() {
     field("offMa", uiText(TextId::SctGateOff), String(ct.offMa), "1");
     field("onMa", uiText(TextId::SctGateOn), String(ct.onMa), "1");
     c += String("<small>") + uiText(TextId::SctGateHint) + "</small></fieldset>";
-    c += (String("<div id='rainGaugeConfiguration'><label>") + uiText(TextId::MillimetresPerTip) + "<input type='number' name='millimetersPerTip' min='0.0001' max='100' step='0.0001' value='") + String(slot.implementationConfiguration.rainGauge.millimetersPerTip, 4) + (String("'></label><label>") + uiText(TextId::DebounceTimeMs) + "<input type='number' name='debounceMs' min='1' max='5000' value='") + String(slot.implementationConfiguration.rainGauge.debounceMs) + "'></label></div>";
-    c += (String("<label>") + uiText(TextId::SampleIntervalMs) + "<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='") + String(slot.schedule.sampleIntervalMs) + "'></label>";
-    c += String("<p id='rainIntervalHelp' class='help'>") + uiText(TextId::RainIntervalHelp) + "</p>";
-    c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/sensors'>" + uiText(TextId::Cancel) + "</a></div></form></section>");
+    c += (String("<div id='rainGaugeConfiguration'") + (rainGauge ? "" : " hidden") + "><label>" + uiText(TextId::MillimetresPerTip) + "<input type='number' name='millimetersPerTip' min='0.0001' max='100' step='0.0001' value='") + String(slot.implementationConfiguration.rainGauge.millimetersPerTip, 4) + (String("'></label><label>") + uiText(TextId::DebounceTimeMs) + "<input type='number' name='debounceMs' min='1' max='5000' value='") + String(slot.implementationConfiguration.rainGauge.debounceMs) + "'></label></div>";
+    c += String("<label") + (periodic ? "" : " hidden") + ">" + uiText(TextId::SampleIntervalMs)
+        + "<input id='sensorInterval' type='number' min='1' max='2147483647' name='interval' value='"
+        + String(slot.schedule.sampleIntervalMs) + "'" + (periodic ? "" : " disabled") + "></label>";
+    c += String("<p id='rainIntervalHelp' class='help'") + (rainDetector ? "" : " hidden") + ">" + uiText(TextId::RainIntervalHelp) + "</p>";
+    c += (String("<div class='actions'><button id='sensorSave' type='submit' disabled>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/sensors'>" + uiText(TextId::Cancel) + "</a></div></form>");
+    if (canResetSlot(slot, "Slot ")) c += slotResetForm("/sensors", slot.slotId);
+    c += "</section>";
     c += String("<section class='card'><h2>") + uiText(TextId::ImplementationMetadata)
         + "</h2><div class='kv'><span>" + uiText(TextId::Type) + "</span><span id='sensorMetadataType'></span><span>"
         + uiText(TextId::Interface) + "</span><span id='sensorMetadataInterface'></span><span>"
         + uiText(TextId::Provenance) + "</span><span id='sensorMetadataProvenance'></span><span>"
         + uiText(TextId::Measurements) + "</span><span id='sensorMetadataMeasurements'></span></div></section>";
-    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('sensorMetadataType').textContent=o.textContent;document.getElementById('sensorMetadataInterface').textContent=o.dataset.interface+' / '+o.dataset.description;document.getElementById('sensorMetadataProvenance').textContent=o.dataset.provenance;document.getElementById('sensorMetadataMeasurements').textContent=o.dataset.measurements;document.getElementById('rainIntervalHelp').style.display=o.dataset.kind==='rain_detector'?'block':'none';const ct=o.dataset.kind==='sct013';document.getElementById('sensorPortKind').textContent=ct?'ADC-Port':'GPIO';const fields=document.getElementById('ctFields');fields.hidden=!ct;fields.disabled=!ct;document.getElementById('gpioConfiguration').style.display=(ct||o.dataset.interface==='GPIO')?'block':'none';document.getElementById('i2cConfiguration').style.display=o.dataset.interface==='I2C'?'block':'none';document.getElementById('rainGaugeConfiguration').style.display=o.dataset.kind==='rain_gauge'?'block':'none';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r||(ct&&x.dataset.sct!=='1');if(reset&&(ct||o.dataset.interface==='GPIO')&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='shtc3'?x.value!=='112':o.dataset.kind==='bme280'?(x.value!=='118'&&x.value!=='119'):false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='shtc3')a.value='112';if(reset&&o.dataset.kind==='bme280'&&(a.value==='68'||a.value==='112'))a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.style.display=n>0?'block':'none';f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);</script>";
+    c += "<script>function sensorFields(reset){const s=document.getElementById('sensorImplementation');const o=s.options[s.selectedIndex];document.getElementById('sensorMetadataType').textContent=o.textContent;document.getElementById('sensorMetadataInterface').textContent=o.dataset.interface+' / '+o.dataset.description;document.getElementById('sensorMetadataProvenance').textContent=o.dataset.provenance;document.getElementById('sensorMetadataMeasurements').textContent=o.dataset.measurements;document.getElementById('rainIntervalHelp').hidden=o.dataset.kind!=='rain_detector';const ct=o.dataset.kind==='sct013';document.getElementById('sensorPortKind').textContent=ct?'ADC-Port':'GPIO';const fields=document.getElementById('ctFields');fields.hidden=!ct;fields.disabled=!ct;document.getElementById('gpioConfiguration').hidden=!(ct||o.dataset.interface==='GPIO');document.getElementById('i2cConfiguration').hidden=o.dataset.interface!=='I2C';document.getElementById('rainGaugeConfiguration').hidden=o.dataset.kind!=='rain_gauge';const g=document.querySelector('[name=gpio]');const r=Number(o.dataset.requires);for(const x of g.options)x.hidden=(Number(x.dataset.capabilities)&r)!==r||(ct&&x.dataset.sct!=='1');if(reset&&(ct||o.dataset.interface==='GPIO')&&(g.selectedOptions.length===0||g.selectedOptions[0].hidden)){const x=Array.from(g.options).find(x=>!x.hidden);if(x)g.value=x.value}const a=document.getElementById('i2cAddress');for(const x of a.options)x.hidden=o.dataset.kind==='sht4x'?x.value!=='68':o.dataset.kind==='shtc3'?x.value!=='112':o.dataset.kind==='bme280'?(x.value!=='118'&&x.value!=='119'):false;if(reset&&o.dataset.kind==='sht4x')a.value='68';if(reset&&o.dataset.kind==='shtc3')a.value='112';if(reset&&o.dataset.kind==='bme280'&&(a.value==='68'||a.value==='112'))a.value='118';const n=Number(o.dataset.interval);const f=document.getElementById('sensorInterval');f.parentElement.hidden=n<=0;f.disabled=n<=0;if(reset)f.value=n}document.getElementById('sensorImplementation').addEventListener('change',()=>sensorFields(true));sensorFields(false);document.getElementById('sensorSave').disabled=false;</script>";
     sendPage(uiText(TextId::ConfigureSensorSlot), "/sensors", std::move(c));
 }
 
@@ -1675,6 +1744,7 @@ void WebService::handleActuatorEdit() {
         } else {
             c += (String("<p>") + uiText(TextId::AModuleInstanceIdentityIsRequiredToSave) + "</p>");
         }
+        if (savedModule) c += slotResetForm("/actuators", slot.slotId, true);
         c += "</section>";
         sendPage(uiText(TextId::ConfigureModuleActuator), "/actuators", std::move(c));
         return;
@@ -1729,7 +1799,9 @@ void WebService::handleActuatorEdit() {
         + options + "</select></label>";
     c += "<div id='actuatorGpioConfiguration'><label>GPIO<select name='gpio'>"
         + gpioOptions + "</select></label></div>";
-    c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/actuators'>" + uiText(TextId::Cancel) + "</a></div></form></section>");
+    c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/actuators'>" + uiText(TextId::Cancel) + "</a></div></form>");
+    if (canResetSlot(slot, "Actuator Slot ")) c += slotResetForm("/actuators", slot.slotId);
+    c += "</section>";
     if (selected != nullptr) {
         c += (((String("<section class='card'><h2>") + uiText(TextId::ImplementationMetadata) + "</h2><div class='kv'><span>")) + uiText(TextId::Type) + "</span><span>")
             + escapeHtml(webActuatorImplementationName(configurationService_.getLocale(), selected->implementation)) + (String("</span><span>") + uiText(TextId::Interface) + "</span><span>")
@@ -2005,7 +2077,9 @@ void WebService::handleControllerEdit() {
     rainNumber("rainHysteresis",TextId::RainHysteresis,rain.policy.hysteresisHz,1,99999);
     rainNumber("rainConfirm",TextId::RainConfirm,rain.policy.drySeconds,1,120);
     c += "</div>";
-    c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/controllers'>" + uiText(TextId::Cancel) + "</a></div></form></section>");
+    c += (String("<div class='actions'><button type='submit'>") + uiText(TextId::SaveSlot) + "</button><a class='button' href='/controllers'>" + uiText(TextId::Cancel) + "</a></div></form>");
+    if (canResetSlot(slot, "Controller Slot ")) c += slotResetForm("/controllers", slot.slotId);
+    c += "</section>";
     if (selected != nullptr) {
         c += (((String("<section class='card'><h2>") + uiText(TextId::ImplementationMetadata) + "</h2><div class='kv'><span>")) + uiText(TextId::Type) + "</span><span>")
             + escapeHtml(webControllerImplementationName(configurationService_.getLocale(), selected->implementation)) + (String("</span><span>") + uiText(TextId::RequiredActuatorCapability) + "</span><span>")
@@ -2204,6 +2278,44 @@ void WebService::handleGeoPositionSave() {
         "/device", uiText(TextId::InvalidGeoPosition));
 }
 
+
+void WebService::handleSensorReset() {
+    ValueId id;
+    if (!parseValueId(server_.arg("slot"), id) || id > MaxSensorSlotCount) {
+        sendResult(uiText(TextId::SlotResetFailed), "/sensors",
+            uiText(TextId::TheRequestedSlotDoesNotExist), false);
+        return;
+    }
+
+    const auto& configuration = configurationService_.getConfiguration();
+    const auto empty = emptySlot<SensorSlotConfiguration>(id, "Slot ");
+    const auto action = runtimeActionForChange(configuration.sensorSlots[id - 1], empty);
+    const auto outcome = configurationService_.saveSensorSlotWithStatus(empty);
+    if (outcome.status == SensorSlotSaveStatus::Saved) {
+        sendConfigurationResult({true, action}, uiText(TextId::SlotReset),
+            uiText(TextId::SlotResetFailed), "/sensors", "");
+        return;
+    }
+
+    String reason;
+    switch (outcome.status) {
+        case SensorSlotSaveStatus::PressureTemperatureSource:
+            reason = uiText(TextId::SensorResetPressureTemperatureSource);
+            break;
+        case SensorSlotSaveStatus::ControllerDependency:
+            reason = String(uiText(TextId::SensorResetControllerDependency)) + " #"
+                + outcome.controllerId + " (" + configuration.controllerSlots[outcome.controllerId - 1].name + ").";
+            reason += String(" ") + uiText(TextId::SensorResetChangeController);
+            break;
+        case SensorSlotSaveStatus::StorageFailure:
+            reason = uiText(TextId::SensorResetStorageFailure);
+            break;
+        default:
+            reason = uiText(TextId::SensorResetInvalidConfiguration);
+            break;
+    }
+    sendResult(uiText(TextId::SlotResetFailed), "/sensors", reason.c_str(), false);
+}
 
 void WebService::handleSensorSave() {
     const long requestedSlot = server_.arg("slot").toInt();

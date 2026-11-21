@@ -37,6 +37,7 @@ public:
     bool setLocale(Locale locale) override;
     bool setPresentationUnit(MeasurementType type, PresentationUnit unit) override;
     bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) override;
+    SensorSlotSaveOutcome saveSensorSlotWithStatus(const SensorSlotConfiguration& slot) override;
     bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) override;
     bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) override;
     bool setDisplayConfiguration(const DisplayConfiguration& display) override;

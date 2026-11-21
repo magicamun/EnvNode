@@ -330,3 +330,22 @@ hardware provisioning and protocol/log views are visible again. This confirms
 restored browser functionality on build 484; it does not constitute an EEPROM
 write test or a post-flash byte-level EEPROM/partition comparison. No further
 device access was performed for that confirmation.
+
+
+## Recovery from a stalled page body, 2026-11-21
+
+After repeated slot edits, a user-observed `/sensors/edit` response timed out
+after 10 seconds with 7,296 of 9,231 bytes sent. The pump continued to run
+(3,156 of 3,164 turns made no progress), with about 56 KB free heap and a
+42,996-byte largest allocation reported on abort. The incomplete response
+explains why controls near the end of the page could be absent. The log does
+not establish the cause of socket backpressure or rule out transient memory
+pressure earlier in the request.
+
+The deferred sender now retries a blocked write after 5 ms and closes a
+connection after 3 seconds without send progress, freeing the single response
+slot for the next request. Slow responses log the last send errno. Fixed-length
+deferred responses build their headers directly via the SDK header builder,
+avoiding the SDK warning from sending an empty body during header capture.
+The response format, successful write budget and 60-second total limit are
+unchanged. Device validation of the intermittent stall remains open.

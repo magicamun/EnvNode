@@ -4,7 +4,7 @@
 #include <utility>
 #include "HttpClientGate.h"
 namespace EnvNode {
-// Observe SDK writes; capture fixed-length page headers for deferred delivery.
+// Observe SDK writes and prepare fixed-length headers for deferred delivery.
 class MeasuredWebServer : public WebServer {
 public:
     explicit MeasuredWebServer(uint16_t port) : WebServer(port) {}
@@ -26,9 +26,9 @@ public:
     void beginMeasurement() {
         started_=millis();firstWriteMs_=writeMs_=bytes_=0;wrote_=false;route_=String();
     }
-    void captureResponseHeaders() {captured_=String();capture_=true;captureFailed_=false;}
-    bool finishHeaderCapture(String& result) {
-        capture_=false;result=std::move(captured_);return !captureFailed_;
+    void prepareDeferredHeader(String& header, int status, const char* type, size_t length) {
+        setContentLength(length);
+        _prepareHeader(header, status, type, length);
     }
     uint32_t firstWriteMs() const {return firstWriteMs_;}
     uint32_t writeMs() const {return writeMs_;}
@@ -40,20 +40,12 @@ private:
     }
     size_t _currentClientWrite(const char* data,size_t size) override {
         beforeWrite();
-        if(capture_) {
-            if(size>2048-captured_.length() || !captured_.concat(data,size))captureFailed_=true;
-            return captureFailed_?0:size;
-        }
         const uint32_t started=millis();
         const size_t written=WebServer::_currentClientWrite(data,size);
         writeMs_+=millis()-started;bytes_+=written;return written;
     }
     size_t _currentClientWrite_P(const char* data,size_t size) override {
         beforeWrite();
-        if(capture_) {
-            if(size>2048-captured_.length() || !captured_.concat(data,size))captureFailed_=true;
-            return captureFailed_?0:size;
-        }
         const uint32_t started=millis();
         const size_t written=WebServer::_currentClientWrite_P(data,size);
         writeMs_+=millis()-started;bytes_+=written;return written;
@@ -61,7 +53,6 @@ private:
 #if defined(ARDUINO_ARCH_ESP32)
     HttpClientGate<WiFiClient> waitingClients_;
 #endif
-    String captured_;bool capture_=false,captureFailed_=false;
     uint32_t started_=0,firstWriteMs_=0,writeMs_=0;
     size_t bytes_=0;bool wrote_=false;String route_;
 };

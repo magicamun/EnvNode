@@ -6,6 +6,15 @@
 
 namespace EnvNode {
 
+enum class SensorSlotSaveStatus {
+    Saved, InvalidConfiguration, PressureTemperatureSource, ControllerDependency, StorageFailure
+};
+
+struct SensorSlotSaveOutcome {
+    SensorSlotSaveStatus status;
+    ControllerId controllerId;
+};
+
 class IConfigurationService : public INetworkSettings, public IBaseSettings {
 public:
     virtual ~IConfigurationService() = default;
@@ -38,6 +47,11 @@ public:
     virtual bool setLocale(Locale locale) override = 0;
     virtual bool setPresentationUnit(MeasurementType type, PresentationUnit unit) = 0;
     virtual bool setSensorSlotConfiguration(const SensorSlotConfiguration& slot) = 0;
+    virtual SensorSlotSaveOutcome saveSensorSlotWithStatus(const SensorSlotConfiguration& slot) {
+        return {setSensorSlotConfiguration(slot)
+            ? SensorSlotSaveStatus::Saved : SensorSlotSaveStatus::InvalidConfiguration,
+            InvalidControllerId};
+    }
     virtual bool setActuatorSlotConfiguration(const ActuatorSlotConfiguration& slot) = 0;
     virtual bool setControllerSlotConfiguration(const ControllerSlotConfiguration& slot) = 0;
     virtual bool setDisplayConfiguration(const DisplayConfiguration& display) = 0;

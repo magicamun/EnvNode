@@ -1067,20 +1067,37 @@ bool ConfigurationService::persistSensorSlot(const SensorSlotConfiguration& slot
 }
 
 bool ConfigurationService::setSensorSlotConfiguration(const SensorSlotConfiguration& slot) {
-    if (!isValidSensorId(slot.slotId) || slot.slotId > MaxSensorSlotCount) return false;
+    return saveSensorSlotWithStatus(slot).status == SensorSlotSaveStatus::Saved;
+}
+
+SensorSlotSaveOutcome ConfigurationService::saveSensorSlotWithStatus(
+    const SensorSlotConfiguration& slot) {
+    const SensorSlotSaveOutcome invalid{SensorSlotSaveStatus::InvalidConfiguration, InvalidControllerId};
+    if (!isValidSensorId(slot.slotId) || slot.slotId > MaxSensorSlotCount) return invalid;
     SensorSlotConfiguration candidate[MaxSensorSlotCount];
     for (size_t index = 0; index < MaxSensorSlotCount; ++index) {
         candidate[index] = configuration_.sensorSlots[index];
     }
     candidate[slot.slotId - 1] = slot;
-    if (!validPressureReduction(configuration_.pressureReduction, candidate)
-        || !validateSensorSlots(candidate)
-        || !validateHardwareOccupancy(candidate, configuration_.actuatorSlots)
-        || !validateControllerSlots(
-            configuration_.controllerSlots, candidate, configuration_.actuatorSlots)
-        || !persistSensorSlot(slot)) return false;
+    if (!validPressureReduction(configuration_.pressureReduction, candidate)) {
+        return {SensorSlotSaveStatus::PressureTemperatureSource, InvalidControllerId};
+    }
+    if (!validateSensorSlots(candidate)
+        || !validateHardwareOccupancy(candidate, configuration_.actuatorSlots)) return invalid;
+    if (!validateControllerSlots(
+            configuration_.controllerSlots, candidate, configuration_.actuatorSlots)) {
+        for (const auto& controller : configuration_.controllerSlots) {
+            if (!validateControllerSlot(controller, candidate, configuration_.actuatorSlots)) {
+                return {SensorSlotSaveStatus::ControllerDependency, controller.slotId};
+            }
+        }
+        return invalid;
+    }
+    if (!persistSensorSlot(slot)) {
+        return {SensorSlotSaveStatus::StorageFailure, InvalidControllerId};
+    }
     configuration_.sensorSlots[slot.slotId - 1] = slot;
-    return true;
+    return {SensorSlotSaveStatus::Saved, InvalidControllerId};
 }
 
 bool ConfigurationService::persistActuatorSlot(const ActuatorSlotConfiguration& slot) {
@@ -1142,7 +1159,8 @@ bool ConfigurationService::persistControllerSlot(
                     sizeof(target.deviceIdHash)) : String());
     };
     const auto& rain = slot.implementationConfiguration.rainDetector;
-    if (slot.implementation == ControllerImplementation::RainDetector) {
+    if (slot.implementation == ControllerImplementation::RainDetector
+        || slot.implementation == ControllerImplementation::None) {
         if (!persistUInt(controllerKey(id,"rclim").c_str(),rain.climateSensorId)
             || !persistFloat(controllerKey(id,"rdon").c_str(),rain.dewOnC)
             || !persistFloat(controllerKey(id,"rdoff").c_str(),rain.dewOffC)

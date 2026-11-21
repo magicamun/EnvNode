@@ -13,6 +13,8 @@ const char SharedStyle[] PROGMEM = R"CSS(
 )CSS" R"CSS(
 .actions.equal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:max-content;max-width:100%}.actions.equal>form{margin:0}.actions.equal button,.actions.equal>.button{display:block;width:100%;font:inherit;font-size:14px;font-weight:600;text-align:center}@media(max-width:480px){.actions.equal{grid-template-columns:1fr}}
 .sensor-table tr>:nth-child(2){min-width:110px;overflow-wrap:anywhere}.sensor-table tr>:nth-child(3){min-width:140px}.sensor-table tr>:nth-child(6){min-width:180px}.sensor-table td{padding-top:8px;padding-bottom:8px}.sensor-table .sensor-actions .button{display:inline-block}
+/* Keep initially hidden form labels hidden despite the shared label display rule. */
+label[hidden]{display:none}
 .measurement-topic{font-size:12px;white-space:normal;overflow-wrap:anywhere;user-select:text}
 )CSS";
 }

@@ -851,6 +851,47 @@ void test_rain_dew_configuration_single_source_bounds_persistence_and_locale() {
     TEST_ASSERT_TRUE(decodeConfigurationBackup(backup,reboot.getConfiguration(),restored,passwords));
     TEST_ASSERT_EQUAL_UINT(4,restored.controllerSlots[0].implementationConfiguration.rainDetector.climateSensorId);
     TEST_ASSERT_EQUAL_FLOAT(3.25F,restored.controllerSlots[0].implementationConfiguration.rainDetector.dewOffC);
+
+    SensorSlotConfiguration emptySensor{};
+    emptySensor.slotId = 5;
+    emptySensor.name = "Slot 5";
+    const auto controllerBlock = fixture.service.saveSensorSlotWithStatus(emptySensor);
+    TEST_ASSERT_TRUE(controllerBlock.status == SensorSlotSaveStatus::ControllerDependency);
+    TEST_ASSERT_EQUAL_UINT(1, controllerBlock.controllerId);
+
+    PressureReductionConfiguration reduction;
+    reduction.temperatureSensorId = 4;
+    TEST_ASSERT_TRUE(fixture.service.setPressureReduction(reduction));
+    auto emptyClimate = emptySensor;
+    emptyClimate.slotId = 4;
+    emptyClimate.name = "Slot 4";
+    TEST_ASSERT_TRUE(fixture.service.saveSensorSlotWithStatus(emptyClimate).status
+        == SensorSlotSaveStatus::PressureTemperatureSource);
+    TEST_ASSERT_TRUE(fixture.service.setPressureReduction(PressureReductionConfiguration{}));
+
+    ControllerSlotConfiguration emptyController{};
+    emptyController.slotId = 1;
+    emptyController.name = "Controller Slot 1";
+    TEST_ASSERT_TRUE(fixture.service.setControllerSlotConfiguration(emptyController));
+    TEST_ASSERT_TRUE(fixture.service.setSensorSlotConfiguration(emptySensor));
+
+    ActuatorSlotConfiguration emptyActuator{};
+    emptyActuator.slotId = 1;
+    emptyActuator.name = "Actuator Slot 1";
+    TEST_ASSERT_TRUE(fixture.service.setActuatorSlotConfiguration(emptyActuator));
+
+    ConfigurationService afterReset;
+    afterReset.loadConfiguration();
+    const auto& reset = afterReset.getConfiguration();
+    TEST_ASSERT_EQUAL_STRING("Slot 5", reset.sensorSlots[4].name.c_str());
+    TEST_ASSERT_TRUE(reset.sensorSlots[4].implementation == SensorImplementation::None);
+    TEST_ASSERT_EQUAL_STRING("Actuator Slot 1", reset.actuatorSlots[0].name.c_str());
+    TEST_ASSERT_TRUE(reset.actuatorSlots[0].implementation == ActuatorImplementation::None);
+    TEST_ASSERT_EQUAL_STRING("Controller Slot 1", reset.controllerSlots[0].name.c_str());
+    TEST_ASSERT_TRUE(reset.controllerSlots[0].implementation == ControllerImplementation::None);
+    TEST_ASSERT_EQUAL_UINT(0, reset.controllerSlots[0].implementationConfiguration.rainDetector.climateSensorId);
+    TEST_ASSERT_EQUAL_FLOAT(emptyController.implementationConfiguration.rainDetector.dewOffC,
+        reset.controllerSlots[0].implementationConfiguration.rainDetector.dewOffC);
 }
 
 int main(int, char**) {

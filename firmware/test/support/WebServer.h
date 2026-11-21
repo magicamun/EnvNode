@@ -80,6 +80,13 @@ public:
         return false;
     }
 protected:
+    void _prepareHeader(String& header, int status, const char* type, size_t length) {
+        responseStatus = status;
+        responseType = type;
+        const std::string wire = "HTTP/1.1 " + std::to_string(status)
+            + " OK\r\nContent-Length: " + std::to_string(length) + "\r\n\r\n";
+        header = wire.c_str();
+    }
     virtual size_t _currentClientWrite(const char*,size_t size) {delay(writeDelayMs);return size;}
     virtual size_t _currentClientWrite_P(const char*,size_t size) {delay(writeDelayMs);return size;}
 };

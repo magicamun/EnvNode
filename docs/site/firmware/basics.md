@@ -76,6 +76,7 @@ der neue Treiber oder Controller läuft.
 | --- | --- | --- |
 | Formular bearbeiten | Noch keine Änderung am Gerät, solange nicht gespeichert wurde | Nicht gespeicherte Eingaben gehen verloren |
 | Sensor-, Aktor- oder Controllerkonfiguration speichern | Einstellungen dauerhaft ablegen; eine Laufzeitübernahme kann noch ausstehen | Gespeicherte Einstellungen werden geladen |
+| Slot zurücksetzen | Unter **Konfigurieren** das Löschen bestätigen und die ausstehende Änderung anwenden | Der Slot bleibt leer. Ein automatisch erkannter Modulaktor kann mit seinen Modulvorgaben wieder aktiv werden. |
 | Ausstehende Änderungen anwenden | Den betroffenen Laufzeitbereich mit gespeicherten Einstellungen neu aufbauen | Die Konfiguration bleibt erhalten |
 | Controller Start/Stop | Laufenden Controller bedienen | Die gespeicherte Aktivierung bestimmt den erneuten Start |
 | Aktor Ein/Aus oder Pegel setzen | Ausgang im laufenden Betrieb ändern | Der Handbefehl wird nicht als gewünschter Dauerzustand gespeichert |
