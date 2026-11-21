@@ -39,6 +39,7 @@ nav:
   - Start: index.md
   - Dein erstes EnvNode: getting-started/index.md
   - Anwendungen:
+      - WeatherStation einrichten: firmware/example-weatherstation.md
       - Ich möchte messen: applications/measurements.md
       - Benetzung beobachten: applications/rain-detector.md
       - Relais schalten: firmware/example-relay.md
@@ -115,6 +116,7 @@ nav:
           - MQTT und Home Assistant: firmware/mqtt.md
           - Wartung und Diagnose: firmware/maintenance.md
           - Beispiele:
+              - WeatherStation: firmware/example-weatherstation.md
               - Mini mit SHT4x: firmware/example-measurement.md
   - Test/Provisioning:
       - Übersicht: test-provisioning/index.md

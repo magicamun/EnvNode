@@ -1,0 +1,81 @@
+{
+  "captured_date": "2026-11-21",
+  "firmware": "0.8.15",
+  "build": "0.8.15+539.ge572c2d",
+  "language": "de-DE",
+  "observed_board_profile": "EnvNode Weather 0.2",
+  "example_target_board": "EnvNode Weather 0.4",
+  "capture_method": "Read-only UI inspection; no settings saved or runtime commands sent.",
+  "privacy": "MQTT host and credentials not captured; location coordinates not copied.",
+  "images": [
+    {
+      "file": "rain-controller.jpg",
+      "sha256": "d0061bef92dd3032b6445d9a23f9d2441f0358aaa9b1ba6162d6ee14e50640fb"
+    },
+    {
+      "file": "rain-gauge.jpg",
+      "sha256": "a08b89db15842f685c893adea1af6ac39a45492248b1f1ecbfbf1f4224a15878"
+    }
+  ],
+  "configuration": {
+    "rain_gauge": {
+      "sensor_slot": 5,
+      "gpio": 4,
+      "millimetres_per_tip": 0.2794,
+      "debounce_ms": 50
+    },
+    "rain_frequency": {
+      "sensor_slot": 4,
+      "gpio": 27,
+      "publish_interval_ms": 5000
+    },
+    "heater": {
+      "actuator_slot": 1,
+      "implementation": "GPIO PWM",
+      "gpio": 16
+    },
+    "rain_controller": {
+      "controller_slot": 1,
+      "source_sensor_slot": 4,
+      "target_actuator_slot": 1,
+      "edge_ms": 1000,
+      "drop_hz": 150,
+      "drop_permille": 5,
+      "end_seconds": 60,
+      "dry_hz": 33300,
+      "hysteresis_hz": 500,
+      "dry_seconds": 10,
+      "climate_sensor_slot": 6,
+      "dew_on_c": 2,
+      "dew_off_c": 4
+    },
+    "climate_sensors": [
+      {
+        "slot": 6,
+        "implementation": "BME280",
+        "bus": "I2C0",
+        "address": "0x76",
+        "sample_interval_ms": 5000,
+        "configured_name": "Temperatur/Feuchte"
+      },
+      {
+        "slot": 7,
+        "implementation": "SHTC3",
+        "bus": "I2C0",
+        "address": "0x70",
+        "sample_interval_ms": 5000,
+        "configured_name": "Temperatur, Feuchte Gehäuse"
+      }
+    ],
+    "pressure_reduction": {
+      "temperature_source": null,
+      "maximum_temperature_age_seconds": 60
+    }
+  },
+  "validation_note": "Configured settings only; no wetting, tipping, heating or outdoor validation performed during this inspection.",
+  "license": "LicenseRef-EnvNode-Use-and-Redistribution-1.0; see repository LICENSE",
+  "confirmed_sensor_roles": {
+    "indoor": "SHTC3, sensor slot 7",
+    "outdoor": "BME280, sensor slot 6"
+  }
+}

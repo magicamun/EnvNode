@@ -17,7 +17,8 @@ Aktuelle Plattformabgrenzung: [Classic ESP32 scope](ClassicEsp32Scope.md). RainD
 - [ ] Die überarbeiteten Bedienkapitel am realen Gerät weiter gegenlesen und die beschriebenen Abläufe prüfen.
 - [x] Die fünf bisherigen Firmware-Screenshots mit deutschen Aufnahmen der laufenden Firmware 0.8.15 ersetzt; Bildbeschreibungen mit der tatsächlichen Konfiguration abgeglichen.
 - [ ] Später eine separate Anleitung zur Einrichtung eines externen rsyslogd ergänzen; die Bedienungsdoku setzt einen vorhandenen Empfänger voraus.
-- [ ] Nach Abschluss der allgemeinen Bedienkapitel: WeatherStation als durchgängiges Beispiel — Gehäuseklima, Außenklima, Luftdruck aus einem oder beiden Sensoren, Regenwippe mit mm/Kippung, RainDetector mit Kalibrierung und Heizungscontroller, Standort mit Sensorhöhe/Longitude/Latitude. Reihenfolge entspricht der schrittweisen Inbetriebnahme; Grundlagen bleiben in den Fachkapiteln.
+- [x] WeatherStation als durchgängiges Konfigurationsbeispiel angelegt — Gehäuseklima, Außenklima, Luftdruck aus einem oder beiden Sensoren, Regenwippe mit mm/Kippung, RainDetector mit Kalibrierung und Heizungscontroller, Standort mit Sensorhöhe/Longitude/Latitude. Reihenfolge entspricht der schrittweisen Inbetriebnahme; Grundlagen bleiben in den Fachkapiteln. Zielboard 0.4, Werte und zwei Aufnahmen aus dem konfigurierten 0.2-Testgerät. Messstellenzuordnung vom Nutzer bestätigt: SHTC3 innen, BME280 außen.
+- [ ] WeatherStation-Beispiel am Zielaufbau 0.4 durchgehen und tatsächliche Kalibrier-/Feldergebnisse nach der Erprobung ergänzen.
 - [ ] Optional anschließend: WeatherStation in Home Assistant anzeigen und Regenwippen-Ereignisse zu Stunden-/Tagessummen aggregieren.
 - [ ] Später zweites durchgängiges Beispiel: AnalogHydroPressure-Sondenmessung mit Relais, Threshold und Betriebsarten; danach kurze HA-Anbindung für Relais, Modi und unterstützte Schwellwerte mit einer Demo-Kachel. Tatsächlichen Firmwareumfang vorab prüfen.
 

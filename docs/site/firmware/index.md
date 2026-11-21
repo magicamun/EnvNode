@@ -65,8 +65,9 @@ Qualität und Rückfallverhalten. Die dafür benötigte Sensorhöhe wird unter
 erweiterte Diagnosen an einen bereits eingerichteten externen rsyslogd sendet
 und wie du den Empfang kontrollierst.
 
-## Zwei durchgehende Beispiele
+## Beispiele
 
+- [WeatherStation: Gehäuse- und Außenklima, Regenwippe und RainDetector](example-weatherstation.md)
 - [Mini mit SHT4x: von der Verdrahtung zur MQTT-Messung](example-measurement.md)
 - [DuoRelay: Relais bedienen und mit Blink betreiben](example-relay.md)
 
