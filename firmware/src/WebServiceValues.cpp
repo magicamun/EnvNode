@@ -5,7 +5,9 @@
 namespace EnvNode {
 void WebService::handleValues() {
     server_.sendHeader("Cache-Control", "no-store");
-    sendPage(uiText(TextId::Values), "/values", buildValuesHtml(valueRuntime_, configurationService_.getLocale()));
+    const auto& deviceName = configurationService_.getConfiguration().device.name;
+    sendPage(uiText(TextId::Values), "/values",
+             buildValuesHtml(valueRuntime_, deviceName, configurationService_.getLocale()));
 }
 void WebService::handleValueEdit() {
     server_.sendHeader("Cache-Control", "no-store");

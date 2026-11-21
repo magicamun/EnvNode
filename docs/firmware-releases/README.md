@@ -15,6 +15,11 @@ Fehlende Beschreibungen brechen die Veröffentlichung ab. Keine vollständige
 Commitliste einfügen. Historische Versionen werden erst ab Einführung dieses
 Workflows gesammelt; alte Images werden nicht nachträglich aus ungeprüften Ständen gebaut.
 
+Wenn ein Release ein Boardprofil oder die Unterstützung einer Hardwarefunktion
+ergänzt, in der Release-Notiz die betroffene PCB-Revision und den Prüfstand angeben.
+Die [Kompatibilitätsübersicht](../site/compatibility.md) und bei Bedarf die
+[Auswahlhilfe im Downloadkatalog](introduction.md) entsprechend aktualisieren.
+
 GitHub Releases `firmware-<ziel>-<version>` halten Anwendungsimage, LICENSE und
 `firmware.json` mit Commit, UTC-Zeit, Prüfsumme und Beschreibung. Jede neue
 Versionsnummer (einschließlich Patch-Version) wird einmal veröffentlicht. Bereits

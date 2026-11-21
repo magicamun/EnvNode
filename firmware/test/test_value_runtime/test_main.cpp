@@ -69,19 +69,22 @@ void test_capacity_rejects_extra_value_without_changing_runtime() {
     for (unsigned int i=1; i<=MaxEnumValueCount; ++i) TEST_ASSERT_TRUE(runtime.saveDefinition(mode(i), true));
     TEST_ASSERT_FALSE(runtime.saveDefinition(mode(9), true));
     TEST_ASSERT_EQUAL_UINT32(MaxEnumValueCount, runtime.values().size());
-    TEST_ASSERT_NULL(strstr(buildValuesHtml(runtime).c_str(), "href='/values/edit'"));
+    TEST_ASSERT_NULL(strstr(buildValuesHtml(runtime, "Rain Control").c_str(), "href='/values/edit'"));
 }
 void test_web_view_escapes_user_text_and_exposes_post_controls() {
     ConfigurationService cfg; cfg.loadConfiguration(); ValueRuntime runtime(cfg); runtime.begin();
-    TEST_ASSERT_NOT_NULL(strstr(buildValuesHtml(runtime).c_str(), "Water source example"));
+    TEST_ASSERT_NOT_NULL(strstr(buildValuesHtml(runtime, "Rain Control").c_str(), "Water source example"));
     auto c = mode(); c.name = "<script>bad</script>"; c.options[1].label = "A & B";
     TEST_ASSERT_TRUE(runtime.saveDefinition(c, true)); runtime.set(1, "cistern");
-    const String html = buildValuesHtml(runtime);
+    const String html = buildValuesHtml(runtime, "Rain Control");
     TEST_ASSERT_NULL(strstr(html.c_str(), "<script>bad"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "&lt;script&gt;"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "A &amp; B"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "method='post' action='/values/set'"));
     TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "value='cistern' selected"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "envnode/Rain_Control/value/1/cmd/state"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "envnode/Rain_Control/value/1/status/state"));
+    TEST_ASSERT_NOT_NULL(strstr(html.c_str(), "Example payload (plain option code): <code>auto</code>"));
     const String editor = buildValueEditorHtml(c, false, "Invalid <value>");
     TEST_ASSERT_NOT_NULL(strstr(editor.c_str(), "Invalid &lt;value&gt;"));
     TEST_ASSERT_NOT_NULL(strstr(editor.c_str(), "name='code15'"));

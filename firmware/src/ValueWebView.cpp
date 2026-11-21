@@ -1,5 +1,6 @@
 #include "ValueWebView.h"
 #include "HtmlEscaping.h"
+#include "ValueMqttTopic.h"
 
 namespace EnvNode {
 bool parseValueId(const String& text, ValueId& id) {
@@ -22,7 +23,7 @@ void input(String& html, const char* label, const String& name, const String& va
     html += "' value='"; html += escapeHtml(value).c_str(); html += "'></label>";
 }
 }
-String buildValuesHtml(const ValueRuntime& runtime, Locale locale) {
+String buildValuesHtml(const ValueRuntime& runtime, const String& deviceName, Locale locale) {
     String html;
     html.reserve(4000);
     html += (String("<section class='card'><h2>") + webText(locale, TextId::Values) + "</h2><p>" + webText(locale, TextId::SetNamedValuesForLocalUseChangesTake) + "</p>");
@@ -46,7 +47,14 @@ String buildValuesHtml(const ValueRuntime& runtime, Locale locale) {
             html += ">"; html += escapeHtml(option.label).c_str(); html += "</option>";
         }
         html += (String("</select></label><div class='actions'><button>") + webText(locale, TextId::SetValue) + "</button><a class='button' href='/values/edit?id=");
-        html += String(d.id).c_str(); html += (String("'>") + webText(locale, TextId::EditDefinition) + "</a></div></form></section>");
+        html += String(d.id).c_str(); html += (String("'>") + webText(locale, TextId::EditDefinition) + "</a></div></form>");
+        html += String("<details><summary>MQTT</summary><p>") + webText(locale, TextId::ValueMqttCommandTopic) + "<br><code>";
+        html += escapeHtml(mqttValueCommandTopic(deviceName, d.id));
+        html += String("</code></p><p>") + webText(locale, TextId::ValueMqttExamplePayload) + " <code>";
+        html += escapeHtml(d.defaultCode);
+        html += String("</code></p><p>") + webText(locale, TextId::ValueMqttStatusTopic) + "<br><code>";
+        html += escapeHtml(mqttValueStatusTopic(deviceName, d.id));
+        html += "</code></p></details></section>";
     }
     return html;
 }

@@ -164,6 +164,10 @@ Sensor Home Assistant discovery is implemented. Controller and generic Actuator 
 
 ## Configurable Values
 
+On the Values page, expand **MQTT** on a Value card to see its command topic,
+an example payload using the configured default option code, and the separate
+status topic for feedback.
+
 Values are defined in Web. MQTT changes only their current selection; it does not
 create/delete definitions or configure Selector wiring. Display configuration
 remains Web-only.
