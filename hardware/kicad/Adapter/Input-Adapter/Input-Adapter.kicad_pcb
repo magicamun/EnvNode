@@ -39,6 +39,47 @@
 		(45 "User.4" user)
 	)
 	(setup
+		(stackup
+			(layer "F.SilkS"
+				(type "Top Silk Screen")
+			)
+			(layer "F.Paste"
+				(type "Top Solder Paste")
+			)
+			(layer "F.Mask"
+				(type "Top Solder Mask")
+				(color "#1555A0D4")
+				(thickness 0.01)
+			)
+			(layer "F.Cu"
+				(type "copper")
+				(thickness 0.035)
+			)
+			(layer "dielectric 1"
+				(type "core")
+				(thickness 1.51)
+				(material "FR4")
+				(epsilon_r 4.5)
+				(loss_tangent 0.02)
+			)
+			(layer "B.Cu"
+				(type "copper")
+				(thickness 0.035)
+			)
+			(layer "B.Mask"
+				(type "Bottom Solder Mask")
+				(color "#1555A0D4")
+				(thickness 0.01)
+			)
+			(layer "B.Paste"
+				(type "Bottom Solder Paste")
+			)
+			(layer "B.SilkS"
+				(type "Bottom Silk Screen")
+			)
+			(copper_finish "None")
+			(dielectric_constraints no)
+		)
 		(pad_to_mask_clearance 0)
 		(allow_soldermask_bridges_in_footprints no)
 		(tenting
@@ -55,6 +96,7 @@
 		)
 		(capping no)
 		(filling no)
+		(zone_defaults)
 		(pcbplotparams
 			(layerselection 0x00000000_00000000_55555555_5755f5ff)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
@@ -4552,6 +4594,38 @@
 		(uuid "a6336e1e-e44e-4185-bfc8-ec0b0cf3ba2a")
 	)
 	(segment
+		(start 141.82 85.98)
+		(end 137.34 85.98)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/IN/MB_GND")
+		(uuid "31c1411e-fe34-45b3-aa04-718caccd4972")
+	)
+	(segment
+		(start 145.41 91.7)
+		(end 142.67 88.96)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/IN/MB_GND")
+		(uuid "45a29bbd-52c4-4b58-87ea-2e4d0f7f633d")
+	)
+	(segment
+		(start 142.67 86.83)
+		(end 141.82 85.98)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/IN/MB_GND")
+		(uuid "705a0df2-2924-4712-b5f0-e09029a5aaf7")
+	)
+	(segment
+		(start 142.67 88.96)
+		(end 142.67 86.83)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/IN/MB_GND")
+		(uuid "b8e054e4-e246-45ce-9ece-df0e79933490")
+	)
+	(segment
 		(start 137.34 84.71)
 		(end 141.85 84.71)
 		(width 0.2)
@@ -4590,38 +4664,6 @@
 		(layer "F.Cu")
 		(net "/IN/MB_3V3_SYS")
 		(uuid "b3e781a4-ac02-4634-acb6-4a9860a1282d")
-	)
-	(segment
-		(start 141.82 85.98)
-		(end 137.34 85.98)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/IN/MB_GND")
-		(uuid "31c1411e-fe34-45b3-aa04-718caccd4972")
-	)
-	(segment
-		(start 145.41 91.7)
-		(end 142.67 88.96)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/IN/MB_GND")
-		(uuid "45a29bbd-52c4-4b58-87ea-2e4d0f7f633d")
-	)
-	(segment
-		(start 142.67 86.83)
-		(end 141.82 85.98)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/IN/MB_GND")
-		(uuid "705a0df2-2924-4712-b5f0-e09029a5aaf7")
-	)
-	(segment
-		(start 142.67 88.96)
-		(end 142.67 86.83)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/IN/MB_GND")
-		(uuid "b8e054e4-e246-45ce-9ece-df0e79933490")
 	)
 	(segment
 		(start 128.04 39.248)

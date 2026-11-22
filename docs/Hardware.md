@@ -13,6 +13,7 @@ revision-specific assembly documentation remain the hardware references.
 
 - [EnvNode Module Interface – Hardware Specification](EnvNode_Module_Interface_Hardware_Specification.md) defines the shared electrical and mechanical expansion-module interface.
 - [Hardware Design Guidelines](hardware_guidelines.md) contains general design rules used across EnvNode hardware.
+- [EnvNode PCB Color Convention](../hardware/kicad/PCB_Color_Convention.md) defines solder mask colors by board function and lists RGB values for KiCad rendering.
 
 ## KiCad Reference Designs
 
