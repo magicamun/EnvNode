@@ -8,7 +8,9 @@ String buildWebPageHeader(const WebPageFrameData& page) {
     html = String("<!doctype html><html lang='") + escapeHtml(page.languageTag) + "'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>";
     html += escapeHtml(page.title);
     html += " · "; html += escapeHtml(page.productName);
-    html += "</title><link rel='stylesheet' href='/style.css?build=";
+    html += "</title><link rel='icon' type='image/png' sizes='32x32' href='/favicon.png'>";
+    html += "<link rel='apple-touch-icon' sizes='180x180' href='/apple-touch-icon.png'>";
+    html += "<link rel='stylesheet' href='/style.css?build=";
     html += escapeHtml(page.buildTimestamp);
     html += "'>";
     html += page.uiScript();

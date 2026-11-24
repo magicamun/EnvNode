@@ -1,5 +1,6 @@
 // EnvNode: see repository LICENSE.
 #include "WebHost.h"
+#include "WebFavicon.h"
 #include "WebPageFrame.h"
 #include "WebStyle.h"
 #include <cstring>
@@ -13,6 +14,16 @@ WebHost::WebHost(ILogger& logger, IWiFiService& wifi, uint16_t port)
 WebServer& WebHost::server() { return server_; }
 void WebHost::registerRoutes(IWebRoutes& routes) { routes.registerRoutes(server_); }
 void WebHost::begin() {
+    server_.on("/favicon.png", HTTP_GET, [this]() {
+        server_.sendHeader("Cache-Control", "public, max-age=86400");
+        server_.send_P(200, PSTR("image/png"), reinterpret_cast<const char*>(WebFaviconPng),
+                       sizeof(WebFaviconPng));
+    });
+    server_.on("/apple-touch-icon.png", HTTP_GET, [this]() {
+        server_.sendHeader("Cache-Control", "public, max-age=86400");
+        server_.send_P(200, PSTR("image/png"), reinterpret_cast<const char*>(WebTouchIconPng),
+                       sizeof(WebTouchIconPng));
+    });
     server_.on("/style.css", HTTP_GET, [this]() {
         server_.sendHeader("Cache-Control", "public, max-age=86400");
         queuePage(String(),String(),200,"text/css",sharedWebStyle());
