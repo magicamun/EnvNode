@@ -45,6 +45,9 @@ creates the following files under
 copy of the KiCad board. Copper, mask, silkscreen, footprints and pads remain
 unchanged. Source PCB files are never modified.
 
+KiCad renders both sides using the solder mask colors stored in the board
+stackup. Use a `kicad-cli` version that supports `--use-board-stackup-colors`.
+
 The assembled views are examples of the completed board. If a component has no
 KiCad 3D model, it is absent from these renders. Missing models must not be
 invented or silently replaced with visually similar components.

@@ -128,6 +128,7 @@ def render(cli: str, board: Path, output: Path, side: str, perspective: bool) ->
         "--height", "1800" if perspective else "2400",
         "--side", "top" if side == "front" else "bottom",
         "--background", "transparent",
+        "--use-board-stackup-colors",
         "--quality", "high",
         "--rotate", rotation,
         "--zoom", "0.62" if perspective else "0.78",

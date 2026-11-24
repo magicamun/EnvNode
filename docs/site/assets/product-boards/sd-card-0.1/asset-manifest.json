@@ -3,15 +3,15 @@
   "id": "sd-card-0.1",
   "guide": "modules/sd-card/index.md",
   "pcb_source": "main/hardware/kicad/Modules/FullSize/SD-Card/SD-Card.kicad_pcb",
-  "pcb_sha256": "921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263",
-  "repository_commit": "7f17aaf7f5a8c0fed4497f1c28749fb6bb4cefac",
+  "pcb_sha256": "b28298552b5eea8e384826161d0c004e0ca48bd62cfc0c68d0986f07338d36e0",
+  "repository_commit": "b4c9de707ed1ab01e37cf9cb6c9107fc7af586a1",
   "generator": "tools/product_assets.py",
   "renderer": "KiCad pcb render",
   "bare_render_policy": "Component model entries are removed from a temporary PCB copy; source copper, mask, silkscreen, footprints and pads are unchanged.",
   "removed_component_models": 4,
   "assets": {
     "3d-assembled-front.png": {
-      "sha256": "a44a2ac2d7378bd88c808bfa533309abe50e3649f81006e17ece01935f5dc7f7",
+      "sha256": "6b480747dcefac2bf2f0d59939a988ab1f895f977d00702f1f2c954d63397e1c",
       "size_px": [
         1768,
         1768
@@ -21,7 +21,7 @@
       "component_models": true
     },
     "3d-assembled-back.png": {
-      "sha256": "bb7efef2d1b3e03f0a535ae7b955ff30cfc6860e4b7a33cf31bd50ef380d6bca",
+      "sha256": "354c7be25b43c3278b826e157d1f46c6e0f5adea3f7ba2f68946f39ae90fa5e3",
       "size_px": [
         1768,
         1768
@@ -31,7 +31,7 @@
       "component_models": true
     },
     "3d-bare-front.png": {
-      "sha256": "caeeba063f1499b2df99eb2034666dcd849234624e2ee731d4e603d02cd2df29",
+      "sha256": "f7eb337be1e2881f2f7b4ef88590c8aea4785e06b3209de217f374a2f8ec3f8d",
       "size_px": [
         1768,
         1768
@@ -41,7 +41,7 @@
       "component_models": false
     },
     "3d-bare-back.png": {
-      "sha256": "cf448230195ecb146389b1e349be9aa13ec44ae45355dd56d7fda272e76cc2c1",
+      "sha256": "3748bd1a66f80c7adc450ebbe7a312c23e134d7f8d141881b10f743c5d842bc1",
       "size_px": [
         1768,
         1768
@@ -51,7 +51,7 @@
       "component_models": false
     },
     "2d-assembled-front.png": {
-      "sha256": "e3cbbcfd758c32d32effe7db89a1c1c94faebf9b6ac0da1293a8d5de6de20208",
+      "sha256": "d0f30d6e687072e33e2e77ad45f48ad91cea24eedbdc67a86fa50f678cff3184",
       "size_px": [
         2384,
         2384
@@ -61,7 +61,7 @@
       "component_models": true
     },
     "2d-assembled-back.png": {
-      "sha256": "ee8d224dd6e955ef7e89869dcedd8215df031edd07cd6b53ce572fb6a6bedacd",
+      "sha256": "38a2fc2009bf9422171f8380ed40c0c565df411e1a8923d53abc4437c228f3e5",
       "size_px": [
         2384,
         2384
@@ -71,7 +71,7 @@
       "component_models": true
     },
     "2d-bare-front.png": {
-      "sha256": "313eba6366c9c16df707a986d5143b65e9b0fc94209898e4a29623c4286740eb",
+      "sha256": "b022aa0a4485ec2528a6265c1aec89b321666a8f66098d19155fc57704c49be2",
       "size_px": [
         2384,
         2384
@@ -81,7 +81,7 @@
       "component_models": false
     },
     "2d-bare-back.png": {
-      "sha256": "449fceebd71b2e3bf94c6655e514ff948f0e30dcfd193142349b355bd4448251",
+      "sha256": "c6fe21118a17bdda4586e260656db5d227e94163249e90753aba5331a487d47f",
       "size_px": [
         2384,
         2384

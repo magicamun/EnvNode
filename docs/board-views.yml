@@ -12,7 +12,7 @@
   guide: mainboards/mini/revisions/0.10.0.md
   shop_assets: true
   pcb: main/hardware/kicad/MainBoards/EnvNode Mini/EnvNode Mini.kicad_pcb
-  sha256: 5bc5b1f206bbf27c08f33f483d046fc9d2f339875a74b98d17e2bc5841c0d557
+  sha256: a657ca7299b3a378bb97124c3a773754381c2ba82500a89fd2545546ee006945
 - id: weatherstation-0.3.0
   guide: mainboards/weatherstation/revisions/0.3.0.md
   git_ref: 98704fb24562baecc5ebb4e343ff43aa8d2e41db
@@ -25,7 +25,7 @@
   guide: mainboards/weatherstation/revisions/0.4.md
   shop_assets: true
   pcb: main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb
-  sha256: 6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f
+  sha256: 5ec59d12355b7919784f93e1e9eab6ca204348302f3427887a15db16a4bdc322
 - id: analog-0.6
   guide: modules/analog-hydro-pressure/index.md
   pcb: analog-hydro-pressure/hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb
@@ -36,7 +36,7 @@
   guide: modules/sd-card/index.md
   shop_assets: true
   pcb: main/hardware/kicad/Modules/FullSize/SD-Card/SD-Card.kicad_pcb
-  sha256: 921f321f83ac23143ae23933033053ab336d1ea51afc8c4f610aec39b9beb263
+  sha256: b28298552b5eea8e384826161d0c004e0ca48bd62cfc0c68d0986f07338d36e0
   hero_front: assets/images/sd-card-0.1/top.png
   hero_back: assets/images/sd-card-0.1/bottom.png
 - id: rain-controller-0.4
@@ -76,7 +76,7 @@
   guide: modules/duo-relay/index.md
   shop_assets: true
   pcb: main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb
-  sha256: 9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac
+  sha256: 3c877204d0c1d20342b6132ad3722d99256c5eab6d3519ccbd013a3e9ecc2f5d
   hero_front: assets/images/duorelay-assembly/top.png
   hero_back: assets/images/duorelay-assembly/bottom.png
 - id: oring-power-0.1.1
@@ -89,7 +89,7 @@
   guide: mainboards/oring-power/index.md
   shop_assets: true
   pcb: main/hardware/kicad/Power/ORing Power/ORing Power.kicad_pcb
-  sha256: da90e5c28ec42640f35436c5ba8bd8dc76312a2dac58793f9f6dee7f289c1ea8
+  sha256: 4cc12ad1c7d0cb9f83dedcff0fc64d6451444c06a07408fc750f458ed5170f4b
 - id: i2c-carrier-0.1
   guide: modules/i2c-carrier/assembly.md
   pcb: main/hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/I2C Carrier HalfSize.kicad_pcb

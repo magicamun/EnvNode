@@ -3,15 +3,15 @@
   "id": "duo-relay-0.3",
   "guide": "modules/duo-relay/index.md",
   "pcb_source": "main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb",
-  "pcb_sha256": "9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac",
-  "repository_commit": "ab5d3983b369271b5cb7f0b0e3beaa357c89524e",
+  "pcb_sha256": "3c877204d0c1d20342b6132ad3722d99256c5eab6d3519ccbd013a3e9ecc2f5d",
+  "repository_commit": "b4c9de707ed1ab01e37cf9cb6c9107fc7af586a1",
   "generator": "tools/product_assets.py",
   "renderer": "KiCad pcb render",
   "bare_render_policy": "Component model entries are removed from a temporary PCB copy; source copper, mask, silkscreen, footprints and pads are unchanged.",
   "removed_component_models": 19,
   "assets": {
     "3d-assembled-front.png": {
-      "sha256": "f9496ab60c05d3ae251aef032684d6952732c22a8645a80423585c7e07375ed8",
+      "sha256": "2f798fec859b9e8e5a6dc3c18185973f0378c6ef15df9694744d1fbae179a78e",
       "size_px": [
         1768,
         1768
@@ -21,7 +21,7 @@
       "component_models": true
     },
     "3d-assembled-back.png": {
-      "sha256": "0cae0cbd26d31d3f66ea65a8001cb28377b3d5a2273ad8e31c618ae73f7a8ab1",
+      "sha256": "a1a5616804a4a1344e63a72543e728e435d46030004e45a4a90e5589ab1ad459",
       "size_px": [
         1768,
         1768
@@ -31,7 +31,7 @@
       "component_models": true
     },
     "3d-bare-front.png": {
-      "sha256": "d28e4868f512059150e15ba4420258552cc65a506715fff2cb899a2114482e9b",
+      "sha256": "39a6e354cba16015a0d47a532486338e3219bfe152cb1a7bbbf807006e540d6d",
       "size_px": [
         1768,
         1768
@@ -41,7 +41,7 @@
       "component_models": false
     },
     "3d-bare-back.png": {
-      "sha256": "0d26f50efe2b348accc976b221a85a9f388070f5bc526eb8a03cd9802852ee5b",
+      "sha256": "ccf9fd842a5beec2f1ca121c9a2b937bcb991b97a6994f6c1e88ec48bd6c6bbe",
       "size_px": [
         1768,
         1768
@@ -51,7 +51,7 @@
       "component_models": false
     },
     "2d-assembled-front.png": {
-      "sha256": "e7804d6564360b5ad5f8873d655bc15f889003a6148de5cc51d578fb6c571e57",
+      "sha256": "1254318ed13adba55f14ed3b9ef3650803edfe2fc3ce1ff31585473e059ca1ec",
       "size_px": [
         2384,
         2384
@@ -61,7 +61,7 @@
       "component_models": true
     },
     "2d-assembled-back.png": {
-      "sha256": "3f7f8677af99e85232bfaedb02bfa669bccc83b4bdb05d79e25cc034165cf77c",
+      "sha256": "a77e8b079668709f73c080cd91e790e5546c2cd7e76ee6757ef4c893dbc1e830",
       "size_px": [
         2384,
         2384
@@ -71,7 +71,7 @@
       "component_models": true
     },
     "2d-bare-front.png": {
-      "sha256": "150f2114220fa8ad7819df0c6988136ae189c08f0ae8b194b711157eff516711",
+      "sha256": "37bcabd14ed092ad0769a9d356aa557cc78a1059d030cdcb09ef9e95dc362a8f",
       "size_px": [
         2384,
         2384
@@ -81,7 +81,7 @@
       "component_models": false
     },
     "2d-bare-back.png": {
-      "sha256": "58bd8aa1fdb2e78db0af14a50ab5f22e741696fff9551d18ab6cb0bd11133d3a",
+      "sha256": "e7ac825f7a25bf1a608fd1be5dd3e26dcdb4e6c20407a8669bc213d7d0e56756",
       "size_px": [
         2384,
         2384

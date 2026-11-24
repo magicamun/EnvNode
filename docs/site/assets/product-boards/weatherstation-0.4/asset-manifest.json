@@ -3,15 +3,15 @@
   "id": "weatherstation-0.4",
   "guide": "mainboards/weatherstation/revisions/0.4.md",
   "pcb_source": "main/hardware/kicad/MainBoards/Weatherstation/Weatherstation.kicad_pcb",
-  "pcb_sha256": "6ed0776ab61d7d7c94d0011e95a5952153ee0b30af0c37c40c04db1ae07ce36f",
-  "repository_commit": "e12484ff4e307556ce0821ca8ad457b1390616ba",
+  "pcb_sha256": "5ec59d12355b7919784f93e1e9eab6ca204348302f3427887a15db16a4bdc322",
+  "repository_commit": "b4c9de707ed1ab01e37cf9cb6c9107fc7af586a1",
   "generator": "tools/product_assets.py",
   "renderer": "KiCad pcb render",
   "bare_render_policy": "Component model entries are removed from a temporary PCB copy; source copper, mask, silkscreen, footprints and pads are unchanged.",
   "removed_component_models": 34,
   "assets": {
     "3d-assembled-front.png": {
-      "sha256": "eba81cc42301fe2010f12fb6168f6629403c4f49fd6fb19eb4f67d1a66885616",
+      "sha256": "114ef18494139a14b1c2f5cf386eaef6a50e071d45aa8efc5eac92de66cf6817",
       "size_px": [
         1768,
         1768
@@ -21,7 +21,7 @@
       "component_models": true
     },
     "3d-assembled-back.png": {
-      "sha256": "9f9dbcc6b6f55eeb2022e345e0464d42e132d81a8a18055638559cbfaa2e3392",
+      "sha256": "51d1e0ecd90843277f54c5e1d27324ba3648bb4b0227c72db5423c4c695e3434",
       "size_px": [
         1768,
         1768
@@ -31,7 +31,7 @@
       "component_models": true
     },
     "3d-bare-front.png": {
-      "sha256": "428c5158a98d16e8bce9a0337d2ea83424dc474f917fb0cfa7dc857c1f1620e0",
+      "sha256": "14898d96528c2b236e187906e43605c498e7a24186eb5cfa03394370e5c21825",
       "size_px": [
         1768,
         1768
@@ -41,7 +41,7 @@
       "component_models": false
     },
     "3d-bare-back.png": {
-      "sha256": "2b7df49f4c4587026d5496a5917a76d71297579a2afde31fa1085b7f0fdf739c",
+      "sha256": "b5febc09ce045635ba77d24516926ce0cf983623877d5879efcfb6476857f59c",
       "size_px": [
         1768,
         1768
@@ -51,7 +51,7 @@
       "component_models": false
     },
     "2d-assembled-front.png": {
-      "sha256": "25e3e3796c410a214bfbe2a20be8250bafd352cd16ca52a9f5b5e60120f587cf",
+      "sha256": "d469f411c26716fa723dce60a220fa26f97d1f89b55455d40a42c239e51b6dec",
       "size_px": [
         2384,
         2384
@@ -61,7 +61,7 @@
       "component_models": true
     },
     "2d-assembled-back.png": {
-      "sha256": "3b37a05053e7a707328723b91ac29d24969b6a781963ddda6775e432f32acba9",
+      "sha256": "7e68306ba1eaf374d7548a6f91d4aa521f1eb8dd3cf7631e034ccd9f38836dfd",
       "size_px": [
         2384,
         2384
@@ -71,7 +71,7 @@
       "component_models": true
     },
     "2d-bare-front.png": {
-      "sha256": "dd4e8c444021a9edacb69ffa33a7a1536cfd190ac7f310b5839896e4cb710ebf",
+      "sha256": "7bb1ac5809488fe32a620e830970dda866015813af192efc478d16a11dbd29ca",
       "size_px": [
         2384,
         2384
@@ -81,7 +81,7 @@
       "component_models": false
     },
     "2d-bare-back.png": {
-      "sha256": "373fb51f6746ac93febea3076cf1122b98807ef83e79f91384fb67cf8eedbe13",
+      "sha256": "36641b7a3680d1426d996ad41ea7792b7217291dec99318f9979603b6f9830cf",
       "size_px": [
         2384,
         2384
