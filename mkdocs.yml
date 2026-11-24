@@ -13,6 +13,8 @@ exclude_docs: |
 copyright: '© 2026 Lutz Thielemann · <a href="https://github.com/magicamun/EnvNode/blob/main/LICENSE">Lizenz und Nutzung</a>'
 theme:
   name: material
+  custom_dir: docs/overrides
+  favicon: favicon.png
   language: de
   features:
     - navigation.sections
