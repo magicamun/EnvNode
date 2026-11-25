@@ -2,14 +2,14 @@
   "id": "i2c-carrier-0.1",
   "guide": "modules/i2c-carrier/assembly.md",
   "pcb_source": "main/hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/I2C Carrier HalfSize.kicad_pcb",
-  "pcb_sha256": "b71e5b0ad27786db08d27ee1dfaf55b7bfcc75347c856eb36445d8a2ec0e7dae",
+  "pcb_sha256": "901105b6e22ef07e3131e6b6effeb2e488b2f0b3c779a16029802269368267de",
   "back_components": [
     "C1",
     "J1",
     "U2"
   ],
   "hero": {
-    "front": "assets/images/i2c-carrier-assembly/page-01-view-1.png",
+    "front": "assets/board-views/i2c-carrier-0.1/3d-front.png",
     "back": "assets/board-views/i2c-carrier-0.1/3d-back.png"
   },
   "plans": {
@@ -23,6 +23,11 @@
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -30,23 +35,23 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": false,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     },
     "back": {
       "png": "assets/board-views/i2c-carrier-0.1/assembly-back.png",
       "png_size_px": [
-        2319,
-        1988
+        2320,
+        1987
       ],
       "side": "B.Cu",
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -54,12 +59,7 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": true,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     }
   },
   "footprints": [
@@ -167,10 +167,10 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 5,
   "asset_sha256": {
-    "assets/board-views/i2c-carrier-0.1/assembly-front.png": "609d8496e796b5ee81b4ad2ef61c386c3f56d116ea9a23cfe384f51f122cb4e8",
-    "assets/board-views/i2c-carrier-0.1/assembly-back.png": "4ed0d77458a725096601b00cc5c5089e1fd067e6f27d40f40c2f595ef5427912",
-    "assets/images/i2c-carrier-assembly/page-01-view-1.png": "8171c5e5dbf494eba83c2e40c8ee3d8c889640fae98abd86a670c8b8d4d0ceb7",
-    "assets/board-views/i2c-carrier-0.1/3d-back.png": "9207ebfeff794779a88d82165c7e7ac7c2d3d0116331d924a3d408feb3cf8059"
+    "assets/board-views/i2c-carrier-0.1/assembly-front.png": "3c1e518db1ef54f298f63931607d9c364d6778adb22486f60ddb89b06e938e03",
+    "assets/board-views/i2c-carrier-0.1/assembly-back.png": "30a20d3a92315145ad954e7a4d87130f4ccf046035cb93c08e34855d23930c14",
+    "assets/board-views/i2c-carrier-0.1/3d-front.png": "bc11e8cf6baba9ae0aea4c5ee1f365e694a5ffc0ebc9d4b0ffc17d166ee5154d",
+    "assets/board-views/i2c-carrier-0.1/3d-back.png": "33fbc50e93a40435144852179213c435be13fbbbed169ead734d3eed8e04d5c6"
   },
   "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
 }

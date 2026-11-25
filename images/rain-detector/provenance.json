@@ -152,10 +152,10 @@
     }
   },
   "images": {
-    "RainDetectorHead-Rev0.2-top.png": "5500baa737d9aae87770f14dbade60dbd7fdf9456f47e5beae3f14d02d9c244c",
-    "RainDetectorHead-Rev0.2-bottom.png": "615fec9f8a9ac4cd03bd8f42c2d956d38c5833c1c8226d5badf40bc464fde5b9",
-    "RainDetectorController-Rev0.4-top.png": "bd493e16ec5ca01d616cf758b592a120c61b5ec0aae3a728633675df02841fc1",
-    "RainDetectorController-Rev0.4-bottom.png": "0b1ee2d90c867516c29cd180ea0bd7eff51cc553f5dd2213b4f67237cf2341bf",
+    "RainDetectorHead-Rev0.2-top.png": "453c524410a7c249fce4060801e2a3d513a7df7abd2ad2f77ce3278aa476de4b",
+    "RainDetectorHead-Rev0.2-bottom.png": "4022820844c451d783138a83762dd0216265fe7bc6ac4b23d64f39da1f65e388",
+    "RainDetectorController-Rev0.4-top.png": "ad25b6683d3fb688b503fbfa7a9450681059c2bd97fc0362d8ef2cc1f93f8c89",
+    "RainDetectorController-Rev0.4-bottom.png": "cbc7d68dd6b599d462ff1376eea0deb64e3a58f3152a013bfe3c97abf40b5a31",
     "ENP-00139-RainDetectorHead-Rev0.2.png": "6852df7220229175f0bae9f41a65b873a7cee7404f9272473fc2016028818df0",
     "ENP-00138-RainDetectorController-Rev0.4.png": "0e1452b4ce834dd0992b1c22646a057445d2adf592f2e1b09ccd4e97df480e18"
   },
@@ -169,6 +169,20 @@
       "part_id": 143,
       "image": "ENP-00139-RainDetectorHead-Rev0.2.png",
       "verified": "2026-10-21 via UI: upload success and current image visible"
+    }
+  },
+  "documentation_refresh": {
+    "date": "2026-11-25",
+    "boards": {
+      "Controller": {
+        "pcb_source": "b87e1f59bc8286e9a391f2a0d19d7686ce9bc4b6:hardware/kicad/Sensors/RainDetectorController/RainDetectorController.kicad_pcb",
+        "render_solder_mask": "#8426A8D4"
+      },
+      "Head": {
+        "pcb_source": "b87e1f59bc8286e9a391f2a0d19d7686ce9bc4b6:hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb",
+        "render_solder_mask": "#F2F2F2D4",
+        "render_silkscreen": "Black"
+      }
     }
   }
 }

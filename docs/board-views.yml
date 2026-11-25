@@ -28,7 +28,9 @@
   sha256: 5ec59d12355b7919784f93e1e9eab6ca204348302f3427887a15db16a4bdc322
 - id: analog-0.6
   guide: modules/analog-hydro-pressure/index.md
-  pcb: analog-hydro-pressure/hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb
+  git_ref: 2339f915502840b24e7ee7ccdc360b79d7f68cf4
+  git_path: hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb
+  render_solder_mask: "#141414D4"
   sha256: 922c80698c3d7b888f5c7f905ecb3e3dfc0098ac6227a8902e95c6f52a30463a
   hero_front: assets/images/analog-0.6/top.png
   hero_back: assets/images/analog-0.6/bottom.png
@@ -41,13 +43,18 @@
   hero_back: assets/images/sd-card-0.1/bottom.png
 - id: rain-controller-0.4
   guide: sensors/rain-detector-controller/assembly.md
-  pcb: rain-detector/hardware/kicad/Sensors/RainDetectorController/RainDetectorController.kicad_pcb
+  git_ref: b87e1f59bc8286e9a391f2a0d19d7686ce9bc4b6
+  git_path: hardware/kicad/Sensors/RainDetectorController/RainDetectorController.kicad_pcb
+  render_solder_mask: "#8426A8D4"
   sha256: b793f10c10ec03b201e0514d98e5ed5e4c8befd761ada973139d5f0c5d8845b4
   hero_front: assets/images/rain-controller-0.4/top.png
   hero_back: assets/images/rain-controller-0.4/bottom.png
 - id: rain-head-0.2
   guide: sensors/rain-detector-head/assembly.md
-  pcb: rain-detector/hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb
+  git_ref: b87e1f59bc8286e9a391f2a0d19d7686ce9bc4b6
+  git_path: hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb
+  render_solder_mask: "#F2F2F2D4"
+  render_silkscreen: Black
   sha256: 6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438
   hero_front: assets/images/rain-head-0.2/top.png
   hero_back: assets/images/rain-head-0.2/bottom.png
@@ -93,9 +100,10 @@
 - id: i2c-carrier-0.1
   guide: modules/i2c-carrier/assembly.md
   pcb: main/hardware/kicad/Modules/HalfSize/I2C Carrier HalfSize/I2C Carrier HalfSize.kicad_pcb
-  sha256: b71e5b0ad27786db08d27ee1dfaf55b7bfcc75347c856eb36445d8a2ec0e7dae
-  hero_front: assets/images/i2c-carrier-assembly/page-01-view-1.png
+  sha256: 901105b6e22ef07e3131e6b6effeb2e488b2f0b3c779a16029802269368267de
 - id: sct013-head-0.2
+  render_solder_mask: "#F2F2F2D4"
+  render_silkscreen: Black
   guide: sensors/sct013-head/assembly.md
   git_ref: 9430e6f673e830a76d0034e5a8f6c50af9315007
   git_path: hardware/kicad/Sensors/SCT013Head/SCT013Head.kicad_pcb
@@ -146,16 +154,19 @@
   archive: true
   hero_back: assets/images/rain-head-assembly/page-03-view-1.png
 - id: test-controller-0.2
+  render_solder_mask: "#1555A0D4"
   guide: test-provisioning/hardware/test-controller/assembly.md
   git_ref: a245919334f2c747489a1f075857e04b6326a6b4
   git_path: hardware/kicad/MainBoards/Test-Controller/Test-Controller.kicad_pcb
   sha256: 54f346a9bd8d84590356683723dcc649b2601897429a01b7920e011ac3eb759f
 - id: input-adapter-0.3
+  render_solder_mask: "#1555A0D4"
   guide: test-provisioning/hardware/input-adapter/assembly.md
   git_ref: a245919334f2c747489a1f075857e04b6326a6b4
   git_path: hardware/kicad/Adapter/Adapter ESP32 DevKitC/Adapter ESP32 DevKitC.kicad_pcb
   sha256: 690462aa0233847e88de4612d28afd77e36be17e3710c710956899d09baf2758
 - id: module-adapter-0.2
+  render_solder_mask: "#1555A0D4"
   guide: test-provisioning/hardware/module-adapter/assembly.md
   git_ref: a245919334f2c747489a1f075857e04b6326a6b4
   git_path: hardware/kicad/Adapter/Module-Adapter/Module-Adapter.kicad_pcb

@@ -1,7 +1,7 @@
 {
   "id": "analog-0.6",
   "guide": "modules/analog-hydro-pressure/index.md",
-  "pcb_source": "analog-hydro-pressure/hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb",
+  "pcb_source": "2339f915502840b24e7ee7ccdc360b79d7f68cf4:hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb",
   "pcb_sha256": "922c80698c3d7b888f5c7f905ecb3e3dfc0098ac6227a8902e95c6f52a30463a",
   "back_components": [
     "C1",
@@ -23,6 +23,11 @@
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -30,12 +35,7 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": false,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     },
     "back": {
       "png": "assets/board-views/analog-0.6/assembly-back.png",
@@ -47,6 +47,11 @@
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -54,12 +59,7 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": true,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     }
   },
   "footprints": [
@@ -337,10 +337,11 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 24,
   "asset_sha256": {
-    "assets/board-views/analog-0.6/assembly-front.png": "ae5c9ad644a27bf7539b76c3734d8b5ef21c53d04e3ae2b10c7ccf6e5967030f",
-    "assets/board-views/analog-0.6/assembly-back.png": "9403403a639de56118335ee5e49581830bd6125480a8578f04214ec8d7166b51",
-    "assets/images/analog-0.6/top.png": "56f0be2973b4e8672cb2e193c9b39fc551bf6e07f901e6a9dabf09be2c67bc78",
-    "assets/images/analog-0.6/bottom.png": "c0031bb36d0fef4eddd50435d0cc007da5d77447be446424ca9b2c07f7d24520"
+    "assets/board-views/analog-0.6/assembly-front.png": "5bdaec2ac035c3ac8a04fe1a2b9dda918b33dd7d5f0addcbc67b6d6a343bc452",
+    "assets/board-views/analog-0.6/assembly-back.png": "75af1bb16875c71178592d67b7b2577691874f16b97dc6bafac9d2f38ef78a7e",
+    "assets/images/analog-0.6/top.png": "e1e237caa6be6ab92c5f50f805834cd6ed0af7a1985745e136ef2793aeec3771",
+    "assets/images/analog-0.6/bottom.png": "ec83bd603ab1f8f555746fa410b045b86f9b697c914faf75fd776ba744236fa5"
   },
-  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged.",
+  "render_solder_mask": "#141414D4"
 }

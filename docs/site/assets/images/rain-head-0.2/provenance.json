@@ -16,8 +16,14 @@
     "transparent": true
   },
   "images": {
-    "top.png": "9afbe262e7c9accaa3b62974df1ef8fd3cec38adf9edaa33210d450d90b03e7f",
-    "bottom.png": "e537950d1a963efc083c8ca9ba4ca99195893ce05515b62d3f2fcf0546db9054"
+    "top.png": "84f1ad8817f6986613758e5aedc464467b0e3883de4f2fc974b96bd5cceac12d",
+    "bottom.png": "663cdf3c156bf710d34c8c77b841d5dc07d4669fb1906e68e015c181d03314b9"
   },
-  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged.",
+  "render_source": {
+    "commit": "b87e1f59bc8286e9a391f2a0d19d7686ce9bc4b6",
+    "path": "hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb",
+    "solder_mask": "#F2F2F2D4",
+    "silkscreen": "Black"
+  }
 }

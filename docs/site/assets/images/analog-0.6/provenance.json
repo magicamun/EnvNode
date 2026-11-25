@@ -17,8 +17,13 @@
     "transparent": true
   },
   "images": {
-    "top.png": "56f0be2973b4e8672cb2e193c9b39fc551bf6e07f901e6a9dabf09be2c67bc78",
-    "bottom.png": "c0031bb36d0fef4eddd50435d0cc007da5d77447be446424ca9b2c07f7d24520"
+    "top.png": "e1e237caa6be6ab92c5f50f805834cd6ed0af7a1985745e136ef2793aeec3771",
+    "bottom.png": "ec83bd603ab1f8f555746fa410b045b86f9b697c914faf75fd776ba744236fa5"
   },
-  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged."
+  "notice": "Native KiCad renders; model omissions are retained. EnvNode LICENSE applies to documentation; third-party model rights remain unchanged.",
+  "render_source": {
+    "commit": "2339f915502840b24e7ee7ccdc360b79d7f68cf4",
+    "path": "hardware/kicad/Modules/FullSize/AnalogHydroPressure/AnalogHydroPressure.kicad_pcb",
+    "solder_mask": "#141414D4"
+  }
 }

@@ -19,7 +19,7 @@ Das HalfSize-Modul nimmt zwei kleine I²C-Platinen auf. Jeder Carrier-Steckplatz
 
 ## 3D-Ansicht
 
-![i2c-carrier-0.1: 3D-Vorderseite](../../assets/images/i2c-carrier-assembly/page-01-view-1.png){ .hero-paired-view }
+![i2c-carrier-0.1: 3D-Vorderseite](../../assets/board-views/i2c-carrier-0.1/3d-front.png){ .hero-paired-view }
 ![i2c-carrier-0.1: 3D-Rückseite](../../assets/board-views/i2c-carrier-0.1/3d-back.png){ .hero-paired-view }
 
 Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.

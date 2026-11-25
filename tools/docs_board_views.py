@@ -3,7 +3,8 @@
 """Native orthographic KiCad PCB renderings without component models.
 
 Run with requirements-docs-render.txt and KiCad installed. Source boards are read
-only. Model entries are removed in a temporary copy; all PCB layers stay unchanged.
+only. Model entries are removed in a temporary copy. Configured render colors
+are also applied only to that copy.
 """
 from __future__ import annotations
 import argparse
@@ -46,6 +47,38 @@ def board_bytes(entry):
         raise ValueError(f"Source changed; select/review the documented PCB: {entry['id']}")
     return raw, source
 
+def apply_render_mask_color(tree, color, silkscreen=None):
+    setup = node(tree, 'setup')
+    stackup = node(setup, 'stackup')
+    if stackup is None:
+        copper_layers = [layer[1] for layer in node(tree, 'layers')[1:] if layer[1].endswith('.Cu')]
+        thickness = node(node(tree, 'general'), 'thickness')[1]
+        if copper_layers != ['F.Cu', 'B.Cu'] or thickness != 1.6:
+            raise ValueError('A render stackup is only defined for 1.6 mm two-layer boards')
+        stackup = sexpdata.loads("""(stackup
+            (layer "F.SilkS" (type "Top Silk Screen"))
+            (layer "F.Paste" (type "Top Solder Paste"))
+            (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
+            (layer "F.Cu" (type "copper") (thickness 0.035))
+            (layer "dielectric 1" (type "core") (thickness 1.51) (material "FR4")
+                (epsilon_r 4.5) (loss_tangent 0.02))
+            (layer "B.Cu" (type "copper") (thickness 0.035))
+            (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
+            (layer "B.Paste" (type "Bottom Solder Paste"))
+            (layer "B.SilkS" (type "Bottom Silk Screen")))""")
+        setup.append(stackup)
+    colors = {'F.Mask': color, 'B.Mask': color}
+    if silkscreen:
+        colors.update({'F.SilkS': silkscreen, 'B.SilkS': silkscreen})
+    layers = {layer[1]: layer for layer in nodes(stackup, 'layer')}
+    if not colors.keys() <= layers.keys():
+        raise ValueError('Render stackup is missing a solder mask or silkscreen layer')
+    for name, value in colors.items():
+        layer = layers[name]
+        layer[:] = [item for item in layer if not (isinstance(item, list) and str(item[0]) == 'color')]
+        layer.append([sexpdata.Symbol('color'), value])
+
+
 def back_components(tree):
     refs = []
     for fp in nodes(tree, 'footprint'):
@@ -66,7 +99,7 @@ def run(cmd):
 def render_hero(cli, entry, side, output, source_board):
     output.parent.mkdir(parents=True, exist_ok=True)
     run([cli, 'pcb', 'render', '--width', '1800', '--height', '1800',
-         '--side', side, '--background', 'transparent', '--quality', 'high',
+         '--side', side, '--background', 'transparent', '--quality', 'high', '--use-board-stackup-colors',
          '--rotate', '-25,0,5' if side == 'top' else '-25,0,-5',
          '--perspective', '--zoom', '0.6', '--output', str(output), str(source_board)])
     image = Image.open(output).convert('RGBA')
@@ -79,6 +112,10 @@ def render_hero(cli, entry, side, output, source_board):
 def create(entry, cli):
     raw, source = board_bytes(entry)
     tree = sexpdata.loads(raw.decode())
+    color = entry.get('render_solder_mask')
+    silkscreen = entry.get('render_silkscreen')
+    if color:
+        apply_render_mask_color(tree, color, silkscreen)
     back = back_components(tree)
     dest = SITE / 'assets/board-views' / entry['id']
     dest.mkdir(parents=True, exist_ok=True)
@@ -98,7 +135,7 @@ def create(entry, cli):
             png = dest / f'assembly-{side}.png'
             run([cli, 'pcb', 'render', '--width', '2800', '--height', '2800',
                  '--side', 'top' if side == 'front' else 'bottom',
-                 '--background', 'transparent', '--quality', 'high',
+                 '--background', 'transparent', '--quality', 'high', '--use-board-stackup-colors',
                  '--rotate', '0,0,0', '--zoom', '0.78',
                  '--output', str(png), str(plot)])
             image = Image.open(png).convert('RGBA')
@@ -118,9 +155,16 @@ def create(entry, cli):
                            'zoom': 0.78, 'mirrored_for_back_view': side == 'back',
                            'overlay_calibration': 'PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.'}
         heroes = {}
+        if color:
+            colored_source = temp / 'source-colored.kicad_pcb'
+            colored_source.write_text(sexpdata.dumps(tree))
         for side in ['front'] + (['back'] if back else []):
             relative = entry.get('hero_' + side)
-            if relative and (SITE / relative).is_file():
+            if color:
+                output = SITE / relative if relative else dest / f'3d-{side}.png'
+                render_hero(cli, entry, 'top' if side == 'front' else 'bottom', output, colored_source)
+                heroes[side] = str(output.relative_to(SITE))
+            elif relative and (SITE / relative).is_file():
                 heroes[side] = relative
             else:
                 output = dest / f'3d-{side}.png'
@@ -148,6 +192,10 @@ def create(entry, cli):
                 'removed_model_entries': removed_models,
                 'asset_sha256': {str(p.relative_to(SITE)): digest(p.read_bytes()) for p in assets},
                 'license': 'EnvNode documentation: see root LICENSE; native KiCad model rights unchanged.'}
+    if color:
+        metadata['render_solder_mask'] = color
+    if silkscreen:
+        metadata['render_silkscreen'] = silkscreen
     (dest / 'views.json').write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n')
     return entry['id'], back
 

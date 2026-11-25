@@ -19,8 +19,8 @@
     "front": {
       "png": "assets/board-views/sct013-head-0.2/assembly-front.png",
       "png_size_px": [
-        2451,
-        1756
+        2452,
+        1757
       ],
       "side": "F.Cu",
       "projection": "orthographic",
@@ -44,7 +44,7 @@
       "png": "assets/board-views/sct013-head-0.2/assembly-back.png",
       "png_size_px": [
         2450,
-        1758
+        1756
       ],
       "side": "B.Cu",
       "projection": "orthographic",
@@ -150,10 +150,12 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 7,
   "asset_sha256": {
-    "assets/board-views/sct013-head-0.2/assembly-front.png": "9543202b7eea29f95e033c11e9217ea8731ee6d399fe2673eca6b304b6cf7012",
-    "assets/board-views/sct013-head-0.2/assembly-back.png": "7ba079701c97c7e9bc3bf6b3d2144b9cd15ff307b8ce7157a20383c04faa1b18",
-    "assets/board-views/sct013-head-0.2/3d-front.png": "835f020be8dbeef727266dec3825757fd0f0fdcf0aedad1d7fb7eb350f77e86b",
-    "assets/board-views/sct013-head-0.2/3d-back.png": "33603aa91d274907331e88322b801cf4ed2a19587ff895d0920038a808b50683"
+    "assets/board-views/sct013-head-0.2/assembly-front.png": "7e890928d927ebb9635ecf80a78f5213fc3f5813e12f6096062c1bf332e7cb29",
+    "assets/board-views/sct013-head-0.2/assembly-back.png": "bc3ed65465cacf4142297629dee7ff9d9da4e4bee7383cf8fedf76043d4808e2",
+    "assets/board-views/sct013-head-0.2/3d-front.png": "0c20c66d720283e875319a56b53a6c0b7f2fbc7274680a63e7c68f273b4f37a7",
+    "assets/board-views/sct013-head-0.2/3d-back.png": "36d8ed12f73294ac5c74c8f829f62289a23547137ec471b08686938fca6d7f50"
   },
-  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged.",
+  "render_solder_mask": "#F2F2F2D4",
+  "render_silkscreen": "Black"
 }

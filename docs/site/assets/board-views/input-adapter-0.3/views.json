@@ -128,8 +128,9 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 8,
   "asset_sha256": {
-    "assets/board-views/input-adapter-0.3/assembly-front.png": "8e314a59c5561ca0417904ca41e8b2ac1574cd4888effbadc26c9dd198b7f570",
-    "assets/board-views/input-adapter-0.3/3d-front.png": "62c45eda248c4a888042b166cbce6d54442f4be7bf5e98a187e1c1da3515f381"
+    "assets/board-views/input-adapter-0.3/assembly-front.png": "ba9a55d5483e8e86ee49956f3c2e0d46959d184ecd522de782a8aee43f876055",
+    "assets/board-views/input-adapter-0.3/3d-front.png": "34208ebd818e5081336317f6e316867356bf3676e8b6d0567d7931e55b936520"
   },
-  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged.",
+  "render_solder_mask": "#1555A0D4"
 }

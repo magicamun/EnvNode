@@ -1,7 +1,7 @@
 {
   "id": "rain-head-0.2",
   "guide": "sensors/rain-detector-head/assembly.md",
-  "pcb_source": "rain-detector/hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb",
+  "pcb_source": "b87e1f59bc8286e9a391f2a0d19d7686ce9bc4b6:hardware/kicad/Sensors/RainDetectorHead/RainDetectorHead.kicad_pcb",
   "pcb_sha256": "6cf50cba758762ee190e0aff3aae11c6274afda0fded1f36e0ee592886aab438",
   "back_components": [
     "J1",
@@ -35,13 +35,18 @@
     "front": {
       "png": "assets/board-views/rain-head-0.2/assembly-front.png",
       "png_size_px": [
-        2259,
+        2260,
         2002
       ],
       "side": "F.Cu",
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -49,12 +54,7 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": false,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     },
     "back": {
       "png": "assets/board-views/rain-head-0.2/assembly-back.png",
@@ -66,6 +66,11 @@
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -73,12 +78,7 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": true,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     }
   },
   "footprints": [
@@ -356,10 +356,12 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 22,
   "asset_sha256": {
-    "assets/board-views/rain-head-0.2/assembly-front.png": "8435e9bed5a9da3132d75f5923e650e79e51c5541f323e62bc74cb467660a202",
-    "assets/board-views/rain-head-0.2/assembly-back.png": "dcd12be5ce3af30ae8bcb06b01c3bc98364e75d5df4d8029a34f09946b6c25c7",
-    "assets/images/rain-head-0.2/top.png": "9afbe262e7c9accaa3b62974df1ef8fd3cec38adf9edaa33210d450d90b03e7f",
-    "assets/images/rain-head-0.2/bottom.png": "e537950d1a963efc083c8ca9ba4ca99195893ce05515b62d3f2fcf0546db9054"
+    "assets/board-views/rain-head-0.2/assembly-front.png": "65211e164d4566ad9ee27d000bfdff3eb280c270c32446c7b287961b174a69d0",
+    "assets/board-views/rain-head-0.2/assembly-back.png": "e687f450cfbf2525a236c967bafd335b2f148a9a0f91de4f7fc32062b312733c",
+    "assets/images/rain-head-0.2/top.png": "84f1ad8817f6986613758e5aedc464467b0e3883de4f2fc974b96bd5cceac12d",
+    "assets/images/rain-head-0.2/bottom.png": "663cdf3c156bf710d34c8c77b841d5dc07d4669fb1906e68e015c181d03314b9"
   },
-  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged.",
+  "render_solder_mask": "#F2F2F2D4",
+  "render_silkscreen": "Black"
 }

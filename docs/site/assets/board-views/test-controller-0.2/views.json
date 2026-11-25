@@ -399,10 +399,11 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 27,
   "asset_sha256": {
-    "assets/board-views/test-controller-0.2/assembly-front.png": "e625e5dfa27764345b52dd028965d046485cbd41f68449b82f163b97dab0ba5e",
-    "assets/board-views/test-controller-0.2/assembly-back.png": "08531a8e23718a1d352c8012129fed57b84848af2656e2ea409304ece408a5ff",
-    "assets/board-views/test-controller-0.2/3d-front.png": "c8bdaa986b3ede773e3b74988415929b24100067745a92fc3e85cc5070e47618",
-    "assets/board-views/test-controller-0.2/3d-back.png": "c5de5e10142e2557117d72686bd61ef9c0e1ef1331dbb24c97c1ffdcaf3651f1"
+    "assets/board-views/test-controller-0.2/assembly-front.png": "419ed3ae195455805a500026782765d9726f5452063703b99aa95e88f24eb3f6",
+    "assets/board-views/test-controller-0.2/assembly-back.png": "1f0d1b66e547d0c18bc6adebabaf2566856f58eec5f6690f5a06fd668dbe019c",
+    "assets/board-views/test-controller-0.2/3d-front.png": "6046d50b8838a86214876b5ad6d21b33f7372532d29b44a3a3d99144294481e6",
+    "assets/board-views/test-controller-0.2/3d-back.png": "87d5fa95257e1d893163ce0a69b776dfd506aa34d5b69d50f31bd2c9b4e201ce"
   },
-  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
+  "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged.",
+  "render_solder_mask": "#1555A0D4"
 }

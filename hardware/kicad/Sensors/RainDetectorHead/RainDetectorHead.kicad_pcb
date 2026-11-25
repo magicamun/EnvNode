@@ -42,6 +42,7 @@
 		(stackup
 			(layer "F.SilkS"
 				(type "Top Silk Screen")
+				(color "Black")
 			)
 			(layer "F.Paste"
 				(type "Top Solder Paste")
@@ -76,6 +77,7 @@
 			)
 			(layer "B.SilkS"
 				(type "Bottom Silk Screen")
+				(color "Black")
 			)
 			(copper_finish "None")
 			(dielectric_constraints no)

@@ -2,15 +2,15 @@
   "id": "duo-relay-0.3",
   "guide": "modules/duo-relay/index.md",
   "pcb_source": "main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb",
-  "pcb_sha256": "9c7e7d0384efa0a1356a4b9addc3fd7d3b9b6d98eff934059c3addbe35f9a5ac",
+  "pcb_sha256": "3c877204d0c1d20342b6132ad3722d99256c5eab6d3519ccbd013a3e9ecc2f5d",
   "back_components": [
     "C1",
     "J1",
     "U2"
   ],
   "hero": {
-    "front": "assets/images/duorelay-assembly/top.png",
-    "back": "assets/images/duorelay-assembly/bottom.png"
+    "front": "assets/product-boards/duo-relay-0.3/3d-assembled-front.png",
+    "back": "assets/product-boards/duo-relay-0.3/3d-assembled-back.png"
   },
   "plans": {
     "front": {
@@ -23,6 +23,11 @@
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -30,23 +35,23 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": false,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     },
     "back": {
       "png": "assets/board-views/duo-relay-0.3/assembly-back.png",
       "png_size_px": [
         1400,
-        2257
+        2256
       ],
       "side": "B.Cu",
       "projection": "orthographic",
       "component_models": false,
       "renderer": "KiCad pcb render",
+      "quality": "high",
+      "canvas_size_px": [
+        2800,
+        2800
+      ],
       "rotation_deg": [
         0,
         0,
@@ -54,12 +59,7 @@
       ],
       "zoom": 0.78,
       "mirrored_for_back_view": true,
-      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering.",
-      "quality": "high",
-      "canvas_size_px": [
-        2800,
-        2800
-      ]
+      "overlay_calibration": "PCB coordinates are provided separately; pixel mapping requires calibration to the cropped rendering."
     }
   },
   "footprints": [
@@ -277,10 +277,10 @@
   "plot_policy": "Orthographic native KiCad rendering. Only model entries are removed in a temporary copy; original copper, solder mask, silkscreen, references and source files remain unchanged.",
   "removed_model_entries": 19,
   "asset_sha256": {
-    "assets/board-views/duo-relay-0.3/assembly-front.png": "f1e5df1ce2c86fa2943a8c2faf555f9defef6b937719b867e3b1368bdd7af8b3",
-    "assets/board-views/duo-relay-0.3/assembly-back.png": "ee3e14500bec14cceb6a8580825f8d9b04a627b775b469cd35dfa5b0454804c7",
-    "assets/images/duorelay-assembly/top.png": "c221cc38afa51da54e90cbd2c2cc3e06ceee4732985c2e7b68ef14a6060555e4",
-    "assets/images/duorelay-assembly/bottom.png": "d78eb0b599241970198c66ba4d67a7f8c306331c572f65858d5f5d09eae88710"
+    "assets/board-views/duo-relay-0.3/assembly-front.png": "964c4b1341fff9bd83f7a68aacba8f776b1acae4fe5f3f113758e235db8516ad",
+    "assets/board-views/duo-relay-0.3/assembly-back.png": "1bdab2fab49a66a7161d3f771782d9360239d1f68f5286770fc610c80f3c6672",
+    "assets/product-boards/duo-relay-0.3/3d-assembled-front.png": "2f798fec859b9e8e5a6dc3c18185973f0378c6ef15df9694744d1fbae179a78e",
+    "assets/product-boards/duo-relay-0.3/3d-assembled-back.png": "a1a5616804a4a1344e63a72543e728e435d46030004e45a4a90e5589ab1ad459"
   },
   "license": "EnvNode documentation: see root LICENSE; native KiCad model rights unchanged."
 }
