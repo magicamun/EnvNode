@@ -28,8 +28,8 @@ Die Einrichtung mit der EnvNode-Firmware folgt separat unter
 
 ## 3D-Ansicht
 
-![duo-relay-0.3: 3D-Vorderseite](../../assets/images/duorelay-assembly/top.png){ .hero-paired-view }
-![duo-relay-0.3: 3D-Rückseite](../../assets/images/duorelay-assembly/bottom.png){ .hero-paired-view }
+![duo-relay-0.3: 3D-Vorderseite](../../assets/product-boards/duo-relay-0.3/3d-assembled-front.png){ .hero-paired-view }
+![duo-relay-0.3: 3D-Rückseite](../../assets/product-boards/duo-relay-0.3/3d-assembled-back.png){ .hero-paired-view }
 
 Vorderseite (F.Cu) und bestückte Rückseite (B.Cu). Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 

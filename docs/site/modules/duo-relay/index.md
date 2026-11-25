@@ -4,7 +4,7 @@ DuoRelay ergänzt EnvNode um **zwei unabhängig schaltbare Relaiskanäle**.
 Du kannst sie manuell über die Weboberfläche bedienen oder mit einem lokalen
 Controller verbinden. Ein Relaiskanal wird in der Firmware als **Aktor** verwendet.
 
-![DuoRelay 0.3](../../assets/images/duorelay-assembly/top.png){ .board-view }
+![DuoRelay 0.3](../../assets/product-boards/duo-relay-0.3/3d-assembled-front.png){ .board-view }
 
 ## Was möchtest du tun?
 

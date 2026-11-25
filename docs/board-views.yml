@@ -77,8 +77,8 @@
   shop_assets: true
   pcb: main/hardware/kicad/Modules/FullSize/DuoRelay/DuoRelay.kicad_pcb
   sha256: 3c877204d0c1d20342b6132ad3722d99256c5eab6d3519ccbd013a3e9ecc2f5d
-  hero_front: assets/images/duorelay-assembly/top.png
-  hero_back: assets/images/duorelay-assembly/bottom.png
+  hero_front: assets/product-boards/duo-relay-0.3/3d-assembled-front.png
+  hero_back: assets/product-boards/duo-relay-0.3/3d-assembled-back.png
 - id: oring-power-0.1.1
   guide: mainboards/oring-power/index.md
   archive: true

@@ -45,7 +45,7 @@ Board Identity und Modulzuordnung beschreibt zentral
 
 ## 3D-Ansicht
 
-![mini-0.10.0: 3D-Vorderseite](../../assets/board-views/mini-0.10.0/3d-front.png){ .hero-board-view }
+![mini-0.10.0: 3D-Vorderseite](../../assets/product-boards/mini-0.10.0/3d-assembled-front.png){ .hero-board-view }
 
 Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteile. Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 

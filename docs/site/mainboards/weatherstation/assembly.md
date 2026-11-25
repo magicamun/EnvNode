@@ -45,7 +45,7 @@ Board Identity und Modulzuordnung beschreibt zentral
 
 ## 3D-Ansicht
 
-![weatherstation-0.4: 3D-Vorderseite](../../assets/board-views/weatherstation-0.4/3d-front.png){ .hero-board-view }
+![weatherstation-0.4: 3D-Vorderseite](../../assets/product-boards/weatherstation-0.4/3d-assembled-front.png){ .hero-board-view }
 
 Vorderseite (F.Cu); die Rückseite trägt keine separat zu bestückenden Bauteile. Nicht hinterlegte 3D-Modelle bleiben ausgespart. Die Bestückungspläne folgen im Abschnitt zur Bestückungsübersicht.
 
